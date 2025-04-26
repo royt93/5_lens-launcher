@@ -163,8 +163,8 @@ public class ActSettings extends ActBase implements Observer, ColorChooserDialog
             boolean hasRead = utilSettings.getBoolean(UtilSettings.KEY_READ_POLICY);
             if (!hasRead) {
                 showDialog2(this, getString(R.string.terms_and_privacy_policy), getString(R.string.read_policy), getString(R.string.agree_and_continue), getString(R.string.cancel), () -> {
-                    openUrlInBrowser(this, URL_POLICY_NOTION, getString(R.string.terms_and_privacy_policy), false);
                     utilSettings.save(UtilSettings.KEY_READ_POLICY, true);
+                    openUrlInBrowser(this, URL_POLICY_NOTION, getString(R.string.terms_and_privacy_policy), false);
                 }, () -> {
                     utilSettings.save(UtilSettings.KEY_READ_POLICY, true);
                 });
