@@ -38,6 +38,11 @@
             android:name="DOMAIN_PACKAGE_NAME"
             android:value="com.mckimquyen.model" />
 
+        <!-- Khai báo AdMob App ID -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-3612191981543807~3330254772" /> <!-- Sample AdMob App ID -->
+
         <activity
             android:name=".ui.SplashAct"
             android:exported="true"
