@@ -62,12 +62,11 @@ android {
             buildConfigField("String", "FLAVOR_buildEnv", '"dev"')
             resValue "string", "app_name", "Fisheye Launcher DEV"
 
-            resValue("string", "SDK_KEY", "e75FnQfS9XTTqM1Kne69U7PW_MBgAnGQTFvtwVVui6kRPKs5L7ws9twr5IQWwVfzPKZ5pF2IfDa7lguMgGlCyt")
-            resValue "string", "BANNER", "aa291bda0fb0b6c5"
-            resValue "string", "INTER", "7cf8ffccbdb242be"
-
-            resValue("string", "EnableAdInter", "false")
-            resValue("string", "EnableAdBanner", "true")
+//            resValue("string", "SDK_KEY", "e75FnQfS9XTTqM1Kne69U7PW_MBgAnGQTFvtwVVui6kRPKs5L7ws9twr5IQWwVfzPKZ5pF2IfDa7lguMgGlCyt")
+//            resValue "string", "BANNER", "aa291bda0fb0b6c5"
+//            resValue "string", "INTER", "7cf8ffccbdb242be"
+//            resValue("string", "EnableAdInter", "false")
+//            resValue("string", "EnableAdBanner", "true")
         }
 
         production {
@@ -75,12 +74,12 @@ android {
             dimension "type"
             buildConfigField("String", "FLAVOR_buildEnv", '"prod"')
             resValue "string", "app_name", "Fisheye Launcher"
-            resValue("string", "SDK_KEY", "e75FnQfS9XTTqM1Kne69U7PW_MBgAnGQTFvtwVVui6kRPKs5L7ws9twr5IQWwVfzPKZ5pF2IfDa7lguMgGlCyt")
-            resValue "string", "BANNER", "aa291bda0fb0b6c5"
-            resValue "string", "INTER", "7cf8ffccbdb242be"
 
-            resValue("string", "EnableAdInter", "true")
-            resValue("string", "EnableAdBanner", "true")
+//            resValue("string", "SDK_KEY", "e75FnQfS9XTTqM1Kne69U7PW_MBgAnGQTFvtwVVui6kRPKs5L7ws9twr5IQWwVfzPKZ5pF2IfDa7lguMgGlCyt")
+//            resValue "string", "BANNER", "aa291bda0fb0b6c5"
+//            resValue "string", "INTER", "7cf8ffccbdb242be"
+//            resValue("string", "EnableAdInter", "true")
+//            resValue("string", "EnableAdBanner", "true")
         }
 
     }

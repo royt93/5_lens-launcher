@@ -3,7 +3,6 @@ package com.mckimquyen.ui;
 import static com.mckimquyen.ext.ActivityKt.likeFacebookFanpage;
 import static com.mckimquyen.ext.ActivityKt.moreApp;
 import static com.mckimquyen.ext.ActivityKt.rateApp;
-import static com.mckimquyen.ext.ActivityKt.rateAppInApp;
 import static com.mckimquyen.ext.ActivityKt.shareApp;
 import static com.mckimquyen.ext.ContextKt.openUrlInBrowser;
 import static com.mckimquyen.ext.ContextKt.showDialog2;
@@ -15,13 +14,11 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
-import android.widget.Toast;
 
 import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
@@ -31,6 +28,10 @@ import androidx.viewpager.widget.ViewPager;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.afollestad.materialdialogs.color.ColorChooserDialog;
+import com.google.android.gms.ads.AdError;
+import com.google.android.gms.ads.AdSize;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.LoadAdError;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
@@ -52,6 +53,8 @@ import com.mckimquyen.util.UtilLauncher;
 import com.mckimquyen.util.UtilNightModeUtil;
 import com.mckimquyen.util.UtilSettings;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -65,7 +68,7 @@ import kotlin.Unit;
 import kotlin.jvm.functions.Function0;
 
 //2023.03.19 tried to convert kotlin but failed
-public class ActSettings extends ActBase implements Observer, ColorChooserDialog.ColorCallback {
+public class ActSettings extends ActBase implements Observer, ColorChooserDialog.ColorCallback, AdMobManager.InterstitialAdListener {
 
     private static final String TAG_COLOR_BACKGROUND = "BackgroundColor";
     private static final String TAG_COLOR_HIGHLIGHT = "HighlightColor";
@@ -74,9 +77,8 @@ public class ActSettings extends ActBase implements Observer, ColorChooserDialog
     ViewPager viewpager;
     FloatingActionButton fabSort;
     FrameLayout flAdOpenApp;
-    //TODO roy93~ admob banner
-//    private MaxAdView adView;
-    //TODO roy93~ admob inter
+    //    private MaxAdView adView;
+    private AdView adView = null;
 //    private MaxInterstitialAd interstitialAd;
 //    private int retryAttempt;
 
@@ -107,7 +109,8 @@ public class ActSettings extends ActBase implements Observer, ColorChooserDialog
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.act_settings);
-
+        AdMobManager.INSTANCE.setCurrentActivity(this);
+        AdMobManager.INSTANCE.setInterstitialListener(this);
         setupViews();
 
         LoadedObservable.getInstance().addObserver(this);
@@ -152,9 +155,10 @@ public class ActSettings extends ActBase implements Observer, ColorChooserDialog
         });
         listApp = Objects.requireNonNull(RAppsSingleton.getInstance()).getApps();
 
-        //TODO roy93~ admob banner
 //        adView = ApplovinKt.createAdBanner(this, ActSettings.class.getSimpleName(), Color.TRANSPARENT, findViewById(R.id.flAd), true);
-        createAdInter();
+        adView = AdMobManager.INSTANCE.loadBanner(this, BuildConfig.ADMOB_BANNER_ID, findViewById(R.id.flAd), AdSize.BANNER);
+//        createAdInter();
+        AdMobManager.INSTANCE.loadInterstitial(this, BuildConfig.ADMOB_INTERSTITIAL_ID);
     }
 
     @Override
@@ -167,7 +171,9 @@ public class ActSettings extends ActBase implements Observer, ColorChooserDialog
     @Override
     protected void onResume() {
         super.onResume();
-
+        if (adView != null) {
+            adView.resume();
+        }
         if (utilSettings != null) {
             boolean hasRead = utilSettings.getBoolean(UtilSettings.KEY_READ_POLICY);
             if (!hasRead) {
@@ -181,13 +187,21 @@ public class ActSettings extends ActBase implements Observer, ColorChooserDialog
         }
     }
 
+    @Override
+    protected void onPause() {
+        if (adView != null) {
+            adView.pause();
+        }
+        super.onPause();
+    }
+
     private void launchApps() {
         boolean isDefaultLauncher = UtilLauncher.isDefaultLauncher(getApplication());
         if (isDefaultLauncher) {
-            showAd();
             Intent homeIntent = new Intent(Intent.ACTION_MAIN);
             homeIntent.addCategory(Intent.CATEGORY_HOME);
             startActivity(homeIntent);
+            showAdInterstitial();
         } else {
 //            Intent homeIntent = new Intent(ASettings.this, AHome.class);
 //            startActivity(homeIntent);
@@ -196,71 +210,70 @@ public class ActSettings extends ActBase implements Observer, ColorChooserDialog
         overridePendingTransition(R.anim.a_fade_in, R.anim.a_fade_out);
     }
 
-    void showAd() {
-        boolean enableAdInter = getString(R.string.EnableAdInter).equals("true");
-        if (!enableAdInter) {
-            Toast.makeText(this, "Show ad full SUCCESSFULLY", Toast.LENGTH_SHORT).show();
-            return;
-        }
+    void showAdInterstitial() {
+//        boolean enableAdInter = getString(R.string.EnableAdInter).equals("true");
+//        if (!enableAdInter) {
+//            Toast.makeText(this, "Show ad full SUCCESSFULLY", Toast.LENGTH_SHORT).show();
+//            return;
+//        }
 
-        //TODO roy93~ admob inter
 //        if (interstitialAd != null && interstitialAd.isReady()) {
 //            interstitialAd.showAd();
 //        }
+        AdMobManager.INSTANCE.showInterstitial(this);
     }
 
-    private void createAdInter() {
-        boolean enableAdInter = getString(R.string.EnableAdInter).equals("true");
-        if (!enableAdInter) {
-            return;
-        }
-        String id = getString(R.string.INTER);
-        if (id.isEmpty()) {
-            return;
-        }
+//    private void createAdInter() {
+//        boolean enableAdInter = getString(R.string.EnableAdInter).equals("true");
+//        if (!enableAdInter) {
+//            return;
+//        }
+//        String id = getString(R.string.INTER);
+//        if (id.isEmpty()) {
+//            return;
+//        }
+//
 
-        //TODO roy93~ admob inter
-//        interstitialAd = new MaxInterstitialAd(id, this);
-//        interstitialAd.setListener(new MaxAdListener() {
-//            @Override
-//            public void onAdLoaded(@NonNull MaxAd maxAd) {
-////                retryAttempt = 0;
-//            }
-//
-//            @Override
-//            public void onAdDisplayed(@NonNull MaxAd maxAd) {
-//
-//            }
-//
-//            @Override
-//            public void onAdHidden(@NonNull MaxAd maxAd) {
-//                // Interstitial ad is hidden. Pre-load the next ad
-//                interstitialAd.loadAd();
-//            }
-//
-//            @Override
-//            public void onAdClicked(@NonNull MaxAd maxAd) {
-//
-//            }
-//
-//            @Override
-//            public void onAdLoadFailed(@NonNull String s, @NonNull MaxError maxError) {
-////                retryAttempt++;
-////                long delayMillis = TimeUnit.SECONDS.toMillis((long) Math.pow(2, Math.min(6, retryAttempt)));
-////
-////                new Handler().postDelayed(() -> interstitialAd.loadAd(), delayMillis);
-//            }
-//
-//            @Override
-//            public void onAdDisplayFailed(@NonNull MaxAd maxAd, @NonNull MaxError maxError) {
-//                // Interstitial ad failed to display. AppLovin recommends that you load the next ad.
-//                interstitialAd.loadAd();
-//            }
-//        });
-//        // Load the first ad
-//        interstitialAd.loadAd();
-    }
-
+    /// /        interstitialAd = new MaxInterstitialAd(id, this);
+    /// /        interstitialAd.setListener(new MaxAdListener() {
+    /// /            @Override
+    /// /            public void onAdLoaded(@NonNull MaxAd maxAd) {
+    /// ///                retryAttempt = 0;
+    /// /            }
+    /// /
+    /// /            @Override
+    /// /            public void onAdDisplayed(@NonNull MaxAd maxAd) {
+    /// /
+    /// /            }
+    /// /
+    /// /            @Override
+    /// /            public void onAdHidden(@NonNull MaxAd maxAd) {
+    /// /                // Interstitial ad is hidden. Pre-load the next ad
+    /// /                interstitialAd.loadAd();
+    /// /            }
+    /// /
+    /// /            @Override
+    /// /            public void onAdClicked(@NonNull MaxAd maxAd) {
+    /// /
+    /// /            }
+    /// /
+    /// /            @Override
+    /// /            public void onAdLoadFailed(@NonNull String s, @NonNull MaxError maxError) {
+    /// ///                retryAttempt++;
+    /// ///                long delayMillis = TimeUnit.SECONDS.toMillis((long) Math.pow(2, Math.min(6, retryAttempt)));
+    /// ///
+    /// ///                new Handler().postDelayed(() -> interstitialAd.loadAd(), delayMillis);
+    /// /            }
+    /// /
+    /// /            @Override
+    /// /            public void onAdDisplayFailed(@NonNull MaxAd maxAd, @NonNull MaxError maxError) {
+    /// /                // Interstitial ad failed to display. AppLovin recommends that you load the next ad.
+    /// /                interstitialAd.loadAd();
+    /// /            }
+    /// /        });
+    /// /        // Load the first ad
+    /// /        interstitialAd.loadAd();
+//    }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
@@ -268,10 +281,10 @@ public class ActSettings extends ActBase implements Observer, ColorChooserDialog
             launchApps();
             return true;
         } else if (id == R.id.menuItemAbout) {
-            showAd();
             Intent aboutIntent = new Intent(ActSettings.this, ActAbout.class);
             startActivity(aboutIntent);
             overridePendingTransition(R.anim.a_slide_in_left, R.anim.a_slide_out_right);
+            showAdInterstitial();
             return true;
         } else if (id == R.id.menuItemResetDefaultSettings) {
             switch (viewpager.getCurrentItem()) {
@@ -375,7 +388,7 @@ public class ActSettings extends ActBase implements Observer, ColorChooserDialog
     }
 
     private void showSortTypeDialog() {
-        showAd();
+        showAdInterstitial();
         final List<SortType> lSortType = new ArrayList<>(EnumSet.allOf(SortType.class));
         final List<String> lSortTypeString = new ArrayList<>();
         for (int i = 0; i < lSortType.size(); i++) {
@@ -540,10 +553,12 @@ public class ActSettings extends ActBase implements Observer, ColorChooserDialog
         LoadedObservable.getInstance().deleteObserver(this);
         NightModeObservable.getInstance().deleteObserver(this);
 
-        //TODO roy93~ admob banner
 //        if (adView != null) {
 //            destroyAdBanner(findViewById(R.id.flAd), adView);
 //        }
+        if (adView != null) {
+            adView.destroy();
+        }
         super.onDestroy();
     }
 
@@ -579,7 +594,7 @@ public class ActSettings extends ActBase implements Observer, ColorChooserDialog
         new Thread(() -> {
             final Runnable delayedRunnable = () -> {
                 if (hasCalledGoToMain.compareAndSet(false, true)) {
-                    Log.d("roy93~", "goToMain #1");
+//                    Log.d("roy93~", "goToMain #1");
                     flAdOpenApp.setVisibility(View.GONE);
                 }
             };
@@ -595,7 +610,7 @@ public class ActSettings extends ActBase implements Observer, ColorChooserDialog
                         public Unit invoke() {
                             if (hasCalledGoToMain.compareAndSet(false, true)) {
                                 handler.removeCallbacks(delayedRunnable);
-                                Log.d("roy93~", "goToMain #2");
+//                                Log.d("roy93~", "goToMain #2");
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
@@ -609,5 +624,40 @@ public class ActSettings extends ActBase implements Observer, ColorChooserDialog
                     }
             ));
         }).start();
+    }
+
+    @Override
+    public void onAdLoaded() {
+
+    }
+
+    @Override
+    public void onAdFailedToLoad(@NotNull LoadAdError error) {
+
+    }
+
+    @Override
+    public void onAdShowed() {
+
+    }
+
+    @Override
+    public void onAdDismissed() {
+
+    }
+
+    @Override
+    public void onAdClicked() {
+
+    }
+
+    @Override
+    public void onAdFailedToShow(@NotNull AdError error) {
+
+    }
+
+    @Override
+    public void onAdNotAvailable() {
+
     }
 }
