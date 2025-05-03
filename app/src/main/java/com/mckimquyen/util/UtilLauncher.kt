@@ -42,10 +42,10 @@ object UtilLauncher {
 //        intent.data = Uri.parse("package:${context.packageName}")
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
         if (intent.resolveActivity(context.packageManager) == null) {
-            Log.d("roy93~", "#1")
+//            Log.d("roy93~", "#1")
 //            context.chooseLauncher(ActFakeLauncher::class.java)
         } else {
-            Log.d("roy93~", "#2")
+//            Log.d("roy93~", "#2")
             context.startActivity(intent)
             return
         }
