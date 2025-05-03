@@ -13,9 +13,14 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import androidx.annotation.ColorInt;
@@ -38,6 +43,7 @@ import com.mckimquyen.itf.AppsInterface;
 import com.mckimquyen.itf.LensInterface;
 import com.mckimquyen.itf.SettingsInterface;
 import com.mckimquyen.model.App;
+import com.mckimquyen.sdkadbmob.AdMobManager;
 import com.mckimquyen.services.BroadcastReceivers;
 import com.mckimquyen.services.LoadedObservable;
 import com.mckimquyen.services.NightModeObservable;
@@ -53,6 +59,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import kotlin.Unit;
+import kotlin.jvm.functions.Function0;
 
 //2023.03.19 tried to convert kotlin but failed
 public class ActSettings extends ActBase implements Observer, ColorChooserDialog.ColorCallback {
@@ -63,6 +73,7 @@ public class ActSettings extends ActBase implements Observer, ColorChooserDialog
     TabLayout tabs;
     ViewPager viewpager;
     FloatingActionButton fabSort;
+    FrameLayout flAdOpenApp;
     //TODO roy93~ admob banner
 //    private MaxAdView adView;
     //TODO roy93~ admob inter
@@ -101,9 +112,12 @@ public class ActSettings extends ActBase implements Observer, ColorChooserDialog
 
         LoadedObservable.getInstance().addObserver(this);
         NightModeObservable.getInstance().addObserver(this);
+
+        checkShowAd();
     }
 
     private void setupViews() {
+        flAdOpenApp = findViewById(R.id.flAdOpenApp);
         toolbar = findViewById(R.id.toolbar);
         tabs = findViewById(R.id.tabs);
         viewpager = findViewById(R.id.viewpager);
@@ -556,5 +570,44 @@ public class ActSettings extends ActBase implements Observer, ColorChooserDialog
         } else {
             System.out.println("No email app found!");
         }
+    }
+
+    private void checkShowAd() {
+        final Handler handler = new Handler(Looper.getMainLooper());
+        final AtomicBoolean hasCalledGoToMain = new AtomicBoolean(false);
+
+        new Thread(() -> {
+            final Runnable delayedRunnable = () -> {
+                if (hasCalledGoToMain.compareAndSet(false, true)) {
+                    Log.d("roy93~", "goToMain #1");
+                    flAdOpenApp.setVisibility(View.GONE);
+                }
+            };
+
+            handler.postDelayed(delayedRunnable, 3000);
+
+            // Load quảng cáo
+            runOnUiThread(() -> AdMobManager.INSTANCE.loadAppOpenAd(
+                    ActSettings.this,
+                    BuildConfig.ADMOB_APP_OPEN_ID,
+                    new Function0<Unit>() {
+                        @Override
+                        public Unit invoke() {
+                            if (hasCalledGoToMain.compareAndSet(false, true)) {
+                                handler.removeCallbacks(delayedRunnable);
+                                Log.d("roy93~", "goToMain #2");
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        flAdOpenApp.setVisibility(View.GONE);
+                                        AdMobManager.INSTANCE.showAppOpenAd(ActSettings.this);
+                                    }
+                                });
+                            }
+                            return null;
+                        }
+                    }
+            ));
+        }).start();
     }
 }
