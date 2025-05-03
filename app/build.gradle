@@ -11,8 +11,8 @@ android {
         minSdkVersion 25
         //noinspection EditedTargetSdkVersion
         targetSdkVersion 35
-        versionCode 20250426
-        versionName "2025.04.26"
+        versionCode 20250503
+        versionName "2025.05.03"
     }
 
     android.applicationVariants.configureEach { variant ->
@@ -120,7 +120,7 @@ dependencies {
 
     // debugImplementation because LeakCanary should only run in debug builds.
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.14'
-    implementation 'com.applovin:applovin-sdk:13.1.0'
+//    implementation 'com.applovin:applovin-sdk:13.1.0'
 
     implementation("com.google.android.play:review:2.0.2")
     implementation("com.google.android.play:review-ktx:2.0.2")

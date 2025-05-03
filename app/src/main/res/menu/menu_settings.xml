@@ -38,10 +38,10 @@
         android:id="@+id/menuPolicy"
         android:title="@string/terms_and_privacy_policy"
         app:showAsAction="ifRoom" />
-    <item
-        android:id="@+id/menuApplovinConfig"
-        android:title="@string/applovin_config"
-        app:showAsAction="ifRoom" />
+<!--    <item-->
+<!--        android:id="@+id/menuApplovinConfig"-->
+<!--        android:title="@string/applovin_config"-->
+<!--        app:showAsAction="ifRoom" />-->
     <item
         android:id="@+id/menuGithubOriginal"
         android:title="@string/github_original"

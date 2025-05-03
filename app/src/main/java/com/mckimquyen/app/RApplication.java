@@ -1,6 +1,5 @@
 package com.mckimquyen.app;
 
-import com.mckimquyen.ext.ApplovinKt;
 import com.mckimquyen.services.EditedObservable;
 import com.mckimquyen.services.TaskSortApps;
 import com.mckimquyen.services.TaskUpdateApps;
@@ -41,7 +40,9 @@ public class RApplication extends SugarApp implements Observer {
     @Override
     public void onCreate() {
         super.onCreate();
-        ApplovinKt.setupApplovinAd(this);
+
+        //TODO roy93~ admob init
+//        ApplovinKt.setupApplovinAd(this);
         UpdatedObservable.getInstance().addObserver(this);
         EditedObservable.getInstance().addObserver(this);
         updateApps();
