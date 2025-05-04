@@ -66,6 +66,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import kotlin.Unit;
 import kotlin.jvm.functions.Function0;
+import kotlin.jvm.functions.Function1;
 
 //2023.03.19 tried to convert kotlin but failed
 public class ActSettings extends ActBase implements Observer, ColorChooserDialog.ColorCallback, AdMobManager.InterstitialAdListener {
@@ -588,42 +589,55 @@ public class ActSettings extends ActBase implements Observer, ColorChooserDialog
     }
 
     private void checkShowAd() {
-        final Handler handler = new Handler(Looper.getMainLooper());
-        final AtomicBoolean hasCalledGoToMain = new AtomicBoolean(false);
-
-        new Thread(() -> {
-            final Runnable delayedRunnable = () -> {
-                if (hasCalledGoToMain.compareAndSet(false, true)) {
-//                    Log.d("roy93~", "goToMain #1");
-                    flAdOpenApp.setVisibility(View.GONE);
-                }
-            };
-
-            handler.postDelayed(delayedRunnable, 3000);
-
-            // Load quảng cáo
-            runOnUiThread(() -> AdMobManager.INSTANCE.loadAppOpenAd(
-                    ActSettings.this,
-                    BuildConfig.ADMOB_APP_OPEN_ID,
-                    new Function0<Unit>() {
-                        @Override
-                        public Unit invoke() {
-                            if (hasCalledGoToMain.compareAndSet(false, true)) {
-                                handler.removeCallbacks(delayedRunnable);
-//                                Log.d("roy93~", "goToMain #2");
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        flAdOpenApp.setVisibility(View.GONE);
-                                        AdMobManager.INSTANCE.showAppOpenAd(ActSettings.this);
-                                    }
-                                });
-                            }
-                            return null;
-                        }
+        AdMobManager.INSTANCE.loadAppOpenAd(
+                ActSettings.this,
+                BuildConfig.ADMOB_APP_OPEN_ID,
+                new Function1<Boolean, Unit>() {
+                    @Override
+                    public Unit invoke(Boolean aBoolean) {
+                        flAdOpenApp.setVisibility(View.GONE);
+                        AdMobManager.INSTANCE.showAppOpenAd(ActSettings.this);
+                        return null;
                     }
-            ));
-        }).start();
+                }
+        );
+
+//        final Handler handler = new Handler(Looper.getMainLooper());
+//        final AtomicBoolean hasCalledGoToMain = new AtomicBoolean(false);
+//
+//        new Thread(() -> {
+//            final Runnable delayedRunnable = () -> {
+//                if (hasCalledGoToMain.compareAndSet(false, true)) {
+////                    Log.d("roy93~", "goToMain #1");
+//                    flAdOpenApp.setVisibility(View.GONE);
+//                }
+//            };
+//
+//            handler.postDelayed(delayedRunnable, 3000);
+//
+//            // Load quảng cáo
+//            runOnUiThread(() -> AdMobManager.INSTANCE.loadAppOpenAd(
+//                    ActSettings.this,
+//                    BuildConfig.ADMOB_APP_OPEN_ID,
+//                    new Function0<Unit>() {
+//                        @Override
+//                        public Unit invoke() {
+//                            if (hasCalledGoToMain.compareAndSet(false, true)) {
+//                                handler.removeCallbacks(delayedRunnable);
+////                                Log.d("roy93~", "goToMain #2");
+//                                runOnUiThread(new Runnable() {
+//                                    @Override
+//                                    public void run() {
+//                                        flAdOpenApp.setVisibility(View.GONE);
+//                                        AdMobManager.INSTANCE.showAppOpenAd(ActSettings.this);
+//                                    }
+//                                });
+//                            }
+//                            return null;
+//                        }
+//                    }
+//            ));
+//        }).start();
     }
 
     @Override

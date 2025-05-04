@@ -11,8 +11,8 @@ android {
         minSdkVersion 25
         //noinspection EditedTargetSdkVersion
         targetSdkVersion 35
-        versionCode 20250503
-        versionName "2025.05.03"
+        versionCode 20250504
+        versionName "2025.05.04"
     }
 
     android.applicationVariants.configureEach { variant ->
