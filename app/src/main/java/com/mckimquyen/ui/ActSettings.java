@@ -19,6 +19,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 
 import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
@@ -77,7 +78,7 @@ public class ActSettings extends ActBase implements Observer, ColorChooserDialog
     TabLayout tabs;
     ViewPager viewpager;
     FloatingActionButton fabSort;
-    FrameLayout flAdOpenApp;
+    LinearLayout flAdOpenApp;
     //    private MaxAdView adView;
     private AdView adView = null;
 //    private MaxInterstitialAd interstitialAd;
