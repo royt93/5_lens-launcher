@@ -12,13 +12,10 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
 import androidx.annotation.ColorInt;
@@ -63,11 +60,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Observable;
 import java.util.Observer;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import kotlin.Unit;
 import kotlin.jvm.functions.Function0;
-import kotlin.jvm.functions.Function1;
 
 //2023.03.19 tried to convert kotlin but failed
 public class ActSettings extends ActBase implements Observer, ColorChooserDialog.ColorCallback, AdMobManager.InterstitialAdListener {
@@ -390,7 +385,6 @@ public class ActSettings extends ActBase implements Observer, ColorChooserDialog
     }
 
     private void showSortTypeDialog() {
-        showAdInterstitial();
         final List<SortType> lSortType = new ArrayList<>(EnumSet.allOf(SortType.class));
         final List<String> lSortTypeString = new ArrayList<>();
         for (int i = 0; i < lSortType.size(); i++) {
@@ -590,55 +584,13 @@ public class ActSettings extends ActBase implements Observer, ColorChooserDialog
     }
 
     private void checkShowAd() {
-        AdMobManager.INSTANCE.loadAppOpenAd(
-                ActSettings.this,
-                BuildConfig.ADMOB_APP_OPEN_ID,
-                new Function1<Boolean, Unit>() {
-                    @Override
-                    public Unit invoke(Boolean aBoolean) {
-                        flAdOpenApp.setVisibility(View.GONE);
-                        AdMobManager.INSTANCE.showAppOpenAd(ActSettings.this);
-                        return null;
-                    }
-                }
-        );
-
-//        final Handler handler = new Handler(Looper.getMainLooper());
-//        final AtomicBoolean hasCalledGoToMain = new AtomicBoolean(false);
-//
-//        new Thread(() -> {
-//            final Runnable delayedRunnable = () -> {
-//                if (hasCalledGoToMain.compareAndSet(false, true)) {
-////                    Log.d("roy93~", "goToMain #1");
-//                    flAdOpenApp.setVisibility(View.GONE);
-//                }
-//            };
-//
-//            handler.postDelayed(delayedRunnable, 3000);
-//
-//            // Load quảng cáo
-//            runOnUiThread(() -> AdMobManager.INSTANCE.loadAppOpenAd(
-//                    ActSettings.this,
-//                    BuildConfig.ADMOB_APP_OPEN_ID,
-//                    new Function0<Unit>() {
-//                        @Override
-//                        public Unit invoke() {
-//                            if (hasCalledGoToMain.compareAndSet(false, true)) {
-//                                handler.removeCallbacks(delayedRunnable);
-////                                Log.d("roy93~", "goToMain #2");
-//                                runOnUiThread(new Runnable() {
-//                                    @Override
-//                                    public void run() {
-//                                        flAdOpenApp.setVisibility(View.GONE);
-//                                        AdMobManager.INSTANCE.showAppOpenAd(ActSettings.this);
-//                                    }
-//                                });
-//                            }
-//                            return null;
-//                        }
-//                    }
-//            ));
-//        }).start();
+        AdMobManager.INSTANCE.initSplashScreen(this, new Function0<Unit>() {
+            @Override
+            public Unit invoke() {
+                flAdOpenApp.setVisibility(View.GONE);
+                return null;
+            }
+        });
     }
 
     @Override

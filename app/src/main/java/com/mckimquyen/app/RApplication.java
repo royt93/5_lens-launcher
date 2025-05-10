@@ -1,11 +1,9 @@
 package com.mckimquyen.app;
 
-import android.app.Activity;
 import android.util.Log;
 
 import com.google.android.gms.ads.MobileAds;
 import com.mckimquyen.sdkadbmob.AdMobManager;
-import com.mckimquyen.sdkadbmob.AppLifecycleListener;
 import com.mckimquyen.services.EditedObservable;
 import com.mckimquyen.services.TaskSortApps;
 import com.mckimquyen.services.TaskUpdateApps;
@@ -16,7 +14,6 @@ import java.util.Observable;
 import java.util.Observer;
 
 import kotlin.Unit;
-import kotlin.jvm.functions.Function1;
 import kotlin.jvm.functions.Function2;
 
 //done
@@ -71,27 +68,27 @@ public class RApplication extends SugarApp implements Observer {
                 }
             });
         }).start();
-        registerActivityLifecycleCallbacks(new AppLifecycleListener(new Function2<Boolean, Activity, Unit>() {
-            @Override
-            public Unit invoke(Boolean isForeground, Activity activity) {
-                if (isForeground) {
-//                    Log.d("roy93~", "App moved to Foreground");
-//                    Log.d("roy93~", "activity.getClass().getSimpleName() " + activity.getClass().getSimpleName());
-//                    Log.d("roy93~", "SplashActivity.class.getSimpleName() " + SplashActivity.class.getSimpleName());
-                } else {
-//                    Log.d("roy93~", "App moved to Background");
-                }
-                return null;
-            }
-        }, new Function1<Activity, Unit>() {
-            @Override
-            public Unit invoke(Activity activity) {
-//                Log.d("roy93~", "callbackActivityCreated");
-//                Log.d("roy93~", "activity.getClass().getSimpleName() " + activity.getClass().getSimpleName());
-//                Log.d("roy93~", "SplashActivity.class.getSimpleName() " + SplashActivity.class.getSimpleName());
-                return null;
-            }
-        }));
+//        registerActivityLifecycleCallbacks(new AppLifecycleListener(new Function2<Boolean, Activity, Unit>() {
+//            @Override
+//            public Unit invoke(Boolean isForeground, Activity activity) {
+//                if (isForeground) {
+////                    Log.d("roy93~", "App moved to Foreground");
+////                    Log.d("roy93~", "activity.getClass().getSimpleName() " + activity.getClass().getSimpleName());
+////                    Log.d("roy93~", "SplashActivity.class.getSimpleName() " + SplashActivity.class.getSimpleName());
+//                } else {
+////                    Log.d("roy93~", "App moved to Background");
+//                }
+//                return null;
+//            }
+//        }, new Function1<Activity, Unit>() {
+//            @Override
+//            public Unit invoke(Activity activity) {
+////                Log.d("roy93~", "callbackActivityCreated");
+////                Log.d("roy93~", "activity.getClass().getSimpleName() " + activity.getClass().getSimpleName());
+////                Log.d("roy93~", "SplashActivity.class.getSimpleName() " + SplashActivity.class.getSimpleName());
+//                return null;
+//            }
+//        }));
     }
 
     @Override
