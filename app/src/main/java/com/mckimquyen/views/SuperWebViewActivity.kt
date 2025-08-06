@@ -20,6 +20,7 @@ import androidx.webkit.WebSettingsCompat
 import androidx.webkit.WebViewFeature
 import com.google.android.material.progressindicator.LinearProgressIndicator
 import com.mckimquyen.R
+import com.mckimquyen.sdkadbmob.UIUtils
 import com.mckimquyen.ui.ActBase
 
 class SuperWebViewActivity : ActBase() {
@@ -38,9 +39,9 @@ class SuperWebViewActivity : ActBase() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        UIUtils.setupEdgeToEdge1(window)
         setContentView(R.layout.act_super_wv)
-
+        UIUtils.setupEdgeToEdge2(findViewById(R.id.rootLayout))
         currentTitle = intent?.getStringExtra(KEY_TITLE) ?: ""
         currentWebsite = intent?.getStringExtra(KEY_URL) ?: ""
 

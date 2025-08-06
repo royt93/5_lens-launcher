@@ -15,6 +15,7 @@ import com.mckimquyen.R;
 import com.mckimquyen.app.RAppsSingleton;
 import com.mckimquyen.model.App;
 import com.mckimquyen.model.AppPersistent;
+import com.mckimquyen.sdkadbmob.UIUtils;
 import com.mckimquyen.services.BackgroundChangedObservable;
 import com.mckimquyen.services.LoadedObservable;
 import com.mckimquyen.services.LockChangedObservable;
@@ -40,8 +41,9 @@ public class ActHome extends ActBase implements Observer {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        UIUtils.INSTANCE.setupEdgeToEdge1(getWindow());
         setContentView(R.layout.act_home);
-
+        UIUtils.INSTANCE.setupEdgeToEdge2(findViewById(R.id.rootLayout));
         setupViews();
 
         PackageManager mPackageManager = getPackageManager();

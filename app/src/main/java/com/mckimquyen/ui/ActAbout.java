@@ -16,6 +16,7 @@ import androidx.core.content.ContextCompat;
 
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.mckimquyen.R;
+import com.mckimquyen.sdkadbmob.UIUtils;
 import com.mckimquyen.services.NightModeObservable;
 
 import java.util.Objects;
@@ -33,8 +34,9 @@ public class ActAbout extends ActBase implements Observer {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        UIUtils.INSTANCE.setupEdgeToEdge1(getWindow());
         setContentView(R.layout.act_about);
-
+        UIUtils.INSTANCE.setupEdgeToEdge2(findViewById(R.id.rootLayout));
         findViews();
 
         setupViews();

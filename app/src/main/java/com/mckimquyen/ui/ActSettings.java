@@ -43,6 +43,7 @@ import com.mckimquyen.itf.LensInterface;
 import com.mckimquyen.itf.SettingsInterface;
 import com.mckimquyen.model.App;
 import com.mckimquyen.sdkadbmob.AdMobManager;
+import com.mckimquyen.sdkadbmob.UIUtils;
 import com.mckimquyen.services.BroadcastReceivers;
 import com.mckimquyen.services.LoadedObservable;
 import com.mckimquyen.services.NightModeObservable;
@@ -63,6 +64,7 @@ import java.util.Observer;
 
 import kotlin.Unit;
 import kotlin.jvm.functions.Function0;
+import kotlin.jvm.functions.Function1;
 
 //2023.03.19 tried to convert kotlin but failed
 public class ActSettings extends ActBase implements Observer, ColorChooserDialog.ColorCallback, AdMobManager.InterstitialAdListener {
@@ -105,7 +107,9 @@ public class ActSettings extends ActBase implements Observer, ColorChooserDialog
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        UIUtils.INSTANCE.setupEdgeToEdge1(getWindow());
         setContentView(R.layout.act_settings);
+        UIUtils.INSTANCE.setupEdgeToEdge2(findViewById(R.id.rootLayout));
         AdMobManager.INSTANCE.setCurrentActivity(this);
         AdMobManager.INSTANCE.setInterstitialListener(this);
         setupViews();
@@ -153,7 +157,7 @@ public class ActSettings extends ActBase implements Observer, ColorChooserDialog
         listApp = Objects.requireNonNull(RAppsSingleton.getInstance()).getApps();
 
 //        adView = ApplovinKt.createAdBanner(this, ActSettings.class.getSimpleName(), Color.TRANSPARENT, findViewById(R.id.flAd), true);
-        adView = AdMobManager.INSTANCE.loadBanner(this, BuildConfig.ADMOB_BANNER_ID, findViewById(R.id.flAd), AdSize.BANNER);
+        adView = AdMobManager.INSTANCE.loadBanner(this, BuildConfig.ADMOB_BANNER_ID, findViewById(R.id.bannerContainer), findViewById(R.id.tvLabelAd), AdSize.BANNER);
 //        createAdInter();
         AdMobManager.INSTANCE.loadInterstitial(this, BuildConfig.ADMOB_INTERSTITIAL_ID);
     }
@@ -195,29 +199,21 @@ public class ActSettings extends ActBase implements Observer, ColorChooserDialog
     private void launchApps() {
         boolean isDefaultLauncher = UtilLauncher.isDefaultLauncher(getApplication());
         if (isDefaultLauncher) {
-            Intent homeIntent = new Intent(Intent.ACTION_MAIN);
-            homeIntent.addCategory(Intent.CATEGORY_HOME);
-            startActivity(homeIntent);
-            showAdInterstitial();
+            AdMobManager.INSTANCE.showInterstitial(this, new Function1<Boolean, Unit>() {
+                @Override
+                public Unit invoke(Boolean aBoolean) {
+                    Intent homeIntent = new Intent(Intent.ACTION_MAIN);
+                    homeIntent.addCategory(Intent.CATEGORY_HOME);
+                    startActivity(homeIntent);
+                    return null;
+                }
+            });
         } else {
 //            Intent homeIntent = new Intent(ASettings.this, AHome.class);
 //            startActivity(homeIntent);
             showHomeLauncherChooser();
         }
         overridePendingTransition(R.anim.a_fade_in, R.anim.a_fade_out);
-    }
-
-    void showAdInterstitial() {
-//        boolean enableAdInter = getString(R.string.EnableAdInter).equals("true");
-//        if (!enableAdInter) {
-//            Toast.makeText(this, "Show ad full SUCCESSFULLY", Toast.LENGTH_SHORT).show();
-//            return;
-//        }
-
-//        if (interstitialAd != null && interstitialAd.isReady()) {
-//            interstitialAd.showAd();
-//        }
-        AdMobManager.INSTANCE.showInterstitial(this);
     }
 
 //    private void createAdInter() {
@@ -278,10 +274,15 @@ public class ActSettings extends ActBase implements Observer, ColorChooserDialog
             launchApps();
             return true;
         } else if (id == R.id.menuItemAbout) {
-            Intent aboutIntent = new Intent(ActSettings.this, ActAbout.class);
-            startActivity(aboutIntent);
-            overridePendingTransition(R.anim.a_slide_in_left, R.anim.a_slide_out_right);
-            showAdInterstitial();
+            AdMobManager.INSTANCE.showInterstitial(this, new Function1<Boolean, Unit>() {
+                @Override
+                public Unit invoke(Boolean aBoolean) {
+                    Intent aboutIntent = new Intent(ActSettings.this, ActAbout.class);
+                    startActivity(aboutIntent);
+                    overridePendingTransition(R.anim.a_slide_in_left, R.anim.a_slide_out_right);
+                    return null;
+                }
+            });
             return true;
         } else if (id == R.id.menuItemResetDefaultSettings) {
             switch (viewpager.getCurrentItem()) {
