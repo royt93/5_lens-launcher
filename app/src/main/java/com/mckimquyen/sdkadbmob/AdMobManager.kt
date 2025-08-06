@@ -651,15 +651,15 @@ object NetworkUtils {
 object UIUtils {
     fun setupEdgeToEdge1(window: Window) {
         // Edge-to-edge cho Android 10+ (API 29+)
-        WindowCompat.setDecorFitsSystemWindows(window, false)
+//        WindowCompat.setDecorFitsSystemWindows(window, false)
     }
 
     fun setupEdgeToEdge2(rootLayout: View) {
         // Nếu cần inset padding cho layout chính
-        ViewCompat.setOnApplyWindowInsetsListener(rootLayout) { view, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            view.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            WindowInsetsCompat.CONSUMED
-        }
+//        ViewCompat.setOnApplyWindowInsetsListener(rootLayout) { view, insets ->
+//            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+//            view.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+//            WindowInsetsCompat.CONSUMED
+//        }
     }
 }
