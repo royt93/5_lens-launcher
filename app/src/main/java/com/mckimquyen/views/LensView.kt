@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.graphics.*
 import android.graphics.drawable.NinePatchDrawable
 import android.util.AttributeSet
+import android.util.Log
 import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import android.view.View
@@ -95,8 +96,8 @@ class LensView : View {
         setBackgroundColor(ContextCompat.getColor(context, R.color.colorTransparent))
         mUtilSettings = UtilSettings(context)
         setupPaints()
-        mWorkspaceBackgroundDrawable =
-            ContextCompat.getDrawable(context, R.drawable.workspace_bg) as NinePatchDrawable?
+//        mWorkspaceBackgroundDrawable =
+//            ContextCompat.getDrawable(context, R.drawable.workspace_bg) as NinePatchDrawable?
         mTouchSlop = ViewConfiguration.get(context).scaledTouchSlop.toFloat()
     }
 

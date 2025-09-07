@@ -40,6 +40,20 @@ public class ActHome extends ActBase implements Observer {
     private ArrayList<App> listApp;
     private ArrayList<Bitmap> listAppIcon;
 
+    private void updateColor() {
+        var mUtilSettings = new UtilSettings(this);
+        var kBackground = mUtilSettings.getString(UtilSettings.KEY_BACKGROUND);
+        Log.d("roy93~", "kBackground " + kBackground);
+        if (Objects.equals(kBackground, "Color")) {
+            Log.d("roy93~", "setBackgroundColor");
+            var kBackgroundColor = mUtilSettings.getString(UtilSettings.KEY_BACKGROUND_COLOR);
+            Log.d("roy93~", "kBackgroundColor " + kBackgroundColor);
+            findViewById(R.id.rootLayout).setBackgroundColor(Color.parseColor(kBackgroundColor));
+        } else {
+            findViewById(R.id.rootLayout).setBackgroundColor(Color.TRANSPARENT);
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,15 +61,7 @@ public class ActHome extends ActBase implements Observer {
         setContentView(R.layout.act_home);
         UIUtils.INSTANCE.setupEdgeToEdge2(findViewById(R.id.rootLayout), true, true);
         setupViews();
-//        var mUtilSettings = new UtilSettings(this);
-//        var kBackground = mUtilSettings.getString(UtilSettings.KEY_BACKGROUND);
-//        var kBackgroundColor = mUtilSettings.getString(UtilSettings.KEY_BACKGROUND_COLOR);
-//        Log.d("roy93~", "kBackground " + kBackground);
-//        Log.d("roy93~", "kBackgroundColor " + kBackgroundColor);
-//        if (Objects.equals(kBackground, "Color")) {
-//            Log.d("roy93~", "setBackgroundColor");
-//            findViewById(R.id.rootLayout).setBackgroundColor(Color.parseColor(kBackgroundColor));
-//        }
+//        updateColor();
         PackageManager mPackageManager = getPackageManager();
         lensViews.setPackageManager(mPackageManager);
         lensViews.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
@@ -75,6 +81,8 @@ public class ActHome extends ActBase implements Observer {
     @Override
     protected void onResume() {
         super.onResume();
+        Log.d("roy93~", "onResume");
+        updateColor();
         setupTransparentSystemBarsForLollipop();
     }
 
