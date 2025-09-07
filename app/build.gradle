@@ -101,6 +101,13 @@ android {
     }
 
     namespace 'com.mckimquyen'
+
+//    packaging {
+//        jniLibs {
+//            useLegacyPackaging false
+//        }
+//        pageSizeAlignment = 16384
+//    }
 }
 
 dependencies {
