@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -21,6 +22,7 @@ import com.mckimquyen.services.LoadedObservable;
 import com.mckimquyen.services.LockChangedObservable;
 import com.mckimquyen.services.NightModeObservable;
 import com.mckimquyen.services.VisibilityChangedObservable;
+import com.mckimquyen.util.UtilSettings;
 import com.mckimquyen.views.LensView;
 
 import java.util.ArrayList;
@@ -45,7 +47,15 @@ public class ActHome extends ActBase implements Observer {
         setContentView(R.layout.act_home);
         UIUtils.INSTANCE.setupEdgeToEdge2(findViewById(R.id.rootLayout), true, true);
         setupViews();
-
+//        var mUtilSettings = new UtilSettings(this);
+//        var kBackground = mUtilSettings.getString(UtilSettings.KEY_BACKGROUND);
+//        var kBackgroundColor = mUtilSettings.getString(UtilSettings.KEY_BACKGROUND_COLOR);
+//        Log.d("roy93~", "kBackground " + kBackground);
+//        Log.d("roy93~", "kBackgroundColor " + kBackgroundColor);
+//        if (Objects.equals(kBackground, "Color")) {
+//            Log.d("roy93~", "setBackgroundColor");
+//            findViewById(R.id.rootLayout).setBackgroundColor(Color.parseColor(kBackgroundColor));
+//        }
         PackageManager mPackageManager = getPackageManager();
         lensViews.setPackageManager(mPackageManager);
         lensViews.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
