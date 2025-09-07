@@ -12,4 +12,5 @@
     <color name="colorShadow">#80000000</color>
     <color name="colorCircles">#A6A4A6</color>
     <color name="colorAppTint">@color/colorBlack</color>
+    <color name="background">#FFFFFF</color>
 </resources>

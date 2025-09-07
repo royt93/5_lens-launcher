@@ -2,4 +2,5 @@
 <resources>
     <color name="colorCircles">@color/colorWhite</color>
     <color name="colorAppTint">@color/colorWhite</color>
+    <color name="background">#000000</color>
 </resources>
