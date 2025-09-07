@@ -109,7 +109,7 @@ public class ActSettings extends ActBase implements Observer, ColorChooserDialog
         super.onCreate(savedInstanceState);
         UIUtils.INSTANCE.setupEdgeToEdge1(getWindow());
         setContentView(R.layout.act_settings);
-        UIUtils.INSTANCE.setupEdgeToEdge2(findViewById(R.id.rootLayout));
+        UIUtils.INSTANCE.setupEdgeToEdge2(findViewById(R.id.rootLayout), true, true);
         AdMobManager.INSTANCE.setCurrentActivity(this);
         AdMobManager.INSTANCE.setInterstitialListener(this);
         setupViews();

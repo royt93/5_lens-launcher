@@ -36,7 +36,7 @@ public class ActAbout extends ActBase implements Observer {
         super.onCreate(savedInstanceState);
         UIUtils.INSTANCE.setupEdgeToEdge1(getWindow());
         setContentView(R.layout.act_about);
-        UIUtils.INSTANCE.setupEdgeToEdge2(findViewById(R.id.rootLayout));
+        UIUtils.INSTANCE.setupEdgeToEdge2(findViewById(R.id.rootLayout), true , true);
         findViews();
 
         setupViews();
