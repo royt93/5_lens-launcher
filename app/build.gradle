@@ -4,15 +4,15 @@ apply plugin: 'kotlin-android'
 //apply plugin: 'com.google.firebase.crashlytics'
 
 android {
-    compileSdk 35
+    compileSdk 36
 
     defaultConfig {
         applicationId "com.mckimquyen.lenslauncher"
         minSdkVersion 25
         //noinspection EditedTargetSdkVersion
-        targetSdkVersion 35
-        versionCode 20250907
-        versionName "2025.09.07"
+        targetSdkVersion 36
+        versionCode 20251007
+        versionName "2025.10.07"
     }
 
     android.applicationVariants.configureEach { variant ->
