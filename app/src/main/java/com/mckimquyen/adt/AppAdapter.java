@@ -38,6 +38,8 @@ import com.mckimquyen.util.UtilApp;
 import java.util.List;
 import java.util.Objects;
 
+import kotlin.Unit;
+
 /**
  * ============================================================================
  * APP ADAPTER - RecyclerView Adapter cho danh sách ứng dụng
@@ -48,19 +50,17 @@ import java.util.Objects;
  * - Khóa/mở khóa app bằng biometric (lock toggle)
  * - Context menu: App Info, Uninstall
  * - Launch app khi click
- *
  * ARCHITECTURE:
  * - Adapter: Quản lý danh sách apps
  * - ViewHolder: Quản lý UI và events của từng app item
  * - AppPersistent: Lưu trữ settings (visibility, lock status)
  * - Biometric: Xử lý authentication
- *
  * MIGRATION NOTE:
  * Đã cố migrate sang Kotlin nhưng gặp lỗi với lambda callbacks và ViewHolder,
  * nên tạm giữ Java version (2023.03.19)
  * ============================================================================
  */
-public class AppAdapter extends RecyclerView.Adapter {
+public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
 
     // ========================================================================
     // FIELDS
@@ -110,7 +110,7 @@ public class AppAdapter extends RecyclerView.Adapter {
      */
     @NonNull
     @Override
-    public AppViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public AppViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         View view = inflater.inflate(R.layout.view_item_app, parent, false);
         final AppViewHolder holder = new AppViewHolder(view, mContext);
@@ -123,13 +123,12 @@ public class AppAdapter extends RecyclerView.Adapter {
      * Method này được gọi mỗi khi item scroll vào view
      */
     @Override
-    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull AppViewHolder holder, int position) {
         App app = getItemForPosition(position);
         if (app == null) {
             return;
         }
-        AppViewHolder appViewHolder = (AppViewHolder) holder;
-        appViewHolder.setAppElement(app);
+        holder.setAppElement(app);
     }
 
     /**
@@ -142,7 +141,7 @@ public class AppAdapter extends RecyclerView.Adapter {
      * - Update UI state (visibility, lock)
      * ============================================================================
      */
-    static class AppViewHolder extends RecyclerView.ViewHolder implements PopupMenu.OnMenuItemClickListener {
+    public static class AppViewHolder extends RecyclerView.ViewHolder implements PopupMenu.OnMenuItemClickListener {
 
         // ====================================================================
         // UI COMPONENTS
@@ -338,7 +337,8 @@ public class AppAdapter extends RecyclerView.Adapter {
                                         ColorStateList.valueOf(Color.GRAY)
                                 );
                             }
-                            return null;
+                            // Return Unit instead of null to fix @NotNull warning
+                            return Unit.INSTANCE;
                         }
                 );
             }
@@ -356,12 +356,11 @@ public class AppAdapter extends RecyclerView.Adapter {
             if (mContext == null) {
                 return;
             }
-            if (!(mContext instanceof ActSettings)) {
-                return;
+            // Pattern variable matching (Java 16+)
+            if (mContext instanceof ActSettings activitySettings) {
+                Intent changeAppsVisibilityIntent = new Intent(activitySettings, BroadcastReceivers.AppsVisibilityChangedReceiver.class);
+                activitySettings.sendBroadcast(changeAppsVisibilityIntent);
             }
-            ActSettings activitySettings = (ActSettings) mContext;
-            Intent changeAppsVisibilityIntent = new Intent(activitySettings, BroadcastReceivers.AppsVisibilityChangedReceiver.class);
-            activitySettings.sendBroadcast(changeAppsVisibilityIntent);
         }
 
         /**
@@ -372,12 +371,11 @@ public class AppAdapter extends RecyclerView.Adapter {
             if (mContext == null) {
                 return;
             }
-            if (!(mContext instanceof ActSettings)) {
-                return;
+            // Pattern variable matching (Java 16+)
+            if (mContext instanceof ActSettings activitySettings) {
+                Intent intent = new Intent(activitySettings, BroadcastReceivers.AppsLockChangedReceiver.class);
+                activitySettings.sendBroadcast(intent);
             }
-            ActSettings activitySettings = (ActSettings) mContext;
-            Intent intent = new Intent(activitySettings, BroadcastReceivers.AppsLockChangedReceiver.class);
-            activitySettings.sendBroadcast(intent);
         }
 
         // ====================================================================

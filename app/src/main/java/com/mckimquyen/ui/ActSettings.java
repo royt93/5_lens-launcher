@@ -22,7 +22,7 @@ import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
-import androidx.viewpager.widget.ViewPager;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.afollestad.materialdialogs.color.ColorChooserDialog;
@@ -33,6 +33,7 @@ import com.google.android.gms.ads.LoadAdError;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
 import com.mckimquyen.BuildConfig;
 import com.mckimquyen.R;
 import com.mckimquyen.adt.FragmentPagerAdapter;
@@ -73,7 +74,7 @@ public class ActSettings extends ActBase implements Observer, ColorChooserDialog
     private static final String TAG_COLOR_HIGHLIGHT = "HighlightColor";
     Toolbar toolbar;
     TabLayout tabs;
-    ViewPager viewpager;
+    ViewPager2 viewpager;
     FloatingActionButton fabSort;
     LinearLayout flAdOpenApp;
     //    private MaxAdView adView;
@@ -132,11 +133,16 @@ public class ActSettings extends ActBase implements Observer, ColorChooserDialog
 
         fabSort.hide();
         setSupportActionBar(toolbar);
-        FragmentPagerAdapter mPagerAdapter = new FragmentPagerAdapter(getSupportFragmentManager(), ActSettings.this);
+        FragmentPagerAdapter mPagerAdapter = new FragmentPagerAdapter(ActSettings.this, ActSettings.this);
         viewpager.setOffscreenPageLimit(2);
         viewpager.setAdapter(mPagerAdapter);
-        tabs.setupWithViewPager(viewpager);
-        viewpager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+
+        // Setup TabLayout with TabLayoutMediator (ViewPager2 requirement)
+        new TabLayoutMediator(tabs, viewpager, (tab, position) -> {
+            tab.setText(mPagerAdapter.getPageTitle(position));
+        }).attach();
+
+        viewpager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
             }

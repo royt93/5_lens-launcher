@@ -2,8 +2,8 @@ package com.mckimquyen.adt
 
 import android.content.Context
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.FragmentStatePagerAdapter
+import androidx.fragment.app.FragmentActivity
+import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.mckimquyen.R
 import com.mckimquyen.ui.FrmApps
 import com.mckimquyen.ui.FrmLens
@@ -11,37 +11,36 @@ import com.mckimquyen.ui.FrmSettings
 
 /**
  * ============================================================================
- * FRAGMENT PAGER ADAPTER
+ * FRAGMENT PAGER ADAPTER (ViewPager2 + FragmentStateAdapter)
  * ============================================================================
- * Adapter cho ViewPager để quản lý 3 tabs chính của launcher:
+ * Adapter cho ViewPager2 để quản lý 3 tabs chính của launcher:
  * - Tab 0: Lens (Fisheye view)
  * - Tab 1: Apps (Danh sách ứng dụng)
  * - Tab 2: Settings (Cài đặt)
  *
- * DEPRECATION NOTE:
- * FragmentStatePagerAdapter đã deprecated từ AndroidX, nhưng vẫn hoạt động tốt.
- * Để migrate sang ViewPager2 + FragmentStateAdapter sẽ cần:
- * - Thay đổi layout XML (ViewPager -> ViewPager2)
- * - Viết lại adapter extend FragmentStateAdapter
- * - Update logic trong ActHome
- * Migration này có thể làm sau khi có thời gian test kỹ.
+ * MIGRATION NOTE:
+ * - Migrated từ FragmentStatePagerAdapter -> FragmentStateAdapter
+ * - Cần update ViewPager -> ViewPager2 trong XML layout
+ * - FragmentStateAdapter tự động optimize lifecycle và memory
  *
- * FIX HISTORY:
- * - 1.3: Sử dụng BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT để tối ưu lifecycle
- *        (Chỉ resume fragment đang hiển thị, pause các fragment khác)
+ * ADVANTAGES của ViewPager2:
+ * - Better performance với RecyclerView internally
+ * - RTL (Right-to-Left) support built-in
+ * - Vertical orientation support
+ * - Improved fragment lifecycle management
+ * - DiffUtil support cho animations
+ *
+ * BREAKING CHANGES:
+ * - getPageTitle() không còn được support trong ViewPager2
+ * - Cần setup TabLayout riêng với TabLayoutMediator
+ * - getItem() -> createFragment()
+ * - getCount() -> getItemCount()
  * ============================================================================
  */
 class FragmentPagerAdapter(
-    fragmentManager: FragmentManager,
+    fragmentActivity: FragmentActivity,
     private val mContext: Context,
-) : FragmentStatePagerAdapter(
-    fragmentManager,
-    // BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT: Tối ưu lifecycle
-    // - Fragment hiện tại: RESUMED state
-    // - Fragment khác: STARTED state
-    // - Giúp tiết kiệm tài nguyên, fragment không hiển thị sẽ pause
-    BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT
-) {
+) : FragmentStateAdapter(fragmentActivity) {
 
     companion object {
         // Số lượng tabs cố định = 3
@@ -54,21 +53,29 @@ class FragmentPagerAdapter(
     }
 
     /**
+     * Trả về tổng số pages/tabs
+     * Required override cho FragmentStateAdapter
+     */
+    override fun getItemCount(): Int = NUM_PAGES
+
+    /**
      * Tạo Fragment tương ứng với position
      *
      * @param position Vị trí tab (0, 1, 2)
      * @return Fragment instance cho tab đó
      *
-     * NOTE: Mỗi lần swipe hoặc select tab, method này được gọi
-     * FragmentStatePagerAdapter tự động cache fragments nên không lo về performance
+     * NOTE:
+     * - FragmentStateAdapter tự động cache và manage lifecycle
+     * - Fragment được destroy khi không visible để tiết kiệm memory
+     * - Fragment được recreate khi user swipe về
      */
-    override fun getItem(position: Int): Fragment {
+    override fun createFragment(position: Int): Fragment {
         return when (position) {
-            TAB_LENS -> FrmLens.newInstance()      // Fisheye lens view
-            TAB_APPS -> FrmApps.newInstance()      // Danh sách apps dạng grid
+            TAB_LENS -> FrmLens.newInstance()         // Fisheye lens view
+            TAB_APPS -> FrmApps.newInstance()         // Danh sách apps dạng grid
             TAB_SETTINGS -> FrmSettings.newInstance() // Settings & preferences
             else -> {
-                // Fallback - Không bao giờ xảy ra vì NUM_PAGES = 3
+                // Fallback - Không bao giờ xảy ra vì getItemCount() = 3
                 // Nhưng cần có để satisfy when expression
                 Fragment()
             }
@@ -76,49 +83,59 @@ class FragmentPagerAdapter(
     }
 
     /**
-     * Trả về tổng số pages/tabs
-     */
-    override fun getCount(): Int {
-        return NUM_PAGES
-    }
-
-    /**
-     * Trả về tiêu đề của từng tab
-     * Được sử dụng bởi TabLayout để hiển thị tên tab
+     * Lấy tiêu đề của tab theo position
+     *
+     * NOTE: ViewPager2 không support getPageTitle() natively
+     * Method này dùng cho TabLayoutMediator trong Activity
      *
      * @param position Vị trí tab
      * @return Tên tab (từ strings.xml)
      */
-    override fun getPageTitle(position: Int): CharSequence? {
+    fun getPageTitle(position: Int): CharSequence {
         return when (position) {
             TAB_LENS -> mContext.getString(R.string.tab_lens)
             TAB_APPS -> mContext.getString(R.string.tab_apps)
             TAB_SETTINGS -> mContext.getString(R.string.tab_settings)
-            else -> super.getPageTitle(position)
+            else -> ""
         }
     }
 
     /**
-     * TODO: Nếu cần migrate sang ViewPager2, uncomment code bên dưới
-     * và thay thế class này bằng implementation mới
+     * ============================================================================
+     * USAGE trong Activity (ActHome.kt):
+     * ============================================================================
+     *
+     * // Setup ViewPager2
+     * val adapter = FragmentPagerAdapter(this, this)
+     * viewPager2.adapter = adapter
+     *
+     * // Setup TabLayout với TabLayoutMediator
+     * TabLayoutMediator(tabLayout, viewPager2) { tab, position ->
+     *     tab.text = adapter.getPageTitle(position)
+     * }.attach()
+     *
+     * // Optional: Set offscreen page limit
+     * viewPager2.offscreenPageLimit = 2  // Cache 2 pages on each side
+     *
+     * // Optional: Set page transformer for animations
+     * viewPager2.setPageTransformer(ZoomOutPageTransformer())
+     *
+     * ============================================================================
+     * UPDATE trong layout XML:
+     * ============================================================================
+     *
+     * Replace:
+     *   <androidx.viewpager.widget.ViewPager
+     *       android:id="@+id/viewPager"
+     *       ... />
+     *
+     * With:
+     *   <androidx.viewpager2.widget.ViewPager2
+     *       android:id="@+id/viewPager2"
+     *       android:layout_width="match_parent"
+     *       android:layout_height="match_parent"
+     *       android:orientation="horizontal" />
+     *
+     * ============================================================================
      */
-    /*
-    // ViewPager2 Migration Example:
-    class FragmentPagerAdapter2(
-        fragmentActivity: FragmentActivity,
-        private val mContext: Context
-    ) : FragmentStateAdapter(fragmentActivity) {
-
-        override fun getItemCount(): Int = NUM_PAGES
-
-        override fun createFragment(position: Int): Fragment {
-            return when (position) {
-                TAB_LENS -> FrmLens.newInstance()
-                TAB_APPS -> FrmApps.newInstance()
-                TAB_SETTINGS -> FrmSettings.newInstance()
-                else -> Fragment()
-            }
-        }
-    }
-    */
 }
