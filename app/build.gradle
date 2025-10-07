@@ -1,26 +1,35 @@
+// ============================================================================
+// PLUGINS
+// ============================================================================
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
+// Firebase plugins - bật khi cần sử dụng Firebase
 //apply plugin: 'com.google.gms.google-services'
 //apply plugin: 'com.google.firebase.crashlytics'
 
+// ============================================================================
+// ANDROID CONFIGURATION
+// ============================================================================
 android {
-    // Fix: 1.5 - Update compileSdk (giữ nguyên version 36)
-    compileSdk 36
+    namespace 'com.mckimquyen'
+
+    // SDK Versions - Android 14 (API 36)
+    compileSdkVersion 36
 
     defaultConfig {
         applicationId "com.mckimquyen.lenslauncher"
-        minSdkVersion 25
+        minSdkVersion 25    // Android 7.1 (Nougat)
         //noinspection EditedTargetSdkVersion
-        targetSdkVersion 36
+        targetSdkVersion 36 // Android 14
+
+        // Version format: YYYYMMDD
         versionCode 20251007
         versionName "2025.10.07"
     }
 
-    android.applicationVariants.configureEach { variant ->
-        variant.outputs.configureEach {
-            outputFileName = defaultConfig.applicationId + buildType.name + "_" + defaultConfig.versionName + "_" + defaultConfig.versionCode + ".apk"
-        }
-    }
+    // ========================================================================
+    // SIGNING CONFIGURATION
+    // ========================================================================
     signingConfigs {
         release {
             storeFile file("keystore.jks")
@@ -30,9 +39,12 @@ android {
         }
     }
 
+    // ========================================================================
+    // BUILD TYPES (Debug vs Release)
+    // ========================================================================
     buildTypes {
         release {
-            // nhớ check APPLICATION_ID trong manifest
+            // Release config - sử dụng AdMob IDs thật
             buildConfigField "String", "ADMOB_BANNER_ID", "\"ca-app-pub-3612191981543807/9970850592\""
             buildConfigField "String", "ADMOB_INTERSTITIAL_ID", "\"ca-app-pub-3612191981543807/2896523398\""
             buildConfigField "String", "ADMOB_APP_OPEN_ID", "\"ca-app-pub-3612191981543807/2604638100\""
@@ -41,135 +53,171 @@ android {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
-//            applicationIdSuffix ".release"
         }
+
         debug {
+            // Debug config - sử dụng AdMob test IDs
             buildConfigField "String", "ADMOB_BANNER_ID", "\"ca-app-pub-3940256099942544/6300978111\""
             buildConfigField "String", "ADMOB_INTERSTITIAL_ID", "\"ca-app-pub-3940256099942544/1033173712\""
             buildConfigField "String", "ADMOB_APP_OPEN_ID", "\"ca-app-pub-3940256099942544/9257395921\""
 
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-//            applicationIdSuffix ".debug"
         }
     }
 
+    // ========================================================================
+    // PRODUCT FLAVORS (Dev vs Production)
+    // ========================================================================
     flavorDimensions.add("type")
+
     productFlavors {
-
         dev {
-//            applicationId = "com.mckimquyen.lenslauncher.dev"
             dimension "type"
-            buildConfigField("String", "FLAVOR_buildEnv", '"dev"')
+            buildConfigField "String", "FLAVOR_buildEnv", '"dev"'
             resValue "string", "app_name", "Fisheye Launcher DEV"
-
-//            resValue("string", "SDK_KEY", "e75FnQfS9XTTqM1Kne69U7PW_MBgAnGQTFvtwVVui6kRPKs5L7ws9twr5IQWwVfzPKZ5pF2IfDa7lguMgGlCyt")
-//            resValue "string", "BANNER", "aa291bda0fb0b6c5"
-//            resValue "string", "INTER", "7cf8ffccbdb242be"
-//            resValue("string", "EnableAdInter", "false")
-//            resValue("string", "EnableAdBanner", "true")
         }
 
         production {
-//            applicationId = "com.mckimquyen.lenslauncher.prod"
             dimension "type"
-            buildConfigField("String", "FLAVOR_buildEnv", '"prod"')
+            buildConfigField "String", "FLAVOR_buildEnv", '"prod"'
             resValue "string", "app_name", "Fisheye Launcher"
-
-//            resValue("string", "SDK_KEY", "e75FnQfS9XTTqM1Kne69U7PW_MBgAnGQTFvtwVVui6kRPKs5L7ws9twr5IQWwVfzPKZ5pF2IfDa7lguMgGlCyt")
-//            resValue "string", "BANNER", "aa291bda0fb0b6c5"
-//            resValue "string", "INTER", "7cf8ffccbdb242be"
-//            resValue("string", "EnableAdInter", "true")
-//            resValue("string", "EnableAdBanner", "true")
         }
-
     }
-//    dataBinding {
-//        enabled = true
-//    }
 
+    // ========================================================================
+    // BUILD FEATURES
+    // ========================================================================
     buildFeatures {
-        buildConfig = true
-//        viewBinding true
+        buildConfig = true  // Enable BuildConfig generation
+        // viewBinding true // Bật khi cần sử dụng View Binding
     }
 
+    // ========================================================================
+    // COMPILE OPTIONS
+    // ========================================================================
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = 17
+        jvmTarget = '17'
     }
 
-    namespace 'com.mckimquyen'
+    // ========================================================================
+    // OUTPUT FILE NAME CUSTOMIZATION
+    // ========================================================================
+    applicationVariants.configureEach { variant ->
+        variant.outputs.configureEach {
+            // Format: com.mckimquyen.lenslauncher[buildType]_[version]_[versionCode].apk
+            // VD: com.mckimquyen.launcherrelease_2025.10.07_20251007.apk
+            outputFileName = "${defaultConfig.applicationId}${buildType.name}_${defaultConfig.versionName}_${defaultConfig.versionCode}.apk"
+        }
+    }
 
-//    packaging {
-//        jniLibs {
-//            useLegacyPackaging false
-//        }
-//        pageSizeAlignment = 16384
-//    }
+    // ========================================================================
+    // PACKAGING OPTIONS (nếu cần)
+    // ========================================================================
+    // packaging {
+    //     jniLibs {
+    //         useLegacyPackaging false
+    //     }
+    //     pageSizeAlignment = 16384
+    // }
 }
 
+// ============================================================================
+// DEPENDENCIES
+// ============================================================================
 dependencies {
+    // Local JARs
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    // Unit Testing
+    // ========================================================================
+    // TESTING DEPENDENCIES
+    // ========================================================================
+
+    // Unit Testing (JVM-based tests)
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.jetbrains.kotlin:kotlin-test:2.0.20'
     testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0'
-    testImplementation 'androidx.arch.core:core-testing:2.2.0' // LiveData testing
-    testImplementation 'org.mockito:mockito-core:5.8.0'
+    testImplementation 'androidx.arch.core:core-testing:2.2.0'  // LiveData testing
+    testImplementation 'org.mockito:mockito-core:5.8.0'         // Mocking framework
     testImplementation 'org.mockito.kotlin:mockito-kotlin:5.2.1'
-    testImplementation 'org.robolectric:robolectric:4.11.1' // Android unit tests
+    testImplementation 'org.robolectric:robolectric:4.11.1'    // Android unit tests
 
-    // Android Instrumentation Testing
+    // Android Instrumentation Testing (Device/Emulator-based tests)
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
     androidTestImplementation 'androidx.test:runner:1.5.2'
     androidTestImplementation 'androidx.test:rules:1.5.0'
     androidTestImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0'
-//    implementation 'androidx.appcompat:appcompat:1.6.1'
 
-    // Fix: 1.5 - Update dependencies (cẩn thận để không break code)
-    implementation 'com.google.android.material:material:1.13.0' // Updated từ 1.12.0
+    // ========================================================================
+    // ANDROID UI COMPONENTS
+    // ========================================================================
+    implementation 'com.google.android.material:material:1.13.0'
     implementation 'androidx.recyclerview:recyclerview:1.4.0'
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation 'androidx.palette:palette-ktx:1.0.0'
-    implementation 'com.github.satyan:sugar:1.5'
-
-    // Giữ nguyên version material-dialogs (version mới có breaking changes)
-    implementation 'com.afollestad.material-dialogs:core:0.9.6.0'
-    implementation 'com.afollestad.material-dialogs:commons:0.9.6.0' // Updated minor version
-
     implementation 'androidx.preference:preference-ktx:1.2.1'
-    implementation("androidx.webkit:webkit:1.14.0") // Updated từ 1.12.1
+    implementation 'androidx.webkit:webkit:1.14.0'
 
-    // Thêm lifecycle dependencies cho LiveData/ViewModel
+    // Material Dialogs - giữ version cũ vì version mới có breaking changes
+    implementation 'com.afollestad.material-dialogs:core:0.9.6.0'
+    implementation 'com.afollestad.material-dialogs:commons:0.9.6.0'
+
+    // ========================================================================
+    // ARCHITECTURE COMPONENTS
+    // ========================================================================
+    // AndroidX Lifecycle - LiveData & ViewModel
     implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.8.7'
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.8.7'
 
-    // Thêm Kotlin Coroutines
+    // ========================================================================
+    // KOTLIN COROUTINES
+    // ========================================================================
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0'
 
-    //firebase
-//    api platform('com.google.firebase:firebase-bom:33.2.0')
-//    api 'com.google.firebase:firebase-analytics-ktx'
-//    api 'com.google.firebase:firebase-crashlytics-ktx'
-//    api 'com.google.firebase:firebase-config-ktx'
+    // ========================================================================
+    // DATABASE
+    // ========================================================================
+    implementation 'com.github.satyan:sugar:1.5'  // Sugar ORM
 
-    //https://github.com/SimformSolutionsPvtLtd/SSBiometricsAuthentication
-    implementation("androidx.biometric:biometric:1.2.0-alpha05")
+    // ========================================================================
+    // SECURITY
+    // ========================================================================
+    // Biometric Authentication
+    // https://github.com/SimformSolutionsPvtLtd/SSBiometricsAuthentication
+    implementation 'androidx.biometric:biometric:1.2.0-alpha05'
 
-    // debugImplementation because LeakCanary should only run in debug builds.
-//    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.14'
-//    implementation 'com.applovin:applovin-sdk:13.1.0'
-    implementation("com.google.android.gms:play-services-ads:23.6.0")
-    implementation("com.google.ads.mediation:applovin:13.0.0.0")
+    // ========================================================================
+    // MONETIZATION - ADMOB
+    // ========================================================================
+    implementation 'com.google.android.gms:play-services-ads:23.6.0'
+    implementation 'com.google.ads.mediation:applovin:13.0.0.0'
 
-    implementation("com.google.android.play:review:2.0.2")
-    implementation("com.google.android.play:review-ktx:2.0.2")
+    // ========================================================================
+    // GOOGLE PLAY SERVICES
+    // ========================================================================
+    // In-App Review
+    implementation 'com.google.android.play:review:2.0.2'
+    implementation 'com.google.android.play:review-ktx:2.0.2'
+
+    // ========================================================================
+    // FIREBASE (commented out - bật khi cần)
+    // ========================================================================
+    // api platform('com.google.firebase:firebase-bom:33.2.0')
+    // api 'com.google.firebase:firebase-analytics-ktx'
+    // api 'com.google.firebase:firebase-crashlytics-ktx'
+    // api 'com.google.firebase:firebase-config-ktx'
+
+    // ========================================================================
+    // DEBUG TOOLS (commented out - bật khi cần debug)
+    // ========================================================================
+    // Memory leak detection - chỉ chạy trong debug builds
+    // debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.14'
 }
