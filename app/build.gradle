@@ -25,6 +25,20 @@ android {
         // Version format: YYYYMMDD
         versionCode 20251007
         versionName "2025.10.07"
+
+        // ====================================================================
+        // SIZE OPTIMIZATION - Giảm kích thước APK/AAB
+        // ====================================================================
+
+        // NOTE: Không dùng ndk.abiFilters ở đây vì conflict với splits.abi
+        // ABI filtering được xử lý bởi splits.abi (xem bên dưới)
+
+        // Vector drawable support cho API < 21
+        vectorDrawables.useSupportLibrary = true
+
+        // Chỉ giữ ngôn ngữ tiếng Anh và tiếng Việt
+        // Loại bỏ resources của các ngôn ngữ khác (giảm ~1-2 MB)
+//        resourceConfigurations += ['en', 'vi']
     }
 
     // ========================================================================
@@ -50,9 +64,26 @@ android {
             buildConfigField "String", "ADMOB_APP_OPEN_ID", "\"ca-app-pub-3612191981543807/2604638100\""
 
             debuggable false
-            minifyEnabled true
+
+            // ================================================================
+            // CODE SHRINKING & OBFUSCATION
+            // ================================================================
+            minifyEnabled true              // Bật R8 để shrink code
+            shrinkResources true            // Xóa resources không dùng (giảm ~10-20%)
+
+            // Sử dụng proguard-android-optimize.txt thay vì proguard-android.txt
+            // để có optimization tốt hơn (giảm thêm ~5-10%)
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+
             signingConfig signingConfigs.release
+
+            // ================================================================
+            // NDK & NATIVE LIBS OPTIMIZATION
+            // ================================================================
+            ndk {
+                // Loại bỏ debug symbols trong native libs (giảm ~20-30%)
+                debugSymbolLevel 'NONE'
+            }
         }
 
         debug {
@@ -61,6 +92,8 @@ android {
             buildConfigField "String", "ADMOB_INTERSTITIAL_ID", "\"ca-app-pub-3940256099942544/1033173712\""
             buildConfigField "String", "ADMOB_APP_OPEN_ID", "\"ca-app-pub-3940256099942544/9257395921\""
 
+            // Có thể bật minify cho debug build để test
+            // nhưng nên tắt để build nhanh hơn khi develop
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
@@ -86,10 +119,42 @@ android {
     }
 
     // ========================================================================
+    // APK SPLITS - Tạo APK riêng cho từng cấu hình
+    // ========================================================================
+    // CHÚ Ý: Phải comment out splits khi build AAB (Android App Bundle)
+    // AAB tự động xử lý splitting. Chỉ bật splits khi build APK thông thường.
+
+    // Để bật: uncomment block splits bên dưới
+    // Để tắt (cho AAB): comment out hoặc set enable = false
+
+//    splits {
+//        // Split theo ABI (CPU architecture) - giảm ~40-60% size mỗi APK
+//        abi {
+//            enable true
+//            reset()
+//            include 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
+//            universalApk false  // Không tạo universal APK (chứa tất cả ABIs)
+//        }
+//
+//        // Split theo density (màn hình) - DEPRECATED, không nên dùng
+//        // AAB tự động xử lý density splitting tốt hơn
+//        density {
+//            enable false
+//        }
+//    }
+
+    // ========================================================================
     // BUILD FEATURES
     // ========================================================================
     buildFeatures {
         buildConfig = true  // Enable BuildConfig generation
+
+        // Tắt các feature không dùng để giảm overhead
+//        aidl = false
+//        renderScript = false
+//        resValues = true
+//        shaders = false
+
         // viewBinding true // Bật khi cần sử dụng View Binding
     }
 
@@ -103,28 +168,91 @@ android {
 
     kotlinOptions {
         jvmTarget = '17'
+
+        // Tối ưu Kotlin compilation
+        freeCompilerArgs += [
+            '-Xjvm-default=all',  // Generate default methods trong interfaces
+            '-opt-in=kotlin.RequiresOptIn'  // Opt-in cho experimental APIs
+        ]
     }
+
+    // ========================================================================
+    // PACKAGING OPTIONS - Loại bỏ files không cần thiết
+    // ========================================================================
+//    packagingOptions {
+//        // Loại bỏ các file META-INF không cần thiết (giảm ~1-2 MB)
+//        resources {
+//            excludes += [
+//                'META-INF/DEPENDENCIES',
+//                'META-INF/LICENSE',
+//                'META-INF/LICENSE.txt',
+//                'META-INF/license.txt',
+//                'META-INF/NOTICE',
+//                'META-INF/NOTICE.txt',
+//                'META-INF/notice.txt',
+//                'META-INF/ASL2.0',
+//                'META-INF/*.kotlin_module',
+//                'META-INF/AL2.0',
+//                'META-INF/LGPL2.1',
+//                'META-INF/versions/9/previous-compilation-data.bin'
+//            ]
+//        }
+//
+//        // Loại bỏ debug info trong native libs
+//        jniLibs {
+//            useLegacyPackaging = false
+//            // Chỉ pick file .so đầu tiên nếu bị duplicate
+//            pickFirsts += ['**/*.so']
+//        }
+//
+//        // Giảm kích thước dex files
+//        dex {
+//            useLegacyPackaging = false
+//        }
+//    }
 
     // ========================================================================
     // OUTPUT FILE NAME CUSTOMIZATION
     // ========================================================================
     applicationVariants.configureEach { variant ->
-        variant.outputs.configureEach {
+        variant.outputs.configureEach { output ->
             // Format: com.mckimquyen.lenslauncher[buildType]_[version]_[versionCode].apk
             // VD: com.mckimquyen.launcherrelease_2025.10.07_20251007.apk
-            outputFileName = "${defaultConfig.applicationId}${buildType.name}_${defaultConfig.versionName}_${defaultConfig.versionCode}.apk"
+            def fileName = "${defaultConfig.applicationId}${buildType.name}_${defaultConfig.versionName}_${defaultConfig.versionCode}"
+
+            // Nếu có split, thêm thông tin split vào tên file
+            def abiFilter = output.getFilter('ABI')
+            def densityFilter = output.getFilter('DENSITY')
+            if (abiFilter != null) {
+                fileName += "_${abiFilter}"
+            }
+            if (densityFilter != null) {
+                fileName += "_${densityFilter}"
+            }
+
+            outputFileName = "${fileName}.apk"
         }
     }
 
     // ========================================================================
-    // PACKAGING OPTIONS (nếu cần)
+    // BUNDLE (AAB) CONFIGURATION
     // ========================================================================
-    // packaging {
-    //     jniLibs {
-    //         useLegacyPackaging false
-    //     }
-    //     pageSizeAlignment = 16384
-    // }
+    bundle {
+        // Ngôn ngữ: AAB sẽ tự động split theo ngôn ngữ
+        language {
+            enableSplit = true
+        }
+
+        // Density: AAB sẽ tự động split theo màn hình
+        density {
+            enableSplit = true
+        }
+
+        // ABI: AAB sẽ tự động split theo kiến trúc CPU
+        abi {
+            enableSplit = true
+        }
+    }
 }
 
 // ============================================================================

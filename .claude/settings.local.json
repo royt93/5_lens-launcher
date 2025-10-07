@@ -3,7 +3,9 @@
     "allow": [
       "mcp__ide__getDiagnostics",
       "Bash(chmod:*)",
-      "Bash(./gradlew:*)"
+      "Bash(./gradlew:*)",
+      "Bash(find:*)",
+      "Bash(awk:*)"
     ],
     "deny": [],
     "ask": []
