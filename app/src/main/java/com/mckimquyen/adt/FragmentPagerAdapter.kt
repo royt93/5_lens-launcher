@@ -9,34 +9,56 @@ import com.mckimquyen.ui.FrmApps
 import com.mckimquyen.ui.FrmLens
 import com.mckimquyen.ui.FrmSettings
 
+/**
+ * Adapter cho ViewPager để hiển thị 3 tabs: Lens, Apps, Settings
+ *
+ * Fix: 1.3 - Sử dụng BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT để fix deprecated warning
+ * Note: FragmentStatePagerAdapter vẫn deprecated, nhưng migrate sang ViewPager2
+ * sẽ yêu cầu thay đổi layout XML và logic lớn, nên tạm thời giữ nguyên với behavior mới
+ */
 class FragmentPagerAdapter(
     fragmentManager: FragmentManager,
     private val mContext: Context,
-) : FragmentStatePagerAdapter(fragmentManager) {
+) : FragmentStatePagerAdapter(
+    fragmentManager,
+    BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT // Fix deprecated constructor
+) {
 
     companion object {
         private const val NUM_PAGES = 3
     }
 
+    /**
+     * Trả về Fragment tương ứng với position
+     * Position 0: Lens tab
+     * Position 1: Apps tab
+     * Position 2: Settings tab
+     */
     override fun getItem(position: Int): Fragment {
-        when (position) {
-            0 -> return FrmLens.newInstance()
-            1 -> return FrmApps.newInstance()
-            2 -> return FrmSettings.newInstance()
+        return when (position) {
+            0 -> FrmLens.newInstance()
+            1 -> FrmApps.newInstance()
+            2 -> FrmSettings.newInstance()
+            else -> Fragment() // Fallback, không bao giờ xảy ra với NUM_PAGES = 3
         }
-        return Fragment()
     }
 
+    /**
+     * Tổng số pages
+     */
     override fun getCount(): Int {
         return NUM_PAGES
     }
 
+    /**
+     * Tiêu đề của từng tab
+     */
     override fun getPageTitle(position: Int): CharSequence? {
-        when (position) {
-            0 -> return mContext.resources.getString(R.string.tab_lens)
-            1 -> return mContext.resources.getString(R.string.tab_apps)
-            2 -> return mContext.resources.getString(R.string.tab_settings)
+        return when (position) {
+            0 -> mContext.resources.getString(R.string.tab_lens)
+            1 -> mContext.resources.getString(R.string.tab_apps)
+            2 -> mContext.resources.getString(R.string.tab_settings)
+            else -> super.getPageTitle(position)
         }
-        return super.getPageTitle(position)
     }
 }

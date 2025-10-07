@@ -15,6 +15,8 @@ import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.animation.Animation
 import android.view.animation.Transformation
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import com.mckimquyen.R
 import com.mckimquyen.enums.DrawType
 import com.mckimquyen.model.App
@@ -101,7 +103,22 @@ class LensView : View {
         mTouchSlop = ViewConfiguration.get(context).scaledTouchSlop.toFloat()
     }
 
-    @Deprecated("Deprecated in Java")
+    /**
+     * Fix: 1.4 - Migrate từ fitSystemWindows (deprecated) sang WindowInsetsCompat
+     * Xử lý system window insets (status bar, navigation bar) để view không bị che khuất
+     */
+    init {
+        // Sử dụng WindowInsetsCompat thay cho fitSystemWindows deprecated
+        ViewCompat.setOnApplyWindowInsetsListener(this) { view, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            // Lưu insets để sử dụng khi draw
+            mInsets = Rect(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            insets
+        }
+    }
+
+    // Giữ lại method cũ để backward compatibility, nhưng đã được thay thế bằng WindowInsetsCompat
+    @Deprecated("Deprecated in Java", ReplaceWith("WindowInsetsCompat"))
     override fun fitSystemWindows(insets: Rect): Boolean {
         mInsets = insets
         return true

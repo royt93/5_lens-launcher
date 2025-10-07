@@ -8,7 +8,15 @@ import androidx.preference.PreferenceManager
 import com.mckimquyen.BuildConfig
 import com.mckimquyen.enums.SortType
 
-class UtilSettings(private val mContext: Context) {
+/**
+ * Utility class để quản lý SharedPreferences settings
+ *
+ * Fix: 4.4 - Sử dụng Application Context thay vì Activity Context để tránh memory leak
+ */
+class UtilSettings(context: Context) {
+    // Sử dụng Application Context thay vì giữ Activity Context để tránh memory leak
+    private val mContext: Context = context.applicationContext
+
     companion object {
         const val DEFAULT_ICON_SIZE = 18.0f
         const val DEFAULT_DISTORTION_FACTOR = 2.5f

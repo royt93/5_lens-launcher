@@ -10,7 +10,7 @@ class BroadcastReceivers {
             context: Context,
             intent: Intent
         ) {
-            UpdatedObservable.getInstance().update()
+            UpdatedObservable.instance.update()
         }
     }
 
@@ -19,7 +19,7 @@ class BroadcastReceivers {
             context: Context,
             intent: Intent
         ) {
-            EditedObservable.getInstance().update()
+            EditedObservable.instance.update()
         }
     }
 
@@ -28,7 +28,7 @@ class BroadcastReceivers {
             context: Context,
             intent: Intent
         ) {
-            VisibilityChangedObservable.getInstance().update()
+            VisibilityChangedObservable.instance.update()
         }
     }
 
@@ -37,7 +37,7 @@ class BroadcastReceivers {
             context: Context,
             intent: Intent
         ) {
-            LockChangedObservable.getInstance().update()
+            LockChangedObservable.instance.update()
         }
     }
 
@@ -46,7 +46,7 @@ class BroadcastReceivers {
             context: Context,
             intent: Intent
         ) {
-            LoadedObservable.getInstance().update()
+            LoadedObservable.instance.update()
         }
     }
 
@@ -55,7 +55,7 @@ class BroadcastReceivers {
             context: Context,
             intent: Intent
         ) {
-            BackgroundChangedObservable.getInstance().update()
+            BackgroundChangedObservable.instance.update()
         }
     }
 
@@ -64,7 +64,7 @@ class BroadcastReceivers {
             context: Context,
             intent: Intent
         ) {
-            NightModeObservable.getInstance().update()
+            NightModeObservable.instance.update()
         }
     }
 }

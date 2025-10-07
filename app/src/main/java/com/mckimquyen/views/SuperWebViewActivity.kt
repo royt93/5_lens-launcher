@@ -96,12 +96,12 @@ class SuperWebViewActivity : ActBase() {
          */
         val spinnerTypedValue = TypedValue()
         theme.resolveAttribute(
-            com.google.android.material.R.attr.colorPrimary, spinnerTypedValue, true
+            androidx.appcompat.R.attr.colorPrimary, spinnerTypedValue, true
         )
 
         val backgroundTypedValue = TypedValue()
         theme.resolveAttribute(
-            com.google.android.material.R.attr.colorPrimaryContainer, backgroundTypedValue, true
+            androidx.appcompat.R.attr.colorPrimary, backgroundTypedValue, true
         )
 //        val backgroundColor = backgroundTypedValue.resourceId
 //        binding.srl.setProgressBackgroundColorSchemeResource(backgroundColor)

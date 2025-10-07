@@ -4,6 +4,7 @@ apply plugin: 'kotlin-android'
 //apply plugin: 'com.google.firebase.crashlytics'
 
 android {
+    // Fix: 1.5 - Update compileSdk (giữ nguyên version 36)
     compileSdk 36
 
     defaultConfig {
@@ -87,9 +88,10 @@ android {
 //        enabled = true
 //    }
 
-//    buildFeatures {
+    buildFeatures {
+        buildConfig = true
 //        viewBinding true
-//    }
+    }
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
@@ -112,17 +114,46 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    // Unit Testing
     testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.jetbrains.kotlin:kotlin-test:2.0.20'
+    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0'
+    testImplementation 'androidx.arch.core:core-testing:2.2.0' // LiveData testing
+    testImplementation 'org.mockito:mockito-core:5.8.0'
+    testImplementation 'org.mockito.kotlin:mockito-kotlin:5.2.1'
+    testImplementation 'org.robolectric:robolectric:4.11.1' // Android unit tests
+
+    // Android Instrumentation Testing
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+    androidTestImplementation 'androidx.test:runner:1.5.2'
+    androidTestImplementation 'androidx.test:rules:1.5.0'
+    androidTestImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0'
 //    implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'com.google.android.material:material:1.12.0'
+
+    // Fix: 1.5 - Update dependencies (cẩn thận để không break code)
+    implementation 'com.google.android.material:material:1.13.0' // Updated từ 1.12.0
     implementation 'androidx.recyclerview:recyclerview:1.4.0'
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation 'androidx.palette:palette-ktx:1.0.0'
     implementation 'com.github.satyan:sugar:1.5'
+
+    // Giữ nguyên version material-dialogs (version mới có breaking changes)
     implementation 'com.afollestad.material-dialogs:core:0.9.6.0'
-    implementation 'com.afollestad.material-dialogs:commons:0.9.5.0'
+    implementation 'com.afollestad.material-dialogs:commons:0.9.6.0' // Updated minor version
+
     implementation 'androidx.preference:preference-ktx:1.2.1'
-    implementation("androidx.webkit:webkit:1.12.1")
+    implementation("androidx.webkit:webkit:1.14.0") // Updated từ 1.12.1
+
+    // Thêm lifecycle dependencies cho LiveData/ViewModel
+    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.8.7'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7'
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.8.7'
+
+    // Thêm Kotlin Coroutines
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0'
 
     //firebase
 //    api platform('com.google.firebase:firebase-bom:33.2.0')
@@ -134,7 +165,7 @@ dependencies {
     implementation("androidx.biometric:biometric:1.2.0-alpha05")
 
     // debugImplementation because LeakCanary should only run in debug builds.
-    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.14'
+//    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.14'
 //    implementation 'com.applovin:applovin-sdk:13.1.0'
     implementation("com.google.android.gms:play-services-ads:23.6.0")
     implementation("com.google.ads.mediation:applovin:13.0.0.0")
