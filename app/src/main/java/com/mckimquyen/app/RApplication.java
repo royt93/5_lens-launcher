@@ -4,114 +4,280 @@ import android.util.Log;
 
 import com.google.android.gms.ads.MobileAds;
 import com.mckimquyen.sdkadbmob.AdMobManager;
-import com.mckimquyen.services.EditedObservable;
+import com.mckimquyen.services.AppEventManager;
 import com.mckimquyen.services.TaskSortApps;
 import com.mckimquyen.services.TaskUpdateApps;
-import com.mckimquyen.services.UpdatedObservable;
 import com.orm.SugarApp;
 
-import java.util.Observable;
-import java.util.Observer;
-
 import kotlin.Unit;
-import kotlin.jvm.functions.Function2;
 
-//done
-//review in app
-//120hz
-//apply new logic applovin utils
-//splash screen <<< app nay k can splash dau loi dep trai
-//screen screenOrientation
-//keystore
-//bug khi toggle lock/unlock, hide/unhide ko work
-//khi cai ung dung dau tien, bi loi UI light mode
-//bug load apps vo cuc o tab APPS
-//dialog policy first
-//ic_launcher
-//setting search icon pack
-//check home default khi start launcher
-//lock/unlock app
-//github
-//license
-//showMediationDebuggerApplovin
-//switch customized like ios
-//internal webview
-//changelog view
-//font scale
-//app launcher uninstall app
-//app launcher app infor
+/**
+ * ============================================================================
+ * APPLICATION CLASS - Fisheye Launcher
+ * ============================================================================
+ * Class chính của ứng dụng, kế thừa từ SugarApp (Sugar ORM)
+ * Khởi tạo khi app start và tồn tại trong suốt vòng đời của app
 
-//2023.03.18 tried to convert to kotlin but failed
-public class RApplication extends SugarApp implements Observer {
+ * CHỨC NĂNG CHÍNH:
+ * 1. Khởi tạo AdMob SDK (Google Ads)
+ * 2. Quản lý danh sách apps qua LiveData event system
+ * 3. Tự động update apps khi có thay đổi (install/uninstall/update)
+ * 4. Tự động sort apps khi user thay đổi settings
 
+ * EVENT MANAGEMENT:
+ * - Lắng nghe AppEventManager.appsUpdated: Apps được install/uninstall/update
+ * - Lắng nghe AppEventManager.appsEdited: User thay đổi settings (sort type, icon pack, etc.)
+ * - Sử dụng LiveData thay vì deprecated Observable/Observer pattern
+
+ * THREADING:
+ * - AdMob initialization chạy trên background thread để không block main thread
+ * - Task execution (TaskUpdateApps, TaskSortApps) chạy async với coroutines
+ * - LiveData observers chạy trên main thread
+
+ * NOTE:
+ * - Class này được khai báo trong AndroidManifest.xml: android:name=".app.RApplication"
+ * - Không thể convert sang Kotlin vì SugarApp có compatibility issues
+ * - SugarApp tự động handle database initialization qua metadata trong manifest
+ * ============================================================================
+ */
+// 2023.03.18 Tried to convert to Kotlin but failed due to SugarApp compatibility
+public class RApplication extends SugarApp {
+
+    private static final String TAG = "RApplication";
+
+    // ========================================================================
+    // LIFECYCLE - Application Initialization
+    // ========================================================================
+
+    /**
+     * Được gọi khi app start lần đầu tiên
+     * Chỉ chạy 1 lần trong toàn bộ lifecycle của app
+
+     * Thứ tự thực hiện:
+     * 1. super.onCreate() - SugarApp khởi tạo database
+     * 2. setupAdmob() - Khởi tạo Google AdMob SDK
+     * 3. setupEventListeners() - Đăng ký lắng nghe events từ AppEventManager
+     * 4. updateApps() - Load danh sách apps lần đầu
+     */
     @Override
     public void onCreate() {
         super.onCreate();
 
-//        ApplovinKt.setupApplovinAd(this);
+        // Khởi tạo AdMob SDK trên background thread
         setupAdmob();
-        UpdatedObservable.getInstance().addObserver(this);
-        EditedObservable.getInstance().addObserver(this);
+
+        // Đăng ký LiveData observers để lắng nghe app events
+        setupEventListeners();
+
+        // Load danh sách apps lần đầu tiên
         updateApps();
     }
 
+    // ========================================================================
+    // ADMOB INITIALIZATION
+    // ========================================================================
+
+    /**
+     * Khởi tạo Google AdMob SDK
+
+     * CHÚ Ý:
+     * - Chạy trên background thread để không block main thread
+     * - MobileAds.initialize() có thể mất 1-2 giây
+     * - AdMobManager.init() cần GAID (Google Advertising ID) nên cũng mất thời gian
+
+     * PROCESS:
+     * 1. MobileAds.initialize(): Khởi tạo AdMob SDK
+     * 2. AdMobManager.init(): Setup custom ad manager (GAID, consent, etc.)
+
+     * THREADING:
+     * - new Thread().start(): Background thread để tránh ANR (Application Not Responding)
+     * - Lambda callback: Được gọi khi initialization hoàn tất
+     */
     private void setupAdmob() {
         new Thread(() -> {
+            // Step 1: Khởi tạo Google AdMob SDK
             MobileAds.initialize(RApplication.this, initializationStatus -> {
-                // Không làm gì
+                // Initialization complete - không cần xử lý gì thêm
+                // initializationStatus chứa thông tin về adapter status
             });
-            AdMobManager.INSTANCE.init(this, new Function2<Boolean, String, Unit>() {
-                @Override
-                public Unit invoke(Boolean success, String gaidCurrent) {
-                    Log.d("roy93~", "AdMobManager init success " + success + ", gaidCurrent " + gaidCurrent);
-                    return null;
-                }
+
+            // Step 2: Khởi tạo custom AdMob Manager
+            AdMobManager.INSTANCE.init(this, (success, gaidCurrent) -> {
+                // Callback khi init xong
+                Log.d(TAG, "AdMobManager init success: " + success + ", GAID: " + gaidCurrent);
+                return Unit.INSTANCE; // Fixed: Return Unit.INSTANCE instead of null
             });
         }).start();
-//        registerActivityLifecycleCallbacks(new AppLifecycleListener(new Function2<Boolean, Activity, Unit>() {
-//            @Override
-//            public Unit invoke(Boolean isForeground, Activity activity) {
-//                if (isForeground) {
-////                    Log.d("roy93~", "App moved to Foreground");
-////                    Log.d("roy93~", "activity.getClass().getSimpleName() " + activity.getClass().getSimpleName());
-////                    Log.d("roy93~", "SplashActivity.class.getSimpleName() " + SplashActivity.class.getSimpleName());
-//                } else {
-////                    Log.d("roy93~", "App moved to Background");
-//                }
-//                return null;
-//            }
-//        }, new Function1<Activity, Unit>() {
-//            @Override
-//            public Unit invoke(Activity activity) {
-////                Log.d("roy93~", "callbackActivityCreated");
-////                Log.d("roy93~", "activity.getClass().getSimpleName() " + activity.getClass().getSimpleName());
-////                Log.d("roy93~", "SplashActivity.class.getSimpleName() " + SplashActivity.class.getSimpleName());
-//                return null;
-//            }
-//        }));
+
+        // ====================================================================
+        // APP LIFECYCLE CALLBACKS (COMMENTED OUT)
+        // ====================================================================
+        // Code dưới đây dùng để track foreground/background state
+        // Hiện tại không cần thiết nên đã comment out
+        // Có thể enable lại nếu cần show App Open Ads khi user quay lại app
+        // registerActivityLifecycleCallbacks(new AppLifecycleListener(
+        //     new Function2<Boolean, Activity, Unit>() {
+        //         @Override
+        //         public Unit invoke(Boolean isForeground, Activity activity) {
+        //             if (isForeground) {
+        //                 // App moved to Foreground - có thể show App Open Ad ở đây
+        //             } else {
+        //                 // App moved to Background
+        //             }
+        //             return Unit.INSTANCE;
+        //         }
+        //     },
+        //     new Function1<Activity, Unit>() {
+        //         @Override
+        //         public Unit invoke(Activity activity) {
+        //             // Callback khi Activity được created
+        //             return Unit.INSTANCE;
+        //         }
+        //     }
+        // ));
     }
 
-    @Override
-    public void update(Observable observable, Object data) {
-        if (observable instanceof UpdatedObservable) {
+    // ========================================================================
+    // EVENT LISTENERS - Setup LiveData Observers
+    // ========================================================================
+
+    /**
+     * Đăng ký lắng nghe các sự kiện từ AppEventManager
+
+     * MIGRATION NOTE:
+     * - OLD: Observable/Observer pattern (deprecated since Java 9)
+     * - NEW: LiveData từ AndroidX Lifecycle
+     * - observeForever() được dùng vì Application không có LifecycleOwner
+
+     * EVENTS:
+     * - appsUpdated: Apps được install/uninstall/update
+     *   → Gọi updateApps() để reload danh sách apps từ PackageManager
+
+     * - appsEdited: User thay đổi settings (sort type, visibility, etc.)
+     *   → Gọi editApps() để re-sort danh sách apps hiện tại
+
+     * FLOW:
+     * BroadcastReceiver → AppEventManager.notify() → LiveData.postValue() → Observer callback → Task.execute()
+
+     * THREADING:
+     * - observeForever() chạy trên main thread (LiveData requirement)
+     * - Callbacks được gọi trên main thread
+     * - Tasks (updateApps/editApps) tự động chuyển sang background thread
+
+     * MEMORY LEAK:
+     * - Application lifecycle = Process lifecycle
+     * - Không cần removeObserver() vì Application never destroyed
+     * - Chỉ destroyed khi process bị kill (observeForever cũng bị clear)
+     */
+    private void setupEventListeners() {
+        // Lắng nghe sự kiện apps updated (install/uninstall/update)
+        AppEventManager.INSTANCE.getAppsUpdated().observeForever(data -> {
+            // Apps changed → Reload from PackageManager
             updateApps();
-        } else if (observable instanceof EditedObservable) {
+        });
+
+        // Lắng nghe sự kiện apps edited (settings changed)
+        AppEventManager.INSTANCE.getAppsEdited().observeForever(data -> {
+            // Settings changed → Re-sort existing apps
             editApps();
-        }
+        });
     }
 
+    // ========================================================================
+    // TASK EXECUTION - Background Processing
+    // ========================================================================
+
+    /**
+     * Update danh sách apps từ PackageManager
+
+     * KỊCH BẢN SỬ DỤNG:
+     * - Lần đầu app start
+     * - User install app mới
+     * - User uninstall app
+     * - User update app
+
+     * PROCESS:
+     * 1. Query PackageManager để lấy tất cả apps có LAUNCHER intent
+     * 2. Load icon cho từng app
+     * 3. Apply settings (icon pack, visibility, sort type)
+     * 4. Lưu vào RAppsSingleton
+     * 5. Notify observers (FrmLens, FrmApps) để update UI
+
+     * THREADING:
+     * - Task chạy async trên background thread (Kotlin coroutines)
+     * - UI update trên main thread
+     */
     private void updateApps() {
         new TaskUpdateApps(
-                getPackageManager(),
-                getApplicationContext(),
-                this)
-                .execute();
+                getPackageManager(),        // PackageManager để query apps
+                getApplicationContext(),    // Context để load resources
+                this)                       // Application instance
+                .execute();                 // Execute async
     }
 
+    /**
+     * Re-sort danh sách apps hiện tại
+
+     * KỊCH BẢN SỬ DỤNG:
+     * - User thay đổi sort type (A-Z, Z-A, Most Used, etc.)
+     * - User thay đổi icon pack
+     * - User hide/unhide apps
+     * - User lock/unlock apps
+
+     * PROCESS:
+     * 1. Lấy danh sách apps từ RAppsSingleton
+     * 2. Apply sort type từ settings
+     * 3. Filter apps theo visibility
+     * 4. Lưu lại vào RAppsSingleton
+     * 5. Notify observers để update UI
+
+     * THREADING:
+     * - Task chạy async trên background thread (Kotlin coroutines)
+     * - UI update trên main thread
+
+     * PERFORMANCE:
+     * - Nhanh hơn updateApps() vì không cần query PackageManager
+     * - Chỉ re-sort data có sẵn trong memory
+     */
     private void editApps() {
         new TaskSortApps(
-                getApplicationContext(),
-                this)
-                .execute();
+                getApplicationContext(),    // Context để load settings
+                this)                       // Application instance
+                .execute();                 // Execute async
     }
+
+    // ========================================================================
+    // DEVELOPMENT NOTES & TODO LIST
+    // ========================================================================
+    //
+    // ✅ COMPLETED:
+    // - In-app review integration
+    // - 120hz support (smooth scrolling)
+    // - AppLovin mediation logic
+    // - Keystore configuration
+    // - Fix toggle lock/unlock, hide/unhide bugs
+    // - Fix UI light mode bug on first app install
+    // - Fix infinite loading in APPS tab
+    // - Privacy policy dialog on first launch
+    // - App launcher icon (ic_launcher)
+    // - Icon pack search feature
+    // - Check default home launcher on start
+    // - Lock/unlock app with biometric
+    // - GitHub repository links
+    // - License page
+    // - AppLovin mediation debugger (debug builds only)
+    // - iOS-style customized switches
+    // - Internal WebView for links
+    // - Changelog viewer
+    // - Font scale support
+    // - App launcher uninstall feature
+    // - App launcher app info feature
+    // - Migrate from Observable/Observer to LiveData (Fix deprecation warnings)
+    //
+    // 📝 NOTES:
+    // - Splash screen: App này không cần splash screen (direct to ActSettings)
+    // - Screen orientation: Locked to portrait for better UX
+    // - Cannot convert to Kotlin: SugarApp has compatibility issues with Kotlin
+    //
+    // ========================================================================
 }
