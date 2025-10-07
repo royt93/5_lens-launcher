@@ -1,62 +1,128 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    ============================================================================
+    ANDROID MANIFEST - Fisheye Launcher
+    ============================================================================
+    File manifest chính của ứng dụng, khai báo:
+    - Permissions: Quyền truy cập cần thiết
+    - Activities: Các màn hình của app
+    - Receivers: Các broadcast receiver để lắng nghe sự kiện hệ thống
+    - Metadata: Thông tin cấu hình (Database, AdMob, etc.)
+    ============================================================================
+-->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- ========================================================================
+         PERMISSIONS - Quyền truy cập
+         ======================================================================== -->
+
+    <!-- Quyền yêu cầu xóa gói ứng dụng - dùng để uninstall apps -->
     <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
+
+    <!-- Quyền truy cập Google Advertising ID - cần cho AdMob -->
     <uses-permission android:name="com.google.android.gms.permission.AD_ID" />
+
+    <!-- Quyền gửi thông báo (Android 13+) - cần để hiển thị notifications -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!-- Quyền truy cập Internet - cần cho ads và web content -->
     <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- Quyền kiểm tra trạng thái mạng - để check connectivity trước khi load ads -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
+    <!-- ========================================================================
+         QUERIES - Cho phép query các app khác (Android 11+)
+         ======================================================================== -->
+    <!-- Package Visibility: Cho phép launcher query tất cả các app được cài đặt -->
     <queries>
         <intent>
+            <!-- Query các app có MAIN action - tất cả apps có launcher icon -->
             <action android:name="android.intent.action.MAIN" />
         </intent>
     </queries>
 
+    <!-- ========================================================================
+         APPLICATION CONFIGURATION
+         ======================================================================== -->
     <application
         android:name=".app.RApplication"
         android:allowBackup="true"
+        android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:largeHeap="true"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
+        android:usesCleartextTraffic="false"
         tools:ignore="DiscouragedApi,LockedOrientationActivity">
 
+        <!-- ====================================================================
+             DATABASE CONFIGURATION - SugarORM
+             ==================================================================== -->
+        <!-- Tên database file -->
         <meta-data
             android:name="DATABASE"
             android:value="app_persistent.db" />
+
+        <!-- Database version - tăng lên khi cần migrate schema -->
         <meta-data
             android:name="VERSION"
             android:value="7" />
+
+        <!-- Debug: Log SQL queries (nên = false ở production) -->
         <meta-data
             android:name="QUERY_LOG"
             android:value="false" />
+
+        <!-- Package chứa các model classes của database -->
         <meta-data
             android:name="DOMAIN_PACKAGE_NAME"
             android:value="com.mckimquyen.model" />
 
-        <!-- Khai báo AdMob App ID -->
+        <!-- ====================================================================
+             ADMOB CONFIGURATION
+             ==================================================================== -->
+        <!-- AdMob App ID - lấy từ Google AdMob Console -->
+        <!-- Format: ca-app-pub-XXXXXXXXXXXXXXXX~YYYYYYYYYY -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-3612191981543807~3330254772" /> <!-- Sample AdMob App ID -->
+            android:value="ca-app-pub-3612191981543807~3330254772" />
 
+        <!-- ====================================================================
+             ACTIVITIES - Các màn hình của app
+             ==================================================================== -->
+
+        <!-- ====================================================================
+             SPLASH SCREEN (Hiện đang tắt - không dùng làm entry point)
+             ==================================================================== -->
         <activity
             android:name=".ui.SplashAct"
             android:exported="true"
+            android:noHistory="true"
             android:screenOrientation="portrait">
-            <!--            <intent-filter>-->
-            <!--                <action android:name="android.intent.action.MAIN" />-->
-
-            <!--                <category android:name="android.intent.category.LAUNCHER" />-->
-            <!--                <category android:name="android.intent.category.DEFAULT" />-->
-            <!--            </intent-filter>-->
+            <!-- Intent filter đã comment - Splash không phải entry point -->
+            <!-- Nếu muốn dùng Splash, uncomment intent-filter bên dưới -->
+            <!--
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            -->
         </activity>
 
+        <!-- ====================================================================
+             HOME ACTIVITY - Màn hình chính của launcher
+             ==================================================================== -->
+        <!-- Launcher configuration: singleTask, stateNotNeeded, empty taskAffinity -->
+        <!-- HOME category: Quan trọng để được chọn làm default launcher -->
         <activity
             android:name=".ui.ActHome"
+            android:clearTaskOnLaunch="false"
+            android:excludeFromRecents="false"
             android:exported="true"
             android:launchMode="singleTask"
             android:screenOrientation="portrait"
@@ -65,12 +131,16 @@
             android:theme="@style/HomeTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.HOME" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
 
+        <!-- ====================================================================
+             SETTINGS ACTIVITY - Màn hình cài đặt (Entry point chính của app)
+             ==================================================================== -->
+        <!-- LAUNCHER category: Icon hiển thị trong app drawer -->
+        <!-- App Shortcuts: Long press icon để hiện shortcuts (xem res/xml/shortcuts.xml) -->
         <activity
             android:name=".ui.ActSettings"
             android:exported="true"
@@ -88,56 +158,124 @@
                 android:resource="@xml/shortcuts" />
         </activity>
 
+        <!-- ====================================================================
+             ABOUT ACTIVITY - Màn hình giới thiệu app
+             ==================================================================== -->
+        <!-- parentActivityName: Cho phép Up navigation về Settings -->
         <activity
             android:name=".ui.ActAbout"
             android:exported="true"
             android:label="@string/activity_title_about"
+            android:parentActivityName=".ui.ActSettings"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
 
+        <!-- ====================================================================
+             WEBVIEW ACTIVITY - Màn hình hiển thị web content
+             ==================================================================== -->
+        <!-- hardwareAccelerated: Bắt buộc phải bật cho WebView để render tốt -->
         <activity
             android:name=".views.SuperWebViewActivity"
             android:exported="true"
+            android:hardwareAccelerated="true"
             android:label=""
+            android:parentActivityName=".ui.ActSettings"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
 
+        <!-- ====================================================================
+             FAKE LAUNCHER - Activity giả để reset default launcher
+             ==================================================================== -->
+        <!-- enabled=false: Tắt mặc định, chỉ bật programmatically khi cần -->
+        <!-- Mục đích: Dùng để reset default launcher choice của hệ thống -->
+        <!-- Cách dùng: Enable activity này -> User chọn launcher -> Disable lại -->
         <activity
             android:name=".ui.ActFakeLauncher"
             android:enabled="false"
+            android:excludeFromRecents="true"
             android:exported="true"
+            android:noHistory="true"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.HOME" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
 
+        <!-- ====================================================================
+             BROADCAST RECEIVERS - Lắng nghe sự kiện hệ thống và internal events
+             ==================================================================== -->
+
+        <!-- ====================================================================
+             APPS UPDATED RECEIVER - Lắng nghe package install/remove/update
+             ==================================================================== -->
+        <!-- exported=true: Cần thiết để nhận broadcast từ system -->
+        <!-- Actions: PACKAGE_ADDED, REMOVED, CHANGED, REPLACED -->
+        <!-- Data scheme="package": Để nhận được package name trong intent -->
         <receiver
             android:name=".services.BroadcastReceivers$AppsUpdatedReceiver"
+            android:enabled="true"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.PACKAGE_ADDED" />
                 <action android:name="android.intent.action.PACKAGE_REMOVED" />
                 <action android:name="android.intent.action.PACKAGE_CHANGED" />
                 <action android:name="android.intent.action.PACKAGE_REPLACED" />
-
                 <data android:scheme="package" />
             </intent-filter>
         </receiver>
 
-        <!--        <meta-data-->
-        <!--            android:name="applovin.sdk.key"-->
-        <!--            android:value="@string/SDK_KEY" />-->
+        <!-- ====================================================================
+             INTERNAL RECEIVERS - Các receiver nội bộ của app
+             ==================================================================== -->
+        <!-- exported=false: Chỉ dùng trong app, không nhận broadcast từ bên ngoài -->
 
-        <receiver android:name=".services.BroadcastReceivers$AppsEditedReceiver" />
-        <receiver android:name=".services.BroadcastReceivers$AppsVisibilityChangedReceiver" />
-        <receiver android:name=".services.BroadcastReceivers$AppsLockChangedReceiver" />
-        <receiver android:name=".services.BroadcastReceivers$AppsLoadedReceiver" />
-        <receiver android:name=".services.BroadcastReceivers$BackgroundChangedReceiver" />
-        <receiver android:name=".services.BroadcastReceivers$NightModeReceiver" />
+        <!-- Receiver khi apps được edit (tên, icon, v.v.) -->
+        <receiver
+            android:name=".services.BroadcastReceivers$AppsEditedReceiver"
+            android:enabled="true"
+            android:exported="false" />
+
+        <!-- Receiver khi visibility của apps thay đổi (ẩn/hiện) -->
+        <receiver
+            android:name=".services.BroadcastReceivers$AppsVisibilityChangedReceiver"
+            android:enabled="true"
+            android:exported="false" />
+
+        <!-- Receiver khi lock status của apps thay đổi -->
+        <receiver
+            android:name=".services.BroadcastReceivers$AppsLockChangedReceiver"
+            android:enabled="true"
+            android:exported="false" />
+
+        <!-- Receiver khi danh sách apps được load xong -->
+        <receiver
+            android:name=".services.BroadcastReceivers$AppsLoadedReceiver"
+            android:enabled="true"
+            android:exported="false" />
+
+        <!-- Receiver khi background wallpaper thay đổi -->
+        <receiver
+            android:name=".services.BroadcastReceivers$BackgroundChangedReceiver"
+            android:enabled="true"
+            android:exported="false" />
+
+        <!-- Receiver khi chế độ Night Mode thay đổi -->
+        <receiver
+            android:name=".services.BroadcastReceivers$NightModeReceiver"
+            android:enabled="true"
+            android:exported="false" />
+
+        <!-- ====================================================================
+             APPLOVIN SDK (Commented out - không sử dụng)
+             ==================================================================== -->
+        <!-- Nếu muốn enable AppLovin mediation, uncomment và thêm SDK key -->
+        <!--
+        <meta-data
+            android:name="applovin.sdk.key"
+            android:value="YOUR_SDK_KEY_HERE" />
+        -->
 
     </application>
 
