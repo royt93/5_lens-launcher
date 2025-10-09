@@ -1,21 +1,22 @@
 package com.mckimquyen.ui
 
+import android.app.Activity
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
+import androidx.lifecycle.lifecycleScope
 import com.mckimquyen.R
 import com.mckimquyen.sdkadbmob.UIUtils
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 /**
  * Splash Activity - Màn hình khởi động
  *
- * Fix: 4.3 - Cleanup handler để tránh memory leak khi Activity bị destroy sớm
+ * Fix: 4.3 - Sử dụng coroutines thay vì Handler để tránh memory leak
+ * Fix: 5.1 - Sử dụng overrideActivityTransition() thay cho overridePendingTransition() deprecated
  */
 class SplashAct : BaseActivity() {
-
-    // Lưu reference đến handler để cleanup trong onDestroy
-    private var handler: Handler? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,26 +25,27 @@ class SplashAct : BaseActivity() {
         setContentView(R.layout.a_splash)
         UIUtils.setupEdgeToEdge2(findViewById(R.id.rootLayout))
 
-        // Khởi tạo handler và lưu reference
-        handler = Handler(Looper.getMainLooper())
-        handler?.postDelayed({
-            // Chỉ thực hiện nếu Activity chưa bị destroy
+        // Sử dụng lifecycleScope để tự động cancel khi Activity destroy
+        lifecycleScope.launch {
+            delay(1000)
             if (!isFinishing && !isDestroyed) {
-                val intent = Intent(this, ActSettings::class.java)
+                val intent = Intent(this@SplashAct, ActSettings::class.java)
                 startActivity(intent)
-                overridePendingTransition(0, 0)
+                overrideTransition(0, 0)
                 finish()
             }
-        }, 1000)
+        }
     }
 
     /**
-     * Cleanup handler callbacks để tránh memory leak
+     * Helper function để handle deprecated overridePendingTransition
      */
-    override fun onDestroy() {
-        // Remove tất cả callbacks và messages để tránh memory leak
-        handler?.removeCallbacksAndMessages(null)
-        handler = null
-        super.onDestroy()
+    private fun Activity.overrideTransition(enterAnim: Int, exitAnim: Int) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            overrideActivityTransition(OVERRIDE_TRANSITION_OPEN, enterAnim, exitAnim)
+        } else {
+            @Suppress("DEPRECATION")
+            overridePendingTransition(enterAnim, exitAnim)
+        }
     }
 }
