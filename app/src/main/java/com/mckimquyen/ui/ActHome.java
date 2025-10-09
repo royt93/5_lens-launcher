@@ -19,23 +19,17 @@ import com.mckimquyen.app.RAppsSingleton;
 import com.mckimquyen.model.App;
 import com.mckimquyen.model.AppPersistent;
 import com.mckimquyen.sdkadbmob.UIUtils;
-import com.mckimquyen.services.BackgroundChangedObservable;
-import com.mckimquyen.services.LoadedObservable;
-import com.mckimquyen.services.LockChangedObservable;
-import com.mckimquyen.services.NightModeObservable;
-import com.mckimquyen.services.VisibilityChangedObservable;
+import com.mckimquyen.services.AppEventManager;
 import com.mckimquyen.util.UtilSettings;
 import com.mckimquyen.views.LensView;
 
 import java.util.ArrayList;
 import java.util.Objects;
-import java.util.Observable;
-import java.util.Observer;
 
 import me.zhanghai.android.materialprogressbar.MaterialProgressBar;
 
 //2023.03.19 tried to convert kotlin but failed
-public class ActHome extends ActBase implements Observer {
+public class ActHome extends ActBase {
 
     LensView lensViews;
     MaterialProgressBar progressBarHome;
@@ -68,10 +62,26 @@ public class ActHome extends ActBase implements Observer {
         lensViews.setPackageManager(mPackageManager);
         lensViews.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
         assignApps(Objects.requireNonNull(Objects.requireNonNull(RAppsSingleton.getInstance()).getApps()), RAppsSingleton.getInstance().getAppIcons());
-        LoadedObservable.getInstance().addObserver(this);
-        VisibilityChangedObservable.getInstance().addObserver(this);
-        BackgroundChangedObservable.getInstance().addObserver(this);
-        NightModeObservable.getInstance().addObserver(this);
+
+        // Observe app events using LiveData
+        AppEventManager.INSTANCE.getAppsLoaded().observe(this, data ->
+                assignApps(Objects.requireNonNull(RAppsSingleton.getInstance().getApps()),
+                        RAppsSingleton.getInstance().getAppIcons())
+        );
+
+        AppEventManager.INSTANCE.getVisibilityChanged().observe(this, data ->
+                assignApps(Objects.requireNonNull(RAppsSingleton.getInstance().getApps()),
+                        RAppsSingleton.getInstance().getAppIcons())
+        );
+
+        AppEventManager.INSTANCE.getLockChanged().observe(this, data ->
+                assignApps(Objects.requireNonNull(RAppsSingleton.getInstance().getApps()),
+                        RAppsSingleton.getInstance().getAppIcons())
+        );
+
+        AppEventManager.INSTANCE.getBackgroundChanged().observe(this, data -> setBackground());
+
+        AppEventManager.INSTANCE.getNightModeChanged().observe(this, data -> updateNightMode());
 
         // Disable back button for launcher home screen
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
@@ -129,28 +139,6 @@ public class ActHome extends ActBase implements Observer {
                 listAppIcon.remove(i);
                 i--;
             }
-        }
-    }
-
-    @Override
-    protected void onDestroy() {
-        LoadedObservable.getInstance().deleteObserver(this);
-        super.onDestroy();
-    }
-
-    @Override
-    public void update(Observable observable, Object data) {
-        if (observable instanceof LoadedObservable
-                || observable instanceof VisibilityChangedObservable
-                || observable instanceof LockChangedObservable
-        ) {
-            assignApps(Objects.requireNonNull(
-                            Objects.requireNonNull(RAppsSingleton.getInstance()).getApps()),
-                    RAppsSingleton.getInstance().getAppIcons());
-        } else if (observable instanceof BackgroundChangedObservable) {
-            setBackground();
-        } else if (observable instanceof NightModeObservable) {
-            updateNightMode();
         }
     }
 }
