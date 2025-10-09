@@ -1,16 +1,15 @@
 package com.mckimquyen.ui
 
 import android.content.Context
-import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.CompoundButton
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.widget.SwitchCompat
+import androidx.core.graphics.toColorInt
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import com.mckimquyen.R
@@ -22,9 +21,7 @@ import com.mckimquyen.util.UtilSettings
 
 class FrmSettings : Fragment(), SettingsInterface {
     companion object {
-        fun newInstance(): FrmSettings {
-            return FrmSettings()
-        }
+        fun newInstance() = FrmSettings()
     }
 
     private var tvSelectedHomeLauncher: TextView? = null
@@ -42,25 +39,23 @@ class FrmSettings : Fragment(), SettingsInterface {
     private var utilSettings: UtilSettings? = null
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?,
-    ): View? {
-        val view = inflater.inflate(R.layout.frm_settings, container, false)
-        utilSettings = UtilSettings(requireContext())
-        return view
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        return inflater.inflate(R.layout.frm_settings, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        utilSettings = UtilSettings(requireContext())
         setupViews(view)
         assignValues()
     }
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        if (activity != null && activity is ActSettings) {
-            (activity as ActSettings?)?.setSettingsInterface(this)
-        }
+        (context as? ActSettings)?.setSettingsInterface(this)
     }
 
     private fun setupViews(view: View) {
@@ -95,90 +90,68 @@ class FrmSettings : Fragment(), SettingsInterface {
         view.findViewById<View>(R.id.llHighlightColor).setOnClickListener {
             showHighlightColorDialog()
         }
-        view.findViewById<View>(R.id.rlSwitchVibrateAppHoverParent).setOnClickListener {
-            //do nothing
-        }
-        view.findViewById<View>(R.id.rlSwitchVibrateAppLaunchParent).setOnClickListener {
-            //do nothing
-        }
-        view.findViewById<View>(R.id.rlSwitchShowNameAppHoverParent).setOnClickListener {
-            //do nothing
-        }
-        view.findViewById<View>(R.id.swShowNewAppTagParent).setOnClickListener {
-            //do nothing
-        }
-        view.findViewById<View>(R.id.rlSwitchShowTouchSelectionParent).setOnClickListener {
-            //do nothing
-        }
+        // Empty click listeners to prevent parent click events
+        view.findViewById<View>(R.id.rlSwitchVibrateAppHoverParent).setOnClickListener(null)
+        view.findViewById<View>(R.id.rlSwitchVibrateAppLaunchParent).setOnClickListener(null)
+        view.findViewById<View>(R.id.rlSwitchShowNameAppHoverParent).setOnClickListener(null)
+        view.findViewById<View>(R.id.swShowNewAppTagParent).setOnClickListener(null)
+        view.findViewById<View>(R.id.rlSwitchShowTouchSelectionParent).setOnClickListener(null)
 
-        swVibrateAppHover?.setOnCheckedChangeListener { _: CompoundButton?, isChecked: Boolean ->
-            utilSettings?.save(
-                /* name = */ UtilSettings.KEY_VIBRATE_APP_HOVER,
-                /* value = */ isChecked
-            )
+        swVibrateAppHover?.setOnCheckedChangeListener { _, isChecked ->
+            utilSettings?.save(UtilSettings.KEY_VIBRATE_APP_HOVER, isChecked)
         }
-        swVibrateAppLaunch?.setOnCheckedChangeListener { _: CompoundButton?, isChecked: Boolean ->
-            utilSettings?.save(
-                /* name = */ UtilSettings.KEY_VIBRATE_APP_LAUNCH,
-                /* value = */ isChecked
-            )
+        swVibrateAppLaunch?.setOnCheckedChangeListener { _, isChecked ->
+            utilSettings?.save(UtilSettings.KEY_VIBRATE_APP_LAUNCH, isChecked)
         }
-        swShowNameAppHover?.setOnCheckedChangeListener { _: CompoundButton?, isChecked: Boolean ->
-            utilSettings?.save(
-                /* name = */ UtilSettings.KEY_SHOW_NAME_APP_HOVER,
-                /* value = */ isChecked
-            )
+        swShowNameAppHover?.setOnCheckedChangeListener { _, isChecked ->
+            utilSettings?.save(UtilSettings.KEY_SHOW_NAME_APP_HOVER, isChecked)
         }
-        swShowNewAppTag?.setOnCheckedChangeListener { _: CompoundButton?, isChecked: Boolean ->
-            utilSettings?.save(
-                /* name = */ UtilSettings.KEY_SHOW_NEW_APP_TAG,
-                /* value = */ isChecked
-            )
+        swShowNewAppTag?.setOnCheckedChangeListener { _, isChecked ->
+            utilSettings?.save(UtilSettings.KEY_SHOW_NEW_APP_TAG, isChecked)
         }
-        swShowTouchSelection?.setOnCheckedChangeListener { _: CompoundButton?, isChecked: Boolean ->
-            utilSettings?.save(
-                /* name = */ UtilSettings.KEY_SHOW_TOUCH_SELECTION,
-                /* value = */ isChecked
-            )
+        swShowTouchSelection?.setOnCheckedChangeListener { _, isChecked ->
+            utilSettings?.save(UtilSettings.KEY_SHOW_TOUCH_SELECTION, isChecked)
         }
     }
 
     private fun assignValues() {
         utilSettings?.let { us ->
             tvSelectedIconPack?.text = us.getString(UtilSettings.KEY_ICON_PACK_LABEL_NAME)
-            val highlightColor = "#" + us.getString(UtilSettings.KEY_HIGHLIGHT_COLOR)?.substring(3)
-            var homeLauncher: String? = ""
-            activity?.let {
-                homeLauncher = UtilLauncher.getNameHomeLauncher(it.application)
-            }
+
+            val highlightColorFull = us.getString(UtilSettings.KEY_HIGHLIGHT_COLOR) ?: ""
+            val highlightColor = "#${highlightColorFull.substring(3)}"
+            tvSelectedHighlightColor?.text = highlightColor
+
+            val homeLauncher = activity?.let { UtilLauncher.getNameHomeLauncher(it.application) } ?: ""
             tvSelectedHomeLauncher?.text = homeLauncher
+
             tvSelectedNightMode?.text = UtilNightModeUtil.getNightModeDisplayName(us.nightMode)
+
+            // Background setup
             if (us.getString(UtilSettings.KEY_BACKGROUND) == "Color") {
-                val backgroundColor =
-                    "#" + us.getString(UtilSettings.KEY_BACKGROUND_COLOR)?.substring(3)
+                val backgroundColorFull = us.getString(UtilSettings.KEY_BACKGROUND_COLOR) ?: ""
+                val backgroundColor = "#${backgroundColorFull.substring(3)}"
                 tvSelectedBackground?.text = backgroundColor
                 ivSelectedBackgroundColor?.isVisible = true
-                val backgroundColorDrawable = GradientDrawable()
-                backgroundColorDrawable.setColor(
-                    Color.parseColor(
-                        us.getString(
-                            UtilSettings.KEY_BACKGROUND_COLOR
-                        )
-                    )
-                )
-                backgroundColorDrawable.cornerRadius =
-                    resources.getDimension(R.dimen.radius_highlight_color_switch)
+
+                val backgroundColorDrawable = GradientDrawable().apply {
+                    setColor(backgroundColorFull.toColorInt())
+                    cornerRadius = resources.getDimension(R.dimen.radius_highlight_color_switch)
+                }
                 ivSelectedBackgroundColor?.setImageDrawable(backgroundColorDrawable)
             } else {
                 tvSelectedBackground?.text = us.getString(UtilSettings.KEY_BACKGROUND)
                 ivSelectedBackgroundColor?.isVisible = false
             }
-            tvSelectedHighlightColor?.text = highlightColor
-            val highlightColorDrawable = GradientDrawable()
-            highlightColorDrawable.setColor(Color.parseColor(us.getString(UtilSettings.KEY_HIGHLIGHT_COLOR)))
-            highlightColorDrawable.cornerRadius =
-                resources.getDimension(R.dimen.radius_highlight_color_switch)
+
+            // Highlight color drawable
+            val highlightColorDrawable = GradientDrawable().apply {
+                setColor(highlightColorFull.toColorInt())
+                cornerRadius = resources.getDimension(R.dimen.radius_highlight_color_switch)
+            }
             ivSelectedHighlightColor?.setImageDrawable(highlightColorDrawable)
+
+            // Switches
             swVibrateAppHover?.isChecked = us.getBoolean(UtilSettings.KEY_VIBRATE_APP_HOVER)
             swVibrateAppLaunch?.isChecked = us.getBoolean(UtilSettings.KEY_VIBRATE_APP_LAUNCH)
             swShowNameAppHover?.isChecked = us.getBoolean(UtilSettings.KEY_SHOW_NAME_APP_HOVER)
@@ -188,33 +161,23 @@ class FrmSettings : Fragment(), SettingsInterface {
     }
 
     private fun showIconPackDialog() {
-        if (activity != null && activity is ActSettings) {
-            (activity as ActSettings?)?.showIconPackDialog()
-        }
+        (activity as? ActSettings)?.showIconPackDialog()
     }
 
     private fun showHomeLauncherChooser() {
-        if (activity != null && activity is ActSettings) {
-            (activity as ActSettings?)?.showHomeLauncherChooser()
-        }
+        (activity as? ActSettings)?.showHomeLauncherChooser()
     }
 
     private fun showNightModeChooser() {
-        if (activity != null && activity is ActSettings) {
-            (activity as ActSettings?)?.showNightModeChooser()
-        }
+        (activity as? ActSettings)?.showNightModeChooser()
     }
 
     private fun showBackgroundDialog() {
-        if (activity != null && activity is ActSettings) {
-            (activity as ActSettings?)?.showBackgroundDialog()
-        }
+        (activity as? ActSettings)?.showBackgroundDialog()
     }
 
     private fun showHighlightColorDialog() {
-        if (activity != null && activity is ActSettings) {
-            (activity as ActSettings?)?.showHighlightColorDialog()
-        }
+        (activity as? ActSettings)?.showHighlightColorDialog()
     }
 
     override fun onDefaultsReset() {
@@ -228,49 +191,17 @@ class FrmSettings : Fragment(), SettingsInterface {
 
     private fun resetToDefault() {
         utilSettings?.let { us ->
-            us.save(
-                /* name = */ UtilSettings.KEY_VIBRATE_APP_HOVER,
-                /* value = */ UtilSettings.DEFAULT_VIBRATE_APP_HOVER
-            )
-            us.save(
-                /* name = */ UtilSettings.KEY_VIBRATE_APP_LAUNCH,
-                /* value = */ UtilSettings.DEFAULT_VIBRATE_APP_LAUNCH
-            )
-            us.save(
-                /* name = */ UtilSettings.KEY_SHOW_NAME_APP_HOVER,
-                /* value = */ UtilSettings.DEFAULT_SHOW_NAME_APP_HOVER
-            )
-            us.save(
-                /* name = */ UtilSettings.KEY_SHOW_TOUCH_SELECTION,
-                /* value = */ UtilSettings.DEFAULT_SHOW_TOUCH_SELECTION
-            )
-            us.save(
-                /* name = */ UtilSettings.KEY_SHOW_NEW_APP_TAG,
-                /* value = */ UtilSettings.DEFAULT_SHOW_NEW_APP_TAG
-            )
-            us.save(
-                /* name = */ UtilSettings.KEY_BACKGROUND,
-                /* value = */ UtilSettings.DEFAULT_BACKGROUND
-            )
-            us.save(
-                /* name = */ UtilSettings.KEY_BACKGROUND_COLOR,
-                /* value = */ UtilSettings.DEFAULT_BACKGROUND_COLOR
-            )
-            us.save(
-                /* name = */ UtilSettings.KEY_HIGHLIGHT_COLOR,
-                /* value = */ UtilSettings.DEFAULT_HIGHLIGHT_COLOR
-            )
-            us.save(
-                /* name = */ UtilSettings.KEY_ICON_PACK_LABEL_NAME,
-                /* value = */ UtilSettings.DEFAULT_ICON_PACK_LABEL_NAME
-            )
-            us.save(
-                /* name = */ UtilSettings.KEY_NIGHT_MODE,
-                /* value = */ UtilSettings.DEFAULT_NIGHT_MODE
-            )
+            us.save(UtilSettings.KEY_VIBRATE_APP_HOVER, false)
+            us.save(UtilSettings.KEY_VIBRATE_APP_LAUNCH, true)
+            us.save(UtilSettings.KEY_SHOW_NAME_APP_HOVER, true)
+            us.save(UtilSettings.KEY_SHOW_TOUCH_SELECTION, false)
+            us.save(UtilSettings.KEY_SHOW_NEW_APP_TAG, true)
+            us.save(UtilSettings.KEY_BACKGROUND, UtilSettings.DEFAULT_BACKGROUND)
+            us.save(UtilSettings.KEY_BACKGROUND_COLOR, UtilSettings.DEFAULT_BACKGROUND_COLOR)
+            us.save(UtilSettings.KEY_HIGHLIGHT_COLOR, UtilSettings.DEFAULT_HIGHLIGHT_COLOR)
+            us.save(UtilSettings.KEY_ICON_PACK_LABEL_NAME, UtilSettings.DEFAULT_ICON_PACK_LABEL_NAME)
+            us.save(UtilSettings.KEY_NIGHT_MODE, UtilSettings.DEFAULT_NIGHT_MODE)
         }
-        if (activity != null && activity is ActSettings) {
-            (activity as ActSettings?)?.sendNightModeBroadcast()
-        }
+        (activity as? ActSettings)?.sendNightModeBroadcast()
     }
 }
