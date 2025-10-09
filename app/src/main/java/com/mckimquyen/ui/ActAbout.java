@@ -18,14 +18,12 @@ import androidx.core.content.ContextCompat;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.mckimquyen.R;
 import com.mckimquyen.sdkadbmob.UIUtils;
-import com.mckimquyen.services.NightModeObservable;
+import com.mckimquyen.services.AppEventManager;
 
 import java.util.Objects;
-import java.util.Observable;
-import java.util.Observer;
 
 //2023.03.19 tried to convert kotlin but failed
-public class ActAbout extends ActBase implements Observer {
+public class ActAbout extends ActBase {
     TextView tvAbout;
     ImageView backdrop;
     CollapsingToolbarLayout collapsingToolbar;
@@ -42,7 +40,9 @@ public class ActAbout extends ActBase implements Observer {
 
         setupViews();
         backdrop.postDelayed(this::circularRevealAboutImage, 150);
-        NightModeObservable.getInstance().addObserver(this);
+
+        // Observe night mode changes using LiveData
+        AppEventManager.INSTANCE.getNightModeChanged().observe(this, data -> updateNightMode());
 
         // Handle back button press using OnBackPressedDispatcher
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
@@ -98,7 +98,10 @@ public class ActAbout extends ActBase implements Observer {
         setSupportActionBar(toolbar);
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         collapsingToolbar.setExpandedTitleColor(ContextCompat.getColor(this, R.color.colorTransparent));
-        tvAbout.setText(Html.fromHtml(getString(R.string.about)));
+
+        // Set HTML text (minSdk = 25 >= API 24, always use new API)
+        tvAbout.setText(Html.fromHtml(getString(R.string.about), Html.FROM_HTML_MODE_LEGACY));
+
         tvAbout.setMovementMethod(LinkMovementMethod.getInstance());
     }
 
@@ -115,12 +118,5 @@ public class ActAbout extends ActBase implements Observer {
             return true;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void update(Observable observable, Object o) {
-        if (observable instanceof NightModeObservable) {
-            updateNightMode();
-        }
     }
 }
