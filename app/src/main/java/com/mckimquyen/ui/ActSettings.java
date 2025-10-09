@@ -9,7 +9,6 @@ import static com.mckimquyen.ext.ContextKt.showDialog2;
 import static com.mckimquyen.util.CKt.URL_POLICY_NOTION;
 
 import android.content.Intent;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
@@ -45,9 +44,8 @@ import com.mckimquyen.itf.SettingsInterface;
 import com.mckimquyen.model.App;
 import com.mckimquyen.sdkadbmob.AdMobManager;
 import com.mckimquyen.sdkadbmob.UIUtils;
+import com.mckimquyen.services.AppEventManager;
 import com.mckimquyen.services.BroadcastReceivers;
-import com.mckimquyen.services.LoadedObservable;
-import com.mckimquyen.services.NightModeObservable;
 import com.mckimquyen.util.UtilIconPackManager;
 import com.mckimquyen.util.UtilLauncher;
 import com.mckimquyen.util.UtilNightModeUtil;
@@ -60,15 +58,11 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Observable;
-import java.util.Observer;
 
 import kotlin.Unit;
-import kotlin.jvm.functions.Function0;
-import kotlin.jvm.functions.Function1;
 
 //2023.03.19 tried to convert kotlin but failed
-public class ActSettings extends ActBase implements Observer, ColorChooserDialog.ColorCallback, AdMobManager.InterstitialAdListener {
+public class ActSettings extends ActBase implements ColorChooserDialog.ColorCallback, AdMobManager.InterstitialAdListener {
 
     private static final String TAG_COLOR_BACKGROUND = "BackgroundColor";
     private static final String TAG_COLOR_HIGHLIGHT = "HighlightColor";
@@ -79,8 +73,6 @@ public class ActSettings extends ActBase implements Observer, ColorChooserDialog
     LinearLayout flAdOpenApp;
     //    private MaxAdView adView;
     private AdView adView = null;
-//    private MaxInterstitialAd interstitialAd;
-//    private int retryAttempt;
 
     private ArrayList<App> listApp;
     private MaterialDialog dlgSortType;
@@ -115,8 +107,15 @@ public class ActSettings extends ActBase implements Observer, ColorChooserDialog
         AdMobManager.INSTANCE.setInterstitialListener(this);
         setupViews();
 
-        LoadedObservable.getInstance().addObserver(this);
-        NightModeObservable.getInstance().addObserver(this);
+        // Observe app events using LiveData
+        AppEventManager.INSTANCE.getAppsLoaded().observe(this, data -> {
+            listApp = RAppsSingleton.getInstance().getApps();
+            if (appsInterface != null) {
+                appsInterface.onAppsUpdated(listApp);
+            }
+        });
+
+        AppEventManager.INSTANCE.getNightModeChanged().observe(this, data -> updateNightMode());
 
         // Note: Intentionally NOT using OnBackPressedCallback here
         // Default back button behavior (finish()) is sufficient
@@ -142,15 +141,9 @@ public class ActSettings extends ActBase implements Observer, ColorChooserDialog
         viewpager.setAdapter(mPagerAdapter);
 
         // Setup TabLayout with TabLayoutMediator (ViewPager2 requirement)
-        new TabLayoutMediator(tabs, viewpager, (tab, position) -> {
-            tab.setText(mPagerAdapter.getPageTitle(position));
-        }).attach();
+        new TabLayoutMediator(tabs, viewpager, (tab, position) -> tab.setText(mPagerAdapter.getPageTitle(position))).attach();
 
         viewpager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
-            @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-            }
-
             @Override
             public void onPageSelected(int position) {
                 if (position == 1) {
@@ -158,10 +151,6 @@ public class ActSettings extends ActBase implements Observer, ColorChooserDialog
                 } else {
                     fabSort.hide();
                 }
-            }
-
-            @Override
-            public void onPageScrollStateChanged(int state) {
             }
         });
         listApp = Objects.requireNonNull(RAppsSingleton.getInstance()).getApps();
@@ -191,9 +180,7 @@ public class ActSettings extends ActBase implements Observer, ColorChooserDialog
                 showDialog2(this, getString(R.string.terms_and_privacy_policy), getString(R.string.read_policy), getString(R.string.agree_and_continue), getString(R.string.cancel), () -> {
                     utilSettings.save(UtilSettings.KEY_READ_POLICY, true);
                     openUrlInBrowser(this, URL_POLICY_NOTION, getString(R.string.terms_and_privacy_policy), false);
-                }, () -> {
-                    utilSettings.save(UtilSettings.KEY_READ_POLICY, true);
-                });
+                }, () -> utilSettings.save(UtilSettings.KEY_READ_POLICY, true));
             }
         }
     }
@@ -209,18 +196,13 @@ public class ActSettings extends ActBase implements Observer, ColorChooserDialog
     private void launchApps() {
         boolean isDefaultLauncher = UtilLauncher.isDefaultLauncher(getApplication());
         if (isDefaultLauncher) {
-            AdMobManager.INSTANCE.showInterstitial(this, new Function1<Boolean, Unit>() {
-                @Override
-                public Unit invoke(Boolean aBoolean) {
-                    Intent homeIntent = new Intent(Intent.ACTION_MAIN);
-                    homeIntent.addCategory(Intent.CATEGORY_HOME);
-                    startActivity(homeIntent);
-                    return null;
-                }
+            AdMobManager.INSTANCE.showInterstitial(this, aBoolean -> {
+                Intent homeIntent = new Intent(Intent.ACTION_MAIN);
+                homeIntent.addCategory(Intent.CATEGORY_HOME);
+                startActivity(homeIntent);
+                return Unit.INSTANCE;
             });
         } else {
-//            Intent homeIntent = new Intent(ASettings.this, AHome.class);
-//            startActivity(homeIntent);
             showHomeLauncherChooser();
         }
         overridePendingTransition(R.anim.a_fade_in, R.anim.a_fade_out);
@@ -284,14 +266,11 @@ public class ActSettings extends ActBase implements Observer, ColorChooserDialog
             launchApps();
             return true;
         } else if (id == R.id.menuItemAbout) {
-            AdMobManager.INSTANCE.showInterstitial(this, new Function1<Boolean, Unit>() {
-                @Override
-                public Unit invoke(Boolean aBoolean) {
-                    Intent aboutIntent = new Intent(ActSettings.this, ActAbout.class);
-                    startActivity(aboutIntent);
-                    overridePendingTransition(R.anim.a_slide_in_left, R.anim.a_slide_out_right);
-                    return null;
-                }
+            AdMobManager.INSTANCE.showInterstitial(this, aBoolean -> {
+                Intent aboutIntent = new Intent(ActSettings.this, ActAbout.class);
+                startActivity(aboutIntent);
+                overridePendingTransition(R.anim.a_slide_in_left, R.anim.a_slide_out_right);
+                return Unit.INSTANCE;
             });
             return true;
         } else if (id == R.id.menuItemResetDefaultSettings) {
@@ -358,20 +337,6 @@ public class ActSettings extends ActBase implements Observer, ColorChooserDialog
             return true;
         } else {
             return super.onOptionsItemSelected(item);
-        }
-    }
-
-    @Override
-    public void update(Observable observable, Object data) {
-        if (observable instanceof LoadedObservable) {
-            if (RAppsSingleton.getInstance() != null) {
-                listApp = RAppsSingleton.getInstance().getApps();
-            }
-            if (appsInterface != null) {
-                appsInterface.onAppsUpdated(listApp);
-            }
-        } else if (observable instanceof NightModeObservable) {
-            updateNightMode();
         }
     }
 
@@ -487,17 +452,17 @@ public class ActSettings extends ActBase implements Observer, ColorChooserDialog
     }
 
     public void showBackgroundColorDialog() {
-        if (utilSettings == null) {
-            return;
-        }
-        ColorChooserDialog mBackgroundColorDialog = new ColorChooserDialog.Builder(this, R.string.setting_background_color).titleSub(R.string.setting_background_color).accentMode(false).doneButton(R.string.done).cancelButton(R.string.cancel).backButton(R.string.back).preselect(Color.parseColor(utilSettings.getString(UtilSettings.KEY_BACKGROUND_COLOR))).dynamicButtonColor(false).allowUserColorInputAlpha(false).tag(TAG_COLOR_BACKGROUND).show(this);
+//        if (utilSettings == null) {
+//            return;
+//        }
+//        ColorChooserDialog mBackgroundColorDialog = new ColorChooserDialog.Builder(this, R.string.setting_background_color).titleSub(R.string.setting_background_color).accentMode(false).doneButton(R.string.done).cancelButton(R.string.cancel).backButton(R.string.back).preselect(Color.parseColor(utilSettings.getString(UtilSettings.KEY_BACKGROUND_COLOR))).dynamicButtonColor(false).allowUserColorInputAlpha(false).tag(TAG_COLOR_BACKGROUND).show(this);
     }
 
     public void showHighlightColorDialog() {
-        if (utilSettings == null) {
-            return;
-        }
-        ColorChooserDialog mHighlightColorDialog = new ColorChooserDialog.Builder(this, R.string.setting_highlight_color).titleSub(R.string.setting_highlight_color).accentMode(true).doneButton(R.string.done).cancelButton(R.string.cancel).backButton(R.string.back).preselect(Color.parseColor(utilSettings.getString(UtilSettings.KEY_HIGHLIGHT_COLOR))).dynamicButtonColor(false).allowUserColorInputAlpha(false).tag(TAG_COLOR_HIGHLIGHT).show(this);
+//        if (utilSettings == null) {
+//            return;
+//        }
+//        ColorChooserDialog mHighlightColorDialog = new ColorChooserDialog.Builder(this, R.string.setting_highlight_color).titleSub(R.string.setting_highlight_color).accentMode(true).doneButton(R.string.done).cancelButton(R.string.cancel).backButton(R.string.back).preselect(Color.parseColor(utilSettings.getString(UtilSettings.KEY_HIGHLIGHT_COLOR))).dynamicButtonColor(false).allowUserColorInputAlpha(false).tag(TAG_COLOR_HIGHLIGHT).show(this);
     }
 
     @Override
@@ -557,12 +522,7 @@ public class ActSettings extends ActBase implements Observer, ColorChooserDialog
     @Override
     protected void onDestroy() {
         dismissAllDialogs();
-        LoadedObservable.getInstance().deleteObserver(this);
-        NightModeObservable.getInstance().deleteObserver(this);
-
-//        if (adView != null) {
-//            destroyAdBanner(findViewById(R.id.flAd), adView);
-//        }
+        // LiveData observers are automatically removed when lifecycle owner is destroyed
         if (adView != null) {
             adView.destroy();
         }
@@ -580,7 +540,17 @@ public class ActSettings extends ActBase implements Observer, ColorChooserDialog
         intent.setData(Uri.parse("mailto:")); // Only email apps should handle this
         intent.putExtra(Intent.EXTRA_EMAIL, new String[]{"roy.mobile.dev@gmail.com", "20testersforclosedtesting@googlegroups.com"});
         intent.putExtra(Intent.EXTRA_SUBJECT, "Feedback on Fisheye Launcher App");
-        intent.putExtra(Intent.EXTRA_TEXT, "Hello,\n\n" + "I hope this message finds you well. Below are my feedback and suggestions regarding the Fisheye Launcher app:\n\n" + "[Insert your feedback here]\n\n" + "Thank you for your attention and support.\n\n" + "Best regards,\n" + "[Your Name]");
+        intent.putExtra(Intent.EXTRA_TEXT, """
+                Hello,
+                
+                I hope this message finds you well. Below are my feedback and suggestions regarding the Fisheye Launcher app:
+                
+                [Insert your feedback here]
+                
+                Thank you for your attention and support.
+                
+                Best regards,
+                [Your Name]""");
 
         if (intent.resolveActivity(getPackageManager()) != null) {
             startActivity(intent);
@@ -590,12 +560,9 @@ public class ActSettings extends ActBase implements Observer, ColorChooserDialog
     }
 
     private void checkShowAd() {
-        AdMobManager.INSTANCE.initSplashScreen(this, new Function0<Unit>() {
-            @Override
-            public Unit invoke() {
-                flAdOpenApp.setVisibility(View.GONE);
-                return null;
-            }
+        AdMobManager.INSTANCE.initSplashScreen(this, () -> {
+            flAdOpenApp.setVisibility(View.GONE);
+            return Unit.INSTANCE;
         });
     }
 
