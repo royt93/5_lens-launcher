@@ -3,7 +3,6 @@ package com.mckimquyen.ui
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -26,80 +25,80 @@ import me.zhanghai.android.materialprogressbar.MaterialProgressBar
 class FrmApps : Fragment(), AppsInterface {
 
     companion object {
-        fun newInstance(): FrmApps {
-            return FrmApps()
-        }
+        fun newInstance() = FrmApps()
     }
 
     private var rvApps: RecyclerView? = null
     private var progressBarApps: MaterialProgressBar? = null
     private var utilSettings: UtilSettings? = null
+    private var appAdapter: AppAdapter? = null
     private var indexScrolledItem = 0
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?,
-    ): View? {
-        val view = inflater.inflate(R.layout.frm_apps, container, false)
-        utilSettings = UtilSettings(requireContext())
-        return view
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        return inflater.inflate(R.layout.frm_apps, container, false)
     }
 
-    override fun onViewCreated(
-        view: View, savedInstanceState: Bundle?,
-    ) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        utilSettings = UtilSettings(requireContext())
         setupViews(view)
-        instance?.apps?.let {
-//            Log.d("", "onCreateView $it")
-            setupRecycler(it)
-        }
+        instance.apps?.let { setupRecycler(it) }
     }
 
     private fun setupViews(view: View) {
         rvApps = view.findViewById(R.id.rvApps)
         progressBarApps = view.findViewById(R.id.progressBarApps)
+
+        // Initialize RecyclerView once
+        rvApps?.apply {
+            layoutManager = GridLayoutManager(requireContext(), resources.getInteger(R.integer.columns_apps))
+            itemAnimator = DefaultItemAnimator()
+        }
     }
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        if (activity != null && activity is ActSettings) {
-            (activity as ActSettings?)?.setAppsInterface(this)
-        }
+        (context as? ActSettings)?.setAppsInterface(this)
     }
 
     private fun sendEditAppsBroadcast() {
-        val editAppsIntent = Intent(activity, AppsEditedReceiver::class.java)
-        activity?.sendBroadcast(editAppsIntent)
+        val editAppsIntent = Intent(requireContext(), AppsEditedReceiver::class.java)
+        requireContext().sendBroadcast(editAppsIntent)
     }
 
     private fun setupRecycler(apps: ArrayList<App>?) {
-//        Log.d("", "setupRecycler $apps")
-        if (activity == null || apps?.size == 0) {
+        if (apps.isNullOrEmpty()) {
             progressBarApps?.isVisible = false
             return
         }
-//        Log.d("", "apps?.size ${apps?.size}")
-        rvApps?.layoutManager?.let { lm ->
-            indexScrolledItem = (lm as LinearLayoutManager).findFirstCompletelyVisibleItemPosition()
+
+        // Save scroll position before updating
+        (rvApps?.layoutManager as? LinearLayoutManager)?.let { lm ->
+            indexScrolledItem = lm.findFirstCompletelyVisibleItemPosition()
         }
 
         progressBarApps?.isVisible = false
         rvApps?.isVisible = true
 
-        val appAdapter = AppAdapter(activity, apps)
-        rvApps?.apply {
-            adapter = appAdapter
-            layoutManager = GridLayoutManager(activity, resources.getInteger(R.integer.columns_apps))
-            itemAnimator = DefaultItemAnimator()
-            scrollToPosition(indexScrolledItem)
+        // Reuse adapter if possible, otherwise create new one
+        if (appAdapter == null) {
+            appAdapter = AppAdapter(requireActivity(), apps)
+            rvApps?.adapter = appAdapter
+        } else {
+            appAdapter?.updateApps(apps)
         }
+
+        rvApps?.scrollToPosition(indexScrolledItem)
         indexScrolledItem = 0
-//        Log.d("", "done")
     }
 
     override fun onDefaultsReset() {
         utilSettings?.let { us ->
-            if (us.sortType != SortType.values()[UtilSettings.DEFAULT_SORT_TYPE]) {
+            if (us.sortType != SortType.entries[UtilSettings.DEFAULT_SORT_TYPE]) {
                 us.save(UtilSettings.KEY_SORT_TYPE, UtilSettings.DEFAULT_SORT_TYPE)
                 sendEditAppsBroadcast()
             }
@@ -107,7 +106,11 @@ class FrmApps : Fragment(), AppsInterface {
     }
 
     override fun onAppsUpdated(apps: ArrayList<App>?) {
-//        Log.d("", "onAppsUpdated $apps")
         setupRecycler(apps)
+    }
+
+    override fun onDestroyView() {
+        appAdapter = null
+        super.onDestroyView()
     }
 }

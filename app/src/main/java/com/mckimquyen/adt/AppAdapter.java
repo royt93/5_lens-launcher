@@ -90,6 +90,18 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
         return mApps.get(position);
     }
 
+    /**
+     * Cập nhật danh sách apps và notify adapter
+     * Tối ưu: Reuse adapter thay vì tạo mới mỗi lần update
+     *
+     * @param newApps Danh sách apps mới
+     */
+    public void updateApps(List<App> newApps) {
+        mApps.clear();
+        mApps.addAll(newApps);
+        notifyDataSetChanged();
+    }
+
     // ========================================================================
     // RECYCLERVIEW ADAPTER OVERRIDES
     // ========================================================================
