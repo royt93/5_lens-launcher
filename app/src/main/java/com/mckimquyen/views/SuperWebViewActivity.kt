@@ -164,7 +164,7 @@ class SuperWebViewActivity : ActBase() {
                 if (view?.url.isNullOrEmpty()) {
                     view?.loadUrl(currentWebsite)
                 } else {
-                    view?.reload()
+                    view.reload()
                 }
             }
         }

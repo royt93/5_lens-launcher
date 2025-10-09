@@ -6,7 +6,6 @@ import android.content.pm.PackageManager
 import android.graphics.*
 import android.graphics.drawable.NinePatchDrawable
 import android.util.AttributeSet
-import android.util.Log
 import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import android.view.View
@@ -15,6 +14,7 @@ import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.animation.Animation
 import android.view.animation.Transformation
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.toColorInt
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.mckimquyen.R
@@ -24,7 +24,6 @@ import com.mckimquyen.model.AppPersistent
 import com.mckimquyen.util.UtilApp
 import com.mckimquyen.util.UtilCalculator
 import com.mckimquyen.util.UtilSettings
-import java.util.*
 import kotlin.math.pow
 import kotlin.math.sqrt
 
@@ -37,12 +36,7 @@ class LensView : View {
     private var mTouchX = -Float.MAX_VALUE
     private var mTouchY = -Float.MAX_VALUE
     private var mInsideRect = false
-    private var mRectToSelect: RectF? = RectF(
-        /* left = */ 0f,
-        /* top = */ 0f,
-        /* right = */ 0f,
-        /* bottom = */ 0f
-    )
+    private var mRectToSelect: RectF? = RectF(0f, 0f, 0f, 0f)
     private var mMustVibrate = true
     private var mSelectIndex = 0
     private var mApps: ArrayList<App>? = null
@@ -54,12 +48,7 @@ class LensView : View {
     private var mMoving = false
     private var mUtilSettings: UtilSettings? = null
     private var mWorkspaceBackgroundDrawable: NinePatchDrawable? = null
-    private var mInsets = Rect(
-        /* left = */ 0,
-        /* top = */ 0,
-        /* right = */ 0,
-        /* bottom = */ 0
-    )
+    private var mInsets = Rect(0, 0, 0, 0)
 
     private var mDrawType: DrawType? = null
     fun setDrawType(drawType: DrawType?) {
@@ -98,8 +87,6 @@ class LensView : View {
         setBackgroundColor(ContextCompat.getColor(context, R.color.colorTransparent))
         mUtilSettings = UtilSettings(context)
         setupPaints()
-//        mWorkspaceBackgroundDrawable =
-//            ContextCompat.getDrawable(context, R.drawable.workspace_bg) as NinePatchDrawable?
         mTouchSlop = ViewConfiguration.get(context).scaledTouchSlop.toFloat()
     }
 
@@ -145,7 +132,7 @@ class LensView : View {
             isAntiAlias = true
             style = Paint.Style.STROKE
             mUtilSettings?.let {
-                color = Color.parseColor(it.getString(UtilSettings.KEY_HIGHLIGHT_COLOR))
+                color = it.getString(UtilSettings.KEY_HIGHLIGHT_COLOR)?.toColorInt() ?: 0
             }
             strokeWidth = resources.getDimension(R.dimen.stroke_width_touch_selection)
         }
@@ -157,7 +144,6 @@ class LensView : View {
             color = ContextCompat.getColor(context, R.color.colorWhite)
             textSize = resources.getDimension(R.dimen.text_size_lens)
             textAlign = Paint.Align.CENTER
-//            typeface = Typeface.createFromAsset(context.assets, "fonts/RobotoCondensed-Regular.ttf")
         }
 
         mPaintNewAppTag = Paint()
@@ -165,14 +151,14 @@ class LensView : View {
             isAntiAlias = true
             style = Paint.Style.FILL
             mUtilSettings?.let {
-                color = Color.parseColor(it.getString(UtilSettings.KEY_HIGHLIGHT_COLOR))
+                color = it.getString(UtilSettings.KEY_HIGHLIGHT_COLOR)?.toColorInt() ?: 0
             }
             isDither = true
             setShadowLayer(
-                /* radius = */ resources.getDimension(R.dimen.shadow_text),
-                /* dx = */ resources.getDimension(R.dimen.shadow_text),
-                /* dy = */ resources.getDimension(R.dimen.shadow_text),
-                /* shadowColor = */ ContextCompat.getColor(context, R.color.colorShadow)
+                resources.getDimension(R.dimen.shadow_text),
+                resources.getDimension(R.dimen.shadow_text),
+                resources.getDimension(R.dimen.shadow_text),
+                ContextCompat.getColor(context, R.color.colorShadow)
             )
         }
     }
@@ -182,10 +168,10 @@ class LensView : View {
         if (mDrawType == DrawType.APPS) {
             mUtilSettings?.let { us ->
                 if (us.getString(UtilSettings.KEY_BACKGROUND) == "Color") {
-                    canvas.drawColor(Color.parseColor(us.getString(UtilSettings.KEY_BACKGROUND_COLOR)))
+                    canvas.drawColor(us.getString(UtilSettings.KEY_BACKGROUND_COLOR)?.toColorInt() ?: 0)
                 }
                 mPaintNewAppTag?.color =
-                    Color.parseColor(us.getString(UtilSettings.KEY_HIGHLIGHT_COLOR))
+                    us.getString(UtilSettings.KEY_HIGHLIGHT_COLOR)?.toColorInt() ?: 0
                 drawWorkspaceBackground(canvas)
                 mApps?.let {
                     drawGrid(canvas, it.size)
@@ -198,10 +184,7 @@ class LensView : View {
             val mNumberOfCircles = 100
             mTouchX = (width / 2).toFloat()
             mTouchY = (height / 2).toFloat()
-            drawGrid(
-                canvas = canvas,
-                itemCount = mNumberOfCircles
-            )
+            drawGrid(canvas, mNumberOfCircles)
         }
     }
 
@@ -210,16 +193,8 @@ class LensView : View {
         return if (mDrawType == DrawType.APPS) {
             when (event.actionMasked) {
                 MotionEvent.ACTION_DOWN -> {
-                    mTouchX = if (event.x < 0.0f) {
-                        0.0f
-                    } else {
-                        event.x
-                    }
-                    mTouchY = if (event.y < 0.0f) {
-                        0.0f
-                    } else {
-                        event.y
-                    }
+                    mTouchX = event.x.coerceAtLeast(0.0f)
+                    mTouchY = event.y.coerceAtLeast(0.0f)
                     mSelectIndex = -1
                     mMoving = false
                     invalidate()
@@ -239,16 +214,8 @@ class LensView : View {
                     if (!mMoving) {
                         return true
                     }
-                    mTouchX = if (event.x < 0.0f) {
-                        0.0f
-                    } else {
-                        event.x
-                    }
-                    mTouchY = if (event.y < 0.0f) {
-                        0.0f
-                    } else {
-                        event.y
-                    }
+                    mTouchX = event.x.coerceAtLeast(0.0f)
+                    mTouchY = event.y.coerceAtLeast(0.0f)
                     invalidate()
                     true
                 }
@@ -273,7 +240,7 @@ class LensView : View {
     }
 
     private fun drawWorkspaceBackground(canvas: Canvas) {
-        val rect = Rect(/* left = */ 0, /* top = */ 0, /* right = */ width, /* bottom = */ height)
+        val rect = Rect(0, 0, width, height)
         mWorkspaceBackgroundDrawable?.apply {
             bounds = rect
             draw(canvas)
@@ -283,20 +250,20 @@ class LensView : View {
     private fun drawTouchSelection(canvas: Canvas) {
         mPaintTouchSelection?.let {
             canvas.drawCircle(
-                /* cx = */ mTouchX,
-                /* cy = */ mTouchY,
-                /* radius = */ resources.getDimension(R.dimen.radius_touch_selection),
-                /* paint = */ it
+                mTouchX,
+                mTouchY,
+                resources.getDimension(R.dimen.radius_touch_selection),
+                it
             )
         }
     }
 
     private fun drawGrid(canvas: Canvas, itemCount: Int) {
         val grid = UtilCalculator.calculateGrid(
-            /* context = */ context,
-            /* screenWidth = */ width - (mInsets.left + mInsets.right),
-            /* screenHeight = */ height - (mInsets.top + mInsets.bottom),
-            /* itemCount = */ itemCount
+            context,
+            width - (mInsets.left + mInsets.right),
+            height - (mInsets.top + mInsets.bottom),
+            itemCount
         )
         mInsideRect = false
         var selectIndex = -1
@@ -321,83 +288,71 @@ class LensView : View {
                     }
                     if (mTouchX >= 0 && mTouchY >= 0) {
                         val shiftedCenterX = UtilCalculator.shiftPoint(
-                            /* context = */ context,
-                            /* lensPosition = */ mTouchX,
-                            /* itemPosition = */ rect.centerX(),
-                            /* boundary = */ width.toFloat(),
-                            /* multiplier = */ animationMultiplier
+                            context,
+                            mTouchX,
+                            rect.centerX(),
+                            width.toFloat(),
+                            animationMultiplier
                         )
                         val shiftedCenterY = UtilCalculator.shiftPoint(
-                            /* context = */ context,
-                            /* lensPosition = */ mTouchY,
-                            /* itemPosition = */ rect.centerY(),
-                            /* boundary = */ height.toFloat(),
-                            /* multiplier = */ animationMultiplier
+                            context,
+                            mTouchY,
+                            rect.centerY(),
+                            height.toFloat(),
+                            animationMultiplier
                         )
                         val scaledCenterX = UtilCalculator.scalePoint(
-                            /* context = */ context,
-                            /* lensPosition = */ mTouchX,
-                            /* itemPosition = */ rect.centerX(),
-                            /* itemSize = */ rect.width(),
-                            /* boundary = */ width.toFloat(),
-                            /* multiplier = */ animationMultiplier
+                            context,
+                            mTouchX,
+                            rect.centerX(),
+                            rect.width(),
+                            width.toFloat(),
+                            animationMultiplier
                         )
                         val scaledCenterY = UtilCalculator.scalePoint(
-                            /* context = */ context,
-                            /* lensPosition = */ mTouchY,
-                            /* itemPosition = */ rect.centerY(),
-                            /* itemSize = */ rect.height(),
-                            /* boundary = */ height.toFloat(),
-                            /* multiplier = */ animationMultiplier
+                            context,
+                            mTouchY,
+                            rect.centerY(),
+                            rect.height(),
+                            height.toFloat(),
+                            animationMultiplier
                         )
                         val newSize = UtilCalculator.calculateSquareScaledSize(
-                            /* scaledPositionX = */ scaledCenterX,
-                            /* shiftedPositionX = */ shiftedCenterX,
-                            /* scaledPositionY = */ scaledCenterY,
-                            /* shiftedPositionY = */ shiftedCenterY
+                            scaledCenterX,
+                            shiftedCenterX,
+                            scaledCenterY,
+                            shiftedCenterY
                         )
                         mUtilSettings?.let { us ->
                             if (us.getFloat(UtilSettings.KEY_DISTORTION_FACTOR) > 0.0f
                                 && us.getFloat(UtilSettings.KEY_SCALE_FACTOR) > 0.0f
                             ) {
                                 rect = UtilCalculator.calculateRect(
-                                    /* newCenterX = */ shiftedCenterX,
-                                    /* newCenterY = */ shiftedCenterY,
-                                    /* newSize = */ newSize
+                                    shiftedCenterX,
+                                    shiftedCenterY,
+                                    newSize
                                 )
                             } else if (us.getFloat(UtilSettings.KEY_DISTORTION_FACTOR) > 0.0f
                                 && us.getFloat(UtilSettings.KEY_SCALE_FACTOR) == 0.0f
                             ) {
                                 rect = UtilCalculator.calculateRect(
-                                    /* newCenterX = */ shiftedCenterX,
-                                    /* newCenterY = */ shiftedCenterY,
-                                    /* newSize = */ rect.width()
+                                    shiftedCenterX,
+                                    shiftedCenterY,
+                                    rect.width()
                                 )
                             }
                         }
 
-                        if (UtilCalculator.isInsideRect(
-                                /* x = */ mTouchX,
-                                /* y = */ mTouchY,
-                                /* rect = */ rect
-                            )
-                        ) {
+                        if (UtilCalculator.isInsideRect(mTouchX, mTouchY, rect)) {
                             mInsideRect = true
                             selectIndex = currentIndex
                             mRectToSelect = rect
                         }
                     }
                     if (mDrawType == DrawType.APPS) {
-                        drawAppIcon(
-                            canvas = canvas,
-                            rect = rect,
-                            index = currentIndex
-                        )
+                        drawAppIcon(canvas, rect, currentIndex)
                     } else if (mDrawType == DrawType.CIRCLES) {
-                        drawCircle(
-                            canvas = canvas,
-                            rect = rect
-                        )
+                        drawCircle(canvas, rect)
                     }
                 }
                 x += 1.0f
@@ -416,10 +371,7 @@ class LensView : View {
             performHoverVibration()
         }
         if (mRectToSelect != null && mDrawType == DrawType.APPS && mApps != null && mSelectIndex >= 0) {
-            drawAppName(
-                canvas = canvas,
-                rect = mRectToSelect
-            )
+            drawAppName(canvas, mRectToSelect)
         }
     }
 
@@ -431,30 +383,17 @@ class LensView : View {
         mAppIcons?.let { list ->
             if (index < list.size) {
                 val appIcon = list[index]
-                val src = Rect(
-                    /* left = */ 0,
-                    /* top = */ 0,
-                    /* right = */ appIcon.width,
-                    /* bottom = */ appIcon.height
-                )
-                canvas.drawBitmap(
-                    /* bitmap = */ appIcon,
-                    /* src = */ src,
-                    /* dst = */ rect,
-                    /* paint = */ mPaintIcons
-                )
+                val src = Rect(0, 0, appIcon.width, appIcon.height)
+                canvas.drawBitmap(appIcon, src, rect, mPaintIcons)
                 mApps?.let { l ->
-                    if (l[index].installDate >= System.currentTimeMillis() - UtilSettings.SHOW_NEW_APP_TAG_DURATION
-                        &&
-                        AppPersistent.getAppOpenCount(
-                            Objects.requireNonNull(l[index].packageName).toString(),
-                            Objects.requireNonNull(l[index].name).toString()
+                    val app = l[index]
+                    if (app.installDate >= System.currentTimeMillis() - UtilSettings.SHOW_NEW_APP_TAG_DURATION
+                        && AppPersistent.getAppOpenCount(
+                            app.packageName.toString(),
+                            app.name.toString()
                         ) == 0L
                     ) {
-                        drawNewAppTag(
-                            canvas = canvas,
-                            rect = rect
-                        )
+                        drawNewAppTag(canvas, rect)
                     }
                 }
             }
@@ -466,12 +405,7 @@ class LensView : View {
         rect: RectF,
     ) {
         mPaintCircles?.let {
-            canvas.drawCircle(
-                /* cx = */ rect.centerX(),
-                /* cy = */ rect.centerY(),
-                /* radius = */ rect.width() / 2.0f,
-                /* paint = */ it
-            )
+            canvas.drawCircle(rect.centerX(), rect.centerY(), rect.width() / 2.0f, it)
         }
     }
 
@@ -485,10 +419,10 @@ class LensView : View {
                     rect?.let { r ->
                         mPaintText?.let { p ->
                             canvas.drawText(
-                                /* text = */ list[mSelectIndex].label as String,
-                                /* x = */ r.centerX(),
-                                /* y = */ r.top - resources.getDimension(R.dimen.margin_lens_text),
-                                /* paint = */ p
+                                list[mSelectIndex].label as String,
+                                r.centerX(),
+                                r.top - resources.getDimension(R.dimen.margin_lens_text),
+                                p
                             )
                         }
                     }
@@ -505,10 +439,10 @@ class LensView : View {
             if (us.getBoolean(UtilSettings.KEY_SHOW_NEW_APP_TAG)) {
                 mPaintNewAppTag?.let { p ->
                     canvas.drawCircle(
-                        /* cx = */ rect.centerX(),
-                        /* cy = */ rect.bottom + resources.getDimension(R.dimen.margin_new_app_tag),
-                        /* radius = */ resources.getDimension(R.dimen.radius_new_app_tag),
-                        /* paint = */ p
+                        rect.centerX(),
+                        rect.bottom + resources.getDimension(R.dimen.margin_new_app_tag),
+                        resources.getDimension(R.dimen.radius_new_app_tag),
+                        p
                     )
                 }
             }
@@ -543,21 +477,16 @@ class LensView : View {
     private fun launchApp() {
         mApps?.let { list ->
             if (mPackageManager != null && mSelectIndex >= 0) {
-                val bounds = if (mRectToSelect == null)
-                    null
-                else Rect(
-                    mRectToSelect!!.left.toInt(),
-                    mRectToSelect!!.top.toInt(),
-                    mRectToSelect!!.right.toInt(),
-                    mRectToSelect!!.bottom.toInt()
-                )
+                val bounds = mRectToSelect?.let {
+                    Rect(it.left.toInt(), it.top.toInt(), it.right.toInt(), it.bottom.toInt())
+                }
                 UtilApp.launchComponent(
-                    /* context = */ context,
-                    /* packageName = */ list[mSelectIndex].packageName as String?,
-                    /* label = */ list[mSelectIndex].label as String?,
-                    /* name = */ list[mSelectIndex].name as String?,
-                    /* view = */ this,
-                    /* bounds = */ bounds
+                    context,
+                    list[mSelectIndex].packageName as String?,
+                    list[mSelectIndex].label as String?,
+                    list[mSelectIndex].name as String?,
+                    this,
+                    bounds
                 )
             }
         }
@@ -587,10 +516,10 @@ class LensView : View {
                         mAnimationHiding = false
                     } else {
                         mPaintText?.setShadowLayer(
-                            /* radius = */ resources.getDimension(R.dimen.shadow_text),
-                            /* dx = */ resources.getDimension(R.dimen.shadow_text),
-                            /* dy = */ resources.getDimension(R.dimen.shadow_text),
-                            /* shadowColor = */ ContextCompat.getColor(context, R.color.colorShadow)
+                            resources.getDimension(R.dimen.shadow_text),
+                            resources.getDimension(R.dimen.shadow_text),
+                            resources.getDimension(R.dimen.shadow_text),
+                            ContextCompat.getColor(context, R.color.colorShadow)
                         )
                     }
                 }
@@ -605,7 +534,7 @@ class LensView : View {
                 mAnimationMultiplier = interpolatedTime
                 mUtilSettings?.let { us ->
                     mPaintTouchSelection?.color =
-                        Color.parseColor(us.getString(UtilSettings.KEY_HIGHLIGHT_COLOR))
+                        us.getString(UtilSettings.KEY_HIGHLIGHT_COLOR)?.toColorInt() ?: 0
                 }
                 mPaintTouchSelection?.alpha = (255.0f * interpolatedTime).toInt()
                 mPaintText?.alpha = (255.0f * interpolatedTime).toInt()
@@ -613,7 +542,7 @@ class LensView : View {
                 mAnimationMultiplier = 1.0f - interpolatedTime
                 mUtilSettings?.let { us ->
                     mPaintTouchSelection?.color =
-                        Color.parseColor(us.getString(UtilSettings.KEY_HIGHLIGHT_COLOR))
+                        us.getString(UtilSettings.KEY_HIGHLIGHT_COLOR)?.toColorInt() ?: 0
                 }
                 mPaintTouchSelection?.alpha = (255.0f * (1.0f - interpolatedTime)).toInt()
                 mPaintText?.alpha = (255.0f * (1.0f - interpolatedTime)).toInt()
