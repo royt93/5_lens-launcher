@@ -18,6 +18,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -117,6 +118,14 @@ public class ActSettings extends ActBase implements Observer, ColorChooserDialog
 
         LoadedObservable.getInstance().addObserver(this);
         NightModeObservable.getInstance().addObserver(this);
+
+        // Handle back button press using OnBackPressedDispatcher
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                finish();
+            }
+        });
 
         checkShowAd();
     }
@@ -563,11 +572,6 @@ public class ActSettings extends ActBase implements Observer, ColorChooserDialog
             adView.destroy();
         }
         super.onDestroy();
-    }
-
-    @Override
-    public void onBackPressed() {
-        finish();
     }
 
     @Override

@@ -11,6 +11,8 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
+import androidx.activity.OnBackPressedCallback;
+
 import com.mckimquyen.BuildConfig;
 import com.mckimquyen.R;
 import com.mckimquyen.app.RAppsSingleton;
@@ -70,6 +72,15 @@ public class ActHome extends ActBase implements Observer {
         VisibilityChangedObservable.getInstance().addObserver(this);
         BackgroundChangedObservable.getInstance().addObserver(this);
         NightModeObservable.getInstance().addObserver(this);
+
+        // Disable back button for launcher home screen
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                // Do nothing - back button disabled for home screen
+            }
+        });
+
         rateAppInApp(this, BuildConfig.DEBUG);
     }
 
@@ -119,11 +130,6 @@ public class ActHome extends ActBase implements Observer {
                 i--;
             }
         }
-    }
-
-    @Override
-    public void onBackPressed() {
-        //do nothing
     }
 
     @Override

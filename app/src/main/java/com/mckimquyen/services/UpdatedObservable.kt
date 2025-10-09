@@ -16,7 +16,6 @@ import java.util.Observable
  *
  * @deprecated Sử dụng AppEventManager.appsUpdated thay thế
  */
-@Deprecated("Use AppEventManager.appsUpdated instead")
 class UpdatedObservable private constructor() : Observable() {
 
     companion object {

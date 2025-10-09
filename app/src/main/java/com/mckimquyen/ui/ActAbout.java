@@ -10,6 +10,7 @@ import android.view.ViewAnimationUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
@@ -42,6 +43,14 @@ public class ActAbout extends ActBase implements Observer {
         setupViews();
         backdrop.postDelayed(this::circularRevealAboutImage, 150);
         NightModeObservable.getInstance().addObserver(this);
+
+        // Handle back button press using OnBackPressedDispatcher
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                finish();
+            }
+        });
     }
 
     private void findViews() {
@@ -91,11 +100,6 @@ public class ActAbout extends ActBase implements Observer {
         collapsingToolbar.setExpandedTitleColor(ContextCompat.getColor(this, R.color.colorTransparent));
         tvAbout.setText(Html.fromHtml(getString(R.string.about)));
         tvAbout.setMovementMethod(LinkMovementMethod.getInstance());
-    }
-
-    @Override
-    public void onBackPressed() {
-        finish();
     }
 
     @Override

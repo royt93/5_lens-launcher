@@ -16,7 +16,6 @@ import java.util.Observable
  *
  * @deprecated Sử dụng AppEventManager.visibilityChanged thay thế
  */
-@Deprecated("Use AppEventManager.visibilityChanged instead")
 class VisibilityChangedObservable private constructor() : Observable() {
 
     companion object {
