@@ -10,7 +10,6 @@ import android.view.ViewAnimationUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
@@ -44,13 +43,8 @@ public class ActAbout extends ActBase {
         // Observe night mode changes using LiveData
         AppEventManager.INSTANCE.getNightModeChanged().observe(this, data -> updateNightMode());
 
-        // Handle back button press using OnBackPressedDispatcher
-        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
-            @Override
-            public void handleOnBackPressed() {
-                finish();
-            }
-        });
+        // Note: Intentionally NOT using OnBackPressedCallback here
+        // Default back button behavior (finish()) is sufficient
     }
 
     private void findViews() {

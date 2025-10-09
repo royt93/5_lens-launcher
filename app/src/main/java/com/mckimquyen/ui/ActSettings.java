@@ -18,7 +18,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
 
-import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -119,13 +118,9 @@ public class ActSettings extends ActBase implements Observer, ColorChooserDialog
         LoadedObservable.getInstance().addObserver(this);
         NightModeObservable.getInstance().addObserver(this);
 
-        // Handle back button press using OnBackPressedDispatcher
-        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
-            @Override
-            public void handleOnBackPressed() {
-                finish();
-            }
-        });
+        // Note: Intentionally NOT using OnBackPressedCallback here
+        // Default back button behavior (finish()) is sufficient
+        // OnBackPressedCallback would intercept back press from ad dismiss, causing issues
 
         checkShowAd();
     }
