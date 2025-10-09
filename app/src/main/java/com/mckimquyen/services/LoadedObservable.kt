@@ -16,7 +16,6 @@ import java.util.Observable
  *
  * @deprecated Sử dụng AppEventManager.appsLoaded thay thế
  */
-@Deprecated("Use AppEventManager.appsLoaded instead")
 class LoadedObservable private constructor() : Observable() {
 
     companion object {

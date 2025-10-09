@@ -16,7 +16,6 @@ import java.util.Observable
  *
  * @deprecated Sử dụng AppEventManager.lockChanged thay thế
  */
-@Deprecated("Use AppEventManager.lockChanged instead")
 class LockChangedObservable private constructor() : Observable() {
 
     companion object {

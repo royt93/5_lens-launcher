@@ -4,22 +4,23 @@ import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import com.mckimquyen.app.ApplicationScope
 import com.mckimquyen.app.RAppsSingleton
 import com.mckimquyen.model.App
 import com.mckimquyen.util.UtilAppSorter
 import com.mckimquyen.util.UtilSettings
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.lang.ref.WeakReference
 
 /**
- * Task để sắp xếp lại danh sách ứng dụng
- * Đã migrate từ AsyncTask sang Coroutines để tránh memory leak và deprecated API
- *
+ * Task để sắp xếp lại danh sách ứng dụng.
+ * Đã migrate từ AsyncTask sang Coroutines để tránh memory leak và deprecated API.
+ * <p>
  * Fix: 1.1 - Migrate AsyncTask sang Coroutines
  * Fix: 4.1 - Sử dụng WeakReference để tránh Context leak
+ * Fix: 5.1 - Migrate from GlobalScope to ApplicationScope (lifecycle-aware)
  */
 class TaskSortApps(
     context: Context,
@@ -34,12 +35,15 @@ class TaskSortApps(
     private var mAppIcons: ArrayList<Bitmap>? = null
 
     /**
-     * Hàm chính để thực thi task (for Java compatibility)
-     * Non-blocking, returns immediately
+     * Hàm chính để thực thi task (for Java compatibility).
+     * Non-blocking, returns immediately.
+     * <p>
+     * Uses ApplicationScope instead of GlobalScope for proper lifecycle management.
+     * ApplicationScope is tied to the Application lifecycle and automatically cleaned up
+     * when the process is killed.
      */
-    @Suppress("DEPRECATION")
     fun execute() {
-        GlobalScope.launch {
+        ApplicationScope.scope.launch {
             executeAsync()
         }
     }
@@ -66,7 +70,7 @@ class TaskSortApps(
         val utilSettings = UtilSettings(context)
 
         // Lấy danh sách apps hiện tại từ Singleton
-        val apps = RAppsSingleton.instance?.apps ?: return@withContext
+        val apps = RAppsSingleton.instance.apps ?: return@withContext
 
         // Sắp xếp apps theo sort type từ settings
         UtilAppSorter.sort(apps, utilSettings.sortType)
@@ -93,7 +97,7 @@ class TaskSortApps(
         val application = applicationRef.get() ?: return
 
         // Cập nhật Singleton với danh sách apps đã sort
-        RAppsSingleton.instance?.let { singleton ->
+        RAppsSingleton.instance.let { singleton ->
             singleton.apps = mApps
             singleton.appIcons = mAppIcons
         }

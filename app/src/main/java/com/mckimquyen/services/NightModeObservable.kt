@@ -16,7 +16,6 @@ import java.util.Observable
  *
  * @deprecated Sử dụng AppEventManager.nightModeChanged thay thế
  */
-@Deprecated("Use AppEventManager.nightModeChanged instead")
 class NightModeObservable private constructor() : Observable() {
 
     companion object {
