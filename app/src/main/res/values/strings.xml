@@ -75,4 +75,18 @@
     <string name="button_retry">TRY AGAIN</string>
     <string name="error_message">Something went wrong.</string>
     <string name="changelog">Changelog</string>
+
+    <!-- Support Emails -->
+    <string-array name="support_emails">
+        <item>www.muathu@gmail.com</item>
+        <item>freuss47@gmail.com</item>
+    </string-array>
+
+    <!-- Share Messages -->
+    <string name="share_app_message">Ứng dụng này rất bổ ích, thân mời bạn tải về cài đặt để trải nghiệm</string>
+    <string name="share_via">Vui lòng chọn</string>
+
+    <!-- Biometric Error Messages -->
+    <string name="biometric_error_generic">Biometric authentication error: %1$s</string>
+    <string name="biometric_error_authentication_failed">Authentication failed. Please try again.</string>
 </resources>

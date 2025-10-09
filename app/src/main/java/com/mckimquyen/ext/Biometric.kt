@@ -2,6 +2,7 @@ package com.mckimquyen.ext
 
 import android.content.Context
 import android.util.Log
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
@@ -9,11 +10,19 @@ import androidx.core.content.ContextCompat
 import com.mckimquyen.R
 
 object Biometric {
+    /**
+     * Checks if biometric authentication is available on the device.
+     * Uses BIOMETRIC_STRONG for enhanced security.
+     *
+     * @param c Context
+     * @return true if biometric authentication is available and enrolled, false otherwise
+     */
     fun isHaveBiometric(
         c: Context
     ): Boolean {
         val biometricManager = BiometricManager.from(c)
-        return biometricManager.canAuthenticate() == BiometricManager.BIOMETRIC_SUCCESS
+        return biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG) ==
+                BiometricManager.BIOMETRIC_SUCCESS
     }
 
     fun toggleLockApp(
@@ -55,11 +64,25 @@ object Biometric {
             override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
                 super.onAuthenticationError(errorCode, errString)
                 Log.d("BiometricPrompt", "onAuthenticationError $errorCode $errString")
+
+                // Show error toast to user (skip for user cancellation)
+                if (errorCode != BiometricPrompt.ERROR_USER_CANCELED &&
+                    errorCode != BiometricPrompt.ERROR_NEGATIVE_BUTTON) {
+                    val errorMessage = activity.getString(
+                        R.string.biometric_error_generic,
+                        errString
+                    )
+                    Toast.makeText(activity, errorMessage, Toast.LENGTH_SHORT).show()
+                }
             }
 
             override fun onAuthenticationFailed() {
                 super.onAuthenticationFailed()
                 Log.d("BiometricPrompt", "onAuthenticationFailed")
+
+                // Show failed toast to user
+                val failedMessage = activity.getString(R.string.biometric_error_authentication_failed)
+                Toast.makeText(activity, failedMessage, Toast.LENGTH_SHORT).show()
             }
 
             override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {

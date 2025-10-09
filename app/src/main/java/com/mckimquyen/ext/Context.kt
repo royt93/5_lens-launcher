@@ -48,9 +48,13 @@ fun Context.launchSystemSetting(
          */
 fun Context?.sendEmail(
 ) {
-    val emailIntent = Intent(Intent.ACTION_SENDTO)
-    emailIntent.data = Uri.parse("mailto: www.muathu@gmail.com")
-    this?.startActivity(Intent.createChooser(emailIntent, "Send feedback"))
+    this?.let { context ->
+        val emailIntent = Intent(Intent.ACTION_SENDTO)
+        val emails = context.resources.getStringArray(R.array.support_emails)
+        val emailAddresses = emails.joinToString(",")
+        emailIntent.data = Uri.parse("mailto:$emailAddresses")
+        context.startActivity(Intent.createChooser(emailIntent, "Send feedback"))
+    }
 }
 
 //fun Context.openBrowserPolicy(

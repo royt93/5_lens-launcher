@@ -149,29 +149,26 @@ fun Activity.rateAppInApp(forceRateInApp: Boolean = false) {
 //    implementation("com.google.android.play:review-ktx:2.0.2")
 
     val sharedPreferences = getSharedPreferences("app_preferences", Context.MODE_PRIVATE)
-    val lastReviewTime = sharedPreferences.getLong("last_review_time", 0L)
-//    Log.d("roy93~", "requestReview lastReviewTime $lastReviewTime")
-    val currentTime = Calendar.getInstance().timeInMillis
-    val daysSinceLastReview = (currentTime - lastReviewTime) / (1000 * 60 * 60 * 24)
-//    Log.d("roy93~", "requestReview forceRateInApp $forceRateInApp")
-//    Log.d("roy93~", "requestReview daysSinceLastReview $daysSinceLastReview")
-    if (daysSinceLastReview >= 7 || forceRateInApp) {
-//    if (daysSinceLastReview >= 7) {
-        val reviewManager = ReviewManagerFactory.create(this)
-        val request = reviewManager.requestReviewFlow()
-        request.addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                val reviewInfo: ReviewInfo = task.result
-                reviewManager.launchReviewFlow(this, reviewInfo)
-                sharedPreferences.edit().putLong("last_review_time", currentTime).apply()
-//                Log.d("roy93~", "requestReview result ${task.result}")
-//                Log.d("roy93~", "requestReview isSuccessful ${task.isSuccessful}")
-//                Log.d("roy93~", "requestReview isCanceled ${task.isCanceled}")
-//                Log.d("roy93~", "requestReview isComplete ${task.isComplete}")
-//                Log.d("roy93~", "requestReview exception ${task.exception}")
-            } else {
-                @ReviewErrorCode val reviewErrorCode = (task.exception as ReviewException).errorCode
-//                Log.e("roy93~", "requestReview error $reviewErrorCode")
+
+    // Use synchronized block to prevent race condition when reading/writing last_review_time
+    synchronized(sharedPreferences) {
+        val lastReviewTime = sharedPreferences.getLong("last_review_time", 0L)
+        val currentTime = Calendar.getInstance().timeInMillis
+        val daysSinceLastReview = (currentTime - lastReviewTime) / (1000 * 60 * 60 * 24)
+
+        if (daysSinceLastReview >= 7 || forceRateInApp) {
+            val reviewManager = ReviewManagerFactory.create(this)
+            val request = reviewManager.requestReviewFlow()
+            request.addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val reviewInfo: ReviewInfo = task.result
+                    reviewManager.launchReviewFlow(this, reviewInfo)
+                    // Use commit() instead of apply() to ensure synchronous write
+                    sharedPreferences.edit().putLong("last_review_time", currentTime).commit()
+                } else {
+                    @ReviewErrorCode val reviewErrorCode = (task.exception as ReviewException).errorCode
+                    Log.e("rateAppInApp", "Review request error: $reviewErrorCode")
+                }
             }
         }
     }
@@ -218,10 +215,10 @@ fun Activity.shareApp(
         val intent = Intent(Intent.ACTION_SEND)
         intent.type = "text/plain"
         intent.putExtra(Intent.EXTRA_SUBJECT, this.getString(R.string.app_name))
-        var sAux = "\nỨng dụng này rất bổ ích, thân mời bạn tải về cài đặt để trải nghiệm\n\n"
-        sAux = sAux + "https://play.google.com/store/apps/details?id=" + this.packageName
-        intent.putExtra(Intent.EXTRA_TEXT, sAux)
-        this.startActivity(Intent.createChooser(intent, "Vui lòng chọn"))
+        val message = "\n${this.getString(R.string.share_app_message)}\n\n" +
+                "https://play.google.com/store/apps/details?id=${this.packageName}"
+        intent.putExtra(Intent.EXTRA_TEXT, message)
+        this.startActivity(Intent.createChooser(intent, this.getString(R.string.share_via)))
     } catch (e: Exception) {
         e.printStackTrace()
     }
@@ -298,14 +295,30 @@ fun Activity.playYoutubeWithId(
 fun Activity.setChangeStatusBarTintToDark(
     shouldChangeStatusBarTintToDark: Boolean,
 ) {
-    val decor = this.window.decorView
-    if (shouldChangeStatusBarTintToDark) {
-        decor.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        // Use WindowInsetsController for API 30+
+        val controller = this.window.insetsController
+        if (shouldChangeStatusBarTintToDark) {
+            controller?.setSystemBarsAppearance(
+                WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS,
+                WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
+            )
+        } else {
+            controller?.setSystemBarsAppearance(
+                0,
+                WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
+            )
+        }
     } else {
-        // We want to change tint color to white again.
-        // You can also record the flags in advance so that you can turn UI back completely if
-        // you have set other flags before, such as translucent or full screen.
-        decor.systemUiVisibility = 0
+        // Fallback for API < 30
+        val decor = this.window.decorView
+        if (shouldChangeStatusBarTintToDark) {
+            @Suppress("DEPRECATION")
+            decor.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+        } else {
+            @Suppress("DEPRECATION")
+            decor.systemUiVisibility = 0
+        }
     }
 }
 
@@ -317,47 +330,45 @@ val screenHeight: Int
 
 fun Context.getScreenHeightIncludeNavigationBar(): Int {
     val windowManager = this.getSystemService(Context.WINDOW_SERVICE) as WindowManager
-    val display = windowManager.defaultDisplay
-    val outPoint = Point()
-    // include navigation bar
-    display.getRealSize(outPoint)
-    val mRealSizeHeight: Int = if (outPoint.y > outPoint.x) {
-        outPoint.y
-        // mRealSizeWidth = outPoint.x;
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        // Use WindowMetrics for API 30+
+        val windowMetrics = windowManager.currentWindowMetrics
+        val bounds = windowMetrics.bounds
+        if (bounds.height() > bounds.width()) {
+            bounds.height()
+        } else {
+            bounds.width()
+        }
     } else {
-        outPoint.x
-        // mRealSizeWidth = outPoint.y;
+        // Fallback for API < 30
+        @Suppress("DEPRECATION")
+        val display = windowManager.defaultDisplay
+        val outPoint = Point()
+        // include navigation bar
+        @Suppress("DEPRECATION")
+        display.getRealSize(outPoint)
+        if (outPoint.y > outPoint.x) {
+            outPoint.y
+        } else {
+            outPoint.x
+        }
     }
-    return mRealSizeHeight
 }
 
-@SuppressLint("ObsoleteSdkInt")
 fun Activity.showStatusBar(
 ) {
-    if (Build.VERSION.SDK_INT < 16) {
-        this.window.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
-    } else {
-        val decorView = this.window.decorView
-        // Show Status Bar.
-        val uiOptions = View.SYSTEM_UI_FLAG_VISIBLE
-        decorView.systemUiVisibility = uiOptions
-    }
+    val decorView = this.window.decorView
+    // Show Status Bar.
+    val uiOptions = View.SYSTEM_UI_FLAG_VISIBLE
+    decorView.systemUiVisibility = uiOptions
 }
 
-@SuppressLint("ObsoleteSdkInt")
 fun Activity.hideStatusBar(
 ) {
-    // Hide Status Bar
-    if (Build.VERSION.SDK_INT < 16) {
-        this.window.setFlags(
-            WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN
-        )
-    } else {
-        val decorView = this.window.decorView
-        // Hide Status Bar.
-        val uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN
-        decorView.systemUiVisibility = uiOptions
-    }
+    val decorView = this.window.decorView
+    // Hide Status Bar.
+    val uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN
+    decorView.systemUiVisibility = uiOptions
 }
 
 fun Activity.toggleFullscreen(
@@ -385,17 +396,21 @@ fun Activity.toggleFullscreen(
     }
 }
 
+/**
+ * Hides the navigation bar with immersive mode.
+ * NOTE: Use with lifecycle awareness - call clearSystemUiVisibilityListener() in onDestroy()
+ * to prevent memory leaks.
+ */
 fun Activity.hideNavigationBar(
 ) {
-    // set navigation bar status, remember to disable "setNavigationBarTintEnabled"
     val flags =
-        (View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
-    // This work only for android 4.4+
+        (View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
+         View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or
+         View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
+
     this.window.decorView.systemUiVisibility = flags
 
-    // Code below is to handle presses of Volume up or Volume down.
-    // Without this, after pressing volume buttons, the navigation bar will
-    // show up and won't hide
+    // Handle volume button presses to keep navigation bar hidden
     val decorView = this.window.decorView
     decorView.setOnSystemUiVisibilityChangeListener { visibility ->
         if (visibility and View.SYSTEM_UI_FLAG_FULLSCREEN == 0) {
@@ -404,61 +419,53 @@ fun Activity.hideNavigationBar(
     }
 }
 
+/**
+ * Shows the navigation bar by removing immersive mode flags.
+ * Clears the visibility change listener to prevent memory leaks.
+ */
 fun Activity.showNavigationBar(
 ) {
-    // set navigation bar status, remember to disable "setNavigationBarTintEnabled"
-    val flags =
-        (View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
-    // This work only for android 4.4+
-    this.window.decorView.systemUiVisibility = flags
-
-    // Code below is to handle presses of Volume up or Volume down.
-    // Without this, after pressing volume buttons, the navigation bar will
-    // show up and won't hide
     val decorView = this.window.decorView
-    decorView.setOnSystemUiVisibilityChangeListener { visibility ->
-        if (visibility and View.SYSTEM_UI_FLAG_FULLSCREEN == 0) {
-            decorView.systemUiVisibility = flags
-        }
-    }
+    // Clear the listener to prevent memory leak
+    decorView.setOnSystemUiVisibilityChangeListener(null)
+
+    // Show navigation bar by using only layout flags without hiding flags
+    val flags = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
+                 View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
+                 View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN)
+    decorView.systemUiVisibility = flags
 }
 
-@SuppressLint("ObsoleteSdkInt")
+/**
+ * Clears the system UI visibility listener to prevent memory leaks.
+ * Call this in onDestroy() if you used hideNavigationBar().
+ */
+fun Activity.clearSystemUiVisibilityListener() {
+    this.window.decorView.setOnSystemUiVisibilityChangeListener(null)
+}
+
 fun Activity.hideDefaultControls(
 ) {
     val window = this.window ?: return
     window.clearFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN)
     window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
     val decorView = window.decorView
-    var uiOptions = decorView.systemUiVisibility
-    if (Build.VERSION.SDK_INT >= 14) {
-        uiOptions = uiOptions or View.SYSTEM_UI_FLAG_LOW_PROFILE
-    }
-    if (Build.VERSION.SDK_INT >= 16) {
-        uiOptions = uiOptions or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-    }
-    if (Build.VERSION.SDK_INT >= 19) {
-        uiOptions = uiOptions or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-    }
+    val uiOptions = decorView.systemUiVisibility or
+            View.SYSTEM_UI_FLAG_LOW_PROFILE or
+            View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or
+            View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
     decorView.systemUiVisibility = uiOptions
 }
 
-@SuppressLint("ObsoleteSdkInt")
 fun Activity.showDefaultControls(
 ) {
     val window = this.window ?: return
     window.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
     window.addFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN)
     val decorView = window.decorView
-    var uiOptions = decorView.systemUiVisibility
-    if (Build.VERSION.SDK_INT >= 14) {
-        uiOptions = uiOptions and View.SYSTEM_UI_FLAG_LOW_PROFILE.inv()
-    }
-    if (Build.VERSION.SDK_INT >= 16) {
-        uiOptions = uiOptions and View.SYSTEM_UI_FLAG_HIDE_NAVIGATION.inv()
-    }
-    if (Build.VERSION.SDK_INT >= 19) {
-        uiOptions = uiOptions and View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY.inv()
-    }
+    val uiOptions = decorView.systemUiVisibility and
+            View.SYSTEM_UI_FLAG_LOW_PROFILE.inv() and
+            View.SYSTEM_UI_FLAG_HIDE_NAVIGATION.inv() and
+            View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY.inv()
     decorView.systemUiVisibility = uiOptions
 }

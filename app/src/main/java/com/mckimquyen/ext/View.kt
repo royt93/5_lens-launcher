@@ -203,17 +203,14 @@ fun View?.setSizeOfView(
     }
 }
 
-@SuppressLint("ObsoleteSdkInt")
 fun View.setRipple() {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-        val outValue = TypedValue()
-        this.context.theme.resolveAttribute(
-            /* resid = */ android.R.attr.selectableItemBackground,
-            /* outValue = */ outValue,
-            /* resolveRefs = */ true
-        )
-        this.setBackgroundResource(outValue.resourceId)
-    }
+    val outValue = TypedValue()
+    this.context.theme.resolveAttribute(
+        /* resid = */ android.R.attr.selectableItemBackground,
+        /* outValue = */ outValue,
+        /* resolveRefs = */ true
+    )
+    this.setBackgroundResource(outValue.resourceId)
 }
 
 fun Snackbar.withBackground(resId: Int): Snackbar {
