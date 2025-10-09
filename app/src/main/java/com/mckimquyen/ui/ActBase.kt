@@ -2,6 +2,7 @@ package com.mckimquyen.ui
 
 import android.app.ActivityManager.TaskDescription
 import android.graphics.BitmapFactory
+import android.os.Build
 import android.os.Bundle
 import androidx.annotation.LayoutRes
 import androidx.core.content.ContextCompat
@@ -27,12 +28,22 @@ open class ActBase : BaseActivity() {
     }
 
     private fun setTaskDescription() {
-        val appIconBitmap = BitmapFactory.decodeResource(resources, R.mipmap.ic_launcher)
-        val taskDescription = TaskDescription(
-            /* label = */ getString(/* resId = */ R.string.app_name),
-            /* icon = */ appIconBitmap,
-            /* colorPrimary = */ ContextCompat.getColor(baseContext, R.color.colorPrimaryDark)
-        )
+        val taskDescription = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            // API 33+: Use Builder pattern, icon is resource ID
+            TaskDescription.Builder()
+                .setLabel(getString(R.string.app_name))
+                .setIcon(R.mipmap.ic_launcher)
+                .build()
+        } else {
+            // API < 33: Use deprecated constructor with colorPrimary and Bitmap icon
+            val appIconBitmap = BitmapFactory.decodeResource(resources, R.mipmap.ic_launcher)
+            @Suppress("DEPRECATION")
+            TaskDescription(
+                /* label = */ getString(R.string.app_name),
+                /* icon = */ appIconBitmap,
+                /* colorPrimary = */ ContextCompat.getColor(baseContext, R.color.colorPrimaryDark)
+            )
+        }
         setTaskDescription(taskDescription)
     }
 
