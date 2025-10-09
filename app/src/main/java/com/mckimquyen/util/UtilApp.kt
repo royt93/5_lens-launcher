@@ -60,29 +60,55 @@ object UtilApp {
             }
             for (i in availableActivities.indices) {
                 val resolveInfo = availableActivities[i]
-                val app = App()
-                app.id = i
-                try {
-                    app.installDate = packageManager.getPackageInfo(
+
+                // Extract install date
+                val installDate = try {
+                    packageManager.getPackageInfo(
                         resolveInfo.activityInfo.packageName,
                         0
                     ).firstInstallTime
                 } catch (e: PackageManager.NameNotFoundException) {
-                    app.installDate = 0
+                    0L
                 }
-                app.label = resolveInfo.loadLabel(packageManager)
-                app.packageName = resolveInfo.activityInfo.packageName
-                app.name = resolveInfo.activityInfo.name
-                app.iconResId = resolveInfo.activityInfo.iconResource
+
+                // Extract app info
+                val label = resolveInfo.loadLabel(packageManager)
+                val packageName = resolveInfo.activityInfo.packageName
+                val name = resolveInfo.activityInfo.name
+                val iconResId = resolveInfo.activityInfo.iconResource
+
+                // Get icon bitmap
                 val defaultBitmap = UtilBitmap.packageNameToBitmap(
                     /* packageManager = */ packageManager,
-                    /* packageName = */ resolveInfo.activityInfo.packageName,
-                    /* resId = */ resolveInfo.activityInfo.iconResource
+                    /* packageName = */ packageName,
+                    /* resId = */ iconResId
                 )
-                if (selectedIconPack != null) app.icon = selectedIconPack.getIconForPackage(
-                    Objects.requireNonNull(app.packageName).toString(), defaultBitmap
-                ) else app.icon = defaultBitmap
-                app.paletteColor = UtilColor.getPaletteColorFromApp(app)
+                val icon = if (selectedIconPack != null) {
+                    selectedIconPack.getIconForPackage(
+                        Objects.requireNonNull(packageName).toString(),
+                        defaultBitmap
+                    )
+                } else {
+                    defaultBitmap
+                }
+
+                // Create immutable App instance
+                val tempApp = App(
+                    id = i,
+                    label = label,
+                    packageName = packageName,
+                    name = name,
+                    iconResId = iconResId,
+                    icon = icon,
+                    installDate = installDate,
+                    paletteColor = 0 // Will be set next
+                )
+
+                // Calculate and set palette color
+                val app = tempApp.copyWithPaletteColor(
+                    UtilColor.getPaletteColorFromApp(tempApp)
+                )
+
                 apps.add(app)
             }
         }

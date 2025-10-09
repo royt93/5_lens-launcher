@@ -12,8 +12,7 @@ public class UtilCalculator {
 
     // Algorithm for calculating equispaced grid
     public static Grid calculateGrid(Context context, int screenWidth, int screenHeight, int itemCount) {
-        Grid grid = new Grid();
-        grid.setItemCount(itemCount);
+        // Calculate item counts
         int itemCountHorizontal, itemCountVertical;
         if (itemCount == 0 || itemCount == 1) {
             itemCountHorizontal = itemCount;
@@ -23,16 +22,24 @@ public class UtilCalculator {
             itemCountHorizontal = (int) Math.ceil(screenWidth / optimalSquareSize);
             itemCountVertical = (int) Math.ceil((double) itemCount / (double) itemCountHorizontal);
         }
-        grid.setItemCountHorizontal(itemCountHorizontal);
-        grid.setItemCountVertical(itemCountVertical);
+
+        // Calculate item size
         UtilSettings utilSettings = new UtilSettings(context);
         float itemSize = UtilCalculator.convertDpToPixel(utilSettings.getFloat(UtilSettings.KEY_ICON_SIZE), context);
-        grid.setItemSize(itemSize);
+
+        // Calculate spacing
         float spacingHorizontal = (((float) screenWidth) - ((float) itemCountHorizontal * itemSize)) / ((float) (itemCountHorizontal + 1));
-        grid.setSpacingHorizontal(spacingHorizontal);
         float spacingVertical = (((float) screenHeight) - ((float) itemCountVertical * itemSize)) / ((float) (itemCountVertical + 1));
-        grid.setSpacingVertical(spacingVertical);
-        return grid;
+
+        // Create immutable Grid instance with all calculated values
+        return new Grid(
+            itemCount,
+            itemCountHorizontal,
+            itemCountVertical,
+            itemSize,
+            spacingHorizontal,
+            spacingVertical
+        );
     }
 
     // Algorithm for calculating optimal square side length given width, height and number of items

@@ -269,9 +269,9 @@ class RAppsSingletonTest {
 
     // Helper function
     private fun createTestApp(packageName: String): App {
-        return App().apply {
-            this.packageName = packageName
-            this.name = "Test App $packageName"
-        }
+        return App(
+            packageName = packageName,
+            name = "Test App $packageName"
+        )
     }
 }
