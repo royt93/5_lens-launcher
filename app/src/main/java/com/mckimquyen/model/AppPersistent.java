@@ -2,20 +2,34 @@ package com.mckimquyen.model;
 
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.orm.SugarRecord;
 import com.orm.query.Condition;
 import com.orm.query.Select;
 import com.orm.util.NamingHelper;
 
-//2023.03.19 try to convert kotlin but failed
+/**
+ * Persistent storage model for application metadata.
+ * <p>
+ * Stores per-app data including:
+ * - Open count (for sorting by most used)
+ * - Custom order number (for manual sorting)
+ * - Visibility state (for hiding apps)
+ * - Lock state (for biometric protection)
+ * <p>
+ * Uses SugarORM for database operations.
+ * <p>
+ * Note: 2023.03.19 tried to convert to Kotlin but failed due to SugarORM compatibility
+ */
 @Keep
 public class AppPersistent extends SugarRecord {
 
-    /* Required Default Constructor */
+    /* Required Default Constructor for SugarORM */
     public AppPersistent() {
     }
 
+    // Fields - use Hungarian notation for SugarORM compatibility
     private String mPackageName;
     private String mName;
     private String mIdentifier;
@@ -24,10 +38,14 @@ public class AppPersistent extends SugarRecord {
     private boolean mAppVisible;
     private boolean mAppOpened;
 
+    // Default values
     private static final boolean DEFAULT_APP_VISIBILITY = true;
-    private static final boolean DEFAULT_APP_LOCK = true;
+    private static final boolean DEFAULT_APP_OPENED = true;
     private static final int DEFAULT_ORDER_NUMBER = -1;
     private static final long DEFAULT_OPEN_COUNT = 1;
+
+    // Cache column name to avoid repeated NamingHelper calls
+    private static final String COLUMN_IDENTIFIER = NamingHelper.toSQLNameDefault("mIdentifier");
 
     public AppPersistent(String packageName, String name, long openCount, int orderNumber, boolean appVisible, boolean appOpened) {
         this.mPackageName = packageName;
@@ -96,88 +114,195 @@ public class AppPersistent extends SugarRecord {
     @NonNull
     @Override
     public String toString() {
-        return "AppPersistent{" + "mPackageName='" + mPackageName + '\'' + ", mName='" + mName + '\'' + ", mIdentifier='" + mIdentifier + '\'' + ", mOpenCount=" + mOpenCount + ", mOrderNumber=" + mOrderNumber + ", mAppVisible=" + mAppVisible + ", mAppLock=" + mAppOpened + '}';
+        return "AppPersistent{" +
+                "mPackageName='" + mPackageName + '\'' +
+                ", mName='" + mName + '\'' +
+                ", mIdentifier='" + mIdentifier + '\'' +
+                ", mOpenCount=" + mOpenCount +
+                ", mOrderNumber=" + mOrderNumber +
+                ", mAppVisible=" + mAppVisible +
+                ", mAppOpened=" + mAppOpened +
+                '}';
     }
 
-    public static String generateIdentifier(String packageName, String name) {
+    /**
+     * Generates unique identifier from packageName and name.
+     * Format: "packageName-name"
+     *
+     * @param packageName Android package name (e.g., "com.example.app")
+     * @param name Activity name
+     * @return Unique identifier string
+     */
+    @NonNull
+    public static String generateIdentifier(@Nullable String packageName, @Nullable String name) {
+        if (packageName == null || name == null) {
+            return "";
+        }
         return packageName + "-" + name;
     }
 
-    public static void incrementAppCount(String packageName, String name) {
-        String identifier = AppPersistent.generateIdentifier(packageName, name);
-        AppPersistent appPersistent = Select.from(AppPersistent.class).where(Condition.prop(NamingHelper.toSQLNameDefault("mIdentifier")).eq(identifier)).first();
-        if (appPersistent != null) {
-            appPersistent.setOpenCount(appPersistent.getOpenCount() + 1);
-            appPersistent.save();
+    /**
+     * Helper method: Find existing app by identifier or return null.
+     * Reduces code duplication across all query methods.
+     */
+    @Nullable
+    private static AppPersistent findByIdentifier(@NonNull String identifier) {
+        return Select.from(AppPersistent.class)
+                .where(Condition.prop(COLUMN_IDENTIFIER).eq(identifier))
+                .first();
+    }
+
+    /**
+     * Helper method: Find existing app or create new one with defaults.
+     * Reduces code duplication across all setter methods.
+     */
+    @NonNull
+    private static AppPersistent findOrCreate(@NonNull String packageName,
+                                              @NonNull String name) {
+        String identifier = generateIdentifier(packageName, name);
+        AppPersistent existing = findByIdentifier(identifier);
+
+        if (existing != null) {
+            return existing;
+        }
+
+        return new AppPersistent(
+                packageName,
+                name,
+                DEFAULT_OPEN_COUNT,
+                DEFAULT_ORDER_NUMBER,
+                DEFAULT_APP_VISIBILITY,
+                DEFAULT_APP_OPENED
+        );
+    }
+
+    /**
+     * Increments the open count for an app.
+     * Creates new entry if app doesn't exist in database.
+     *
+     * @param packageName Android package name
+     * @param name Activity name
+     */
+    public static void incrementAppCount(@Nullable String packageName, @Nullable String name) {
+        if (packageName == null || name == null) return;
+
+        String identifier = generateIdentifier(packageName, name);
+        AppPersistent app = findByIdentifier(identifier);
+
+        if (app != null) {
+            // Existing app: increment count
+            app.setOpenCount(app.getOpenCount() + 1);
+            app.save();
         } else {
-            AppPersistent newAppPersistent = new AppPersistent(packageName, name, DEFAULT_OPEN_COUNT, DEFAULT_ORDER_NUMBER, DEFAULT_APP_VISIBILITY, DEFAULT_APP_LOCK);
-            newAppPersistent.save();
+            // New app: create with DEFAULT_OPEN_COUNT (1)
+            AppPersistent newApp = new AppPersistent(
+                    packageName,
+                    name,
+                    DEFAULT_OPEN_COUNT,
+                    DEFAULT_ORDER_NUMBER,
+                    DEFAULT_APP_VISIBILITY,
+                    DEFAULT_APP_OPENED
+            );
+            newApp.save();
         }
     }
 
-    public static void setAppOrderNumber(String packageName, String name, int orderNumber) {
-        String identifier = AppPersistent.generateIdentifier(packageName, name);
-        AppPersistent appPersistent = Select.from(AppPersistent.class).where(Condition.prop(NamingHelper.toSQLNameDefault("mIdentifier")).eq(identifier)).first();
-        if (appPersistent != null) {
-            appPersistent.setOrderNumber(orderNumber);
-            appPersistent.save();
-        } else {
-            AppPersistent newAppPersistent = new AppPersistent(packageName, name, DEFAULT_OPEN_COUNT, DEFAULT_ORDER_NUMBER, DEFAULT_APP_VISIBILITY, DEFAULT_APP_LOCK);
-            newAppPersistent.save();
-        }
+    /**
+     * Sets custom order number for manual app sorting.
+     *
+     * @param packageName Android package name
+     * @param name Activity name
+     * @param orderNumber Custom order position
+     */
+    public static void setAppOrderNumber(@Nullable String packageName,
+                                         @Nullable String name,
+                                         int orderNumber) {
+        if (packageName == null || name == null) return;
+
+        AppPersistent app = findOrCreate(packageName, name);
+        app.setOrderNumber(orderNumber);
+        app.save();
     }
 
-    public static boolean getAppOpened(String packageName, String name) {
-        String identifier = AppPersistent.generateIdentifier(packageName, name);
-        AppPersistent appPersistent = Select.from(AppPersistent.class).where(Condition.prop(NamingHelper.toSQLNameDefault("mIdentifier")).eq(identifier)).first();
-        if (appPersistent != null) {
-            return appPersistent.isAppOpened();
-        } else {
-            return true;
-        }
+    /**
+     * Gets app lock state (for biometric protection).
+     *
+     * @param packageName Android package name
+     * @param name Activity name
+     * @return true if app is unlocked (opened), false if locked
+     */
+    public static boolean getAppOpened(@Nullable String packageName, @Nullable String name) {
+        if (packageName == null || name == null) return true;
+
+        String identifier = generateIdentifier(packageName, name);
+        AppPersistent app = findByIdentifier(identifier);
+
+        return app == null || app.isAppOpened();
     }
 
-    public static void setAppOpened(String packageName, String name, boolean appLock) {
-        String identifier = AppPersistent.generateIdentifier(packageName, name);
-        AppPersistent appPersistent = Select.from(AppPersistent.class).where(Condition.prop(NamingHelper.toSQLNameDefault("mIdentifier")).eq(identifier)).first();
-        if (appPersistent != null) {
-            appPersistent.setAppOpened(appLock);
-            appPersistent.save();
-        } else {
-            AppPersistent newAppPersistent = new AppPersistent(packageName, name, DEFAULT_OPEN_COUNT, DEFAULT_ORDER_NUMBER, DEFAULT_APP_VISIBILITY, appLock);
-            newAppPersistent.save();
-        }
+    /**
+     * Sets app lock state (for biometric protection).
+     *
+     * @param packageName Android package name
+     * @param name Activity name
+     * @param appOpened true to unlock app, false to lock it
+     */
+    public static void setAppOpened(@Nullable String packageName,
+                                    @Nullable String name,
+                                    boolean appOpened) {
+        if (packageName == null || name == null) return;
+
+        AppPersistent app = findOrCreate(packageName, name);
+        app.setAppOpened(appOpened);
+        app.save();
     }
 
-    public static boolean getAppVisibility(String packageName, String name) {
-        String identifier = AppPersistent.generateIdentifier(packageName, name);
-        AppPersistent appPersistent = Select.from(AppPersistent.class).where(Condition.prop(NamingHelper.toSQLNameDefault("mIdentifier")).eq(identifier)).first();
-        if (appPersistent != null) {
-            return appPersistent.isAppVisible();
-        } else {
-            return true;
-        }
+    /**
+     * Gets app visibility state.
+     *
+     * @param packageName Android package name
+     * @param name Activity name
+     * @return true if app is visible, false if hidden
+     */
+    public static boolean getAppVisibility(@Nullable String packageName, @Nullable String name) {
+        if (packageName == null || name == null) return true;
+
+        String identifier = generateIdentifier(packageName, name);
+        AppPersistent app = findByIdentifier(identifier);
+
+        return app == null || app.isAppVisible();
     }
 
-    public static void setAppVisibility(String packageName, String name, boolean mHideApp) {
-        String identifier = AppPersistent.generateIdentifier(packageName, name);
-        AppPersistent appPersistent = Select.from(AppPersistent.class).where(Condition.prop(NamingHelper.toSQLNameDefault("mIdentifier")).eq(identifier)).first();
-        if (appPersistent != null) {
-            appPersistent.setAppVisible(mHideApp);
-            appPersistent.save();
-        } else {
-            AppPersistent newAppPersistent = new AppPersistent(packageName, name, DEFAULT_OPEN_COUNT, DEFAULT_ORDER_NUMBER, mHideApp, DEFAULT_APP_LOCK);
-            newAppPersistent.save();
-        }
+    /**
+     * Sets app visibility state.
+     *
+     * @param packageName Android package name
+     * @param name Activity name
+     * @param visible true to show app, false to hide it
+     */
+    public static void setAppVisibility(@Nullable String packageName,
+                                        @Nullable String name,
+                                        boolean visible) {
+        if (packageName == null || name == null) return;
+
+        AppPersistent app = findOrCreate(packageName, name);
+        app.setAppVisible(visible);
+        app.save();
     }
 
-    public static long getAppOpenCount(String packageName, String name) {
-        String identifier = AppPersistent.generateIdentifier(packageName, name);
-        AppPersistent appPersistent = Select.from(AppPersistent.class).where(Condition.prop(NamingHelper.toSQLNameDefault("mIdentifier")).eq(identifier)).first();
-        if (appPersistent != null) {
-            return appPersistent.getOpenCount();
-        } else {
-            return 0;
-        }
+    /**
+     * Gets the number of times an app has been opened.
+     *
+     * @param packageName Android package name
+     * @param name Activity name
+     * @return Open count, or 0 if app not found
+     */
+    public static long getAppOpenCount(@Nullable String packageName, @Nullable String name) {
+        if (packageName == null || name == null) return 0;
+
+        String identifier = generateIdentifier(packageName, name);
+        AppPersistent app = findByIdentifier(identifier);
+
+        return app != null ? app.getOpenCount() : 0;
     }
 }
