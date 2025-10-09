@@ -5,7 +5,8 @@
       "Bash(chmod:*)",
       "Bash(./gradlew:*)",
       "Bash(find:*)",
-      "Bash(awk:*)"
+      "Bash(awk:*)",
+      "Bash(git revert:*)"
     ],
     "deny": [],
     "ask": []

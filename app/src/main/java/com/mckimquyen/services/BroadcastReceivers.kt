@@ -14,81 +14,66 @@ import android.content.Intent
  */
 class BroadcastReceivers {
 
-    /**
-     * Receives broadcast when apps list is updated (e.g., app installed/uninstalled)
-     * <p>
-     * Security: Validates intent action to prevent spoofed intents from third-party apps.
-     * Only processes system package broadcasts (PACKAGE_ADDED, REMOVED, CHANGED, REPLACED).
-     */
     class AppsUpdatedReceiver : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            // Validate action to prevent intent spoofing
-            when (intent.action) {
-                Intent.ACTION_PACKAGE_ADDED,
-                Intent.ACTION_PACKAGE_REMOVED,
-                Intent.ACTION_PACKAGE_CHANGED,
-                Intent.ACTION_PACKAGE_REPLACED -> {
-                    AppEventManager.notifyAppsUpdated()
-                }
-                else -> {
-                    // Ignore unexpected or spoofed actions
-                    return
-                }
-            }
+        override fun onReceive(
+            context: Context,
+            intent: Intent
+        ) {
+            UpdatedObservable.instance.update()
         }
     }
 
-    /**
-     * Receives broadcast when an app is edited (e.g., order changed)
-     */
     class AppsEditedReceiver : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            AppEventManager.notifyAppsEdited()
+        override fun onReceive(
+            context: Context,
+            intent: Intent
+        ) {
+            EditedObservable.instance.update()
         }
     }
 
-    /**
-     * Receives broadcast when app visibility is changed (show/hide)
-     */
     class AppsVisibilityChangedReceiver : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            AppEventManager.notifyVisibilityChanged()
+        override fun onReceive(
+            context: Context,
+            intent: Intent
+        ) {
+            VisibilityChangedObservable.instance.update()
         }
     }
 
-    /**
-     * Receives broadcast when app lock status is changed (biometric protection)
-     */
     class AppsLockChangedReceiver : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            AppEventManager.notifyLockChanged()
+        override fun onReceive(
+            context: Context,
+            intent: Intent
+        ) {
+            LockChangedObservable.instance.update()
         }
     }
 
-    /**
-     * Receives broadcast when apps are loaded for the first time
-     */
     class AppsLoadedReceiver : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            AppEventManager.notifyAppsLoaded()
+        override fun onReceive(
+            context: Context,
+            intent: Intent
+        ) {
+            LoadedObservable.instance.update()
         }
     }
 
-    /**
-     * Receives broadcast when background/wallpaper is changed
-     */
     class BackgroundChangedReceiver : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            AppEventManager.notifyBackgroundChanged()
+        override fun onReceive(
+            context: Context,
+            intent: Intent
+        ) {
+            BackgroundChangedObservable.instance.update()
         }
     }
 
-    /**
-     * Receives broadcast when night mode setting is changed
-     */
     class NightModeReceiver : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            AppEventManager.notifyNightModeChanged()
+        override fun onReceive(
+            context: Context,
+            intent: Intent
+        ) {
+            NightModeObservable.instance.update()
         }
     }
 }
