@@ -16,10 +16,25 @@ class BroadcastReceivers {
 
     /**
      * Receives broadcast when apps list is updated (e.g., app installed/uninstalled)
+     * <p>
+     * Security: Validates intent action to prevent spoofed intents from third-party apps.
+     * Only processes system package broadcasts (PACKAGE_ADDED, REMOVED, CHANGED, REPLACED).
      */
     class AppsUpdatedReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            AppEventManager.notifyAppsUpdated()
+            // Validate action to prevent intent spoofing
+            when (intent.action) {
+                Intent.ACTION_PACKAGE_ADDED,
+                Intent.ACTION_PACKAGE_REMOVED,
+                Intent.ACTION_PACKAGE_CHANGED,
+                Intent.ACTION_PACKAGE_REPLACED -> {
+                    AppEventManager.notifyAppsUpdated()
+                }
+                else -> {
+                    // Ignore unexpected or spoofed actions
+                    return
+                }
+            }
         }
     }
 
