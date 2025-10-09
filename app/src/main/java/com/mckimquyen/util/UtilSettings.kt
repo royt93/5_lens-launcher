@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.app.AppCompatDelegate.NightMode
+import androidx.core.content.edit
 import androidx.preference.PreferenceManager
 import com.mckimquyen.BuildConfig
 import com.mckimquyen.enums.SortType
@@ -15,7 +16,7 @@ import com.mckimquyen.enums.SortType
  */
 class UtilSettings(context: Context) {
     // Sử dụng Application Context thay vì giữ Activity Context để tránh memory leak
-    private val mContext: Context = context.applicationContext
+    private val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
 
     companion object {
         const val DEFAULT_ICON_SIZE = 18.0f
@@ -68,252 +69,99 @@ class UtilSettings(context: Context) {
         const val KEY_READ_POLICY = "KEY_READ_POLICY${BuildConfig.VERSION_CODE}"
     }
 
-    private var mPrefs: SharedPreferences? = null
-    private fun sharedPreferences(): SharedPreferences {
-        if (mPrefs == null) {
-            mPrefs = PreferenceManager.getDefaultSharedPreferences(mContext)
-        }
-        return mPrefs!!
+    fun save(name: String?, value: Int) {
+        prefs.edit { putInt(name, value) }
     }
 
-    fun save(
-        name: String?, value: Int,
-    ) {
-        sharedPreferences().edit().putInt(name, value).apply()
+    fun save(name: String?, value: Float) {
+        prefs.edit { putFloat(name, value) }
+    }
+
+    fun save(name: String?, value: Long) {
+        prefs.edit { putLong(name, value) }
+    }
+
+    fun save(name: String?, value: String?) {
+        prefs.edit { putString(name, value) }
+    }
+
+    fun save(name: String?, value: Boolean) {
+        prefs.edit { putBoolean(name, value) }
+    }
+
+    fun save(value: SortType) {
+        save(KEY_SORT_TYPE, value.ordinal)
     }
 
     @get:NightMode
     val nightMode: Int
-        get() = when (sharedPreferences().getInt(
-            KEY_NIGHT_MODE, DEFAULT_NIGHT_MODE
-        )) {
-            AppCompatDelegate.MODE_NIGHT_AUTO -> AppCompatDelegate.MODE_NIGHT_AUTO
+        get() = when (prefs.getInt(KEY_NIGHT_MODE, DEFAULT_NIGHT_MODE)) {
             AppCompatDelegate.MODE_NIGHT_NO -> AppCompatDelegate.MODE_NIGHT_NO
             AppCompatDelegate.MODE_NIGHT_YES -> AppCompatDelegate.MODE_NIGHT_YES
             else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
         }
 
-    fun save(name: String?, value: Float) {
-        sharedPreferences().edit().putFloat(name, value).apply()
+    fun getFloat(name: String?): Float = when (name) {
+        KEY_ICON_SIZE -> getFloatWithValidation(name, DEFAULT_ICON_SIZE, MIN_ICON_SIZE, MAX_ICON_SIZE.toFloat() + MIN_ICON_SIZE)
+        KEY_DISTORTION_FACTOR -> getFloatWithValidation(name, DEFAULT_DISTORTION_FACTOR, MIN_DISTORTION_FACTOR, MAX_DISTORTION_FACTOR / 2f + MIN_DISTORTION_FACTOR)
+        KEY_SCALE_FACTOR -> getFloatWithValidation(name, DEFAULT_SCALE_FACTOR, MIN_SCALE_FACTOR, MAX_SCALE_FACTOR / 2f + MIN_SCALE_FACTOR)
+        else -> prefs.getFloat(name, DEFAULT_FLOAT)
     }
 
-    fun getFloat(name: String?): Float {
-        return when (name) {
-            KEY_ICON_SIZE -> {
-                if (sharedPreferences().getFloat(
-                        name,
-                        DEFAULT_ICON_SIZE
-                    ) < MIN_ICON_SIZE
-                ) {
-                    save(
-                        name = name, value = MIN_ICON_SIZE
-                    )
-                } else if (sharedPreferences().getFloat(
-                        name,
-                        DEFAULT_ICON_SIZE
-                    ) > getMaxFloatValue(name)
-                ) {
-                    save(
-                        name = name, value = getMaxFloatValue(name)
-                    )
+    fun getLong(name: String): Long = when (name) {
+        KEY_ANIMATION_TIME -> {
+            val value = prefs.getLong(name, DEFAULT_ANIMATION_TIME)
+            when {
+                value < MIN_ANIMATION_TIME -> {
+                    save(name, MIN_ANIMATION_TIME)
+                    MIN_ANIMATION_TIME
                 }
-                sharedPreferences().getFloat(name, DEFAULT_ICON_SIZE)
-            }
-
-            KEY_DISTORTION_FACTOR -> {
-                if (sharedPreferences().getFloat(
-                        name,
-                        DEFAULT_DISTORTION_FACTOR
-                    ) < MIN_DISTORTION_FACTOR
-                ) {
-                    save(
-                        name = name, value = MIN_DISTORTION_FACTOR
-                    )
-                } else if (sharedPreferences().getFloat(
-                        name,
-                        DEFAULT_DISTORTION_FACTOR
-                    ) > getMaxFloatValue(name)
-                ) {
-                    save(
-                        name = name, value = getMaxFloatValue(name)
-                    )
+                value > MAX_ANIMATION_TIME / 2L + MIN_ANIMATION_TIME -> {
+                    val maxValue = MAX_ANIMATION_TIME / 2L + MIN_ANIMATION_TIME
+                    save(name, maxValue)
+                    maxValue
                 }
-                sharedPreferences().getFloat(
-                    name,
-                    DEFAULT_DISTORTION_FACTOR
-                )
+                else -> value
             }
-
-            KEY_SCALE_FACTOR -> {
-                if (sharedPreferences().getFloat(
-                        name,
-                        DEFAULT_SCALE_FACTOR
-                    ) < MIN_SCALE_FACTOR
-                ) {
-                    save(
-                        name = name, value = MIN_SCALE_FACTOR
-                    )
-                } else if (sharedPreferences().getFloat(
-                        name,
-                        DEFAULT_SCALE_FACTOR
-                    ) > getMaxFloatValue(name)
-                ) {
-                    save(
-                        name = name, value = getMaxFloatValue(name)
-                    )
-                }
-                sharedPreferences().getFloat(
-                    name,
-                    DEFAULT_SCALE_FACTOR
-                )
-            }
-
-            else -> sharedPreferences().getFloat(
-                name,
-                DEFAULT_FLOAT
-            )
         }
+        else -> prefs.getLong(name, DEFAULT_LONG)
     }
 
-    fun save(
-        name: String?, value: Long,
-    ) {
-        sharedPreferences().edit().putLong(name, value).apply()
+    fun getString(name: String?): String? = when (name) {
+        KEY_BACKGROUND -> prefs.getString(name, DEFAULT_BACKGROUND)
+        KEY_BACKGROUND_COLOR -> prefs.getString(name, DEFAULT_BACKGROUND_COLOR)
+        KEY_HIGHLIGHT_COLOR -> prefs.getString(name, DEFAULT_HIGHLIGHT_COLOR)
+        KEY_ICON_PACK_LABEL_NAME -> prefs.getString(name, DEFAULT_ICON_PACK_LABEL_NAME)
+        else -> prefs.getString(name, DEFAULT_STRING)
     }
 
-    fun getLong(name: String): Long {
-        return if (name == KEY_ANIMATION_TIME) {
-            if (sharedPreferences().getLong(
-                    name,
-                    DEFAULT_ANIMATION_TIME
-                ) < MIN_ANIMATION_TIME
-            ) {
-                save(
-                    name = name, value = MIN_ANIMATION_TIME
-                )
-            } else if (sharedPreferences().getLong(
-                    name,
-                    DEFAULT_ANIMATION_TIME
-                ) > getMaxLongValue(name)
-            ) {
-                save(
-                    name = name, value = getMaxLongValue(name)
-                )
-            }
-            sharedPreferences().getLong(
-                name,
-                DEFAULT_ANIMATION_TIME
-            )
-        } else {
-            sharedPreferences().getLong(
-                name,
-                DEFAULT_LONG
-            )
-        }
-    }
-
-    fun save(
-        name: String?, value: String?,
-    ) {
-        sharedPreferences().edit().putString(name, value).apply()
-    }
-
-    fun getString(name: String?): String? {
-        return when (name) {
-            KEY_BACKGROUND -> sharedPreferences().getString(
-                name,
-                DEFAULT_BACKGROUND
-            )
-
-            KEY_BACKGROUND_COLOR -> sharedPreferences().getString(
-                name,
-                DEFAULT_BACKGROUND_COLOR
-            )
-
-            KEY_HIGHLIGHT_COLOR -> sharedPreferences().getString(
-                name,
-                DEFAULT_HIGHLIGHT_COLOR
-            )
-
-            KEY_ICON_PACK_LABEL_NAME -> sharedPreferences().getString(
-                name,
-                DEFAULT_ICON_PACK_LABEL_NAME
-            )
-
-            else -> sharedPreferences().getString(
-                name,
-                DEFAULT_STRING
-            )
-        }
-    }
-
-    fun save(name: String?, value: Boolean) {
-        sharedPreferences().edit().putBoolean(name, value).apply()
-    }
-
-    fun getBoolean(name: String?): Boolean {
-        return when (name) {
-            KEY_VIBRATE_APP_HOVER -> sharedPreferences().getBoolean(
-                name,
-                DEFAULT_VIBRATE_APP_HOVER
-            )
-
-            KEY_VIBRATE_APP_LAUNCH -> sharedPreferences().getBoolean(
-                name,
-                DEFAULT_VIBRATE_APP_LAUNCH
-            )
-
-            KEY_SHOW_NAME_APP_HOVER -> sharedPreferences().getBoolean(
-                name,
-                DEFAULT_SHOW_NAME_APP_HOVER
-            )
-
-            KEY_SHOW_TOUCH_SELECTION -> sharedPreferences().getBoolean(
-                name,
-                DEFAULT_SHOW_TOUCH_SELECTION
-            )
-
-            KEY_SHOW_NEW_APP_TAG -> sharedPreferences().getBoolean(
-                name,
-                DEFAULT_SHOW_NEW_APP_TAG
-            )
-
-            else -> sharedPreferences().getBoolean(
-                name,
-                DEFAULT_BOOLEAN
-            )
-        }
-    }
-
-    fun save(value: SortType) {
-        save(
-            name = KEY_SORT_TYPE, value = value.ordinal
-        )
+    fun getBoolean(name: String?): Boolean = when (name) {
+        KEY_VIBRATE_APP_HOVER -> prefs.getBoolean(name, DEFAULT_VIBRATE_APP_HOVER)
+        KEY_VIBRATE_APP_LAUNCH -> prefs.getBoolean(name, DEFAULT_VIBRATE_APP_LAUNCH)
+        KEY_SHOW_NAME_APP_HOVER -> prefs.getBoolean(name, DEFAULT_SHOW_NAME_APP_HOVER)
+        KEY_SHOW_TOUCH_SELECTION -> prefs.getBoolean(name, DEFAULT_SHOW_TOUCH_SELECTION)
+        KEY_SHOW_NEW_APP_TAG -> prefs.getBoolean(name, DEFAULT_SHOW_NEW_APP_TAG)
+        else -> prefs.getBoolean(name, DEFAULT_BOOLEAN)
     }
 
     val sortType: SortType
         get() {
-            val ordinal = sharedPreferences().getInt(
-                KEY_SORT_TYPE,
-                DEFAULT_SORT_TYPE
-            )
-            return SortType.values()[ordinal]
+            val ordinal = prefs.getInt(KEY_SORT_TYPE, DEFAULT_SORT_TYPE)
+            return SortType.entries[ordinal]
         }
 
-    private fun getMaxFloatValue(name: String?): Float {
-        return when (name) {
-            KEY_ICON_SIZE -> MAX_ICON_SIZE.toFloat() + MIN_ICON_SIZE
-            KEY_DISTORTION_FACTOR -> MAX_DISTORTION_FACTOR.toFloat() / 2 + MIN_DISTORTION_FACTOR
-            KEY_SCALE_FACTOR -> MAX_SCALE_FACTOR.toFloat() / 2 + MIN_SCALE_FACTOR
-            else -> DEFAULT_FLOAT
-        }
-    }
-
-    private fun getMaxLongValue(name: String): Long {
-        return if (name == KEY_ANIMATION_TIME) {
-            MAX_ANIMATION_TIME.toLong() / 2 + MIN_ANIMATION_TIME
-        } else {
-            DEFAULT_LONG
+    private fun getFloatWithValidation(name: String?, defaultValue: Float, minValue: Float, maxValue: Float): Float {
+        val value = prefs.getFloat(name, defaultValue)
+        return when {
+            value < minValue -> {
+                save(name, minValue)
+                minValue
+            }
+            value > maxValue -> {
+                save(name, maxValue)
+                maxValue
+            }
+            else -> value
         }
     }
 }

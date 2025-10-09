@@ -6,53 +6,35 @@ import androidx.annotation.ColorInt
 import androidx.palette.graphics.Palette
 import com.mckimquyen.model.App
 
+/**
+ * Utility for color extraction and manipulation
+ */
 object UtilColor {
+
     @ColorInt
-    fun getPaletteColorFromApp(app: App): Int {
-        return getPaletteColorFromBitmap(app.icon)
-    }
+    fun getPaletteColorFromApp(app: App): Int = getPaletteColorFromBitmap(app.icon)
 
     @JvmStatic
     @ColorInt
     fun getPaletteColorFromBitmap(bitmap: Bitmap?): Int {
-        try {
-            if (bitmap == null) {
-                return Color.BLACK
-            }
-            val palette: Palette = try {
-                Palette.from(bitmap).generate()
-            } catch (e: IllegalArgumentException) {
-                e.printStackTrace()
-                return Color.BLACK
-            }
-            return if (palette.swatches.size > 0) {
-                var swatchIndex = 0
-                for (i in 1 until palette.swatches.size) {
-                    if (palette.swatches[i].population > palette.swatches[swatchIndex].population) {
-                        swatchIndex = i
-                    }
-                }
-                palette.swatches[swatchIndex].rgb
-            } else {
-                Color.BLACK
-            }
+        if (bitmap == null) return Color.BLACK
+
+        return try {
+            val palette = Palette.from(bitmap).generate()
+            palette.swatches.maxByOrNull { it.population }?.rgb ?: Color.BLACK
         } catch (e: Exception) {
-            return Color.BLACK
+            e.printStackTrace()
+            Color.BLACK
         }
     }
 
     @JvmStatic
-    fun getHueColorFromApp(app: App): Float {
-        return getHueColorFromColor(app.paletteColor)
-    }
+    fun getHueColorFromApp(app: App): Float = getHueColorFromColor(app.paletteColor)
 
     @JvmStatic
     fun getHueColorFromColor(@ColorInt color: Int): Float {
         val hsvValues = FloatArray(3)
-        Color.colorToHSV(
-            /* color = */ color,
-            /* hsv = */ hsvValues
-        )
+        Color.colorToHSV(color, hsvValues)
         return hsvValues[0]
     }
 }
