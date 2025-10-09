@@ -4,10 +4,8 @@ import android.content.Context
 import android.content.res.Configuration
 import android.os.Build
 import android.view.Display
-import android.view.WindowManager
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
-import kotlin.apply
-import kotlin.collections.maxByOrNull
 
 open class BaseActivity : AppCompatActivity() {
 
@@ -25,25 +23,20 @@ open class BaseActivity : AppCompatActivity() {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.R)
     private fun enableAdaptiveRefreshRate() {
-        val wm = getSystemService(WINDOW_SERVICE) as WindowManager
-        val display: Display? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            display // Sử dụng API mới
-        } else {
-            @Suppress("DEPRECATION")
-            wm.defaultDisplay // Fallback cho API thấp hơn
-        }
+        // This function is only called when SDK_INT >= R (API 30)
+        val currentDisplay: Display? = display
 
-        if (display != null) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                val supportedModes = display.supportedModes
-                val highestRefreshRateMode = supportedModes.maxByOrNull { it.refreshRate }
-                if (highestRefreshRateMode != null) {
-                    window.attributes = window.attributes.apply {
-                        preferredDisplayModeId = highestRefreshRateMode.modeId
-                    }
-                    println("Adaptive refresh rate applied: ${highestRefreshRateMode.refreshRate} Hz")
+        if (currentDisplay != null) {
+            // minSdk is 25, so SDK_INT is always >= M (API 23)
+            val supportedModes = currentDisplay.supportedModes
+            val highestRefreshRateMode = supportedModes.maxByOrNull { it.refreshRate }
+            if (highestRefreshRateMode != null) {
+                window.attributes = window.attributes.apply {
+                    preferredDisplayModeId = highestRefreshRateMode.modeId
                 }
+                println("Adaptive refresh rate applied: ${highestRefreshRateMode.refreshRate} Hz")
             }
         }
     }
