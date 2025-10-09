@@ -73,8 +73,10 @@ object BitmapCache {
      * @param bitmap Icon bitmap cần cache
      */
     fun put(key: String, bitmap: Bitmap) {
+        if (bitmap.isRecycled) return
+
         try {
-            if (cache.get(key) == null && !bitmap.isRecycled) {
+            if (get(key) == null) {
                 cache.put(key, bitmap)
                 Log.d(TAG, "Cached bitmap for key: $key, size: ${bitmap.byteCount / 1024}KB")
             }

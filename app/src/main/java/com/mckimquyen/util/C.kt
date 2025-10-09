@@ -25,12 +25,9 @@ fun isValid(): Boolean {
         set(2024, Calendar.DECEMBER, 1) // Ngày 1/12/2024
     }
 
-    if (currentDate.before(cutoffDate)) {
-        return false
-    }
+    return !currentDate.before(cutoffDate)
 
     // Nếu tất cả các điều kiện đều pass thì return true
-    return true
 }
 
 // Phương thức kiểm tra máy ảo (emulator)
@@ -65,7 +62,7 @@ fun isRooted(): Boolean {
                 )
                 path.any { File(it).exists() }
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             false
         }
     }
