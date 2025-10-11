@@ -7,8 +7,8 @@
     android:layout_height="wrap_content"
     android:foreground="?attr/selectableItemBackground"
     android:stateListAnimator="@animator/a_raise"
-    card_view:cardCornerRadius="@dimen/margin_app"
-    card_view:cardElevation="@dimen/margin_app"
+    card_view:cardCornerRadius="16dp"
+    card_view:cardElevation="4dp"
     card_view:cardUseCompatPadding="true"
     tools:ignore="HardcodedText,contentDescription">
 
@@ -20,10 +20,12 @@
             android:id="@+id/ivAppIcon"
             android:layout_width="@dimen/width_app_icon"
             android:layout_height="@dimen/width_app_icon"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginBottom="8dp"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginEnd="12dp"
+            android:layout_marginBottom="12dp"
+            android:background="@drawable/bg_app_icon_circle"
+            android:padding="8dp"
             android:contentDescription="ivAppIcon"
             tools:src="@drawable/ic_launcher_round" />
 
@@ -46,9 +48,17 @@
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_toStartOf="@+id/ivAppHide"
+            android:layout_marginEnd="4dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="6dp"
+            android:paddingBottom="6dp"
+            android:background="@drawable/bg_button_lock"
             android:contentDescription="btAppLock"
             android:textAllCaps="false"
             android:textColor="@color/colorWhite"
+            android:textSize="12sp"
+            android:textStyle="bold"
             tools:text="Lock" />
 
         <androidx.appcompat.widget.AppCompatImageView
@@ -56,6 +66,7 @@
             android:layout_width="@dimen/width_app_icon"
             android:layout_height="@dimen/height_app_action_button"
             android:layout_toStartOf="@+id/ivAppMenu"
+            android:layout_marginEnd="4dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="ivAppHide"
             android:scaleType="centerInside"
@@ -67,6 +78,7 @@
             android:layout_width="@dimen/width_app_icon"
             android:layout_height="@dimen/height_app_action_button"
             android:layout_alignParentEnd="true"
+            android:layout_marginEnd="8dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="ivAppMenu"
             android:scaleType="centerInside"
