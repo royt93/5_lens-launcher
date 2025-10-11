@@ -464,6 +464,13 @@ public class ActSettings extends ActBase implements ColorChooserDialog.ColorCall
             dismissBackgroundDialog();
             return true;
         }).show();
+
+        // Apply rounded background
+        new android.os.Handler().postDelayed(() -> {
+            if (dlgNightMode != null && dlgNightMode.getWindow() != null) {
+                dlgNightMode.getWindow().setBackgroundDrawableResource(R.drawable.bg_dialog_rounded);
+            }
+        }, 100);
     }
 
     public void showBackgroundDialog() {
@@ -489,6 +496,13 @@ public class ActSettings extends ActBase implements ColorChooserDialog.ColorCall
             }
             return true;
         }).show();
+
+        // Apply rounded background
+        new android.os.Handler().postDelayed(() -> {
+            if (dlgBackground != null && dlgBackground.getWindow() != null) {
+                dlgBackground.getWindow().setBackgroundDrawableResource(R.drawable.bg_dialog_rounded);
+            }
+        }, 100);
     }
 
     public void showWallpaperPicker() {
