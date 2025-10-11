@@ -3,4 +3,5 @@
     <color name="colorCircles">@color/colorWhite</color>
     <color name="colorAppTint">@color/colorWhite</color>
     <color name="background">#000000</color>
+    <color name="dialogBackground">#2C2C2C</color>
 </resources>

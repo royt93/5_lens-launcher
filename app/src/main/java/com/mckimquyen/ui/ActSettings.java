@@ -462,6 +462,10 @@ public class ActSettings extends ActBase implements ColorChooserDialog.ColorCall
                 settingsInterface.onValuesUpdated();
             }
             dismissBackgroundDialog();
+
+            // Recreate activity to apply new theme
+            new android.os.Handler().postDelayed(() -> recreate(), 200);
+
             return true;
         }).show();
 
