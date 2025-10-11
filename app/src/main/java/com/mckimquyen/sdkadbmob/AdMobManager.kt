@@ -168,6 +168,10 @@ object AdMobManager {
         this.currentActivity = WeakReference(activity)
     }
 
+    fun clearCurrentActivity() {
+        this.currentActivity = null
+    }
+
     //search logcat: "to get test ads on this device"
     fun setTestDeviceIds(vararg deviceIds: String) {
         val configuration = RequestConfiguration.Builder().setTestDeviceIds(deviceIds.toList()).build()

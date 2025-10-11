@@ -104,13 +104,6 @@ class LensView : View {
         }
     }
 
-    // Giữ lại method cũ để backward compatibility, nhưng đã được thay thế bằng WindowInsetsCompat
-    @Deprecated("Deprecated in Java", ReplaceWith("WindowInsetsCompat"))
-    override fun fitSystemWindows(insets: Rect): Boolean {
-        mInsets = insets
-        return true
-    }
-
     private fun setupPaints() {
         mPaintIcons = Paint()
         mPaintIcons?.apply {
@@ -383,8 +376,11 @@ class LensView : View {
         mAppIcons?.let { list ->
             if (index < list.size) {
                 val appIcon = list[index]
-                val src = Rect(0, 0, appIcon.width, appIcon.height)
-                canvas.drawBitmap(appIcon, src, rect, mPaintIcons)
+                // Check if bitmap is recycled before drawing to prevent crash
+                if (!appIcon.isRecycled) {
+                    val src = Rect(0, 0, appIcon.width, appIcon.height)
+                    canvas.drawBitmap(appIcon, src, rect, mPaintIcons)
+                }
                 mApps?.let { l ->
                     val app = l[index]
                     if (app.installDate >= System.currentTimeMillis() - UtilSettings.SHOW_NEW_APP_TAG_DURATION
@@ -549,5 +545,15 @@ class LensView : View {
             }
             postInvalidate()
         }
+    }
+
+    /**
+     * Clean up resources when view is detached to prevent memory leaks
+     */
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        // Clear bitmap references to allow garbage collection
+        mApps = null
+        mAppIcons = null
     }
 }

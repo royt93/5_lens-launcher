@@ -178,8 +178,9 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
         // ====================================================================
         public AppViewHolder(View itemView, Context context) {
             super(itemView);
-            this.mContext = context;
-            this.mIsHaveBiometric = Biometric.INSTANCE.isHaveBiometric(mContext);
+            // Use ApplicationContext to prevent Activity leak
+            this.mContext = context.getApplicationContext();
+            this.mIsHaveBiometric = Biometric.INSTANCE.isHaveBiometric(context);
 
             // Initialize views - findViewById chỉ gọi 1 lần khi tạo ViewHolder
             this.cvAppContainer = itemView.findViewById(R.id.cvAppContainer);

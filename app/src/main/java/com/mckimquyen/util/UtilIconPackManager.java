@@ -87,6 +87,9 @@ public class UtilIconPackManager {
          * Load icon pack resources from appfilter.xml
          */
         public void load() {
+            // Clean up old bitmaps before loading new ones
+            cleanup();
+
             PackageManager pm = mApplication.getPackageManager();
             try {
                 mIconPackRes = pm.getResourcesForApplication(mPackageName);
@@ -105,6 +108,31 @@ public class UtilIconPackManager {
             }
         }
 
+        /**
+         * Clean up bitmap resources to prevent memory leaks
+         */
+        public void cleanup() {
+            // Recycle back images
+            for (Bitmap bitmap : mBackImages) {
+                if (bitmap != null && !bitmap.isRecycled()) {
+                    bitmap.recycle();
+                }
+            }
+            mBackImages.clear();
+
+            // Recycle mask image
+            if (mMaskImage != null && !mMaskImage.isRecycled()) {
+                mMaskImage.recycle();
+                mMaskImage = null;
+            }
+
+            // Recycle front image
+            if (mFrontImage != null && !mFrontImage.isRecycled()) {
+                mFrontImage.recycle();
+                mFrontImage = null;
+            }
+        }
+
         @SuppressLint("DiscouragedApi")
         private XmlPullParser getAppFilterParser() throws IOException, XmlPullParserException {
             int appfilterId = mIconPackRes.getIdentifier("appfilter", "xml", mPackageName);
@@ -113,8 +141,7 @@ public class UtilIconPackManager {
             }
 
             // No resource found, try to open from assets
-            try {
-                InputStream appFilterStream = mIconPackRes.getAssets().open("appfilter.xml");
+            try (InputStream appFilterStream = mIconPackRes.getAssets().open("appfilter.xml")) {
                 XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
                 factory.setNamespaceAware(true);
                 XmlPullParser xpp = factory.newPullParser();

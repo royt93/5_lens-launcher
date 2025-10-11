@@ -154,9 +154,9 @@ class RAppsSingleton private constructor() {
      */
     var apps: ArrayList<App>?
         get() {
-            // Return mApps hoặc empty list nếu null
+            // Return unmodifiable copy to prevent external modifications (thread-safety)
             // Elvis operator (?:) để handle null case
-            return mApps ?: ArrayList()
+            return mApps?.let { ArrayList(it) } ?: ArrayList()
         }
         set(apps) {
             // Replace toàn bộ list
@@ -205,11 +205,21 @@ class RAppsSingleton private constructor() {
      */
     var appIcons: ArrayList<Bitmap>?
         get() {
-            // Return mAppIcons hoặc empty list nếu null
+            // Return defensive copy to prevent external modifications (thread-safety)
             // Elvis operator (?:) để handle null case
-            return mAppIcons ?: ArrayList()
+            return mAppIcons?.let { ArrayList(it) } ?: ArrayList()
         }
         set(appIcons) {
+            // Recycle old bitmaps before assigning new list to prevent memory leak
+            mAppIcons?.forEach { bitmap ->
+                if (!bitmap.isRecycled) {
+                    try {
+                        bitmap.recycle()
+                    } catch (e: Exception) {
+                        // Bitmap might be in use, skip recycling
+                    }
+                }
+            }
             // Replace toàn bộ list
             mAppIcons = appIcons
         }

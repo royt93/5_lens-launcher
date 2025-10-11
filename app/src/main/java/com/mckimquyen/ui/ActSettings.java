@@ -190,6 +190,8 @@ public class ActSettings extends ActBase implements ColorChooserDialog.ColorCall
         if (adView != null) {
             adView.pause();
         }
+        // Dismiss dialogs in onPause to prevent WindowLeaked exception
+        dismissAllDialogs();
         super.onPause();
     }
 
@@ -527,12 +529,22 @@ public class ActSettings extends ActBase implements ColorChooserDialog.ColorCall
 
     @Override
     protected void onDestroy() {
-        dismissAllDialogs();
-        // LiveData observers are automatically removed when lifecycle owner is destroyed
-        if (adView != null) {
-            adView.destroy();
+        try {
+            dismissAllDialogs();
+            // LiveData observers are automatically removed when lifecycle owner is destroyed
+            // Clear fragment interface references to prevent memory leaks
+            lensInterface = null;
+            appsInterface = null;
+            settingsInterface = null;
+            // Clear Activity reference from AdMobManager
+            AdMobManager.INSTANCE.clearCurrentActivity();
+        } finally {
+            // Ensure AdView is always destroyed, even if exception occurs
+            if (adView != null) {
+                adView.destroy();
+            }
+            super.onDestroy();
         }
-        super.onDestroy();
     }
 
     @Override

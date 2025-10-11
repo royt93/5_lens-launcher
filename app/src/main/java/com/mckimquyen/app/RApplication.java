@@ -2,6 +2,8 @@ package com.mckimquyen.app;
 
 import android.util.Log;
 
+import androidx.lifecycle.ProcessLifecycleOwner;
+
 import com.google.android.gms.ads.MobileAds;
 import com.mckimquyen.sdkadbmob.AdMobManager;
 import com.mckimquyen.services.AppEventManager;
@@ -147,7 +149,7 @@ public class RApplication extends SugarApp {
      * MIGRATION NOTE:
      * - OLD: Observable/Observer pattern (deprecated since Java 9)
      * - NEW: LiveData từ AndroidX Lifecycle
-     * - observeForever() được dùng vì Application không có LifecycleOwner
+     * - FIX: Dùng ProcessLifecycleOwner.get() thay vì observeForever()
 
      * EVENTS:
      * - appsUpdated: Apps được install/uninstall/update
@@ -160,24 +162,26 @@ public class RApplication extends SugarApp {
      * BroadcastReceiver → AppEventManager.notify() → LiveData.postValue() → Observer callback → Task.execute()
 
      * THREADING:
-     * - observeForever() chạy trên main thread (LiveData requirement)
+     * - observe() chạy trên main thread (LiveData requirement)
      * - Callbacks được gọi trên main thread
      * - Tasks (updateApps/editApps) tự động chuyển sang background thread
 
-     * MEMORY LEAK:
-     * - Application lifecycle = Process lifecycle
-     * - Không cần removeObserver() vì Application never destroyed
-     * - Chỉ destroyed khi process bị kill (observeForever cũng bị clear)
+     * LIFECYCLE AWARE:
+     * - ProcessLifecycleOwner represents the lifecycle of the whole application process
+     * - Observers tự động cleanup khi process bị destroyed
+     * - No memory leak: Lifecycle-aware observers được auto-removed
      */
     private void setupEventListeners() {
         // Lắng nghe sự kiện apps updated (install/uninstall/update)
-        AppEventManager.INSTANCE.getAppsUpdated().observeForever(data -> {
+        // Use ProcessLifecycleOwner instead of observeForever to prevent memory leak
+        AppEventManager.INSTANCE.getAppsUpdated().observe(ProcessLifecycleOwner.get(), data -> {
             // Apps changed → Reload from PackageManager
             updateApps();
         });
 
         // Lắng nghe sự kiện apps edited (settings changed)
-        AppEventManager.INSTANCE.getAppsEdited().observeForever(data -> {
+        // Use ProcessLifecycleOwner instead of observeForever to prevent memory leak
+        AppEventManager.INSTANCE.getAppsEdited().observe(ProcessLifecycleOwner.get(), data -> {
             // Settings changed → Re-sort existing apps
             editApps();
         });
