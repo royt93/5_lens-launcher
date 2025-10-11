@@ -3,350 +3,527 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/background">
 
-    <androidx.appcompat.widget.LinearLayoutCompat
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:padding="0dp">
 
-        <androidx.appcompat.widget.LinearLayoutCompat
-            android:id="@+id/llHomeLauncher"
+        <!-- General Settings Card -->
+        <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="?android:attr/selectableItemBackground"
-            android:orientation="vertical"
-            android:paddingStart="@dimen/activity_horizontal_margin"
-            android:paddingTop="@dimen/activity_vertical_margin"
-            android:paddingEnd="@dimen/activity_horizontal_margin"
-            android:paddingBottom="@dimen/activity_vertical_margin">
+            app:cardCornerRadius="20dp"
+            app:cardElevation="6dp"
+            app:cardMaxElevation="8dp"
+            app:cardUseCompatPadding="true">
 
-            <androidx.appcompat.widget.AppCompatTextView
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/setting_home_launcher"
-                android:textStyle="bold" />
+                android:orientation="vertical"
+                android:paddingStart="8dp"
+                android:paddingTop="16dp"
+                android:paddingEnd="16dp"
+                android:paddingBottom="16dp">
 
-            <androidx.appcompat.widget.AppCompatTextView
-                android:id="@+id/tvSelectedHomeLauncher"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                tools:text="@string/app_name" />
-
-        </androidx.appcompat.widget.LinearLayoutCompat>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/colorDivider" />
-
-        <androidx.appcompat.widget.LinearLayoutCompat
-            android:id="@+id/llIconPack"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="?android:attr/selectableItemBackground"
-            android:baselineAligned="false"
-            android:orientation="vertical"
-            android:paddingStart="@dimen/activity_horizontal_margin"
-            android:paddingTop="@dimen/activity_vertical_margin"
-            android:paddingEnd="@dimen/activity_horizontal_margin"
-            android:paddingBottom="@dimen/activity_vertical_margin">
-
-            <androidx.appcompat.widget.AppCompatTextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/setting_icon_pack"
-                android:textStyle="bold" />
-
-            <androidx.appcompat.widget.AppCompatTextView
-                android:id="@+id/tvSelectedIconPack"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/setting_default_icon_pack" />
-
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/btGetMoreIconPacks"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="end"
-                android:backgroundTint="@color/colorPrimary"
-                android:text="@string/get_more_icon_packs"
-                android:textAllCaps="false"
-                android:textColor="@color/colorWhite" />
-
-        </androidx.appcompat.widget.LinearLayoutCompat>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/colorDivider" />
-
-        <androidx.appcompat.widget.LinearLayoutCompat
-            android:id="@+id/llNightMode"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="?android:attr/selectableItemBackground"
-            android:baselineAligned="false"
-            android:orientation="vertical"
-            android:paddingStart="@dimen/activity_horizontal_margin"
-            android:paddingTop="@dimen/activity_vertical_margin"
-            android:paddingEnd="@dimen/activity_horizontal_margin"
-            android:paddingBottom="@dimen/activity_vertical_margin">
-
-            <androidx.appcompat.widget.AppCompatTextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/setting_night_mode"
-                android:textStyle="bold" />
-
-            <androidx.appcompat.widget.AppCompatTextView
-                android:id="@+id/tvSelectedNightMode"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                tools:text="@string/app_name" />
-
-        </androidx.appcompat.widget.LinearLayoutCompat>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/colorDivider" />
-
-        <androidx.appcompat.widget.LinearLayoutCompat
-            android:id="@+id/llBackground"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="?android:attr/selectableItemBackground"
-            android:baselineAligned="false"
-            android:orientation="horizontal">
-
-            <RelativeLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:paddingLeft="@dimen/activity_horizontal_margin"
-                android:paddingTop="@dimen/activity_vertical_margin"
-                android:paddingRight="@dimen/activity_horizontal_margin"
-                android:paddingBottom="@dimen/activity_vertical_margin">
-
-                <androidx.appcompat.widget.LinearLayoutCompat
-                    android:layout_width="wrap_content"
+                <!-- Home Launcher -->
+                <LinearLayout
+                    android:id="@+id/llHomeLauncher"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
-                    android:layout_centerVertical="true"
-                    android:orientation="vertical">
+                    android:background="?android:attr/selectableItemBackground"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="12dp">
 
-                    <androidx.appcompat.widget.AppCompatTextView
+                    <ImageView
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:contentDescription="@string/app_name"
+                        android:padding="8dp"
+                        android:src="@drawable/ic_home_24dp" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/setting_home_launcher"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tvSelectedHomeLauncher"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/colorPrimary"
+                            android:textSize="14sp"
+                            tools:text="@string/app_name" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginStart="52dp"
+                    android:background="@color/colorDivider" />
+
+                <!-- Icon Pack -->
+                <LinearLayout
+                    android:id="@+id/llIconPack"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="12dp">
+
+                    <ImageView
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:contentDescription="@string/app_name"
+                        android:padding="8dp"
+                        android:src="@drawable/ic_palette_24dp" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/setting_icon_pack"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tvSelectedIconPack"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/setting_default_icon_pack"
+                            android:textColor="@color/colorPrimary"
+                            android:textSize="14sp" />
+
+                        <androidx.appcompat.widget.AppCompatButton
+                            android:id="@+id/btGetMoreIconPacks"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:backgroundTint="@color/colorPrimary"
+                            android:paddingStart="16dp"
+                            android:paddingTop="6dp"
+                            android:paddingEnd="16dp"
+                            android:paddingBottom="6dp"
+                            android:text="@string/get_more_icon_packs"
+                            android:textAllCaps="false"
+                            android:textColor="@color/colorWhite"
+                            android:textSize="12sp" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginStart="52dp"
+                    android:background="@color/colorDivider" />
+
+                <!-- Night Mode -->
+                <LinearLayout
+                    android:id="@+id/llNightMode"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="12dp">
+
+                    <ImageView
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:contentDescription="@string/app_name"
+                        android:padding="8dp"
+                        android:src="@drawable/ic_dark_mode_24dp" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/setting_night_mode"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tvSelectedNightMode"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/colorPrimary"
+                            android:textSize="14sp"
+                            tools:text="@string/app_name" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+        <!-- Appearance Card -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="6dp"
+            app:cardMaxElevation="8dp"
+            app:cardUseCompatPadding="true">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingStart="8dp"
+                android:paddingTop="16dp"
+                android:paddingEnd="16dp"
+                android:paddingBottom="16dp">
+
+                <!-- Background Color -->
+                <LinearLayout
+                    android:id="@+id/llBackground"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="12dp">
+
+                    <ImageView
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:contentDescription="@string/app_name"
+                        android:padding="8dp"
+                        android:src="@drawable/ic_color_lens_24dp" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/setting_background"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tvSelectedBackground"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/colorPrimary"
+                            android:textSize="14sp"
+                            tools:text="#FFFFFF" />
+
+                    </LinearLayout>
+
+                    <ImageView
+                        android:id="@+id/ivSelectedBackgroundColor"
+                        android:layout_width="@dimen/diameter_highlight_color_switch"
+                        android:layout_height="@dimen/diameter_highlight_color_switch"
+                        android:layout_marginStart="12dp"
+                        tools:ignore="contentDescription" />
+
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginStart="52dp"
+                    android:background="@color/colorDivider" />
+
+                <!-- Highlight Color -->
+                <LinearLayout
+                    android:id="@+id/llHighlightColor"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="12dp">
+
+                    <ImageView
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:contentDescription="@string/app_name"
+                        android:padding="8dp"
+                        android:src="@drawable/ic_color_lens_24dp" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/setting_highlight_color"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tvSelectedHighlightColor"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/colorPrimary"
+                            android:textSize="14sp"
+                            tools:text="#FFFFFF" />
+
+                    </LinearLayout>
+
+                    <ImageView
+                        android:id="@+id/ivSelectedHighlightColor"
+                        android:layout_width="@dimen/diameter_highlight_color_switch"
+                        android:layout_height="@dimen/diameter_highlight_color_switch"
+                        android:layout_marginStart="12dp"
+                        tools:ignore="contentDescription" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+        <!-- Behavior Card -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="6dp"
+            app:cardMaxElevation="8dp"
+            app:cardUseCompatPadding="true">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingStart="16dp"
+                android:paddingTop="16dp"
+                android:paddingEnd="16dp"
+                android:paddingBottom="16dp">
+
+                <!-- Vibrate App Hover -->
+                <RelativeLayout
+                    android:id="@+id/rlSwitchVibrateAppHoverParent"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <ImageView
+                        android:id="@+id/iconVibrateHover"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_alignParentStart="true"
+                        android:layout_centerVertical="true"
+                        android:contentDescription="@string/app_name"
+                        android:padding="8dp"
+                        android:src="@drawable/ic_vibrate_24dp" />
+
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/swVibrateAppHover"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/setting_background"
+                        android:layout_marginStart="12dp"
+                        android:layout_toEndOf="@id/iconVibrateHover"
+                        android:paddingTop="12dp"
+                        android:paddingBottom="12dp"
+                        android:switchMinWidth="64dp"
+                        android:text="@string/setting_vibrate_app_hover"
+                        android:textColor="?android:attr/textColorSecondary"
+                        android:textSize="16sp"
                         android:textStyle="bold" />
 
-                    <androidx.appcompat.widget.AppCompatTextView
-                        android:id="@+id/tvSelectedBackground"
+                </RelativeLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginStart="52dp"
+                    android:background="@color/colorDivider" />
+
+                <!-- Vibrate App Launch -->
+                <RelativeLayout
+                    android:id="@+id/rlSwitchVibrateAppLaunchParent"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <ImageView
+                        android:id="@+id/iconVibrateLaunch"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_alignParentStart="true"
+                        android:layout_centerVertical="true"
+                        android:contentDescription="@string/app_name"
+                        android:padding="8dp"
+                        android:src="@drawable/ic_vibrate_24dp" />
+
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/swVibrateAppLaunch"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        tools:text="#FFFFFF" />
-
-                </androidx.appcompat.widget.LinearLayoutCompat>
-
-                <androidx.appcompat.widget.AppCompatImageView
-                    android:id="@+id/ivSelectedBackgroundColor"
-                    android:layout_width="@dimen/diameter_highlight_color_switch"
-                    android:layout_height="@dimen/diameter_highlight_color_switch"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    tools:ignore="contentDescription" />
-
-            </RelativeLayout>
-
-        </androidx.appcompat.widget.LinearLayoutCompat>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/colorDivider" />
-
-        <LinearLayout
-            android:id="@+id/llHighlightColor"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="?android:attr/selectableItemBackground"
-            android:baselineAligned="false"
-            android:orientation="horizontal">
-
-            <RelativeLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:paddingLeft="@dimen/activity_horizontal_margin"
-                android:paddingTop="@dimen/activity_vertical_margin"
-                android:paddingRight="@dimen/activity_horizontal_margin"
-                android:paddingBottom="@dimen/activity_vertical_margin">
-
-                <androidx.appcompat.widget.LinearLayoutCompat
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
-                    android:layout_centerVertical="true"
-                    android:orientation="vertical">
-
-                    <androidx.appcompat.widget.AppCompatTextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@string/setting_highlight_color"
+                        android:layout_marginStart="12dp"
+                        android:layout_toEndOf="@id/iconVibrateLaunch"
+                        android:paddingTop="12dp"
+                        android:paddingBottom="12dp"
+                        android:switchMinWidth="64dp"
+                        android:text="@string/setting_vibrate_app_launch"
+                        android:textColor="?android:attr/textColorSecondary"
+                        android:textSize="16sp"
                         android:textStyle="bold" />
 
-                    <androidx.appcompat.widget.AppCompatTextView
-                        android:id="@+id/tvSelectedHighlightColor"
+                </RelativeLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginStart="52dp"
+                    android:background="@color/colorDivider" />
+
+                <!-- Show Name App Hover -->
+                <RelativeLayout
+                    android:id="@+id/rlSwitchShowNameAppHoverParent"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <ImageView
+                        android:id="@+id/iconShowName"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_alignParentStart="true"
+                        android:layout_centerVertical="true"
+                        android:contentDescription="@string/app_name"
+                        android:padding="8dp"
+                        android:src="@drawable/ic_label_24dp" />
+
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/swShowNameAppHover"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        tools:text="#FFFFFF" />
+                        android:layout_marginStart="12dp"
+                        android:layout_toEndOf="@id/iconShowName"
+                        android:paddingTop="12dp"
+                        android:paddingBottom="12dp"
+                        android:switchMinWidth="64dp"
+                        android:text="@string/setting_show_name_app_hover"
+                        android:textColor="?android:attr/textColorSecondary"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
 
-                </androidx.appcompat.widget.LinearLayoutCompat>
+                </RelativeLayout>
 
-                <androidx.appcompat.widget.AppCompatImageView
-                    android:id="@+id/ivSelectedHighlightColor"
-                    android:layout_width="@dimen/diameter_highlight_color_switch"
-                    android:layout_height="@dimen/diameter_highlight_color_switch"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    tools:ignore="contentDescription" />
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginStart="52dp"
+                    android:background="@color/colorDivider" />
 
-            </RelativeLayout>
+                <!-- Show New App Tag -->
+                <RelativeLayout
+                    android:id="@+id/swShowNewAppTagParent"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
 
-        </LinearLayout>
+                    <ImageView
+                        android:id="@+id/iconNewTag"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_alignParentStart="true"
+                        android:layout_centerVertical="true"
+                        android:contentDescription="@string/app_name"
+                        android:padding="8dp"
+                        android:src="@drawable/ic_new_releases_24dp" />
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/colorDivider" />
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/swShowNewAppTag"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:layout_toEndOf="@id/iconNewTag"
+                        android:paddingTop="12dp"
+                        android:paddingBottom="12dp"
+                        android:switchMinWidth="64dp"
+                        android:text="@string/setting_show_new_app_tag"
+                        android:textColor="?android:attr/textColorSecondary"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
 
-        <RelativeLayout
-            android:id="@+id/rlSwitchVibrateAppHoverParent"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+                </RelativeLayout>
 
-            <com.google.android.material.switchmaterial.SwitchMaterial
-                android:id="@+id/swVibrateAppHover"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingStart="@dimen/activity_horizontal_margin"
-                android:paddingTop="@dimen/activity_vertical_margin"
-                android:paddingEnd="@dimen/activity_horizontal_margin"
-                android:paddingBottom="@dimen/activity_vertical_margin"
-                android:switchMinWidth="56dp"
-                android:text="@string/setting_vibrate_app_hover"
-                android:textColor="?android:attr/textColorSecondary"
-                android:textStyle="bold"
-                android:thumb="@drawable/sw_thumb_selector"
-                app:thumbTint="@color/colorPrimary"
-                app:track="@drawable/sw_track_selector"
-                app:trackTintMode="multiply" />
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginStart="52dp"
+                    android:background="@color/colorDivider" />
 
-        </RelativeLayout>
+                <!-- Show Touch Selection -->
+                <RelativeLayout
+                    android:id="@+id/rlSwitchShowTouchSelectionParent"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
 
-        <RelativeLayout
-            android:id="@+id/rlSwitchVibrateAppLaunchParent"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+                    <ImageView
+                        android:id="@+id/iconTouch"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_alignParentStart="true"
+                        android:layout_centerVertical="true"
+                        android:contentDescription="@string/app_name"
+                        android:padding="8dp"
+                        android:src="@drawable/ic_touch_24dp" />
 
-            <com.google.android.material.switchmaterial.SwitchMaterial
-                android:id="@+id/swVibrateAppLaunch"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingStart="@dimen/activity_horizontal_margin"
-                android:paddingTop="@dimen/activity_vertical_margin"
-                android:paddingEnd="@dimen/activity_horizontal_margin"
-                android:paddingBottom="@dimen/activity_vertical_margin"
-                android:switchMinWidth="56dp"
-                android:text="@string/setting_vibrate_app_launch"
-                android:textColor="?android:attr/textColorSecondary"
-                android:textStyle="bold"
-                android:thumb="@drawable/sw_thumb_selector"
-                app:thumbTint="@color/colorPrimary"
-                app:track="@drawable/sw_track_selector"
-                app:trackTintMode="multiply" />
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/swShowTouchSelection"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:layout_toEndOf="@id/iconTouch"
+                        android:paddingTop="12dp"
+                        android:paddingBottom="12dp"
+                        android:switchMinWidth="64dp"
+                        android:text="@string/setting_show_touch_selection"
+                        android:textColor="?android:attr/textColorSecondary"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
 
-        </RelativeLayout>
+                </RelativeLayout>
 
-        <RelativeLayout
-            android:id="@+id/rlSwitchShowNameAppHoverParent"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            </LinearLayout>
 
-            <com.google.android.material.switchmaterial.SwitchMaterial
-                android:id="@+id/swShowNameAppHover"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingStart="@dimen/activity_horizontal_margin"
-                android:paddingTop="@dimen/activity_vertical_margin"
-                android:paddingEnd="@dimen/activity_horizontal_margin"
-                android:paddingBottom="@dimen/activity_vertical_margin"
-                android:switchMinWidth="56dp"
-                android:text="@string/setting_show_name_app_hover"
-                android:textColor="?android:attr/textColorSecondary"
-                android:textStyle="bold"
-                android:thumb="@drawable/sw_thumb_selector"
-                app:thumbTint="@color/colorPrimary"
-                app:track="@drawable/sw_track_selector"
-                app:trackTintMode="multiply" />
+        </androidx.cardview.widget.CardView>
 
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:id="@+id/swShowNewAppTagParent"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <com.google.android.material.switchmaterial.SwitchMaterial
-                android:id="@+id/swShowNewAppTag"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingStart="@dimen/activity_horizontal_margin"
-                android:paddingTop="@dimen/activity_vertical_margin"
-                android:paddingEnd="@dimen/activity_horizontal_margin"
-                android:paddingBottom="@dimen/activity_vertical_margin"
-                android:switchMinWidth="56dp"
-                android:text="@string/setting_show_new_app_tag"
-                android:textColor="?android:attr/textColorSecondary"
-                android:textStyle="bold"
-                android:thumb="@drawable/sw_thumb_selector"
-                app:thumbTint="@color/colorPrimary"
-                app:track="@drawable/sw_track_selector"
-                app:trackTintMode="multiply" />
-
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:id="@+id/rlSwitchShowTouchSelectionParent"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <com.google.android.material.switchmaterial.SwitchMaterial
-                android:id="@+id/swShowTouchSelection"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingStart="@dimen/activity_horizontal_margin"
-                android:paddingTop="@dimen/activity_vertical_margin"
-                android:paddingEnd="@dimen/activity_horizontal_margin"
-                android:paddingBottom="@dimen/activity_vertical_margin"
-                android:switchMinWidth="56dp"
-                android:text="@string/setting_show_touch_selection"
-                android:textColor="?android:attr/textColorSecondary"
-                android:textStyle="bold"
-                android:thumb="@drawable/sw_thumb_selector"
-                app:thumbTint="@color/colorPrimary"
-                app:track="@drawable/sw_track_selector"
-                app:trackTintMode="multiply" />
-
-        </RelativeLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/colorDivider" />
-
-    </androidx.appcompat.widget.LinearLayoutCompat>
+    </LinearLayout>
 
 </androidx.core.widget.NestedScrollView>
