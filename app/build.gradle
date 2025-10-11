@@ -23,8 +23,8 @@ android {
         targetSdkVersion 36 // Android 14
 
         // Version format: YYYYMMDD
-        versionCode 20251007
-        versionName "2025.10.07"
+        versionCode 20251012
+        versionName "2025.10.12"
 
         // ====================================================================
         // SIZE OPTIMIZATION - Giảm kích thước APK/AAB
@@ -71,9 +71,8 @@ android {
             minifyEnabled true              // Bật R8 để shrink code
             shrinkResources true            // Xóa resources không dùng (giảm ~10-20%)
 
-            // Sử dụng proguard-android-optimize.txt thay vì proguard-android.txt
-            // để có optimization tốt hơn (giảm thêm ~5-10%)
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            // Sử dụng proguard-android-optimize.txt để có optimization tốt hơn
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
 
             signingConfig signingConfigs.release
 
@@ -150,10 +149,9 @@ android {
         buildConfig = true  // Enable BuildConfig generation
 
         // Tắt các feature không dùng để giảm overhead
-//        aidl = false
-//        renderScript = false
-//        resValues = true
-//        shaders = false
+        aidl = false
+        renderScript = false
+        shaders = false
 
         // viewBinding true // Bật khi cần sử dụng View Binding
     }
@@ -172,44 +170,49 @@ android {
         // Tối ưu Kotlin compilation
         freeCompilerArgs += [
             '-Xjvm-default=all',  // Generate default methods trong interfaces
-            '-opt-in=kotlin.RequiresOptIn'  // Opt-in cho experimental APIs
+            '-opt-in=kotlin.RequiresOptIn',  // Opt-in cho experimental APIs
+            '-Xno-param-assertions',  // Giảm bytecode (tắt null checks cho params)
+            '-Xno-call-assertions',  // Giảm bytecode (tắt null checks cho return)
+            '-Xno-receiver-assertions'  // Giảm bytecode (tắt null checks cho receiver)
         ]
     }
 
     // ========================================================================
     // PACKAGING OPTIONS - Loại bỏ files không cần thiết
     // ========================================================================
-//    packagingOptions {
-//        // Loại bỏ các file META-INF không cần thiết (giảm ~1-2 MB)
-//        resources {
-//            excludes += [
-//                'META-INF/DEPENDENCIES',
-//                'META-INF/LICENSE',
-//                'META-INF/LICENSE.txt',
-//                'META-INF/license.txt',
-//                'META-INF/NOTICE',
-//                'META-INF/NOTICE.txt',
-//                'META-INF/notice.txt',
-//                'META-INF/ASL2.0',
-//                'META-INF/*.kotlin_module',
-//                'META-INF/AL2.0',
-//                'META-INF/LGPL2.1',
-//                'META-INF/versions/9/previous-compilation-data.bin'
-//            ]
-//        }
-//
-//        // Loại bỏ debug info trong native libs
-//        jniLibs {
-//            useLegacyPackaging = false
-//            // Chỉ pick file .so đầu tiên nếu bị duplicate
-//            pickFirsts += ['**/*.so']
-//        }
-//
-//        // Giảm kích thước dex files
-//        dex {
-//            useLegacyPackaging = false
-//        }
-//    }
+    packagingOptions {
+        // Loại bỏ các file META-INF không cần thiết (giảm ~1-2 MB)
+        resources {
+            excludes += [
+                'META-INF/DEPENDENCIES',
+                'META-INF/LICENSE',
+                'META-INF/LICENSE.txt',
+                'META-INF/license.txt',
+                'META-INF/NOTICE',
+                'META-INF/NOTICE.txt',
+                'META-INF/notice.txt',
+                'META-INF/ASL2.0',
+                'META-INF/*.kotlin_module',
+                'META-INF/AL2.0',
+                'META-INF/LGPL2.1',
+                'META-INF/versions/9/previous-compilation-data.bin',
+                'kotlin/**',
+                'DebugProbesKt.bin'
+            ]
+        }
+
+        // Loại bỏ debug info trong native libs
+        jniLibs {
+            useLegacyPackaging = false
+            // Chỉ pick file .so đầu tiên nếu bị duplicate
+            pickFirsts += ['**/*.so']
+        }
+
+        // Giảm kích thước dex files
+        dex {
+            useLegacyPackaging = false
+        }
+    }
 
     // ========================================================================
     // OUTPUT FILE NAME CUSTOMIZATION
