@@ -507,7 +507,26 @@ public class ActSettings extends ActBase implements ColorChooserDialog.ColorCall
         if (utilSettings == null) {
             return;
         }
-        ColorChooserDialog mHighlightColorDialog = new ColorChooserDialog.Builder(this, R.string.setting_highlight_color).titleSub(R.string.setting_highlight_color).accentMode(true).doneButton(R.string.done).cancelButton(R.string.cancel).backButton(R.string.back).preselect(Color.parseColor(utilSettings.getString(UtilSettings.KEY_HIGHLIGHT_COLOR))).dynamicButtonColor(false).allowUserColorInputAlpha(false).tag(TAG_COLOR_HIGHLIGHT).show(this);
+        ColorChooserDialog dialog = new ColorChooserDialog.Builder(this, R.string.setting_highlight_color)
+                .titleSub(R.string.setting_highlight_color)
+                .accentMode(true)
+                .doneButton(R.string.done)
+                .cancelButton(R.string.cancel)
+                .backButton(R.string.back)
+                .preselect(Color.parseColor(utilSettings.getString(UtilSettings.KEY_HIGHLIGHT_COLOR)))
+                .dynamicButtonColor(false)
+                .allowUserColorInputAlpha(false)
+                .tag(TAG_COLOR_HIGHLIGHT)
+                .build();
+
+        dialog.show(getSupportFragmentManager(), TAG_COLOR_HIGHLIGHT);
+
+        // Apply rounded background after dialog is fully shown
+        new android.os.Handler().postDelayed(() -> {
+            if (dialog.getDialog() != null && dialog.getDialog().getWindow() != null) {
+                dialog.getDialog().getWindow().setBackgroundDrawableResource(R.drawable.bg_dialog_rounded);
+            }
+        }, 100);
     }
 
     @Override
