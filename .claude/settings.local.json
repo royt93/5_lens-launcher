@@ -6,7 +6,13 @@
       "Bash(./gradlew:*)",
       "Bash(find:*)",
       "Bash(awk:*)",
-      "Bash(git revert:*)"
+      "Bash(git revert:*)",
+      "Bash(adb install:*)",
+      "Bash(adb shell am start:*)",
+      "Bash(adb shell monkey:*)",
+      "Bash(timeout 3 adb logcat:*)",
+      "Bash(adb shell:*)",
+      "Bash(timeout 5 adb logcat:*)"
     ],
     "deny": [],
     "ask": []

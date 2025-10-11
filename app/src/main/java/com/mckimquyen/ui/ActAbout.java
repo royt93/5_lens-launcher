@@ -1,6 +1,7 @@
 package com.mckimquyen.ui;
 
 import android.animation.Animator;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
@@ -15,6 +16,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 
 import com.google.android.material.appbar.CollapsingToolbarLayout;
+import com.mckimquyen.BuildConfig;
 import com.mckimquyen.R;
 import com.mckimquyen.sdkadbmob.UIUtils;
 import com.mckimquyen.services.AppEventManager;
@@ -24,21 +26,38 @@ import java.util.Objects;
 //2023.03.19 tried to convert kotlin but failed
 public class ActAbout extends ActBase {
     TextView tvAbout;
+    TextView tvVersion;
     ImageView backdrop;
     CollapsingToolbarLayout collapsingToolbar;
     Toolbar toolbar;
+
+    View cardFeatures, cardAbout, cardCredits;
+    View headerFeatures, headerAbout, headerCredits;
+    View contentFeatures, contentAbout, contentCredits;
+    TextView iconFeatures, iconAbout, iconCredits;
+
     private Animator animator;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         UIUtils.INSTANCE.setupEdgeToEdge1(getWindow());
         setContentView(R.layout.act_about);
         UIUtils.INSTANCE.setupEdgeToEdge2(findViewById(R.id.rootLayout), true , true);
+
         findViews();
 
         setupViews();
+
+        // Setup expandable cards
+        setupExpandableCards();
+
+        // Animate backdrop
         backdrop.postDelayed(this::circularRevealAboutImage, 150);
+
+        // Animate cards
+        animateCards();
 
         // Observe night mode changes using LiveData
         AppEventManager.INSTANCE.getNightModeChanged().observe(this, data -> updateNightMode());
@@ -49,9 +68,89 @@ public class ActAbout extends ActBase {
 
     private void findViews() {
         tvAbout = findViewById(R.id.tvAbout);
+        tvVersion = findViewById(R.id.tvVersion);
         backdrop = findViewById(R.id.backdrop);
         collapsingToolbar = findViewById(R.id.collapsingToolbar);
         toolbar = findViewById(R.id.toolbar);
+
+        // Cards
+        cardFeatures = findViewById(R.id.cardFeatures);
+        cardAbout = findViewById(R.id.cardAbout);
+        cardCredits = findViewById(R.id.cardCredits);
+
+        // Headers
+        headerFeatures = findViewById(R.id.headerFeatures);
+        headerAbout = findViewById(R.id.headerAbout);
+        headerCredits = findViewById(R.id.headerCredits);
+
+        // Contents
+        contentFeatures = findViewById(R.id.contentFeatures);
+        contentAbout = findViewById(R.id.contentAbout);
+        contentCredits = findViewById(R.id.contentCredits);
+
+        // Icons
+        iconFeatures = findViewById(R.id.iconFeatures);
+        iconAbout = findViewById(R.id.iconAbout);
+        iconCredits = findViewById(R.id.iconCredits);
+    }
+
+    private void animateCards() {
+        View[] cards = {cardFeatures, cardAbout, cardCredits};
+        long baseDelay = 300;
+        long staggerDelay = 150;
+
+        for (int i = 0; i < cards.length; i++) {
+            final View card = cards[i];
+            if (card != null) {
+                long delay = baseDelay + (i * staggerDelay);
+                card.postDelayed(() -> {
+                    card.animate()
+                        .alpha(1f)
+                        .setDuration(500)
+                        .start();
+                }, delay);
+            }
+        }
+    }
+
+    private void setupExpandableCards() {
+        // Features card
+        if (headerFeatures != null) {
+            headerFeatures.setOnClickListener(v -> toggleCard(contentFeatures, iconFeatures));
+        }
+
+        // About card
+        if (headerAbout != null) {
+            headerAbout.setOnClickListener(v -> toggleCard(contentAbout, iconAbout));
+        }
+
+        // Credits card
+        if (headerCredits != null) {
+            headerCredits.setOnClickListener(v -> toggleCard(contentCredits, iconCredits));
+        }
+    }
+
+    private void toggleCard(View content, TextView icon) {
+        if (content == null || icon == null) return;
+
+        if (content.getVisibility() == View.VISIBLE) {
+            // Collapse
+            content.animate()
+                .alpha(0f)
+                .setDuration(200)
+                .withEndAction(() -> content.setVisibility(View.GONE))
+                .start();
+            icon.animate().rotation(0f).setDuration(200).start();
+        } else {
+            // Expand
+            content.setVisibility(View.VISIBLE);
+            content.setAlpha(0f);
+            content.animate()
+                .alpha(1f)
+                .setDuration(300)
+                .start();
+            icon.animate().rotation(180f).setDuration(200).start();
+        }
     }
 
     private void circularRevealAboutImage() {
@@ -92,11 +191,16 @@ public class ActAbout extends ActBase {
         setSupportActionBar(toolbar);
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         collapsingToolbar.setExpandedTitleColor(ContextCompat.getColor(this, R.color.colorTransparent));
+        collapsingToolbar.setTitle(getString(R.string.activity_title_about));
 
         // Set HTML text (minSdk = 25 >= API 24, always use new API)
         tvAbout.setText(Html.fromHtml(getString(R.string.about), Html.FROM_HTML_MODE_LEGACY));
-
         tvAbout.setMovementMethod(LinkMovementMethod.getInstance());
+
+        // Set version info
+        if (tvVersion != null) {
+            tvVersion.setText("Version " + BuildConfig.VERSION_NAME + " (" + BuildConfig.VERSION_CODE + ")");
+        }
     }
 
     @Override
