@@ -9,6 +9,8 @@ import static com.mckimquyen.ext.ContextKt.showDialog2;
 import static com.mckimquyen.util.CKt.URL_POLICY_NOTION;
 
 import android.content.Intent;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
@@ -168,6 +170,16 @@ public class ActSettings extends ActBase implements ColorChooserDialog.ColorCall
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_settings, menu);
+
+        // Tint all menu icons white
+        for (int i = 0; i < menu.size(); i++) {
+            MenuItem item = menu.getItem(i);
+            Drawable icon = item.getIcon();
+            if (icon != null) {
+                icon.setColorFilter(getResources().getColor(R.color.colorWhite), PorterDuff.Mode.SRC_IN);
+            }
+        }
+
         return true;
     }
 

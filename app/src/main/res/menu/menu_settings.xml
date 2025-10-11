@@ -14,37 +14,44 @@
         android:id="@+id/menuItemAbout"
         android:icon="@drawable/ic_info_outline_24dp"
         android:title="@string/menu_title_about"
+        app:iconTint="@color/colorWhite"
         app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/menuItemResetDefaultSettings"
         android:icon="@drawable/ic_restore_24dp"
         android:title="@string/menu_title_reset_defaults"
+        app:iconTint="@color/colorWhite"
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/menuRateApp"
         android:icon="@drawable/ic_star_24dp"
         android:title="@string/rate_app"
+        app:iconTint="@color/colorWhite"
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/menuMoreApp"
         android:icon="@drawable/ic_store_24dp"
         android:title="@string/more_app"
+        app:iconTint="@color/colorWhite"
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/menuShareApp"
         android:icon="@drawable/ic_share_24dp"
         android:title="@string/share_app"
+        app:iconTint="@color/colorWhite"
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/menuFacebookFanPage"
         android:icon="@drawable/ic_group_24dp"
         android:title="@string/facebook_fan_page"
+        app:iconTint="@color/colorWhite"
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/menuPolicy"
         android:icon="@drawable/ic_policy_24dp"
         android:title="@string/terms_and_privacy_policy"
+        app:iconTint="@color/colorWhite"
         app:showAsAction="ifRoom" />
 <!--    <item-->
 <!--        android:id="@+id/menuApplovinConfig"-->
@@ -54,25 +61,30 @@
         android:id="@+id/menuGithubOriginal"
         android:icon="@drawable/ic_code_24dp"
         android:title="@string/github_original"
+        app:iconTint="@color/colorWhite"
         app:showAsAction="never" />
     <item
         android:id="@+id/menuGithubFork"
         android:icon="@drawable/ic_git_branch_24dp"
         android:title="@string/github_fork"
+        app:iconTint="@color/colorWhite"
         app:showAsAction="never" />
     <item
         android:id="@+id/menuLicense"
         android:icon="@drawable/ic_description_24dp"
         android:title="@string/license"
+        app:iconTint="@color/colorWhite"
         app:showAsAction="never" />
     <item
         android:id="@+id/menuChangelog"
         android:icon="@drawable/ic_history_24dp"
         android:title="@string/changelog"
+        app:iconTint="@color/colorWhite"
         app:showAsAction="never" />
     <item
         android:id="@+id/menuFeedback"
         android:icon="@drawable/ic_feedback_24dp"
         android:title="@string/feedback"
+        app:iconTint="@color/colorWhite"
         app:showAsAction="never" />
 </menu>
