@@ -171,7 +171,8 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
         // STATE
         // ====================================================================
         private App mApp;                    // App object hiện tại
-        private final Context mContext;      // Context reference
+        private final Context mContext;      // Application context reference
+        private final Context mActivityContext; // Activity context for biometric
         private final boolean mIsHaveBiometric; // Device có hỗ trợ biometric không
 
         // ====================================================================
@@ -179,8 +180,9 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
         // ====================================================================
         public AppViewHolder(View itemView, Context context) {
             super(itemView);
-            // Use ApplicationContext to prevent Activity leak
+            // Keep both contexts: ApplicationContext for general use, Activity for biometric
             this.mContext = context.getApplicationContext();
+            this.mActivityContext = context; // Keep Activity context for biometric
             this.mIsHaveBiometric = Biometric.INSTANCE.isHaveBiometric(context);
 
             // Initialize views - findViewById chỉ gọi 1 lần khi tạo ViewHolder
@@ -324,9 +326,9 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
             boolean isAppOpened = AppPersistent.getAppOpened(pkgName, name);
 
             // Yêu cầu biometric authentication
-            if (mContext instanceof AppCompatActivity) {
+            if (mActivityContext instanceof AppCompatActivity) {
                 Biometric.INSTANCE.toggleLockApp(
-                        (AppCompatActivity) mContext,
+                        (AppCompatActivity) mActivityContext,
                         label,
                         pkgName,
                         isAppOpened,
@@ -368,11 +370,11 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
          * Home screen sẽ nhận broadcast này để refresh danh sách apps
          */
         private void sendChangeAppsVisibilityBroadcast() {
-            if (mContext == null) {
+            if (mActivityContext == null) {
                 return;
             }
             // Pattern variable matching (Java 16+)
-            if (mContext instanceof ActSettings activitySettings) {
+            if (mActivityContext instanceof ActSettings activitySettings) {
                 Intent changeAppsVisibilityIntent = new Intent(activitySettings, BroadcastReceivers.AppsVisibilityChangedReceiver.class);
                 activitySettings.sendBroadcast(changeAppsVisibilityIntent);
             }
@@ -383,11 +385,11 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
          * Home screen sẽ nhận broadcast này để update lock icons
          */
         private void sendChangeAppsLockBroadcast() {
-            if (mContext == null) {
+            if (mActivityContext == null) {
                 return;
             }
             // Pattern variable matching (Java 16+)
-            if (mContext instanceof ActSettings activitySettings) {
+            if (mActivityContext instanceof ActSettings activitySettings) {
                 Intent intent = new Intent(activitySettings, BroadcastReceivers.AppsLockChangedReceiver.class);
                 activitySettings.sendBroadcast(intent);
             }
@@ -449,7 +451,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
             // CLICK MENU BUTTON: Show popup menu
             // ================================================================
             ivAppMenu.setOnClickListener(view -> {
-                Context wrapper = new ContextThemeWrapper(mContext, R.style.PopupMenuTheme);
+                Context wrapper = new ContextThemeWrapper(mActivityContext, R.style.PopupMenuTheme);
                 PopupMenu popupMenu = new PopupMenu(wrapper, view, Gravity.END);
                 popupMenu.setOnMenuItemClickListener(AppViewHolder.this);
                 popupMenu.inflate(R.menu.menu_app);
