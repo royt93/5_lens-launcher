@@ -8,6 +8,7 @@ import android.text.method.LinkMovementMethod;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewAnimationUtils;
+import android.view.WindowInsetsController;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -46,6 +47,9 @@ public class ActAbout extends ActBase {
         setContentView(R.layout.act_about);
         UIUtils.INSTANCE.setupEdgeToEdge2(findViewById(R.id.rootLayout), true , true);
 
+        // Set status bar icon tint to light (white icons)
+        setupStatusBarIconTint();
+
         findViews();
 
         setupViews();
@@ -64,6 +68,28 @@ public class ActAbout extends ActBase {
 
         // Note: Intentionally NOT using OnBackPressedCallback here
         // Default back button behavior (finish()) is sufficient
+    }
+
+    private void setupStatusBarIconTint() {
+        // Set dark status bar icons (black icons for light status bar)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            // Android 11+ (API 30+)
+            WindowInsetsController controller = getWindow().getInsetsController();
+            if (controller != null) {
+                // Set light status bar flag to use dark (black) icons
+                controller.setSystemBarsAppearance(
+                    WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS,
+                    WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
+                );
+            }
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            // Android 6.0+ (API 23-29)
+            View decorView = getWindow().getDecorView();
+            int flags = decorView.getSystemUiVisibility();
+            // Add SYSTEM_UI_FLAG_LIGHT_STATUS_BAR to use dark icons
+            flags |= View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+            decorView.setSystemUiVisibility(flags);
+        }
     }
 
     private void findViews() {
