@@ -9,6 +9,7 @@ import static com.mckimquyen.ext.ContextKt.showDialog2;
 import static com.mckimquyen.util.CKt.URL_POLICY_NOTION;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -503,10 +504,10 @@ public class ActSettings extends ActBase implements ColorChooserDialog.ColorCall
     }
 
     public void showHighlightColorDialog() {
-//        if (utilSettings == null) {
-//            return;
-//        }
-//        ColorChooserDialog mHighlightColorDialog = new ColorChooserDialog.Builder(this, R.string.setting_highlight_color).titleSub(R.string.setting_highlight_color).accentMode(true).doneButton(R.string.done).cancelButton(R.string.cancel).backButton(R.string.back).preselect(Color.parseColor(utilSettings.getString(UtilSettings.KEY_HIGHLIGHT_COLOR))).dynamicButtonColor(false).allowUserColorInputAlpha(false).tag(TAG_COLOR_HIGHLIGHT).show(this);
+        if (utilSettings == null) {
+            return;
+        }
+        ColorChooserDialog mHighlightColorDialog = new ColorChooserDialog.Builder(this, R.string.setting_highlight_color).titleSub(R.string.setting_highlight_color).accentMode(true).doneButton(R.string.done).cancelButton(R.string.cancel).backButton(R.string.back).preselect(Color.parseColor(utilSettings.getString(UtilSettings.KEY_HIGHLIGHT_COLOR))).dynamicButtonColor(false).allowUserColorInputAlpha(false).tag(TAG_COLOR_HIGHLIGHT).show(this);
     }
 
     @Override
