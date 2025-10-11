@@ -362,11 +362,13 @@
                         android:layout_toEndOf="@id/iconVibrateHover"
                         android:paddingTop="12dp"
                         android:paddingBottom="12dp"
-                        android:switchMinWidth="64dp"
                         android:text="@string/setting_vibrate_app_hover"
                         android:textColor="?android:attr/textColorSecondary"
                         android:textSize="16sp"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"
+                        android:thumb="@drawable/sw_thumb_ios"
+                        app:switchPadding="16dp"
+                        app:track="@drawable/sw_track_ios" />
 
                 </RelativeLayout>
 
@@ -401,11 +403,13 @@
                         android:layout_toEndOf="@id/iconVibrateLaunch"
                         android:paddingTop="12dp"
                         android:paddingBottom="12dp"
-                        android:switchMinWidth="64dp"
                         android:text="@string/setting_vibrate_app_launch"
                         android:textColor="?android:attr/textColorSecondary"
                         android:textSize="16sp"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"
+                        android:thumb="@drawable/sw_thumb_ios"
+                        app:switchPadding="16dp"
+                        app:track="@drawable/sw_track_ios" />
 
                 </RelativeLayout>
 
@@ -440,11 +444,13 @@
                         android:layout_toEndOf="@id/iconShowName"
                         android:paddingTop="12dp"
                         android:paddingBottom="12dp"
-                        android:switchMinWidth="64dp"
                         android:text="@string/setting_show_name_app_hover"
                         android:textColor="?android:attr/textColorSecondary"
                         android:textSize="16sp"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"
+                        android:thumb="@drawable/sw_thumb_ios"
+                        app:switchPadding="16dp"
+                        app:track="@drawable/sw_track_ios" />
 
                 </RelativeLayout>
 
@@ -479,11 +485,13 @@
                         android:layout_toEndOf="@id/iconNewTag"
                         android:paddingTop="12dp"
                         android:paddingBottom="12dp"
-                        android:switchMinWidth="64dp"
                         android:text="@string/setting_show_new_app_tag"
                         android:textColor="?android:attr/textColorSecondary"
                         android:textSize="16sp"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"
+                        android:thumb="@drawable/sw_thumb_ios"
+                        app:switchPadding="16dp"
+                        app:track="@drawable/sw_track_ios" />
 
                 </RelativeLayout>
 
@@ -518,11 +526,13 @@
                         android:layout_toEndOf="@id/iconTouch"
                         android:paddingTop="12dp"
                         android:paddingBottom="12dp"
-                        android:switchMinWidth="64dp"
                         android:text="@string/setting_show_touch_selection"
                         android:textColor="?android:attr/textColorSecondary"
                         android:textSize="16sp"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"
+                        android:thumb="@drawable/sw_thumb_ios"
+                        app:switchPadding="16dp"
+                        app:track="@drawable/sw_track_ios" />
 
                 </RelativeLayout>
 
