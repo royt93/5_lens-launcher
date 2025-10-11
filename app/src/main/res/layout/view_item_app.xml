@@ -5,11 +5,15 @@
     android:id="@+id/cvAppContainer"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_marginStart="8dp"
+    android:layout_marginTop="8dp"
+    android:layout_marginEnd="8dp"
+    android:layout_marginBottom="8dp"
     android:foreground="?attr/selectableItemBackground"
     android:stateListAnimator="@animator/a_raise"
     card_view:cardCornerRadius="45dp"
     card_view:cardElevation="4dp"
-    card_view:cardUseCompatPadding="true"
+    card_view:cardUseCompatPadding="false"
     tools:ignore="HardcodedText,contentDescription">
 
     <RelativeLayout
@@ -49,8 +53,8 @@
             android:layout_centerVertical="true"
             android:layout_toStartOf="@+id/ivAppHide"
             android:layout_marginEnd="4dp"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
             android:paddingTop="4dp"
             android:paddingBottom="4dp"
             android:background="@drawable/bg_button_lock"
