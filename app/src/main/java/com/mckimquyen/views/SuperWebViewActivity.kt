@@ -83,6 +83,8 @@ class SuperWebViewActivity : ActBase() {
             domStorageEnabled = false
             // Disable support for zooming using webView's on-screen zoom controls and gestures
             setSupportZoom(false)
+            // Set text zoom to increase font size
+            textZoom = 120
         }
         // If dark theme is turned on, automatically render all web contents using a dark theme
         if (WebViewFeature.isFeatureSupported(WebViewFeature.ALGORITHMIC_DARKENING)) {
@@ -160,6 +162,18 @@ class SuperWebViewActivity : ActBase() {
             super.onPageFinished(view, url)
             progressIndicator.visibility = View.INVISIBLE
 //            toolbar.title = view?.title
+
+            // Add horizontal padding to web content
+            view?.evaluateJavascript(
+                """
+                (function() {
+                    var style = document.createElement('style');
+                    style.innerHTML = 'body { padding-left: 16px !important; padding-right: 16px !important; }';
+                    document.head.appendChild(style);
+                })();
+                """.trimIndent(),
+                null
+            )
         }
 
         override fun onReceivedError(
