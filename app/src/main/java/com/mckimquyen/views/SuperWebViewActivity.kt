@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Bitmap
+import android.os.Build
 import android.os.Bundle
 import android.util.TypedValue
 import android.view.View
@@ -42,6 +43,13 @@ class SuperWebViewActivity : ActBase() {
         UIUtils.setupEdgeToEdge1(window)
         setContentView(R.layout.act_super_wv)
         UIUtils.setupEdgeToEdge2(findViewById(R.id.rootLayout))
+
+        // Set status bar icons to dark/black
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            window.decorView.systemUiVisibility = window.decorView.systemUiVisibility or
+                View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+        }
+
         currentTitle = intent?.getStringExtra(KEY_TITLE) ?: ""
         currentWebsite = intent?.getStringExtra(KEY_URL) ?: ""
 
