@@ -9,6 +9,7 @@ import android.graphics.Color;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.provider.Settings;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -446,9 +447,10 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
             // CLICK MENU BUTTON: Show popup menu
             // ================================================================
             ivAppMenu.setOnClickListener(view -> {
-                PopupMenu popupMenu = new PopupMenu(mContext, view);
+                PopupMenu popupMenu = new PopupMenu(mContext, view, Gravity.END, 0, R.style.RoundedPopupMenu);
                 popupMenu.setOnMenuItemClickListener(AppViewHolder.this);
                 popupMenu.inflate(R.menu.menu_app);
+                popupMenu.setForceShowIcon(true); // Force show icons in menu
                 popupMenu.show();
             });
         }
