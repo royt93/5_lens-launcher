@@ -19,17 +19,48 @@ object UtilLauncher {
         val intent = Intent(Intent.ACTION_MAIN).apply {
             addCategory(Intent.CATEGORY_HOME)
         }
-        val res = application.packageManager.resolveActivity(intent, 0)
-        return res?.activityInfo?.let {
-            it.packageName != "android" && it.packageName == application.packageName
+
+        val res = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            application.packageManager.resolveActivity(
+                intent,
+                PackageManager.ResolveInfoFlags.of(PackageManager.MATCH_DEFAULT_ONLY.toLong())
+            )
+        } else {
+            @Suppress("DEPRECATION")
+            application.packageManager.resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY)
+        }
+
+        // Debug logging
+        val currentPackage = application.packageName
+        val resolvedPackage = res?.activityInfo?.packageName
+        val resolvedActivity = res?.activityInfo?.name
+        android.util.Log.d("UtilLauncher", "isDefaultLauncher check:")
+        android.util.Log.d("UtilLauncher", "  Current package: $currentPackage")
+        android.util.Log.d("UtilLauncher", "  Resolved package: $resolvedPackage")
+        android.util.Log.d("UtilLauncher", "  Resolved activity: $resolvedActivity")
+
+        // Check if resolved package matches current app
+        val isDefault = res?.activityInfo?.let {
+            it.packageName != "android" && it.packageName == currentPackage
         } ?: false
+
+        android.util.Log.d("UtilLauncher", "  Result: $isDefault")
+        return isDefault
     }
 
     fun getNameHomeLauncher(application: Application): String {
         val intent = Intent(Intent.ACTION_MAIN).apply {
             addCategory(Intent.CATEGORY_HOME)
         }
-        val res = application.packageManager.resolveActivity(intent, 0)
+        val res = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            application.packageManager.resolveActivity(
+                intent,
+                PackageManager.ResolveInfoFlags.of(PackageManager.MATCH_DEFAULT_ONLY.toLong())
+            )
+        } else {
+            @Suppress("DEPRECATION")
+            application.packageManager.resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY)
+        }
         return res?.activityInfo?.loadLabel(application.packageManager)?.toString() ?: ""
     }
 

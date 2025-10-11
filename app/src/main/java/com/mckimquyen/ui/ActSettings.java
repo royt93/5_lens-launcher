@@ -195,14 +195,20 @@ public class ActSettings extends ActBase implements ColorChooserDialog.ColorCall
 
     private void launchApps() {
         boolean isDefaultLauncher = UtilLauncher.isDefaultLauncher(getApplication());
+        android.util.Log.d("ActSettings", "launchApps - isDefaultLauncher: " + isDefaultLauncher);
+
         if (isDefaultLauncher) {
+            // Already default launcher -> go to launcher home screen
             AdMobManager.INSTANCE.showInterstitial(this, aBoolean -> {
                 Intent homeIntent = new Intent(Intent.ACTION_MAIN);
                 homeIntent.addCategory(Intent.CATEGORY_HOME);
+                homeIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(homeIntent);
+                finish(); // Close settings activity to go back to launcher
                 return Unit.INSTANCE;
             });
         } else {
+            // Not default launcher -> show chooser to set as default
             showHomeLauncherChooser();
         }
         overridePendingTransition(R.anim.a_fade_in, R.anim.a_fade_out);

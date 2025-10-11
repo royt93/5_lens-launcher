@@ -37,6 +37,22 @@ public class UtilCalculator {
         float spacingHorizontal = (screenWidth - (itemCountHorizontal * itemSize)) / (itemCountHorizontal + 1);
         float spacingVertical = (screenHeight - (itemCountVertical * itemSize)) / (itemCountVertical + 1);
 
+        // If spacing is negative, recalculate itemSize to fit the screen
+        if (spacingHorizontal < 0 || spacingVertical < 0) {
+            // Recalculate item size with minimal spacing of 1px between items
+            float maxItemSizeH = (screenWidth - (itemCountHorizontal + 1)) / (float) itemCountHorizontal;
+            float maxItemSizeV = (screenHeight - (itemCountVertical + 1)) / (float) itemCountVertical;
+            itemSize = Math.min(maxItemSizeH, maxItemSizeV);
+
+            // Recalculate spacing with new item size
+            spacingHorizontal = (screenWidth - (itemCountHorizontal * itemSize)) / (itemCountHorizontal + 1);
+            spacingVertical = (screenHeight - (itemCountVertical * itemSize)) / (itemCountVertical + 1);
+        }
+
+        // Ensure spacing is non-negative as a final safeguard
+        spacingHorizontal = Math.max(0, spacingHorizontal);
+        spacingVertical = Math.max(0, spacingVertical);
+
         return new Grid(itemCount, itemCountHorizontal, itemCountVertical, itemSize, spacingHorizontal, spacingVertical);
     }
 

@@ -41,6 +41,11 @@
             <!-- Query các app có MAIN action - tất cả apps có launcher icon -->
             <action android:name="android.intent.action.MAIN" />
         </intent>
+        <intent>
+            <!-- Query HOME intent - cần để detect default launcher -->
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.HOME" />
+        </intent>
     </queries>
 
     <!-- ========================================================================
