@@ -33,7 +33,9 @@
     <!-- App Bar Themes -->
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
-    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light">
+        <item name="android:popupBackground">@drawable/bg_popup_menu</item>
+    </style>
 
     <style name="LightAlertDialogCustom" parent="Theme.AppCompat.Light.Dialog.Alert">
         <item name="android:background">@color/colorWhite</item>
@@ -42,10 +44,13 @@
         <item name="android:textColorAlertDialogListItem">@color/colorPrimary</item>
     </style>
 
-    <!-- Rounded PopupMenu Style -->
-    <style name="RoundedPopupMenu" parent="Widget.AppCompat.PopupMenu">
+    <!-- Popup Menu Style -->
+    <style name="RoundedPopupMenuStyle" parent="Widget.AppCompat.PopupMenu">
         <item name="android:popupBackground">@drawable/bg_popup_menu</item>
-        <item name="android:popupElevation" tools:targetApi="lollipop">8dp</item>
-        <item name="android:dropDownVerticalOffset">4dp</item>
+    </style>
+
+    <!-- Popup Menu Theme with Rounded Background -->
+    <style name="PopupMenuTheme" parent="Theme.AppCompat.Light">
+        <item name="popupMenuStyle">@style/RoundedPopupMenuStyle</item>
     </style>
 </resources>

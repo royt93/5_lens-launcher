@@ -81,6 +81,9 @@ public class ActSettings extends ActBase implements ColorChooserDialog.ColorCall
     private MaterialDialog dlgBackground;
     private LensInterface lensInterface;
 
+    // Flag to prevent showing Terms dialog multiple times in same session
+    private boolean hasShownTermsDialog = false;
+
     public void setLensInterface(LensInterface lensInterface) {
         this.lensInterface = lensInterface;
     }
@@ -174,13 +177,34 @@ public class ActSettings extends ActBase implements ColorChooserDialog.ColorCall
         if (adView != null) {
             adView.resume();
         }
-        if (utilSettings != null) {
+        // Show Terms and Privacy Policy dialog only once per session
+        if (utilSettings != null && !hasShownTermsDialog) {
             boolean hasRead = utilSettings.getBoolean(UtilSettings.KEY_READ_POLICY);
             if (!hasRead) {
-                showDialog2(this, getString(R.string.terms_and_privacy_policy), getString(R.string.read_policy), getString(R.string.agree_and_continue), getString(R.string.cancel), () -> {
-                    utilSettings.save(UtilSettings.KEY_READ_POLICY, true);
-                    openUrlInBrowser(this, URL_POLICY_NOTION, getString(R.string.terms_and_privacy_policy), false);
-                }, () -> utilSettings.save(UtilSettings.KEY_READ_POLICY, true));
+                hasShownTermsDialog = true;  // Mark as shown for this session
+
+                // Show non-cancelable dialog - user MUST choose an option
+                showDialog2(
+                        this,
+                        getString(R.string.terms_and_privacy_policy),
+                        getString(R.string.read_policy),
+                        getString(R.string.agree_and_continue),
+                        getString(R.string.cancel),
+                        () -> {
+                            // Button 1: Agree and Continue
+                            utilSettings.save(UtilSettings.KEY_READ_POLICY, true);
+                            openUrlInBrowser(this, URL_POLICY_NOTION, getString(R.string.terms_and_privacy_policy), false);
+                        },
+                        () -> {
+                            // Button 2: Cancel
+                            utilSettings.save(UtilSettings.KEY_READ_POLICY, true);
+                        },
+                        false,  // isCancelable = false (user MUST choose)
+                        () -> {
+                            // onDismiss: Fallback to save state even if somehow dismissed
+                            utilSettings.save(UtilSettings.KEY_READ_POLICY, true);
+                        }
+                );
             }
         }
     }

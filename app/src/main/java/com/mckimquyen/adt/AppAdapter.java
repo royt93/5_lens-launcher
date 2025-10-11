@@ -5,6 +5,7 @@ import static com.mckimquyen.util.CKt.PKG_NAME;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
+import android.view.ContextThemeWrapper;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.net.Uri;
@@ -448,7 +449,8 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
             // CLICK MENU BUTTON: Show popup menu
             // ================================================================
             ivAppMenu.setOnClickListener(view -> {
-                PopupMenu popupMenu = new PopupMenu(mContext, view, Gravity.END, 0, R.style.RoundedPopupMenu);
+                Context wrapper = new ContextThemeWrapper(mContext, R.style.PopupMenuTheme);
+                PopupMenu popupMenu = new PopupMenu(wrapper, view, Gravity.END);
                 popupMenu.setOnMenuItemClickListener(AppViewHolder.this);
                 popupMenu.inflate(R.menu.menu_app);
                 popupMenu.setForceShowIcon(true); // Force show icons in menu

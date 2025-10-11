@@ -98,6 +98,8 @@ fun Context.showDialog2(
     button2: String = getString(R.string.cancel),
     onClickButton1: Runnable? = null,
     onClickButton2: Runnable? = null,
+    isCancelable: Boolean = true,  // Add parameter to control cancelable behavior
+    onDismiss: Runnable? = null,  // Add callback for dismiss event
 ): AlertDialog {
     val builder = AlertDialog.Builder(ContextThemeWrapper(this, R.style.LightAlertDialogCustom))
 
@@ -119,8 +121,20 @@ fun Context.showDialog2(
         onClickButton2?.run()
     }
     val dialog = builder.create()
-    dialog.setCancelable(true)
+    dialog.setCancelable(isCancelable)
+
+    // Add dismiss listener if callback provided
+    if (onDismiss != null) {
+        dialog.setOnDismissListener {
+            onDismiss.run()
+        }
+    }
+
     dialog.show()
+
+    // Set rounded background
+    dialog.window?.setBackgroundDrawableResource(R.drawable.bg_dialog_rounded)
+
     val color = ContextCompat.getColor(this, R.color.colorPrimary)
     dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(color)
     dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(color)

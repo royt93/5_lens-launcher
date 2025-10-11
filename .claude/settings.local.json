@@ -4,7 +4,9 @@
       "Bash(do sed -i '' 's/@android:color\\/blackVariant/@android:color\\/darker_gray/g' \"$file\")",
       "Bash(do sed -i '' 's/@android:color\\/background_lightVariant/@android:color\\/darker_gray/g' \"$file\")",
       "Bash(do sed -i '' 's/com\\.google\\.android\\.material\\.card\\.MaterialCardView/androidx.cardview.widget.CardView/g' \"$file\")",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "Read(//Users/loitran/Library/Android/sdk/**)",
+      "Bash(xargs cat:*)"
     ],
     "deny": [],
     "ask": []
