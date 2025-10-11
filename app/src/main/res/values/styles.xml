@@ -34,7 +34,7 @@
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light">
-        <item name="android:popupBackground">@drawable/bg_popup_menu</item>
+        <item name="actionOverflowMenuStyle">@style/RoundedOverflowMenuStyle</item>
     </style>
 
     <style name="LightAlertDialogCustom" parent="Theme.AppCompat.Light.Dialog.Alert">
@@ -46,6 +46,11 @@
 
     <!-- Popup Menu Style -->
     <style name="RoundedPopupMenuStyle" parent="Widget.AppCompat.PopupMenu">
+        <item name="android:popupBackground">@drawable/bg_popup_menu</item>
+    </style>
+
+    <!-- Overflow Menu Style -->
+    <style name="RoundedOverflowMenuStyle" parent="Widget.AppCompat.PopupMenu.Overflow">
         <item name="android:popupBackground">@drawable/bg_popup_menu</item>
     </style>
 
