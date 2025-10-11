@@ -123,11 +123,12 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="8dp"
-                            android:backgroundTint="@color/colorPrimary"
+                            android:background="@drawable/bg_button_icon_pack"
                             android:paddingStart="16dp"
-                            android:paddingTop="6dp"
+                            android:paddingTop="0dp"
                             android:paddingEnd="16dp"
-                            android:paddingBottom="6dp"
+                            android:paddingBottom="0dp"
+                            android:stateListAnimator="@null"
                             android:text="@string/get_more_icon_packs"
                             android:textAllCaps="false"
                             android:textColor="@color/colorWhite"
@@ -340,7 +341,8 @@
                 <RelativeLayout
                     android:id="@+id/rlSwitchVibrateAppHoverParent"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:paddingVertical="8dp">
 
                     <ImageView
                         android:id="@+id/iconVibrateHover"
@@ -378,7 +380,8 @@
                 <RelativeLayout
                     android:id="@+id/rlSwitchVibrateAppLaunchParent"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:paddingVertical="8dp">
 
                     <ImageView
                         android:id="@+id/iconVibrateLaunch"
@@ -416,7 +419,8 @@
                 <RelativeLayout
                     android:id="@+id/rlSwitchShowNameAppHoverParent"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:paddingVertical="8dp">
 
                     <ImageView
                         android:id="@+id/iconShowName"
@@ -454,7 +458,8 @@
                 <RelativeLayout
                     android:id="@+id/swShowNewAppTagParent"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:paddingVertical="8dp">
 
                     <ImageView
                         android:id="@+id/iconNewTag"
@@ -492,7 +497,8 @@
                 <RelativeLayout
                     android:id="@+id/rlSwitchShowTouchSelectionParent"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:paddingVertical="8dp">
 
                     <ImageView
                         android:id="@+id/iconTouch"
