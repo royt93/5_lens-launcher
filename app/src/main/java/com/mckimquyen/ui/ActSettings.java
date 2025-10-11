@@ -419,6 +419,13 @@ public class ActSettings extends ActBase implements ColorChooserDialog.ColorCall
             sendEditAppsBroadcast();
             return true;
         }).show();
+
+        // Apply rounded background
+        new android.os.Handler().postDelayed(() -> {
+            if (dlgSortType != null && dlgSortType.getWindow() != null) {
+                dlgSortType.getWindow().setBackgroundDrawableResource(R.drawable.bg_dialog_rounded);
+            }
+        }, 100);
     }
 
     public void showIconPackDialog() {
@@ -441,6 +448,13 @@ public class ActSettings extends ActBase implements ColorChooserDialog.ColorCall
             sendUpdateAppsBroadcast();
             return true;
         }).show();
+
+        // Apply rounded background
+        new android.os.Handler().postDelayed(() -> {
+            if (dlgIconPack != null && dlgIconPack.getWindow() != null) {
+                dlgIconPack.getWindow().setBackgroundDrawableResource(R.drawable.bg_dialog_rounded);
+            }
+        }, 100);
     }
 
     public void showHomeLauncherChooser() {
