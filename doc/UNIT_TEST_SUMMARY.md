@@ -287,7 +287,7 @@ BUILD SUCCESSFUL in 8s
 ## 📚 Test Documentation
 
 - **Detailed Guide**: [TEST_DOCUMENTATION.md](TEST_DOCUMENTATION.md)
-- **Test README**: [app/src/test/README.md](app/src/test/README.md)
+- **Test README**: [app/src/test/README.md](../app/src/test/README.md)
 - **Migration Guide**: [MIGRATION_GUIDE.md](MIGRATION_GUIDE.md)
 - **Fix Summary**: [FIX_SUMMARY.md](FIX_SUMMARY.md)
 

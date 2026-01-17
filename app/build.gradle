@@ -23,8 +23,8 @@ android {
         targetSdkVersion 36 // Android 14
 
         // Version format: YYYYMMDD
-        versionCode 20251012
-        versionName "2025.10.12"
+        versionCode 20260117
+        versionName "2026.01.17"
 
         // ====================================================================
         // SIZE OPTIMIZATION - Giảm kích thước APK/AAB

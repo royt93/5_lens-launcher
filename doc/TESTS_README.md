@@ -226,7 +226,7 @@ Total: 55+ tests
 ### Main Documents:
 1. **[UNIT_TEST_SUMMARY.md](UNIT_TEST_SUMMARY.md)** - Test statistics và verification
 2. **[TEST_DOCUMENTATION.md](TEST_DOCUMENTATION.md)** - Chi tiết technical documentation
-3. **[app/src/test/README.md](app/src/test/README.md)** - Test suite guide
+3. **[app/src/test/README.md](../app/src/test/README.md)** - Test suite guide
 
 ### Related Documents:
 - **[FIX_SUMMARY.md](FIX_SUMMARY.md)** - Tóm tắt các fixes đã làm
