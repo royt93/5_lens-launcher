@@ -34,7 +34,6 @@ public class ActHome extends ActBase {
     LensView lensViews;
     MaterialProgressBar progressBarHome;
     private ArrayList<App> listApp;
-    private ArrayList<Bitmap> listAppIcon;
 
     private void updateColor() {
         var mUtilSettings = new UtilSettings(this);
@@ -57,27 +56,22 @@ public class ActHome extends ActBase {
         setContentView(R.layout.act_home);
         UIUtils.INSTANCE.setupEdgeToEdge2(findViewById(R.id.rootLayout), true, true);
         setupViews();
-//        updateColor();
+        // updateColor();
         PackageManager mPackageManager = getPackageManager();
         lensViews.setPackageManager(mPackageManager);
-        lensViews.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
-        assignApps(Objects.requireNonNull(Objects.requireNonNull(RAppsSingleton.getInstance()).getApps()), RAppsSingleton.getInstance().getAppIcons());
+        lensViews.setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
+        assignApps(Objects.requireNonNull(Objects.requireNonNull(RAppsSingleton.getInstance()).getApps()));
 
         // Observe app events using LiveData
-        AppEventManager.INSTANCE.getAppsLoaded().observe(this, data ->
-                assignApps(Objects.requireNonNull(RAppsSingleton.getInstance().getApps()),
-                        RAppsSingleton.getInstance().getAppIcons())
-        );
+        AppEventManager.INSTANCE.getAppsLoaded().observe(this,
+                data -> assignApps(Objects.requireNonNull(RAppsSingleton.getInstance().getApps())));
 
-        AppEventManager.INSTANCE.getVisibilityChanged().observe(this, data ->
-                assignApps(Objects.requireNonNull(RAppsSingleton.getInstance().getApps()),
-                        RAppsSingleton.getInstance().getAppIcons())
-        );
+        AppEventManager.INSTANCE.getVisibilityChanged().observe(this,
+                data -> assignApps(Objects.requireNonNull(RAppsSingleton.getInstance().getApps())));
 
-        AppEventManager.INSTANCE.getLockChanged().observe(this, data ->
-                assignApps(Objects.requireNonNull(RAppsSingleton.getInstance().getApps()),
-                        RAppsSingleton.getInstance().getAppIcons())
-        );
+        AppEventManager.INSTANCE.getLockChanged().observe(this,
+                data -> assignApps(Objects.requireNonNull(RAppsSingleton.getInstance().getApps())));
 
         AppEventManager.INSTANCE.getBackgroundChanged().observe(this, data -> setBackground());
 
@@ -109,8 +103,10 @@ public class ActHome extends ActBase {
 
     private void setupTransparentSystemBarsForLollipop() {
         Window window = getWindow();
-        window.getAttributes().systemUiVisibility |= (View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
-        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
+        window.getAttributes().systemUiVisibility |= (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
+        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS
+                | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
         window.setStatusBarColor(Color.TRANSPARENT);
         window.setNavigationBarColor(Color.TRANSPARENT);
@@ -120,24 +116,30 @@ public class ActHome extends ActBase {
         lensViews.invalidate();
     }
 
-    private void assignApps(ArrayList<App> lApp, ArrayList<Bitmap> lAppIcon) {
-        if (lApp.isEmpty() || lAppIcon.isEmpty()) {
+    private void assignApps(ArrayList<App> lApp) {
+        if (lApp.isEmpty()) {
             return;
         }
         progressBarHome.setVisibility(View.INVISIBLE);
         lensViews.setVisibility(View.VISIBLE);
         listApp = lApp;
-        listAppIcon = lAppIcon;
         removeHiddenApps();
-        lensViews.setApps(listApp, listAppIcon);
+        lensViews.setApps(listApp);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
     }
 
     private void removeHiddenApps() {
-        for (int i = 0; i < listApp.size(); i++) {
-            if (!AppPersistent.getAppVisibility(Objects.requireNonNull(listApp.get(i).getPackageName()).toString(), Objects.requireNonNull(listApp.get(i).getName()).toString())) {
+        // Fix 3.1: Loop from end to start to avoid IndexOutOfBounds when removing items
+        for (int i = listApp.size() - 1; i >= 0; i--) {
+            App app = listApp.get(i);
+            if (!AppPersistent.getAppVisibility(
+                    Objects.requireNonNull(app.getPackageName()).toString(),
+                    Objects.requireNonNull(app.getName()).toString())) {
                 listApp.remove(i);
-                listAppIcon.remove(i);
-                i--;
             }
         }
     }

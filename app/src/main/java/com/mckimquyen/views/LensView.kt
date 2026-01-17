@@ -40,7 +40,6 @@ class LensView : View {
     private var mMustVibrate = true
     private var mSelectIndex = 0
     private var mApps: ArrayList<App>? = null
-    private var mAppIcons: ArrayList<Bitmap>? = null
     private var mPackageManager: PackageManager? = null
     private var mAnimationMultiplier = 0.0f
     private var mAnimationHiding = false
@@ -70,9 +69,8 @@ class LensView : View {
         init()
     }
 
-    fun setApps(apps: ArrayList<App>?, appIcons: ArrayList<Bitmap>?) {
+    fun setApps(apps: ArrayList<App>?) {
         mApps = apps
-        mAppIcons = appIcons
         invalidate()
     }
 
@@ -82,7 +80,6 @@ class LensView : View {
 
     private fun init() {
         mApps = ArrayList()
-        mAppIcons = ArrayList()
         mDrawType = DrawType.APPS
         setBackgroundColor(ContextCompat.getColor(context, R.color.colorTransparent))
         mUtilSettings = UtilSettings(context)
@@ -373,24 +370,24 @@ class LensView : View {
         rect: RectF,
         index: Int,
     ) {
-        mAppIcons?.let { list ->
+        mApps?.let { list ->
             if (index < list.size) {
-                val appIcon = list[index]
-                // Check if bitmap is recycled before drawing to prevent crash
-                if (!appIcon.isRecycled) {
+                val app = list[index]
+                // Fetch icon from cache on-the-fly (Fix 5.1)
+                val appIcon = com.mckimquyen.app.RAppsSingleton.instance.getAppIcon(app.packageName.toString())
+                
+                if (appIcon != null && !appIcon.isRecycled) {
                     val src = Rect(0, 0, appIcon.width, appIcon.height)
                     canvas.drawBitmap(appIcon, src, rect, mPaintIcons)
                 }
-                mApps?.let { l ->
-                    val app = l[index]
-                    if (app.installDate >= System.currentTimeMillis() - UtilSettings.SHOW_NEW_APP_TAG_DURATION
-                        && AppPersistent.getAppOpenCount(
-                            app.packageName.toString(),
-                            app.name.toString()
-                        ) == 0L
-                    ) {
-                        drawNewAppTag(canvas, rect)
-                    }
+                
+                if (app.installDate >= System.currentTimeMillis() - UtilSettings.SHOW_NEW_APP_TAG_DURATION
+                    && AppPersistent.getAppOpenCount(
+                        app.packageName.toString(),
+                        app.name.toString()
+                    ) == 0L
+                ) {
+                    drawNewAppTag(canvas, rect)
                 }
             }
         }
@@ -547,13 +544,9 @@ class LensView : View {
         }
     }
 
-    /**
-     * Clean up resources when view is detached to prevent memory leaks
-     */
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
-        // Clear bitmap references to allow garbage collection
+        // Clear references to allow garbage collection
         mApps = null
-        mAppIcons = null
     }
 }

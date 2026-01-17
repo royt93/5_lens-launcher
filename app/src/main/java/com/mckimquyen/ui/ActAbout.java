@@ -45,7 +45,7 @@ public class ActAbout extends ActBase {
 
         UIUtils.INSTANCE.setupEdgeToEdge1(getWindow());
         setContentView(R.layout.act_about);
-        UIUtils.INSTANCE.setupEdgeToEdge2(findViewById(R.id.rootLayout), true , true);
+        UIUtils.INSTANCE.setupEdgeToEdge2(findViewById(R.id.rootLayout), true, true);
 
         // Set status bar icon tint to light (white icons)
         setupStatusBarIconTint();
@@ -78,9 +78,8 @@ public class ActAbout extends ActBase {
             if (controller != null) {
                 // Set light status bar flag to use dark (black) icons
                 controller.setSystemBarsAppearance(
-                    WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS,
-                    WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
-                );
+                        WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS,
+                        WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS);
             }
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             // Android 6.0+ (API 23-29)
@@ -121,7 +120,7 @@ public class ActAbout extends ActBase {
     }
 
     private void animateCards() {
-        View[] cards = {cardFeatures, cardAbout, cardCredits};
+        View[] cards = { cardFeatures, cardAbout, cardCredits };
         long baseDelay = 300;
         long staggerDelay = 150;
 
@@ -131,9 +130,9 @@ public class ActAbout extends ActBase {
                 long delay = baseDelay + (i * staggerDelay);
                 card.postDelayed(() -> {
                     card.animate()
-                        .alpha(1f)
-                        .setDuration(500)
-                        .start();
+                            .alpha(1f)
+                            .setDuration(500)
+                            .start();
                 }, delay);
             }
         }
@@ -157,24 +156,25 @@ public class ActAbout extends ActBase {
     }
 
     private void toggleCard(View content, TextView icon) {
-        if (content == null || icon == null) return;
+        if (content == null || icon == null)
+            return;
 
         if (content.getVisibility() == View.VISIBLE) {
             // Collapse
             content.animate()
-                .alpha(0f)
-                .setDuration(200)
-                .withEndAction(() -> content.setVisibility(View.GONE))
-                .start();
+                    .alpha(0f)
+                    .setDuration(200)
+                    .withEndAction(() -> content.setVisibility(View.GONE))
+                    .start();
             icon.animate().rotation(0f).setDuration(200).start();
         } else {
             // Expand
             content.setVisibility(View.VISIBLE);
             content.setAlpha(0f);
             content.animate()
-                .alpha(1f)
-                .setDuration(300)
-                .start();
+                    .alpha(1f)
+                    .setDuration(300)
+                    .start();
             icon.animate().rotation(180f).setDuration(200).start();
         }
     }
@@ -201,7 +201,7 @@ public class ActAbout extends ActBase {
                 }
             }
         } catch (Exception e) {
-            //do nothing
+            // do nothing
         }
     }
 
@@ -242,5 +242,10 @@ public class ActAbout extends ActBase {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
     }
 }

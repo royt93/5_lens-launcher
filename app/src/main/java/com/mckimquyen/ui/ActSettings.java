@@ -65,7 +65,8 @@ import java.util.Objects;
 import kotlin.Unit;
 
 //2023.03.19 tried to convert kotlin but failed
-public class ActSettings extends ActBase implements ColorChooserDialog.ColorCallback, AdMobManager.InterstitialAdListener {
+public class ActSettings extends ActBase
+        implements ColorChooserDialog.ColorCallback, AdMobManager.InterstitialAdListener {
 
     private static final String TAG_COLOR_BACKGROUND = "BackgroundColor";
     private static final String TAG_COLOR_HIGHLIGHT = "HighlightColor";
@@ -74,7 +75,7 @@ public class ActSettings extends ActBase implements ColorChooserDialog.ColorCall
     ViewPager2 viewpager;
     FloatingActionButton fabSort;
     LinearLayout flAdOpenApp;
-    //    private MaxAdView adView;
+    // private MaxAdView adView;
     private AdView adView = null;
 
     private ArrayList<App> listApp;
@@ -125,7 +126,8 @@ public class ActSettings extends ActBase implements ColorChooserDialog.ColorCall
 
         // Note: Intentionally NOT using OnBackPressedCallback here
         // Default back button behavior (finish()) is sufficient
-        // OnBackPressedCallback would intercept back press from ad dismiss, causing issues
+        // OnBackPressedCallback would intercept back press from ad dismiss, causing
+        // issues
 
         checkShowAd();
     }
@@ -147,23 +149,17 @@ public class ActSettings extends ActBase implements ColorChooserDialog.ColorCall
         viewpager.setAdapter(mPagerAdapter);
 
         // Setup TabLayout with TabLayoutMediator (ViewPager2 requirement)
-        new TabLayoutMediator(tabs, viewpager, (tab, position) -> tab.setText(mPagerAdapter.getPageTitle(position))).attach();
+        new TabLayoutMediator(tabs, viewpager, (tab, position) -> tab.setText(mPagerAdapter.getPageTitle(position)))
+                .attach();
 
-        viewpager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
-            @Override
-            public void onPageSelected(int position) {
-                if (position == 1) {
-                    fabSort.show();
-                } else {
-                    fabSort.hide();
-                }
-            }
-        });
+        viewpager.registerOnPageChangeCallback(new PageChangeCallback(fabSort));
         listApp = Objects.requireNonNull(RAppsSingleton.getInstance()).getApps();
 
-//        adView = ApplovinKt.createAdBanner(this, ActSettings.class.getSimpleName(), Color.TRANSPARENT, findViewById(R.id.flAd), true);
-        adView = AdMobManager.INSTANCE.loadBanner(this, BuildConfig.ADMOB_BANNER_ID, findViewById(R.id.bannerContainer), findViewById(R.id.tvLabelAd), AdSize.BANNER);
-//        createAdInter();
+        // adView = ApplovinKt.createAdBanner(this, ActSettings.class.getSimpleName(),
+        // Color.TRANSPARENT, findViewById(R.id.flAd), true);
+        adView = AdMobManager.INSTANCE.loadBanner(this, BuildConfig.ADMOB_BANNER_ID, findViewById(R.id.bannerContainer),
+                findViewById(R.id.tvLabelAd), AdSize.BANNER);
+        // createAdInter();
         AdMobManager.INSTANCE.loadInterstitial(this, BuildConfig.ADMOB_INTERSTITIAL_ID);
     }
 
@@ -194,7 +190,7 @@ public class ActSettings extends ActBase implements ColorChooserDialog.ColorCall
         if (utilSettings != null && !hasShownTermsDialog) {
             boolean hasRead = utilSettings.getBoolean(UtilSettings.KEY_READ_POLICY);
             if (!hasRead) {
-                hasShownTermsDialog = true;  // Mark as shown for this session
+                hasShownTermsDialog = true; // Mark as shown for this session
 
                 // Show non-cancelable dialog - user MUST choose an option
                 showDialog2(
@@ -206,18 +202,18 @@ public class ActSettings extends ActBase implements ColorChooserDialog.ColorCall
                         () -> {
                             // Button 1: Agree and Continue
                             utilSettings.save(UtilSettings.KEY_READ_POLICY, true);
-                            openUrlInBrowser(this, URL_POLICY_NOTION, getString(R.string.terms_and_privacy_policy), false);
+                            openUrlInBrowser(this, URL_POLICY_NOTION, getString(R.string.terms_and_privacy_policy),
+                                    false);
                         },
                         () -> {
                             // Button 2: Cancel
                             utilSettings.save(UtilSettings.KEY_READ_POLICY, true);
                         },
-                        false,  // isCancelable = false (user MUST choose)
+                        false, // isCancelable = false (user MUST choose)
                         () -> {
                             // onDismiss: Fallback to save state even if somehow dismissed
                             utilSettings.save(UtilSettings.KEY_READ_POLICY, true);
-                        }
-                );
+                        });
             }
         }
     }
@@ -253,57 +249,61 @@ public class ActSettings extends ActBase implements ColorChooserDialog.ColorCall
         overridePendingTransition(R.anim.a_fade_in, R.anim.a_fade_out);
     }
 
-//    private void createAdInter() {
-//        boolean enableAdInter = getString(R.string.EnableAdInter).equals("true");
-//        if (!enableAdInter) {
-//            return;
-//        }
-//        String id = getString(R.string.INTER);
-//        if (id.isEmpty()) {
-//            return;
-//        }
-//
+    // private void createAdInter() {
+    // boolean enableAdInter = getString(R.string.EnableAdInter).equals("true");
+    // if (!enableAdInter) {
+    // return;
+    // }
+    // String id = getString(R.string.INTER);
+    // if (id.isEmpty()) {
+    // return;
+    // }
+    //
 
-    /// /        interstitialAd = new MaxInterstitialAd(id, this);
-    /// /        interstitialAd.setListener(new MaxAdListener() {
-    /// /            @Override
-    /// /            public void onAdLoaded(@NonNull MaxAd maxAd) {
-    /// ///                retryAttempt = 0;
-    /// /            }
+    /// / interstitialAd = new MaxInterstitialAd(id, this);
+    /// / interstitialAd.setListener(new MaxAdListener() {
+    /// / @Override
+    /// / public void onAdLoaded(@NonNull MaxAd maxAd) {
+    /// /// retryAttempt = 0;
+    /// / }
     /// /
-    /// /            @Override
-    /// /            public void onAdDisplayed(@NonNull MaxAd maxAd) {
+    /// / @Override
+    /// / public void onAdDisplayed(@NonNull MaxAd maxAd) {
     /// /
-    /// /            }
+    /// / }
     /// /
-    /// /            @Override
-    /// /            public void onAdHidden(@NonNull MaxAd maxAd) {
-    /// /                // Interstitial ad is hidden. Pre-load the next ad
-    /// /                interstitialAd.loadAd();
-    /// /            }
+    /// / @Override
+    /// / public void onAdHidden(@NonNull MaxAd maxAd) {
+    /// / // Interstitial ad is hidden. Pre-load the next ad
+    /// / interstitialAd.loadAd();
+    /// / }
     /// /
-    /// /            @Override
-    /// /            public void onAdClicked(@NonNull MaxAd maxAd) {
+    /// / @Override
+    /// / public void onAdClicked(@NonNull MaxAd maxAd) {
     /// /
-    /// /            }
+    /// / }
     /// /
-    /// /            @Override
-    /// /            public void onAdLoadFailed(@NonNull String s, @NonNull MaxError maxError) {
-    /// ///                retryAttempt++;
-    /// ///                long delayMillis = TimeUnit.SECONDS.toMillis((long) Math.pow(2, Math.min(6, retryAttempt)));
+    /// / @Override
+    /// / public void onAdLoadFailed(@NonNull String s, @NonNull MaxError maxError)
+    /// {
+    /// /// retryAttempt++;
+    /// /// long delayMillis = TimeUnit.SECONDS.toMillis((long) Math.pow(2,
+    /// Math.min(6, retryAttempt)));
     /// ///
-    /// ///                new Handler().postDelayed(() -> interstitialAd.loadAd(), delayMillis);
-    /// /            }
+    /// /// new Handler().postDelayed(() -> interstitialAd.loadAd(), delayMillis);
+    /// / }
     /// /
-    /// /            @Override
-    /// /            public void onAdDisplayFailed(@NonNull MaxAd maxAd, @NonNull MaxError maxError) {
-    /// /                // Interstitial ad failed to display. AppLovin recommends that you load the next ad.
-    /// /                interstitialAd.loadAd();
-    /// /            }
-    /// /        });
-    /// /        // Load the first ad
-    /// /        interstitialAd.loadAd();
-//    }
+    /// / @Override
+    /// / public void onAdDisplayFailed(@NonNull MaxAd maxAd, @NonNull MaxError
+    /// maxError) {
+    /// / // Interstitial ad failed to display. AppLovin recommends that you load
+    /// the next ad.
+    /// / interstitialAd.loadAd();
+    /// / }
+    /// / });
+    /// / // Load the first ad
+    /// / interstitialAd.loadAd();
+    // }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
@@ -345,17 +345,17 @@ public class ActSettings extends ActBase implements ColorChooserDialog.ColorCall
             moreApp(this, "SAIGON PHANTOM LABS");
             return true;
         }
-//        else if (id == R.id.menuApplovinConfig) {
-//            if (BuildConfig.DEBUG) {
-//                showMediationDebuggerApplovin(this);
-//            } else {
-//                Toast.makeText(
-//                        /* context = */ this,
-//                        /* resId = */ "This feature is only available in Debug mode",
-//                        /* duration = */ Toast.LENGTH_SHORT).show();
-//            }
-//            return true;
-//        }
+        // else if (id == R.id.menuApplovinConfig) {
+        // if (BuildConfig.DEBUG) {
+        // showMediationDebuggerApplovin(this);
+        // } else {
+        // Toast.makeText(
+        // /* context = */ this,
+        // /* resId = */ "This feature is only available in Debug mode",
+        // /* duration = */ Toast.LENGTH_SHORT).show();
+        // }
+        // return true;
+        // }
         else if (id == R.id.menuShareApp) {
             shareApp(this);
             return true;
@@ -366,16 +366,19 @@ public class ActSettings extends ActBase implements ColorChooserDialog.ColorCall
             openUrlInBrowser(this, URL_POLICY_NOTION, getString(R.string.terms_and_privacy_policy), false);
             return true;
         } else if (id == R.id.menuGithubOriginal) {
-            openUrlInBrowser(this, "https://github.com/ricknout/lens-launcher", getString(R.string.github_original), true);
+            openUrlInBrowser(this, "https://github.com/ricknout/lens-launcher", getString(R.string.github_original),
+                    true);
             return true;
         } else if (id == R.id.menuGithubFork) {
             openUrlInBrowser(this, "https://github.com/gj-loitp/lens-launcher", getString(R.string.github_fork), true);
             return true;
         } else if (id == R.id.menuLicense) {
-            openUrlInBrowser(this, "https://raw.githubusercontent.com/ricknout/lens-launcher/master/LICENSE.md", getString(R.string.license), true);
+            openUrlInBrowser(this, "https://raw.githubusercontent.com/ricknout/lens-launcher/master/LICENSE.md",
+                    getString(R.string.license), true);
             return true;
         } else if (id == R.id.menuChangelog) {
-            openUrlInBrowser(this, "https://raw.githubusercontent.com/gj-loitp/lens-launcher/dev/CHANGE_LOG.md", getString(R.string.changelog), true);
+            openUrlInBrowser(this, "https://raw.githubusercontent.com/gj-loitp/lens-launcher/dev/CHANGE_LOG.md",
+                    getString(R.string.changelog), true);
             return true;
         } else if (id == R.id.menuFeedback) {
             sendEmail();
@@ -396,7 +399,8 @@ public class ActSettings extends ActBase implements ColorChooserDialog.ColorCall
     }
 
     private void sendBackgroundChangedBroadcast() {
-        Intent changeBackgroundIntent = new Intent(ActSettings.this, BroadcastReceivers.BackgroundChangedReceiver.class);
+        Intent changeBackgroundIntent = new Intent(ActSettings.this,
+                BroadcastReceivers.BackgroundChangedReceiver.class);
         sendBroadcast(changeBackgroundIntent);
     }
 
@@ -414,11 +418,13 @@ public class ActSettings extends ActBase implements ColorChooserDialog.ColorCall
         assert utilSettings != null;
         SortType selectedSortType = utilSettings.getSortType();
         int selectedIndex = lSortType.indexOf(selectedSortType);
-        dlgSortType = new MaterialDialog.Builder(ActSettings.this).title(R.string.setting_sort_apps).items(lSortTypeString).alwaysCallSingleChoiceCallback().itemsCallbackSingleChoice(selectedIndex, (dialog, view, which, text) -> {
-            utilSettings.save(lSortType.get(which));
-            sendEditAppsBroadcast();
-            return true;
-        }).show();
+        dlgSortType = new MaterialDialog.Builder(ActSettings.this).title(R.string.setting_sort_apps)
+                .items(lSortTypeString).alwaysCallSingleChoiceCallback()
+                .itemsCallbackSingleChoice(selectedIndex, (dialog, view, which, text) -> {
+                    utilSettings.save(lSortType.get(which));
+                    sendEditAppsBroadcast();
+                    return true;
+                }).show();
 
         // Apply rounded background
         new android.os.Handler().postDelayed(() -> {
@@ -429,7 +435,8 @@ public class ActSettings extends ActBase implements ColorChooserDialog.ColorCall
     }
 
     public void showIconPackDialog() {
-        final ArrayList<UtilIconPackManager.IconPack> lAvailableIconPack = new UtilIconPackManager().getAvailableIconPacksWithIcons(true, getApplication());
+        final ArrayList<UtilIconPackManager.IconPack> lAvailableIconPack = new UtilIconPackManager()
+                .getAvailableIconPacksWithIcons(true, getApplication());
         final ArrayList<String> lIconPackName = new ArrayList<>();
         lIconPackName.add(getString(R.string.setting_default_icon_pack));
         for (int i = 0; i < lAvailableIconPack.size(); i++) {
@@ -440,14 +447,16 @@ public class ActSettings extends ActBase implements ColorChooserDialog.ColorCall
         assert utilSettings != null;
         String selectedPackageName = utilSettings.getString(UtilSettings.KEY_ICON_PACK_LABEL_NAME);
         int selectedIndex = lIconPackName.indexOf(selectedPackageName);
-        dlgIconPack = new MaterialDialog.Builder(ActSettings.this).title(R.string.setting_icon_pack).items(lIconPackName).alwaysCallSingleChoiceCallback().itemsCallbackSingleChoice(selectedIndex, (dialog, view, which, text) -> {
-            utilSettings.save(UtilSettings.KEY_ICON_PACK_LABEL_NAME, lIconPackName.get(which));
-            if (settingsInterface != null) {
-                settingsInterface.onValuesUpdated();
-            }
-            sendUpdateAppsBroadcast();
-            return true;
-        }).show();
+        dlgIconPack = new MaterialDialog.Builder(ActSettings.this).title(R.string.setting_icon_pack)
+                .items(lIconPackName).alwaysCallSingleChoiceCallback()
+                .itemsCallbackSingleChoice(selectedIndex, (dialog, view, which, text) -> {
+                    utilSettings.save(UtilSettings.KEY_ICON_PACK_LABEL_NAME, lIconPackName.get(which));
+                    if (settingsInterface != null) {
+                        settingsInterface.onValuesUpdated();
+                    }
+                    sendUpdateAppsBroadcast();
+                    return true;
+                }).show();
 
         // Apply rounded background
         new android.os.Handler().postDelayed(() -> {
@@ -468,20 +477,23 @@ public class ActSettings extends ActBase implements ColorChooserDialog.ColorCall
         assert utilSettings != null;
         String selectedNightMode = UtilNightModeUtil.getNightModeDisplayName(utilSettings.getNightMode());
         int selectedIndex = nightModes.indexOf(selectedNightMode);
-        dlgNightMode = new MaterialDialog.Builder(ActSettings.this).title(R.string.setting_night_mode).items(R.array.night_modes).alwaysCallSingleChoiceCallback().itemsCallbackSingleChoice(selectedIndex, (dialog, view, which, text) -> {
-            String selection = nightModes.get(which);
-            utilSettings.save(UtilSettings.KEY_NIGHT_MODE, UtilNightModeUtil.getNightModeFromDisplayName(selection));
-            sendNightModeBroadcast();
-            if (settingsInterface != null) {
-                settingsInterface.onValuesUpdated();
-            }
-            dismissBackgroundDialog();
+        dlgNightMode = new MaterialDialog.Builder(ActSettings.this).title(R.string.setting_night_mode)
+                .items(R.array.night_modes).alwaysCallSingleChoiceCallback()
+                .itemsCallbackSingleChoice(selectedIndex, (dialog, view, which, text) -> {
+                    String selection = nightModes.get(which);
+                    utilSettings.save(UtilSettings.KEY_NIGHT_MODE,
+                            UtilNightModeUtil.getNightModeFromDisplayName(selection));
+                    sendNightModeBroadcast();
+                    if (settingsInterface != null) {
+                        settingsInterface.onValuesUpdated();
+                    }
+                    dismissBackgroundDialog();
 
-            // Recreate activity to apply new theme
-            new android.os.Handler().postDelayed(() -> recreate(), 200);
+                    // Recreate activity to apply new theme
+                    new android.os.Handler().postDelayed(() -> recreate(), 200);
 
-            return true;
-        }).show();
+                    return true;
+                }).show();
 
         // Apply rounded background
         new android.os.Handler().postDelayed(() -> {
@@ -498,22 +510,24 @@ public class ActSettings extends ActBase implements ColorChooserDialog.ColorCall
         assert utilSettings != null;
         String selectedBackground = utilSettings.getString(UtilSettings.KEY_BACKGROUND);
         int selectedIndex = backgroundNames.indexOf(selectedBackground);
-        dlgBackground = new MaterialDialog.Builder(ActSettings.this).title(R.string.setting_background).items(R.array.backgrounds).alwaysCallSingleChoiceCallback().itemsCallbackSingleChoice(selectedIndex, (dialog, view, which, text) -> {
-            String selection = backgroundNames.get(which);
-            if (selection.equals("Wallpaper")) {
-                utilSettings.save(UtilSettings.KEY_BACKGROUND, selection);
-                sendBackgroundChangedBroadcast();
-                if (settingsInterface != null) {
-                    settingsInterface.onValuesUpdated();
-                }
-                dismissBackgroundDialog();
-                showWallpaperPicker();
-            } else if (selection.equals("Color")) {
-                dismissBackgroundDialog();
-                showBackgroundColorDialog();
-            }
-            return true;
-        }).show();
+        dlgBackground = new MaterialDialog.Builder(ActSettings.this).title(R.string.setting_background)
+                .items(R.array.backgrounds).alwaysCallSingleChoiceCallback()
+                .itemsCallbackSingleChoice(selectedIndex, (dialog, view, which, text) -> {
+                    String selection = backgroundNames.get(which);
+                    if (selection.equals("Wallpaper")) {
+                        utilSettings.save(UtilSettings.KEY_BACKGROUND, selection);
+                        sendBackgroundChangedBroadcast();
+                        if (settingsInterface != null) {
+                            settingsInterface.onValuesUpdated();
+                        }
+                        dismissBackgroundDialog();
+                        showWallpaperPicker();
+                    } else if (selection.equals("Color")) {
+                        dismissBackgroundDialog();
+                        showBackgroundColorDialog();
+                    }
+                    return true;
+                }).show();
 
         // Apply rounded background
         new android.os.Handler().postDelayed(() -> {
@@ -529,10 +543,12 @@ public class ActSettings extends ActBase implements ColorChooserDialog.ColorCall
     }
 
     public void showBackgroundColorDialog() {
-//        if (utilSettings == null) {
-//            return;
-//        }
-//        ColorChooserDialog mBackgroundColorDialog = new ColorChooserDialog.Builder(this, R.string.setting_background_color).titleSub(R.string.setting_background_color).accentMode(false).doneButton(R.string.done).cancelButton(R.string.cancel).backButton(R.string.back).preselect(Color.parseColor(utilSettings.getString(UtilSettings.KEY_BACKGROUND_COLOR))).dynamicButtonColor(false).allowUserColorInputAlpha(false).tag(TAG_COLOR_BACKGROUND).show(this);
+        // if (utilSettings == null) {
+        // return;
+        // }
+        // ColorChooserDialog mBackgroundColorDialog = new
+        // ColorChooserDialog.Builder(this,
+        // R.string.setting_background_color).titleSub(R.string.setting_background_color).accentMode(false).doneButton(R.string.done).cancelButton(R.string.cancel).backButton(R.string.back).preselect(Color.parseColor(utilSettings.getString(UtilSettings.KEY_BACKGROUND_COLOR))).dynamicButtonColor(false).allowUserColorInputAlpha(false).tag(TAG_COLOR_BACKGROUND).show(this);
     }
 
     public void showHighlightColorDialog() {
@@ -619,7 +635,8 @@ public class ActSettings extends ActBase implements ColorChooserDialog.ColorCall
     protected void onDestroy() {
         try {
             dismissAllDialogs();
-            // LiveData observers are automatically removed when lifecycle owner is destroyed
+            // LiveData observers are automatically removed when lifecycle owner is
+            // destroyed
             // Clear fragment interface references to prevent memory leaks
             lensInterface = null;
             appsInterface = null;
@@ -630,8 +647,32 @@ public class ActSettings extends ActBase implements ColorChooserDialog.ColorCall
             // Ensure AdView is always destroyed, even if exception occurs
             if (adView != null) {
                 adView.destroy();
+                adView = null;
             }
             super.onDestroy();
+        }
+    }
+
+    /**
+     * Fix 4.6: Static inner class for ViewPager2 callback to avoid memory leak
+     */
+    private static class PageChangeCallback extends ViewPager2.OnPageChangeCallback {
+        private final java.lang.ref.WeakReference<FloatingActionButton> fabSortRef;
+
+        PageChangeCallback(FloatingActionButton fabSort) {
+            this.fabSortRef = new java.lang.ref.WeakReference<>(fabSort);
+        }
+
+        @Override
+        public void onPageSelected(int position) {
+            FloatingActionButton fabSort = fabSortRef.get();
+            if (fabSort != null) {
+                if (position == 1) {
+                    fabSort.show();
+                } else {
+                    fabSort.hide();
+                }
+            }
         }
     }
 
@@ -644,19 +685,21 @@ public class ActSettings extends ActBase implements ColorChooserDialog.ColorCall
     private void sendEmail() {
         Intent intent = new Intent(Intent.ACTION_SENDTO);
         intent.setData(Uri.parse("mailto:")); // Only email apps should handle this
-        intent.putExtra(Intent.EXTRA_EMAIL, new String[]{"roy.mobile.dev@gmail.com", "20testersforclosedtesting@googlegroups.com"});
+        intent.putExtra(Intent.EXTRA_EMAIL,
+                new String[]{"roy.mobile.dev@gmail.com", "20testersforclosedtesting@googlegroups.com"});
         intent.putExtra(Intent.EXTRA_SUBJECT, "Feedback on Fisheye Launcher App");
-        intent.putExtra(Intent.EXTRA_TEXT, """
-                Hello,
-                
-                I hope this message finds you well. Below are my feedback and suggestions regarding the Fisheye Launcher app:
-                
-                [Insert your feedback here]
-                
-                Thank you for your attention and support.
-                
-                Best regards,
-                [Your Name]""");
+        intent.putExtra(Intent.EXTRA_TEXT,
+                """
+                        Hello,
+                        
+                        I hope this message finds you well. Below are my feedback and suggestions regarding the Fisheye Launcher app:
+                        
+                        [Insert your feedback here]
+                        
+                        Thank you for your attention and support.
+                        
+                        Best regards,
+                        [Your Name]""");
 
         if (intent.resolveActivity(getPackageManager()) != null) {
             startActivity(intent);

@@ -30,9 +30,8 @@ class TaskSortApps(
     private val contextRef = WeakReference(context)
     private val applicationRef = WeakReference(application)
 
-    // Danh sách apps và icons kết quả sau khi sort
+    // Danh sách apps kết quả sau khi sort
     private var mApps: ArrayList<App>? = null
-    private var mAppIcons: ArrayList<Bitmap>? = null
 
     /**
      * Hàm chính để thực thi task (for Java compatibility).
@@ -75,15 +74,15 @@ class TaskSortApps(
         // Sắp xếp apps theo sort type từ settings
         UtilAppSorter.sort(apps, utilSettings.sortType)
 
-        // Lọc và lưu apps có icon hợp lệ sau khi sort
+        // Lọc và lưu apps có icon hợp lệ sau khi sort, cache icon vào BitmapCache
         mApps = ArrayList()
-        mAppIcons = ArrayList()
 
         for (app in apps) {
             val appIcon = app.icon
             if (appIcon != null) {
                 mApps?.add(app)
-                mAppIcons?.add(appIcon)
+                // Đảm bảo icon được cache (dù thường đã được cache từ TaskUpdateApps)
+                RAppsSingleton.instance.setAppIcon(app.packageName.toString(), appIcon)
             }
         }
     }
@@ -99,7 +98,6 @@ class TaskSortApps(
         // Cập nhật Singleton với danh sách apps đã sort
         RAppsSingleton.instance.let { singleton ->
             singleton.apps = mApps
-            singleton.appIcons = mAppIcons
         }
 
         // Gửi broadcast thông báo apps đã được sort xong

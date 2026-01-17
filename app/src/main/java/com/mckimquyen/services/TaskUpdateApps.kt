@@ -32,9 +32,8 @@ class TaskUpdateApps(
     private val contextRef = WeakReference(context)
     private val applicationRef = WeakReference(application)
 
-    // Danh sách apps và icons kết quả
+    // Danh sách apps kết quả
     private var mApps: ArrayList<App>? = null
-    private var mAppIcons: ArrayList<Bitmap>? = null
 
     /**
      * Hàm chính để thực thi task (for Java compatibility).
@@ -80,15 +79,15 @@ class TaskUpdateApps(
             utilSettings.sortType
         )
 
-        // Lọc và lưu apps có icon hợp lệ
+        // Lọc và lưu apps có icon hợp lệ, cache icon vào BitmapCache
         mApps = ArrayList()
-        mAppIcons = ArrayList()
 
         for (app in apps) {
             val appIcon = app.icon
             if (appIcon != null) {
                 mApps?.add(app)
-                mAppIcons?.add(appIcon)
+                // Cache icon ngay lập tức để giải phóng memory từ object App
+                RAppsSingleton.instance.setAppIcon(app.packageName.toString(), appIcon)
             }
         }
     }
@@ -104,7 +103,6 @@ class TaskUpdateApps(
         // Cập nhật Singleton với danh sách apps mới
         RAppsSingleton.instance.let { singleton ->
             singleton.apps = mApps
-            singleton.appIcons = mAppIcons
         }
 
         // Gửi broadcast thông báo apps đã load xong

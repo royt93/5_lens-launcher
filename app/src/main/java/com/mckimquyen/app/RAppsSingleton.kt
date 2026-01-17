@@ -106,12 +106,8 @@ class RAppsSingleton private constructor() {
      */
     private var mApps: ArrayList<App>? = null
 
-    /**
-     * Danh sách bitmap icons tương ứng với mApps
-     * Index phải match với mApps: mAppIcons[i] là icon của mApps[i]
-     * null = chưa load, ArrayList() = đã load nhưng rỗng
-     */
-    private var mAppIcons: ArrayList<Bitmap>? = null
+    // NOT storing mAppIcons anymore to save memory (Fix 5.1)
+    // Icons are now managed by BitmapCache (LruCache)
 
     // ========================================================================
     // PUBLIC PROPERTIES - Thread-Safe Access
@@ -119,110 +115,42 @@ class RAppsSingleton private constructor() {
 
     /**
      * Public property để get/set danh sách apps
-     *
-     * GETTER:
-     * - Trả về reference của mApps (không copy) → Fast, memory efficient
-     * - Nếu null → trả về empty ArrayList để tránh NullPointerException
-     * - Caller có thể modify list → Careful!
-     *
-     * SETTER:
-     * - Thay thế toàn bộ list bằng list mới
-     * - Assignment là atomic operation → Thread-safe
-     * - Old list sẽ được GC collect nếu không còn reference
-     *
-     * THREAD SAFETY:
-     * - Read/Write: Thread-safe (atomic reference assignment)
-     * - Modify elements: KHÔNG thread-safe (cần synchronize)
-     *
-     * EXAMPLE:
-     * ```kotlin
-     * // Safe read
-     * val apps = singleton.apps
-     * apps?.forEach { app -> println(app.label) }
-     *
-     * // Safe write (replace entire list)
-     * singleton.apps = newAppsList
-     *
-     * // UNSAFE modification (cần synchronize)
-     * singleton.apps?.add(newApp)  // ⚠️ Not thread-safe!
-     *
-     * // Safe modification (synchronized)
-     * synchronized(singleton) {
-     *     singleton.apps?.add(newApp)  // ✅ Thread-safe
-     * }
-     * ```
      */
     var apps: ArrayList<App>?
         get() {
-            // Return unmodifiable copy to prevent external modifications (thread-safety)
-            // Elvis operator (?:) để handle null case
+            // Return defensive copy to prevent external modifications
             return mApps?.let { ArrayList(it) } ?: ArrayList()
         }
         set(apps) {
-            // Replace toàn bộ list
             mApps = apps
         }
 
     /**
-     * Public property để get/set danh sách bitmap icons
-     *
-     * GETTER:
-     * - Trả về reference của mAppIcons (không copy) → Fast, memory efficient
-     * - Nếu null → trả về empty ArrayList để tránh NullPointerException
-     * - Caller có thể modify list → Careful!
-     *
-     * SETTER:
-     * - Thay thế toàn bộ list bằng list mới
-     * - Assignment là atomic operation → Thread-safe
-     * - Old bitmaps sẽ được GC collect nếu không còn reference
-     *
-     * MEMORY WARNING:
-     * - Bitmaps rất tốn memory (mỗi icon ~100KB-1MB)
-     * - 100 apps × 500KB/icon = 50MB RAM
-     * - Nên implement BitmapCache với LruCache để giảm memory
-     *
-     * THREAD SAFETY:
-     * - Read/Write: Thread-safe (atomic reference assignment)
-     * - Modify elements: KHÔNG thread-safe (cần synchronize)
-     *
-     * EXAMPLE:
-     * ```kotlin
-     * // Safe read
-     * val icons = singleton.appIcons
-     * val firstIcon = icons?.getOrNull(0)
-     *
-     * // Safe write (replace entire list)
-     * singleton.appIcons = newIconsList
-     *
-     * // UNSAFE modification
-     * singleton.appIcons?.add(newBitmap)  // ⚠️ Not thread-safe!
-     *
-     * // Safe modification (synchronized)
-     * synchronized(singleton) {
-     *     singleton.appIcons?.add(newBitmap)  // ✅ Thread-safe
-     * }
-     * ```
+     * Lấy icon của app từ cache
+     * @param packageName Package name của app
+     * @return Bitmap icon hoặc null nếu không có trong cache
      */
-    var appIcons: ArrayList<Bitmap>?
-        get() {
-            // Return defensive copy to prevent external modifications (thread-safety)
-            // Elvis operator (?:) để handle null case
-            return mAppIcons?.let { ArrayList(it) } ?: ArrayList()
-        }
-        set(appIcons) {
-            // Recycle old bitmaps before assigning new list to prevent memory leak
-            mAppIcons?.forEach { bitmap ->
-                if (!bitmap.isRecycled) {
-                    try {
-                        bitmap.recycle()
-                    } catch (e: Exception) {
-                        // Bitmap might be in use, skip recycling
-                    }
-                }
-            }
-            // Replace toàn bộ list
-            mAppIcons = appIcons
-        }
+    fun getAppIcon(packageName: String): Bitmap? {
+        return com.mckimquyen.util.BitmapCache.get(packageName)
+    }
+
+    /**
+     * Lưu icon của app vào cache
+     * @param packageName Package name của app
+     * @param icon Bitmap icon cần cache
+     */
+    fun setAppIcon(packageName: String, icon: Bitmap) {
+        com.mckimquyen.util.BitmapCache.put(packageName, icon)
+    }
+
+    /**
+     * Xóa toàn bộ dữ liệu apps và icons
+     * Nên gọi khi cần refresh toàn bộ dữ liệu hoặc memory low
+     */
+    fun clearAllData() {
+        mApps = null
+        com.mckimquyen.util.BitmapCache.clear()
+    }
 
     // ========================================================================
     // COMPANION OBJECT - Singleton Instance
