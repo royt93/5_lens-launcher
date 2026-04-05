@@ -1,5 +1,8 @@
 package com.mckimquyen.app;
 
+import android.content.BroadcastReceiver;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.util.Log;
 
 import androidx.lifecycle.ProcessLifecycleOwner;
@@ -7,6 +10,7 @@ import androidx.lifecycle.ProcessLifecycleOwner;
 import com.google.android.gms.ads.MobileAds;
 import com.mckimquyen.sdkadbmob.AdMobManager;
 import com.mckimquyen.services.AppEventManager;
+import com.mckimquyen.services.BroadcastReceivers;
 import com.mckimquyen.services.TaskSortApps;
 import com.mckimquyen.services.TaskUpdateApps;
 import com.orm.SugarApp;
@@ -61,6 +65,8 @@ public class RApplication extends SugarApp {
      * 3. setupEventListeners() - Đăng ký lắng nghe events từ AppEventManager
      * 4. updateApps() - Load danh sách apps lần đầu
      */
+    private BroadcastReceiver packageReceiver;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -71,8 +77,29 @@ public class RApplication extends SugarApp {
         // Đăng ký LiveData observers để lắng nghe app events
         setupEventListeners();
 
+        // Fix BUG: Không nhận được PACKAGE_ADDED trên Android 8+
+        // Đăng ký dynamic BroadcastReceiver thay vì dùng Manifest
+        registerPackageChangeReceiver();
+
         // Load danh sách apps lần đầu tiên
         updateApps();
+    }
+
+    /**
+     * Đăng ký receiver lắng nghe cài đặt/gỡ cài đặt ứng dụng.
+     * Bắt buộc đăng ký dynamically vì Android 8.0+ giới hạn implicit broadcasts
+     * trong Manifest (bao gồm PACKAGE_ADDED, PACKAGE_REMOVED).
+     */
+    private void registerPackageChangeReceiver() {
+        Log.d("roy93~", "RApplication: Registering dynamic package receiver for PACKAGE_ADDED/REMOVED");
+        packageReceiver = new BroadcastReceivers.AppsUpdatedReceiver();
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_PACKAGE_ADDED);
+        filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+        filter.addAction(Intent.ACTION_PACKAGE_CHANGED);
+        filter.addAction(Intent.ACTION_PACKAGE_REPLACED);
+        filter.addDataScheme("package");
+        registerReceiver(packageReceiver, filter);
     }
 
     // ========================================================================

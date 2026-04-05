@@ -213,23 +213,10 @@
              ==================================================================== -->
 
         <!-- ====================================================================
-             APPS UPDATED RECEIVER - Lắng nghe package install/remove/update
+             Lưu ý: Đã chuyển sang Dynamic Broadcast Receiver trong RApplication.java.
+             Android 8.0+ (API 26+) bỏ qua implicit broadcasts trong Manifest cho các action này.
+             Vì vậy, receiver dưới đây đã được xóa khỏi Manifest để tránh nhầm lẫn.
              ==================================================================== -->
-        <!-- exported=true: Cần thiết để nhận broadcast từ system -->
-        <!-- Actions: PACKAGE_ADDED, REMOVED, CHANGED, REPLACED -->
-        <!-- Data scheme="package": Để nhận được package name trong intent -->
-        <receiver
-            android:name=".services.BroadcastReceivers$AppsUpdatedReceiver"
-            android:enabled="true"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.PACKAGE_ADDED" />
-                <action android:name="android.intent.action.PACKAGE_REMOVED" />
-                <action android:name="android.intent.action.PACKAGE_CHANGED" />
-                <action android:name="android.intent.action.PACKAGE_REPLACED" />
-                <data android:scheme="package" />
-            </intent-filter>
-        </receiver>
 
         <!-- ====================================================================
              INTERNAL RECEIVERS - Các receiver nội bộ của app

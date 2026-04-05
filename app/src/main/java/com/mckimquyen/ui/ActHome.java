@@ -117,6 +117,7 @@ public class ActHome extends ActBase {
     }
 
     private void assignApps(ArrayList<App> lApp) {
+        android.util.Log.d("roy93~", "ActHome: assignApps called, input list size: " + (lApp != null ? lApp.size() : "null"));
         if (lApp.isEmpty()) {
             return;
         }
@@ -124,6 +125,7 @@ public class ActHome extends ActBase {
         lensViews.setVisibility(View.VISIBLE);
         listApp = lApp;
         removeHiddenApps();
+        android.util.Log.d("roy93~", "ActHome: Setting " + listApp.size() + " apps to lensViews");
         lensViews.setApps(listApp);
     }
 

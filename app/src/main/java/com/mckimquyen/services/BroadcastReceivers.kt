@@ -18,6 +18,7 @@ class BroadcastReceivers {
 
     class AppsUpdatedReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
+            android.util.Log.d("roy93~", "BroadcastReceivers: AppsUpdatedReceiver onReceive! Action: ${intent.action}")
             AppEventManager.notifyAppsUpdated()
         }
     }
