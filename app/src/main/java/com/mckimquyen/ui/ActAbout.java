@@ -246,6 +246,12 @@ public class ActAbout extends ActBase {
 
     @Override
     protected void onDestroy() {
+        // Fix BUG-09: Cancel animator trong onDestroy() để tránh window/view leak
+        // onPause() đã cancel nhưng nếu Activity bị destroy trực tiếp thì cần xử lý ở đây
+        if (animator != null) {
+            animator.cancel();
+            animator = null;
+        }
         super.onDestroy();
     }
 }

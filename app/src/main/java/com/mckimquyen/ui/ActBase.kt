@@ -36,13 +36,17 @@ open class ActBase : BaseActivity() {
                 .build()
         } else {
             // API < 33: Use deprecated constructor with colorPrimary and Bitmap icon
+            // Fix BUG-12: Recycle bitmap sau khi setTaskDescription() để tránh memory waste.
+            // TaskDescription tạo internal copy của bitmap nên an toàn để recycle ngay.
             val appIconBitmap = BitmapFactory.decodeResource(resources, R.mipmap.ic_launcher)
             @Suppress("DEPRECATION")
-            TaskDescription(
+            val desc = TaskDescription(
                 /* label = */ getString(R.string.app_name),
                 /* icon = */ appIconBitmap,
                 /* colorPrimary = */ ContextCompat.getColor(baseContext, R.color.colorPrimaryDark)
             )
+            appIconBitmap.recycle()
+            desc
         }
         setTaskDescription(taskDescription)
     }

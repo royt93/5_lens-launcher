@@ -427,7 +427,9 @@ public class ActSettings extends ActBase
                 }).show();
 
         // Apply rounded background
-        new android.os.Handler().postDelayed(() -> {
+        new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+            // Fix BUG-10: Guard Activity state trước khi chạm vào Window
+            if (isDestroyed() || isFinishing()) return;
             if (dlgSortType != null && dlgSortType.getWindow() != null) {
                 dlgSortType.getWindow().setBackgroundDrawableResource(R.drawable.bg_dialog_rounded);
             }
@@ -459,7 +461,8 @@ public class ActSettings extends ActBase
                 }).show();
 
         // Apply rounded background
-        new android.os.Handler().postDelayed(() -> {
+        new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+            if (isDestroyed() || isFinishing()) return;
             if (dlgIconPack != null && dlgIconPack.getWindow() != null) {
                 dlgIconPack.getWindow().setBackgroundDrawableResource(R.drawable.bg_dialog_rounded);
             }
@@ -490,13 +493,16 @@ public class ActSettings extends ActBase
                     dismissBackgroundDialog();
 
                     // Recreate activity to apply new theme
-                    new android.os.Handler().postDelayed(() -> recreate(), 200);
+                    new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                        if (!isDestroyed() && !isFinishing()) recreate();
+                    }, 200);
 
                     return true;
                 }).show();
 
         // Apply rounded background
-        new android.os.Handler().postDelayed(() -> {
+        new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+            if (isDestroyed() || isFinishing()) return;
             if (dlgNightMode != null && dlgNightMode.getWindow() != null) {
                 dlgNightMode.getWindow().setBackgroundDrawableResource(R.drawable.bg_dialog_rounded);
             }
@@ -530,7 +536,8 @@ public class ActSettings extends ActBase
                 }).show();
 
         // Apply rounded background
-        new android.os.Handler().postDelayed(() -> {
+        new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+            if (isDestroyed() || isFinishing()) return;
             if (dlgBackground != null && dlgBackground.getWindow() != null) {
                 dlgBackground.getWindow().setBackgroundDrawableResource(R.drawable.bg_dialog_rounded);
             }
@@ -570,7 +577,8 @@ public class ActSettings extends ActBase
         dialog.show(getSupportFragmentManager(), TAG_COLOR_HIGHLIGHT);
 
         // Apply rounded background after dialog is fully shown
-        new android.os.Handler().postDelayed(() -> {
+        new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+            if (isDestroyed() || isFinishing()) return;
             if (dialog.getDialog() != null && dialog.getDialog().getWindow() != null) {
                 dialog.getDialog().getWindow().setBackgroundDrawableResource(R.drawable.bg_dialog_rounded);
             }

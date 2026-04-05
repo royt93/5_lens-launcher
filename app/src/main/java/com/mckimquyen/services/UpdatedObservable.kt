@@ -32,9 +32,8 @@ class UpdatedObservable private constructor() : Observable() {
      */
     @Synchronized
     fun updateValue(data: Any?) {
+        // Fix BUG-13: chỉ delegate sang AppEventManager (LiveData).
         AppEventManager.notifyAppsUpdated(data)
-        setChanged()
-        notifyObservers(data)
     }
 
     /**

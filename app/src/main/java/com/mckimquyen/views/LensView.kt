@@ -546,7 +546,13 @@ class LensView : View {
 
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
-        // Clear references to allow garbage collection
+        // Fix BUG-05: Cancel animation đang chạy để tránh AnimationListener callback
+        // vào LensView (inner class giữ outer reference) sau khi view bị detach/destroy
+        clearAnimation()
+        // Null toàn bộ references để GC thu hồi
         mApps = null
+        mUtilSettings = null
+        mPackageManager = null
+        mWorkspaceBackgroundDrawable = null
     }
 }

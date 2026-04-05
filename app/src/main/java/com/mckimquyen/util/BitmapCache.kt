@@ -33,7 +33,13 @@ object BitmapCache {
         }
 
         /**
-         * Tự động recycle bitmap khi bị remove khỏi cache để giải phóng memory
+         * Fix BUG-06: KHÔNG recycle bitmap thủ công khi bị remove khỏi cache.
+         * LẬP LUẬN:
+         * - LruCache evict có thể xảy ra đồng thời khi UI thread đang vẽ bitmap đó
+         * - Nếu recycle, LensView.drawAppIcon() sẽ gặp "bitmap is recycled" → visual glitch
+         * - An toàn hơn: để GC tự thu hồi sau khi không còn reference nào giữ bitmap
+         *
+         * Trade-off: memory không được giải phóng ngay lập tức, nhưng tránh được crash/glitch.
          */
         override fun entryRemoved(
             evicted: Boolean,
@@ -41,15 +47,8 @@ object BitmapCache {
             oldValue: Bitmap,
             newValue: Bitmap?
         ) {
-            // Chỉ recycle khi bitmap bị evict (không phải khi update)
-            if (evicted && oldValue != null && !oldValue.isRecycled) {
-                try {
-                    oldValue.recycle()
-                    Log.d(TAG, "Recycled bitmap for key: $key")
-                } catch (e: Exception) {
-                    Log.e(TAG, "Error recycling bitmap for key: $key", e)
-                }
-            }
+            Log.d(TAG, "Bitmap evicted from cache for key: $key, evicted=$evicted")
+            // Do not call oldValue.recycle() - let GC handle it to avoid race conditions
         }
     }
 

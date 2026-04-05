@@ -168,4 +168,22 @@ class FrmLens : Fragment(), LensInterface {
             us.save(UtilSettings.KEY_ANIMATION_TIME, UtilSettings.DEFAULT_ANIMATION_TIME)
         }
     }
+
+    /**
+     * Fix BUG-14: Null toàn bộ view references và utilSettings trong onDestroyView()
+     * để tránh Fragment giữ context sau khi view bị destroy.
+     */
+    override fun onDestroyView() {
+        lensViewsSettings = null
+        sbMinIconSize = null
+        tvValueMinIconSize = null
+        sbDistortionFactor = null
+        tvValueDistortionFactor = null
+        sbScaleFactor = null
+        tvValueScaleFactor = null
+        sbAnimationTime = null
+        tvValueAnimationTime = null
+        utilSettings = null
+        super.onDestroyView()
+    }
 }

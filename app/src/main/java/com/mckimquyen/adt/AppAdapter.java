@@ -209,7 +209,11 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
 
             // Set basic info
             tvAppLabel.setText(mApp.getLabel());
-            ivAppIcon.setImageBitmap(mApp.getIcon());
+            // BUG-07 fix consequence: App.icon is now null (icon stored in BitmapCache only).
+            // Must fetch icon via RAppsSingleton.getAppIcon() instead of mApp.getIcon().
+            android.graphics.Bitmap cachedIcon = com.mckimquyen.app.RAppsSingleton.getInstance()
+                    .getAppIcon(Objects.requireNonNull(mApp.getPackageName()).toString());
+            ivAppIcon.setImageBitmap(cachedIcon);
 
             String pkgName = Objects.requireNonNull(mApp.getPackageName()).toString();
             String name = Objects.requireNonNull(mApp.getName()).toString();

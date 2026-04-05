@@ -85,8 +85,9 @@ class TaskUpdateApps(
         for (app in apps) {
             val appIcon = app.icon
             if (appIcon != null) {
-                mApps?.add(app)
-                // Cache icon ngay lập tức để giải phóng memory từ object App
+                // Fix BUG-07: Lưu App với icon = null để tránh dual-storage (bitmap 2 lần).
+                // Icon đã được cache vào BitmapCache, giữ thêm trong App.icon là dư thừa.
+                mApps?.add(app.copy(icon = null))
                 RAppsSingleton.instance.setAppIcon(app.packageName.toString(), appIcon)
             }
         }

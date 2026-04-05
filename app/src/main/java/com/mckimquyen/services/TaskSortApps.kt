@@ -3,7 +3,6 @@ package com.mckimquyen.services
 import android.app.Application
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
 import com.mckimquyen.app.ApplicationScope
 import com.mckimquyen.app.RAppsSingleton
 import com.mckimquyen.model.App
@@ -74,16 +73,23 @@ class TaskSortApps(
         // Sắp xếp apps theo sort type từ settings
         UtilAppSorter.sort(apps, utilSettings.sortType)
 
-        // Lọc và lưu apps có icon hợp lệ sau khi sort, cache icon vào BitmapCache
+        // Fix BUG-07 consequence: Sau khi BUG-07 fix, app.icon = null trong tất cả App objects.
+        // Icons được lưu trong BitmapCache (qua RAppsSingleton.getAppIcon) không còn trong App.icon.
+        //
+        // Logic cũ sai: "if (appIcon != null)" → lần 2 trở đi sẽ filter RA TẤT CẢ apps
+        // vì app.icon luôn = null → mApps rỗng → launcher trắng tinh.
+        //
+        // Logic đúng: giữ lại TẤT CẢ apps sau khi sort (BitmapCache đã có đủ icons).
+        // Nếu lần nào đó icon còn trong app.icon (lần đầu load), vẫn cache lại.
         mApps = ArrayList()
-
         for (app in apps) {
             val appIcon = app.icon
             if (appIcon != null) {
-                mApps?.add(app)
-                // Đảm bảo icon được cache (dù thường đã được cache từ TaskUpdateApps)
+                // Lần đầu chạy (TaskUpdateApps copy app nhưng icon chưa null): cache icon vào BitmapCache
                 RAppsSingleton.instance.setAppIcon(app.packageName.toString(), appIcon)
             }
+            // Luôn thêm app vào list (dù icon null), vì icon đã có trong BitmapCache
+            mApps?.add(app.copy(icon = null))
         }
     }
 

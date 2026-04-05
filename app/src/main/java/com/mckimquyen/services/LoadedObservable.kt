@@ -32,9 +32,9 @@ class LoadedObservable private constructor() : Observable() {
      */
     @Synchronized
     fun updateValue(data: Any?) {
+        // Fix BUG-13: chỉ delegate sang AppEventManager (LiveData).
+        // setChanged()/notifyObservers() đã là dead code và đã bỏ qua BroadcastReceivers.
         AppEventManager.notifyAppsLoaded(data)
-        setChanged()
-        notifyObservers(data)
     }
 
     /**

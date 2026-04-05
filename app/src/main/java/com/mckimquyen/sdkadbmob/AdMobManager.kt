@@ -35,12 +35,13 @@ import com.google.android.gms.ads.identifier.AdvertisingIdClient
 import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import com.mckimquyen.BuildConfig
-import kotlinx.coroutines.CoroutineScope
+import com.mckimquyen.app.ApplicationScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.lang.ref.WeakReference
 
 //version 20250803
@@ -119,7 +120,7 @@ object AdMobManager {
                 }
             }
             onComplete(true, gaidCurrent)
-            CoroutineScope(Dispatchers.Default).launch {
+            ApplicationScope.scope.launch(Dispatchers.Default) {
                 EventBus.sendEvent(true)
             }
         }
@@ -151,17 +152,23 @@ object AdMobManager {
         return list
     }
 
+    /**
+     * Fix BUG-03: Migrate raw Thread sang coroutine với ApplicationScope để tránh thread leak.
+     * Sử dụng Dispatchers.IO phù hợp với blocking I/O operation.
+     */
     fun getGAID(context: Context, callback: (String) -> Unit) {
-        Thread {
-            try {
-                val info = AdvertisingIdClient.getAdvertisingIdInfo(context)
-                val id = info.id ?: ""
-                callback(id)
+        val appContext = context.applicationContext
+        ApplicationScope.scope.launch(Dispatchers.IO) {
+            val id = try {
+                AdvertisingIdClient.getAdvertisingIdInfo(appContext).id ?: ""
             } catch (e: Exception) {
-                callback("")
-                Log.d("AdMobManager", "getGAID error $e")
+                Log.d(TAG, "getGAID error $e")
+                ""
             }
-        }.start()
+            withContext(Dispatchers.Main) {
+                callback(id)
+            }
+        }
     }
 
     fun setCurrentActivity(activity: Activity) {
@@ -500,24 +507,44 @@ object AdMobManager {
 
     var countInitSplashScreen = 0
 
+    /**
+     * Fix BUG-01: Dùng ApplicationScope thay vì CoroutineScope(Default) không được quản lý.
+     *   CoroutineScope cũ không bao giờ bị cancel → SharedFlow collector chạy mãi mãi → leak.
+     * Fix BUG-02: Activity được giữ qua WeakReference thay vì strong reference trực tiếp.
+     */
     fun initSplashScreen(activity: Activity, onAdLoaded: () -> Unit) {
         countInitSplashScreen++
         Log.d(TAG, "~~~initSplashScreen countInitSplashScreen $countInitSplashScreen")
         if (countInitSplashScreen > 1) {
             onAdLoaded.invoke()
         } else {
-            CoroutineScope(Dispatchers.Default).launch {
-                Log.d(TAG, "~~~initSplashScreen launch")
+            // WeakReference để tránh giữ Activity khi coroutine chờ event
+            val activityRef = WeakReference(activity)
+            ApplicationScope.scope.launch(Dispatchers.Default) {
+                Log.d(TAG, "~~~initSplashScreen launch with ApplicationScope")
                 EventBus.eventFlow.collectLatest { value ->
                     Log.d(TAG, "initSplashScreen collectLatest: $value")
-                    CoroutineScope(Dispatchers.Main).launch {
+                    val act = activityRef.get()
+                    if (act == null || act.isFinishing || act.isDestroyed) {
+                        Log.d(TAG, "initSplashScreen: Activity no longer valid, skip ad")
+                        return@collectLatest
+                    }
+                    withContext(Dispatchers.Main) {
+                        val currentAct = activityRef.get()
+                        if (currentAct == null || currentAct.isFinishing || currentAct.isDestroyed) {
+                            Log.d(TAG, "initSplashScreen: Activity destroyed before ad load")
+                            return@withContext
+                        }
                         loadAppOpenAd(
-                            context = activity,
+                            context = currentAct,
                             adUnitId = BuildConfig.ADMOB_APP_OPEN_ID,
                             onAdLoaded = { result ->
                                 Log.d(TAG, "onAdLoaded result $result")
-                                if (result) {
-                                    showAppOpenAd(activity) {
+                                val finalAct = activityRef.get()
+                                if (finalAct != null && !finalAct.isFinishing && !finalAct.isDestroyed) {
+                                    if (result) {
+                                        showAppOpenAd(finalAct) { onAdLoaded.invoke() }
+                                    } else {
                                         onAdLoaded.invoke()
                                     }
                                 } else {
@@ -587,13 +614,27 @@ class AppPreferences private constructor(context: Context) {
 }
 
 object EventBus {
-    private val _eventFlow = MutableSharedFlow<Boolean>()
+    /**
+     * Fix Race Condition: replay=1 đảm bảo late subscriber nhận được event đã emit.
+     *
+     * Scenario không có replay=1 (BUG):
+     *   T=0ms:  MobileAds.initialize() done → sendEvent(true)       [emit, không ai nghe]
+     *   T=10ms: ActSettings.onCreate() → initSplashScreen() → collect  [bỏ lỡ event]
+     *   → loadAppOpenAd() không bao giờ được gọi → splash overlay stuck
+     *
+     * Scenario với replay=1 (FIXED):
+     *   T=0ms:  MobileAds.initialize() done → sendEvent(true)       [emit, buffer=1]
+     *   T=10ms: ActSettings.onCreate() → initSplashScreen() → collect  [nhận từ buffer ✅]
+     *   → loadAppOpenAd() được gọi bình thường
+     */
+    private val _eventFlow = MutableSharedFlow<Boolean>(replay = 1)
     val eventFlow = _eventFlow.asSharedFlow()
 
     suspend fun sendEvent(value: Boolean) {
         _eventFlow.emit(value)
     }
 }
+
 
 //class AppLifecycleListener(
 //    private val callbackForegroundBackground: (

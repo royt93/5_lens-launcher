@@ -32,9 +32,8 @@ class LockChangedObservable private constructor() : Observable() {
      */
     @Synchronized
     fun updateValue(data: Any?) {
+        // Fix BUG-13: chỉ delegate sang AppEventManager (LiveData).
         AppEventManager.notifyLockChanged(data)
-        setChanged()
-        notifyObservers(data)
     }
 
     /**

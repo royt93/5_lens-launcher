@@ -32,9 +32,8 @@ class VisibilityChangedObservable private constructor() : Observable() {
      */
     @Synchronized
     fun updateValue(data: Any?) {
+        // Fix BUG-13: chỉ delegate sang AppEventManager (LiveData).
         AppEventManager.notifyVisibilityChanged(data)
-        setChanged()
-        notifyObservers(data)
     }
 
     /**

@@ -6,74 +6,55 @@ import android.content.Intent
 
 /**
  * Collection of BroadcastReceivers for handling app events.
- * <p>
- * Migrated from deprecated Observable pattern to AppEventManager (LiveData).
- * Each receiver notifies AppEventManager when corresponding event occurs.
- * <p>
- * Fix: Removed deprecated Observable wrappers, use AppEventManager directly
+ *
+ * Fix BUG-13: Bypass deprecated Observable layer — gọi AppEventManager trực tiếp.
+ * Trước đây: BroadcastReceiver → XxxObservable.instance.update() → AppEventManager
+ * Bây giờ:   BroadcastReceiver → AppEventManager (direct, clean, no deprecated wrapper)
+ *
+ * XxxObservable classes vẫn giữ lại (không xóa) để tránh compile error nếu còn
+ * bất kỳ chỗ nào reference, nhưng không được gọi từ đây nữa.
  */
 class BroadcastReceivers {
 
     class AppsUpdatedReceiver : BroadcastReceiver() {
-        override fun onReceive(
-            context: Context,
-            intent: Intent
-        ) {
-            UpdatedObservable.instance.update()
+        override fun onReceive(context: Context, intent: Intent) {
+            AppEventManager.notifyAppsUpdated()
         }
     }
 
     class AppsEditedReceiver : BroadcastReceiver() {
-        override fun onReceive(
-            context: Context,
-            intent: Intent
-        ) {
-            EditedObservable.instance.update()
+        override fun onReceive(context: Context, intent: Intent) {
+            AppEventManager.notifyAppsEdited()
         }
     }
 
     class AppsVisibilityChangedReceiver : BroadcastReceiver() {
-        override fun onReceive(
-            context: Context,
-            intent: Intent
-        ) {
-            VisibilityChangedObservable.instance.update()
+        override fun onReceive(context: Context, intent: Intent) {
+            AppEventManager.notifyVisibilityChanged()
         }
     }
 
     class AppsLockChangedReceiver : BroadcastReceiver() {
-        override fun onReceive(
-            context: Context,
-            intent: Intent
-        ) {
-            LockChangedObservable.instance.update()
+        override fun onReceive(context: Context, intent: Intent) {
+            AppEventManager.notifyLockChanged()
         }
     }
 
     class AppsLoadedReceiver : BroadcastReceiver() {
-        override fun onReceive(
-            context: Context,
-            intent: Intent
-        ) {
-            LoadedObservable.instance.update()
+        override fun onReceive(context: Context, intent: Intent) {
+            AppEventManager.notifyAppsLoaded()
         }
     }
 
     class BackgroundChangedReceiver : BroadcastReceiver() {
-        override fun onReceive(
-            context: Context,
-            intent: Intent
-        ) {
-            BackgroundChangedObservable.instance.update()
+        override fun onReceive(context: Context, intent: Intent) {
+            AppEventManager.notifyBackgroundChanged()
         }
     }
 
     class NightModeReceiver : BroadcastReceiver() {
-        override fun onReceive(
-            context: Context,
-            intent: Intent
-        ) {
-            NightModeObservable.instance.update()
+        override fun onReceive(context: Context, intent: Intent) {
+            AppEventManager.notifyNightModeChanged()
         }
     }
 }

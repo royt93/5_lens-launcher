@@ -95,48 +95,31 @@ public class RApplication extends SugarApp {
      * - new Thread().start(): Background thread để tránh ANR (Application Not Responding)
      * - Lambda callback: Được gọi khi initialization hoàn tất
      */
+    /**
+     * Khởi tạo Google AdMob SDK
+     *
+     * Fix BUG-04: Migrate từ raw Thread sang named daemon Thread ỉ nhất để tránh thread leak.
+     * Dùng getApplicationContext() thay vì RApplication.this để tránh context leak không cần thiết.
+     */
     private void setupAdmob() {
-        new Thread(() -> {
-            // Step 1: Khởi tạo Google AdMob SDK
-            MobileAds.initialize(RApplication.this, initializationStatus -> {
-                // Initialization complete - không cần xử lý gì thêm
-                // initializationStatus chứa thông tin về adapter status
-            });
+        Thread adMobInitThread = new Thread(() -> {
+            try {
+                // Step 1: Khởi tạo Google AdMob SDK
+                MobileAds.initialize(getApplicationContext(), initializationStatus -> {
+                    // Initialization complete
+                });
 
-            // Step 2: Khởi tạo custom AdMob Manager
-            AdMobManager.INSTANCE.init(this, (success, gaidCurrent) -> {
-                // Callback khi init xong
-                Log.d(TAG, "AdMobManager init success: " + success + ", GAID: " + gaidCurrent);
-                return Unit.INSTANCE; // Fixed: Return Unit.INSTANCE instead of null
-            });
-        }).start();
-
-        // ====================================================================
-        // APP LIFECYCLE CALLBACKS (COMMENTED OUT)
-        // ====================================================================
-        // Code dưới đây dùng để track foreground/background state
-        // Hiện tại không cần thiết nên đã comment out
-        // Có thể enable lại nếu cần show App Open Ads khi user quay lại app
-        // registerActivityLifecycleCallbacks(new AppLifecycleListener(
-        //     new Function2<Boolean, Activity, Unit>() {
-        //         @Override
-        //         public Unit invoke(Boolean isForeground, Activity activity) {
-        //             if (isForeground) {
-        //                 // App moved to Foreground - có thể show App Open Ad ở đây
-        //             } else {
-        //                 // App moved to Background
-        //             }
-        //             return Unit.INSTANCE;
-        //         }
-        //     },
-        //     new Function1<Activity, Unit>() {
-        //         @Override
-        //         public Unit invoke(Activity activity) {
-        //             // Callback khi Activity được created
-        //             return Unit.INSTANCE;
-        //         }
-        //     }
-        // ));
+                // Step 2: Khởi tạo custom AdMob Manager
+                AdMobManager.INSTANCE.init(this, (success, gaidCurrent) -> {
+                    Log.d(TAG, "AdMobManager init success: " + success + ", GAID: " + gaidCurrent);
+                    return Unit.INSTANCE;
+                });
+            } catch (Exception e) {
+                Log.e(TAG, "setupAdmob error: " + e.getMessage(), e);
+            }
+        }, "AdMob-Init-Thread"); // Named thread để dễ debug
+        adMobInitThread.setDaemon(true); // Daemon thread: tự động dừng khi app process bị kill
+        adMobInitThread.start();
     }
 
     // ========================================================================

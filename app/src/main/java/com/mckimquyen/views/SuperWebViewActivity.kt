@@ -202,4 +202,15 @@ class SuperWebViewActivity : ActBase() {
             progressIndicator.progress = newProgress
         }
     }
+    /**
+     * Fix BUG-11: WebView phải được destroy đúng cách trong onDestroy().
+     * WebView là nguồn memory leak nổi tiếng trên Android nếu không cleanup.
+     */
+    override fun onDestroy() {
+        webView.stopLoading()
+        webView.clearHistory()
+        webView.loadUrl("about:blank")  // Clear content để giải phóng bộ nhớ renderer
+        webView.destroy()
+        super.onDestroy()
+    }
 }
