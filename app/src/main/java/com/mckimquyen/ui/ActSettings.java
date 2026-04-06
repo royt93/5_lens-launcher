@@ -45,8 +45,7 @@ import com.mckimquyen.itf.AppsInterface;
 import com.mckimquyen.itf.LensInterface;
 import com.mckimquyen.itf.SettingsInterface;
 import com.mckimquyen.model.App;
-import com.mckimquyen.sdkadbmob.AdMobManager;
-import com.mckimquyen.sdkadbmob.UIUtils;
+import com.mckimquyen.util.UIUtils;
 import com.mckimquyen.services.AppEventManager;
 import com.mckimquyen.services.BroadcastReceivers;
 import com.mckimquyen.util.UtilIconPackManager;
@@ -66,7 +65,7 @@ import kotlin.Unit;
 
 //2023.03.19 tried to convert kotlin but failed
 public class ActSettings extends ActBase
-        implements ColorChooserDialog.ColorCallback, AdMobManager.InterstitialAdListener {
+        implements ColorChooserDialog.ColorCallback {
 
     private static final String TAG_COLOR_BACKGROUND = "BackgroundColor";
     private static final String TAG_COLOR_HIGHLIGHT = "HighlightColor";
@@ -76,7 +75,7 @@ public class ActSettings extends ActBase
     FloatingActionButton fabSort;
     LinearLayout flAdOpenApp;
     // private MaxAdView adView;
-    private AdView adView = null;
+    private View adView = null;
 
     private ArrayList<App> listApp;
     private MaterialDialog dlgSortType;
@@ -110,8 +109,7 @@ public class ActSettings extends ActBase
         UIUtils.INSTANCE.setupEdgeToEdge1(getWindow());
         setContentView(R.layout.act_settings);
         UIUtils.INSTANCE.setupEdgeToEdge2(findViewById(R.id.rootLayout), true, true);
-        AdMobManager.INSTANCE.setCurrentActivity(this);
-        AdMobManager.INSTANCE.setInterstitialListener(this);
+        com.roy.sdkadbmob.AdManager.INSTANCE.setCurrentActivity(this);
         setupViews();
 
         // Observe app events using LiveData
@@ -123,11 +121,6 @@ public class ActSettings extends ActBase
         });
 
         AppEventManager.INSTANCE.getNightModeChanged().observe(this, data -> updateNightMode());
-
-        // Note: Intentionally NOT using OnBackPressedCallback here
-        // Default back button behavior (finish()) is sufficient
-        // OnBackPressedCallback would intercept back press from ad dismiss, causing
-        // issues
 
         checkShowAd();
     }
@@ -155,12 +148,9 @@ public class ActSettings extends ActBase
         viewpager.registerOnPageChangeCallback(new PageChangeCallback(fabSort));
         listApp = Objects.requireNonNull(RAppsSingleton.getInstance()).getApps();
 
-        // adView = ApplovinKt.createAdBanner(this, ActSettings.class.getSimpleName(),
-        // Color.TRANSPARENT, findViewById(R.id.flAd), true);
-        adView = AdMobManager.INSTANCE.loadBanner(this, BuildConfig.ADMOB_BANNER_ID, findViewById(R.id.bannerContainer),
-                findViewById(R.id.tvLabelAd), AdSize.BANNER);
-        // createAdInter();
-        AdMobManager.INSTANCE.loadInterstitial(this, BuildConfig.ADMOB_INTERSTITIAL_ID);
+        // Banner chỉ load SAU KHI App Open Splash dismiss (xem checkShowAd)
+        // để tránh count hidden impression khi flAdOpenApp đang che
+        com.roy.sdkadbmob.AdManager.INSTANCE.loadInterstitial(this);
     }
 
     @Override
@@ -183,9 +173,7 @@ public class ActSettings extends ActBase
     @Override
     protected void onResume() {
         super.onResume();
-        if (adView != null) {
-            adView.resume();
-        }
+        com.roy.sdkadbmob.AdManager.INSTANCE.bannerResume(adView);
         // Show Terms and Privacy Policy dialog only once per session
         if (utilSettings != null && !hasShownTermsDialog) {
             boolean hasRead = utilSettings.getBoolean(UtilSettings.KEY_READ_POLICY);
@@ -220,9 +208,7 @@ public class ActSettings extends ActBase
 
     @Override
     protected void onPause() {
-        if (adView != null) {
-            adView.pause();
-        }
+        com.roy.sdkadbmob.AdManager.INSTANCE.bannerPause(adView);
         // Dismiss dialogs in onPause to prevent WindowLeaked exception
         dismissAllDialogs();
         super.onPause();
@@ -234,7 +220,7 @@ public class ActSettings extends ActBase
 
         if (isDefaultLauncher) {
             // Already default launcher -> go to launcher home screen
-            AdMobManager.INSTANCE.showInterstitial(this, aBoolean -> {
+            com.roy.sdkadbmob.AdManager.INSTANCE.showInterstitial(this, aBoolean -> {
                 Intent homeIntent = new Intent(Intent.ACTION_MAIN);
                 homeIntent.addCategory(Intent.CATEGORY_HOME);
                 homeIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -311,7 +297,7 @@ public class ActSettings extends ActBase
             launchApps();
             return true;
         } else if (id == R.id.menuItemAbout) {
-            AdMobManager.INSTANCE.showInterstitial(this, aBoolean -> {
+            com.roy.sdkadbmob.AdManager.INSTANCE.showInterstitial(this, aBoolean -> {
                 Intent aboutIntent = new Intent(ActSettings.this, ActAbout.class);
                 startActivity(aboutIntent);
                 overridePendingTransition(R.anim.a_slide_in_left, R.anim.a_slide_out_right);
@@ -649,14 +635,10 @@ public class ActSettings extends ActBase
             lensInterface = null;
             appsInterface = null;
             settingsInterface = null;
-            // Clear Activity reference from AdMobManager
-            AdMobManager.INSTANCE.clearCurrentActivity();
         } finally {
             // Ensure AdView is always destroyed, even if exception occurs
-            if (adView != null) {
-                adView.destroy();
-                adView = null;
-            }
+            com.roy.sdkadbmob.AdManager.INSTANCE.bannerDestroy(adView);
+            adView = null;
             super.onDestroy();
         }
     }
@@ -717,44 +699,16 @@ public class ActSettings extends ActBase
     }
 
     private void checkShowAd() {
-        AdMobManager.INSTANCE.initSplashScreen(this, () -> {
+        com.roy.sdkadbmob.AdManager.INSTANCE.initSplashScreen(this, () -> {
+            // 1. Ẩn splash overlay
             flAdOpenApp.setVisibility(View.GONE);
+            // 2. Chỉ load banner SAU KHI user thực sự nhìn thấy nó
+            adView = com.roy.sdkadbmob.AdManager.INSTANCE.loadBanner(this,
+                    (android.view.ViewGroup) findViewById(R.id.bannerContainer),
+                    (android.widget.TextView) findViewById(R.id.tvLabelAd),
+                    com.google.android.gms.ads.AdSize.BANNER);
             return Unit.INSTANCE;
         });
     }
 
-    @Override
-    public void onAdLoaded() {
-
-    }
-
-    @Override
-    public void onAdFailedToLoad(@NotNull LoadAdError error) {
-
-    }
-
-    @Override
-    public void onAdShowed() {
-
-    }
-
-    @Override
-    public void onAdDismissed() {
-
-    }
-
-    @Override
-    public void onAdClicked() {
-
-    }
-
-    @Override
-    public void onAdFailedToShow(@NotNull AdError error) {
-
-    }
-
-    @Override
-    public void onAdNotAvailable() {
-
-    }
 }

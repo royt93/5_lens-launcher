@@ -8,7 +8,7 @@ import android.util.Log;
 import androidx.lifecycle.ProcessLifecycleOwner;
 
 import com.google.android.gms.ads.MobileAds;
-import com.mckimquyen.sdkadbmob.AdMobManager;
+import com.google.android.gms.ads.MobileAds;
 import com.mckimquyen.services.AppEventManager;
 import com.mckimquyen.services.BroadcastReceivers;
 import com.mckimquyen.services.TaskSortApps;
@@ -122,31 +122,40 @@ public class RApplication extends SugarApp {
      * - new Thread().start(): Background thread để tránh ANR (Application Not Responding)
      * - Lambda callback: Được gọi khi initialization hoàn tất
      */
-    /**
-     * Khởi tạo Google AdMob SDK
-     *
-     * Fix BUG-04: Migrate từ raw Thread sang named daemon Thread ỉ nhất để tránh thread leak.
-     * Dùng getApplicationContext() thay vì RApplication.this để tránh context leak không cần thiết.
-     */
     private void setupAdmob() {
-        Thread adMobInitThread = new Thread(() -> {
-            try {
-                // Step 1: Khởi tạo Google AdMob SDK
-                MobileAds.initialize(getApplicationContext(), initializationStatus -> {
-                    // Initialization complete
-                });
+        com.roy.sdkadbmob.AdSdkConfig adConfig = new com.roy.sdkadbmob.AdSdkConfig(
+            com.mckimquyen.BuildConfig.IS_ENABLE_ADMOB,
+            com.mckimquyen.BuildConfig.DEBUG,
+            com.mckimquyen.BuildConfig.ADMOB_APP_OPEN_ID,
+            com.mckimquyen.BuildConfig.ADMOB_INTERSTITIAL_ID,
+            com.mckimquyen.BuildConfig.ADMOB_BANNER_ID,
+            com.mckimquyen.BuildConfig.APPLOVIN_APP_OPEN_ID,
+            com.mckimquyen.BuildConfig.APPLOVIN_INTERSTITIAL_ID,
+            com.mckimquyen.BuildConfig.APPLOVIN_BANNER_ID
+        );
 
-                // Step 2: Khởi tạo custom AdMob Manager
-                AdMobManager.INSTANCE.init(this, (success, gaidCurrent) -> {
-                    Log.d(TAG, "AdMobManager init success: " + success + ", GAID: " + gaidCurrent);
-                    return Unit.INSTANCE;
+        com.roy.sdkadbmob.AdManager.INSTANCE.setConfig(adConfig);
+        com.roy.sdkadbmob.AdManager.INSTANCE.earlyInit(this);
+
+        if (com.mckimquyen.BuildConfig.IS_ENABLE_ADMOB) {
+            MobileAds.initialize(this, status -> {
+                com.roy.sdkadbmob.AdManager.INSTANCE.init(this, adConfig, (success, gaid) -> {
+                    Log.d(TAG, "AdManager init success=" + success + ", gaid=" + gaid);
+                    // Removed registerAppOpenAdLifecycle to comply with Google Play Launcher Policy
+                    return kotlin.Unit.INSTANCE;
                 });
-            } catch (Exception e) {
-                Log.e(TAG, "setupAdmob error: " + e.getMessage(), e);
-            }
-        }, "AdMob-Init-Thread"); // Named thread để dễ debug
-        adMobInitThread.setDaemon(true); // Daemon thread: tự động dừng khi app process bị kill
-        adMobInitThread.start();
+            });
+        } else {
+            com.applovin.sdk.AppLovinSdk sdk = com.applovin.sdk.AppLovinSdk.getInstance(this);
+            sdk.setMediationProvider("max");
+            sdk.initializeSdk(config -> {
+                com.roy.sdkadbmob.AdManager.INSTANCE.init(this, adConfig, (success, gaid) -> {
+                    Log.d(TAG, "AdManager init success=" + success + ", gaid=" + gaid);
+                    // Removed registerAppOpenAdLifecycle to comply with Google Play Launcher Policy
+                    return kotlin.Unit.INSTANCE;
+                });
+            });
+        }
     }
 
     // ========================================================================

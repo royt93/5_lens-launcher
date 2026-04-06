@@ -2,7 +2,7 @@ package com.mckimquyen.ui
 
 import android.os.Bundle
 import com.mckimquyen.R
-import com.mckimquyen.sdkadbmob.UIUtils
+import com.mckimquyen.util.UIUtils
 
 class ActFakeLauncher : BaseActivity() {
 

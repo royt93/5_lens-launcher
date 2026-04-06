@@ -19,7 +19,7 @@ import androidx.core.content.ContextCompat;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.mckimquyen.BuildConfig;
 import com.mckimquyen.R;
-import com.mckimquyen.sdkadbmob.UIUtils;
+import com.mckimquyen.util.UIUtils;
 import com.mckimquyen.services.AppEventManager;
 
 import java.util.Objects;

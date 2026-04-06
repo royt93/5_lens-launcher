@@ -58,6 +58,12 @@ android {
     // ========================================================================
     buildTypes {
         release {
+            buildConfigField "Boolean", "IS_ENABLE_ADMOB", "false"
+            buildConfigField "String", "APPLOVIN_SDK_KEY", "\"e75FnQfS9XTTqM1Kne69U7PW_MBgAnGQTFvtwVVui6kRPKs5L7ws9twr5IQWwVfzPKZ5pF2IfDa7lguMgGlCyt\""
+            buildConfigField "String", "APPLOVIN_BANNER_ID", "\"aa291bda0fb0b6c5\""
+            buildConfigField "String", "APPLOVIN_INTERSTITIAL_ID", "\"7cf8ffccbdb242be\""
+            buildConfigField "String", "APPLOVIN_APP_OPEN_ID", "\"d4acd020c861e87a\""
+
             // Release config - sử dụng AdMob IDs thật
             buildConfigField "String", "ADMOB_BANNER_ID", "\"ca-app-pub-3612191981543807/9970850592\""
             buildConfigField "String", "ADMOB_INTERSTITIAL_ID", "\"ca-app-pub-3612191981543807/2896523398\""
@@ -86,6 +92,13 @@ android {
         }
 
         debug {
+            buildConfigField "Boolean", "IS_ENABLE_ADMOB", "false"
+            buildConfigField "String", "APPLOVIN_SDK_KEY", "\"e75FnQfS9XTTqM1Kne69U7PW_MBgAnGQTFvtwVVui6kRPKs5L7ws9twr5IQWwVfzPKZ5pF2IfDa7lguMgGlCyt\""
+            // Use real AppLovin IDs for debug or place test logic if AppLovin requires it. AppLovin test mode can be enabled via code.
+            buildConfigField "String", "APPLOVIN_BANNER_ID", "\"aa291bda0fb0b6c5\""
+            buildConfigField "String", "APPLOVIN_INTERSTITIAL_ID", "\"7cf8ffccbdb242be\""
+            buildConfigField "String", "APPLOVIN_APP_OPEN_ID", "\"d4acd020c861e87a\""
+
             // Debug config - sử dụng AdMob test IDs
             buildConfigField "String", "ADMOB_BANNER_ID", "\"ca-app-pub-3940256099942544/6300978111\""
             buildConfigField "String", "ADMOB_INTERSTITIAL_ID", "\"ca-app-pub-3940256099942544/1033173712\""
@@ -327,10 +340,9 @@ dependencies {
     implementation 'androidx.biometric:biometric:1.2.0-alpha05'
 
     // ========================================================================
-    // MONETIZATION - ADMOB
+    // MONETIZATION - ADMOB WRAPPER
     // ========================================================================
-    implementation 'com.google.android.gms:play-services-ads:23.6.0'
-    implementation 'com.google.ads.mediation:applovin:13.0.0.0'
+    implementation 'com.github.royt93:AdmobWrapper:1.1.1'
 
     // ========================================================================
     // GOOGLE PLAY SERVICES

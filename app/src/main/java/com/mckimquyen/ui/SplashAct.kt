@@ -6,7 +6,7 @@ import android.os.Build
 import android.os.Bundle
 import androidx.lifecycle.lifecycleScope
 import com.mckimquyen.R
-import com.mckimquyen.sdkadbmob.UIUtils
+import com.mckimquyen.util.UIUtils
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 

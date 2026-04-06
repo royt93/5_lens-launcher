@@ -18,7 +18,7 @@ import com.mckimquyen.R;
 import com.mckimquyen.app.RAppsSingleton;
 import com.mckimquyen.model.App;
 import com.mckimquyen.model.AppPersistent;
-import com.mckimquyen.sdkadbmob.UIUtils;
+import com.mckimquyen.util.UIUtils;
 import com.mckimquyen.services.AppEventManager;
 import com.mckimquyen.util.UtilSettings;
 import com.mckimquyen.views.LensView;

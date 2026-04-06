@@ -96,6 +96,11 @@
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-3612191981543807~3330254772" />
 
+        <!-- AppLovin SDK Key -->
+        <meta-data
+            android:name="applovin.sdk.key"
+            android:value="e75FnQfS9XTTqM1Kne69U7PW_MBgAnGQTFvtwVVui6kRPKs5L7ws9twr5IQWwVfzPKZ5pF2IfDa7lguMgGlCyt" />
+
         <!-- ====================================================================
              ACTIVITIES - Các màn hình của app
              ==================================================================== -->
@@ -258,16 +263,6 @@
             android:name=".services.BroadcastReceivers$NightModeReceiver"
             android:enabled="true"
             android:exported="false" />
-
-        <!-- ====================================================================
-             APPLOVIN SDK (Commented out - không sử dụng)
-             ==================================================================== -->
-        <!-- Nếu muốn enable AppLovin mediation, uncomment và thêm SDK key -->
-        <!--
-        <meta-data
-            android:name="applovin.sdk.key"
-            android:value="YOUR_SDK_KEY_HERE" />
-        -->
 
     </application>
 

@@ -21,7 +21,7 @@ import androidx.webkit.WebSettingsCompat
 import androidx.webkit.WebViewFeature
 import com.google.android.material.progressindicator.LinearProgressIndicator
 import com.mckimquyen.R
-import com.mckimquyen.sdkadbmob.UIUtils
+import com.mckimquyen.util.UIUtils
 import com.mckimquyen.ui.ActBase
 
 class SuperWebViewActivity : ActBase() {
