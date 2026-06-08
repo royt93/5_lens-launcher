@@ -124,9 +124,12 @@ public class RApplication extends android.app.Application {
     private void setupAdmob() {
         boolean isTestEnv = false;
         try {
-            Class.forName("androidx.test.platform.app.InstrumentationRegistry");
-            isTestEnv = true;
-        } catch (ClassNotFoundException ignored) {}
+            Class<?> registryClass = Class.forName("androidx.test.platform.app.InstrumentationRegistry");
+            java.lang.reflect.Method getInstrumentation = registryClass.getMethod("getInstrumentation");
+            isTestEnv = (getInstrumentation.invoke(null) != null);
+        } catch (Throwable ignored) {
+            // Throws exception (e.g. IllegalStateException: No instrumentation registered) if not running under a test runner
+        }
 
         com.roy.sdkadbmob.AdSafetyLimits safety = com.mckimquyen.BuildConfig.DEBUG ? 
                 com.roy.sdkadbmob.AdSafetyLimits.Companion.getTEST() : 
