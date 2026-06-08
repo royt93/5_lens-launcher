@@ -170,11 +170,7 @@ class ActVipManagement : AppCompatActivity() {
         }
 
         binding.btnRevokeVip.setOnClickListener {
-            val contextThemeWrapper = androidx.appcompat.view.ContextThemeWrapper(
-                this,
-                com.google.android.material.R.style.Theme_Material3_DayNight_Dialog_Alert
-            )
-            MaterialAlertDialogBuilder(contextThemeWrapper)
+            androidx.appcompat.app.AlertDialog.Builder(this, R.style.MaterialYouDialogTheme)
                 .setTitle(R.string.vip_revoke_all_confirm_title)
                 .setMessage(R.string.vip_revoke_all_confirm_message)
                 .setPositiveButton(R.string.confirm) { _, _ ->
@@ -221,6 +217,14 @@ class ActVipManagement : AppCompatActivity() {
         binding.btnRevokeVip.isEnabled = isActive
 
         if (isActive) {
+            binding.tvStatusBadge.text = getString(R.string.vip_badge_premium_member)
+            binding.tvStatusBadge.setBackgroundTintList(android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#20000000")))
+            binding.tvStatusBadge.setTextColor(android.graphics.Color.parseColor("#1C1C1E"))
+
+            binding.btnWatchAdVip.isEnabled = false
+            binding.btnWatchAdVip.text = getString(R.string.vip_ad_disabled_active)
+            binding.btnWatchAdVip.alpha = 0.5f
+
             binding.tvStatusTitle.text = getString(R.string.vip_active)
             binding.layoutStatusHeaderBg.setBackgroundResource(R.drawable.bg_vip_status_header_active)
             binding.imgCrown.setColorFilter(android.graphics.Color.parseColor("#FFFFFF"), android.graphics.PorterDuff.Mode.SRC_IN)
@@ -275,6 +279,14 @@ class ActVipManagement : AppCompatActivity() {
                 countDownTimer = null
             }
         } else {
+            binding.tvStatusBadge.text = getString(R.string.vip_badge_free_member)
+            binding.tvStatusBadge.setBackgroundTintList(android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#15FFFFFF")))
+            binding.tvStatusBadge.setTextColor(android.graphics.Color.parseColor("#FFFFFF"))
+
+            binding.btnWatchAdVip.isEnabled = true
+            binding.btnWatchAdVip.text = getString(R.string.vip_watch_ad_3d)
+            binding.btnWatchAdVip.alpha = 1.0f
+
             binding.tvStatusTitle.text = getString(R.string.vip_free_user)
             binding.layoutStatusHeaderBg.setBackgroundResource(R.drawable.bg_vip_status_header_free)
             binding.imgCrown.setColorFilter(android.graphics.Color.parseColor("#ECEFF1"), android.graphics.PorterDuff.Mode.SRC_IN)
@@ -293,11 +305,7 @@ class ActVipManagement : AppCompatActivity() {
 
     private fun showMaterialDialog(title: String, message: String, iconRes: Int? = null) {
         if (isFinishing) return
-        val contextThemeWrapper = androidx.appcompat.view.ContextThemeWrapper(
-            this,
-            com.google.android.material.R.style.Theme_Material3_DayNight_Dialog_Alert
-        )
-        val builder = MaterialAlertDialogBuilder(contextThemeWrapper)
+        val builder = androidx.appcompat.app.AlertDialog.Builder(this, R.style.MaterialYouDialogTheme)
             .setTitle(title)
             .setMessage(message)
             .setPositiveButton(android.R.string.ok, null)

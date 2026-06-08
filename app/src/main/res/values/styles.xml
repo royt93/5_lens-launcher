@@ -63,4 +63,11 @@
     <style name="PopupMenuTheme" parent="Theme.AppCompat.Light">
         <item name="popupMenuStyle">@style/RoundedPopupMenuStyle</item>
     </style>
+
+    <!-- Material 3 styled Dialog Theme with Crimson Accent Colors based on AppCompat -->
+    <style name="MaterialYouDialogTheme" parent="Theme.AppCompat.DayNight.Dialog.Alert">
+        <item name="dialogCornerRadius">28dp</item>
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorAccent">@color/colorPrimary</item>
+    </style>
 </resources>

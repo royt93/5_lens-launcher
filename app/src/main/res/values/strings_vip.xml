@@ -40,8 +40,20 @@
     <string name="vip_badge_get">Get VIP</string>
     <string name="privacy_policy">Privacy Policy</string>
     <string name="vip_active_thank_you">Thank you for supporting VIP!</string>
-    <string name="vip_activation_success_message">VIP successfully activated (%1$d days).</string>
-    <string name="vip_invalid_key_message">Invalid VIP code!</string>
     <string name="vip_error_title">Error</string>
     <string name="vip_lifetime_device">Lifetime VIP (Device)</string>
+    <string name="vip_activation_success_message">Congratulations! VIP has been successfully activated for %1$d days.</string>
+    <string name="vip_activation_failed_message">Failed to activate VIP. Please check your network connection or try again.</string>
+    <string name="vip_invalid_key_message">The VIP code you entered is invalid or has already been used. Please verify and try again.</string>
+    <string name="vip_ad_reward_failed_message">Could not load video advertisement. Please check your connection or try again later.</string>
+    <string name="vip_ad_disabled_active">Ad-Free Activated</string>
+    <string name="vip_features_title">Exclusive VIP Privileges</string>
+    <string name="vip_feature_no_ads_title">Completely Ad-Free</string>
+    <string name="vip_feature_no_ads_desc">Enjoy clean layout and zero interruptions while using the app.</string>
+    <string name="vip_feature_customization_title">Premium Customization</string>
+    <string name="vip_feature_customization_desc">Access premium customization controls, themes, and layouts.</string>
+    <string name="vip_feature_support_title">Priority Support</string>
+    <string name="vip_feature_support_desc">Your questions and bug reports are processed with high priority.</string>
+    <string name="vip_badge_premium_member">PREMIUM MEMBER</string>
+    <string name="vip_badge_free_member">FREE MEMBER</string>
 </resources>

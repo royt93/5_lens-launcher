@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- VIP -->
-    <string name="vip_active">VIP đang kích hoạt</string>
-    <string name="vip_free_user">Người dùng miễn phí</string>
-    <string name="vip_until">Đến %1$s</string>
-    <string name="vip_activated_at">Kích hoạt: %1$s</string>
-    <string name="vip_expires_at">Hết hạn: %1$s</string>
-    <string name="vip_remaining">%1$dd %2$02dh %3$02dm %4$02ds</string>
+    <string name="vip_active">VIP đang hoạt động</string>
+    <string name="vip_free_user">Tài khoản miễn phí</string>
+    <string name="vip_until">Thời hạn đến %1$s</string>
+    <string name="vip_activated_at">Kích hoạt lúc: %1$s</string>
+    <string name="vip_expires_at">Hết hạn lúc: %1$s</string>
+    <string name="vip_remaining">%1$d ngày %2$02d giờ %3$02d phút %4$02d giây</string>
     <string name="vip_redeem_label">Nhập mã VIP</string>
     <string name="vip_redeem_hint">VD: LOITP_30</string>
     <string name="vip_redeem_button">Kích hoạt</string>
-    <string name="vip_watch_ad_3d">Xem quảng cáo → 3 ngày VIP</string>
-    <string name="vip_buy_30d_locked">Mua VIP 30 ngày — sắp ra mắt</string>
-    <string name="vip_buy_90d_locked">Mua VIP 90 ngày — sắp ra mắt</string>
-    <string name="vip_buy_1y_locked">Mua VIP 1 năm — sắp ra mắt</string>
-    <string name="vip_buy_lifetime_locked">Mua VIP trọn đời — sắp ra mắt</string>
-    <string name="vip_restore_locked">Khôi phục mua hàng — sắp ra mắt</string>
+    <string name="vip_watch_ad_3d">Xem quảng cáo → Nhận 3 ngày VIP</string>
+    <string name="vip_buy_30d_locked">Mua VIP 30 ngày — Sắp ra mắt</string>
+    <string name="vip_buy_90d_locked">Mua VIP 90 ngày — Sắp ra mắt</string>
+    <string name="vip_buy_1y_locked">Mua VIP 1 năm — Sắp ra mắt</string>
+    <string name="vip_buy_lifetime_locked">Mua VIP trọn đời — Sắp ra mắt</string>
+    <string name="vip_restore_locked">Khôi phục mua hàng — Sắp ra mắt</string>
     <string name="vip_revoke_all_button">Thu hồi VIP</string>
     <string name="vip_revoke_all_confirm_title">Xác nhận thu hồi</string>
-    <string name="vip_revoke_all_confirm_message">Bạn có chắc muốn thu hồi VIP và quay về tài khoản Free?</string>
+    <string name="vip_revoke_all_confirm_message">Bạn có chắc chắn muốn thu hồi VIP và quay về tài khoản miễn phí không?</string>
     <string name="vip_entry_first_install">🎁 Quà tặng cài đặt mới</string>
     <string name="vip_entry_redeemed">VIP %1$d ngày</string>
     <string name="vip_verifying_title">Đang xác minh…</string>
@@ -40,8 +40,22 @@
     <string name="vip_badge_get">Nhận VIP</string>
     <string name="privacy_policy">Chính sách bảo mật</string>
     <string name="vip_active_thank_you">Cảm ơn bạn đã đồng hành cùng VIP!</string>
-    <string name="vip_activation_success_message">Đã kích hoạt VIP thành công (%1$d ngày).</string>
-    <string name="vip_invalid_key_message">Mã VIP không hợp lệ!</string>
     <string name="vip_error_title">Lỗi</string>
     <string name="vip_lifetime_device">VIP trọn đời (Thiết bị)</string>
+    <string name="vip_activation_success_message">Chúc mừng! VIP đã được kích hoạt thành công trong %1$d ngày.</string>
+    <string name="vip_activation_failed_message">Kích hoạt VIP thất bại. Vui lòng kiểm tra kết nối mạng hoặc thử lại sau.</string>
+    <string name="vip_invalid_key_message">Mã VIP bạn nhập không hợp lệ hoặc đã được sử dụng. Vui lòng kiểm tra và thử lại.</string>
+    <string name="vip_ad_reward_failed_message">Không thể tải video quảng cáo. Vui lòng kiểm tra kết nối mạng hoặc thử lại sau.</string>
+    <string name="vip_ad_disabled_active">Đã kích hoạt chặn quảng cáo</string>
+    <string name="vip_features_title">Đặc quyền VIP độc quyền</string>
+    <string name="vip_feature_no_ads_title">Hoàn toàn không quảng cáo</string>
+    <string name="vip_feature_no_ads_desc">Tận hưởng giao diện sạch và không bị làm phiền khi dùng app.</string>
+    <string name="vip_feature_customization_title">Mở khoá toàn bộ tính năng</string>
+    <string name="vip_feature_customization_desc">Truy cập các tùy chỉnh cao cấp, chủ đề và bố cục độc quyền.</string>
+    <string name="vip_feature_support_title">Hỗ trợ ưu tiên</string>
+    <string name="vip_feature_support_desc">Các câu hỏi và báo cáo lỗi của bạn sẽ được xử lý ưu tiên.</string>
+    <string name="vip_badge_premium_member">THÀNH VIÊN PREMIUM</string>
+    <string name="vip_badge_free_member">THÀNH VIÊN MIỄN PHÍ</string>
+    <string name="confirm">Xác nhận</string>
+    <string name="cancel">Hủy</string>
 </resources>

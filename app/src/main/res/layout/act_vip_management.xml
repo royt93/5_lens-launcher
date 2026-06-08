@@ -63,44 +63,95 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:cardCornerRadius="24dp"
-                    app:cardElevation="8dp"
-                    android:layout_marginBottom="16dp">
+                    app:cardElevation="0dp"
+                    android:layout_marginBottom="16dp"
+                    app:cardBackgroundColor="@android:color/transparent">
 
-                    <LinearLayout
+                    <FrameLayout
                         android:id="@+id/layoutStatusHeaderBg"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="32dp"
-                        android:gravity="center"
                         android:background="@drawable/bg_vip_card_gradient">
 
+                        <!-- Background decorative star 1 (Top Left) -->
                         <ImageView
-                            android:id="@+id/imgCrown"
+                            android:id="@+id/imgDecoStarLeft"
+                            android:layout_width="72dp"
+                            android:layout_height="72dp"
+                            android:src="@drawable/ic_star_24dp"
+                            android:alpha="0.10"
+                            android:rotation="-20"
+                            android:layout_gravity="start|top"
+                            android:layout_marginStart="-16dp"
+                            android:layout_marginTop="-16dp"
+                            app:tint="#FFFFFF" />
+
+                        <!-- Background decorative star 2 (Bottom Right) -->
+                        <ImageView
+                            android:id="@+id/imgDecoStarRight"
                             android:layout_width="96dp"
                             android:layout_height="96dp"
                             android:src="@drawable/ic_star_24dp"
-                            app:tint="#FF9800"
-                            android:layout_marginBottom="16dp" />
+                            android:alpha="0.10"
+                            android:rotation="35"
+                            android:layout_gravity="end|bottom"
+                            android:layout_marginEnd="-24dp"
+                            android:layout_marginBottom="-24dp"
+                            app:tint="#FFFFFF" />
 
-                        <TextView
-                            android:id="@+id/tvStatusTitle"
-                            android:layout_width="wrap_content"
+                        <!-- Foreground content -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:textColor="#424242"
-                            android:textSize="24sp"
-                            android:textStyle="bold"
-                            android:text="@string/vip_free_user" />
+                            android:orientation="vertical"
+                            android:padding="32dp"
+                            android:gravity="center">
 
-                        <TextView
-                            android:id="@+id/tvStatusSubtitle"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:textColor="#757575"
-                            android:textSize="14sp"
-                            android:layout_marginTop="8dp"
-                            android:visibility="gone" />
-                    </LinearLayout>
+                            <!-- Premium Pill Badge -->
+                            <TextView
+                                android:id="@+id/tvStatusBadge"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:background="@drawable/bg_vip_pill_badge"
+                                android:backgroundTint="#15FFFFFF"
+                                android:text="LENS MEMBER"
+                                android:textColor="#FFFFFF"
+                                android:textSize="10sp"
+                                android:textStyle="bold"
+                                android:letterSpacing="0.15"
+                                android:paddingStart="12dp"
+                                android:paddingEnd="12dp"
+                                android:paddingTop="4dp"
+                                android:paddingBottom="4dp"
+                                android:layout_marginBottom="16dp" />
+
+                            <ImageView
+                                android:id="@+id/imgCrown"
+                                android:layout_width="96dp"
+                                android:layout_height="96dp"
+                                android:src="@drawable/ic_star_24dp"
+                                app:tint="#FF9800"
+                                android:layout_marginBottom="16dp" />
+
+                            <TextView
+                                android:id="@+id/tvStatusTitle"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textColor="#FFFFFF"
+                                android:textSize="24sp"
+                                android:textStyle="bold"
+                                android:text="@string/vip_free_user" />
+
+                            <TextView
+                                android:id="@+id/tvStatusSubtitle"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textColor="#B0BEC5"
+                                android:textSize="14sp"
+                                android:layout_marginTop="8dp"
+                                android:visibility="gone" />
+                        </LinearLayout>
+                    </FrameLayout>
                 </androidx.cardview.widget.CardView>
 
                 <!-- Active VIP info -->
@@ -152,34 +203,186 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="16dp"
-                        app:cardCornerRadius="8dp"
-                        app:cardElevation="2dp">
+                        app:cardCornerRadius="16dp"
+                        app:cardElevation="0dp"
+                        app:cardBackgroundColor="@android:color/transparent"
+                        android:clipChildren="false"
+                        android:clipToPadding="false">
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:orientation="horizontal"
                             android:padding="16dp"
-                            android:gravity="center_vertical">
+                            android:gravity="center_vertical"
+                            android:background="@drawable/bg_glass_card_rect"
+                            android:clipChildren="false"
+                            android:clipToPadding="false">
 
                             <TextView
                                 android:id="@+id/tvActiveVipLabel"
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:textSize="16sp"
-                                android:textStyle="bold" />
+                                android:textSize="14sp"
+                                android:textColor="?android:attr/textColorSecondary"
+                                android:fontFamily="sans-serif-medium" />
 
                             <Button
                                 android:id="@+id/btnRevokeVip"
                                 style="?android:attr/borderlessButtonStyle"
                                 android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
+                                android:layout_height="36dp"
                                 android:textColor="#D32F2F"
-                                android:text="@string/vip_revoke_all_button" />
+                                android:text="@string/vip_revoke_all_button"
+                                android:textSize="13sp"
+                                android:textStyle="bold"
+                                android:textAllCaps="false"
+                                android:paddingStart="8dp"
+                                android:paddingEnd="8dp"
+                                android:minWidth="0dp"
+                                android:minHeight="0dp" />
                         </LinearLayout>
                     </androidx.cardview.widget.CardView>
                 </LinearLayout>
+
+                <!-- VIP Features List (Spotify/YouTube Premium style) -->
+                <androidx.cardview.widget.CardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="8dp"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="0dp"
+                    app:cardBackgroundColor="@android:color/transparent">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="20dp"
+                        android:background="@drawable/bg_glass_card_rect">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/vip_features_title"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            android:textColor="?android:attr/textColorPrimary"
+                            android:layout_marginBottom="16dp" />
+
+                        <!-- Feature 1: No Ads -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:layout_marginBottom="12dp">
+
+                            <ImageView
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:src="@drawable/ic_star_24dp"
+                                app:tint="#FFB300"
+                                android:layout_marginEnd="12dp" />
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/vip_feature_no_ads_title"
+                                    android:textSize="14sp"
+                                    android:textStyle="bold"
+                                    android:textColor="?android:attr/textColorPrimary" />
+
+                                <TextView
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/vip_feature_no_ads_desc"
+                                    android:textSize="12sp"
+                                    android:textColor="?android:attr/textColorSecondary" />
+                            </LinearLayout>
+                        </LinearLayout>
+
+                        <!-- Feature 2: High Performance / Premium Customization -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:layout_marginBottom="12dp">
+
+                            <ImageView
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:src="@drawable/ic_color_lens_24dp"
+                                app:tint="#FFB300"
+                                android:layout_marginEnd="12dp" />
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/vip_feature_customization_title"
+                                    android:textSize="14sp"
+                                    android:textStyle="bold"
+                                    android:textColor="?android:attr/textColorPrimary" />
+
+                                <TextView
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/vip_feature_customization_desc"
+                                    android:textSize="12sp"
+                                    android:textColor="?android:attr/textColorSecondary" />
+                            </LinearLayout>
+                        </LinearLayout>
+
+                        <!-- Feature 3: Priority Support -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical">
+
+                            <ImageView
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:src="@drawable/ic_feedback_24dp"
+                                app:tint="#FFB300"
+                                android:layout_marginEnd="12dp" />
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/vip_feature_support_title"
+                                    android:textSize="14sp"
+                                    android:textStyle="bold"
+                                    android:textColor="?android:attr/textColorPrimary" />
+
+                                <TextView
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/vip_feature_support_desc"
+                                    android:textSize="12sp"
+                                    android:textColor="?android:attr/textColorSecondary" />
+                            </LinearLayout>
+                        </LinearLayout>
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
             </LinearLayout>
 
             <!-- SECTION 2: Key Verification (Search-bar style) -->
@@ -190,13 +393,14 @@
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="16dp"
                 app:cardCornerRadius="100dp"
-                app:cardElevation="2dp">
+                app:cardElevation="0dp"
+                app:cardBackgroundColor="@android:color/transparent">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="64dp"
                     android:orientation="horizontal"
-                    android:background="?android:attr/colorBackground"
+                    android:background="@drawable/bg_glass_card_pill"
                     android:gravity="center_vertical"
                     android:paddingEnd="6dp">
 
@@ -224,6 +428,7 @@
                         android:textColor="#9E9E9E"
                         android:textStyle="bold"
                         android:textSize="14sp"
+                        android:textAllCaps="false"
                         android:paddingStart="20dp"
                         android:paddingEnd="20dp" />
                 </LinearLayout>
@@ -256,7 +461,8 @@
                         android:textColor="@android:color/white"
                         android:background="@drawable/bg_vip_button_green"
                         android:paddingStart="32dp"
-                        android:paddingEnd="32dp" />
+                        android:paddingEnd="32dp"
+                        android:textAllCaps="false" />
                 </FrameLayout>
 
                 <!-- 8. Buy 30-day VIP (disabled) -->
@@ -270,7 +476,8 @@
                     android:background="@drawable/bg_vip_button_outline"
                     android:text="@string/vip_buy_30d_locked"
                     android:paddingStart="24dp"
-                    android:paddingEnd="24dp" />
+                    android:paddingEnd="24dp"
+                    android:textAllCaps="false" />
 
                 <!-- 9. Buy 90-day VIP (disabled) -->
                 <Button
@@ -283,7 +490,8 @@
                     android:text="@string/vip_buy_90d_locked"
                     android:layout_marginTop="8dp"
                     android:paddingStart="24dp"
-                    android:paddingEnd="24dp" />
+                    android:paddingEnd="24dp"
+                    android:textAllCaps="false" />
 
                 <!-- 10. Buy 1-year VIP (disabled) -->
                 <Button
@@ -296,7 +504,8 @@
                     android:text="@string/vip_buy_1y_locked"
                     android:layout_marginTop="8dp"
                     android:paddingStart="24dp"
-                    android:paddingEnd="24dp" />
+                    android:paddingEnd="24dp"
+                    android:textAllCaps="false" />
 
                 <!-- 11. Buy lifetime VIP (disabled) -->
                 <Button
@@ -309,7 +518,8 @@
                     android:text="@string/vip_buy_lifetime_locked"
                     android:layout_marginTop="8dp"
                     android:paddingStart="24dp"
-                    android:paddingEnd="24dp" />
+                    android:paddingEnd="24dp"
+                    android:textAllCaps="false" />
 
                 <!-- 13. Restore Purchase (disabled) -->
                 <Button
@@ -322,7 +532,8 @@
                     android:text="@string/vip_restore_locked"
                     android:layout_marginTop="8dp"
                     android:paddingStart="24dp"
-                    android:paddingEnd="24dp" />
+                    android:paddingEnd="24dp"
+                    android:textAllCaps="false" />
 
                 <Space
                     android:layout_width="match_parent"
