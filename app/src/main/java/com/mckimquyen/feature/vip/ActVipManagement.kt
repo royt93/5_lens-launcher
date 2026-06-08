@@ -91,6 +91,8 @@ class ActVipManagement : AppCompatActivity() {
             
             val days = VipKeys.lookupDays(key)
             if (days != null) {
+                val originalSecret = AdManager.adConfig.vipKeySecret
+                AdManager.adConfig = AdManager.adConfig.copy(vipKeySecret = key)
                 val success = AdManager.activateVipByKey(this, key, days)
                 if (success) {
                     showMaterialDialog(
@@ -105,6 +107,7 @@ class ActVipManagement : AppCompatActivity() {
                     imm.hideSoftInputFromWindow(binding.edtVipKey.windowToken, 0)
                     handleVipSuccess(days)
                 } else {
+                    AdManager.adConfig = AdManager.adConfig.copy(vipKeySecret = originalSecret)
                     showMaterialDialog(
                         R.string.vip_failed_title,
                         R.string.vip_activation_failed_message
@@ -191,6 +194,8 @@ class ActVipManagement : AppCompatActivity() {
     }
 
     private fun grantViaRewarded() {
+        val originalSecret = AdManager.adConfig.vipKeySecret
+        AdManager.adConfig = AdManager.adConfig.copy(vipKeySecret = VipKeys.VIP_3D_KEY)
         val success = AdManager.activateVipByKey(this, VipKeys.VIP_3D_KEY, 3)
         if (success) {
             showMaterialDialog(
@@ -199,6 +204,8 @@ class ActVipManagement : AppCompatActivity() {
                 R.drawable.ic_star_24dp
             )
             handleVipSuccess(3)
+        } else {
+            AdManager.adConfig = AdManager.adConfig.copy(vipKeySecret = originalSecret)
         }
     }
 
