@@ -8,6 +8,7 @@ import android.graphics.Bitmap
 import com.mckimquyen.app.ApplicationScope
 import com.mckimquyen.app.RAppsSingleton
 import com.mckimquyen.model.App
+import com.mckimquyen.util.Logger
 import com.mckimquyen.util.UtilApp
 import com.mckimquyen.util.UtilSettings
 import kotlinx.coroutines.Dispatchers
@@ -67,7 +68,7 @@ class TaskUpdateApps(
      * Tương đương với doInBackground() của AsyncTask
      */
     private suspend fun doInBackground() = withContext(Dispatchers.IO) {
-        android.util.Log.d("roy93~", "TaskUpdateApps: doInBackground started")
+        Logger.d("TaskUpdateApps: doInBackground started")
         val context = contextRef.get() ?: return@withContext
         val utilSettings = UtilSettings(context)
 
@@ -80,7 +81,7 @@ class TaskUpdateApps(
             utilSettings.sortType
         )
 
-        android.util.Log.d("roy93~", "TaskUpdateApps: getApps returned ${apps.size} apps")
+        Logger.d("TaskUpdateApps: getApps returned ${apps.size} apps")
 
         // Lọc và lưu apps có icon hợp lệ, cache icon vào BitmapCache
         mApps = ArrayList()
@@ -102,7 +103,7 @@ class TaskUpdateApps(
      * Chạy trên Main thread
      */
     private fun onPostExecute() {
-        android.util.Log.d("roy93~", "TaskUpdateApps: onPostExecute! Total apps updated: ${mApps?.size}")
+        Logger.d("TaskUpdateApps: onPostExecute! Total apps updated: ${mApps?.size}")
         val application = applicationRef.get() ?: return
 
         // Cập nhật Singleton với danh sách apps mới

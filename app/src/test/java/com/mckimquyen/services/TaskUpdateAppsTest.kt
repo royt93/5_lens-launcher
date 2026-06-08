@@ -45,14 +45,14 @@ class TaskUpdateAppsTest {
 
         // Reset singleton
         RAppsSingleton.instance.apps = null
-        RAppsSingleton.instance.appIcons = null
+        com.mckimquyen.util.BitmapCache.clear()
     }
 
     @After
     fun tearDown() {
         // Cleanup
         RAppsSingleton.instance.apps = null
-        RAppsSingleton.instance.appIcons = null
+        com.mckimquyen.util.BitmapCache.clear()
     }
 
     @Test

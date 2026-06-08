@@ -30,14 +30,14 @@ class RAppsSingletonTest {
     fun setup() {
         // Reset singleton state
         RAppsSingleton.instance.apps = null
-        RAppsSingleton.instance.appIcons = null
+        com.mckimquyen.util.BitmapCache.clear()
     }
 
     @After
     fun tearDown() {
         // Cleanup
         RAppsSingleton.instance.apps = null
-        RAppsSingleton.instance.appIcons = null
+        com.mckimquyen.util.BitmapCache.clear()
     }
 
     @Test
@@ -65,19 +65,6 @@ class RAppsSingletonTest {
     }
 
     @Test
-    fun `test get app icons returns empty list when null`() {
-        // Given
-        RAppsSingleton.instance.appIcons = null
-
-        // When
-        val icons = RAppsSingleton.instance.appIcons
-
-        // Then
-        assertNotNull("Should return non-null list", icons)
-        assertTrue("Should return empty list when null", icons!!.isEmpty())
-    }
-
-    @Test
     fun `test set and get apps`() {
         // Given
         val testApps = ArrayList<App>().apply {
@@ -95,23 +82,21 @@ class RAppsSingletonTest {
     }
 
     @Test
-    fun `test set and get app icons`() {
+    fun `test set and get app icon cache`() {
         // Given
-        val testIcons = ArrayList<Bitmap>().apply {
-            add(Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888))
-            add(Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888))
-        }
+        val bitmap = Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888)
+        val packageName = "com.test.app"
 
         // When
-        RAppsSingleton.instance.appIcons = testIcons
-        val retrievedIcons = RAppsSingleton.instance.appIcons
+        RAppsSingleton.instance.setAppIcon(packageName, bitmap)
+        val retrievedIcon = RAppsSingleton.instance.getAppIcon(packageName)
 
         // Then
-        assertNotNull("Retrieved icons should not be null", retrievedIcons)
-        assertEquals("Should have same size", testIcons.size, retrievedIcons!!.size)
+        assertNotNull("Retrieved icon should not be null", retrievedIcon)
+        assertEquals("Should be same bitmap", bitmap, retrievedIcon)
 
         // Cleanup
-        testIcons.forEach { if (!it.isRecycled) it.recycle() }
+        if (!bitmap.isRecycled) bitmap.recycle()
     }
 
     @Test

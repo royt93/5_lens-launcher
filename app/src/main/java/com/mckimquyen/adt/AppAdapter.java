@@ -127,7 +127,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
     public AppViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         View view = inflater.inflate(R.layout.view_item_app, parent, false);
-        final AppViewHolder holder = new AppViewHolder(view, mContext);
+        final AppViewHolder holder = new AppViewHolder(view, mContext, this);
         holder.setOnClickListeners();
         return holder;
     }
@@ -174,16 +174,18 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
         private final Context mContext;      // Application context reference
         private final Context mActivityContext; // Activity context for biometric
         private final boolean mIsHaveBiometric; // Device có hỗ trợ biometric không
+        private final AppAdapter mAdapter;   // Reference to adapter for state sync
 
         // ====================================================================
         // CONSTRUCTOR
         // ====================================================================
-        public AppViewHolder(View itemView, Context context) {
+        public AppViewHolder(View itemView, Context context, AppAdapter adapter) {
             super(itemView);
             // Keep both contexts: ApplicationContext for general use, Activity for biometric
             this.mContext = context.getApplicationContext();
             this.mActivityContext = context; // Keep Activity context for biometric
             this.mIsHaveBiometric = Biometric.INSTANCE.isHaveBiometric(context);
+            this.mAdapter = adapter;
 
             // Initialize views - findViewById chỉ gọi 1 lần khi tạo ViewHolder
             this.cvAppContainer = itemView.findViewById(R.id.cvAppContainer);
@@ -222,7 +224,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
             // LOCK BUTTON STATE (Chỉ hiển thị nếu device có biometric)
             // ================================================================
             if (this.mIsHaveBiometric) {
-                boolean isAppOpened = AppPersistent.getAppOpened(pkgName, name);
+                boolean isAppOpened = mApp.isOpened();
                 btAppLock.setVisibility(View.VISIBLE);
 
                 if (isAppOpened) {
@@ -248,7 +250,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
             // ================================================================
             // VISIBILITY BUTTON STATE
             // ================================================================
-            boolean isAppVisible = AppPersistent.getAppVisibility(pkgName, name);
+            boolean isAppVisible = mApp.isVisible();
             if (isAppVisible) {
                 // App đang VISIBLE trong launcher
                 ivAppHide.setImageResource(R.drawable.ic_visibility_grey_24dp);
@@ -291,8 +293,8 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
             String pkgName = Objects.requireNonNull(mApp.getPackageName()).toString();
             String name = Objects.requireNonNull(mApp.getName()).toString();
 
-            // Lấy trạng thái hiện tại
-            boolean isAppVisible = AppPersistent.getAppVisibility(pkgName, name);
+            // Lấy trạng thái hiện tại từ mApp property thay vì DB query
+            boolean isAppVisible = mApp.isVisible();
 
             // Toggle trạng thái
             AppPersistent.setAppVisibility(pkgName, name, !isAppVisible);
@@ -308,6 +310,14 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
                 Snackbar.make(cvAppContainer, mApp.getLabel() + " is now visible", Snackbar.LENGTH_LONG).show();
                 ivAppHide.setImageResource(R.drawable.ic_visibility_grey_24dp);
                 ivAppHide.setColorFilter(Color.GRAY);
+            }
+
+            // Đồng bộ trạng thái vào Adapter list
+            int position = getBindingAdapterPosition();
+            if (position != RecyclerView.NO_POSITION) {
+                App updatedApp = mApp.copyWithLockAndVisibility(mApp.isOpened(), !isAppVisible, mApp.getOpenCount());
+                mAdapter.mApps.set(position, updatedApp);
+                mAdapter.notifyItemChanged(position);
             }
         }
 
@@ -326,8 +336,8 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
             String name = Objects.requireNonNull(mApp.getName()).toString();
             String label = Objects.requireNonNull(mApp.getLabel()).toString();
 
-            // Lấy trạng thái lock hiện tại
-            boolean isAppOpened = AppPersistent.getAppOpened(pkgName, name);
+            // Lấy trạng thái lock hiện tại từ mApp property thay vì DB query
+            boolean isAppOpened = mApp.isOpened();
 
             // Yêu cầu biometric authentication
             if (mActivityContext instanceof AppCompatActivity) {
@@ -358,6 +368,15 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
                                         ColorStateList.valueOf(Color.GRAY)
                                 );
                             }
+
+                            // Đồng bộ trạng thái vào Adapter list
+                            int position = getBindingAdapterPosition();
+                            if (position != RecyclerView.NO_POSITION) {
+                                App updatedApp = mApp.copyWithLockAndVisibility(!isAppOpened, mApp.isVisible(), mApp.getOpenCount());
+                                mAdapter.mApps.set(position, updatedApp);
+                                mAdapter.notifyItemChanged(position);
+                            }
+
                             // Return Unit instead of null to fix @NotNull warning
                             return Unit.INSTANCE;
                         }

@@ -8,12 +8,12 @@ import android.util.Log;
 import androidx.lifecycle.ProcessLifecycleOwner;
 
 import com.google.android.gms.ads.MobileAds;
-import com.google.android.gms.ads.MobileAds;
 import com.mckimquyen.services.AppEventManager;
+import com.mckimquyen.util.Logger;
 import com.mckimquyen.services.BroadcastReceivers;
 import com.mckimquyen.services.TaskSortApps;
 import com.mckimquyen.services.TaskUpdateApps;
-import com.orm.SugarApp;
+import com.mckimquyen.model.AppDatabase;
 
 import kotlin.Unit;
 
@@ -21,7 +21,7 @@ import kotlin.Unit;
  * ============================================================================
  * APPLICATION CLASS - Fisheye Launcher
  * ============================================================================
- * Class chính của ứng dụng, kế thừa từ SugarApp (Sugar ORM)
+ * Class chính của ứng dụng, kế thừa từ Application
  * Khởi tạo khi app start và tồn tại trong suốt vòng đời của app
 
  * CHỨC NĂNG CHÍNH:
@@ -42,12 +42,9 @@ import kotlin.Unit;
 
  * NOTE:
  * - Class này được khai báo trong AndroidManifest.xml: android:name=".app.RApplication"
- * - Không thể convert sang Kotlin vì SugarApp có compatibility issues
- * - SugarApp tự động handle database initialization qua metadata trong manifest
  * ============================================================================
  */
-// 2023.03.18 Tried to convert to Kotlin but failed due to SugarApp compatibility
-public class RApplication extends SugarApp {
+public class RApplication extends android.app.Application {
 
     private static final String TAG = "RApplication";
 
@@ -60,7 +57,7 @@ public class RApplication extends SugarApp {
      * Chỉ chạy 1 lần trong toàn bộ lifecycle của app
 
      * Thứ tự thực hiện:
-     * 1. super.onCreate() - SugarApp khởi tạo database
+     * 1. super.onCreate() - Khởi tạo database Room
      * 2. setupAdmob() - Khởi tạo Google AdMob SDK
      * 3. setupEventListeners() - Đăng ký lắng nghe events từ AppEventManager
      * 4. updateApps() - Load danh sách apps lần đầu
@@ -70,6 +67,9 @@ public class RApplication extends SugarApp {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        // Khởi tạo database Room
+        AppDatabase.Companion.init(this);
 
         // Khởi tạo AdMob SDK trên background thread
         setupAdmob();
@@ -91,7 +91,7 @@ public class RApplication extends SugarApp {
      * trong Manifest (bao gồm PACKAGE_ADDED, PACKAGE_REMOVED).
      */
     private void registerPackageChangeReceiver() {
-        Log.d("roy93~", "RApplication: Registering dynamic package receiver for PACKAGE_ADDED/REMOVED");
+        Logger.d("RApplication: Registering dynamic package receiver for PACKAGE_ADDED/REMOVED");
         packageReceiver = new BroadcastReceivers.AppsUpdatedReceiver();
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_PACKAGE_ADDED);
@@ -140,7 +140,7 @@ public class RApplication extends SugarApp {
         if (com.mckimquyen.BuildConfig.IS_ENABLE_ADMOB) {
             MobileAds.initialize(this, status -> {
                 com.roy.sdkadbmob.AdManager.INSTANCE.init(this, adConfig, (success, gaid) -> {
-                    Log.d(TAG, "AdManager init success=" + success + ", gaid=" + gaid);
+                    Logger.d(TAG, "AdManager init success=" + success + ", gaid=" + gaid);
                     // Removed registerAppOpenAdLifecycle to comply with Google Play Launcher Policy
                     return kotlin.Unit.INSTANCE;
                 });
@@ -150,7 +150,7 @@ public class RApplication extends SugarApp {
             sdk.setMediationProvider("max");
             sdk.initializeSdk(config -> {
                 com.roy.sdkadbmob.AdManager.INSTANCE.init(this, adConfig, (success, gaid) -> {
-                    Log.d(TAG, "AdManager init success=" + success + ", gaid=" + gaid);
+                    Logger.d(TAG, "AdManager init success=" + success + ", gaid=" + gaid);
                     // Removed registerAppOpenAdLifecycle to comply with Google Play Launcher Policy
                     return kotlin.Unit.INSTANCE;
                 });
@@ -267,6 +267,25 @@ public class RApplication extends SugarApp {
                 getApplicationContext(),    // Context để load settings
                 this)                       // Application instance
                 .execute();                 // Execute async
+    }
+
+    /**
+     * Override onTerminate() để unregister packageReceiver.
+     * Lưu ý: trên real Android device, onTerminate() thường không được gọi.
+     * Nhưng cần đối với emulator, tests, và trành đã đăng ký lạ trên Android 14+.
+     */
+    @Override
+    public void onTerminate() {
+        if (packageReceiver != null) {
+            try {
+                unregisterReceiver(packageReceiver);
+                packageReceiver = null;
+                Logger.d("RApplication: packageReceiver unregistered in onTerminate()");
+            } catch (IllegalArgumentException e) {
+                Logger.w("RApplication: packageReceiver was already unregistered");
+            }
+        }
+        super.onTerminate();
     }
 
     // ========================================================================

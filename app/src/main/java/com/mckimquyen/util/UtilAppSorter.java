@@ -61,19 +61,11 @@ public class UtilAppSorter {
     }
 
     private static void sortByOpenCountAscending(ArrayList<App> apps) {
-        apps.sort((a1, a2) -> {
-            long count1 = AppPersistent.getAppOpenCount(a1.getPackageName().toString(), a1.getName().toString());
-            long count2 = AppPersistent.getAppOpenCount(a2.getPackageName().toString(), a2.getName().toString());
-            return Long.compare(count2, count1);
-        });
+        apps.sort((a1, a2) -> Long.compare(a2.getOpenCount(), a1.getOpenCount()));
     }
 
     private static void sortByOpenCountDescending(ArrayList<App> apps) {
-        apps.sort((a1, a2) -> {
-            long count1 = AppPersistent.getAppOpenCount(a1.getPackageName().toString(), a1.getName().toString());
-            long count2 = AppPersistent.getAppOpenCount(a2.getPackageName().toString(), a2.getName().toString());
-            return Long.compare(count1, count2);
-        });
+        apps.sort((a1, a2) -> Long.compare(a1.getOpenCount(), a2.getOpenCount()));
     }
 
     private static void sortByIconColorAscending(ArrayList<App> apps) {

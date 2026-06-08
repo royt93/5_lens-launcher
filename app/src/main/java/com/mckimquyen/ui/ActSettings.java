@@ -23,6 +23,7 @@ import android.widget.LinearLayout;
 import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import com.mckimquyen.util.Logger;
 import androidx.appcompat.widget.Toolbar;
 import androidx.viewpager2.widget.ViewPager2;
 
@@ -216,7 +217,7 @@ public class ActSettings extends ActBase
 
     private void launchApps() {
         boolean isDefaultLauncher = UtilLauncher.isDefaultLauncher(getApplication());
-        android.util.Log.d("ActSettings", "launchApps - isDefaultLauncher: " + isDefaultLauncher);
+        Logger.d("ActSettings", "launchApps - isDefaultLauncher: " + isDefaultLauncher);
 
         if (isDefaultLauncher) {
             // Already default launcher -> go to launcher home screen

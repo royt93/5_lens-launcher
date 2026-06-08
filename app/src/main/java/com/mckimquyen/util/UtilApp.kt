@@ -18,6 +18,7 @@ import com.mckimquyen.enums.SortType
 import com.mckimquyen.ext.Biometric
 import com.mckimquyen.model.App
 import com.mckimquyen.model.AppPersistent
+import com.mckimquyen.model.AppDatabase
 import com.mckimquyen.services.BroadcastReceivers.AppsEditedReceiver
 import java.util.*
 
@@ -47,6 +48,15 @@ object UtilApp {
             return apps
         }
 
+        // Query all DB records once to avoid N database queries in loop
+        val allPersistents = try {
+            AppDatabase.getInstance().appPersistentDao().getAll()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emptyList<AppPersistent>()
+        }
+        val persistentMap = allPersistents.associateBy { it.identifier }
+
         // Find selected icon pack
         val iconPacks = UtilIconPackManager().getAvailableIconPacksWithIcons(true, application)
         val selectedIconPack = iconPacks.find { it.mName == iconPackLabelName }
@@ -69,8 +79,24 @@ object UtilApp {
             val defaultBitmap = UtilBitmap.packageNameToBitmap(packageManager, packageName, iconResId)
             val icon = selectedIconPack?.getIconForPackage(packageName, defaultBitmap) ?: defaultBitmap
 
-            // Create immutable App instance with palette color
-            val tempApp = App(
+            val identifier = AppPersistent.generateIdentifier(packageName, name)
+            val persistent = persistentMap[identifier]
+
+            val isOpened = persistent?.appOpened ?: true
+            val isVisible = persistent?.appVisible ?: true
+            val openCount = persistent?.openCount ?: 0L
+
+            // Cache palette color (Issue 3)
+            var paletteColor = persistent?.paletteColor ?: 0
+            if (paletteColor == 0 && icon != null) {
+                paletteColor = UtilColor.getPaletteColorFromBitmap(icon)
+                if (paletteColor != 0) {
+                    AppPersistent.setAppPaletteColor(packageName, name, paletteColor)
+                }
+            }
+
+            // Create App instance
+            val app = App(
                 id = index,
                 label = label,
                 packageName = packageName,
@@ -78,10 +104,11 @@ object UtilApp {
                 iconResId = iconResId,
                 icon = icon,
                 installDate = installDate,
-                paletteColor = 0
+                paletteColor = paletteColor,
+                isOpened = isOpened,
+                isVisible = isVisible,
+                openCount = openCount
             )
-
-            val app = tempApp.copyWithPaletteColor(UtilColor.getPaletteColorFromApp(tempApp))
             apps.add(app)
         }
 

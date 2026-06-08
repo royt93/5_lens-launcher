@@ -249,11 +249,17 @@ class LensView : View {
     }
 
     private fun drawGrid(canvas: Canvas, itemCount: Int) {
+        val us = mUtilSettings ?: return
+        val iconSizeDp = us.getFloat(UtilSettings.KEY_ICON_SIZE)
+        val distortionFactor = us.getFloat(UtilSettings.KEY_DISTORTION_FACTOR)
+        val scaleFactor = us.getFloat(UtilSettings.KEY_SCALE_FACTOR)
+
         val grid = UtilCalculator.calculateGrid(
             context,
             width - (mInsets.left + mInsets.right),
             height - (mInsets.top + mInsets.bottom),
-            itemCount
+            itemCount,
+            iconSizeDp
         )
         mInsideRect = false
         var selectIndex = -1
@@ -278,34 +284,36 @@ class LensView : View {
                     }
                     if (mTouchX >= 0 && mTouchY >= 0) {
                         val shiftedCenterX = UtilCalculator.shiftPoint(
-                            context,
                             mTouchX,
                             rect.centerX(),
                             width.toFloat(),
-                            animationMultiplier
+                            animationMultiplier,
+                            distortionFactor
                         )
                         val shiftedCenterY = UtilCalculator.shiftPoint(
-                            context,
                             mTouchY,
                             rect.centerY(),
                             height.toFloat(),
-                            animationMultiplier
+                            animationMultiplier,
+                            distortionFactor
                         )
                         val scaledCenterX = UtilCalculator.scalePoint(
-                            context,
                             mTouchX,
                             rect.centerX(),
                             rect.width(),
                             width.toFloat(),
-                            animationMultiplier
+                            animationMultiplier,
+                            scaleFactor,
+                            distortionFactor
                         )
                         val scaledCenterY = UtilCalculator.scalePoint(
-                            context,
                             mTouchY,
                             rect.centerY(),
                             rect.height(),
                             height.toFloat(),
-                            animationMultiplier
+                            animationMultiplier,
+                            scaleFactor,
+                            distortionFactor
                         )
                         val newSize = UtilCalculator.calculateSquareScaledSize(
                             scaledCenterX,
@@ -313,24 +321,18 @@ class LensView : View {
                             scaledCenterY,
                             shiftedCenterY
                         )
-                        mUtilSettings?.let { us ->
-                            if (us.getFloat(UtilSettings.KEY_DISTORTION_FACTOR) > 0.0f
-                                && us.getFloat(UtilSettings.KEY_SCALE_FACTOR) > 0.0f
-                            ) {
-                                rect = UtilCalculator.calculateRect(
-                                    shiftedCenterX,
-                                    shiftedCenterY,
-                                    newSize
-                                )
-                            } else if (us.getFloat(UtilSettings.KEY_DISTORTION_FACTOR) > 0.0f
-                                && us.getFloat(UtilSettings.KEY_SCALE_FACTOR) == 0.0f
-                            ) {
-                                rect = UtilCalculator.calculateRect(
-                                    shiftedCenterX,
-                                    shiftedCenterY,
-                                    rect.width()
-                                )
-                            }
+                        if (distortionFactor > 0.0f && scaleFactor > 0.0f) {
+                            rect = UtilCalculator.calculateRect(
+                                shiftedCenterX,
+                                shiftedCenterY,
+                                newSize
+                            )
+                        } else if (distortionFactor > 0.0f && scaleFactor == 0.0f) {
+                            rect = UtilCalculator.calculateRect(
+                                shiftedCenterX,
+                                shiftedCenterY,
+                                rect.width()
+                            )
                         }
 
                         if (UtilCalculator.isInsideRect(mTouchX, mTouchY, rect)) {
@@ -382,10 +384,7 @@ class LensView : View {
                 }
                 
                 if (app.installDate >= System.currentTimeMillis() - UtilSettings.SHOW_NEW_APP_TAG_DURATION
-                    && AppPersistent.getAppOpenCount(
-                        app.packageName.toString(),
-                        app.name.toString()
-                    ) == 0L
+                    && app.openCount == 0L
                 ) {
                     drawNewAppTag(canvas, rect)
                 }

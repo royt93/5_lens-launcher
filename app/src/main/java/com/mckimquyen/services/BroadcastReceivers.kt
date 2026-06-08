@@ -3,6 +3,7 @@ package com.mckimquyen.services
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import com.mckimquyen.util.Logger
 
 /**
  * Collection of BroadcastReceivers for handling app events.
@@ -18,7 +19,7 @@ class BroadcastReceivers {
 
     class AppsUpdatedReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            android.util.Log.d("roy93~", "BroadcastReceivers: AppsUpdatedReceiver onReceive! Action: ${intent.action}")
+            Logger.d("BroadcastReceivers: AppsUpdatedReceiver onReceive! Action: ${intent.action}")
             AppEventManager.notifyAppsUpdated()
         }
     }

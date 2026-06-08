@@ -23,13 +23,18 @@ object BitmapCache {
      * LruCache lưu trữ bitmap với key là package name
      * Size tính bằng KB
      */
-    private val cache = object : LruCache<String, Bitmap>(cacheSize) {
+    private data class CachedBitmap(
+        val bitmap: Bitmap,
+        val sizeKb: Int
+    )
+
+    private val cache = object : LruCache<String, CachedBitmap>(cacheSize) {
 
         /**
          * Tính size của bitmap trong cache (đơn vị KB)
          */
-        override fun sizeOf(key: String, bitmap: Bitmap): Int {
-            return bitmap.byteCount / 1024
+        override fun sizeOf(key: String, cachedBitmap: CachedBitmap): Int {
+            return cachedBitmap.sizeKb
         }
 
         /**
@@ -44,13 +49,16 @@ object BitmapCache {
         override fun entryRemoved(
             evicted: Boolean,
             key: String,
-            oldValue: Bitmap,
-            newValue: Bitmap?
+            oldValue: CachedBitmap,
+            newValue: CachedBitmap?
         ) {
             Log.d(TAG, "Bitmap evicted from cache for key: $key, evicted=$evicted")
             // Do not call oldValue.recycle() - let GC handle it to avoid race conditions
         }
     }
+
+    // Target size for launcher icons (192x192 is ideal for xxxhdpi screens)
+    private const val TARGET_ICON_SIZE = 192
 
     /**
      * Lấy bitmap từ cache
@@ -59,7 +67,13 @@ object BitmapCache {
      */
     fun get(key: String): Bitmap? {
         return try {
-            cache.get(key)?.takeIf { !it.isRecycled }
+            val cached = cache.get(key) ?: return null
+            if (cached.bitmap.isRecycled) {
+                cache.remove(key)
+                null
+            } else {
+                cached.bitmap
+            }
         } catch (e: Exception) {
             Log.e(TAG, "Error getting bitmap for key: $key", e)
             null
@@ -67,7 +81,7 @@ object BitmapCache {
     }
 
     /**
-     * Lưu bitmap vào cache
+     * Lưu bitmap vào cache. Tự động resize nếu kích thước lớn hơn TARGET_ICON_SIZE.
      * @param key Package name của app
      * @param bitmap Icon bitmap cần cache
      */
@@ -76,8 +90,17 @@ object BitmapCache {
 
         try {
             if (get(key) == null) {
-                cache.put(key, bitmap)
-                Log.d(TAG, "Cached bitmap for key: $key, size: ${bitmap.byteCount / 1024}KB")
+                val originalWidth = bitmap.width
+                val originalHeight = bitmap.height
+                val originalSizeKb = bitmap.byteCount / 1024
+                val optimizedBitmap = if (bitmap.width > TARGET_ICON_SIZE || bitmap.height > TARGET_ICON_SIZE) {
+                    Bitmap.createScaledBitmap(bitmap, TARGET_ICON_SIZE, TARGET_ICON_SIZE, true)
+                } else {
+                    bitmap
+                }
+                val optimizedSizeKb = optimizedBitmap.byteCount / 1024
+                cache.put(key, CachedBitmap(optimizedBitmap, optimizedSizeKb))
+                Log.d(TAG, "Cached bitmap for key: $key, size: ${optimizedSizeKb}KB (Original: ${originalWidth}x${originalHeight}, ${originalSizeKb}KB)")
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error putting bitmap for key: $key", e)

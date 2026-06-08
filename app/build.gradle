@@ -3,6 +3,7 @@
 // ============================================================================
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
 // Firebase plugins - bật khi cần sử dụng Firebase
 //apply plugin: 'com.google.gms.google-services'
 //apply plugin: 'com.google.firebase.crashlytics'
@@ -21,6 +22,8 @@ android {
         minSdkVersion 25    // Android 7.1 (Nougat)
         //noinspection EditedTargetSdkVersion
         targetSdkVersion 36 // Android 14
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         // Version format: YYYYMMDD
         versionCode 20260608
@@ -59,7 +62,8 @@ android {
     buildTypes {
         release {
             buildConfigField "Boolean", "IS_ENABLE_ADMOB", "false"
-            buildConfigField "String", "APPLOVIN_SDK_KEY", "\"e75FnQfS9XTTqM1Kne69U7PW_MBgAnGQTFvtwVVui6kRPKs5L7ws9twr5IQWwVfzPKZ5pF2IfDa7lguMgGlCyt\""
+            // AppLovin SDK Key injected via manifestPlaceholders (không hardcode trong Manifest)
+            manifestPlaceholders = [APPLOVIN_SDK_KEY: "e75FnQfS9XTTqM1Kne69U7PW_MBgAnGQTFvtwVVui6kRPKs5L7ws9twr5IQWwVfzPKZ5pF2IfDa7lguMgGlCyt"]
             buildConfigField "String", "APPLOVIN_BANNER_ID", "\"aa291bda0fb0b6c5\""
             buildConfigField "String", "APPLOVIN_INTERSTITIAL_ID", "\"7cf8ffccbdb242be\""
             buildConfigField "String", "APPLOVIN_APP_OPEN_ID", "\"d4acd020c861e87a\""
@@ -93,7 +97,8 @@ android {
 
         debug {
             buildConfigField "Boolean", "IS_ENABLE_ADMOB", "false"
-            buildConfigField "String", "APPLOVIN_SDK_KEY", "\"e75FnQfS9XTTqM1Kne69U7PW_MBgAnGQTFvtwVVui6kRPKs5L7ws9twr5IQWwVfzPKZ5pF2IfDa7lguMgGlCyt\""
+            // AppLovin SDK Key injected via manifestPlaceholders (không hardcode trong Manifest)
+            manifestPlaceholders = [APPLOVIN_SDK_KEY: "e75FnQfS9XTTqM1Kne69U7PW_MBgAnGQTFvtwVVui6kRPKs5L7ws9twr5IQWwVfzPKZ5pF2IfDa7lguMgGlCyt"]
             // Use real AppLovin IDs for debug or place test logic if AppLovin requires it. AppLovin test mode can be enabled via code.
             buildConfigField "String", "APPLOVIN_BANNER_ID", "\"aa291bda0fb0b6c5\""
             buildConfigField "String", "APPLOVIN_INTERSTITIAL_ID", "\"7cf8ffccbdb242be\""
@@ -183,10 +188,7 @@ android {
         // Tối ưu Kotlin compilation
         freeCompilerArgs += [
             '-Xjvm-default=all',  // Generate default methods trong interfaces
-            '-opt-in=kotlin.RequiresOptIn',  // Opt-in cho experimental APIs
-            '-Xno-param-assertions',  // Giảm bytecode (tắt null checks cho params)
-            '-Xno-call-assertions',  // Giảm bytecode (tắt null checks cho return)
-            '-Xno-receiver-assertions'  // Giảm bytecode (tắt null checks cho receiver)
+            '-opt-in=kotlin.RequiresOptIn'  // Opt-in cho experimental APIs
         ]
     }
 
@@ -292,10 +294,12 @@ dependencies {
     testImplementation 'org.robolectric:robolectric:4.11.1'    // Android unit tests
 
     // Android Instrumentation Testing (Device/Emulator-based tests)
-    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
-    androidTestImplementation 'androidx.test:runner:1.5.2'
-    androidTestImplementation 'androidx.test:rules:1.5.0'
+    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
+    androidTestImplementation 'androidx.test:runner:1.6.1'
+    androidTestImplementation 'androidx.test:rules:1.6.1'
+    androidTestImplementation 'androidx.test:core-ktx:1.6.1'               // ActivityScenario KTX
+    androidTestImplementation 'androidx.fragment:fragment-testing:1.8.6'    // launchFragmentInContainer (FrmLensWidgetTest)
     androidTestImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0'
 
     // ========================================================================
@@ -330,7 +334,10 @@ dependencies {
     // ========================================================================
     // DATABASE
     // ========================================================================
-    implementation 'com.github.satyan:sugar:1.5'  // Sugar ORM
+    // Room Database
+    implementation 'androidx.room:room-runtime:2.6.1'
+    kapt 'androidx.room:room-compiler:2.6.1'
+    implementation 'androidx.room:room-ktx:2.6.1'
 
     // ========================================================================
     // SECURITY

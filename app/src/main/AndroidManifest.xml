@@ -64,28 +64,7 @@
         android:usesCleartextTraffic="false"
         tools:ignore="DiscouragedApi,LockedOrientationActivity">
 
-        <!-- ====================================================================
-             DATABASE CONFIGURATION - SugarORM
-             ==================================================================== -->
-        <!-- Tên database file -->
-        <meta-data
-            android:name="DATABASE"
-            android:value="app_persistent.db" />
-
-        <!-- Database version - tăng lên khi cần migrate schema -->
-        <meta-data
-            android:name="VERSION"
-            android:value="7" />
-
-        <!-- Debug: Log SQL queries (nên = false ở production) -->
-        <meta-data
-            android:name="QUERY_LOG"
-            android:value="false" />
-
-        <!-- Package chứa các model classes của database -->
-        <meta-data
-            android:name="DOMAIN_PACKAGE_NAME"
-            android:value="com.mckimquyen.model" />
+        <!-- Room Database uses code-based configuration (AppDatabase) -->
 
         <!-- ====================================================================
              ADMOB CONFIGURATION
@@ -96,10 +75,11 @@
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-3612191981543807~3330254772" />
 
-        <!-- AppLovin SDK Key -->
+        <!-- AppLovin SDK Key — injected by Gradle manifestPlaceholders (see app/build.gradle) -->
         <meta-data
             android:name="applovin.sdk.key"
-            android:value="e75FnQfS9XTTqM1Kne69U7PW_MBgAnGQTFvtwVVui6kRPKs5L7ws9twr5IQWwVfzPKZ5pF2IfDa7lguMgGlCyt" />
+            android:value="${APPLOVIN_SDK_KEY}" />
+
 
         <!-- ====================================================================
              ACTIVITIES - Các màn hình của app

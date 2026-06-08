@@ -126,6 +126,33 @@ class RAppsSingleton private constructor() {
         }
 
     /**
+     * Cập nhật trạng thái in-memory của app trong singleton để đồng bộ với Database.
+     * Tránh đọc lại DB hoặc re-query toàn bộ danh sách khi thay đổi nhỏ (visible, lock, openCount).
+     */
+    fun updateAppState(
+        packageName: String,
+        name: String,
+        isOpened: Boolean? = null,
+        isVisible: Boolean? = null,
+        openCount: Long? = null
+    ) {
+        synchronized(this) {
+            val list = mApps ?: return
+            for (i in list.indices) {
+                val app = list[i]
+                if (app.packageName.toString() == packageName && app.name.toString() == name) {
+                    list[i] = app.copyWithLockAndVisibility(
+                        newOpened = isOpened ?: app.isOpened,
+                        newVisible = isVisible ?: app.isVisible,
+                        newOpenCount = openCount ?: app.openCount
+                    )
+                    break
+                }
+            }
+        }
+    }
+
+    /**
      * Lấy icon của app từ cache
      * @param packageName Package name của app
      * @return Bitmap icon hoặc null nếu không có trong cache

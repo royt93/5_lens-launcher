@@ -18,6 +18,7 @@ import com.mckimquyen.R;
 import com.mckimquyen.app.RAppsSingleton;
 import com.mckimquyen.model.App;
 import com.mckimquyen.model.AppPersistent;
+import com.mckimquyen.util.Logger;
 import com.mckimquyen.util.UIUtils;
 import com.mckimquyen.services.AppEventManager;
 import com.mckimquyen.util.UtilSettings;
@@ -99,6 +100,9 @@ public class ActHome extends ActBase {
         Log.d("roy93~", "onResume");
         updateColor();
         setupTransparentSystemBarsForLollipop();
+        if (RAppsSingleton.getInstance().getApps() != null && !RAppsSingleton.getInstance().getApps().isEmpty()) {
+            assignApps(Objects.requireNonNull(RAppsSingleton.getInstance().getApps()));
+        }
     }
 
     private void setupTransparentSystemBarsForLollipop() {
@@ -116,33 +120,54 @@ public class ActHome extends ActBase {
         lensViews.invalidate();
     }
 
+    private boolean isSameAppList(java.util.List<App> list1, java.util.List<App> list2) {
+        if (list1 == list2) return true;
+        if (list1 == null || list2 == null) return false;
+        if (list1.size() != list2.size()) return false;
+        for (int i = 0; i < list1.size(); i++) {
+            App app1 = list1.get(i);
+            App app2 = list2.get(i);
+            if (app1 == null || app2 == null) {
+                if (app1 != app2) return false;
+                continue;
+            }
+            if (!Objects.equals(app1.getPackageName().toString(), app2.getPackageName().toString())
+                    || app1.isVisible() != app2.isVisible()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     private void assignApps(ArrayList<App> lApp) {
-        android.util.Log.d("roy93~", "ActHome: assignApps called, input list size: " + (lApp != null ? lApp.size() : "null"));
-        if (lApp.isEmpty()) {
+        Logger.d("ActHome: assignApps called, input list size: " + (lApp != null ? lApp.size() : "null"));
+        if (lApp == null || lApp.isEmpty()) {
             return;
         }
+
+        // Filter out hidden apps first to get the target visible list
+        ArrayList<App> visibleApps = new ArrayList<>();
+        for (App app : lApp) {
+            if (app.isVisible()) {
+                visibleApps.add(app);
+            }
+        }
+
+        // Check if the new visible list is identical to the currently displayed listApp
+        if (listApp != null && isSameAppList(listApp, visibleApps)) {
+            Logger.d("ActHome: assignApps skipped - identical list of visible apps");
+            return;
+        }
+
         progressBarHome.setVisibility(View.INVISIBLE);
         lensViews.setVisibility(View.VISIBLE);
-        listApp = lApp;
-        removeHiddenApps();
-        android.util.Log.d("roy93~", "ActHome: Setting " + listApp.size() + " apps to lensViews");
+        listApp = visibleApps;
+        Logger.d("ActHome: Setting " + listApp.size() + " apps to lensViews");
         lensViews.setApps(listApp);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-    }
-
-    private void removeHiddenApps() {
-        // Fix 3.1: Loop from end to start to avoid IndexOutOfBounds when removing items
-        for (int i = listApp.size() - 1; i >= 0; i--) {
-            App app = listApp.get(i);
-            if (!AppPersistent.getAppVisibility(
-                    Objects.requireNonNull(app.getPackageName()).toString(),
-                    Objects.requireNonNull(app.getName()).toString())) {
-                listApp.remove(i);
-            }
-        }
     }
 }

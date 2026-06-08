@@ -27,7 +27,10 @@ data class App(
     val iconResId: Int = 0,
     val icon: Bitmap? = null,
     val installDate: Long = 0L,
-    @ColorInt val paletteColor: Int = 0
+    @ColorInt val paletteColor: Int = 0,
+    val isOpened: Boolean = true,
+    val isVisible: Boolean = true,
+    val openCount: Long = 0L
 ) {
     /**
      * Creates a copy of this App with the specified properties changed.
@@ -36,6 +39,9 @@ data class App(
     fun copyWithIcon(newIcon: Bitmap?): App = copy(icon = newIcon)
 
     fun copyWithPaletteColor(@ColorInt newColor: Int): App = copy(paletteColor = newColor)
+
+    fun copyWithLockAndVisibility(newOpened: Boolean, newVisible: Boolean, newOpenCount: Long): App = 
+        copy(isOpened = newOpened, isVisible = newVisible, openCount = newOpenCount)
 
     /**
      * Checks if the app has a valid package name.

@@ -14,10 +14,9 @@ import com.mckimquyen.model.Grid;
 public class UtilCalculator {
 
     /**
-     * Calculate equispaced grid based on screen dimensions and item count
-     * Source: <a href="http://math.stackexchange.com/questions/466198/algorithm-to-get-the-maximum-size-of-n-squares-that-fit-into-a-rectangle-with-a">...</a>
+     * Calculate equispaced grid based on screen dimensions, item count, and icon size in DP
      */
-    public static Grid calculateGrid(Context context, int screenWidth, int screenHeight, int itemCount) {
+    public static Grid calculateGrid(Context context, int screenWidth, int screenHeight, int itemCount, float iconSizeDp) {
         // Calculate item counts
         int itemCountHorizontal, itemCountVertical;
         if (itemCount <= 1) {
@@ -30,8 +29,7 @@ public class UtilCalculator {
         }
 
         // Calculate item size
-        UtilSettings utilSettings = new UtilSettings(context);
-        float itemSize = convertDpToPixel(utilSettings.getFloat(UtilSettings.KEY_ICON_SIZE), context);
+        float itemSize = convertDpToPixel(iconSizeDp, context);
 
         // Calculate spacing
         float spacingHorizontal = (screenWidth - (itemCountHorizontal * itemSize)) / (itemCountHorizontal + 1);
@@ -76,14 +74,13 @@ public class UtilCalculator {
     /**
      * Graphical Fisheye Lens algorithm for shifting item position
      */
-    public static float shiftPoint(Context context, float lensPosition, float itemPosition, float boundary, float multiplier) {
+    public static float shiftPoint(float lensPosition, float itemPosition, float boundary, float multiplier, float distortionFactor) {
         if (lensPosition < 0) return itemPosition;
 
-        UtilSettings utilSettings = new UtilSettings(context);
         float a = Math.abs(lensPosition - itemPosition);
         float b = Math.max(lensPosition, boundary - lensPosition);
         float x = a / b;
-        float d = multiplier * utilSettings.getFloat(UtilSettings.KEY_DISTORTION_FACTOR);
+        float d = multiplier * distortionFactor;
         float y = ((1.0f + d) * x) / (1.0f + (d * x));
         float newDistanceFromCenter = b * y;
 
@@ -95,18 +92,17 @@ public class UtilCalculator {
     /**
      * Graphical Fisheye Lens algorithm for scaling
      */
-    public static float scalePoint(Context context, float lensPosition, float itemPosition, float itemSize, float boundary, float multiplier) {
+    public static float scalePoint(float lensPosition, float itemPosition, float itemSize, float boundary, float multiplier, float scaleFactor, float distortionFactor) {
         if (lensPosition < 0) return itemSize;
 
-        UtilSettings utilSettings = new UtilSettings(context);
-        float scaleDifference = utilSettings.getFloat(UtilSettings.KEY_SCALE_FACTOR) - UtilSettings.MIN_SCALE_FACTOR;
+        float scaleDifference = scaleFactor - UtilSettings.MIN_SCALE_FACTOR;
         float d = UtilSettings.MIN_SCALE_FACTOR + scaleDifference * multiplier;
 
         float adjustedPosition = (lensPosition >= itemPosition)
                 ? itemPosition - d * (itemSize / 2.0f)
                 : itemPosition + d * (itemSize / 2.0f);
 
-        return shiftPoint(context, lensPosition, adjustedPosition, boundary, multiplier);
+        return shiftPoint(lensPosition, adjustedPosition, boundary, multiplier, distortionFactor);
     }
 
     /**

@@ -34,17 +34,17 @@ object UtilLauncher {
         val currentPackage = application.packageName
         val resolvedPackage = res?.activityInfo?.packageName
         val resolvedActivity = res?.activityInfo?.name
-        android.util.Log.d("UtilLauncher", "isDefaultLauncher check:")
-        android.util.Log.d("UtilLauncher", "  Current package: $currentPackage")
-        android.util.Log.d("UtilLauncher", "  Resolved package: $resolvedPackage")
-        android.util.Log.d("UtilLauncher", "  Resolved activity: $resolvedActivity")
+        Logger.d("UtilLauncher", "isDefaultLauncher check:")
+        Logger.d("UtilLauncher", "  Current package: $currentPackage")
+        Logger.d("UtilLauncher", "  Resolved package: $resolvedPackage")
+        Logger.d("UtilLauncher", "  Resolved activity: $resolvedActivity")
 
         // Check if resolved package matches current app
         val isDefault = res?.activityInfo?.let {
             it.packageName != "android" && it.packageName == currentPackage
         } ?: false
 
-        android.util.Log.d("UtilLauncher", "  Result: $isDefault")
+        Logger.d("UtilLauncher", "  Result: $isDefault")
         return isDefault
     }
 
