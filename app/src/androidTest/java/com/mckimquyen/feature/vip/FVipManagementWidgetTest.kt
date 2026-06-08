@@ -32,9 +32,9 @@ class FVipManagementWidgetTest {
             assertNotNull("edtVipKey should be present", edtVipKey)
             assertEquals(View.VISIBLE, edtVipKey.visibility)
 
-            val btnRedeemKey = activity.findViewById<View>(R.id.btnRedeemKey)
-            assertNotNull("btnRedeemKey should be present", btnRedeemKey)
-            assertEquals(View.VISIBLE, btnRedeemKey.visibility)
+            val btnActivateVipKey = activity.findViewById<View>(R.id.btnActivateVipKey)
+            assertNotNull("btnActivateVipKey should be present", btnActivateVipKey)
+            assertEquals(View.VISIBLE, btnActivateVipKey.visibility)
             
             // Verify watch ad button
             val btnWatchAdVip = activity.findViewById<View>(R.id.btnWatchAdVip)

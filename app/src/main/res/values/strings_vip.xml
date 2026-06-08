@@ -3,7 +3,7 @@
     <!-- VIP -->
     <string name="vip_active">VIP is active</string>
     <string name="vip_free_user">Free account</string>
-    <string name="vip_until">Until %1$s</string>
+    <string name="vip_until">Active until %1$s</string>
     <string name="vip_activated_at">Activated: %1$s</string>
     <string name="vip_expires_at">Expires: %1$s</string>
     <string name="vip_remaining">%1$dd %2$02dh %3$02dm %4$02ds</string>
@@ -36,7 +36,7 @@
     <string name="vip_unlock_key_btn">Unlock VIP by Key</string>
     <string name="vip_manage_desc">Manage your VIP status below.</string>
     <string name="vip_premium_title">VIP Premium</string>
-    <string name="vip_badge_active">VIP Active</string>
+    <string name="vip_badge_active">Active</string>
     <string name="vip_badge_get">Get VIP</string>
     <string name="privacy_policy">Privacy Policy</string>
     <string name="vip_active_thank_you">Thank you for supporting VIP!</string>
@@ -54,6 +54,7 @@
     <string name="vip_feature_customization_desc">Access premium customization controls, themes, and layouts.</string>
     <string name="vip_feature_support_title">Priority Support</string>
     <string name="vip_feature_support_desc">Your questions and bug reports are processed with high priority.</string>
-    <string name="vip_badge_premium_member">PREMIUM MEMBER</string>
-    <string name="vip_badge_free_member">FREE MEMBER</string>
+    <string name="vip_badge_premium_member">Premium Member</string>
+    <string name="vip_badge_free_member">Free Member</string>
+    <string name="vip_dialog_ok">Ok</string>
 </resources>

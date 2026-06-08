@@ -107,7 +107,7 @@ class ActVipManagement : AppCompatActivity() {
                 } else {
                     showMaterialDialog(
                         R.string.vip_failed_title,
-                        R.string.vip_failed_title
+                        R.string.vip_activation_failed_message
                     )
                 }
             } else {
@@ -130,7 +130,7 @@ class ActVipManagement : AppCompatActivity() {
                                 } else {
                                     showMaterialDialog(
                                         R.string.vip_failed_title,
-                                        R.string.vip_failed_title
+                                        R.string.vip_ad_reward_failed_message
                                     )
                                 }
                             }
@@ -308,7 +308,7 @@ class ActVipManagement : AppCompatActivity() {
         val builder = androidx.appcompat.app.AlertDialog.Builder(this, R.style.MaterialYouDialogTheme)
             .setTitle(title)
             .setMessage(message)
-            .setPositiveButton(android.R.string.ok, null)
+            .setPositiveButton(R.string.vip_dialog_ok, null)
         
         if (iconRes != null) {
             builder.setIcon(iconRes)

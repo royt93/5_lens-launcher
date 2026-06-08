@@ -64,10 +64,17 @@
         <item name="popupMenuStyle">@style/RoundedPopupMenuStyle</item>
     </style>
 
-    <!-- Material 3 styled Dialog Theme with Crimson Accent Colors based on AppCompat -->
-    <style name="MaterialYouDialogTheme" parent="Theme.AppCompat.DayNight.Dialog.Alert">
+    <!-- Material 3 styled Dialog Theme with Crimson Accent Colors based on Material Components -->
+    <style name="MaterialYouDialogTheme" parent="Theme.MaterialComponents.DayNight.Dialog.Alert">
         <item name="dialogCornerRadius">28dp</item>
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorAccent">@color/colorPrimary</item>
+        <item name="buttonBarButtonStyle">@style/DialogButtonNoAllCapsStyle</item>
+        <item name="android:buttonBarButtonStyle">@style/DialogButtonNoAllCapsStyle</item>
+    </style>
+
+    <!-- Dialog Button Style to keep only first letter capitalized -->
+    <style name="DialogButtonNoAllCapsStyle" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="android:textAllCaps">false</item>
     </style>
 </resources>
