@@ -1,0 +1,27 @@
+--------- beginning of system
+06-08 14:48:41.339 I/ActivityManager( 1442): Force stopping com.mckimquyen.lenslauncher appid=11387 user=-1: installPackageLI
+06-08 14:48:41.372 I/ActivityManager( 1442): Force stopping com.mckimquyen.lenslauncher appid=11387 user=0: pkg removed
+06-08 14:48:41.446 D/ActivityManager( 1442): sync unfroze 2469 com.android.settings for 10
+06-08 14:48:41.446 D/ActivityManager( 1442): sync unfroze 7433 com.android.DeviceAsWebcam for 10
+06-08 14:48:41.446 D/ActivityManager( 1442): sync unfroze 4149 com.android.keychain for 10
+06-08 14:48:41.448 D/ActivityManager( 1442): sync unfroze 7147 com.android.dynsystem:dynsystem for 10
+06-08 14:48:41.448 D/ActivityManager( 1442): sync unfroze 7118 com.android.dynsystem for 10
+06-08 14:48:41.448 D/ActivityManager( 1442): sync unfroze 2983 com.google.android.repairmode for 10
+06-08 14:48:41.449 D/ActivityManager( 1442): sync unfroze 5029 com.android.localtransport for 10
+06-08 14:48:41.451 D/ActivityManager( 1442): sync unfroze 3090 com.google.android.apps.wellbeing for 7
+06-08 14:48:41.455 D/ActivityManager( 1442): sync unfroze 5858 com.android.vending for 3
+06-08 14:48:41.472 D/ActivityManager( 1442): sync unfroze 5335 com.android.vending:background for 3
+06-08 14:48:41.474 D/ActivityManager( 1442): sync unfroze 2798 com.google.android.permissioncontroller for 3
+06-08 14:48:41.492 D/ActivityManager( 1442): sync unfroze 3038 com.google.android.euicc for 6
+06-08 14:48:41.652 D/ActivityManager( 1442): sync unfroze 5587 com.google.android.odad for 6
+06-08 14:48:41.787 I/ActivityManager( 1442): Background started FGS: Allowed [callingPackage: com.google.android.odad; callingUid: 10123; uidState: IMPF; uidBFSL: n/a; intent: Intent { xflg=0x4 cmp=com.google.android.odad/com.google.android.apps.miphone.odad.backgroundwork.impl.WorkService (has extras) }; code:BACKGROUND_ACTIVITY_PERMISSION; tempAllowListReason:<null>; allowWiu:58; targetSdkVersion:37; callerTargetSdkVersion:37; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+06-08 14:48:41.909 D/ActivityManager( 1442): sync unfroze 2879 com.google.android.gms for 6
+06-08 14:48:41.910 D/ActivityManager( 1442): sync unfroze 23981 com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 for 6
+06-08 14:48:51.418 I/ActivityManager( 1442): Start proc 16048:com.mckimquyen.lenslauncher/u0a1387 for next-top-activity {com.mckimquyen.lenslauncher/com.mckimquyen.ui.ActSettings}
+--------- beginning of main
+06-08 14:48:51.635 D/roy93~  (16048): RApplication: Registering dynamic package receiver for PACKAGE_ADDED/REMOVED
+06-08 14:48:51.649 D/roy93~  (16048): TaskUpdateApps: doInBackground started
+06-08 14:48:53.391 D/ActivityManager( 1442): sync unfroze 14836 com.android.chrome for 4
+06-08 14:48:53.402 D/roy93~  (16048): TaskUpdateApps: getApps returned 117 apps
+06-08 14:48:53.439 D/roy93~  (16048): TaskUpdateApps: onPostExecute! Total apps updated: 117
+06-08 14:48:54.693 D/ActivityManager( 1442): freezing 5587 com.google.android.odad
