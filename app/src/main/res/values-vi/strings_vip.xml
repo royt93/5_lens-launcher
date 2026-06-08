@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- VIP -->
+    <string name="vip_active">VIP đang kích hoạt</string>
+    <string name="vip_free_user">Người dùng miễn phí</string>
+    <string name="vip_until">Đến %1$s</string>
+    <string name="vip_activated_at">Kích hoạt: %1$s</string>
+    <string name="vip_expires_at">Hết hạn: %1$s</string>
+    <string name="vip_remaining">%1$dd %2$02dh %3$02dm %4$02ds</string>
+    <string name="vip_redeem_label">Nhập mã VIP</string>
+    <string name="vip_redeem_hint">VD: LOITP_30</string>
+    <string name="vip_redeem_button">Kích hoạt</string>
+    <string name="vip_watch_ad_3d">Xem quảng cáo → 3 ngày VIP</string>
+    <string name="vip_buy_30d_locked">Mua VIP 30 ngày — sắp ra mắt</string>
+    <string name="vip_buy_90d_locked">Mua VIP 90 ngày — sắp ra mắt</string>
+    <string name="vip_buy_1y_locked">Mua VIP 1 năm — sắp ra mắt</string>
+    <string name="vip_buy_lifetime_locked">Mua VIP trọn đời — sắp ra mắt</string>
+    <string name="vip_restore_locked">Khôi phục mua hàng — sắp ra mắt</string>
+    <string name="vip_revoke_all_button">Thu hồi VIP</string>
+    <string name="vip_revoke_all_confirm_title">Xác nhận thu hồi</string>
+    <string name="vip_revoke_all_confirm_message">Bạn có chắc muốn thu hồi VIP và quay về tài khoản Free?</string>
+    <string name="vip_entry_first_install">🎁 Quà tặng cài đặt mới</string>
+    <string name="vip_entry_redeemed">VIP %1$d ngày</string>
+    <string name="vip_verifying_title">Đang xác minh…</string>
+    <string name="vip_success_title">Thành công</string>
+    <string name="vip_failed_title">Thất bại</string>
+
+    <string name="vip_member_yes">Thành viên VIP: Có</string>
+    <string name="vip_member_no">Thành viên VIP: Không</string>
+    <string name="vip_expires_at_format">Hết hạn lúc: %1$s</string>
+    <string name="vip_added_success">Đã thêm vào danh sách VIP</string>
+    <string name="vip_removed_success">Đã xóa khỏi danh sách VIP</string>
+    <string name="vip_3d_activated">Đã kích hoạt 3 ngày VIP!</string>
+    <string name="vip_add_btn">Thêm VIP</string>
+    <string name="vip_remove_btn">Xóa VIP</string>
+    <string name="vip_unlock_key_btn">Mở khóa VIP bằng Key</string>
+    <string name="vip_manage_desc">Quản lý trạng thái VIP của bạn dưới đây.</string>
+    <string name="vip_premium_title">VIP Premium</string>
+    <string name="vip_badge_active">Đang VIP</string>
+    <string name="vip_badge_get">Nhận VIP</string>
+    <string name="privacy_policy">Chính sách bảo mật</string>
+    <string name="vip_active_thank_you">Cảm ơn bạn đã đồng hành cùng VIP!</string>
+    <string name="vip_activation_success_message">Đã kích hoạt VIP thành công (%1$d ngày).</string>
+    <string name="vip_invalid_key_message">Mã VIP không hợp lệ!</string>
+    <string name="vip_error_title">Lỗi</string>
+    <string name="vip_lifetime_device">VIP trọn đời (Thiết bị)</string>
+</resources>

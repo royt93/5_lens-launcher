@@ -117,14 +117,14 @@ class AppCodeChangesIntegrationTest {
 
     @Test
     fun testAppEventManager_notifyFromBackground_doesNotCrash() {
-        // Simulate what BroadcastReceivers do after BUG-13 fix:
-        // Direct call to AppEventManager (no Observable layer)
         val latch = CountDownLatch(2)
         val updatedObserver = Observer<Any?> { latch.countDown() }
         val loadedObserver = Observer<Any?> { latch.countDown() }
 
-        AppEventManager.appsUpdated.observeForever(updatedObserver)
-        AppEventManager.appsLoaded.observeForever(loadedObserver)
+        androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            AppEventManager.appsUpdated.observeForever(updatedObserver)
+            AppEventManager.appsLoaded.observeForever(loadedObserver)
+        }
 
         try {
             val worker = Thread {
@@ -139,8 +139,10 @@ class AppCodeChangesIntegrationTest {
                 latch.await(2, TimeUnit.SECONDS)
             )
         } finally {
-            AppEventManager.appsUpdated.removeObserver(updatedObserver)
-            AppEventManager.appsLoaded.removeObserver(loadedObserver)
+            androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().runOnMainSync {
+                AppEventManager.appsUpdated.removeObserver(updatedObserver)
+                AppEventManager.appsLoaded.removeObserver(loadedObserver)
+            }
         }
     }
 

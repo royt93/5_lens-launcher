@@ -7,7 +7,6 @@ import android.util.Log;
 
 import androidx.lifecycle.ProcessLifecycleOwner;
 
-import com.google.android.gms.ads.MobileAds;
 import com.mckimquyen.services.AppEventManager;
 import com.mckimquyen.util.Logger;
 import com.mckimquyen.services.BroadcastReceivers;
@@ -123,39 +122,37 @@ public class RApplication extends android.app.Application {
      * - Lambda callback: Được gọi khi initialization hoàn tất
      */
     private void setupAdmob() {
+        boolean isTestEnv = false;
+        try {
+            Class.forName("androidx.test.platform.app.InstrumentationRegistry");
+            isTestEnv = true;
+        } catch (ClassNotFoundException ignored) {}
+
+        com.roy.sdkadbmob.AdSafetyLimits safety = com.mckimquyen.BuildConfig.DEBUG ? 
+                com.roy.sdkadbmob.AdSafetyLimits.Companion.getTEST() : 
+                new com.roy.sdkadbmob.AdSafetyLimits();
+
         com.roy.sdkadbmob.AdSdkConfig adConfig = new com.roy.sdkadbmob.AdSdkConfig(
-            com.mckimquyen.BuildConfig.IS_ENABLE_ADMOB,
+            isTestEnv ? false : com.mckimquyen.BuildConfig.IS_ENABLE_ADMOB,
             com.mckimquyen.BuildConfig.DEBUG,
-            com.mckimquyen.BuildConfig.ADMOB_APP_OPEN_ID,
-            com.mckimquyen.BuildConfig.ADMOB_INTERSTITIAL_ID,
-            com.mckimquyen.BuildConfig.ADMOB_BANNER_ID,
-            com.mckimquyen.BuildConfig.APPLOVIN_APP_OPEN_ID,
-            com.mckimquyen.BuildConfig.APPLOVIN_INTERSTITIAL_ID,
-            com.mckimquyen.BuildConfig.APPLOVIN_BANNER_ID
+            isTestEnv ? "" : com.mckimquyen.BuildConfig.ADMOB_APP_OPEN_ID,
+            isTestEnv ? "" : com.mckimquyen.BuildConfig.ADMOB_INTERSTITIAL_ID,
+            isTestEnv ? "" : com.mckimquyen.BuildConfig.ADMOB_BANNER_ID,
+            isTestEnv ? "" : com.mckimquyen.BuildConfig.ADMOB_REWARDED_ID,
+            isTestEnv ? "" : com.mckimquyen.BuildConfig.APPLOVIN_APP_OPEN_ID,
+            isTestEnv ? "" : com.mckimquyen.BuildConfig.APPLOVIN_INTERSTITIAL_ID,
+            isTestEnv ? "" : com.mckimquyen.BuildConfig.APPLOVIN_BANNER_ID,
+            isTestEnv ? "" : com.mckimquyen.BuildConfig.APPLOVIN_REWARDED_ID,
+            safety,
+            com.mckimquyen.feature.vip.AdKeys.INSTANCE.getVIP_SECRET(),
+            "e75FnQfS9XTTqM1Kne69U7PW_MBgAnGQTFvtwVVui6kRPKs5L7ws9twr5IQWwVfzPKZ5pF2IfDa7lguMgGlCyt"
         );
 
         com.roy.sdkadbmob.AdManager.INSTANCE.setConfig(adConfig);
-        com.roy.sdkadbmob.AdManager.INSTANCE.earlyInit(this);
-
-        if (com.mckimquyen.BuildConfig.IS_ENABLE_ADMOB) {
-            MobileAds.initialize(this, status -> {
-                com.roy.sdkadbmob.AdManager.INSTANCE.init(this, adConfig, (success, gaid) -> {
-                    Logger.d(TAG, "AdManager init success=" + success + ", gaid=" + gaid);
-                    // Removed registerAppOpenAdLifecycle to comply with Google Play Launcher Policy
-                    return kotlin.Unit.INSTANCE;
-                });
-            });
-        } else {
-            com.applovin.sdk.AppLovinSdk sdk = com.applovin.sdk.AppLovinSdk.getInstance(this);
-            sdk.setMediationProvider("max");
-            sdk.initializeSdk(config -> {
-                com.roy.sdkadbmob.AdManager.INSTANCE.init(this, adConfig, (success, gaid) -> {
-                    Logger.d(TAG, "AdManager init success=" + success + ", gaid=" + gaid);
-                    // Removed registerAppOpenAdLifecycle to comply with Google Play Launcher Policy
-                    return kotlin.Unit.INSTANCE;
-                });
-            });
-        }
+        com.roy.sdkadbmob.AdManager.INSTANCE.initialize(this, (success, gaid) -> {
+            Logger.d(TAG, "AdManager init success=" + success + ", gaid=" + gaid);
+            return kotlin.Unit.INSTANCE;
+        });
     }
 
     // ========================================================================

@@ -36,7 +36,44 @@
                         android:layout_height="?attr/actionBarSize"
                         android:background="?attr/colorPrimary"
                         app:layout_scrollFlags="scroll|enterAlways"
-                        app:popupTheme="@style/AppTheme.PopupOverlay" />
+                        app:popupTheme="@style/AppTheme.PopupOverlay">
+
+                        <LinearLayout
+                            android:id="@+id/chipVipBadge"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="end|center_vertical"
+                            android:layout_marginEnd="16dp"
+                            android:background="@drawable/bg_vip_pill_badge"
+                            android:paddingStart="12dp"
+                            android:paddingEnd="12dp"
+                            android:paddingTop="5dp"
+                            android:paddingBottom="5dp"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:visibility="gone">
+
+                            <ImageView
+                                android:id="@+id/ivVipBadgeIcon"
+                                android:layout_width="14dp"
+                                android:layout_height="14dp"
+                                android:src="@drawable/ic_star_24dp"
+                                app:tint="@android:color/black" />
+
+                            <TextView
+                                android:id="@+id/tvVipBadgeStatus"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="4dp"
+                                android:fontFamily="sans-serif-medium"
+                                android:includeFontPadding="false"
+                                android:text="VIP"
+                                android:textColor="@android:color/black"
+                                android:textSize="12sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+
+                    </androidx.appcompat.widget.Toolbar>
 
                     <com.google.android.material.tabs.TabLayout
                         android:id="@+id/tabs"

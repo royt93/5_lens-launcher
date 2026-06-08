@@ -64,14 +64,18 @@ android {
             buildConfigField "Boolean", "IS_ENABLE_ADMOB", "false"
             // AppLovin SDK Key injected via manifestPlaceholders (không hardcode trong Manifest)
             manifestPlaceholders = [APPLOVIN_SDK_KEY: "e75FnQfS9XTTqM1Kne69U7PW_MBgAnGQTFvtwVVui6kRPKs5L7ws9twr5IQWwVfzPKZ5pF2IfDa7lguMgGlCyt"]
+            buildConfigField "String", "PRIVACY_POLICY_URL", "\"https://loitp.notion.site/Term-Privacy-Policy-Disclaimer-319b1cd8783942fa8923d2a3c9bce60f\""
+
             buildConfigField "String", "APPLOVIN_BANNER_ID", "\"aa291bda0fb0b6c5\""
             buildConfigField "String", "APPLOVIN_INTERSTITIAL_ID", "\"7cf8ffccbdb242be\""
             buildConfigField "String", "APPLOVIN_APP_OPEN_ID", "\"d4acd020c861e87a\""
+            buildConfigField "String", "APPLOVIN_REWARDED_ID", "\"6a333043c24bd06e\""
 
             // Release config - sử dụng AdMob IDs thật
             buildConfigField "String", "ADMOB_BANNER_ID", "\"ca-app-pub-3612191981543807/9970850592\""
             buildConfigField "String", "ADMOB_INTERSTITIAL_ID", "\"ca-app-pub-3612191981543807/2896523398\""
             buildConfigField "String", "ADMOB_APP_OPEN_ID", "\"ca-app-pub-3612191981543807/2604638100\""
+            buildConfigField "String", "ADMOB_REWARDED_ID", "\"ca-app-pub-3940256099942544/5224354917\""
 
             debuggable false
 
@@ -99,15 +103,19 @@ android {
             buildConfigField "Boolean", "IS_ENABLE_ADMOB", "false"
             // AppLovin SDK Key injected via manifestPlaceholders (không hardcode trong Manifest)
             manifestPlaceholders = [APPLOVIN_SDK_KEY: "e75FnQfS9XTTqM1Kne69U7PW_MBgAnGQTFvtwVVui6kRPKs5L7ws9twr5IQWwVfzPKZ5pF2IfDa7lguMgGlCyt"]
+            buildConfigField "String", "PRIVACY_POLICY_URL", "\"https://loitp.notion.site/Term-Privacy-Policy-Disclaimer-319b1cd8783942fa8923d2a3c9bce60f\""
+
             // Use real AppLovin IDs for debug or place test logic if AppLovin requires it. AppLovin test mode can be enabled via code.
             buildConfigField "String", "APPLOVIN_BANNER_ID", "\"aa291bda0fb0b6c5\""
             buildConfigField "String", "APPLOVIN_INTERSTITIAL_ID", "\"7cf8ffccbdb242be\""
             buildConfigField "String", "APPLOVIN_APP_OPEN_ID", "\"d4acd020c861e87a\""
+            buildConfigField "String", "APPLOVIN_REWARDED_ID", "\"6a333043c24bd06e\""
 
             // Debug config - sử dụng AdMob test IDs
             buildConfigField "String", "ADMOB_BANNER_ID", "\"ca-app-pub-3940256099942544/6300978111\""
             buildConfigField "String", "ADMOB_INTERSTITIAL_ID", "\"ca-app-pub-3940256099942544/1033173712\""
             buildConfigField "String", "ADMOB_APP_OPEN_ID", "\"ca-app-pub-3940256099942544/9257395921\""
+            buildConfigField "String", "ADMOB_REWARDED_ID", "\"ca-app-pub-3940256099942544/5224354917\""
 
             // Có thể bật minify cho debug build để test
             // nhưng nên tắt để build nhanh hơn khi develop
@@ -171,7 +179,7 @@ android {
         renderScript = false
         shaders = false
 
-        // viewBinding true // Bật khi cần sử dụng View Binding
+        viewBinding true // Bật khi cần sử dụng View Binding
     }
 
     // ========================================================================
@@ -300,6 +308,7 @@ dependencies {
     androidTestImplementation 'androidx.test:rules:1.6.1'
     androidTestImplementation 'androidx.test:core-ktx:1.6.1'               // ActivityScenario KTX
     androidTestImplementation 'androidx.fragment:fragment-testing:1.8.6'    // launchFragmentInContainer (FrmLensWidgetTest)
+    debugImplementation 'androidx.fragment:fragment-testing:1.8.6'          // Required for launchFragmentInContainer
     androidTestImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0'
 
     // ========================================================================
@@ -349,7 +358,7 @@ dependencies {
     // ========================================================================
     // MONETIZATION - ADMOB WRAPPER
     // ========================================================================
-    implementation 'com.github.royt93:AdmobWrapper:1.1.1'
+    implementation 'com.github.royt93:AdmobApplovinWrapper:1.1.5'
 
     // ========================================================================
     // GOOGLE PLAY SERVICES

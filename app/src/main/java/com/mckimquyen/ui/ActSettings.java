@@ -77,6 +77,7 @@ public class ActSettings extends ActBase
     LinearLayout flAdOpenApp;
     // private MaxAdView adView;
     private View adView = null;
+    private android.animation.ObjectAnimator vipBadgeAnimator;
 
     private ArrayList<App> listApp;
     private MaterialDialog dlgSortType;
@@ -149,6 +150,11 @@ public class ActSettings extends ActBase
         viewpager.registerOnPageChangeCallback(new PageChangeCallback(fabSort));
         listApp = Objects.requireNonNull(RAppsSingleton.getInstance()).getApps();
 
+        android.view.View chipVipBadge = findViewById(R.id.chipVipBadge);
+        if (chipVipBadge != null) {
+            chipVipBadge.setOnClickListener(v -> navigateToVipTab());
+        }
+
         // Banner chỉ load SAU KHI App Open Splash dismiss (xem checkShowAd)
         // để tránh count hidden impression khi flAdOpenApp đang che
         com.roy.sdkadbmob.AdManager.INSTANCE.loadInterstitial(this);
@@ -175,6 +181,7 @@ public class ActSettings extends ActBase
     protected void onResume() {
         super.onResume();
         com.roy.sdkadbmob.AdManager.INSTANCE.bannerResume(adView);
+        bindToolbarVipBadge();
         // Show Terms and Privacy Policy dialog only once per session
         if (utilSettings != null && !hasShownTermsDialog) {
             boolean hasRead = utilSettings.getBoolean(UtilSettings.KEY_READ_POLICY);
@@ -207,8 +214,70 @@ public class ActSettings extends ActBase
         }
     }
 
+    private void startVipBadgeAnimation(android.view.View view) {
+        if (vipBadgeAnimator != null) {
+            vipBadgeAnimator.cancel();
+            vipBadgeAnimator = null;
+        }
+        if (view == null) return;
+        vipBadgeAnimator = android.animation.ObjectAnimator.ofPropertyValuesHolder(
+            view,
+            android.animation.PropertyValuesHolder.ofFloat(android.view.View.SCALE_X, 0.9f, 1.0f),
+            android.animation.PropertyValuesHolder.ofFloat(android.view.View.SCALE_Y, 0.9f, 1.0f)
+        );
+        vipBadgeAnimator.setDuration(1200);
+        vipBadgeAnimator.setRepeatMode(android.animation.ValueAnimator.REVERSE);
+        vipBadgeAnimator.setRepeatCount(android.animation.ValueAnimator.INFINITE);
+        vipBadgeAnimator.start();
+    }
+
+    private void stopVipBadgeAnimation() {
+        if (vipBadgeAnimator != null) {
+            vipBadgeAnimator.cancel();
+            vipBadgeAnimator = null;
+        }
+    }
+
+    public void navigateToVipTab() {
+        android.content.Intent intent = new android.content.Intent(this, com.mckimquyen.feature.vip.ActVipManagement.class);
+        startActivity(intent);
+    }
+
+    private void bindToolbarVipBadge() {
+        android.view.View chipVipBadge = findViewById(R.id.chipVipBadge);
+        if (chipVipBadge != null) {
+            boolean active = com.roy.sdkadbmob.AdManager.INSTANCE.isVIPMember();
+            if (chipVipBadge instanceof android.view.ViewGroup) {
+                android.widget.TextView tv = chipVipBadge.findViewById(R.id.tvVipBadgeStatus);
+                android.widget.ImageView iv = chipVipBadge.findViewById(R.id.ivVipBadgeIcon);
+                boolean isNight = (getResources().getConfiguration().uiMode & android.content.res.Configuration.UI_MODE_NIGHT_MASK) 
+                                  == android.content.res.Configuration.UI_MODE_NIGHT_YES;
+                if (active) {
+                    tv.setText(getString(R.string.vip_badge_active));
+                    tv.setTextColor(android.graphics.Color.parseColor("#1C1C1E"));
+                    chipVipBadge.setBackgroundTintList(android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#FFD60A"))); // Gold
+                    if (iv != null) {
+                        iv.setColorFilter(android.graphics.Color.parseColor("#1C1C1E"), android.graphics.PorterDuff.Mode.SRC_IN);
+                    }
+                } else {
+                    tv.setText(getString(R.string.vip_badge_get));
+                    int bgColor = isNight ? android.graphics.Color.parseColor("#2C2C2E") : android.graphics.Color.parseColor("#E5E5EA");
+                    int textColor = isNight ? android.graphics.Color.parseColor("#E5E5EA") : android.graphics.Color.parseColor("#3A3A3C");
+                    tv.setTextColor(textColor);
+                    chipVipBadge.setBackgroundTintList(android.content.res.ColorStateList.valueOf(bgColor));
+                    if (iv != null) {
+                        iv.setColorFilter(textColor, android.graphics.PorterDuff.Mode.SRC_IN);
+                    }
+                }
+            }
+            chipVipBadge.setVisibility(android.view.View.VISIBLE);
+            startVipBadgeAnimation(chipVipBadge);
+        }
+    }
+
     @Override
     protected void onPause() {
+        stopVipBadgeAnimation();
         com.roy.sdkadbmob.AdManager.INSTANCE.bannerPause(adView);
         // Dismiss dialogs in onPause to prevent WindowLeaked exception
         dismissAllDialogs();
@@ -700,14 +769,23 @@ public class ActSettings extends ActBase
     }
 
     private void checkShowAd() {
-        com.roy.sdkadbmob.AdManager.INSTANCE.initSplashScreen(this, () -> {
-            // 1. Ẩn splash overlay
-            flAdOpenApp.setVisibility(View.GONE);
-            // 2. Chỉ load banner SAU KHI user thực sự nhìn thấy nó
-            adView = com.roy.sdkadbmob.AdManager.INSTANCE.loadBanner(this,
-                    (android.view.ViewGroup) findViewById(R.id.bannerContainer),
-                    (android.widget.TextView) findViewById(R.id.tvLabelAd),
-                    com.google.android.gms.ads.AdSize.BANNER);
+        com.roy.sdkadbmob.AdManager.INSTANCE.requestConsentInfoUpdate(this, false, canRequestAds -> {
+            com.roy.sdkadbmob.AdManager.INSTANCE.initSplashScreen(this, () -> {
+                // 1. Ẩn splash overlay
+                flAdOpenApp.setVisibility(View.GONE);
+                // 2. Chỉ load banner SAU KHI user thực sự nhìn thấy nó
+                if (!com.roy.sdkadbmob.AdManager.INSTANCE.isVIPMember() && !com.roy.sdkadbmob.AdManager.INSTANCE.isVipByKeyActive()) {
+                    adView = com.roy.sdkadbmob.AdManager.INSTANCE.loadBanner(this,
+                            (android.view.ViewGroup) findViewById(R.id.bannerContainer),
+                            (android.widget.TextView) findViewById(R.id.tvLabelAd),
+                            com.roy.sdkadbmob.AdManager.INSTANCE.getAdaptiveBannerSize(this),
+                            true);
+                } else {
+                    findViewById(R.id.bannerContainer).setVisibility(View.GONE);
+                    findViewById(R.id.tvLabelAd).setVisibility(View.GONE);
+                }
+                return Unit.INSTANCE;
+            });
             return Unit.INSTANCE;
         });
     }

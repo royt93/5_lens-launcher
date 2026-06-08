@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- VIP -->
+    <string name="vip_active">VIP is active</string>
+    <string name="vip_free_user">Free account</string>
+    <string name="vip_until">Until %1$s</string>
+    <string name="vip_activated_at">Activated: %1$s</string>
+    <string name="vip_expires_at">Expires: %1$s</string>
+    <string name="vip_remaining">%1$dd %2$02dh %3$02dm %4$02ds</string>
+    <string name="vip_redeem_label">Enter VIP code</string>
+    <string name="vip_redeem_hint">E.g., LOITP_30</string>
+    <string name="vip_redeem_button">Activate</string>
+    <string name="vip_watch_ad_3d">Watch ad → 3 days VIP</string>
+    <string name="vip_buy_30d_locked">Buy 30-day VIP — coming soon</string>
+    <string name="vip_buy_90d_locked">Buy 90-day VIP — coming soon</string>
+    <string name="vip_buy_1y_locked">Buy 1-year VIP — coming soon</string>
+    <string name="vip_buy_lifetime_locked">Buy lifetime VIP — coming soon</string>
+    <string name="vip_restore_locked">Restore Purchase — coming soon</string>
+    <string name="vip_revoke_all_button">Revoke VIP</string>
+    <string name="vip_revoke_all_confirm_title">Confirm Revoke</string>
+    <string name="vip_revoke_all_confirm_message">Are you sure you want to revoke VIP and return to Free account?</string>
+    <string name="vip_entry_first_install">🎁 New Install Gift</string>
+    <string name="vip_entry_redeemed">VIP %1$d days</string>
+    <string name="vip_verifying_title">Verifying…</string>
+    <string name="vip_success_title">Success</string>
+    <string name="vip_failed_title">Failed</string>
+
+    <string name="vip_member_yes">VIP Member: Yes</string>
+    <string name="vip_member_no">VIP Member: No</string>
+    <string name="vip_expires_at_format">Expires at: %1$s</string>
+    <string name="vip_added_success">Added to VIP</string>
+    <string name="vip_removed_success">Removed from VIP</string>
+    <string name="vip_3d_activated">3 Days VIP Activated!</string>
+    <string name="vip_add_btn">Add VIP</string>
+    <string name="vip_remove_btn">Remove VIP</string>
+    <string name="vip_unlock_key_btn">Unlock VIP by Key</string>
+    <string name="vip_manage_desc">Manage your VIP status below.</string>
+    <string name="vip_premium_title">VIP Premium</string>
+    <string name="vip_badge_active">VIP Active</string>
+    <string name="vip_badge_get">Get VIP</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="vip_active_thank_you">Thank you for supporting VIP!</string>
+    <string name="vip_activation_success_message">VIP successfully activated (%1$d days).</string>
+    <string name="vip_invalid_key_message">Invalid VIP code!</string>
+    <string name="vip_error_title">Error</string>
+    <string name="vip_lifetime_device">Lifetime VIP (Device)</string>
+</resources>

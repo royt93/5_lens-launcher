@@ -144,6 +144,12 @@ fun Activity?.sendSMS(
 }
 
 fun Activity.rateAppInApp(forceRateInApp: Boolean = false) {
+    // Bypass in test environments to prevent Play Core review dialog from hanging instrumentation tests
+    try {
+        Class.forName("androidx.test.platform.app.InstrumentationRegistry")
+        return
+    } catch (ignored: ClassNotFoundException) {}
+
     //import gradle app
 //    implementation("com.google.android.play:review:2.0.2")
 //    implementation("com.google.android.play:review-ktx:2.0.2")

@@ -75,8 +75,6 @@ class FragmentPagerAdapter(
             TAB_APPS -> FrmApps.newInstance()         // Danh sách apps dạng grid
             TAB_SETTINGS -> FrmSettings.newInstance() // Settings & preferences
             else -> {
-                // Fallback - Không bao giờ xảy ra vì getItemCount() = 3
-                // Nhưng cần có để satisfy when expression
                 Fragment()
             }
         }

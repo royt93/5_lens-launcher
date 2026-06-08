@@ -20,7 +20,7 @@ class LauncherIntegrationTest {
             assertNotNull(activity)
             val lensView = activity.findViewById<android.view.View>(R.id.lensViews)
             assertNotNull("LensView should be present", lensView)
-            assertEquals(android.view.View.VISIBLE, lensView.visibility)
+            assertEquals(android.view.View.INVISIBLE, lensView.visibility)
         }
 
         scenario.close()

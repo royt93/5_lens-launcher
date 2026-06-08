@@ -37,6 +37,7 @@ class FrmSettings : Fragment(), SettingsInterface {
     private var swShowNewAppTag: SwitchCompat? = null
     private var swShowTouchSelection: SwitchCompat? = null
     private var utilSettings: UtilSettings? = null
+    private var tvVipStatusSummary: TextView? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -50,6 +51,11 @@ class FrmSettings : Fragment(), SettingsInterface {
         super.onViewCreated(view, savedInstanceState)
         utilSettings = UtilSettings(requireContext())
         setupViews(view)
+        assignValues()
+    }
+
+    override fun onResume() {
+        super.onResume()
         assignValues()
     }
 
@@ -71,6 +77,11 @@ class FrmSettings : Fragment(), SettingsInterface {
         swShowNameAppHover = view.findViewById(R.id.swShowNameAppHover)
         swShowNewAppTag = view.findViewById(R.id.swShowNewAppTag)
         swShowTouchSelection = view.findViewById(R.id.swShowTouchSelection)
+        tvVipStatusSummary = view.findViewById(R.id.tvVipStatusSummary)
+
+        view.findViewById<View>(R.id.llVipPremium).setOnClickListener {
+            (activity as? ActSettings)?.navigateToVipTab()
+        }
 
         view.findViewById<View>(R.id.llHomeLauncher).setOnClickListener {
             showHomeLauncherChooser()
@@ -116,6 +127,9 @@ class FrmSettings : Fragment(), SettingsInterface {
 
     private fun assignValues() {
         utilSettings?.let { us ->
+            val isVip = com.roy.sdkadbmob.AdManager.isVIPMember()
+            tvVipStatusSummary?.text = if (isVip) getString(R.string.vip_active) else getString(R.string.vip_free_user)
+
             tvSelectedIconPack?.text = us.getString(UtilSettings.KEY_ICON_PACK_LABEL_NAME)
 
             val highlightColorFull = us.getString(UtilSettings.KEY_HIGHLIGHT_COLOR) ?: ""

@@ -75,10 +75,7 @@
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-3612191981543807~3330254772" />
 
-        <!-- AppLovin SDK Key — injected by Gradle manifestPlaceholders (see app/build.gradle) -->
-        <meta-data
-            android:name="applovin.sdk.key"
-            android:value="${APPLOVIN_SDK_KEY}" />
+
 
 
         <!-- ====================================================================
@@ -170,6 +167,15 @@
             android:hardwareAccelerated="true"
             android:label=""
             android:parentActivityName=".ui.ActSettings"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+
+        <!-- ====================================================================
+             VIP MANAGEMENT ACTIVITY
+             ==================================================================== -->
+        <activity
+            android:name=".feature.vip.ActVipManagement"
+            android:exported="true"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
 
