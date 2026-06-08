@@ -180,7 +180,26 @@ public class ActSettings extends ActBase
     @Override
     protected void onResume() {
         super.onResume();
-        com.roy.sdkadbmob.AdManager.INSTANCE.bannerResume(adView);
+        if (com.roy.sdkadbmob.AdManager.INSTANCE.isVIPMember() || com.roy.sdkadbmob.AdManager.INSTANCE.isVipByKeyActive()) {
+            if (adView != null) {
+                com.roy.sdkadbmob.AdManager.INSTANCE.bannerDestroy(adView);
+                adView = null;
+            }
+            findViewById(R.id.bannerContainer).setVisibility(View.GONE);
+            findViewById(R.id.tvLabelAd).setVisibility(View.GONE);
+        } else {
+            findViewById(R.id.bannerContainer).setVisibility(View.VISIBLE);
+            findViewById(R.id.tvLabelAd).setVisibility(View.VISIBLE);
+            if (adView == null) {
+                adView = com.roy.sdkadbmob.AdManager.INSTANCE.loadBanner(this,
+                        (android.view.ViewGroup) findViewById(R.id.bannerContainer),
+                        (android.widget.TextView) findViewById(R.id.tvLabelAd),
+                        com.roy.sdkadbmob.AdManager.INSTANCE.getAdaptiveBannerSize(this),
+                        true);
+            } else {
+                com.roy.sdkadbmob.AdManager.INSTANCE.bannerResume(adView);
+            }
+        }
         bindToolbarVipBadge();
         // Show Terms and Privacy Policy dialog only once per session
         if (utilSettings != null && !hasShownTermsDialog) {
