@@ -84,6 +84,7 @@ public class ActSettings extends ActBase
     private MaterialDialog dlgIconPack;
     private MaterialDialog dlgNightMode;
     private MaterialDialog dlgBackground;
+    private android.app.AlertDialog dlgTerms;
     private LensInterface lensInterface;
 
     // Flag to prevent showing Terms dialog multiple times in same session
@@ -201,14 +202,15 @@ public class ActSettings extends ActBase
             }
         }
         bindToolbarVipBadge();
-        // Show Terms and Privacy Policy dialog only once per session
+
+        // 1. Show Terms and Privacy Policy dialog only once per session
         if (utilSettings != null && !hasShownTermsDialog) {
             boolean hasRead = utilSettings.getBoolean(UtilSettings.KEY_READ_POLICY);
             if (!hasRead) {
                 hasShownTermsDialog = true; // Mark as shown for this session
 
                 // Show non-cancelable dialog - user MUST choose an option
-                showDialog2(
+                dlgTerms = showDialog2(
                         this,
                         getString(R.string.terms_and_privacy_policy),
                         getString(R.string.read_policy),
@@ -223,12 +225,38 @@ public class ActSettings extends ActBase
                         () -> {
                             // Button 2: Cancel
                             utilSettings.save(UtilSettings.KEY_READ_POLICY, true);
+                            if (!isFinishing() && !isDestroyed()) {
+                                checkShowLanguagePicker();
+                            }
                         },
                         false, // isCancelable = false (user MUST choose)
                         () -> {
                             // onDismiss: Fallback to save state even if somehow dismissed
                             utilSettings.save(UtilSettings.KEY_READ_POLICY, true);
+                            if (!isFinishing() && !isDestroyed()) {
+                                checkShowLanguagePicker();
+                            }
                         });
+                return;
+            }
+        }
+
+        // 2. Show language selection dialog if not selected yet on first launch
+        checkShowLanguagePicker();
+    }
+
+    private void checkShowLanguagePicker() {
+        if (isFinishing() || isDestroyed()) return;
+        if (!com.mckimquyen.util.LocaleHelper.INSTANCE.isLanguageSelected(this)) {
+            if (getSupportFragmentManager().findFragmentByTag("LanguageFirstLaunchBottomSheet") == null) {
+                LanguageBottomSheetDialogFragment dialog = new LanguageBottomSheetDialogFragment();
+                dialog.setOnLanguageSelectedListener(new LanguageBottomSheetDialogFragment.OnLanguageSelectedListener() {
+                    @Override
+                    public void onLanguageSelected(@NonNull String languageCode) {
+                        recreate();
+                    }
+                });
+                dialog.show(getSupportFragmentManager(), "LanguageFirstLaunchBottomSheet");
             }
         }
     }
@@ -711,6 +739,9 @@ public class ActSettings extends ActBase
         dismissIconPackDialog();
         dismissNightModeDialog();
         dismissBackgroundDialog();
+        if (dlgTerms != null && dlgTerms.isShowing()) {
+            dlgTerms.dismiss();
+        }
         // Color dialogs do not need to be dismissed
     }
 

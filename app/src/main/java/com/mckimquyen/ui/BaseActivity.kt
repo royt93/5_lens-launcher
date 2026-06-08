@@ -10,10 +10,11 @@ import androidx.appcompat.app.AppCompatActivity
 open class BaseActivity : AppCompatActivity() {
 
     override fun attachBaseContext(context: Context) {
-        val override = Configuration(context.resources.configuration)
+        val localeContext = com.mckimquyen.util.LocaleHelper.onAttach(context)
+        val override = Configuration(localeContext.resources.configuration)
         override.fontScale = 1.0f
         applyOverrideConfiguration(override)
-        super.attachBaseContext(context)
+        super.attachBaseContext(localeContext)
     }
 
     override fun onResume() {

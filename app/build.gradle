@@ -266,7 +266,7 @@ android {
     bundle {
         // Ngôn ngữ: AAB sẽ tự động split theo ngôn ngữ
         language {
-            enableSplit = true
+            enableSplit = false
         }
 
         // Density: AAB sẽ tự động split theo màn hình

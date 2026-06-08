@@ -1,0 +1,94 @@
+package com.mckimquyen.util
+
+import android.annotation.TargetApi
+import android.content.Context
+import android.content.SharedPreferences
+import android.content.res.Configuration
+import android.os.Build
+import androidx.preference.PreferenceManager
+import java.util.Locale
+
+object LocaleHelper {
+    private const val SELECTED_LANGUAGE = "Locale.Helper.Selected.Language"
+    private const val IS_LANGUAGE_SELECTED = "Locale.Helper.Language.Selected"
+
+    data class AppLanguage(val code: String, val nativeName: String, val flag: String, val englishName: String)
+
+    val supportedLanguages = listOf(
+        AppLanguage("en", "English", "🇺🇸", "English"),
+        AppLanguage("vi", "Tiếng Việt", "🇻🇳", "Vietnamese"),
+        AppLanguage("th", "ภาษาไทย", "🇹🇭", "Thai"),
+        AppLanguage("zh", "简体中文", "🇨🇳", "Chinese (Simplified)"),
+        AppLanguage("ja", "日本語", "🇯🇵", "Japanese"),
+        AppLanguage("ko", "한국어", "🇰🇷", "Korean"),
+        AppLanguage("ru", "Русский", "🇷🇺", "Russian"),
+        AppLanguage("de", "Deutsch", "🇩🇪", "German"),
+        AppLanguage("fr", "Français", "🇫🇷", "French"),
+        AppLanguage("es", "Español", "🇪🇸", "Spanish"),
+        AppLanguage("pt", "Português", "🇵🇹", "Portuguese"),
+        AppLanguage("hi", "हिन्दी", "🇮🇳", "Hindi"),
+        AppLanguage("km", "ភាសាខ្មែរ", "🇰🇭", "Khmer"),
+        AppLanguage("lo", "ພາສາລາວ", "🇱🇦", "Lao"),
+        AppLanguage("ar", "العربية", "🇸🇦", "Arabic"),
+        AppLanguage("in", "Bahasa Indonesia", "🇮🇩", "Indonesian"),
+        AppLanguage("it", "Italiano", "🇮🇹", "Italian")
+    )
+
+    fun onAttach(context: Context): Context {
+        val lang = getLanguage(context)
+        return setLocale(context, lang)
+    }
+
+    fun getLanguage(context: Context): String {
+        val preferences = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
+        return preferences.getString(SELECTED_LANGUAGE, Locale.getDefault().language) ?: "en"
+    }
+
+    fun isLanguageSelected(context: Context): Boolean {
+        val preferences = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
+        return preferences.getBoolean(IS_LANGUAGE_SELECTED, false)
+    }
+
+    fun setLanguageSelected(context: Context) {
+        val preferences = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
+        preferences.edit().putBoolean(IS_LANGUAGE_SELECTED, true).apply()
+    }
+
+    fun setLocale(context: Context, language: String): Context {
+        persist(context, language)
+
+        val locale = Locale.forLanguageTag(language)
+        Locale.setDefault(locale)
+
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            updateResources(context, locale)
+        } else {
+            updateResourcesLegacy(context, locale)
+        }
+    }
+
+    private fun persist(context: Context, language: String) {
+        val preferences = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
+        preferences.edit().putString(SELECTED_LANGUAGE, language).apply()
+    }
+
+    @TargetApi(Build.VERSION_CODES.N)
+    private fun updateResources(context: Context, locale: Locale): Context {
+        val configuration = context.resources.configuration
+        configuration.setLocale(locale)
+        configuration.setLayoutDirection(locale)
+        return context.createConfigurationContext(configuration)
+    }
+
+    @Suppress("DEPRECATION")
+    private fun updateResourcesLegacy(context: Context, locale: Locale): Context {
+        val resources = context.resources
+        val configuration = resources.configuration
+        configuration.locale = locale
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            configuration.setLayoutDirection(locale)
+        }
+        resources.updateConfiguration(configuration, resources.displayMetrics)
+        return context
+    }
+}

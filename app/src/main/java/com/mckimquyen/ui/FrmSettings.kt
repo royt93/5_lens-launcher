@@ -38,6 +38,7 @@ class FrmSettings : Fragment(), SettingsInterface {
     private var swShowTouchSelection: SwitchCompat? = null
     private var utilSettings: UtilSettings? = null
     private var tvVipStatusSummary: TextView? = null
+    private var tvSelectedLanguage: TextView? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -78,6 +79,11 @@ class FrmSettings : Fragment(), SettingsInterface {
         swShowNewAppTag = view.findViewById(R.id.swShowNewAppTag)
         swShowTouchSelection = view.findViewById(R.id.swShowTouchSelection)
         tvVipStatusSummary = view.findViewById(R.id.tvVipStatusSummary)
+        tvSelectedLanguage = view.findViewById(R.id.tvSelectedLanguage)
+
+        view.findViewById<View>(R.id.llLanguage).setOnClickListener {
+            showLanguagePicker()
+        }
 
         view.findViewById<View>(R.id.llVipPremium).setOnClickListener {
             (activity as? ActSettings)?.navigateToVipTab()
@@ -171,6 +177,15 @@ class FrmSettings : Fragment(), SettingsInterface {
             swShowNameAppHover?.isChecked = us.getBoolean(UtilSettings.KEY_SHOW_NAME_APP_HOVER)
             swShowNewAppTag?.isChecked = us.getBoolean(UtilSettings.KEY_SHOW_NEW_APP_TAG)
             swShowTouchSelection?.isChecked = us.getBoolean(UtilSettings.KEY_SHOW_TOUCH_SELECTION)
+
+            // Language
+            val currentLang = com.mckimquyen.util.LocaleHelper.getLanguage(requireContext())
+            val matchingLang = com.mckimquyen.util.LocaleHelper.supportedLanguages.firstOrNull { it.code == currentLang }
+            if (matchingLang != null) {
+                tvSelectedLanguage?.text = "${matchingLang.flag} ${matchingLang.nativeName}"
+            } else {
+                tvSelectedLanguage?.text = currentLang
+            }
         }
     }
 
@@ -217,5 +232,15 @@ class FrmSettings : Fragment(), SettingsInterface {
             us.save(UtilSettings.KEY_NIGHT_MODE, UtilSettings.DEFAULT_NIGHT_MODE)
         }
         (activity as? ActSettings)?.sendNightModeBroadcast()
+    }
+
+    private fun showLanguagePicker() {
+        val dialog = LanguageBottomSheetDialogFragment()
+        dialog.setOnLanguageSelectedListener(object : LanguageBottomSheetDialogFragment.OnLanguageSelectedListener {
+            override fun onLanguageSelected(languageCode: String) {
+                activity?.recreate()
+            }
+        })
+        dialog.show(parentFragmentManager, "LanguageBottomSheet")
     }
 }

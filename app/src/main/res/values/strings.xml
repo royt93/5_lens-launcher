@@ -89,4 +89,10 @@
     <!-- Biometric Error Messages -->
     <string name="biometric_error_generic">Biometric authentication error: %1$s</string>
     <string name="biometric_error_authentication_failed">Authentication failed. Please try again.</string>
+    <!-- Language Settings -->
+    <string name="choose_language_title">Select Language</string>
+    <string name="choose_language_subtitle">Choose your preferred language</string>
+    <string name="setting_language_title">App Language</string>
+    <string name="search_language_hint">Search language…</string>
+    <string name="no_language_found">No language found</string>
 </resources>
