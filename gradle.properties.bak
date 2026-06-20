@@ -1,4 +1,4 @@
-org.gradle.jvmargs=-Xmx2048m -XX:+HeapDumpOnOutOfMemoryError
+org.gradle.jvmargs=-Xmx4096m -XX:+HeapDumpOnOutOfMemoryError
 android.enableJetifier=true
 android.useAndroidX=true
 KS_ALIAS=mckimquyen

@@ -26,8 +26,8 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         // Version format: YYYYMMDD
-        versionCode 20260608
-        versionName "2026.06.08"
+        versionCode 20260620
+        versionName "2026.06.20"
 
         // ====================================================================
         // SIZE OPTIMIZATION - Giảm kích thước APK/AAB
