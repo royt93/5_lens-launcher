@@ -1,0 +1,161 @@
+{
+  "schemaVersion": 2,
+  "appName": "Fisheye Launcher",
+  "themeId": "dark-bold",
+  "connectedCanvas": false,
+  "locales": [
+    "en"
+  ],
+  "locale": "en",
+  "device": "android",
+  "orientation": "portrait",
+  "appIcon": "/app-icon.png",
+  "slidesByDevice": {
+    "iphone": [],
+    "android": [
+      {
+        "id": "sl_fisheye_01",
+        "layout": "split-landscape",
+        "label": {
+          "en": "HERO"
+        },
+        "headline": {
+          "en": "Every app.\nOne screen."
+        },
+        "screenshot": "/screenshots/android/phone/en/01.png"
+      },
+      {
+        "id": "sl_fisheye_02",
+        "layout": "device-bottom",
+        "label": {
+          "en": "FISHEYE LENS"
+        },
+        "headline": {
+          "en": "Zoom where\nyou look."
+        },
+        "screenshot": "/screenshots/android/phone/en/02.png",
+        "transforms": {
+          "device": {
+            "x": 191.68310412906385,
+            "y": 659.512330975256,
+            "width": 678.5844380403457,
+            "height": 1470.266282420749,
+            "rotation": 0,
+            "zIndex": 3
+          }
+        }
+      },
+      {
+        "id": "sl_fisheye_03",
+        "layout": "device-top",
+        "label": {
+          "en": "INSTANT LAUNCH"
+        },
+        "headline": {
+          "en": "Touch.\nFocus. Launch."
+        },
+        "screenshot": "/screenshots/android/phone/en/03.png",
+        "inverted": true
+      },
+      {
+        "id": "sl_fisheye_04",
+        "layout": "device-bottom",
+        "label": {
+          "en": "CUSTOMIZE"
+        },
+        "headline": {
+          "en": "Tune every\npixel."
+        },
+        "screenshot": "/screenshots/android/phone/en/04.png",
+        "transforms": {
+          "device": {
+            "x": 191.68310412906385,
+            "y": 659.512330975256,
+            "width": 678.5844380403457,
+            "height": 1470.266282420749,
+            "rotation": 0,
+            "zIndex": 3
+          }
+        }
+      },
+      {
+        "id": "sl_fisheye_05",
+        "layout": "device-top",
+        "label": {
+          "en": "APP CONTROL"
+        },
+        "headline": {
+          "en": "Lock it.\nHide it. Own it."
+        },
+        "screenshot": "/screenshots/android/phone/en/05.png",
+        "inverted": false
+      },
+      {
+        "id": "sl_fisheye_06",
+        "layout": "device-bottom",
+        "label": {
+          "en": "SETTINGS"
+        },
+        "headline": {
+          "en": "Made for\ntinkerers."
+        },
+        "screenshot": "/screenshots/android/phone/en/06.png"
+      },
+      {
+        "id": "sl_fisheye_07",
+        "layout": "device-top",
+        "label": {
+          "en": "FEATURES"
+        },
+        "headline": {
+          "en": "Grid.\nLens.\nControl."
+        },
+        "screenshot": "/screenshots/android/phone/en/07.png",
+        "inverted": true
+      },
+      {
+        "id": "sl_fisheye_08",
+        "layout": "hero",
+        "label": {
+          "en": "MEET FISHEYE"
+        },
+        "headline": {
+          "en": "Fisheye\nLauncher"
+        },
+        "screenshot": "/screenshots/android/phone/en/08.png",
+        "transforms": {
+          "device": {
+            "x": 221.0133038940457,
+            "y": 677.042167580437,
+            "width": 678.5844380403457,
+            "height": 1470.266282420749,
+            "rotation": 0,
+            "zIndex": 3
+          }
+        }
+      }
+    ],
+    "ipad": [],
+    "android-7": [],
+    "android-10": [],
+    "feature-graphic": [
+      {
+        "id": "sl_fisheye_fg",
+        "layout": "feature-graphic",
+        "label": {},
+        "headline": {
+          "en": "See all your apps. Launch any in one touch."
+        },
+        "screenshot": "/screenshots/android/phone/en/01.png"
+      }
+    ]
+  },
+  "crossScreenMockupsByDevice": {
+    "iphone": [],
+    "ipad": [],
+    "android": [],
+    "android-7": [],
+    "android-10": [],
+    "feature-graphic": []
+  }
+}
