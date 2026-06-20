@@ -89,6 +89,9 @@
     <!-- Biometric Error Messages -->
     <string name="biometric_error_generic">Biometric authentication error: %1$s</string>
     <string name="biometric_error_authentication_failed">Authentication failed. Please try again.</string>
+    <!-- Ad / Network -->
+    <string name="no_internet">No internet connection</string>
+
     <!-- Language Settings -->
     <string name="choose_language_title">Select Language</string>
     <string name="choose_language_subtitle">Choose your preferred language</string>

@@ -56,12 +56,54 @@ class VipPrefsTest {
     @Test
     fun testVipDays() {
         assertEquals(0, prefs.getVipDays())
-        
+
         prefs.saveVipDays(30)
         assertEquals(30, prefs.getVipDays())
-        
+
         prefs.clearVipDays()
         assertEquals(0, prefs.getVipDays())
+    }
+
+    // BUG-5/11: verify clearAll does not leave stale secret-linked state
+    @Test
+    fun `BUG5 - full revoke clears all VIP prefs atomically`() {
+        prefs.saveGrantedAtMs(System.currentTimeMillis())
+        prefs.saveVipDays(3)
+        prefs.markUserRedeemed()
+
+        // Simulate revoke flow in ActVipManagement.btnRevokeVip
+        prefs.clearGrantedAtMs()
+        prefs.clearVipDays()
+
+        assertEquals("grantedAtMs must be 0 after revoke", 0L, prefs.getGrantedAtMs())
+        assertEquals("vipDays must be 0 after revoke", 0, prefs.getVipDays())
+        // userRedeemed flag is intentionally NOT cleared on revoke (per spec — history preserved)
+        assertTrue("userRedeemed flag is preserved after revoke", prefs.userRedeemedAtLeastOnce())
+    }
+
+    // BUG-8: grace detection relies on userRedeemedAtLeastOnce returning false before first redeem
+    @Test
+    fun `BUG8 - grace entry detected when userRedeemed is false`() {
+        assertFalse(
+            "New install: userRedeemed must be false (grace can be shown)",
+            prefs.userRedeemedAtLeastOnce()
+        )
+    }
+
+    // BUG-8: after markUserRedeemed, grace label must NOT be shown
+    @Test
+    fun `BUG8 - grace entry not detected after user redeems a key`() {
+        prefs.markUserRedeemed()
+        assertTrue(
+            "After redeem: userRedeemedAtLeastOnce must be true (grace label hidden)",
+            prefs.userRedeemedAtLeastOnce()
+        )
+    }
+
+    @Test
+    fun testSaveVipDays3DayGrant() {
+        prefs.saveVipDays(3)
+        assertEquals("3-day rewarded grant must persist correctly", 3, prefs.getVipDays())
     }
 }
 

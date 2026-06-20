@@ -84,6 +84,9 @@
         <item>freuss47@gmail.com</item>
     </string-array>
 
+    <!-- Ad / Network -->
+    <string name="no_internet">Không có kết nối internet</string>
+
     <!-- Language Settings -->
     <string name="choose_language_title">Chọn ngôn ngữ</string>
     <string name="choose_language_subtitle">Chọn ngôn ngữ ưa thích của bạn</string>

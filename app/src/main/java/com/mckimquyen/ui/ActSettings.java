@@ -78,6 +78,7 @@ public class ActSettings extends ActBase
     // private MaxAdView adView;
     private View adView = null;
     private android.animation.ObjectAnimator vipBadgeAnimator;
+    private boolean consentResolved = false; // BUG-3: guard banner load before consent
 
     private ArrayList<App> listApp;
     private MaterialDialog dlgSortType;
@@ -156,9 +157,7 @@ public class ActSettings extends ActBase
             chipVipBadge.setOnClickListener(v -> navigateToVipTab());
         }
 
-        // Banner chỉ load SAU KHI App Open Splash dismiss (xem checkShowAd)
-        // để tránh count hidden impression khi flAdOpenApp đang che
-        com.roy.sdkadbmob.AdManager.INSTANCE.loadInterstitial(this);
+        // BUG-1: loadInterstitial moved to checkShowAd() callback — after consent resolved
     }
 
     @Override
@@ -188,7 +187,8 @@ public class ActSettings extends ActBase
             }
             findViewById(R.id.bannerContainer).setVisibility(View.GONE);
             findViewById(R.id.tvLabelAd).setVisibility(View.GONE);
-        } else {
+        } else if (consentResolved) {
+            // BUG-3: only load/resume banner after consent resolved
             findViewById(R.id.bannerContainer).setVisibility(View.VISIBLE);
             findViewById(R.id.tvLabelAd).setVisibility(View.VISIBLE);
             if (adView == null) {
@@ -819,11 +819,29 @@ public class ActSettings extends ActBase
     }
 
     private void checkShowAd() {
+        // BUG-2: timeout fallback — always hide overlay after 8s if SDK never fires callback
+        new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+            if (!isFinishing() && !isDestroyed() && flAdOpenApp.getVisibility() == View.VISIBLE) {
+                flAdOpenApp.setVisibility(View.GONE);
+                consentResolved = true;
+            }
+        }, 8_000L);
+
+        // BUG-2: if offline → hide overlay immediately, skip SDK consent+appopen calls
+        if (!isNetworkAvailable()) {
+            flAdOpenApp.setVisibility(View.GONE);
+            consentResolved = true;
+            // BUG-1: still attempt interstitial preload (SDK queues for when network returns)
+            com.roy.sdkadbmob.AdManager.INSTANCE.loadInterstitial(this);
+            return;
+        }
+
         com.roy.sdkadbmob.AdManager.INSTANCE.requestConsentInfoUpdate(this, false, canRequestAds -> {
             com.roy.sdkadbmob.AdManager.INSTANCE.initSplashScreen(this, () -> {
-                // 1. Ẩn splash overlay
                 flAdOpenApp.setVisibility(View.GONE);
-                // 2. Chỉ load banner SAU KHI user thực sự nhìn thấy nó
+                consentResolved = true; // BUG-3: mark consent resolved before any banner load
+                // BUG-1: load interstitial here — after consent, not in setupViews()
+                com.roy.sdkadbmob.AdManager.INSTANCE.loadInterstitial(this);
                 if (!com.roy.sdkadbmob.AdManager.INSTANCE.isVIPMember() && !com.roy.sdkadbmob.AdManager.INSTANCE.isVipByKeyActive()) {
                     adView = com.roy.sdkadbmob.AdManager.INSTANCE.loadBanner(this,
                             (android.view.ViewGroup) findViewById(R.id.bannerContainer),
@@ -838,6 +856,14 @@ public class ActSettings extends ActBase
             });
             return Unit.INSTANCE;
         });
+    }
+
+    private boolean isNetworkAvailable() {
+        android.net.ConnectivityManager cm = (android.net.ConnectivityManager)
+                getSystemService(android.content.Context.CONNECTIVITY_SERVICE);
+        if (cm == null) return false;
+        android.net.NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        return activeNetwork != null && activeNetwork.isConnected();
     }
 
 }

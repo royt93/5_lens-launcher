@@ -5,6 +5,7 @@ import android.animation.PropertyValuesHolder
 import android.animation.ValueAnimator
 import android.content.Context
 import android.content.Intent
+import android.net.ConnectivityManager
 import android.net.Uri
 import android.os.Bundle
 import android.os.CountDownTimer
@@ -32,6 +33,7 @@ class ActVipManagement : AppCompatActivity() {
     private var shimmerAnimator: ObjectAnimator? = null
     private var countUpAnimator: ValueAnimator? = null
     private var confettiAnimator: ObjectAnimator? = null
+    private var entryAnimator: ValueAnimator? = null // BUG-10: store for cancellation
 
     private lateinit var vipPrefs: VipPrefs
     private var lastMinute: Int? = null
@@ -86,32 +88,34 @@ class ActVipManagement : AppCompatActivity() {
         })
 
         binding.btnActivateVipKey.setOnClickListener {
-            val key = binding.edtVipKey.text?.toString()?.trim() ?: ""
-            if (key.isEmpty()) return@setOnClickListener
-            
-            val days = VipKeys.lookupDays(key)
+            val rawKey = binding.edtVipKey.text?.toString()?.trim() ?: ""
+            if (rawKey.isEmpty()) return@setOnClickListener
+            val normalizedKey = rawKey.uppercase() // BUG-4: normalize to uppercase before SDK call
+            val days = VipKeys.lookupDays(normalizedKey)
             if (days != null) {
                 val originalSecret = AdManager.adConfig.vipKeySecret
-                AdManager.adConfig = AdManager.adConfig.copy(vipKeySecret = key)
-                val success = AdManager.activateVipByKey(this, key, days)
-                if (success) {
-                    showMaterialDialog(
-                        getString(R.string.vip_success_title),
-                        getString(R.string.vip_activation_success_message, days),
-                        R.drawable.ic_star_24dp
-                    )
-                    binding.edtVipKey.text?.clear()
-                    binding.edtVipKey.clearFocus()
-                    // Hide keyboard
-                    val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
-                    imm.hideSoftInputFromWindow(binding.edtVipKey.windowToken, 0)
-                    handleVipSuccess(days)
-                } else {
+                try { // BUG-5: exception-safe — always restore secret in finally
+                    AdManager.adConfig = AdManager.adConfig.copy(vipKeySecret = normalizedKey)
+                    val success = AdManager.activateVipByKey(this, normalizedKey, days)
+                    if (success) {
+                        showMaterialDialog(
+                            getString(R.string.vip_success_title),
+                            getString(R.string.vip_activation_success_message, days),
+                            R.drawable.ic_star_24dp
+                        )
+                        binding.edtVipKey.text?.clear()
+                        binding.edtVipKey.clearFocus()
+                        val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
+                        imm.hideSoftInputFromWindow(binding.edtVipKey.windowToken, 0)
+                        handleVipSuccess(days)
+                    } else {
+                        showMaterialDialog(
+                            R.string.vip_failed_title,
+                            R.string.vip_activation_failed_message
+                        )
+                    }
+                } finally {
                     AdManager.adConfig = AdManager.adConfig.copy(vipKeySecret = originalSecret)
-                    showMaterialDialog(
-                        R.string.vip_failed_title,
-                        R.string.vip_activation_failed_message
-                    )
                 }
             } else {
                 showMaterialDialog(
@@ -122,6 +126,10 @@ class ActVipManagement : AppCompatActivity() {
         }
 
         binding.btnWatchAdVip.setOnClickListener {
+            if (!isNetworkAvailable()) { // BUG-7: fail fast when offline
+                Toast.makeText(this, getString(R.string.no_internet), Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
             val fallbackTriggered = java.util.concurrent.atomic.AtomicBoolean(false)
             val showFallbackInterstitial = {
                 if (fallbackTriggered.compareAndSet(false, true)) {
@@ -173,7 +181,7 @@ class ActVipManagement : AppCompatActivity() {
         }
 
         binding.btnRevokeVip.setOnClickListener {
-            androidx.appcompat.app.AlertDialog.Builder(this, R.style.MaterialYouDialogTheme)
+            MaterialAlertDialogBuilder(this, R.style.MaterialYouDialogTheme) // BUG-9: theme overlay provides colorSurface
                 .setTitle(R.string.vip_revoke_all_confirm_title)
                 .setMessage(R.string.vip_revoke_all_confirm_message)
                 .setPositiveButton(R.string.confirm) { _, _ ->
@@ -195,16 +203,18 @@ class ActVipManagement : AppCompatActivity() {
 
     private fun grantViaRewarded() {
         val originalSecret = AdManager.adConfig.vipKeySecret
-        AdManager.adConfig = AdManager.adConfig.copy(vipKeySecret = VipKeys.VIP_3D_KEY)
-        val success = AdManager.activateVipByKey(this, VipKeys.VIP_3D_KEY, 3)
-        if (success) {
-            showMaterialDialog(
-                getString(R.string.vip_success_title),
-                getString(R.string.vip_activation_success_message, 3),
-                R.drawable.ic_star_24dp
-            )
-            handleVipSuccess(3)
-        } else {
+        try { // BUG-11: always restore original secret regardless of success/failure/exception
+            AdManager.adConfig = AdManager.adConfig.copy(vipKeySecret = VipKeys.VIP_3D_KEY)
+            val success = AdManager.activateVipByKey(this, VipKeys.VIP_3D_KEY, 3)
+            if (success) {
+                showMaterialDialog(
+                    getString(R.string.vip_success_title),
+                    getString(R.string.vip_activation_success_message, 3),
+                    R.drawable.ic_star_24dp
+                )
+                handleVipSuccess(3)
+            }
+        } finally {
             AdManager.adConfig = AdManager.adConfig.copy(vipKeySecret = originalSecret)
         }
     }
@@ -268,7 +278,7 @@ class ActVipManagement : AppCompatActivity() {
             }
             
             val isGrace = AppPreferences.getInstance(this).isAddVIPMemberFirstInitSuccess() && !vipPrefs.userRedeemedAtLeastOnce()
-            if (isGrace && !AdManager.isVipByKeyActive()) {
+            if (isGrace) { // BUG-8: show grace label during active grace period
                 binding.tvActiveVipLabel.text = getString(R.string.vip_entry_first_install)
             } else {
                 val days = vipPrefs.getVipDays()
@@ -312,7 +322,7 @@ class ActVipManagement : AppCompatActivity() {
 
     private fun showMaterialDialog(title: String, message: String, iconRes: Int? = null) {
         if (isFinishing) return
-        val builder = androidx.appcompat.app.AlertDialog.Builder(this, R.style.MaterialYouDialogTheme)
+        val builder = MaterialAlertDialogBuilder(this, R.style.MaterialYouDialogTheme) // BUG-9: theme overlay provides colorSurface
             .setTitle(title)
             .setMessage(message)
             .setPositiveButton(R.string.vip_dialog_ok, null)
@@ -415,7 +425,7 @@ class ActVipManagement : AppCompatActivity() {
         s3.alpha = 0f
         s3.translationY = 200f
 
-        val entryAnimator = ValueAnimator.ofFloat(0f, 1f).apply {
+        entryAnimator = ValueAnimator.ofFloat(0f, 1f).apply { // BUG-10: store in field for cancellation
             duration = 1100L
             interpolator = DecelerateInterpolator()
             addUpdateListener { anim ->
@@ -433,7 +443,7 @@ class ActVipManagement : AppCompatActivity() {
                 s3.translationY = (1f - f3) * 200f
             }
         }
-        entryAnimator.start()
+        entryAnimator?.start()
     }
 
     private fun startAnimators() {
@@ -520,10 +530,21 @@ class ActVipManagement : AppCompatActivity() {
         pulseAnimator = null
         shimmerAnimator?.cancel()
         shimmerAnimator = null
+        entryAnimator?.cancel() // BUG-10: cancel slide-in animator
+        entryAnimator = null
         countUpAnimator?.cancel()
         countUpAnimator = null
         confettiAnimator?.cancel()
         confettiAnimator = null
         super.onDestroy()
+    }
+
+    private fun isNetworkAvailable(): Boolean {
+        val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
+            ?: return false
+        @Suppress("DEPRECATION")
+        val activeNetwork = cm.activeNetworkInfo
+        @Suppress("DEPRECATION")
+        return activeNetwork?.isConnected == true
     }
 }
