@@ -843,11 +843,13 @@ public class ActSettings extends ActBase
                 // BUG-1: load interstitial here — after consent, not in setupViews()
                 com.roy.sdkadbmob.AdManager.INSTANCE.loadInterstitial(this);
                 if (!com.roy.sdkadbmob.AdManager.INSTANCE.isVIPMember() && !com.roy.sdkadbmob.AdManager.INSTANCE.isVipByKeyActive()) {
-                    adView = com.roy.sdkadbmob.AdManager.INSTANCE.loadBanner(this,
-                            (android.view.ViewGroup) findViewById(R.id.bannerContainer),
-                            (android.widget.TextView) findViewById(R.id.tvLabelAd),
-                            com.roy.sdkadbmob.AdManager.INSTANCE.getAdaptiveBannerSize(this),
-                            true);
+                    if (adView == null) { // BUG-3: guard double-load — onResume may have already loaded
+                        adView = com.roy.sdkadbmob.AdManager.INSTANCE.loadBanner(this,
+                                (android.view.ViewGroup) findViewById(R.id.bannerContainer),
+                                (android.widget.TextView) findViewById(R.id.tvLabelAd),
+                                com.roy.sdkadbmob.AdManager.INSTANCE.getAdaptiveBannerSize(this),
+                                true);
+                    }
                 } else {
                     findViewById(R.id.bannerContainer).setVisibility(View.GONE);
                     findViewById(R.id.tvLabelAd).setVisibility(View.GONE);
