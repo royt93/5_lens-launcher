@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginStart="8dp"
@@ -50,12 +51,12 @@
     </LinearLayout>
 
     <!-- Selected Check with animated scale -->
-    <ImageView
+    <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/ivSelected"
         android:layout_width="22dp"
         android:layout_height="22dp"
         android:src="@drawable/ic_done_24dp"
-        android:tint="@color/colorPrimary"
+        app:tint="@color/colorPrimary"
         android:visibility="gone" />
 
 </LinearLayout>

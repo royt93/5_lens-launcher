@@ -32,6 +32,9 @@
     <!-- Quyền kiểm tra trạng thái mạng - để check connectivity trước khi load ads -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
+    <!-- Quyền rung phản hồi khi người dùng kích hoạt thao tác VIP/launcher -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+
     <!-- ========================================================================
          QUERIES - Cho phép query các app khác (Android 11+)
          ======================================================================== -->

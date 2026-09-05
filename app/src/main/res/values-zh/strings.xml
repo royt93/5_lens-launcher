@@ -13,6 +13,7 @@
     <string name="setting_animation_time">动画时间</string>
     <string name="setting_vibrate_app_hover">悬停在应用上时震动</string>
     <string name="setting_vibrate_app_launch">启动应用时震动</string>
+    <string name="no_internet">无互联网连接</string>
     <string name="setting_show_name_app_hover">悬停在应用上时显示名称</string>
     <string name="setting_show_touch_selection">显示触摸选择</string>
     <string name="setting_show_new_app_tag">显示新应用标签</string>

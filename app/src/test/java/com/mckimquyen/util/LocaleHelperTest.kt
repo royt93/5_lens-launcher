@@ -8,7 +8,9 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
+import java.io.File
 import java.util.Locale
+import javax.xml.parsers.DocumentBuilderFactory
 
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE, sdk = [28])
@@ -44,6 +46,46 @@ class LocaleHelperTest {
         assertTrue(codes.contains("ar"))
         assertTrue(codes.contains("in"))
         assertTrue(codes.contains("it"))
+    }
+
+    @Test
+    fun allSupportedLocalesProvideLocalizedNoInternetMessage() {
+        val workingDirectory = File(requireNotNull(System.getProperty("user.dir")))
+        val resourcesDirectory = sequenceOf(
+            File(workingDirectory, "src/main/res"),
+            File(workingDirectory, "app/src/main/res")
+        ).first { it.isDirectory }
+        val documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder()
+
+        fun noInternetMessage(languageCode: String): String {
+            val valuesDirectory = if (languageCode == "en") "values" else "values-$languageCode"
+            val stringsFile = File(resourcesDirectory, "$valuesDirectory/strings.xml")
+            assertTrue("Missing strings.xml for $languageCode", stringsFile.isFile)
+            val stringNodes = documentBuilder.parse(stringsFile).getElementsByTagName("string")
+            for (index in 0 until stringNodes.length) {
+                val node = stringNodes.item(index)
+                if (node.attributes?.getNamedItem("name")?.nodeValue == "no_internet") {
+                    return node.textContent.trim()
+                }
+            }
+            fail("Missing no_internet translation for $languageCode")
+            return ""
+        }
+
+        val englishMessage = noInternetMessage("en")
+
+        LocaleHelper.supportedLanguages.forEach { language ->
+            val localizedMessage = noInternetMessage(language.code)
+
+            assertTrue("${language.code} no_internet must not be blank", localizedMessage.isNotBlank())
+            if (language.code != "en") {
+                assertNotEquals(
+                    "${language.code} must not fall back to English",
+                    englishMessage,
+                    localizedMessage
+                )
+            }
+        }
     }
 
     @Test

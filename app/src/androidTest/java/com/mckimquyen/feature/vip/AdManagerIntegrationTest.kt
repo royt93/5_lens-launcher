@@ -56,7 +56,7 @@ class AdManagerIntegrationTest {
 
     // BUG-5: verify try/finally pattern — secret restored after successful activation
     @Test
-    fun `BUG5 - vipKeySecret is restored after successful activation`() {
+    fun bug5_vipKeySecretIsRestoredAfterSuccessfulActivation() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val originalSecret = AdManager.adConfig.vipKeySecret
 
@@ -79,13 +79,12 @@ class AdManagerIntegrationTest {
 
     // BUG-5: verify secret restored even when activation fails (invalid key)
     @Test
-    fun `BUG5 - vipKeySecret is restored after failed activation`() {
+    fun bug5_vipKeySecretIsRestoredAfterFailedActivation() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val originalSecret = AdManager.adConfig.vipKeySecret
-        val badKey = "INVALID_KEY_XYZ"
+        val badKey = "${originalSecret}_INVALID"
 
         try {
-            AdManager.adConfig = AdManager.adConfig.copy(vipKeySecret = badKey)
             val success = AdManager.activateVipByKey(context, badKey, 30)
             assertFalse("Activation with invalid key should fail", success)
         } finally {
@@ -101,7 +100,7 @@ class AdManagerIntegrationTest {
 
     // BUG-11: grantViaRewarded pattern — 3-day key does not permanently overwrite secret
     @Test
-    fun `BUG11 - 3-day rewarded grant restores original secret`() {
+    fun bug11_threeDayRewardedGrantRestoresOriginalSecret() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val originalSecret = AdManager.adConfig.vipKeySecret
 
@@ -124,7 +123,7 @@ class AdManagerIntegrationTest {
 
     // BUG-4: activation with lowercase input (normalized at call site) should succeed
     @Test
-    fun `BUG4 - activation succeeds with lowercase key after upstream normalization`() {
+    fun bug4_activationSucceedsWithLowercaseKeyAfterUpstreamNormalization() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
 
         val lowercaseInput = VipKeys.VIP_3D_KEY.lowercase()
@@ -144,7 +143,7 @@ class AdManagerIntegrationTest {
 
     // BUG-8: confirm isVipByKeyActive returns true during a just-activated grace period
     @Test
-    fun `BUG8 - isVipByKeyActive true immediately after grace activation`() {
+    fun bug8_isVipByKeyActiveTrueImmediatelyAfterGraceActivation() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
 
         val originalSecret = AdManager.adConfig.vipKeySecret

@@ -13,6 +13,7 @@
     <string name="setting_animation_time">เวลาแอนิเมชัน</string>
     <string name="setting_vibrate_app_hover">สั่นเมื่อวางนิ้วเหนือแอป</string>
     <string name="setting_vibrate_app_launch">สั่นเมื่อเปิดแอป</string>
+    <string name="no_internet">ไม่มีการเชื่อมต่ออินเทอร์เน็ต</string>
     <string name="setting_show_name_app_hover">แสดงชื่อเมื่อวางนิ้วเหนือแอป</string>
     <string name="setting_show_touch_selection">แสดงการเลือกสัมผัส</string>
     <string name="setting_show_new_app_tag">แสดงป้ายกำกับแอปใหม่</string>

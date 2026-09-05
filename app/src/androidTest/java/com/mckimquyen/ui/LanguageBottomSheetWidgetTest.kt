@@ -1,5 +1,9 @@
 package com.mckimquyen.ui
 
+import android.view.LayoutInflater
+import android.widget.ImageView
+import androidx.core.content.ContextCompat
+import androidx.core.widget.ImageViewCompat
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -59,5 +63,25 @@ class LanguageBottomSheetWidgetTest {
         val fragment = LanguageBottomSheetDialogFragment()
         assertNotNull(fragment)
         assertTrue(fragment is androidx.fragment.app.Fragment)
+    }
+
+    @Test
+    fun languagePickerIconsUseConfiguredCompatTints() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val inflater = LayoutInflater.from(context)
+
+        val dialog = inflater.inflate(R.layout.dialog_language_picker, null)
+        val search = dialog.findViewById<ImageView>(R.id.ivSearch)
+        assertEquals(
+            ContextCompat.getColor(context, R.color.colorAppTint),
+            ImageViewCompat.getImageTintList(search)?.defaultColor
+        )
+
+        val row = inflater.inflate(R.layout.item_language, null)
+        val selected = row.findViewById<ImageView>(R.id.ivSelected)
+        assertEquals(
+            ContextCompat.getColor(context, R.color.colorPrimary),
+            ImageViewCompat.getImageTintList(selected)?.defaultColor
+        )
     }
 }

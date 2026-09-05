@@ -58,7 +58,7 @@ class FVipManagementWidgetTest {
 
     // BUG-4+5: Activate button starts disabled (EditText empty), enables on input
     @Test
-    fun `BUG4 - activate button disabled initially and enabled after text input`() {
+    fun bug4_activateButtonDisabledInitiallyAndEnabledAfterTextInput() {
         val scenario = ActivityScenario.launch(ActVipManagement::class.java)
 
         scenario.onActivity { activity ->
@@ -82,7 +82,7 @@ class FVipManagementWidgetTest {
 
     // BUG-7: Watch Ad button visible and enabled for free user
     @Test
-    fun `BUG7 - watch ad button is enabled for free user`() {
+    fun bug7_watchAdButtonIsEnabledForFreeUser() {
         val scenario = ActivityScenario.launch(ActVipManagement::class.java)
 
         scenario.onActivity { activity ->
@@ -96,7 +96,7 @@ class FVipManagementWidgetTest {
 
     // BUG-7: Watch Ad button disabled when VIP active
     @Test
-    fun `BUG7 - watch ad button disabled when VIP is active`() {
+    fun bug7_watchAdButtonDisabledWhenVipIsActive() {
         val context = androidx.test.platform.app.InstrumentationRegistry
             .getInstrumentation().targetContext
         val originalSecret = AdManager.adConfig.vipKeySecret
@@ -119,7 +119,7 @@ class FVipManagementWidgetTest {
 
     // BUG-8: Revoke button disabled for free user
     @Test
-    fun `BUG8 - revoke button disabled for free user`() {
+    fun bug8_revokeButtonDisabledForFreeUser() {
         val scenario = ActivityScenario.launch(ActVipManagement::class.java)
 
         scenario.onActivity { activity ->
@@ -133,7 +133,7 @@ class FVipManagementWidgetTest {
 
     // BUG-8: Revoke button enabled for VIP user
     @Test
-    fun `BUG8 - revoke button enabled when VIP active`() {
+    fun bug8_revokeButtonEnabledWhenVipActive() {
         val context = androidx.test.platform.app.InstrumentationRegistry
             .getInstrumentation().targetContext
         val originalSecret = AdManager.adConfig.vipKeySecret
@@ -156,7 +156,7 @@ class FVipManagementWidgetTest {
 
     // BUG-10: Activity destroys cleanly without crash (animators cancelled)
     @Test
-    fun `BUG10 - activity finishes without crash from animator leak`() {
+    fun bug10_activityFinishesWithoutCrashFromAnimatorLeak() {
         val scenario = ActivityScenario.launch(ActVipManagement::class.java)
         // Give slide-in animator time to start (1100ms duration)
         Thread.sleep(200)

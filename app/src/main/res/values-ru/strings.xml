@@ -13,6 +13,7 @@
     <string name="setting_animation_time">Время анимации</string>
     <string name="setting_vibrate_app_hover">Вибрация при наведении на приложение</string>
     <string name="setting_vibrate_app_launch">Вибрация при запуске приложения</string>
+    <string name="no_internet">Нет подключения к Интернету</string>
     <string name="setting_show_name_app_hover">Показывать имя при наведении</string>
     <string name="setting_show_touch_selection">Показывать выбор касанием</string>
     <string name="setting_show_new_app_tag">Показывать метку нового приложения</string>

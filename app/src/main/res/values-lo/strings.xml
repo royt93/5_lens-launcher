@@ -13,6 +13,7 @@
     <string name="setting_animation_time">ເວລາແອນິເມຊັນ</string>
     <string name="setting_vibrate_app_hover">ສັ່ນເມື່ອວາງນິ້ວເທິງແອັບ</string>
     <string name="setting_vibrate_app_launch">ສັ່ນເມື່ອເປີດແອັບ</string>
+    <string name="no_internet">ບໍ່ມີການເຊື່ອມຕໍ່ອິນເຕີເນັດ</string>
     <string name="setting_show_name_app_hover">ສະແດງຊື່ເມື່ອວາງນິ້ວເທິງແອັບ</string>
     <string name="setting_show_touch_selection">ສະແດງການເລືອກສໍາຜັດ</string>
     <string name="setting_show_new_app_tag">ສະແດງປ້າຍກຳກັບແອັບໃໝ່</string>

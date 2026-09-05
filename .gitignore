@@ -41,6 +41,9 @@ captures/
 
 # Keystore files
 *.jks
+*.keystore
+keystore.properties
+gradle.properties.bak
 
 # Android SDK
 /android-sdk.zip

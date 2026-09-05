@@ -1,5 +1,7 @@
 package com.mckimquyen.ui
 
+import android.Manifest
+import android.content.pm.PackageManager
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -14,6 +16,20 @@ import org.junit.runner.RunWith
  */
 @RunWith(AndroidJUnit4::class)
 class MultiLanguageIntegrationTest {
+
+    @Test
+    fun testInstalledPackage_declaresVibratePermission() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val packageInfo = context.packageManager.getPackageInfo(
+            context.packageName,
+            PackageManager.GET_PERMISSIONS
+        )
+
+        assertTrue(
+            "The installed app must declare VIBRATE before invoking Vibrator",
+            packageInfo.requestedPermissions?.contains(Manifest.permission.VIBRATE) == true
+        )
+    }
 
     @Test
     fun testActSettings_languageSelectionViewsPresent() {
@@ -63,6 +79,15 @@ class MultiLanguageIntegrationTest {
             val frContext = LocaleHelper.setLocale(context, "fr")
             val frTitle = frContext.resources.getString(R.string.setting_language_title)
             assertEquals("Langue de l'application", frTitle)
+
+            // Release smoke locales: RTL and CJK resource loading.
+            val arContext = LocaleHelper.setLocale(context, "ar")
+            assertEquals("لغة التطبيق", arContext.getString(R.string.setting_language_title))
+            assertEquals("لا يوجد اتصال بالإنترنت", arContext.getString(R.string.no_internet))
+
+            val jaContext = LocaleHelper.setLocale(context, "ja")
+            assertEquals("アプリの言語", jaContext.getString(R.string.setting_language_title))
+            assertEquals("インターネットに接続されていません", jaContext.getString(R.string.no_internet))
         } finally {
             // Restore original language
             LocaleHelper.setLocale(context, originalLanguage)

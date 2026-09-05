@@ -13,6 +13,7 @@
     <string name="setting_animation_time">애니메이션 시간</string>
     <string name="setting_vibrate_app_hover">앱에 마우스 호버 시 진동</string>
     <string name="setting_vibrate_app_launch">앱 실행 시 진동</string>
+    <string name="no_internet">인터넷에 연결되어 있지 않습니다</string>
     <string name="setting_show_name_app_hover">앱에 마우스 호버 시 이름 표시</string>
     <string name="setting_show_touch_selection">터치 선택 표시</string>
     <string name="setting_show_new_app_tag">새 앱 태그 표시</string>

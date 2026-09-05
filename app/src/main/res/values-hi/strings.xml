@@ -13,6 +13,7 @@
     <string name="setting_animation_time">एनिमेशन का समय</string>
     <string name="setting_vibrate_app_hover">ऐप पर होवर करने पर कंपन</string>
     <string name="setting_vibrate_app_launch">ऐप लॉन्च करने पर कंपन</string>
+    <string name="no_internet">इंटरनेट कनेक्शन नहीं है</string>
     <string name="setting_show_name_app_hover">ऐप पर होवर करने पर नाम दिखाएं</string>
     <string name="setting_show_touch_selection">स्पर्श चयन दिखाएं</string>
     <string name="setting_show_new_app_tag">नया ऐप टैग दिखाएं</string>

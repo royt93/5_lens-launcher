@@ -13,6 +13,7 @@
     <string name="setting_animation_time">وقت الحركة</string>
     <string name="setting_vibrate_app_hover">الاهتزاز عند التحويم فوق التطبيق</string>
     <string name="setting_vibrate_app_launch">الاهتزاز عند فتح التطبيق</string>
+    <string name="no_internet">لا يوجد اتصال بالإنترنت</string>
     <string name="setting_show_name_app_hover">عرض الاسم عند التحويم فوق التطبيق</string>
     <string name="setting_show_touch_selection">عرض تحديد اللمس</string>
     <string name="setting_show_new_app_tag">عرض علامة التطبيق الجديد</string>

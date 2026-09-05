@@ -8,6 +8,35 @@ apply plugin: 'kotlin-kapt'
 //apply plugin: 'com.google.gms.google-services'
 //apply plugin: 'com.google.firebase.crashlytics'
 
+// Release credentials must come from the environment or an untracked local file.
+// Environment variables take precedence over keystore.properties.
+def releaseSigningProperties = new Properties()
+def releaseSigningPropertiesFile = rootProject.file('keystore.properties')
+if (releaseSigningPropertiesFile.exists()) {
+    releaseSigningPropertiesFile.withInputStream { releaseSigningProperties.load(it) }
+}
+
+def releaseSigningValue = { String environmentName, String propertyName ->
+    def environmentValue = System.getenv(environmentName)
+    if (environmentValue?.trim()) {
+        return environmentValue.trim()
+    }
+
+    def localValue = releaseSigningProperties.getProperty(propertyName)
+    return localValue?.trim() ? localValue.trim() : null
+}
+
+def releaseStoreFile = releaseSigningValue('ANDROID_RELEASE_STORE_FILE', 'storeFile')
+def releaseStorePassword = releaseSigningValue('ANDROID_RELEASE_STORE_PASSWORD', 'storePassword')
+def releaseKeyAlias = releaseSigningValue('ANDROID_RELEASE_KEY_ALIAS', 'keyAlias')
+def releaseKeyPassword = releaseSigningValue('ANDROID_RELEASE_KEY_PASSWORD', 'keyPassword')
+def hasReleaseSigning = [
+        releaseStoreFile,
+        releaseStorePassword,
+        releaseKeyAlias,
+        releaseKeyPassword
+].every { it != null }
+
 // ============================================================================
 // ANDROID CONFIGURATION
 // ============================================================================
@@ -48,11 +77,13 @@ android {
     // SIGNING CONFIGURATION
     // ========================================================================
     signingConfigs {
-        release {
-            storeFile file("keystore.jks")
-            storePassword KS_PW
-            keyAlias KS_ALIAS
-            keyPassword KS_PW
+        if (hasReleaseSigning) {
+            release {
+                storeFile rootProject.file(releaseStoreFile)
+                storePassword releaseStorePassword
+                keyAlias releaseKeyAlias
+                keyPassword releaseKeyPassword
+            }
         }
     }
 
@@ -89,7 +120,9 @@ android {
             // Sử dụng proguard-android-optimize.txt để có optimization tốt hơn
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
 
-            signingConfig signingConfigs.release
+            if (hasReleaseSigning) {
+                signingConfig signingConfigs.release
+            }
 
             // ================================================================
             // NDK & NATIVE LIBS OPTIMIZATION
@@ -279,6 +312,20 @@ android {
         abi {
             enableSplit = true
         }
+    }
+}
+
+gradle.taskGraph.whenReady { taskGraph ->
+    def createsReleaseArtifact = taskGraph.allTasks.any { task ->
+        task.project == project &&
+                task.name.toLowerCase(Locale.ROOT).matches(/(assemble|bundle|package).*release.*/)
+    }
+    if (createsReleaseArtifact && !hasReleaseSigning) {
+        throw new GradleException(
+                'Release signing is not configured. Set ANDROID_RELEASE_STORE_FILE, ' +
+                        'ANDROID_RELEASE_STORE_PASSWORD, ANDROID_RELEASE_KEY_ALIAS and ' +
+                        'ANDROID_RELEASE_KEY_PASSWORD, or create an untracked keystore.properties file.'
+        )
     }
 }
 

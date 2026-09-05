@@ -13,6 +13,7 @@
     <string name="setting_animation_time">Tiempo de animación</string>
     <string name="setting_vibrate_app_hover">Vibrar al pasar sobre la app</string>
     <string name="setting_vibrate_app_launch">Vibrar al abrir la app</string>
+    <string name="no_internet">Sin conexión a Internet</string>
     <string name="setting_show_name_app_hover">Mostrar nombre al pasar sobre la app</string>
     <string name="setting_show_touch_selection">Mostrar selección táctil</string>
     <string name="setting_show_new_app_tag">Mostrar etiqueta de nueva app</string>

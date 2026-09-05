@@ -13,6 +13,7 @@
     <string name="setting_animation_time">アニメーション時間</string>
     <string name="setting_vibrate_app_hover">ホバー時にバイブレーション</string>
     <string name="setting_vibrate_app_launch">アプリ起動時にバイブレーション</string>
+    <string name="no_internet">インターネットに接続されていません</string>
     <string name="setting_show_name_app_hover">ホバー時に名前を表示</string>
     <string name="setting_show_touch_selection">タッチ選択範囲を表示</string>
     <string name="setting_show_new_app_tag">新着アプリタグを表示</string>

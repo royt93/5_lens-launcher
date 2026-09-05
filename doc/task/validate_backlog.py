@@ -9,11 +9,15 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parent
-TODO = ROOT / "todo"
+STATUS_DIRECTORIES = {
+    "todo": ROOT / "todo",
+    "inprogress": ROOT / "inprogress",
+    "done": ROOT / "done",
+}
 EXPECTED_STORY_COUNT = 40
 ALLOWED = {
     "Type": {"fix", "enhance", "new", "idea", "exclusive"},
-    "Status": {"todo"},
+    "Status": set(STATUS_DIRECTORIES),
     "Priority": {"P0", "P1", "P2", "P3"},
     "Evidence": {"confirmed", "conditional", "decision", "idea"},
     "Estimate": {f"{points} SP" for points in (1, 2, 3, 5, 8, 13)},
@@ -21,11 +25,10 @@ ALLOWED = {
 }
 REQUIRED_FIELDS = (*ALLOWED, "Epic", "Dependencies")
 REQUIRED_TEST_MARKERS = (
-    "## Required test matrix",
-    "Unit tests",
-    "Widget/UI tests",
-    "Integration tests",
-    "Tecno device",
+    "unit",
+    "widget/ui",
+    "integration",
+    "smoke",
 )
 
 
@@ -33,7 +36,11 @@ def validate() -> list[str]:
     errors: list[str] = []
     stories: dict[str, Path] = {}
     dependencies: dict[str, list[str]] = {}
-    files = sorted(TODO.glob("*.md"))
+    files = sorted(
+        path
+        for directory in STATUS_DIRECTORIES.values()
+        for path in directory.glob("*.md")
+    )
 
     if len(files) != EXPECTED_STORY_COUNT:
         errors.append(
@@ -64,6 +71,13 @@ def validate() -> list[str]:
                     f"{story_id}: invalid {field} value {metadata.get(field)!r}"
                 )
 
+        expected_status = path.parent.name
+        if metadata.get("Status") != expected_status:
+            errors.append(
+                f"{story_id}: Status {metadata.get('Status')!r} does not match "
+                f"folder {expected_status!r}"
+            )
+
         filename = re.match(
             r"(p[0-3])-([a-z0-9]+)-([a-z0-9]+-\d+)-", path.name
         )
@@ -74,8 +88,14 @@ def validate() -> list[str]:
         ):
             errors.append(f"{story_id}: filename does not match ID/priority metadata")
 
+        test_section = content.split("## Required test matrix", 1)
+        if len(test_section) != 2:
+            errors.append(f"{story_id}: missing required test matrix section")
+            test_content = ""
+        else:
+            test_content = test_section[1].split("\n## ", 1)[0].lower()
         for marker in REQUIRED_TEST_MARKERS:
-            if marker not in content:
+            if marker not in test_content:
                 errors.append(f"{story_id}: missing test requirement {marker!r}")
 
         raw_dependencies = metadata.get("Dependencies", "None")
@@ -122,4 +142,12 @@ if __name__ == "__main__":
         for error in validation_errors:
             print(f"- {error}")
         sys.exit(1)
-    print(f"Backlog validation passed: {EXPECTED_STORY_COUNT} stories, no cycles")
+    counts = {
+        status: len(list(directory.glob("*.md")))
+        for status, directory in STATUS_DIRECTORIES.items()
+    }
+    print(
+        f"Backlog validation passed: {EXPECTED_STORY_COUNT} stories, no cycles "
+        f"({counts['todo']} todo, {counts['inprogress']} in progress, "
+        f"{counts['done']} done)"
+    )
