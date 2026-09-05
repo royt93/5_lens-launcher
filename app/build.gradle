@@ -15,19 +15,19 @@ android {
     namespace 'com.mckimquyen'
 
     // SDK Versions - Android 14 (API 36)
-    compileSdkVersion 36
+    compileSdkVersion 37
 
     defaultConfig {
         applicationId "com.mckimquyen.lenslauncher"
         minSdkVersion 25    // Android 7.1 (Nougat)
         //noinspection EditedTargetSdkVersion
-        targetSdkVersion 36 // Android 14
+        targetSdkVersion 37 // Android 14
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         // Version format: YYYYMMDD
-        versionCode 20260620
-        versionName "2026.06.20"
+        versionCode 20260905
+        versionName "2026.09.05"
 
         // ====================================================================
         // SIZE OPTIMIZATION - Giảm kích thước APK/AAB
