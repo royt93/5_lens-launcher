@@ -14,4 +14,5 @@
     <color name="colorAppTint">@color/colorBlack</color>
     <color name="background">#FFFFFF</color>
     <color name="dialogBackground">#FFFFFF</color>
+    <color name="searchSurface">#F2FFFFFF</color>
 </resources>

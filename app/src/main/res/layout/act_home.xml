@@ -18,4 +18,111 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center" />
+
+    <LinearLayout
+        android:id="@+id/searchOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="12dp"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:background="@drawable/bg_search_bar"
+            android:elevation="8dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="16dp">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:contentDescription="@null"
+                android:src="@drawable/ic_search_24dp" />
+
+            <androidx.appcompat.widget.AppCompatEditText
+                android:id="@+id/etAppSearch"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="8dp"
+                android:layout_weight="1"
+                android:background="@null"
+                android:hint="@string/search_apps_hint"
+                android:imeOptions="actionSearch"
+                android:inputType="textAutoCorrect"
+                android:maxLines="1"
+                android:paddingHorizontal="4dp"
+                android:textDirection="locale" />
+
+            <ImageButton
+                android:id="@+id/btClearAppSearch"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/clear_search"
+                android:src="@drawable/ic_close_24dp"
+                android:visibility="gone" />
+        </LinearLayout>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/searchResultsCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:elevation="12dp"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:id="@+id/recentHeader"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="8dp"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/recent_apps"
+                        android:textStyle="bold" />
+
+                    <Button
+                        android:id="@+id/btClearSearchHistory"
+                        style="?attr/borderlessButtonStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="48dp"
+                        android:text="@string/clear_recent_apps"
+                        android:textAllCaps="false" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tvNoSearchResults"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:minHeight="96dp"
+                    android:padding="16dp"
+                    android:text="@string/no_apps_found"
+                    android:visibility="gone" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvSearchResults"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:nestedScrollingEnabled="true"
+                    android:overScrollMode="ifContentScrolls" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+    </LinearLayout>
 </FrameLayout>

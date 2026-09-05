@@ -91,4 +91,12 @@
     <string name="setting_language_title">アプリの言語</string>
     <string name="search_language_hint">言語を検索…</string>
     <string name="no_language_found">言語が見つかりません</string>
+    <string name="search_apps_hint">アプリを検索</string>
+    <string name="clear_search">検索をクリア</string>
+    <string name="recent_apps">最近のアプリ</string>
+    <string name="clear_recent_apps">クリア</string>
+    <string name="recent_apps_cleared">最近のアプリをクリアしました</string>
+    <string name="no_apps_found">アプリが見つかりません</string>
+    <string name="search_empty_state">検索するアプリ名を入力してください</string>
+    <string name="search_open_app">%1$s を開く</string>
 </resources>

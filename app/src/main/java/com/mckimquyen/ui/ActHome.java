@@ -6,18 +6,33 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
+import android.view.KeyEvent;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.mckimquyen.BuildConfig;
 import com.mckimquyen.R;
 import com.mckimquyen.app.RAppsSingleton;
 import com.mckimquyen.model.App;
 import com.mckimquyen.model.AppPersistent;
+import com.mckimquyen.search.AppSearchEngine;
+import com.mckimquyen.search.SearchHistoryStore;
+import com.mckimquyen.search.SearchResultAdapter;
 import com.mckimquyen.util.Logger;
 import com.mckimquyen.util.UIUtils;
 import com.mckimquyen.services.AppEventManager;
@@ -35,6 +50,14 @@ public class ActHome extends ActBase {
     LensView lensViews;
     MaterialProgressBar progressBarHome;
     private ArrayList<App> listApp;
+    private EditText appSearch;
+    private ImageButton clearAppSearch;
+    private View searchResultsCard;
+    private View recentHeader;
+    private TextView noSearchResults;
+    private RecyclerView searchResults;
+    private SearchResultAdapter searchResultAdapter;
+    private SearchHistoryStore searchHistoryStore;
 
     private void updateColor() {
         var mUtilSettings = new UtilSettings(this);
@@ -57,6 +80,7 @@ public class ActHome extends ActBase {
         setContentView(R.layout.act_home);
         UIUtils.INSTANCE.setupEdgeToEdge2(findViewById(R.id.rootLayout), true, true);
         setupViews();
+        setupSearch();
         // updateColor();
         PackageManager mPackageManager = getPackageManager();
         lensViews.setPackageManager(mPackageManager);
@@ -66,6 +90,12 @@ public class ActHome extends ActBase {
 
         // Observe app events using LiveData
         AppEventManager.INSTANCE.getAppsLoaded().observe(this,
+                data -> assignApps(Objects.requireNonNull(RAppsSingleton.getInstance().getApps())));
+
+        AppEventManager.INSTANCE.getAppsUpdated().observe(this,
+                data -> assignApps(Objects.requireNonNull(RAppsSingleton.getInstance().getApps())));
+
+        AppEventManager.INSTANCE.getAppsEdited().observe(this,
                 data -> assignApps(Objects.requireNonNull(RAppsSingleton.getInstance().getApps())));
 
         AppEventManager.INSTANCE.getVisibilityChanged().observe(this,
@@ -82,7 +112,13 @@ public class ActHome extends ActBase {
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
-                // Do nothing - back button disabled for home screen
+                if (searchResultsCard.getVisibility() == View.VISIBLE) {
+                    if (appSearch.getText().length() > 0) {
+                        appSearch.setText("");
+                    } else {
+                        hideSearch();
+                    }
+                }
             }
         });
 
@@ -92,6 +128,12 @@ public class ActHome extends ActBase {
     private void setupViews() {
         lensViews = findViewById(R.id.lensViews);
         progressBarHome = findViewById(R.id.progressBarHome);
+        appSearch = findViewById(R.id.etAppSearch);
+        clearAppSearch = findViewById(R.id.btClearAppSearch);
+        searchResultsCard = findViewById(R.id.searchResultsCard);
+        recentHeader = findViewById(R.id.recentHeader);
+        noSearchResults = findViewById(R.id.tvNoSearchResults);
+        searchResults = findViewById(R.id.rvSearchResults);
 
         // Hide progress bar in test environments to prevent indeterminate animation loops from hanging tests
         boolean isTestEnv = false;
@@ -102,6 +144,91 @@ public class ActHome extends ActBase {
         if (isTestEnv) {
             progressBarHome.setVisibility(View.GONE);
         }
+    }
+
+    private void setupSearch() {
+        searchHistoryStore = new SearchHistoryStore(this);
+        searchResultAdapter = new SearchResultAdapter(this::launchSearchResult);
+        searchResults.setLayoutManager(new LinearLayoutManager(this));
+        searchResults.setAdapter(searchResultAdapter);
+
+        appSearch.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
+                clearAppSearch.setVisibility(s.length() == 0 ? View.GONE : View.VISIBLE);
+                updateSearchResults(s);
+            }
+            @Override public void afterTextChanged(Editable s) {}
+        });
+        appSearch.setOnFocusChangeListener((view, hasFocus) -> {
+            if (hasFocus) updateSearchResults(appSearch.getText());
+        });
+        appSearch.setOnEditorActionListener((view, actionId, event) -> {
+            boolean isEnterKey = event != null
+                    && event.getAction() == KeyEvent.ACTION_UP
+                    && event.getKeyCode() == KeyEvent.KEYCODE_ENTER;
+            if (actionId == EditorInfo.IME_ACTION_SEARCH
+                    || actionId == EditorInfo.IME_ACTION_GO
+                    || actionId == EditorInfo.IME_ACTION_DONE
+                    || isEnterKey) {
+                App first = searchResultAdapter.firstOrNull();
+                if (first != null) {
+                    launchSearchResult(first, appSearch);
+                    return true;
+                }
+            }
+            return false;
+        });
+        clearAppSearch.setOnClickListener(view -> appSearch.setText(""));
+        Button clearHistory = findViewById(R.id.btClearSearchHistory);
+        clearHistory.setOnClickListener(view -> {
+            searchHistoryStore.clear();
+            updateSearchResults(appSearch.getText());
+            Toast.makeText(this, R.string.recent_apps_cleared, Toast.LENGTH_SHORT).show();
+        });
+    }
+
+    private void updateSearchResults(CharSequence query) {
+        if (!appSearch.hasFocus() && query.length() == 0) {
+            searchResultsCard.setVisibility(View.GONE);
+            return;
+        }
+
+        ArrayList<App> apps = listApp == null ? new ArrayList<>() : listApp;
+        java.util.List<App> results = AppSearchEngine.search(apps, query, searchHistoryStore.recentKeys());
+        boolean isEmptyQuery = AppSearchEngine.normalize(query).isEmpty();
+        searchResultAdapter.submitList(results);
+        int resultHeightDp = Math.min(results.size() * 64, 384);
+        searchResults.getLayoutParams().height = Math.round(
+                resultHeightDp * getResources().getDisplayMetrics().density
+        );
+        searchResults.requestLayout();
+        recentHeader.setVisibility(isEmptyQuery && !results.isEmpty() ? View.VISIBLE : View.GONE);
+        searchResults.setVisibility(results.isEmpty() ? View.GONE : View.VISIBLE);
+        noSearchResults.setText(isEmptyQuery ? R.string.search_empty_state : R.string.no_apps_found);
+        noSearchResults.setVisibility(results.isEmpty() ? View.VISIBLE : View.GONE);
+        searchResultsCard.setVisibility(View.VISIBLE);
+    }
+
+    private void launchSearchResult(App app, View source) {
+        searchHistoryStore.recordLaunch(AppSearchEngine.componentKey(app));
+        hideSearch();
+        com.mckimquyen.util.UtilApp.launchComponent(
+                this,
+                app.getPackageName().toString(),
+                app.getLabel().toString(),
+                app.getName().toString(),
+                source,
+                new android.graphics.Rect(0, 0, source.getWidth(), source.getHeight())
+        );
+    }
+
+    private void hideSearch() {
+        appSearch.setText("");
+        appSearch.clearFocus();
+        searchResultsCard.setVisibility(View.GONE);
+        InputMethodManager keyboard = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+        keyboard.hideSoftInputFromWindow(appSearch.getWindowToken(), 0);
     }
 
     @Override
@@ -142,7 +269,11 @@ public class ActHome extends ActBase {
                 continue;
             }
             if (!Objects.equals(app1.getPackageName().toString(), app2.getPackageName().toString())
-                    || app1.isVisible() != app2.isVisible()) {
+                    || !Objects.equals(app1.getName().toString(), app2.getName().toString())
+                    || !Objects.equals(app1.getLabel().toString(), app2.getLabel().toString())
+                    || app1.isVisible() != app2.isVisible()
+                    || app1.isOpened() != app2.isOpened()
+                    || app1.getOpenCount() != app2.getOpenCount()) {
                 return false;
             }
         }
@@ -152,6 +283,12 @@ public class ActHome extends ActBase {
     private void assignApps(ArrayList<App> lApp) {
         Logger.d("ActHome: assignApps called, input list size: " + (lApp != null ? lApp.size() : "null"));
         if (lApp == null || lApp.isEmpty()) {
+            listApp = new ArrayList<>();
+            progressBarHome.setVisibility(View.INVISIBLE);
+            lensViews.setVisibility(View.INVISIBLE);
+            if (appSearch.hasFocus() || appSearch.getText().length() > 0) {
+                updateSearchResults(appSearch.getText());
+            }
             return;
         }
 
@@ -161,6 +298,16 @@ public class ActHome extends ActBase {
             if (app.isVisible()) {
                 visibleApps.add(app);
             }
+        }
+
+        if (visibleApps.isEmpty()) {
+            listApp = visibleApps;
+            progressBarHome.setVisibility(View.INVISIBLE);
+            lensViews.setVisibility(View.INVISIBLE);
+            if (appSearch.hasFocus() || appSearch.getText().length() > 0) {
+                updateSearchResults(appSearch.getText());
+            }
+            return;
         }
 
         // Check if the new visible list is identical to the currently displayed listApp
@@ -174,6 +321,9 @@ public class ActHome extends ActBase {
         listApp = visibleApps;
         Logger.d("ActHome: Setting " + listApp.size() + " apps to lensViews");
         lensViews.setApps(listApp);
+        if (appSearch.hasFocus() || appSearch.getText().length() > 0) {
+            updateSearchResults(appSearch.getText());
+        }
     }
 
     @Override

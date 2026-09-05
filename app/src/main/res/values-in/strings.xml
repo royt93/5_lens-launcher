@@ -91,4 +91,12 @@
     <string name="setting_language_title">Bahasa Aplikasi</string>
     <string name="search_language_hint">Cari bahasa…</string>
     <string name="no_language_found">Bahasa tidak ditemukan</string>
+    <string name="search_apps_hint">Cari aplikasi</string>
+    <string name="clear_search">Hapus pencarian</string>
+    <string name="recent_apps">Aplikasi terbaru</string>
+    <string name="clear_recent_apps">Hapus</string>
+    <string name="recent_apps_cleared">Aplikasi terbaru dihapus</string>
+    <string name="no_apps_found">Aplikasi tidak ditemukan</string>
+    <string name="search_empty_state">Ketik nama aplikasi untuk mencari</string>
+    <string name="search_open_app">Buka %1$s</string>
 </resources>

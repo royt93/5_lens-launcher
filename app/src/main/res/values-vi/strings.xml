@@ -93,4 +93,12 @@
     <string name="setting_language_title">Ngôn ngữ ứng dụng</string>
     <string name="search_language_hint">Tìm kiếm ngôn ngữ…</string>
     <string name="no_language_found">Không tìm thấy ngôn ngữ</string>
+    <string name="search_apps_hint">Tìm ứng dụng</string>
+    <string name="clear_search">Xóa nội dung tìm kiếm</string>
+    <string name="recent_apps">Ứng dụng gần đây</string>
+    <string name="clear_recent_apps">Xóa</string>
+    <string name="recent_apps_cleared">Đã xóa ứng dụng gần đây</string>
+    <string name="no_apps_found">Không tìm thấy ứng dụng</string>
+    <string name="search_empty_state">Nhập tên ứng dụng để tìm kiếm</string>
+    <string name="search_open_app">Mở %1$s</string>
 </resources>

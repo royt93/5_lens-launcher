@@ -27,13 +27,14 @@
 - ✅ Backlog strategy: balance release hardening with visible user value.
 - ✅ Story structure: one Markdown file per independently deliverable story.
 - ✅ Differentiation direction: prioritize **Fisheye Smart** features implemented locally on device.
-- ✅ Current implementation loop: Wave 0 P0 release hardening.
-- ✅ Device exception for Wave 0: use the connected Pixel 7 Pro as the smoke device instead of Tecno.
+- ✅ FEAT-001 search-first app navigation completed, with only its directly required CORE/A11Y integration seams included.
+- ✅ Device policy from FEAT-001 onward: qualification and smoke use the designated TECNO KJ7 only; Pixel is explicitly excluded.
 
 ## ✅ Implemented
 
 - REL-001 — Android lint release blockers cleared; unit, widget/UI, integration and Pixel smoke evidence recorded.
 - SEC-002 — Closed by the owner's decision to exclude `store-assets`; all Wave 0 code changes in that directory were reverted.
+- FEAT-001 — Search-first app navigation; local deterministic ranking, recent history, accessibility, locale/offline behavior and TECNO KJ7 performance smoke completed.
 
 ## 🟡 In progress
 

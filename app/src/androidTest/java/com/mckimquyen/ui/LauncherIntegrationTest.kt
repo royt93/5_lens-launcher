@@ -20,7 +20,12 @@ class LauncherIntegrationTest {
             assertNotNull(activity)
             val lensView = activity.findViewById<android.view.View>(R.id.lensViews)
             assertNotNull("LensView should be present", lensView)
-            assertEquals(android.view.View.INVISIBLE, lensView.visibility)
+            // Installed apps load asynchronously, so the lens may already be visible here.
+            // It must never be removed from layout, and the primary search entry point must exist.
+            assertNotEquals(android.view.View.GONE, lensView.visibility)
+            val search = activity.findViewById<android.view.View>(R.id.etAppSearch)
+            assertNotNull("App search should be present", search)
+            assertEquals(android.view.View.VISIBLE, search.visibility)
         }
 
         scenario.close()

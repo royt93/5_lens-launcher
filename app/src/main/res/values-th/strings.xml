@@ -91,4 +91,12 @@
     <string name="setting_language_title">ภาษาของแอป</string>
     <string name="search_language_hint">ค้นหาภาษา…</string>
     <string name="no_language_found">ไม่พบภาษา</string>
+    <string name="search_apps_hint">ค้นหาแอป</string>
+    <string name="clear_search">ล้างการค้นหา</string>
+    <string name="recent_apps">แอปล่าสุด</string>
+    <string name="clear_recent_apps">ล้าง</string>
+    <string name="recent_apps_cleared">ล้างแอปล่าสุดแล้ว</string>
+    <string name="no_apps_found">ไม่พบแอป</string>
+    <string name="search_empty_state">พิมพ์ชื่อแอปเพื่อค้นหา</string>
+    <string name="search_open_app">เปิด %1$s</string>
 </resources>

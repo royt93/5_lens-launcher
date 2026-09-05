@@ -91,4 +91,12 @@
     <string name="setting_language_title">لغة التطبيق</string>
     <string name="search_language_hint">البحث عن لغة…</string>
     <string name="no_language_found">لم يتم العثور على لغة</string>
+    <string name="search_apps_hint">البحث عن تطبيقات</string>
+    <string name="clear_search">مسح البحث</string>
+    <string name="recent_apps">التطبيقات الحديثة</string>
+    <string name="clear_recent_apps">مسح</string>
+    <string name="recent_apps_cleared">تم مسح التطبيقات الحديثة</string>
+    <string name="no_apps_found">لم يتم العثور على تطبيقات</string>
+    <string name="search_empty_state">اكتب اسم تطبيق للبحث</string>
+    <string name="search_open_app">فتح %1$s</string>
 </resources>

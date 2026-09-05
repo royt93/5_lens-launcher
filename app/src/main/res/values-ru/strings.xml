@@ -91,4 +91,12 @@
     <string name="setting_language_title">Язык приложения</string>
     <string name="search_language_hint">Поиск языка…</string>
     <string name="no_language_found">Язык не найден</string>
+    <string name="search_apps_hint">Поиск приложений</string>
+    <string name="clear_search">Очистить поиск</string>
+    <string name="recent_apps">Недавние приложения</string>
+    <string name="clear_recent_apps">Очистить</string>
+    <string name="recent_apps_cleared">Недавние приложения удалены</string>
+    <string name="no_apps_found">Приложения не найдены</string>
+    <string name="search_empty_state">Введите название приложения</string>
+    <string name="search_open_app">Открыть %1$s</string>
 </resources>

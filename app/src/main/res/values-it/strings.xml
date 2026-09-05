@@ -91,4 +91,12 @@
     <string name="setting_language_title">Lingua dell\'app</string>
     <string name="search_language_hint">Cerca lingua…</string>
     <string name="no_language_found">Nessuna lingua trovata</string>
+    <string name="search_apps_hint">Cerca app</string>
+    <string name="clear_search">Cancella ricerca</string>
+    <string name="recent_apps">App recenti</string>
+    <string name="clear_recent_apps">Cancella</string>
+    <string name="recent_apps_cleared">App recenti cancellate</string>
+    <string name="no_apps_found">Nessuna app trovata</string>
+    <string name="search_empty_state">Digita il nome di una app da cercare</string>
+    <string name="search_open_app">Apri %1$s</string>
 </resources>

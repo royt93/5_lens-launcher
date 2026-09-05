@@ -91,4 +91,12 @@
     <string name="setting_language_title">ऐप की भाषा</string>
     <string name="search_language_hint">भाषा खोजें…</string>
     <string name="no_language_found">कोई भाषा नहीं मिली</string>
+    <string name="search_apps_hint">ऐप खोजें</string>
+    <string name="clear_search">खोज साफ़ करें</string>
+    <string name="recent_apps">हाल के ऐप</string>
+    <string name="clear_recent_apps">साफ़ करें</string>
+    <string name="recent_apps_cleared">हाल के ऐप साफ़ किए गए</string>
+    <string name="no_apps_found">कोई ऐप नहीं मिला</string>
+    <string name="search_empty_state">खोजने के लिए ऐप का नाम लिखें</string>
+    <string name="search_open_app">%1$s खोलें</string>
 </resources>

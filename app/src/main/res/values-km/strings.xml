@@ -91,4 +91,12 @@
     <string name="setting_language_title">ភាសាកម្មវិធី</string>
     <string name="search_language_hint">ស្វែងរកភាសា…</string>
     <string name="no_language_found">រកមិនឃើញភាសាទេ</string>
+    <string name="search_apps_hint">ស្វែងរកកម្មវិធី</string>
+    <string name="clear_search">សម្អាតការស្វែងរក</string>
+    <string name="recent_apps">កម្មវិធីថ្មីៗ</string>
+    <string name="clear_recent_apps">សម្អាត</string>
+    <string name="recent_apps_cleared">បានសម្អាតកម្មវិធីថ្មីៗ</string>
+    <string name="no_apps_found">រកមិនឃើញកម្មវិធី</string>
+    <string name="search_empty_state">បញ្ចូលឈ្មោះកម្មវិធីដើម្បីស្វែងរក</string>
+    <string name="search_open_app">បើក %1$s</string>
 </resources>
