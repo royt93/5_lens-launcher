@@ -73,10 +73,8 @@ object UtilBitmap {
             val applicationInfo = packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA)
             val resources = packageManager.getResourcesForApplication(applicationInfo)
 
-            resIdToBitmap(resources, resId) ?: run {
-                val drawable = packageManager.getApplicationIcon(packageName)
-                drawableToBitmap(drawable)
-            }
+            resIdToBitmap(resources, resId) ?: packageManager.getApplicationIcon(packageName)
+                ?.let { drawableToBitmap(it) }
         } catch (e: PackageManager.NameNotFoundException) {
             e.printStackTrace()
             null

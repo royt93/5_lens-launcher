@@ -155,6 +155,27 @@ object UtilApp {
     }
 
     /**
+     * PERF-002: reloads exactly one app's icon (respecting the active icon pack), so a
+     * bitmap evicted from [BitmapCache] under memory pressure can be restored on demand
+     * instead of staying blank until the next full app-list refresh.
+     */
+    @JvmStatic
+    suspend fun loadSingleAppIcon(
+        application: Application,
+        packageName: String,
+        iconResId: Int,
+    ): android.graphics.Bitmap? = withContext(Dispatchers.IO) {
+        val packageManager = application.packageManager
+        val defaultBitmap = UtilBitmap.packageNameToBitmap(packageManager, packageName, iconResId)
+            ?: return@withContext null
+        val iconPackLabelName = UtilSettings(application).getString(UtilSettings.KEY_ICON_PACK_LABEL_NAME)
+            ?: UtilSettings.DEFAULT_ICON_PACK_LABEL_NAME
+        val selectedIconPack = UtilIconPackManager().getAvailableIconPacksWithIcons(true, application)
+            .find { it.mName == iconPackLabelName }
+        selectedIconPack?.getIconForPackage(packageName, defaultBitmap) ?: defaultBitmap
+    }
+
+    /**
      * Launch app component with optional biometric authentication
      */
     @JvmStatic

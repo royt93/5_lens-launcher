@@ -1,5 +1,7 @@
 package com.mckimquyen.util
 
+import android.app.ActivityManager
+import android.content.Context
 import android.graphics.Bitmap
 import android.util.LruCache
 import android.util.Log
@@ -9,15 +11,50 @@ import android.util.Log
  *
  * Fix: 5.1 - Bitmap memory management với LruCache
  *
- * Cache sử dụng 1/8 heap memory, tự động recycle bitmap khi bị evict
+ * PERF-002: budget is derived from the device's standard (non-large) memory class and the
+ * actual cached icon size, not from `Runtime.maxMemory()` - which reflects the manifest's
+ * `largeHeap` flag and would otherwise let an inflated heap silently inflate the cache budget.
+ * Call [init] once, before any [get]/[put], from Application.onCreate().
  */
 object BitmapCache {
 
     private const val TAG = "BitmapCache"
 
-    // Tính toán max memory cho cache (1/8 heap size)
-    private val maxMemory = (Runtime.getRuntime().maxMemory() / 1024).toInt()
-    private val cacheSize = maxMemory / 8
+    // Target size for launcher icons (192x192 is ideal for xxxhdpi screens)
+    private const val TARGET_ICON_SIZE = 192
+    private const val BYTES_PER_ICON_PIXEL = 4 // ARGB_8888
+    private val ICON_SIZE_KB = (TARGET_ICON_SIZE * TARGET_ICON_SIZE * BYTES_PER_ICON_PIXEL) / 1024
+
+    // Ceiling: never budget more than this many icons' worth of memory, regardless of how
+    // large the device's memory class is - a launcher grid has no legitimate need for more.
+    private const val MAX_CACHED_ICONS = 300
+    private const val MIN_CACHE_SIZE_KB = 4 * 1024 // floor for very low memory-class devices
+    private const val FALLBACK_STANDARD_HEAP_MB = 64 // used only if init() is never called
+
+    @Volatile
+    private var cacheSizeKb: Int = computeCacheSizeKb(FALLBACK_STANDARD_HEAP_MB)
+
+    private fun computeCacheSizeKb(standardMemoryClassMb: Int): Int {
+        val heapBudgetKb = (standardMemoryClassMb * 1024) / 8
+        val iconBudgetKb = ICON_SIZE_KB * MAX_CACHED_ICONS
+        return heapBudgetKb.coerceAtMost(iconBudgetKb).coerceAtLeast(MIN_CACHE_SIZE_KB)
+    }
+
+    /**
+     * Must be called once, before any [get]/[put], typically from Application.onCreate().
+     * Sizes the cache from the device's standard memory class - unaffected by the app's
+     * `largeHeap` manifest flag - so the budget reflects the real device, not an inflated heap.
+     */
+    fun init(context: Context) {
+        val activityManager = context.applicationContext
+            .getSystemService(Context.ACTIVITY_SERVICE) as? ActivityManager
+        val standardMemoryClassMb = activityManager?.memoryClass ?: FALLBACK_STANDARD_HEAP_MB
+        cacheSizeKb = computeCacheSizeKb(standardMemoryClassMb)
+        // LruCache's maxSize is fixed at construction; resize() is required to actually apply
+        // a new budget (reassigning cacheSizeKb alone would not affect the already-built cache).
+        cache.resize(cacheSizeKb)
+        Log.d(TAG, "Initialized: memoryClass=${standardMemoryClassMb}MB, cacheSize=${cacheSizeKb}KB")
+    }
 
     /**
      * LruCache lưu trữ bitmap với key là package name
@@ -28,7 +65,7 @@ object BitmapCache {
         val sizeKb: Int
     )
 
-    private val cache = object : LruCache<String, CachedBitmap>(cacheSize) {
+    private val cache = object : LruCache<String, CachedBitmap>(cacheSizeKb) {
 
         /**
          * Tính size của bitmap trong cache (đơn vị KB)
@@ -56,9 +93,6 @@ object BitmapCache {
             // Do not call oldValue.recycle() - let GC handle it to avoid race conditions
         }
     }
-
-    // Target size for launcher icons (192x192 is ideal for xxxhdpi screens)
-    private const val TARGET_ICON_SIZE = 192
 
     /**
      * Lấy bitmap từ cache
@@ -140,6 +174,22 @@ object BitmapCache {
     }
 
     /**
+     * PERF-002: evicts least-recently-used entries down to [fraction] of the cache's current
+     * size, for moderate memory pressure where a full [clear] would be overkill (and would
+     * force every visible icon to reload). `LruCache.trimToSize` only ever evicts, so calling
+     * this with `fraction >= 1f` is a safe no-op rather than growing the cache.
+     */
+    fun trimToFraction(fraction: Float) {
+        try {
+            val targetSizeKb = (cache.size() * fraction.coerceIn(0f, 1f)).toInt()
+            cache.trimToSize(targetSizeKb)
+            Log.d(TAG, "Trimmed cache to ${(fraction * 100).toInt()}% (${cache.size()}KB / ${cache.maxSize()}KB)")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error trimming cache", e)
+        }
+    }
+
+    /**
      * Xóa toàn bộ cache và recycle tất cả bitmaps
      * Nên gọi khi cần giải phóng memory (ví dụ: onLowMemory)
      */
@@ -151,6 +201,12 @@ object BitmapCache {
             Log.e(TAG, "Error clearing cache", e)
         }
     }
+
+    /** Current configured cache budget in KB (see [init]). */
+    fun maxSizeKb(): Int = cache.maxSize()
+
+    /** Current cache occupancy in KB. */
+    fun sizeKb(): Int = cache.size()
 
     /**
      * Lấy thông tin về cache để debug

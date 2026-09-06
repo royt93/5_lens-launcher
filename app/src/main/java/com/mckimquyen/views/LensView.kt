@@ -25,6 +25,7 @@ import com.mckimquyen.model.AppPersistent
 import com.mckimquyen.util.UtilApp
 import com.mckimquyen.util.UtilCalculator
 import com.mckimquyen.util.UtilSettings
+import kotlinx.coroutines.launch
 import kotlin.math.pow
 import kotlin.math.sqrt
 
@@ -49,6 +50,10 @@ class LensView : View {
     private var mUtilSettings: UtilSettings? = null
     private var mWorkspaceBackgroundDrawable: NinePatchDrawable? = null
     private var mInsets = Rect(0, 0, 0, 0)
+
+    // PERF-002: de-dupes concurrent reload requests for the same evicted icon - onDraw runs
+    // every frame, so without this the same cache miss would spawn a new coroutine per frame.
+    private val mIconReloadsInFlight = java.util.concurrent.ConcurrentHashMap.newKeySet<String>()
 
     private var mDrawType: DrawType? = null
     fun setDrawType(drawType: DrawType?) {
@@ -383,13 +388,45 @@ class LensView : View {
                 if (appIcon != null && !appIcon.isRecycled) {
                     val src = Rect(0, 0, appIcon.width, appIcon.height)
                     canvas.drawBitmap(appIcon, src, rect, mPaintIcons)
+                } else {
+                    requestIconReload(app)
                 }
-                
+
                 if (app.installDate >= System.currentTimeMillis() - UtilSettings.SHOW_NEW_APP_TAG_DURATION
                     && app.openCount == 0L
                 ) {
                     drawNewAppTag(canvas, rect)
                 }
+            }
+        }
+    }
+
+    /**
+     * PERF-002: BitmapCache trims/clears entries under memory pressure with no other source
+     * of truth for the bitmap (App.icon is nulled out after the initial load to avoid holding
+     * it twice - see TaskSortApps), so a cache miss here must reload from PackageManager/the
+     * active icon pack instead of leaving that grid cell permanently blank.
+     */
+    private fun requestIconReload(app: App) {
+        val iconCacheKey = app.iconCacheKey
+        if (iconCacheKey.isEmpty() || !mIconReloadsInFlight.add(iconCacheKey)) return
+        val application = context?.applicationContext as? android.app.Application ?: run {
+            mIconReloadsInFlight.remove(iconCacheKey)
+            return
+        }
+        com.mckimquyen.app.ApplicationScope.scope.launch {
+            try {
+                val icon = UtilApp.loadSingleAppIcon(application, app.packageName.toString(), app.iconResId)
+                if (icon != null) {
+                    com.mckimquyen.app.RAppsSingleton.instance.setAppIcon(iconCacheKey, icon)
+                    invalidate()
+                }
+            } catch (e: Exception) {
+                // A background icon reload must never crash the launcher; that grid cell just
+                // stays blank until the next full app-list refresh, same as before PERF-002.
+                android.util.Log.e("LensView", "Icon reload failed for $iconCacheKey", e)
+            } finally {
+                mIconReloadsInFlight.remove(iconCacheKey)
             }
         }
     }

@@ -67,13 +67,26 @@ public class RApplication extends android.app.Application {
     private TaskUpdateApps appRefreshPipeline;
     private TaskSortApps appSortPipeline;
     private final ComponentCallbacks2 iconCacheMemoryCallbacks = new ComponentCallbacks2() {
-        // CORE-002: evict cached icon bitmaps under real memory pressure instead of
-        // relying only on LruCache's own bounded eviction.
+        // CORE-002/PERF-002: evict cached icon bitmaps under real memory pressure instead of
+        // relying only on LruCache's own bounded eviction. Tiered by severity so a mild signal
+        // (e.g. RUNNING_MODERATE) does not force every visible icon to reload like a full
+        // clear would; only genuinely severe or deep-background levels clear everything.
         @Override
         public void onTrimMemory(int level) {
-            if (level >= ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL) {
+            if (level >= ComponentCallbacks2.TRIM_MEMORY_BACKGROUND) {
+                // App is in the background and not just briefly hidden: OS is actively
+                // reclaiming memory across the whole system and this process may be killed.
                 Logger.d("RApplication: BitmapCache cleared, onTrimMemory level=" + level);
                 com.mckimquyen.util.BitmapCache.INSTANCE.clear();
+            } else if (level >= ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL) {
+                // Foreground and critically low (also covers UI_HIDDEN): still potentially
+                // visible, so clearing fully would blank every icon on screen at once.
+                // Trim hard but keep half so most of what's on screen redraws instantly.
+                Logger.d("RApplication: BitmapCache trimmed to 50%, onTrimMemory level=" + level);
+                com.mckimquyen.util.BitmapCache.INSTANCE.trimToFraction(0.5f);
+            } else if (level >= ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW) {
+                Logger.d("RApplication: BitmapCache trimmed to 75%, onTrimMemory level=" + level);
+                com.mckimquyen.util.BitmapCache.INSTANCE.trimToFraction(0.75f);
             }
         }
 
@@ -92,6 +105,10 @@ public class RApplication extends android.app.Application {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        // PERF-002: size the icon cache from the device's real memory class before anything
+        // can populate it (must run before any BitmapCache.get/put - e.g. updateApps() below).
+        com.mckimquyen.util.BitmapCache.INSTANCE.init(this);
 
         // Khởi tạo database Room
         AppDatabase.Companion.init(this);
