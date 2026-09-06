@@ -90,7 +90,7 @@
              ==================================================================== -->
         <activity
             android:name=".ui.SplashAct"
-            android:exported="true"
+            android:exported="false"
             android:noHistory="true"
             android:screenOrientation="portrait">
             <!-- Intent filter đã comment - Splash không phải entry point -->
@@ -154,7 +154,7 @@
         <!-- parentActivityName: Cho phép Up navigation về Settings -->
         <activity
             android:name=".ui.ActAbout"
-            android:exported="true"
+            android:exported="false"
             android:label="@string/activity_title_about"
             android:parentActivityName=".ui.ActSettings"
             android:screenOrientation="portrait"
@@ -166,7 +166,7 @@
         <!-- hardwareAccelerated: Bắt buộc phải bật cho WebView để render tốt -->
         <activity
             android:name=".views.SuperWebViewActivity"
-            android:exported="true"
+            android:exported="false"
             android:hardwareAccelerated="true"
             android:label=""
             android:parentActivityName=".ui.ActSettings"
@@ -178,7 +178,7 @@
              ==================================================================== -->
         <activity
             android:name=".feature.vip.ActVipManagement"
-            android:exported="true"
+            android:exported="false"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
 

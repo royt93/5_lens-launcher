@@ -31,6 +31,7 @@
 - ✅ FEAT-002 Smart organization completed with its CORE-001 and DB-001 foundations.
 - ✅ Device policy from FEAT-001 through CORE-002: qualification and smoke used the designated TECNO KJ7 only; Pixel excluded.
 - ✅ Device policy update (2026-09-06, owner decision): qualification and smoke now use the designated **Samsung S24 Ultra (SM_S928B, serial R5CX613VZBR)** only; no other physical device or emulator. Applies from CORE-002 onward. Prior TECNO KJ7 evidence in `done/` stays valid as historical record.
+- ⚠️ One-off exception (2026-09-06, owner decision): S24 Ultra was not connected during SEC-003; owner explicitly approved TECNO BG6 for that round's build/run/smoke only. The S24-Ultra-only policy is unchanged for all other/future stories.
 
 ## ✅ Implemented
 
@@ -41,6 +42,7 @@
 - DB-001 — Room access is asynchronous and atomic with unique component identity, exported schemas and explicit migrations.
 - FEAT-002 — Local favorites, folders, pinned zones, drag/menu ordering and reinstall recovery completed on TECNO KJ7.
 - CORE-002 — Icon cache identity/invalidation fixed (composite key: component + package version + icon-pack identity), self-audited 9.15/10, S24 Ultra smoke and 172 unit + 5 instrumented tests all pass (2026-09-06).
+- SEC-003 — WebView and exported-component hardening: `SuperWebViewActivity`/`ActAbout`/`ActVipManagement`/`SplashAct` set `exported=false` (no legitimate external callers); exact HTTPS host allowlist (`isAllowedWebViewUrl`) gates both the initial load and in-page navigation, replacing a bypassable substring check; dangerous schemes (`javascript:`, `file:`, `content:`, `data:`, `intent:`) rejected; WebView file/content access and mixed content disabled, Safe Browsing enabled; WebView removed from its parent before `destroy()`. Also fixed an unrelated same-day `app/build.gradle` typo that broke every debug build. 18 unit + 14 instrumented (5 hardening + 4 security-integration + 5 widget) tests pass, plus 3 pre-existing tests confirmed non-regressed (17/17 connected suite); real-device proof that an external `am start` is denied (`START_CLASS_NOT_FOUND`); lint 0 errors. Self-audited **9.65/10** (2026-09-06, TECNO BG6, owner-approved one-off exception to the S24 Ultra policy — see the story file for the full rubric).
 
 ## 🟡 In progress
 
@@ -51,15 +53,14 @@
 
 | Order | Story | Priority | SP |
 |---:|---|:---:|---:|
-| 1 | SEC-003 Harden WebView and exported components | P1 | 5 |
-| 2 | VIP-001 Replace reusable VIP secrets | P1 | 13 → split required, blocked on ADS-001 |
-| 3 | STORE-001 Harden store-assets write/upload APIs | P1 | 8 |
-| 4 | STORE-002 Add revision-safe project persistence | P1 | 5 |
-| 5 | LAUNCH-001 Repair and test static shortcuts | P1 | 2 |
-| 6 | REL-002 Add Play/privacy release gate | P1 | 8 |
-| 7 | TEST-001 Establish trustworthy CI test gates | P1 | 8 |
-| 8 | TEST-002 Build complete test coverage and Tecno smoke matrix | P1 | 8 |
-| 9 | AUDIT-001 Score every change round and gate push | P1 | 3 |
+| 1 | VIP-001 Replace reusable VIP secrets | P1 | 13 → split required, blocked on ADS-001 |
+| 2 | STORE-001 Harden store-assets write/upload APIs | P1 | 8 |
+| 3 | STORE-002 Add revision-safe project persistence | P1 | 5 |
+| 4 | LAUNCH-001 Repair and test static shortcuts | P1 | 2 |
+| 5 | REL-002 Add Play/privacy release gate | P1 | 8 |
+| 6 | TEST-001 Establish trustworthy CI test gates | P1 | 8 |
+| 7 | TEST-002 Build complete test coverage and Tecno smoke matrix | P1 | 8 |
+| 8 | AUDIT-001 Score every change round and gate push | P1 | 3 |
 
 ## ⏸️ Deferred
 
@@ -77,7 +78,7 @@
 ## Recommended delivery waves
 
 1. **Wave 0 — Incident response:** SEC-001, SEC-002, REL-001.
-2. **Wave 1 — Trust and correctness:** ADS-001, SEC-003, VIP-001 split, CORE-001, DB-001, CORE-002.
+2. **Wave 1 — Trust and correctness:** ADS-001, VIP-001 split, CORE-001, DB-001, CORE-002. SEC-003 complete.
 3. **Wave 2 — Release system:** STORE-001/002, LAUNCH-001, REL-002, TEST-001.
 4. **Wave 3 — Quality:** accessibility, performance, lifecycle, preferences, architecture, build reproducibility.
 5. **Wave 4 — Product:** FEAT-002, CORE-001 and DB-001 are complete; select the next idea using measured retention and performance.

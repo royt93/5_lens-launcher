@@ -8,9 +8,11 @@ import android.os.Build
 import android.os.Bundle
 import android.util.TypedValue
 import android.view.View
+import android.view.ViewGroup
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
+import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Button
@@ -22,6 +24,7 @@ import androidx.webkit.WebViewFeature
 import com.google.android.material.progressindicator.LinearProgressIndicator
 import com.mckimquyen.R
 import com.mckimquyen.util.UIUtils
+import com.mckimquyen.util.isAllowedWebViewUrl
 import com.mckimquyen.ui.ActBase
 
 class SuperWebViewActivity : ActBase() {
@@ -53,6 +56,12 @@ class SuperWebViewActivity : ActBase() {
         currentTitle = intent?.getStringExtra(KEY_TITLE) ?: ""
         currentWebsite = intent?.getStringExtra(KEY_URL) ?: ""
 
+        // Reject anything outside the exact HTTPS host allowlist before touching the WebView.
+        if (!isAllowedWebViewUrl(currentWebsite)) {
+            finish()
+            return
+        }
+
         setupViews()
     }
 
@@ -77,7 +86,7 @@ class SuperWebViewActivity : ActBase() {
         webView.webViewClient = MyWebViewClient()
         webView.webChromeClient = MyWebChromeClient()
         with(webView.settings) {
-            // Tell the WebView to enable JavaScript execution
+            // loitp.notion.site is client-rendered; JS is required for the allowlisted domain only.
             javaScriptEnabled = true
             // Enable DOM storage API
             domStorageEnabled = false
@@ -85,6 +94,13 @@ class SuperWebViewActivity : ActBase() {
             setSupportZoom(false)
             // Set text zoom to increase font size
             textZoom = 120
+            // No local file or content:// access is ever needed for remote allowlisted pages.
+            allowFileAccess = false
+            allowContentAccess = false
+            mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
+        }
+        if (WebViewFeature.isFeatureSupported(WebViewFeature.SAFE_BROWSING_ENABLE)) {
+            WebSettingsCompat.setSafeBrowsingEnabled(webView.settings, true)
         }
         // If dark theme is turned on, automatically render all web contents using a dark theme
         if (WebViewFeature.isFeatureSupported(WebViewFeature.ALGORITHMIC_DARKENING)) {
@@ -142,11 +158,19 @@ class SuperWebViewActivity : ActBase() {
         override fun shouldOverrideUrlLoading(
             view: WebView?, request: WebResourceRequest?,
         ): Boolean {
-            if (request?.url.toString().contains(currentWebsite)) {
+            val url = request?.url ?: return true
+            if (isAllowedWebViewUrl(url.toString())) {
+                // Stay in-app for the allowlisted host.
                 return false
             }
-            Intent(Intent.ACTION_VIEW, request?.url).apply {
-                startActivity(this)
+            val scheme = url.scheme?.lowercase()
+            if (scheme != "http" && scheme != "https") {
+                // Reject javascript:, file:, content:, data:, intent: and other dangerous schemes.
+                return true
+            }
+            val viewIntent = Intent(Intent.ACTION_VIEW, url)
+            if (viewIntent.resolveActivity(packageManager) != null) {
+                startActivity(viewIntent)
             }
             return true
         }
@@ -207,10 +231,13 @@ class SuperWebViewActivity : ActBase() {
      * WebView là nguồn memory leak nổi tiếng trên Android nếu không cleanup.
      */
     override fun onDestroy() {
-        webView.stopLoading()
-        webView.clearHistory()
-        webView.loadUrl("about:blank")  // Clear content để giải phóng bộ nhớ renderer
-        webView.destroy()
+        if (::webView.isInitialized) {
+            webView.stopLoading()
+            webView.clearHistory()
+            webView.loadUrl("about:blank")  // Clear content để giải phóng bộ nhớ renderer
+            (webView.parent as? ViewGroup)?.removeView(webView)
+            webView.destroy()
+        }
         super.onDestroy()
     }
 }
