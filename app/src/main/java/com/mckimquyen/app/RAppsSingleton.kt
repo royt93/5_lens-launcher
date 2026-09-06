@@ -123,8 +123,17 @@ class RAppsSingleton private constructor() {
     /** Commits one immutable app/icon generation as a single synchronized operation. */
     fun replaceSnapshot(apps: List<App>, icons: Map<String, Bitmap>) {
         synchronized(this) {
-            icons.forEach { (packageName, icon) ->
-                com.mckimquyen.util.BitmapCache.put(packageName, icon)
+            icons.forEach { (iconCacheKey, icon) ->
+                com.mckimquyen.util.BitmapCache.put(iconCacheKey, icon)
+            }
+            // CORE-002: drop any bitmap left over from a package/icon-pack identity
+            // this generation no longer produces (removed app, upgrade, icon-pack switch).
+            // Guarded on a non-empty apps list: an empty snapshot only ever comes from a
+            // transient/partial PackageManager scan (this launcher is always itself a
+            // launcher target), never a real "every app was uninstalled" state, so it must
+            // not be allowed to wipe every other app's still-valid cached icon.
+            if (apps.isNotEmpty()) {
+                com.mckimquyen.util.BitmapCache.retainKeys(apps.map { it.iconCacheKey }.toSet())
             }
             mApps = ArrayList(apps)
         }
@@ -194,20 +203,20 @@ class RAppsSingleton private constructor() {
 
     /**
      * Lấy icon của app từ cache
-     * @param packageName Package name của app
+     * @param iconCacheKey App.iconCacheKey (CORE-002) — không dùng packageName trần
      * @return Bitmap icon hoặc null nếu không có trong cache
      */
-    fun getAppIcon(packageName: String): Bitmap? {
-        return com.mckimquyen.util.BitmapCache.get(packageName)
+    fun getAppIcon(iconCacheKey: String): Bitmap? {
+        return com.mckimquyen.util.BitmapCache.get(iconCacheKey)
     }
 
     /**
      * Lưu icon của app vào cache
-     * @param packageName Package name của app
+     * @param iconCacheKey App.iconCacheKey (CORE-002) — không dùng packageName trần
      * @param icon Bitmap icon cần cache
      */
-    fun setAppIcon(packageName: String, icon: Bitmap) {
-        com.mckimquyen.util.BitmapCache.put(packageName, icon)
+    fun setAppIcon(iconCacheKey: String, icon: Bitmap) {
+        com.mckimquyen.util.BitmapCache.put(iconCacheKey, icon)
     }
 
     /**

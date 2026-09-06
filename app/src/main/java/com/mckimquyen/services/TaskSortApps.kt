@@ -69,7 +69,7 @@ class TaskSortApps @JvmOverloads constructor(
         val apps = RAppsSingleton.instance.apps ?: arrayListOf()
         UtilAppSorter.sort(apps, UtilSettings(appContext).sortType)
         return apps.map { app ->
-            app.icon?.let { RAppsSingleton.instance.setAppIcon(app.packageName.toString(), it) }
+            app.icon?.let { RAppsSingleton.instance.setAppIcon(app.iconCacheKey, it) }
             app.copy(icon = null)
         }
     }

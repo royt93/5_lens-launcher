@@ -5,8 +5,10 @@ import android.content.ActivityNotFoundException
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.graphics.Rect
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
@@ -58,14 +60,20 @@ object UtilApp {
         // Find selected icon pack
         val iconPacks = UtilIconPackManager().getAvailableIconPacksWithIcons(true, application)
         val selectedIconPack = iconPacks.find { it.mName == iconPackLabelName }
+        // CORE-002: icon-pack identity/version folded into every icon cache key below,
+        // computed once since it is the same for every app in this refresh.
+        val iconPackToken = selectedIconPack?.let { pack ->
+            "${pack.mPackageName}@${versionTokenOf(packageManager, pack.mPackageName)}"
+        } ?: "system"
 
         for ((index, resolveInfo) in availableActivities.withIndex()) {
-            // Extract install date
-            val installDate = try {
-                packageManager.getPackageInfo(resolveInfo.activityInfo.packageName, 0).firstInstallTime
+            // Extract install date and package version/update token
+            val packageInfo = try {
+                packageManager.getPackageInfo(resolveInfo.activityInfo.packageName, 0)
             } catch (_: PackageManager.NameNotFoundException) {
-                0L
+                null
             }
+            val installDate = packageInfo?.firstInstallTime ?: 0L
 
             // Extract app info
             val label = resolveInfo.loadLabel(packageManager)
@@ -79,6 +87,13 @@ object UtilApp {
 
             val identifier = AppPersistent.generateIdentifier(packageName, name)
             val persistent = persistentMap[identifier]
+
+            val iconCacheKey = BitmapCache.buildKey(
+                packageName = packageName,
+                componentName = name,
+                versionToken = packageInfo?.let { versionTokenOf(it) } ?: "0",
+                iconPackToken = iconPackToken
+            )
 
             val isOpened = persistent?.appOpened ?: true
             val isVisible = persistent?.appVisible ?: true
@@ -109,13 +124,34 @@ object UtilApp {
                 orderNumber = persistent?.orderNumber ?: -1,
                 isFavorite = persistent?.isFavorite ?: false,
                 folderName = persistent?.folderName,
-                pinnedZone = com.mckimquyen.model.PinnedZone.fromStored(persistent?.pinnedZone)
+                pinnedZone = com.mckimquyen.model.PinnedZone.fromStored(persistent?.pinnedZone),
+                iconCacheKey = iconCacheKey
             )
             apps.add(app)
         }
 
         UtilAppSorter.sort(apps, sortType)
         return apps
+    }
+
+    /** Package version code plus last-update time, so a reinstall/downgrade with an unchanged
+     *  version code still yields a fresh token. */
+    private fun versionTokenOf(packageInfo: PackageInfo): String {
+        val versionCode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            packageInfo.longVersionCode
+        } else {
+            @Suppress("DEPRECATION")
+            packageInfo.versionCode.toLong()
+        }
+        return "$versionCode:${packageInfo.lastUpdateTime}"
+    }
+
+    private fun versionTokenOf(packageManager: PackageManager, packageName: String): String {
+        return try {
+            versionTokenOf(packageManager.getPackageInfo(packageName, 0))
+        } catch (_: PackageManager.NameNotFoundException) {
+            "unknown"
+        }
     }
 
     /**

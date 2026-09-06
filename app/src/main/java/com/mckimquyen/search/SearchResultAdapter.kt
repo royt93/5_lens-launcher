@@ -47,7 +47,8 @@ class SearchResultAdapter(
             val appLabel = app.label.toString()
             label.text = appLabel
             packageName.text = app.packageName
-            icon.setImageBitmap(RAppsSingleton.instance.getAppIcon(app.packageName.toString()))
+            // CORE-002: keyed by iconCacheKey, not packageName (see BitmapCache.buildKey)
+            icon.setImageBitmap(RAppsSingleton.instance.getAppIcon(app.iconCacheKey))
             itemView.contentDescription = itemView.context.getString(R.string.search_open_app, appLabel)
             itemView.setOnClickListener { onAppClick.onAppClick(app, itemView) }
         }

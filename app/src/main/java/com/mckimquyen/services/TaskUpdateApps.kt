@@ -125,7 +125,7 @@ class TaskUpdateApps @JvmOverloads constructor(
         loadedApps.forEach { app ->
             app.icon?.let { icon ->
                 apps.add(app.copy(icon = null))
-                icons[app.packageName.toString()] = icon
+                icons[app.iconCacheKey] = icon
             }
         }
         return AppRefreshSnapshot(apps.toList(), icons.toMap())

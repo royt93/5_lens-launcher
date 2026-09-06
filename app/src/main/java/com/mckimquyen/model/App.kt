@@ -34,7 +34,14 @@ data class App(
     val orderNumber: Int = -1,
     val isFavorite: Boolean = false,
     val folderName: String? = null,
-    val pinnedZone: PinnedZone = PinnedZone.NONE
+    val pinnedZone: PinnedZone = PinnedZone.NONE,
+    /**
+     * Identity key for this app's entry in [com.mckimquyen.util.BitmapCache].
+     * Encodes component name, package version/update token and icon-pack identity/version
+     * (see [com.mckimquyen.util.BitmapCache.buildKey]) so a stale bitmap can never be
+     * returned for a different component, package version or icon pack.
+     */
+    val iconCacheKey: String = ""
 ) {
     /**
      * Creates a copy of this App with the specified properties changed.

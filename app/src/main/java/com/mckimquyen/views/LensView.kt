@@ -376,7 +376,8 @@ class LensView : View {
             if (index < list.size) {
                 val app = list[index]
                 // Fetch icon from cache on-the-fly (Fix 5.1)
-                val appIcon = com.mckimquyen.app.RAppsSingleton.instance.getAppIcon(app.packageName.toString())
+                // CORE-002: keyed by iconCacheKey, not packageName (see BitmapCache.buildKey)
+                val appIcon = com.mckimquyen.app.RAppsSingleton.instance.getAppIcon(app.iconCacheKey)
                 
                 if (appIcon != null && !appIcon.isRecycled) {
                     val src = Rect(0, 0, appIcon.width, appIcon.height)

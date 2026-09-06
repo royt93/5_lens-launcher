@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | fix |
-| Status | todo |
+| Status | inprogress — external (Ad SDK team) |
 | Priority | P1 |
 | Evidence | confirmed |
 | Epic | Ads and privacy |
@@ -11,6 +11,10 @@
 | Risk | High |
 | Dependencies | None |
 | External prerequisites | AdMob/UMP console, wrapper SDK contract |
+
+## Ownership note (2026-09-06)
+
+Handed to the Ad SDK team for implementation; excluded from this repo's code-loop until they deliver. Remains `inprogress` per the push-gate rule for named external ownership. VIP-001 stays blocked on this until it lands.
 
 ## Context and evidence
 

@@ -29,7 +29,8 @@
 - ✅ Differentiation direction: prioritize **Fisheye Smart** features implemented locally on device.
 - ✅ FEAT-001 search-first app navigation completed, with only its directly required CORE/A11Y integration seams included.
 - ✅ FEAT-002 Smart organization completed with its CORE-001 and DB-001 foundations.
-- ✅ Device policy from FEAT-001 onward: qualification and smoke use the designated TECNO KJ7 only; Pixel is explicitly excluded.
+- ✅ Device policy from FEAT-001 through CORE-002: qualification and smoke used the designated TECNO KJ7 only; Pixel excluded.
+- ✅ Device policy update (2026-09-06, owner decision): qualification and smoke now use the designated **Samsung S24 Ultra (SM_S928B, serial R5CX613VZBR)** only; no other physical device or emulator. Applies from CORE-002 onward. Prior TECNO KJ7 evidence in `done/` stays valid as historical record.
 
 ## ✅ Implemented
 
@@ -39,26 +40,26 @@
 - CORE-001 — Installed-app refresh is application-owned, debounced, cancel-latest and generation guarded.
 - DB-001 — Room access is asynchronous and atomic with unique component identity, exported schemas and explicit migrations.
 - FEAT-002 — Local favorites, folders, pinned zones, drag/menu ordering and reinstall recovery completed on TECNO KJ7.
+- CORE-002 — Icon cache identity/invalidation fixed (composite key: component + package version + icon-pack identity), self-audited 9.15/10, S24 Ultra smoke and 172 unit + 5 instrumented tests all pass (2026-09-06).
 
 ## 🟡 In progress
 
 - SEC-001 — Local signing remediation is complete. Play Console rotation/revocation, CI secret replacement, non-production upload validation and coordinated Git-history cleanup require publisher-owner access.
+- ADS-001 — Consent-driven advertising state machine handed to the Ad SDK team (2026-09-06); excluded from this repo's code-loop until they deliver. VIP-001 stays blocked on this dependency.
 
 ## 📋 Picked
 
 | Order | Story | Priority | SP |
 |---:|---|:---:|---:|
-| 1 | ADS-001 Consent-driven advertising state machine | P1 | 8 |
-| 2 | SEC-003 Harden WebView and exported components | P1 | 5 |
-| 3 | VIP-001 Replace reusable VIP secrets | P1 | 13 → split required |
-| 4 | CORE-002 Correct icon cache identity and invalidation | P1 | 5 |
-| 5 | STORE-001 Harden store-assets write/upload APIs | P1 | 8 |
-| 6 | STORE-002 Add revision-safe project persistence | P1 | 5 |
-| 7 | LAUNCH-001 Repair and test static shortcuts | P1 | 2 |
-| 8 | REL-002 Add Play/privacy release gate | P1 | 8 |
-| 9 | TEST-001 Establish trustworthy CI test gates | P1 | 8 |
-| 10 | TEST-002 Build complete test coverage and Tecno smoke matrix | P1 | 8 |
-| 11 | AUDIT-001 Score every change round and gate push | P1 | 3 |
+| 1 | SEC-003 Harden WebView and exported components | P1 | 5 |
+| 2 | VIP-001 Replace reusable VIP secrets | P1 | 13 → split required, blocked on ADS-001 |
+| 3 | STORE-001 Harden store-assets write/upload APIs | P1 | 8 |
+| 4 | STORE-002 Add revision-safe project persistence | P1 | 5 |
+| 5 | LAUNCH-001 Repair and test static shortcuts | P1 | 2 |
+| 6 | REL-002 Add Play/privacy release gate | P1 | 8 |
+| 7 | TEST-001 Establish trustworthy CI test gates | P1 | 8 |
+| 8 | TEST-002 Build complete test coverage and Tecno smoke matrix | P1 | 8 |
+| 9 | AUDIT-001 Score every change round and gate push | P1 | 3 |
 
 ## ⏸️ Deferred
 

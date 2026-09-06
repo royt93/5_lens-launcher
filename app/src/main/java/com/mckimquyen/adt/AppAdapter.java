@@ -246,8 +246,10 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
             bindOrganizationSummary();
             // BUG-07 fix consequence: App.icon is now null (icon stored in BitmapCache only).
             // Must fetch icon via RAppsSingleton.getAppIcon() instead of mApp.getIcon().
+            // CORE-002: keyed by iconCacheKey (component + version + icon-pack identity),
+            // not packageName, so same-package activities and stale versions never collide.
             android.graphics.Bitmap cachedIcon = com.mckimquyen.app.RAppsSingleton.getInstance()
-                    .getAppIcon(Objects.requireNonNull(mApp.getPackageName()).toString());
+                    .getAppIcon(mApp.getIconCacheKey());
             ivAppIcon.setImageBitmap(cachedIcon);
 
             String pkgName = Objects.requireNonNull(mApp.getPackageName()).toString();

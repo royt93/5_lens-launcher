@@ -108,6 +108,38 @@ object BitmapCache {
     }
 
     /**
+     * Builds a cache key that identifies one renderable icon uniquely.
+     *
+     * CORE-002: the old key was package name only, so two activities in the same
+     * package collided, and an icon-pack switch or package upgrade kept showing the
+     * stale bitmap cached under that package name. Folding component identity, the
+     * package's version/update token, and the active icon pack's identity/version
+     * into the key means a real content change always produces a new key instead of
+     * colliding with — or refusing to replace — an unrelated cached bitmap.
+     */
+    fun buildKey(packageName: String, componentName: String, versionToken: String, iconPackToken: String): String {
+        return "$packageName/$componentName#$versionToken#$iconPackToken"
+    }
+
+    /**
+     * Evicts every cached entry whose key is not in [validKeys].
+     *
+     * Called after each full app-list commit so packages that were removed, updated,
+     * or re-keyed by an icon-pack change stop holding bitmaps no current app can reach.
+     */
+    fun retainKeys(validKeys: Set<String>) {
+        try {
+            val staleKeys = cache.snapshot().keys.filterNot { it in validKeys }
+            staleKeys.forEach { cache.remove(it) }
+            if (staleKeys.isNotEmpty()) {
+                Log.d(TAG, "Evicted ${staleKeys.size} stale icon cache entries")
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error retaining keys", e)
+        }
+    }
+
+    /**
      * Xóa toàn bộ cache và recycle tất cả bitmaps
      * Nên gọi khi cần giải phóng memory (ví dụ: onLowMemory)
      */

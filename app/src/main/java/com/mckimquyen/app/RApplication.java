@@ -1,8 +1,10 @@
 package com.mckimquyen.app;
 
 import android.content.BroadcastReceiver;
+import android.content.ComponentCallbacks2;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Configuration;
 import android.util.Log;
 
 import androidx.lifecycle.ProcessLifecycleOwner;
@@ -64,6 +66,28 @@ public class RApplication extends android.app.Application {
     private BroadcastReceiver packageReceiver;
     private TaskUpdateApps appRefreshPipeline;
     private TaskSortApps appSortPipeline;
+    private final ComponentCallbacks2 iconCacheMemoryCallbacks = new ComponentCallbacks2() {
+        // CORE-002: evict cached icon bitmaps under real memory pressure instead of
+        // relying only on LruCache's own bounded eviction.
+        @Override
+        public void onTrimMemory(int level) {
+            if (level >= ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL) {
+                Logger.d("RApplication: BitmapCache cleared, onTrimMemory level=" + level);
+                com.mckimquyen.util.BitmapCache.INSTANCE.clear();
+            }
+        }
+
+        @Override
+        public void onConfigurationChanged(Configuration newConfig) {
+            // No-op: bitmaps are not locale-dependent, so a config change does not stale them.
+        }
+
+        @Override
+        public void onLowMemory() {
+            Logger.d("RApplication: BitmapCache cleared, onLowMemory");
+            com.mckimquyen.util.BitmapCache.INSTANCE.clear();
+        }
+    };
 
     @Override
     public void onCreate() {
@@ -88,6 +112,9 @@ public class RApplication extends android.app.Application {
         // Fix BUG: Không nhận được PACKAGE_ADDED trên Android 8+
         // Đăng ký dynamic BroadcastReceiver thay vì dùng Manifest
         registerPackageChangeReceiver();
+
+        // CORE-002: evict icon cache under memory pressure (onTrimMemory/onLowMemory)
+        registerComponentCallbacks(iconCacheMemoryCallbacks);
 
         // Load danh sách apps lần đầu tiên
         updateApps();
@@ -278,6 +305,7 @@ public class RApplication extends android.app.Application {
      */
     @Override
     public void onTerminate() {
+        unregisterComponentCallbacks(iconCacheMemoryCallbacks);
         if (appRefreshPipeline != null) {
             appRefreshPipeline.cancel();
         }
