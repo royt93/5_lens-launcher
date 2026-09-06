@@ -41,6 +41,7 @@ import com.mckimquyen.BuildConfig;
 import com.mckimquyen.R;
 import com.mckimquyen.adt.FragmentPagerAdapter;
 import com.mckimquyen.app.RAppsSingleton;
+import com.mckimquyen.enums.BackgroundMode;
 import com.mckimquyen.enums.SortType;
 import com.mckimquyen.itf.AppsInterface;
 import com.mckimquyen.itf.LensInterface;
@@ -542,20 +543,27 @@ public class ActSettings extends ActBase
     public void showIconPackDialog() {
         final ArrayList<UtilIconPackManager.IconPack> lAvailableIconPack = new UtilIconPackManager()
                 .getAvailableIconPacksWithIcons(true, getApplication());
-        final ArrayList<String> lIconPackName = new ArrayList<>();
-        lIconPackName.add(getString(R.string.setting_default_icon_pack));
+        // PREF-001: lIconPackDisplay is translated UI text; lIconPackValue is the stable,
+        // never-displayed domain value actually persisted (index-aligned with lIconPackDisplay),
+        // so switching device/app language can never desync the persisted selection.
+        final ArrayList<String> lIconPackDisplay = new ArrayList<>();
+        final ArrayList<String> lIconPackValue = new ArrayList<>();
+        lIconPackDisplay.add(getString(R.string.setting_default_icon_pack));
+        lIconPackValue.add(UtilSettings.DEFAULT_ICON_PACK_LABEL_NAME);
         for (int i = 0; i < lAvailableIconPack.size(); i++) {
-            if (!lIconPackName.isEmpty() && !lIconPackName.contains(lAvailableIconPack.get(i).mName)) {
-                lIconPackName.add(lAvailableIconPack.get(i).mName);
+            String name = lAvailableIconPack.get(i).mName;
+            if (!lIconPackValue.contains(name)) {
+                lIconPackDisplay.add(name);
+                lIconPackValue.add(name);
             }
         }
         assert utilSettings != null;
-        String selectedPackageName = utilSettings.getString(UtilSettings.KEY_ICON_PACK_LABEL_NAME);
-        int selectedIndex = lIconPackName.indexOf(selectedPackageName);
+        String selectedValue = utilSettings.getString(UtilSettings.KEY_ICON_PACK_LABEL_NAME);
+        int selectedIndex = lIconPackValue.indexOf(selectedValue);
         dlgIconPack = new MaterialDialog.Builder(ActSettings.this).title(R.string.setting_icon_pack)
-                .items(lIconPackName).alwaysCallSingleChoiceCallback()
+                .items(lIconPackDisplay).alwaysCallSingleChoiceCallback()
                 .itemsCallbackSingleChoice(selectedIndex, (dialog, view, which, text) -> {
-                    utilSettings.save(UtilSettings.KEY_ICON_PACK_LABEL_NAME, lIconPackName.get(which));
+                    utilSettings.save(UtilSettings.KEY_ICON_PACK_LABEL_NAME, lIconPackValue.get(which));
                     if (settingsInterface != null) {
                         settingsInterface.onValuesUpdated();
                     }
@@ -613,25 +621,26 @@ public class ActSettings extends ActBase
     }
 
     public void showBackgroundDialog() {
-        String[] arrAvailableBackground = getResources().getStringArray(R.array.backgrounds);
-        final ArrayList<String> backgroundNames = new ArrayList<>();
-        Collections.addAll(backgroundNames, arrAvailableBackground);
+        // PREF-001: items(R.array.backgrounds) is UI-only display text; the persisted domain
+        // value is BackgroundMode, selected by list position (declaration order matches
+        // arrays.xml: WALLPAPER=0, COLOR=1), never by comparing against the displayed text.
+        BackgroundMode[] backgroundModes = BackgroundMode.values();
         assert utilSettings != null;
-        String selectedBackground = utilSettings.getString(UtilSettings.KEY_BACKGROUND);
-        int selectedIndex = backgroundNames.indexOf(selectedBackground);
+        BackgroundMode selectedBackground = utilSettings.getBackgroundMode();
+        int selectedIndex = selectedBackground.ordinal();
         dlgBackground = new MaterialDialog.Builder(ActSettings.this).title(R.string.setting_background)
                 .items(R.array.backgrounds).alwaysCallSingleChoiceCallback()
                 .itemsCallbackSingleChoice(selectedIndex, (dialog, view, which, text) -> {
-                    String selection = backgroundNames.get(which);
-                    if (selection.equals("Wallpaper")) {
-                        utilSettings.save(UtilSettings.KEY_BACKGROUND, selection);
+                    BackgroundMode selection = backgroundModes[which];
+                    if (selection == BackgroundMode.WALLPAPER) {
+                        utilSettings.save(BackgroundMode.WALLPAPER);
                         sendBackgroundChangedBroadcast();
                         if (settingsInterface != null) {
                             settingsInterface.onValuesUpdated();
                         }
                         dismissBackgroundDialog();
                         showWallpaperPicker();
-                    } else if (selection.equals("Color")) {
+                    } else if (selection == BackgroundMode.COLOR) {
                         dismissBackgroundDialog();
                         showBackgroundColorDialog();
                     }
@@ -695,7 +704,7 @@ public class ActSettings extends ActBase
         }
         String hexColor = String.format("#%06X", selectedColor);
         if (dialog.tag().equals(TAG_COLOR_BACKGROUND)) {
-            utilSettings.save(UtilSettings.KEY_BACKGROUND, "Color");
+            utilSettings.save(BackgroundMode.COLOR);
             utilSettings.save(UtilSettings.KEY_BACKGROUND_COLOR, hexColor);
             sendBackgroundChangedBroadcast();
         } else if (dialog.tag().equals(TAG_COLOR_HIGHLIGHT)) {

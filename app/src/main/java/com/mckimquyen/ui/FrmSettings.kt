@@ -13,6 +13,7 @@ import androidx.core.graphics.toColorInt
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import com.mckimquyen.R
+import com.mckimquyen.enums.BackgroundMode
 import com.mckimquyen.ext.searchIconPack
 import com.mckimquyen.itf.SettingsInterface
 import com.mckimquyen.util.UtilLauncher
@@ -136,7 +137,12 @@ class FrmSettings : Fragment(), SettingsInterface {
             val isVip = com.roy.sdkadbmob.AdManager.isVIPMember()
             tvVipStatusSummary?.text = if (isVip) getString(R.string.vip_active) else getString(R.string.vip_free_user)
 
-            tvSelectedIconPack?.text = us.getString(UtilSettings.KEY_ICON_PACK_LABEL_NAME)
+            val storedIconPack = us.getString(UtilSettings.KEY_ICON_PACK_LABEL_NAME)
+            tvSelectedIconPack?.text = if (storedIconPack == UtilSettings.DEFAULT_ICON_PACK_LABEL_NAME) {
+                getString(R.string.setting_default_icon_pack)
+            } else {
+                storedIconPack
+            }
 
             val highlightColorFull = us.getString(UtilSettings.KEY_HIGHLIGHT_COLOR) ?: ""
             val highlightColor = "#${highlightColorFull.substring(3)}"
@@ -148,7 +154,7 @@ class FrmSettings : Fragment(), SettingsInterface {
             tvSelectedNightMode?.text = UtilNightModeUtil.getNightModeDisplayName(us.nightMode)
 
             // Background setup
-            if (us.getString(UtilSettings.KEY_BACKGROUND) == "Color") {
+            if (us.backgroundMode == BackgroundMode.COLOR) {
                 val backgroundColorFull = us.getString(UtilSettings.KEY_BACKGROUND_COLOR) ?: ""
                 val backgroundColor = "#${backgroundColorFull.substring(3)}"
                 tvSelectedBackground?.text = backgroundColor
@@ -160,7 +166,8 @@ class FrmSettings : Fragment(), SettingsInterface {
                 }
                 ivSelectedBackgroundColor?.setImageDrawable(backgroundColorDrawable)
             } else {
-                tvSelectedBackground?.text = us.getString(UtilSettings.KEY_BACKGROUND)
+                tvSelectedBackground?.text = resources.getStringArray(R.array.backgrounds)
+                    .getOrNull(BackgroundMode.WALLPAPER.ordinal)
                 ivSelectedBackgroundColor?.isVisible = false
             }
 
@@ -225,7 +232,7 @@ class FrmSettings : Fragment(), SettingsInterface {
             us.save(UtilSettings.KEY_SHOW_NAME_APP_HOVER, true)
             us.save(UtilSettings.KEY_SHOW_TOUCH_SELECTION, false)
             us.save(UtilSettings.KEY_SHOW_NEW_APP_TAG, true)
-            us.save(UtilSettings.KEY_BACKGROUND, UtilSettings.DEFAULT_BACKGROUND)
+            us.save(UtilSettings.DEFAULT_BACKGROUND_MODE)
             us.save(UtilSettings.KEY_BACKGROUND_COLOR, UtilSettings.DEFAULT_BACKGROUND_COLOR)
             us.save(UtilSettings.KEY_HIGHLIGHT_COLOR, UtilSettings.DEFAULT_HIGHLIGHT_COLOR)
             us.save(UtilSettings.KEY_ICON_PACK_LABEL_NAME, UtilSettings.DEFAULT_ICON_PACK_LABEL_NAME)

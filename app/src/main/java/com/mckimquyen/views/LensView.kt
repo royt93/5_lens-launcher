@@ -18,6 +18,7 @@ import androidx.core.graphics.toColorInt
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.mckimquyen.R
+import com.mckimquyen.enums.BackgroundMode
 import com.mckimquyen.enums.DrawType
 import com.mckimquyen.model.App
 import com.mckimquyen.model.AppPersistent
@@ -157,7 +158,7 @@ class LensView : View {
         super.onDraw(canvas)
         if (mDrawType == DrawType.APPS) {
             mUtilSettings?.let { us ->
-                if (us.getString(UtilSettings.KEY_BACKGROUND) == "Color") {
+                if (us.backgroundMode == BackgroundMode.COLOR) {
                     canvas.drawColor(us.getString(UtilSettings.KEY_BACKGROUND_COLOR)?.toColorInt() ?: 0)
                 }
                 mPaintNewAppTag?.color =

@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatDelegate.NightMode
 import androidx.core.content.edit
 import androidx.preference.PreferenceManager
 import com.mckimquyen.BuildConfig
+import com.mckimquyen.enums.BackgroundMode
 import com.mckimquyen.enums.SortType
 
 /**
@@ -31,8 +32,12 @@ class UtilSettings(context: Context) {
         const val DEFAULT_BACKGROUND = "Wallpaper"
         const val DEFAULT_BACKGROUND_COLOR = "#FFF8BBD0"
         const val DEFAULT_HIGHLIGHT_COLOR = "#FFF50057"
-        const val DEFAULT_ICON_PACK_LABEL_NAME = "Default Icon Pack"
+        // PREF-001: a stable, never-displayed sentinel - not the translated "Default Icon Pack"
+        // label - so switching device/app language can never desync it from what's persisted.
+        const val DEFAULT_ICON_PACK_LABEL_NAME = "__default_icon_pack__"
         const val DEFAULT_SORT_TYPE = 0
+        val DEFAULT_SORT_TYPE_ENUM: SortType = SortType.entries[DEFAULT_SORT_TYPE]
+        val DEFAULT_BACKGROUND_MODE = BackgroundMode.WALLPAPER
         const val DEFAULT_NIGHT_MODE = AppCompatDelegate.MODE_NIGHT_NO
 
         // These values are for the progress bars, their real values = (MAX_VALUE / INTERVAL (eg. 2)) + MIN_VALUE
@@ -66,6 +71,12 @@ class UtilSettings(context: Context) {
         const val KEY_SORT_TYPE = "sort_type"
         const val KEY_NIGHT_MODE = "night_mode"
 
+        // PREF-001: stable, locale/reorder-independent keys. Store the enum's .name, not its
+        // ordinal or a translated display string. Legacy KEY_SORT_TYPE/KEY_BACKGROUND values are
+        // migrated on first read (see sortType/backgroundMode below) and never written again.
+        const val KEY_SORT_TYPE_NAME = "sort_type_name"
+        const val KEY_BACKGROUND_MODE = "background_mode"
+
         const val KEY_READ_POLICY = "KEY_READ_POLICY${BuildConfig.VERSION_CODE}"
     }
 
@@ -90,7 +101,11 @@ class UtilSettings(context: Context) {
     }
 
     fun save(value: SortType) {
-        save(KEY_SORT_TYPE, value.ordinal)
+        save(KEY_SORT_TYPE_NAME, value.name)
+    }
+
+    fun save(value: BackgroundMode) {
+        save(KEY_BACKGROUND_MODE, value.name)
     }
 
     @get:NightMode
@@ -146,8 +161,35 @@ class UtilSettings(context: Context) {
 
     val sortType: SortType
         get() {
-            val ordinal = prefs.getInt(KEY_SORT_TYPE, DEFAULT_SORT_TYPE)
-            return SortType.entries[ordinal]
+            val storedName = prefs.getString(KEY_SORT_TYPE_NAME, null)
+            if (storedName != null) {
+                return runCatching { SortType.valueOf(storedName) }.getOrDefault(DEFAULT_SORT_TYPE_ENUM)
+            }
+            // Legacy migration: old installs stored SortType.ordinal as a raw Int, which breaks
+            // (wrong value, or ArrayIndexOutOfBounds) if the enum is ever reordered/resized.
+            val legacyOrdinal = prefs.getInt(KEY_SORT_TYPE, DEFAULT_SORT_TYPE)
+            val migrated = SortType.entries.getOrNull(legacyOrdinal) ?: DEFAULT_SORT_TYPE_ENUM
+            save(migrated)
+            return migrated
+        }
+
+    val backgroundMode: BackgroundMode
+        get() {
+            val storedName = prefs.getString(KEY_BACKGROUND_MODE, null)
+            if (storedName != null) {
+                return runCatching { BackgroundMode.valueOf(storedName) }.getOrDefault(DEFAULT_BACKGROUND_MODE)
+            }
+            // Legacy migration: old installs stored the dialog's displayed English item text
+            // ("Wallpaper"/"Color") as the domain value itself - fragile the moment that text is
+            // ever localized. Unknown/corrupt legacy values fall back to the default, never crash.
+            val legacy = prefs.getString(KEY_BACKGROUND, null)
+            val migrated = when (legacy) {
+                "Color" -> BackgroundMode.COLOR
+                "Wallpaper" -> BackgroundMode.WALLPAPER
+                else -> DEFAULT_BACKGROUND_MODE
+            }
+            save(migrated)
+            return migrated
         }
 
     private fun getFloatWithValidation(name: String?, defaultValue: Float, minValue: Float, maxValue: Float): Float {

@@ -28,6 +28,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.mckimquyen.BuildConfig;
 import com.mckimquyen.R;
 import com.mckimquyen.app.RAppsSingleton;
+import com.mckimquyen.enums.BackgroundMode;
 import com.mckimquyen.model.App;
 import com.mckimquyen.model.AppPersistent;
 import com.mckimquyen.search.AppSearchEngine;
@@ -61,9 +62,9 @@ public class ActHome extends ActBase {
 
     private void updateColor() {
         var mUtilSettings = new UtilSettings(this);
-        var kBackground = mUtilSettings.getString(UtilSettings.KEY_BACKGROUND);
+        var kBackground = mUtilSettings.getBackgroundMode();
         Log.d("roy93~", "kBackground " + kBackground);
-        if (Objects.equals(kBackground, "Color")) {
+        if (kBackground == BackgroundMode.COLOR) {
             Log.d("roy93~", "setBackgroundColor");
             var kBackgroundColor = mUtilSettings.getString(UtilSettings.KEY_BACKGROUND_COLOR);
             Log.d("roy93~", "kBackgroundColor " + kBackgroundColor);

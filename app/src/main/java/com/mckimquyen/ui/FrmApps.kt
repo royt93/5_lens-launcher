@@ -16,7 +16,6 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import com.mckimquyen.R
 import com.mckimquyen.adt.AppAdapter
 import com.mckimquyen.app.RAppsSingleton.Companion.instance
-import com.mckimquyen.enums.SortType
 import com.mckimquyen.itf.AppsInterface
 import com.mckimquyen.model.App
 import com.mckimquyen.services.BroadcastReceivers.AppsEditedReceiver
@@ -126,8 +125,8 @@ class FrmApps : Fragment(), AppsInterface {
 
     override fun onDefaultsReset() {
         utilSettings?.let { us ->
-            if (us.sortType != SortType.entries[UtilSettings.DEFAULT_SORT_TYPE]) {
-                us.save(UtilSettings.KEY_SORT_TYPE, UtilSettings.DEFAULT_SORT_TYPE)
+            if (us.sortType != UtilSettings.DEFAULT_SORT_TYPE_ENUM) {
+                us.save(UtilSettings.DEFAULT_SORT_TYPE_ENUM)
                 sendEditAppsBroadcast()
             }
         }
