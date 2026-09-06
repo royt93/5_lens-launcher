@@ -4,6 +4,12 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
+
+kapt {
+    arguments {
+        arg("room.schemaLocation", "$projectDir/schemas")
+    }
+}
 // Firebase plugins - bật khi cần sử dụng Firebase
 //apply plugin: 'com.google.gms.google-services'
 //apply plugin: 'com.google.firebase.crashlytics'
@@ -392,9 +398,10 @@ dependencies {
     // DATABASE
     // ========================================================================
     // Room Database
-    implementation 'androidx.room:room-runtime:2.6.1'
-    kapt 'androidx.room:room-compiler:2.6.1'
-    implementation 'androidx.room:room-ktx:2.6.1'
+    implementation 'androidx.room:room-runtime:2.8.4'
+    kapt 'androidx.room:room-compiler:2.8.4'
+    implementation 'androidx.room:room-ktx:2.8.4'
+    testImplementation 'androidx.room:room-testing:2.8.4'
 
     // ========================================================================
     // SECURITY

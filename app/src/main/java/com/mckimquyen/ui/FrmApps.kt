@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.ItemTouchHelper
 import com.mckimquyen.R
 import com.mckimquyen.adt.AppAdapter
 import com.mckimquyen.app.RAppsSingleton.Companion.instance
@@ -57,6 +58,33 @@ class FrmApps : Fragment(), AppsInterface {
         rvApps?.apply {
             layoutManager = GridLayoutManager(requireContext(), resources.getInteger(R.integer.columns_apps))
             itemAnimator = DefaultItemAnimator()
+            ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(
+                ItemTouchHelper.UP or ItemTouchHelper.DOWN or
+                    ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT,
+                0
+            ) {
+                override fun onMove(
+                    recyclerView: RecyclerView,
+                    source: RecyclerView.ViewHolder,
+                    target: RecyclerView.ViewHolder
+                ): Boolean = appAdapter?.moveItem(
+                    source.bindingAdapterPosition,
+                    target.bindingAdapterPosition,
+                    false
+                ) ?: false
+
+                override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) = Unit
+
+                override fun clearView(
+                    recyclerView: RecyclerView,
+                    viewHolder: RecyclerView.ViewHolder
+                ) {
+                    super.clearView(recyclerView, viewHolder)
+                    appAdapter?.persistOrder()
+                }
+
+                override fun isLongPressDragEnabled(): Boolean = true
+            }).attachToRecyclerView(this)
         }
     }
 

@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
-@Database(entities = [AppPersistent::class], version = 8)
+@Database(entities = [AppPersistent::class], version = 10, exportSchema = true)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun appPersistentDao(): AppPersistentDao
 
@@ -24,9 +24,7 @@ abstract class AppDatabase : RoomDatabase() {
                             AppDatabase::class.java,
                             "app_persistent.db"
                         )
-                        .allowMainThreadQueries() // Maintain compatibility for direct calls from Java UI thread
-                        .addMigrations(MIGRATION_7_8)
-                        .fallbackToDestructiveMigrationOnDowngrade()
+                        .addMigrations(MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10)
                         .build()
                     }
                 }
@@ -53,6 +51,38 @@ abstract class AppDatabase : RoomDatabase() {
                 } else if (!columns.contains("PALETTE_COLOR")) {
                     db.execSQL("ALTER TABLE APP_PERSISTENT ADD COLUMN PALETTE_COLOR INTEGER NOT NULL DEFAULT 0")
                 }
+            }
+        }
+
+        private val MIGRATION_8_9 = object : Migration(8, 9) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                // Keep the newest legacy row before enforcing stable component identity.
+                db.execSQL(
+                    """
+                    DELETE FROM APP_PERSISTENT
+                    WHERE ID NOT IN (
+                        SELECT MAX(ID) FROM APP_PERSISTENT GROUP BY IDENTIFIER
+                    )
+                    """.trimIndent()
+                )
+                db.execSQL(
+                    "CREATE UNIQUE INDEX IF NOT EXISTS index_APP_PERSISTENT_IDENTIFIER " +
+                        "ON APP_PERSISTENT (IDENTIFIER)"
+                )
+            }
+        }
+
+        private val MIGRATION_9_10 = object : Migration(9, 10) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "ALTER TABLE APP_PERSISTENT ADD COLUMN IS_FAVORITE " +
+                        "INTEGER NOT NULL DEFAULT 0"
+                )
+                db.execSQL("ALTER TABLE APP_PERSISTENT ADD COLUMN FOLDER_NAME TEXT")
+                db.execSQL(
+                    "ALTER TABLE APP_PERSISTENT ADD COLUMN PINNED_ZONE " +
+                        "TEXT NOT NULL DEFAULT 'NONE'"
+                )
             }
         }
 

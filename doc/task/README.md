@@ -28,6 +28,7 @@
 - ✅ Story structure: one Markdown file per independently deliverable story.
 - ✅ Differentiation direction: prioritize **Fisheye Smart** features implemented locally on device.
 - ✅ FEAT-001 search-first app navigation completed, with only its directly required CORE/A11Y integration seams included.
+- ✅ FEAT-002 Smart organization completed with its CORE-001 and DB-001 foundations.
 - ✅ Device policy from FEAT-001 onward: qualification and smoke use the designated TECNO KJ7 only; Pixel is explicitly excluded.
 
 ## ✅ Implemented
@@ -35,6 +36,9 @@
 - REL-001 — Android lint release blockers cleared; unit, widget/UI, integration and Pixel smoke evidence recorded.
 - SEC-002 — Closed by the owner's decision to exclude `store-assets`; all Wave 0 code changes in that directory were reverted.
 - FEAT-001 — Search-first app navigation; local deterministic ranking, recent history, accessibility, locale/offline behavior and TECNO KJ7 performance smoke completed.
+- CORE-001 — Installed-app refresh is application-owned, debounced, cancel-latest and generation guarded.
+- DB-001 — Room access is asynchronous and atomic with unique component identity, exported schemas and explicit migrations.
+- FEAT-002 — Local favorites, folders, pinned zones, drag/menu ordering and reinstall recovery completed on TECNO KJ7.
 
 ## 🟡 In progress
 
@@ -47,20 +51,18 @@
 | 1 | ADS-001 Consent-driven advertising state machine | P1 | 8 |
 | 2 | SEC-003 Harden WebView and exported components | P1 | 5 |
 | 3 | VIP-001 Replace reusable VIP secrets | P1 | 13 → split required |
-| 4 | CORE-001 Serialize installed-app refresh pipeline | P1 | 8 |
-| 5 | DB-001 Move Room off main thread and make counters atomic | P1 | 8 |
-| 6 | CORE-002 Correct icon cache identity and invalidation | P1 | 5 |
-| 7 | STORE-001 Harden store-assets write/upload APIs | P1 | 8 |
-| 8 | STORE-002 Add revision-safe project persistence | P1 | 5 |
-| 9 | LAUNCH-001 Repair and test static shortcuts | P1 | 2 |
-| 10 | REL-002 Add Play/privacy release gate | P1 | 8 |
-| 11 | TEST-001 Establish trustworthy CI test gates | P1 | 8 |
-| 12 | TEST-002 Build complete test coverage and Tecno smoke matrix | P1 | 8 |
-| 13 | AUDIT-001 Score every change round and gate push | P1 | 3 |
+| 4 | CORE-002 Correct icon cache identity and invalidation | P1 | 5 |
+| 5 | STORE-001 Harden store-assets write/upload APIs | P1 | 8 |
+| 6 | STORE-002 Add revision-safe project persistence | P1 | 5 |
+| 7 | LAUNCH-001 Repair and test static shortcuts | P1 | 2 |
+| 8 | REL-002 Add Play/privacy release gate | P1 | 8 |
+| 9 | TEST-001 Establish trustworthy CI test gates | P1 | 8 |
+| 10 | TEST-002 Build complete test coverage and Tecno smoke matrix | P1 | 8 |
+| 11 | AUDIT-001 Score every change round and gate push | P1 | 3 |
 
 ## ⏸️ Deferred
 
-- P2/P3 engineering improvements remain in `todo`; schedule them after P0/P1 release gates are green.
+- Remaining P2/P3 engineering improvements stay deferred until the next owner selection.
 - Fisheye Smart implementation starts after baseline frame-time and accessibility measurements exist.
 
 ## ❌ Skipped
@@ -69,7 +71,7 @@
 
 ## 💭 Ideas
 
-- Search-first navigation, smart organization, accessible list mode, large-screen support, store asset automation, local insights, privacy-first monetization, and five Fisheye Smart concepts are captured as individual `idea` stories in `todo`.
+- Accessible list mode, large-screen support, store asset automation, local insights, privacy-first monetization, and five Fisheye Smart concepts remain captured as individual `idea` stories in `todo`.
 
 ## Recommended delivery waves
 
@@ -77,7 +79,7 @@
 2. **Wave 1 — Trust and correctness:** ADS-001, SEC-003, VIP-001 split, CORE-001, DB-001, CORE-002.
 3. **Wave 2 — Release system:** STORE-001/002, LAUNCH-001, REL-002, TEST-001.
 4. **Wave 3 — Quality:** accessibility, performance, lifecycle, preferences, architecture, build reproducibility.
-5. **Wave 4 — Product:** validate FISH-001 first, then select follow-up ideas using measured retention and performance.
+5. **Wave 4 — Product:** FEAT-002, CORE-001 and DB-001 are complete; select the next idea using measured retention and performance.
 
 ## Test-layer rule inherited by every story
 

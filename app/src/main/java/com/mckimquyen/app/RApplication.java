@@ -62,6 +62,8 @@ public class RApplication extends android.app.Application {
      * 4. updateApps() - Load danh sách apps lần đầu
      */
     private BroadcastReceiver packageReceiver;
+    private TaskUpdateApps appRefreshPipeline;
+    private TaskSortApps appSortPipeline;
 
     @Override
     public void onCreate() {
@@ -69,6 +71,13 @@ public class RApplication extends android.app.Application {
 
         // Khởi tạo database Room
         AppDatabase.Companion.init(this);
+
+        // One application-owned pipeline serializes startup and package-event refreshes.
+        appRefreshPipeline = new TaskUpdateApps(
+                getPackageManager(),
+                getApplicationContext(),
+                this);
+        appSortPipeline = new TaskSortApps(getApplicationContext(), this);
 
         // Khởi tạo AdMob SDK trên background thread
         setupAdmob();
@@ -231,11 +240,7 @@ public class RApplication extends android.app.Application {
      * - UI update trên main thread
      */
     private void updateApps() {
-        new TaskUpdateApps(
-                getPackageManager(),        // PackageManager để query apps
-                getApplicationContext(),    // Context để load resources
-                this)                       // Application instance
-                .execute();                 // Execute async
+        appRefreshPipeline.execute();
     }
 
     /**
@@ -263,10 +268,7 @@ public class RApplication extends android.app.Application {
      * - Chỉ re-sort data có sẵn trong memory
      */
     private void editApps() {
-        new TaskSortApps(
-                getApplicationContext(),    // Context để load settings
-                this)                       // Application instance
-                .execute();                 // Execute async
+        appSortPipeline.execute();
     }
 
     /**
@@ -276,6 +278,12 @@ public class RApplication extends android.app.Application {
      */
     @Override
     public void onTerminate() {
+        if (appRefreshPipeline != null) {
+            appRefreshPipeline.cancel();
+        }
+        if (appSortPipeline != null) {
+            appSortPipeline.cancel();
+        }
         if (packageReceiver != null) {
             try {
                 unregisterReceiver(packageReceiver);

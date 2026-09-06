@@ -30,7 +30,11 @@ data class App(
     @ColorInt val paletteColor: Int = 0,
     val isOpened: Boolean = true,
     val isVisible: Boolean = true,
-    val openCount: Long = 0L
+    val openCount: Long = 0L,
+    val orderNumber: Int = -1,
+    val isFavorite: Boolean = false,
+    val folderName: String? = null,
+    val pinnedZone: PinnedZone = PinnedZone.NONE
 ) {
     /**
      * Creates a copy of this App with the specified properties changed.
@@ -42,6 +46,11 @@ data class App(
 
     fun copyWithLockAndVisibility(newOpened: Boolean, newVisible: Boolean, newOpenCount: Long): App = 
         copy(isOpened = newOpened, isVisible = newVisible, openCount = newOpenCount)
+
+    fun copyWithOrganization(favorite: Boolean, folder: String?, zone: PinnedZone): App =
+        copy(isFavorite = favorite, folderName = folder, pinnedZone = zone)
+
+    fun copyWithOrder(order: Int): App = copy(orderNumber = order)
 
     /**
      * Checks if the app has a valid package name.

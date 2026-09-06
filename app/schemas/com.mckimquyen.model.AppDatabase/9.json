@@ -1,0 +1,88 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 9,
+    "identityHash": "bbe45b986debea15175fa54ffdf1ff85",
+    "entities": [
+      {
+        "tableName": "APP_PERSISTENT",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ID` INTEGER PRIMARY KEY AUTOINCREMENT, `PACKAGE_NAME` TEXT, `NAME` TEXT, `IDENTIFIER` TEXT NOT NULL, `OPEN_COUNT` INTEGER NOT NULL, `ORDER_NUMBER` INTEGER NOT NULL, `APP_VISIBLE` INTEGER NOT NULL, `APP_OPENED` INTEGER NOT NULL, `PALETTE_COLOR` INTEGER NOT NULL DEFAULT 0)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "ID",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "packageName",
+            "columnName": "PACKAGE_NAME",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "NAME",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "identifier",
+            "columnName": "IDENTIFIER",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "openCount",
+            "columnName": "OPEN_COUNT",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "orderNumber",
+            "columnName": "ORDER_NUMBER",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "appVisible",
+            "columnName": "APP_VISIBLE",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "appOpened",
+            "columnName": "APP_OPENED",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "paletteColor",
+            "columnName": "PALETTE_COLOR",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "ID"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_APP_PERSISTENT_IDENTIFIER",
+            "unique": true,
+            "columnNames": [
+              "IDENTIFIER"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_APP_PERSISTENT_IDENTIFIER` ON `${TABLE_NAME}` (`IDENTIFIER`)"
+          }
+        ]
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'bbe45b986debea15175fa54ffdf1ff85')"
+    ]
+  }
+}

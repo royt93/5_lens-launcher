@@ -32,22 +32,18 @@ import com.mckimquyen.model.App
  *
  * DATA FLOW:
  * 1. TaskUpdateApps query PackageManager → Load apps & icons
- * 2. TaskUpdateApps.onPostExecute() → Save to RAppsSingleton
+ * 2. TaskUpdateApps commits a generation-guarded snapshot to RAppsSingleton
  * 3. Observable.notifyObservers() → Notify Fragments
  * 4. FrmLens/FrmApps → Read from RAppsSingleton → Update UI
  *
  * THREAD SAFETY:
  * - Singleton instance: LazyThreadSafetyMode.SYNCHRONIZED
  *   → Chỉ 1 instance được tạo dù có nhiều threads cùng access
- * - Getters/Setters: Thread-safe vì ArrayList là reference type
- *   → Assignments (=) là atomic operations trong JVM
- * - List modifications: KHÔNG thread-safe, cần synchronize nếu modify từ nhiều threads
+ * - App snapshot reads/writes and targeted mutations are synchronized.
+ * - Callers receive defensive list copies so external mutation cannot corrupt stored state.
  *
  * MEMORY OPTIMIZATION:
- * Fix 2.1 - Không copy ArrayList mỗi lần get():
- *   - OLD: return ArrayList(mApps) → Tốn memory, tốn CPU
- *   - NEW: return mApps ?: ArrayList() → Trả về reference, nhanh hơn
- *   - Trade-off: Caller có thể modify list → Cần careful khi sử dụng
+ * App snapshots are copied at the boundary. Bitmap payloads remain in BitmapCache.
  *
  * Fix 3.4 - Thread-safe singleton:
  *   - OLD: Double-checked locking với synchronized block → Phức tạp, dễ lỗi
@@ -83,7 +79,7 @@ import com.mckimquyen.model.App
  * LIMITATIONS:
  * - Không persist data: Khi app killed, data mất
  * - Không sync across processes: Mỗi process có instance riêng
- * - List modifications không thread-safe: Cần synchronize manually
+ * - Snapshot mutation must go through the synchronized methods below.
  *
  * WHY NOT USE:
  * - ViewModel: Scoped to Activity/Fragment lifecycle, mất khi destroy
@@ -117,13 +113,22 @@ class RAppsSingleton private constructor() {
      * Public property để get/set danh sách apps
      */
     var apps: ArrayList<App>?
-        get() {
-            // Return defensive copy to prevent external modifications
-            return mApps?.let { ArrayList(it) } ?: ArrayList()
-        }
+        @Synchronized get() = mApps?.let(::ArrayList) ?: ArrayList()
         set(apps) {
-            mApps = apps
+            synchronized(this) {
+                mApps = apps?.let(::ArrayList)
+            }
         }
+
+    /** Commits one immutable app/icon generation as a single synchronized operation. */
+    fun replaceSnapshot(apps: List<App>, icons: Map<String, Bitmap>) {
+        synchronized(this) {
+            icons.forEach { (packageName, icon) ->
+                com.mckimquyen.util.BitmapCache.put(packageName, icon)
+            }
+            mApps = ArrayList(apps)
+        }
+    }
 
     /**
      * Cập nhật trạng thái in-memory của app trong singleton để đồng bộ với Database.
@@ -134,7 +139,8 @@ class RAppsSingleton private constructor() {
         name: String,
         isOpened: Boolean? = null,
         isVisible: Boolean? = null,
-        openCount: Long? = null
+        openCount: Long? = null,
+        paletteColor: Int? = null
     ) {
         synchronized(this) {
             val list = mApps ?: return
@@ -145,10 +151,44 @@ class RAppsSingleton private constructor() {
                         newOpened = isOpened ?: app.isOpened,
                         newVisible = isVisible ?: app.isVisible,
                         newOpenCount = openCount ?: app.openCount
-                    )
+                    ).copyWithPaletteColor(paletteColor ?: app.paletteColor)
                     break
                 }
             }
+        }
+    }
+
+    fun findApp(packageName: String, name: String): App? = synchronized(this) {
+        mApps?.firstOrNull {
+            it.packageName.toString() == packageName && it.name.toString() == name
+        }
+    }
+
+    fun updateOrganization(
+        packageName: String,
+        name: String,
+        favorite: Boolean,
+        folder: String?,
+        zone: com.mckimquyen.model.PinnedZone
+    ) {
+        synchronized(this) {
+            val list = mApps ?: return
+            val index = list.indexOfFirst {
+                it.packageName.toString() == packageName && it.name.toString() == name
+            }
+            if (index >= 0) {
+                list[index] = list[index].copyWithOrganization(favorite, folder, zone)
+            }
+        }
+    }
+
+    fun updateAppOrder(packageName: String, name: String, order: Int) {
+        synchronized(this) {
+            val list = mApps ?: return
+            val index = list.indexOfFirst {
+                it.packageName.toString() == packageName && it.name.toString() == name
+            }
+            if (index >= 0) list[index] = list[index].copyWithOrder(order)
         }
     }
 
@@ -175,8 +215,10 @@ class RAppsSingleton private constructor() {
      * Nên gọi khi cần refresh toàn bộ dữ liệu hoặc memory low
      */
     fun clearAllData() {
-        mApps = null
-        com.mckimquyen.util.BitmapCache.clear()
+        synchronized(this) {
+            mApps = null
+            com.mckimquyen.util.BitmapCache.clear()
+        }
     }
 
     // ========================================================================

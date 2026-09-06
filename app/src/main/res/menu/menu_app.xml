@@ -16,4 +16,32 @@
         android:visible="true"
         app:iconTint="@color/colorBlack" />
 
+    <item
+        android:id="@+id/menuItemFavorite"
+        android:title="@string/organization_add_favorite" />
+
+    <item
+        android:id="@+id/menuItemFolder"
+        android:title="@string/organization_set_folder" />
+
+    <item
+        android:id="@+id/menuItemPinStart"
+        android:title="@string/organization_pin_start" />
+
+    <item
+        android:id="@+id/menuItemPinEnd"
+        android:title="@string/organization_pin_end" />
+
+    <item
+        android:id="@+id/menuItemUnpin"
+        android:title="@string/organization_unpin" />
+
+    <item
+        android:id="@+id/menuItemMoveEarlier"
+        android:title="@string/organization_move_earlier" />
+
+    <item
+        android:id="@+id/menuItemMoveLater"
+        android:title="@string/organization_move_later" />
+
 </menu>

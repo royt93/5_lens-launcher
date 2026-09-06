@@ -41,6 +41,15 @@ public class UtilAppSorter {
                 sortByLabelAscending(apps);
                 break;
         }
+        // TimSort is stable: keep the selected base sort inside each user-approved zone.
+        apps.sort(Comparator
+                .comparingInt((App app) -> app.getPinnedZone().getRank())
+                .thenComparing(app -> app.isFavorite() ? 0 : 1)
+                .thenComparingInt(app -> app.getOrderNumber() < 0
+                        ? Integer.MAX_VALUE
+                        : app.getOrderNumber())
+                .thenComparing(app -> app.getFolderName() == null ? "" : app.getFolderName(),
+                        String.CASE_INSENSITIVE_ORDER));
     }
 
     private static void sortByLabelAscending(ArrayList<App> apps) {

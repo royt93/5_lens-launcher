@@ -16,6 +16,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -32,13 +33,17 @@ import com.google.android.material.snackbar.Snackbar;
 import com.mckimquyen.R;
 import com.mckimquyen.ext.Biometric;
 import com.mckimquyen.model.App;
+import com.mckimquyen.model.AppOrganizationRules;
 import com.mckimquyen.model.AppPersistent;
+import com.mckimquyen.model.PinnedZone;
 import com.mckimquyen.services.BroadcastReceivers;
 import com.mckimquyen.ui.ActSettings;
 import com.mckimquyen.util.UtilApp;
 
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Objects;
+import java.util.Collections;
 
 import kotlin.Unit;
 
@@ -104,6 +109,31 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
         notifyDataSetChanged();
     }
 
+    public boolean moveItem(int fromPosition, int toPosition) {
+        return moveItem(fromPosition, toPosition, true);
+    }
+
+    public boolean moveItem(int fromPosition, int toPosition, boolean persist) {
+        if (fromPosition < 0 || toPosition < 0 ||
+                fromPosition >= mApps.size() || toPosition >= mApps.size() ||
+                fromPosition == toPosition) {
+            return false;
+        }
+        Collections.swap(mApps, fromPosition, toPosition);
+        notifyItemMoved(fromPosition, toPosition);
+        if (persist) persistOrder();
+        return true;
+    }
+
+    public void persistOrder() {
+        for (int index = 0; index < mApps.size(); index++) {
+            App app = mApps.get(index).copyWithOrder(index);
+            mApps.set(index, app);
+        }
+        AppPersistent.setAppOrderBatch(mApps);
+        mContext.sendBroadcast(new Intent(mContext, BroadcastReceivers.AppsEditedReceiver.class));
+    }
+
     // ========================================================================
     // RECYCLERVIEW ADAPTER OVERRIDES
     // ========================================================================
@@ -162,6 +192,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
         // ====================================================================
         CardView cvAppContainer;    // Container của item
         TextView tvAppLabel;        // Tên app
+        TextView tvAppOrganization;
         ImageView ivAppIcon;        // Icon app
         ImageView ivAppHide;        // Button ẩn/hiện app
         Button btAppLock;           // Button khóa/mở app (biometric)
@@ -190,6 +221,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
             // Initialize views - findViewById chỉ gọi 1 lần khi tạo ViewHolder
             this.cvAppContainer = itemView.findViewById(R.id.cvAppContainer);
             this.tvAppLabel = itemView.findViewById(R.id.tvAppLabel);
+            this.tvAppOrganization = itemView.findViewById(R.id.tvAppOrganization);
             this.ivAppIcon = itemView.findViewById(R.id.ivAppIcon);
             this.ivAppHide = itemView.findViewById(R.id.ivAppHide);
             this.btAppLock = itemView.findViewById(R.id.btAppLock);
@@ -211,6 +243,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
 
             // Set basic info
             tvAppLabel.setText(mApp.getLabel());
+            bindOrganizationSummary();
             // BUG-07 fix consequence: App.icon is now null (icon stored in BitmapCache only).
             // Must fetch icon via RAppsSingleton.getAppIcon() instead of mApp.getIcon().
             android.graphics.Bitmap cachedIcon = com.mckimquyen.app.RAppsSingleton.getInstance()
@@ -277,6 +310,78 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
                     btAppLock.setVisibility(View.GONE);
                 }
             }
+        }
+
+        private void bindOrganizationSummary() {
+            List<String> labels = new ArrayList<>();
+            if (mApp.isFavorite()) {
+                labels.add(mContext.getString(R.string.organization_favorite_label));
+            }
+            if (mApp.getFolderName() != null && !mApp.getFolderName().isBlank()) {
+                labels.add(mContext.getString(R.string.organization_folder_label, mApp.getFolderName()));
+            }
+            if (mApp.getPinnedZone() == PinnedZone.START) {
+                labels.add(mContext.getString(R.string.organization_pinned_start_label));
+            } else if (mApp.getPinnedZone() == PinnedZone.END) {
+                labels.add(mContext.getString(R.string.organization_pinned_end_label));
+            }
+            tvAppOrganization.setText(android.text.TextUtils.join(" • ", labels));
+            tvAppOrganization.setVisibility(labels.isEmpty() ? View.GONE : View.VISIBLE);
+        }
+
+        private void applyOrganization(boolean favorite, String folder, PinnedZone zone) {
+            String packageName = Objects.requireNonNull(mApp.getPackageName()).toString();
+            String componentName = Objects.requireNonNull(mApp.getName()).toString();
+            String normalizedFolder = AppOrganizationRules.normalizeFolder(folder);
+            AppPersistent.setOrganization(packageName, componentName, favorite, normalizedFolder, zone);
+            mApp = mApp.copyWithOrganization(favorite, normalizedFolder, zone);
+            int position = getBindingAdapterPosition();
+            if (position != RecyclerView.NO_POSITION) {
+                mAdapter.mApps.set(position, mApp);
+                mAdapter.notifyItemChanged(position);
+            }
+            mActivityContext.sendBroadcast(
+                    new Intent(mActivityContext, BroadcastReceivers.AppsEditedReceiver.class));
+            Snackbar.make(cvAppContainer, R.string.organization_saved, Snackbar.LENGTH_SHORT).show();
+        }
+
+        private void showFolderDialog() {
+            EditText input = new EditText(mActivityContext);
+            input.setHint(R.string.organization_folder_hint);
+            input.setSingleLine(true);
+            input.setText(mApp.getFolderName());
+            input.setSelectAllOnFocus(true);
+            new androidx.appcompat.app.AlertDialog.Builder(mActivityContext)
+                    .setTitle(R.string.organization_set_folder)
+                    .setView(input)
+                    .setPositiveButton(android.R.string.ok, (dialog, which) ->
+                            applyOrganization(
+                                    mApp.isFavorite(),
+                                    input.getText().toString(),
+                                    mApp.getPinnedZone()))
+                    .setNeutralButton(R.string.organization_clear_folder, (dialog, which) ->
+                            applyOrganization(mApp.isFavorite(), null, mApp.getPinnedZone()))
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .show();
+        }
+
+        private void showAppMenu(View anchor) {
+            Context wrapper = new ContextThemeWrapper(mActivityContext, R.style.PopupMenuTheme);
+            PopupMenu popupMenu = new PopupMenu(wrapper, anchor, Gravity.END);
+            popupMenu.setOnMenuItemClickListener(AppViewHolder.this);
+            popupMenu.inflate(R.menu.menu_app);
+            popupMenu.getMenu().findItem(R.id.menuItemFavorite).setTitle(
+                    mApp.isFavorite()
+                            ? R.string.organization_remove_favorite
+                            : R.string.organization_add_favorite);
+            popupMenu.getMenu().findItem(R.id.menuItemUnpin).setVisible(
+                    mApp.getPinnedZone() != PinnedZone.NONE);
+            int position = getBindingAdapterPosition();
+            popupMenu.getMenu().findItem(R.id.menuItemMoveEarlier).setEnabled(position > 0);
+            popupMenu.getMenu().findItem(R.id.menuItemMoveLater).setEnabled(
+                    position >= 0 && position < mAdapter.getItemCount() - 1);
+            popupMenu.setForceShowIcon(true);
+            popupMenu.show();
         }
 
         // ====================================================================
@@ -445,6 +550,10 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
                             )
                     )
             );
+            itemView.setOnLongClickListener(view -> {
+                showAppMenu(view);
+                return true;
+            });
 
             // ================================================================
             // CLICK HIDE BUTTON: Toggle visibility
@@ -474,12 +583,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
             // CLICK MENU BUTTON: Show popup menu
             // ================================================================
             ivAppMenu.setOnClickListener(view -> {
-                Context wrapper = new ContextThemeWrapper(mActivityContext, R.style.PopupMenuTheme);
-                PopupMenu popupMenu = new PopupMenu(wrapper, view, Gravity.END);
-                popupMenu.setOnMenuItemClickListener(AppViewHolder.this);
-                popupMenu.inflate(R.menu.menu_app);
-                popupMenu.setForceShowIcon(true); // Force show icons in menu
-                popupMenu.show();
+                showAppMenu(view);
             });
         }
 
@@ -496,6 +600,29 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
         @Override
         public boolean onMenuItemClick(MenuItem item) {
             int id = item.getItemId();
+
+            if (id == R.id.menuItemFavorite) {
+                applyOrganization(!mApp.isFavorite(), mApp.getFolderName(), mApp.getPinnedZone());
+                return true;
+            } else if (id == R.id.menuItemFolder) {
+                showFolderDialog();
+                return true;
+            } else if (id == R.id.menuItemPinStart) {
+                applyOrganization(mApp.isFavorite(), mApp.getFolderName(), PinnedZone.START);
+                return true;
+            } else if (id == R.id.menuItemPinEnd) {
+                applyOrganization(mApp.isFavorite(), mApp.getFolderName(), PinnedZone.END);
+                return true;
+            } else if (id == R.id.menuItemUnpin) {
+                applyOrganization(mApp.isFavorite(), mApp.getFolderName(), PinnedZone.NONE);
+                return true;
+            } else if (id == R.id.menuItemMoveEarlier) {
+                int position = getBindingAdapterPosition();
+                return mAdapter.moveItem(position, position - 1);
+            } else if (id == R.id.menuItemMoveLater) {
+                int position = getBindingAdapterPosition();
+                return mAdapter.moveItem(position, position + 1);
+            }
 
             // ================================================================
             // APP INFO: Mở settings app info

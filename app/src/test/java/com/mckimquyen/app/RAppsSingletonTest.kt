@@ -15,7 +15,7 @@ import org.robolectric.annotation.Config
  *
  * Test các tính năng:
  * - Singleton pattern (thread-safe)
- * - ArrayList optimization (no copy on get)
+ * - Defensive-copy snapshot access
  * - Null safety
  * - Concurrent access
  *
@@ -100,7 +100,7 @@ class RAppsSingletonTest {
     }
 
     @Test
-    fun `test get apps returns same reference (no copy optimization)`() {
+    fun `test get apps returns defensive copies`() {
         // Given
         val testApps = ArrayList<App>().apply {
             add(createTestApp("app1"))
@@ -111,12 +111,11 @@ class RAppsSingletonTest {
         val retrieved1 = RAppsSingleton.instance.apps
         val retrieved2 = RAppsSingleton.instance.apps
 
-        // Then - Fix 2.1: Không còn copy ArrayList mỗi lần get
-        // Lưu ý: Do implementation mới return mApps ?: ArrayList()
-        // Nếu mApps != null, cả 2 lần get đều return cùng reference
+        // Then - each read is isolated from external list mutation.
         assertNotNull(retrieved1)
         assertNotNull(retrieved2)
         assertEquals("Both gets should return same content", retrieved1, retrieved2)
+        assertNotSame("Each get should return a defensive copy", retrieved1, retrieved2)
     }
 
     @Test

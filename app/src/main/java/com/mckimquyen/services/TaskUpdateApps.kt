@@ -11,108 +11,136 @@ import com.mckimquyen.model.App
 import com.mckimquyen.util.Logger
 import com.mckimquyen.util.UtilApp
 import com.mckimquyen.util.UtilSettings
+import java.util.concurrent.atomic.AtomicLong
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.lang.ref.WeakReference
+
+/** Immutable result produced by one PackageManager scan. */
+data class AppRefreshSnapshot(
+    val apps: List<App>,
+    val icons: Map<String, Bitmap> = emptyMap()
+)
+
+/** Application-owned refresh state; Activities can re-observe it after recreation. */
+sealed interface AppRefreshState {
+    data object Idle : AppRefreshState
+    data class Loading(val generation: Long) : AppRefreshState
+    data class Ready(val generation: Long, val apps: List<App>) : AppRefreshState
+    data class Error(val generation: Long, val cause: Throwable) : AppRefreshState
+}
 
 /**
- * Task để cập nhật danh sách ứng dụng.
- * Đã migrate từ AsyncTask sang Coroutines để tránh memory leak và deprecated API.
- * <p>
- * Fix: 1.1 - Migrate AsyncTask sang Coroutines
- * Fix: 4.1 - Sử dụng WeakReference để tránh Context leak
- * Fix: 5.1 - Migrate from GlobalScope to ApplicationScope (lifecycle-aware)
+ * Serializes installed-app refreshes. A new request cancels the previous scan and a
+ * generation guard prevents a stale loader from committing even if cancellation is late.
+ * This object must be created once by [Application], not once per package event.
  */
-class TaskUpdateApps(
+class TaskUpdateApps @JvmOverloads constructor(
     private val packageManager: PackageManager,
     context: Context,
-    application: Application
+    private val application: Application,
+    private val scope: CoroutineScope = ApplicationScope.scope,
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
+    private val mainDispatcher: CoroutineDispatcher = Dispatchers.Main.immediate,
+    private val debounceMillis: Long = PACKAGE_EVENT_DEBOUNCE_MS,
+    private val loader: (suspend () -> AppRefreshSnapshot)? = null
 ) {
-    // Sử dụng WeakReference để tránh memory leak khi giữ reference đến Context/Application
-    private val contextRef = WeakReference(context)
-    private val applicationRef = WeakReference(application)
+    private val appContext = context.applicationContext ?: application.applicationContext ?: context
+    private val requestedGeneration = AtomicLong(0L)
+    private val jobLock = Any()
 
-    // Danh sách apps kết quả
-    private var mApps: ArrayList<App>? = null
+    @Volatile
+    private var refreshJob: Job? = null
 
-    /**
-     * Hàm chính để thực thi task (for Java compatibility).
-     * Non-blocking, returns immediately.
-     * <p>
-     * Uses ApplicationScope instead of GlobalScope for proper lifecycle management.
-     * ApplicationScope is tied to the Application lifecycle and automatically cleaned up
-     * when the process is killed.
-     */
-    fun execute() {
-        ApplicationScope.scope.launch {
-            executeAsync()
+    private val _state = MutableStateFlow<AppRefreshState>(AppRefreshState.Idle)
+    val state: StateFlow<AppRefreshState> = _state.asStateFlow()
+
+    /** Non-blocking Java-compatible entry point. */
+    fun execute(): Job {
+        val generation = requestedGeneration.incrementAndGet()
+        return synchronized(jobLock) {
+            refreshJob?.cancel()
+            scope.launch {
+                _state.value = AppRefreshState.Loading(generation)
+                try {
+                    if (debounceMillis > 0) delay(debounceMillis)
+                    val snapshot = withContext(ioDispatcher) {
+                        loader?.invoke() ?: loadSnapshot()
+                    }
+                    ensureActive()
+                    withContext(mainDispatcher) {
+                        if (requestedGeneration.get() == generation) {
+                            commit(generation, snapshot)
+                        }
+                    }
+                } catch (cancelled: CancellationException) {
+                    throw cancelled
+                } catch (error: Throwable) {
+                    Logger.e("TaskUpdateApps: refresh failed for generation $generation", error)
+                    withContext(mainDispatcher) {
+                        if (requestedGeneration.get() == generation) {
+                            _state.value = AppRefreshState.Error(generation, error)
+                        }
+                    }
+                }
+            }.also { refreshJob = it }
         }
     }
 
-    /**
-     * Suspend version of execute for Kotlin coroutines
-     */
+    /** Awaitable compatibility entry point used by tests and coroutine callers. */
     suspend fun executeAsync() {
-        // Thực hiện công việc nặng trên background thread
-        doInBackground()
+        execute().join()
+    }
 
-        // Cập nhật kết quả trên main thread
-        withContext(Dispatchers.Main) {
-            onPostExecute()
+    fun cancel() {
+        synchronized(jobLock) {
+            requestedGeneration.incrementAndGet()
+            refreshJob?.cancel()
+            refreshJob = null
         }
     }
 
-    /**
-     * Thực hiện load danh sách apps trên background thread
-     * Tương đương với doInBackground() của AsyncTask
-     */
-    private suspend fun doInBackground() = withContext(Dispatchers.IO) {
-        Logger.d("TaskUpdateApps: doInBackground started")
-        val context = contextRef.get() ?: return@withContext
-        val utilSettings = UtilSettings(context)
-
-        // Load danh sách apps từ PackageManager
-        val apps = UtilApp.getApps(
+    private suspend fun loadSnapshot(): AppRefreshSnapshot {
+        Logger.d("TaskUpdateApps: loading installed apps")
+        val utilSettings = UtilSettings(appContext)
+        val loadedApps = UtilApp.getApps(
             packageManager,
-            context,
-            applicationRef.get() ?: return@withContext,
+            appContext,
+            application,
             utilSettings.getString(UtilSettings.KEY_ICON_PACK_LABEL_NAME) ?: "",
             utilSettings.sortType
         )
 
-        Logger.d("TaskUpdateApps: getApps returned ${apps.size} apps")
-
-        // Lọc và lưu apps có icon hợp lệ, cache icon vào BitmapCache
-        mApps = ArrayList()
-
-        for (app in apps) {
-            val appIcon = app.icon
-            if (appIcon != null) {
-                // Fix BUG-07: Lưu App với icon = null để tránh dual-storage (bitmap 2 lần).
-                // Icon đã được cache vào BitmapCache, giữ thêm trong App.icon là dư thừa.
-                mApps?.add(app.copy(icon = null))
-                RAppsSingleton.instance.setAppIcon(app.packageName.toString(), appIcon)
+        val apps = ArrayList<App>(loadedApps.size)
+        val icons = LinkedHashMap<String, Bitmap>(loadedApps.size)
+        loadedApps.forEach { app ->
+            app.icon?.let { icon ->
+                apps.add(app.copy(icon = null))
+                icons[app.packageName.toString()] = icon
             }
         }
+        return AppRefreshSnapshot(apps.toList(), icons.toMap())
     }
 
-    /**
-     * Cập nhật kết quả vào Singleton và gửi broadcast
-     * Tương đương với onPostExecute() của AsyncTask
-     * Chạy trên Main thread
-     */
-    private fun onPostExecute() {
-        Logger.d("TaskUpdateApps: onPostExecute! Total apps updated: ${mApps?.size}")
-        val application = applicationRef.get() ?: return
+    private fun commit(generation: Long, snapshot: AppRefreshSnapshot) {
+        RAppsSingleton.instance.replaceSnapshot(snapshot.apps, snapshot.icons)
+        _state.value = AppRefreshState.Ready(generation, snapshot.apps.toList())
+        Logger.d("TaskUpdateApps: committed generation $generation (${snapshot.apps.size} apps)")
 
-        // Cập nhật Singleton với danh sách apps mới
-        RAppsSingleton.instance.let { singleton ->
-            singleton.apps = mApps
-        }
+        val intent = Intent(application, BroadcastReceivers.AppsLoadedReceiver::class.java)
+        application.sendBroadcast(intent)
+    }
 
-        // Gửi broadcast thông báo apps đã load xong
-        val appsLoadedIntent = Intent(application, BroadcastReceivers.AppsLoadedReceiver::class.java)
-        application.sendBroadcast(appsLoadedIntent)
+    companion object {
+        const val PACKAGE_EVENT_DEBOUNCE_MS = 150L
     }
 }

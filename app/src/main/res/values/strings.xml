@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="activity_title_about">About</string>
     <string name="activity_title_arranger">Order &amp; Visibility</string>
     <string name="activity_title_settings">Settings</string>
@@ -40,6 +40,22 @@
     <string name="menu_title_show_apps">Start (Ads may appear)</string>
     <string name="menu_app_open"><b>Open</b></string>
     <string name="menu_app_info">App Info</string>
+    <!-- FEAT-002 ships in the app's maintained English/Vietnamese locales first. -->
+    <string name="organization_add_favorite" tools:ignore="MissingTranslation">Add to favorites</string>
+    <string name="organization_remove_favorite" tools:ignore="MissingTranslation">Remove from favorites</string>
+    <string name="organization_set_folder" tools:ignore="MissingTranslation">Set folder</string>
+    <string name="organization_folder_hint" tools:ignore="MissingTranslation">Folder name</string>
+    <string name="organization_folder_label" tools:ignore="MissingTranslation">Folder: %1$s</string>
+    <string name="organization_clear_folder" tools:ignore="MissingTranslation">Clear</string>
+    <string name="organization_pin_start" tools:ignore="MissingTranslation">Pin to first zone</string>
+    <string name="organization_pin_end" tools:ignore="MissingTranslation">Pin to last zone</string>
+    <string name="organization_unpin" tools:ignore="MissingTranslation">Remove pin</string>
+    <string name="organization_favorite_label" tools:ignore="MissingTranslation">Favorite</string>
+    <string name="organization_pinned_start_label" tools:ignore="MissingTranslation">Pinned first</string>
+    <string name="organization_pinned_end_label" tools:ignore="MissingTranslation">Pinned last</string>
+    <string name="organization_saved" tools:ignore="MissingTranslation">Organization updated</string>
+    <string name="organization_move_earlier" tools:ignore="MissingTranslation">Move earlier</string>
+    <string name="organization_move_later" tools:ignore="MissingTranslation">Move later</string>
     <string name="menu_app_uninstall">Uninstall</string>
     <string name="error_app_not_found">App Not Found</string>
     <string name="error_too_many_apps">Failed to Load Apps</string>

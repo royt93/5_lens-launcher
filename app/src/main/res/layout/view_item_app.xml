@@ -45,6 +45,21 @@
             android:textStyle="bold"
             tools:text="AppName" />
 
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvAppOrganization"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tvAppLabel"
+            android:layout_marginStart="@dimen/margin_app"
+            android:layout_toStartOf="@id/btAppLock"
+            android:layout_toEndOf="@id/ivAppIcon"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textSize="12sp"
+            android:visibility="gone"
+            tools:text="Favorite • Work • Pinned first"
+            tools:visibility="visible" />
+
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btAppLock"
             android:layout_width="wrap_content"

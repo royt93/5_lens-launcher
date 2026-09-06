@@ -21,6 +21,8 @@ import com.mckimquyen.model.AppPersistent
 import com.mckimquyen.model.AppDatabase
 import com.mckimquyen.services.BroadcastReceivers.AppsEditedReceiver
 import java.util.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 object UtilApp {
 
@@ -28,7 +30,7 @@ object UtilApp {
      * Get all available apps for launcher
      */
     @JvmStatic
-    fun getApps(
+    suspend fun getApps(
         packageManager: PackageManager,
         context: Context?,
         application: Application?,
@@ -43,18 +45,14 @@ object UtilApp {
         val availableActivities = try {
             packageManager.queryIntentActivities(intent, 0)
         } catch (e: RuntimeException) {
-            e.printStackTrace()
-            Toast.makeText(context, R.string.error_too_many_apps, Toast.LENGTH_SHORT).show()
-            return apps
+            withContext(Dispatchers.Main.immediate) {
+                context?.let { Toast.makeText(it, R.string.error_too_many_apps, Toast.LENGTH_SHORT).show() }
+            }
+            throw e
         }
 
         // Query all DB records once to avoid N database queries in loop
-        val allPersistents = try {
-            AppDatabase.getInstance().appPersistentDao().getAll()
-        } catch (e: Exception) {
-            e.printStackTrace()
-            emptyList<AppPersistent>()
-        }
+        val allPersistents = AppDatabase.getInstance().appPersistentDao().getAll()
         val persistentMap = allPersistents.associateBy { it.identifier }
 
         // Find selected icon pack
@@ -91,7 +89,7 @@ object UtilApp {
             if (paletteColor == 0 && icon != null) {
                 paletteColor = UtilColor.getPaletteColorFromBitmap(icon)
                 if (paletteColor != 0) {
-                    AppPersistent.setAppPaletteColor(packageName, name, paletteColor)
+                    AppPersistent.setAppPaletteColorAndAwait(packageName, name, paletteColor)
                 }
             }
 
@@ -107,7 +105,11 @@ object UtilApp {
                 paletteColor = paletteColor,
                 isOpened = isOpened,
                 isVisible = isVisible,
-                openCount = openCount
+                openCount = openCount,
+                orderNumber = persistent?.orderNumber ?: -1,
+                isFavorite = persistent?.isFavorite ?: false,
+                folderName = persistent?.folderName,
+                pinnedZone = com.mckimquyen.model.PinnedZone.fromStored(persistent?.pinnedZone)
             )
             apps.add(app)
         }
