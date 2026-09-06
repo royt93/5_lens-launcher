@@ -98,7 +98,7 @@ android {
     // ========================================================================
     buildTypes {
         release {
-            buildConfigField "Boolean", "IS_ENABLE_ADMOB", "false"
+            buildConfigField "Boolean", "IS_ENABLE_ADMOB", "true"
             // AppLovin SDK Key injected via manifestPlaceholders (không hardcode trong Manifest)
             manifestPlaceholders = [APPLOVIN_SDK_KEY: "e75FnQfS9XTTqM1Kne69U7PW_MBgAnGQTFvtwVVui6kRPKs5L7ws9twr5IQWwVfzPKZ5pF2IfDa7lguMgGlCyt"]
             buildConfigField "String", "PRIVACY_POLICY_URL", "\"https://loitp.notion.site/Term-Privacy-Policy-Disclaimer-319b1cd8783942fa8923d2a3c9bce60f\""
@@ -140,7 +140,7 @@ android {
         }
 
         debug {
-            buildConfigField "Boolean", "IS_ENABLE_ADMOB", "false"
+            buildConfigField "Boolean", "true", ""
             // AppLovin SDK Key injected via manifestPlaceholders (không hardcode trong Manifest)
             manifestPlaceholders = [APPLOVIN_SDK_KEY: "e75FnQfS9XTTqM1Kne69U7PW_MBgAnGQTFvtwVVui6kRPKs5L7ws9twr5IQWwVfzPKZ5pF2IfDa7lguMgGlCyt"]
             buildConfigField "String", "PRIVACY_POLICY_URL", "\"https://loitp.notion.site/Term-Privacy-Policy-Disclaimer-319b1cd8783942fa8923d2a3c9bce60f\""
