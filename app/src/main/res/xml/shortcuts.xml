@@ -10,7 +10,7 @@
         <intent
             android:action="android.intent.action.VIEW"
             android:targetClass="com.mckimquyen.ui.ActSettings"
-            android:targetPackage="com.mckimquyen" />
+            android:targetPackage="com.mckimquyen.lenslauncher" />
     </shortcut>
 
     <shortcut
@@ -22,7 +22,7 @@
         <intent
             android:action="android.intent.action.VIEW"
             android:targetClass="com.mckimquyen.ui.ActHome"
-            android:targetPackage="com.mckimquyen" />
+            android:targetPackage="com.mckimquyen.lenslauncher" />
     </shortcut>
 
 </shortcuts>

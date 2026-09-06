@@ -42,6 +42,7 @@
 - DB-001 — Room access is asynchronous and atomic with unique component identity, exported schemas and explicit migrations.
 - FEAT-002 — Local favorites, folders, pinned zones, drag/menu ordering and reinstall recovery completed on TECNO KJ7.
 - CORE-002 — Icon cache identity/invalidation fixed (composite key: component + package version + icon-pack identity), self-audited 9.15/10, S24 Ultra smoke and 172 unit + 5 instrumented tests all pass (2026-09-06).
+- LAUNCH-001 — Fixed `res/xml/shortcuts.xml`'s `targetPackage` (was `com.mckimquyen`, the code namespace; corrected to `com.mckimquyen.lenslauncher`, the real applicationId). A resource-indirection approach (`@string/...` sourced from Gradle's `applicationId`) was tried and found broken on real hardware — the OS shortcut parser does not resolve `@string` references there — so the fix is a corrected literal plus a regression test. 6 new integration tests (real `ShortcutManager.manifestShortcuts` registry) pass; full connected suite 78/80 (2 pre-existing, unrelated, device-capability failures on the weaker smoke device); 190/190 unit tests unchanged. Self-audited **9.55/10** (2026-09-06, Samsung SM_A115F, owner-approved one-off exception to the S24 Ultra policy).
 - SEC-003 — WebView and exported-component hardening: `SuperWebViewActivity`/`ActAbout`/`ActVipManagement`/`SplashAct` set `exported=false` (no legitimate external callers); exact HTTPS host allowlist (`isAllowedWebViewUrl`) gates both the initial load and in-page navigation, replacing a bypassable substring check; dangerous schemes (`javascript:`, `file:`, `content:`, `data:`, `intent:`) rejected; WebView file/content access and mixed content disabled, Safe Browsing enabled; WebView removed from its parent before `destroy()`. Also fixed an unrelated same-day `app/build.gradle` typo that broke every debug build. 18 unit + 14 instrumented (5 hardening + 4 security-integration + 5 widget) tests pass, plus 3 pre-existing tests confirmed non-regressed (17/17 connected suite); real-device proof that an external `am start` is denied (`START_CLASS_NOT_FOUND`); lint 0 errors. Self-audited **9.65/10** (2026-09-06, TECNO BG6, owner-approved one-off exception to the S24 Ultra policy — see the story file for the full rubric).
 
 ## 🟡 In progress
@@ -56,11 +57,10 @@
 | 1 | VIP-001 Replace reusable VIP secrets | P1 | 13 → split required, blocked on ADS-001 |
 | 2 | STORE-001 Harden store-assets write/upload APIs | P1 | 8 |
 | 3 | STORE-002 Add revision-safe project persistence | P1 | 5 |
-| 4 | LAUNCH-001 Repair and test static shortcuts | P1 | 2 |
-| 5 | REL-002 Add Play/privacy release gate | P1 | 8 |
-| 6 | TEST-001 Establish trustworthy CI test gates | P1 | 8 |
-| 7 | TEST-002 Build complete test coverage and Tecno smoke matrix | P1 | 8 |
-| 8 | AUDIT-001 Score every change round and gate push | P1 | 3 |
+| 4 | REL-002 Add Play/privacy release gate | P1 | 8 |
+| 5 | TEST-001 Establish trustworthy CI test gates | P1 | 8 |
+| 6 | TEST-002 Build complete test coverage and Tecno smoke matrix | P1 | 8 |
+| 7 | AUDIT-001 Score every change round and gate push | P1 | 3 |
 
 ## ⏸️ Deferred
 
