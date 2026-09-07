@@ -30,6 +30,15 @@ import kotlin.math.pow
 import kotlin.math.sqrt
 
 class LensView : View {
+
+    companion object {
+        // PERF-001: documented frame-time budgets used to judge the real-device drag benchmark
+        // (adb shell dumpsys gfxinfo framestats) against 60/90/120 Hz displays.
+        const val FRAME_BUDGET_60HZ_MS = 16.6f
+        const val FRAME_BUDGET_90HZ_MS = 11.1f
+        const val FRAME_BUDGET_120HZ_MS = 8.3f
+        const val LARGE_APP_LIST_BENCHMARK_SIZE = 300
+    }
     private var mPaintIcons: Paint? = null
     private var mPaintCircles: Paint? = null
     private var mPaintTouchSelection: Paint? = null
@@ -54,6 +63,13 @@ class LensView : View {
     // PERF-002: de-dupes concurrent reload requests for the same evicted icon - onDraw runs
     // every frame, so without this the same cache miss would spawn a new coroutine per frame.
     private val mIconReloadsInFlight = java.util.concurrent.ConcurrentHashMap.newKeySet<String>()
+
+    // PERF-001: grid geometry and each cell's base rect are cached in LensGridCache (unit-tested
+    // on its own in LensGridCacheTest) since they don't depend on touch position; mScratchRect is
+    // reused for the per-cell fisheye shift/scale math so that no longer allocates a RectF per
+    // cell per frame either.
+    private val mGridCache = LensGridCache()
+    private val mScratchRect = RectF()
 
     private var mDrawType: DrawType? = null
     fun setDrawType(drawType: DrawType?) {
@@ -260,102 +276,84 @@ class LensView : View {
         val distortionFactor = us.getFloat(UtilSettings.KEY_DISTORTION_FACTOR)
         val scaleFactor = us.getFloat(UtilSettings.KEY_SCALE_FACTOR)
 
-        val grid = UtilCalculator.calculateGrid(
+        val grid = mGridCache.getOrCompute(
             context,
             width - (mInsets.left + mInsets.right),
             height - (mInsets.top + mInsets.bottom),
             itemCount,
-            iconSizeDp
+            iconSizeDp,
+            mInsets
         )
+        val baseRects = mGridCache.baseRects
         mInsideRect = false
         var selectIndex = -1
         mRectToSelect = null
-        var y = 0.0f
-        while (y < grid.itemCountVertical.toFloat()) {
-            var x = 0.0f
-            while (x < grid.itemCountHorizontal.toFloat()) {
-                val currentItem = (y * grid.itemCountHorizontal.toFloat() + (x + 1.0f)).toInt()
-                val currentIndex = currentItem - 1
-                if (currentItem <= grid.itemCount || mDrawType == DrawType.CIRCLES) {
-                    var rect = RectF()
-                    rect.left =
-                        mInsets.left + (x + 1.0f) * grid.spacingHorizontal + x * grid.itemSize
-                    rect.top = mInsets.top + (y + 1.0f) * grid.spacingVertical + y * grid.itemSize
-                    rect.right = rect.left + grid.itemSize
-                    rect.bottom = rect.top + grid.itemSize
-                    val animationMultiplier: Float = if (mDrawType == DrawType.APPS) {
-                        mAnimationMultiplier
-                    } else {
-                        1.0f
-                    }
-                    if (mTouchX >= 0 && mTouchY >= 0) {
-                        val shiftedCenterX = UtilCalculator.shiftPoint(
-                            mTouchX,
-                            rect.centerX(),
-                            width.toFloat(),
-                            animationMultiplier,
-                            distortionFactor
-                        )
-                        val shiftedCenterY = UtilCalculator.shiftPoint(
-                            mTouchY,
-                            rect.centerY(),
-                            height.toFloat(),
-                            animationMultiplier,
-                            distortionFactor
-                        )
-                        val scaledCenterX = UtilCalculator.scalePoint(
-                            mTouchX,
-                            rect.centerX(),
-                            rect.width(),
-                            width.toFloat(),
-                            animationMultiplier,
-                            scaleFactor,
-                            distortionFactor
-                        )
-                        val scaledCenterY = UtilCalculator.scalePoint(
-                            mTouchY,
-                            rect.centerY(),
-                            rect.height(),
-                            height.toFloat(),
-                            animationMultiplier,
-                            scaleFactor,
-                            distortionFactor
-                        )
-                        val newSize = UtilCalculator.calculateSquareScaledSize(
-                            scaledCenterX,
-                            shiftedCenterX,
-                            scaledCenterY,
-                            shiftedCenterY
-                        )
-                        if (distortionFactor > 0.0f && scaleFactor > 0.0f) {
-                            rect = UtilCalculator.calculateRect(
-                                shiftedCenterX,
-                                shiftedCenterY,
-                                newSize
-                            )
-                        } else if (distortionFactor > 0.0f && scaleFactor == 0.0f) {
-                            rect = UtilCalculator.calculateRect(
-                                shiftedCenterX,
-                                shiftedCenterY,
-                                rect.width()
-                            )
-                        }
-
-                        if (UtilCalculator.isInsideRect(mTouchX, mTouchY, rect)) {
-                            mInsideRect = true
-                            selectIndex = currentIndex
-                            mRectToSelect = rect
-                        }
-                    }
-                    if (mDrawType == DrawType.APPS) {
-                        drawAppIcon(canvas, rect, currentIndex)
-                    } else if (mDrawType == DrawType.CIRCLES) {
-                        drawCircle(canvas, rect)
-                    }
+        val animationMultiplier: Float = if (mDrawType == DrawType.APPS) {
+            mAnimationMultiplier
+        } else {
+            1.0f
+        }
+        for (currentIndex in baseRects.indices) {
+            if (currentIndex >= grid.itemCount && mDrawType != DrawType.CIRCLES) continue
+            val baseRect = baseRects[currentIndex]
+            mScratchRect.set(baseRect)
+            val rect = mScratchRect
+            if (mTouchX >= 0 && mTouchY >= 0) {
+                val shiftedCenterX = UtilCalculator.shiftPoint(
+                    mTouchX,
+                    baseRect.centerX(),
+                    width.toFloat(),
+                    animationMultiplier,
+                    distortionFactor
+                )
+                val shiftedCenterY = UtilCalculator.shiftPoint(
+                    mTouchY,
+                    baseRect.centerY(),
+                    height.toFloat(),
+                    animationMultiplier,
+                    distortionFactor
+                )
+                val scaledCenterX = UtilCalculator.scalePoint(
+                    mTouchX,
+                    baseRect.centerX(),
+                    baseRect.width(),
+                    width.toFloat(),
+                    animationMultiplier,
+                    scaleFactor,
+                    distortionFactor
+                )
+                val scaledCenterY = UtilCalculator.scalePoint(
+                    mTouchY,
+                    baseRect.centerY(),
+                    baseRect.height(),
+                    height.toFloat(),
+                    animationMultiplier,
+                    scaleFactor,
+                    distortionFactor
+                )
+                val newSize = UtilCalculator.calculateSquareScaledSize(
+                    scaledCenterX,
+                    shiftedCenterX,
+                    scaledCenterY,
+                    shiftedCenterY
+                )
+                if (distortionFactor > 0.0f && scaleFactor > 0.0f) {
+                    UtilCalculator.calculateRect(mScratchRect, shiftedCenterX, shiftedCenterY, newSize)
+                } else if (distortionFactor > 0.0f && scaleFactor == 0.0f) {
+                    UtilCalculator.calculateRect(mScratchRect, shiftedCenterX, shiftedCenterY, baseRect.width())
                 }
-                x += 1.0f
+
+                if (UtilCalculator.isInsideRect(mTouchX, mTouchY, rect)) {
+                    mInsideRect = true
+                    selectIndex = currentIndex
+                    mRectToSelect = RectF(rect)
+                }
             }
-            y += 1.0f
+            if (mDrawType == DrawType.APPS) {
+                drawAppIcon(canvas, rect, currentIndex)
+            } else if (mDrawType == DrawType.CIRCLES) {
+                drawCircle(canvas, rect)
+            }
         }
         mMustVibrate = if (selectIndex >= 0) {
             selectIndex != mSelectIndex
@@ -592,5 +590,7 @@ class LensView : View {
         mUtilSettings = null
         mPackageManager = null
         mWorkspaceBackgroundDrawable = null
+        // PERF-001: drop the cached grid/base-rects too, they're only valid for this view instance.
+        mGridCache.clear()
     }
 }

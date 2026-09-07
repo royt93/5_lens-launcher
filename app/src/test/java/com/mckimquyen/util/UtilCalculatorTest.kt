@@ -97,6 +97,41 @@ class UtilCalculatorTest {
     }
 
     @Test
+    fun testCalculateRectInPlaceMatchesAllocatingOverload() {
+        // Given
+        val centerX = 320f
+        val centerY = 540f
+        val size = 96f
+
+        // When
+        val allocated = UtilCalculator.calculateRect(centerX, centerY, size)
+        val dest = android.graphics.RectF(1f, 2f, 3f, 4f) // pre-populated with unrelated values
+        UtilCalculator.calculateRect(dest, centerX, centerY, size)
+
+        // Then: PERF-001's in-place overload must produce bit-for-bit identical geometry to the
+        // allocating one it replaces in LensView's hot path, only without the allocation.
+        assertEquals(allocated.left, dest.left, 0.0001f)
+        assertEquals(allocated.top, dest.top, 0.0001f)
+        assertEquals(allocated.right, dest.right, 0.0001f)
+        assertEquals(allocated.bottom, dest.bottom, 0.0001f)
+    }
+
+    @Test
+    fun testCalculateRectInPlaceReusedAcrossCalls() {
+        // Given a single reused RectF instance (as LensView's mScratchRect is)
+        val dest = android.graphics.RectF()
+
+        // When set for one cell then overwritten for another
+        UtilCalculator.calculateRect(dest, 100f, 100f, 50f)
+        val firstLeft = dest.left
+        UtilCalculator.calculateRect(dest, 500f, 500f, 50f)
+
+        // Then the second call's values fully replace the first's, nothing stale remains
+        assertEquals(475f, dest.left, 0.0001f)
+        assertTrue(dest.left != firstLeft)
+    }
+
+    @Test
     fun testShiftPointInvalidLensPosition() {
         // Given
         val lensPosition = -1f

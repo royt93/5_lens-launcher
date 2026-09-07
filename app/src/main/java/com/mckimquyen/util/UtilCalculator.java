@@ -126,6 +126,21 @@ public class UtilCalculator {
     }
 
     /**
+     * PERF-001: same math as {@link #calculateRect(float, float, float)} but writes into an
+     * existing RectF instead of allocating a new one - called once per grid cell per frame while
+     * the lens is being dragged, so avoiding the allocation there matters.
+     */
+    public static void calculateRect(RectF dest, float newCenterX, float newCenterY, float newSize) {
+        float halfSize = newSize / 2.0f;
+        dest.set(
+                newCenterX - halfSize,
+                newCenterY - halfSize,
+                newCenterX + halfSize,
+                newCenterY + halfSize
+        );
+    }
+
+    /**
      * Check if touch point is within rect
      */
     public static boolean isInsideRect(float x, float y, RectF rect) {
