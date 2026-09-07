@@ -34,6 +34,8 @@
 - ⚠️ One-off exception (2026-09-06, owner decision): S24 Ultra was not connected during SEC-003; owner explicitly approved TECNO BG6 for that round's build/run/smoke only. The S24-Ultra-only policy is unchanged for all other/future stories.
 - ⏸️ Deferred (2026-09-06, owner decision): TEST-001 (CI trustworthy gates) and checking whether ADS-001 has unblocked VIP-001/REL-002 are both pushed to next month. TEST-002 and AUDIT-001 stay blocked as a consequence (they depend on TEST-001). The loop moves to unblocked P2 work in the meantime.
 - ⚠️ Device policy update (2026-09-07, owner decision): owner authorized the assistant to self-select the physical smoke-test device each round for the remainder of the code-loop, instead of confirming per story. The S24-Ultra-preferred policy is otherwise unchanged; when S24 Ultra isn't connected, the assistant picks the best available connected device and records model/serial in the story's evidence, same as prior one-off exceptions. UI-001 used TECNO KJ7 under this standing authorization.
+- ❌ TEST-001 (CI trustworthy gates) declined by owner (2026-09-07): owner does not want CI-gate process work in this loop. TEST-002 and AUDIT-001 remain blocked as a consequence (they depend on TEST-001); this is a standing decision, not a scheduling delay.
+- ❌ STORE-001/002 confirmed out of scope (2026-09-07, owner decision): `store-assets` is internal tooling, not the shipped app, and stays excluded per the existing skip decision below — the loop only picks app-facing stories.
 
 ## ✅ Implemented
 
