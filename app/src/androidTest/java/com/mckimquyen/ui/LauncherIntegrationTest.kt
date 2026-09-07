@@ -23,7 +23,9 @@ class LauncherIntegrationTest {
             // Installed apps load asynchronously, so the lens may already be visible here.
             // It must never be removed from layout, and the primary search entry point must exist.
             assertNotEquals(android.view.View.GONE, lensView.visibility)
-            val search = activity.findViewById<android.view.View>(R.id.etAppSearch)
+            // UI-001: primary search entry point is now the always-visible SearchBar pill
+            // (the SearchView results panel itself starts hidden until tapped).
+            val search = activity.findViewById<android.view.View>(R.id.searchBar)
             assertNotNull("App search should be present", search)
             assertEquals(android.view.View.VISIBLE, search.visibility)
         }

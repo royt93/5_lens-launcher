@@ -106,6 +106,10 @@ public class RApplication extends android.app.Application {
     public void onCreate() {
         super.onCreate();
 
+        // Material You: harmonize every Activity's theme with the device's wallpaper-derived
+        // dynamic color on Android 12+. No-op on older versions or if the theme isn't Material3.
+        com.google.android.material.color.DynamicColors.applyToActivitiesIfAvailable(this);
+
         // PERF-002: size the icon cache from the device's real memory class before anything
         // can populate it (must run before any BitmapCache.get/put - e.g. updateApps() below).
         com.mckimquyen.util.BitmapCache.INSTANCE.init(this);

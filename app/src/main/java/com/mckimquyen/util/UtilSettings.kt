@@ -29,6 +29,7 @@ class UtilSettings(context: Context) {
         const val DEFAULT_SHOW_NAME_APP_HOVER = true
         const val DEFAULT_SHOW_TOUCH_SELECTION = false
         const val DEFAULT_SHOW_NEW_APP_TAG = true
+        const val DEFAULT_SHOW_SEARCH_BAR = true
         const val DEFAULT_BACKGROUND = "Wallpaper"
         const val DEFAULT_BACKGROUND_COLOR = "#FFF8BBD0"
         const val DEFAULT_HIGHLIGHT_COLOR = "#FFF50057"
@@ -64,6 +65,7 @@ class UtilSettings(context: Context) {
         const val KEY_SHOW_NAME_APP_HOVER = "show_name_app_hover"
         const val KEY_SHOW_TOUCH_SELECTION = "show_touch_selection"
         const val KEY_SHOW_NEW_APP_TAG = "show_new_tag_app"
+        const val KEY_SHOW_SEARCH_BAR = "show_search_bar"
         const val KEY_BACKGROUND = "background"
         const val KEY_BACKGROUND_COLOR = "background_color"
         const val KEY_HIGHLIGHT_COLOR = "show_touch_selection_color"
@@ -156,6 +158,7 @@ class UtilSettings(context: Context) {
         KEY_SHOW_NAME_APP_HOVER -> prefs.getBoolean(name, DEFAULT_SHOW_NAME_APP_HOVER)
         KEY_SHOW_TOUCH_SELECTION -> prefs.getBoolean(name, DEFAULT_SHOW_TOUCH_SELECTION)
         KEY_SHOW_NEW_APP_TAG -> prefs.getBoolean(name, DEFAULT_SHOW_NEW_APP_TAG)
+        KEY_SHOW_SEARCH_BAR -> prefs.getBoolean(name, DEFAULT_SHOW_SEARCH_BAR)
         else -> prefs.getBoolean(name, DEFAULT_BOOLEAN)
     }
 

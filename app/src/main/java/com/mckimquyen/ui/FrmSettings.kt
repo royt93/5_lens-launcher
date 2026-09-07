@@ -37,6 +37,7 @@ class FrmSettings : Fragment(), SettingsInterface {
     private var swShowNameAppHover: SwitchCompat? = null
     private var swShowNewAppTag: SwitchCompat? = null
     private var swShowTouchSelection: SwitchCompat? = null
+    private var swShowSearchBar: SwitchCompat? = null
     private var utilSettings: UtilSettings? = null
     private var tvVipStatusSummary: TextView? = null
     private var tvSelectedLanguage: TextView? = null
@@ -79,6 +80,7 @@ class FrmSettings : Fragment(), SettingsInterface {
         swShowNameAppHover = view.findViewById(R.id.swShowNameAppHover)
         swShowNewAppTag = view.findViewById(R.id.swShowNewAppTag)
         swShowTouchSelection = view.findViewById(R.id.swShowTouchSelection)
+        swShowSearchBar = view.findViewById(R.id.swShowSearchBar)
         tvVipStatusSummary = view.findViewById(R.id.tvVipStatusSummary)
         tvSelectedLanguage = view.findViewById(R.id.tvSelectedLanguage)
 
@@ -114,6 +116,7 @@ class FrmSettings : Fragment(), SettingsInterface {
         view.findViewById<View>(R.id.rlSwitchShowNameAppHoverParent).setOnClickListener(null)
         view.findViewById<View>(R.id.swShowNewAppTagParent).setOnClickListener(null)
         view.findViewById<View>(R.id.rlSwitchShowTouchSelectionParent).setOnClickListener(null)
+        view.findViewById<View>(R.id.rlSwitchShowSearchBarParent).setOnClickListener(null)
 
         swVibrateAppHover?.setOnCheckedChangeListener { _, isChecked ->
             utilSettings?.save(UtilSettings.KEY_VIBRATE_APP_HOVER, isChecked)
@@ -129,6 +132,9 @@ class FrmSettings : Fragment(), SettingsInterface {
         }
         swShowTouchSelection?.setOnCheckedChangeListener { _, isChecked ->
             utilSettings?.save(UtilSettings.KEY_SHOW_TOUCH_SELECTION, isChecked)
+        }
+        swShowSearchBar?.setOnCheckedChangeListener { _, isChecked ->
+            utilSettings?.save(UtilSettings.KEY_SHOW_SEARCH_BAR, isChecked)
         }
     }
 
@@ -184,6 +190,7 @@ class FrmSettings : Fragment(), SettingsInterface {
             swShowNameAppHover?.isChecked = us.getBoolean(UtilSettings.KEY_SHOW_NAME_APP_HOVER)
             swShowNewAppTag?.isChecked = us.getBoolean(UtilSettings.KEY_SHOW_NEW_APP_TAG)
             swShowTouchSelection?.isChecked = us.getBoolean(UtilSettings.KEY_SHOW_TOUCH_SELECTION)
+            swShowSearchBar?.isChecked = us.getBoolean(UtilSettings.KEY_SHOW_SEARCH_BAR)
 
             // Language
             val currentLang = com.mckimquyen.util.LocaleHelper.getLanguage(requireContext())
@@ -231,6 +238,7 @@ class FrmSettings : Fragment(), SettingsInterface {
             us.save(UtilSettings.KEY_VIBRATE_APP_LAUNCH, true)
             us.save(UtilSettings.KEY_SHOW_NAME_APP_HOVER, true)
             us.save(UtilSettings.KEY_SHOW_TOUCH_SELECTION, false)
+            us.save(UtilSettings.KEY_SHOW_SEARCH_BAR, UtilSettings.DEFAULT_SHOW_SEARCH_BAR)
             us.save(UtilSettings.KEY_SHOW_NEW_APP_TAG, true)
             us.save(UtilSettings.DEFAULT_BACKGROUND_MODE)
             us.save(UtilSettings.KEY_BACKGROUND_COLOR, UtilSettings.DEFAULT_BACKGROUND_COLOR)

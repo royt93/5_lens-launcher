@@ -11,13 +11,11 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -25,6 +23,8 @@ import androidx.activity.OnBackPressedCallback;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.search.SearchBar;
+import com.google.android.material.search.SearchView;
 import com.mckimquyen.BuildConfig;
 import com.mckimquyen.R;
 import com.mckimquyen.app.RAppsSingleton;
@@ -51,9 +51,9 @@ public class ActHome extends ActBase {
     LensView lensViews;
     MaterialProgressBar progressBarHome;
     private ArrayList<App> listApp;
+    private SearchBar searchBar;
+    private SearchView searchView;
     private EditText appSearch;
-    private ImageButton clearAppSearch;
-    private View searchResultsCard;
     private View recentHeader;
     private TextView noSearchResults;
     private RecyclerView searchResults;
@@ -109,17 +109,14 @@ public class ActHome extends ActBase {
 
         AppEventManager.INSTANCE.getNightModeChanged().observe(this, data -> updateNightMode());
 
-        // Disable back button for launcher home screen
+        // Disable back button for launcher home screen. When SearchView is showing, its own
+        // MaterialBackHandler intercepts back first (collapsing the panel via a higher-priority
+        // dynamically-registered callback) - this callback only fires once it's fully hidden,
+        // and its no-op body is what stops the launcher from finishing via back press.
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
-                if (searchResultsCard.getVisibility() == View.VISIBLE) {
-                    if (appSearch.getText().length() > 0) {
-                        appSearch.setText("");
-                    } else {
-                        hideSearch();
-                    }
-                }
+                // Intentionally no-op.
             }
         });
 
@@ -129,9 +126,10 @@ public class ActHome extends ActBase {
     private void setupViews() {
         lensViews = findViewById(R.id.lensViews);
         progressBarHome = findViewById(R.id.progressBarHome);
-        appSearch = findViewById(R.id.etAppSearch);
-        clearAppSearch = findViewById(R.id.btClearAppSearch);
-        searchResultsCard = findViewById(R.id.searchResultsCard);
+        searchBar = findViewById(R.id.searchBar);
+        searchView = findViewById(R.id.searchView);
+        searchView.setupWithSearchBar(searchBar);
+        appSearch = searchView.getEditText();
         recentHeader = findViewById(R.id.recentHeader);
         noSearchResults = findViewById(R.id.tvNoSearchResults);
         searchResults = findViewById(R.id.rvSearchResults);
@@ -156,13 +154,16 @@ public class ActHome extends ActBase {
         appSearch.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
-                clearAppSearch.setVisibility(s.length() == 0 ? View.GONE : View.VISIBLE);
                 updateSearchResults(s);
             }
             @Override public void afterTextChanged(Editable s) {}
         });
-        appSearch.setOnFocusChangeListener((view, hasFocus) -> {
-            if (hasFocus) updateSearchResults(appSearch.getText());
+        // SearchBar->SearchView expand/collapse is a Material3 morph animation, not an instant
+        // focus change; refresh results once the panel is fully SHOWN and ready for input.
+        searchView.addTransitionListener((view, previousState, newState) -> {
+            if (newState == SearchView.TransitionState.SHOWN) {
+                updateSearchResults(appSearch.getText());
+            }
         });
         appSearch.setOnEditorActionListener((view, actionId, event) -> {
             boolean isEnterKey = event != null
@@ -180,7 +181,7 @@ public class ActHome extends ActBase {
             }
             return false;
         });
-        clearAppSearch.setOnClickListener(view -> appSearch.setText(""));
+        // No manual clear-button wiring: SearchView's built-in clear affordance already does this.
         Button clearHistory = findViewById(R.id.btClearSearchHistory);
         clearHistory.setOnClickListener(view -> {
             searchHistoryStore.clear();
@@ -190,8 +191,7 @@ public class ActHome extends ActBase {
     }
 
     private void updateSearchResults(CharSequence query) {
-        if (!appSearch.hasFocus() && query.length() == 0) {
-            searchResultsCard.setVisibility(View.GONE);
+        if (!searchView.isShowing() && query.length() == 0) {
             return;
         }
 
@@ -208,7 +208,6 @@ public class ActHome extends ActBase {
         searchResults.setVisibility(results.isEmpty() ? View.GONE : View.VISIBLE);
         noSearchResults.setText(isEmptyQuery ? R.string.search_empty_state : R.string.no_apps_found);
         noSearchResults.setVisibility(results.isEmpty() ? View.VISIBLE : View.GONE);
-        searchResultsCard.setVisibility(View.VISIBLE);
     }
 
     private void launchSearchResult(App app, View source) {
@@ -225,11 +224,9 @@ public class ActHome extends ActBase {
     }
 
     private void hideSearch() {
-        appSearch.setText("");
-        appSearch.clearFocus();
-        searchResultsCard.setVisibility(View.GONE);
-        InputMethodManager keyboard = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-        keyboard.hideSoftInputFromWindow(appSearch.getWindowToken(), 0);
+        // SearchView.hide() runs the reverse morph animation and handles keyboard/focus itself.
+        searchView.clearText();
+        searchView.hide();
     }
 
     @Override
@@ -237,9 +234,20 @@ public class ActHome extends ActBase {
         super.onResume();
         Log.d("roy93~", "onResume");
         updateColor();
+        updateSearchBarVisibility();
         setupTransparentSystemBarsForLollipop();
         if (RAppsSingleton.getInstance().getApps() != null && !RAppsSingleton.getInstance().getApps().isEmpty()) {
             assignApps(Objects.requireNonNull(RAppsSingleton.getInstance().getApps()));
+        }
+    }
+
+    // UI-001: re-read on every resume (matches updateColor's established pattern) so toggling
+    // the setting in ActSettings takes effect immediately when the user returns Home.
+    private void updateSearchBarVisibility() {
+        boolean showSearchBar = new UtilSettings(this).getBoolean(UtilSettings.KEY_SHOW_SEARCH_BAR);
+        searchBar.setVisibility(showSearchBar ? View.VISIBLE : View.GONE);
+        if (!showSearchBar && searchView.isShowing()) {
+            searchView.hide();
         }
     }
 
@@ -287,7 +295,7 @@ public class ActHome extends ActBase {
             listApp = new ArrayList<>();
             progressBarHome.setVisibility(View.INVISIBLE);
             lensViews.setVisibility(View.INVISIBLE);
-            if (appSearch.hasFocus() || appSearch.getText().length() > 0) {
+            if (searchView.isShowing() || appSearch.getText().length() > 0) {
                 updateSearchResults(appSearch.getText());
             }
             return;
@@ -305,7 +313,7 @@ public class ActHome extends ActBase {
             listApp = visibleApps;
             progressBarHome.setVisibility(View.INVISIBLE);
             lensViews.setVisibility(View.INVISIBLE);
-            if (appSearch.hasFocus() || appSearch.getText().length() > 0) {
+            if (searchView.isShowing() || appSearch.getText().length() > 0) {
                 updateSearchResults(appSearch.getText());
             }
             return;
@@ -322,7 +330,7 @@ public class ActHome extends ActBase {
         listApp = visibleApps;
         Logger.d("ActHome: Setting " + listApp.size() + " apps to lensViews");
         lensViews.setApps(listApp);
-        if (appSearch.hasFocus() || appSearch.getText().length() > 0) {
+        if (searchView.isShowing() || appSearch.getText().length() > 0) {
             updateSearchResults(appSearch.getText());
         }
     }

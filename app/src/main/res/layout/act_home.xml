@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/rootLayout"
     android:layout_width="match_parent"
@@ -19,61 +20,29 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center" />
 
-    <LinearLayout
-        android:id="@+id/searchOverlay"
+    <!-- Material You: real SearchBar->SearchView morph, replaces the old plain pill + CardView.
+         setupWithSearchBar() (ActHome.setupViews) wires the tap-to-expand animation and back-
+         press collapse; CoordinatorLayout is required for app:layout_anchor to work. -->
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/searchCoordinator"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginTop="12dp"
-        android:orientation="vertical">
+        android:layout_height="match_parent">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:background="@drawable/bg_search_bar"
-            android:elevation="8dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingStart="16dp">
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:contentDescription="@null"
-                android:src="@drawable/ic_search_24dp" />
-
-            <androidx.appcompat.widget.AppCompatEditText
-                android:id="@+id/etAppSearch"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_marginStart="8dp"
-                android:layout_weight="1"
-                android:background="@null"
-                android:hint="@string/search_apps_hint"
-                android:imeOptions="actionSearch"
-                android:inputType="textAutoCorrect"
-                android:maxLines="1"
-                android:paddingHorizontal="4dp"
-                android:textDirection="locale" />
-
-            <ImageButton
-                android:id="@+id/btClearAppSearch"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="@string/clear_search"
-                android:src="@drawable/ic_close_24dp"
-                android:visibility="gone" />
-        </LinearLayout>
-
-        <androidx.cardview.widget.CardView
-            android:id="@+id/searchResultsCard"
+        <com.google.android.material.search.SearchBar
+            android:id="@+id/searchBar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:elevation="12dp"
-            android:visibility="gone">
+            android:layout_gravity="top"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="12dp"
+            android:hint="@string/search_apps_hint" />
+
+        <com.google.android.material.search.SearchView
+            android:id="@+id/searchView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:hint="@string/search_apps_hint"
+            app:layout_anchor="@id/searchBar">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -123,6 +92,6 @@
                     android:nestedScrollingEnabled="true"
                     android:overScrollMode="ifContentScrolls" />
             </LinearLayout>
-        </androidx.cardview.widget.CardView>
-    </LinearLayout>
+        </com.google.android.material.search.SearchView>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </FrameLayout>

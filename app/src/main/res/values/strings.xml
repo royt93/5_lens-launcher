@@ -15,6 +15,8 @@
     <string name="setting_vibrate_app_launch">Vibrate on App Launch</string>
     <string name="setting_show_name_app_hover">Show Name on App Hover</string>
     <string name="setting_show_touch_selection">Show Touch Selection</string>
+    <!-- UI-001 ships in the app's maintained English/Vietnamese locales first. -->
+    <string name="setting_show_search_bar" tools:ignore="MissingTranslation">Show Search Bar</string>
     <string name="setting_show_new_app_tag">Show New App Tag</string>
     <string name="setting_background_color">Background Color</string>
     <string name="setting_highlight_color">Highlight Color</string>

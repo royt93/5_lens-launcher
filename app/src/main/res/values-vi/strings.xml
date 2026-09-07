@@ -15,6 +15,7 @@
     <string name="setting_vibrate_app_launch">Rung khi khởi chạy ứng dụng</string>
     <string name="setting_show_name_app_hover">Hiện tên khi di chuột qua ứng dụng</string>
     <string name="setting_show_touch_selection">Hiện lựa chọn chạm</string>
+    <string name="setting_show_search_bar">Hiện thanh tìm kiếm</string>
     <string name="setting_show_new_app_tag">Hiện nhãn ứng dụng mới</string>
     <string name="setting_background_color">Màu nền</string>
     <string name="setting_highlight_color">Màu nổi bật</string>

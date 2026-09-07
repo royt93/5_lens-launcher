@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import com.google.android.material.search.SearchView
 import com.mckimquyen.R
 import com.mckimquyen.app.RAppsSingleton
 import com.mckimquyen.model.App
@@ -18,8 +19,22 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 
+/**
+ * UI-001: updated for the real Material3 SearchBar/SearchView (was a plain EditText that was
+ * always inflated and driven purely by View focus). The panel must be shown() first - its
+ * content, including the EditText, is not reliably focusable/interactable while hidden - and
+ * updateSearchResults() in ActHome now gates on SearchView#isShowing() instead of View#hasFocus().
+ */
 @RunWith(AndroidJUnit4::class)
 class AppSearchIntegrationTest {
+
+    private fun waitUntilShowing(searchView: SearchView, showing: Boolean, timeoutMs: Long = 5_000) {
+        val deadline = System.currentTimeMillis() + timeoutMs
+        while (System.currentTimeMillis() < deadline) {
+            if (searchView.isShowing == showing) return
+            Thread.sleep(50)
+        }
+    }
 
     @Test
     fun packageAndAppStateEventsRefreshAnActiveSearch() {
@@ -30,11 +45,15 @@ class AppSearchIntegrationTest {
 
         try {
             ActivityScenario.launch(ActHome::class.java).use { scenario ->
+                var searchView: SearchView? = null
                 scenario.onActivity { activity ->
-                    activity.findViewById<EditText>(R.id.etAppSearch).apply {
-                        requestFocus()
-                        setText("camera")
-                    }
+                    searchView = activity.findViewById(R.id.searchView)
+                    searchView!!.show()
+                }
+                waitUntilShowing(searchView!!, true)
+
+                scenario.onActivity { activity ->
+                    searchView!!.editText.setText("camera")
                     assertSearch(activity, 1, "Camera")
                 }
 
@@ -79,15 +98,24 @@ class AppSearchIntegrationTest {
 
         try {
             ActivityScenario.launch(ActHome::class.java).use { scenario ->
+                var searchView: SearchView? = null
                 scenario.onActivity { activity ->
-                    activity.findViewById<EditText>(R.id.etAppSearch).requestFocus()
+                    searchView = activity.findViewById(R.id.searchView)
+                    searchView!!.show()
+                }
+                waitUntilShowing(searchView!!, true)
+                scenario.onActivity { activity ->
                     assertSearch(activity, 1, "Recent Camera")
                     assertEquals(View.VISIBLE, activity.findViewById<View>(R.id.recentHeader).visibility)
                 }
 
                 scenario.recreate()
                 scenario.onActivity { activity ->
-                    activity.findViewById<EditText>(R.id.etAppSearch).requestFocus()
+                    searchView = activity.findViewById(R.id.searchView)
+                    searchView!!.show()
+                }
+                waitUntilShowing(searchView!!, true)
+                scenario.onActivity { activity ->
                     assertSearch(activity, 1, "Recent Camera")
                     assertEquals(View.VISIBLE, activity.findViewById<View>(R.id.recentHeader).visibility)
                     activity.findViewById<View>(R.id.btClearSearchHistory).performClick()
@@ -113,8 +141,15 @@ class AppSearchIntegrationTest {
 
         try {
             ActivityScenario.launch(ActHome::class.java).use { scenario ->
+                var searchView: SearchView? = null
                 scenario.onActivity { activity ->
-                    val search = activity.findViewById<EditText>(R.id.etAppSearch)
+                    searchView = activity.findViewById(R.id.searchView)
+                    searchView!!.show()
+                }
+                waitUntilShowing(searchView!!, true)
+
+                scenario.onActivity {
+                    val search: EditText = searchView!!.editText
                     for (action in listOf(
                         EditorInfo.IME_ACTION_SEARCH,
                         EditorInfo.IME_ACTION_GO,

@@ -634,6 +634,47 @@
 
                 </RelativeLayout>
 
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginStart="52dp"
+                    android:background="@color/colorDivider" />
+
+                <!-- UI-001: Show Search Bar on Home -->
+                <RelativeLayout
+                    android:id="@+id/rlSwitchShowSearchBarParent"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingVertical="8dp">
+
+                    <ImageView
+                        android:id="@+id/iconShowSearchBar"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_alignParentStart="true"
+                        android:layout_centerVertical="true"
+                        android:contentDescription="@string/app_name"
+                        android:padding="8dp"
+                        android:src="@drawable/ic_search_24dp" />
+
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/swShowSearchBar"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:layout_toEndOf="@id/iconShowSearchBar"
+                        android:paddingTop="12dp"
+                        android:paddingBottom="12dp"
+                        android:text="@string/setting_show_search_bar"
+                        android:textColor="?android:attr/textColorSecondary"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:thumb="@drawable/sw_thumb_ios"
+                        app:switchPadding="16dp"
+                        app:track="@drawable/sw_track_ios" />
+
+                </RelativeLayout>
+
             </LinearLayout>
 
         </androidx.cardview.widget.CardView>
