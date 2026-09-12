@@ -137,7 +137,11 @@ class FrmApps : Fragment(), AppsInterface {
     }
 
     override fun onDestroyView() {
+        rvApps?.adapter = null
         appAdapter = null
+        rvApps = null
+        progressBarApps = null
+        utilSettings = null
         super.onDestroyView()
     }
 }
