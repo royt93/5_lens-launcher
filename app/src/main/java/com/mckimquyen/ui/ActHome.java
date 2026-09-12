@@ -241,6 +241,14 @@ public class ActHome extends ActBase {
         }
     }
 
+    // DISPLAY-001: this is the live, continuously-dragged fisheye grid — the one screen
+    // where a high refresh rate is actually visible to the user. Settings/list screens keep
+    // BaseActivity's default (let the system choose) instead of forcing it here too.
+    @Override
+    protected boolean wantsHighRefreshRate() {
+        return true;
+    }
+
     // UI-001: re-read on every resume (matches updateColor's established pattern) so toggling
     // the setting in ActSettings takes effect immediately when the user returns Home.
     private void updateSearchBarVisibility() {
