@@ -112,7 +112,7 @@
                                 android:backgroundTint="#15FFFFFF"
                                 android:text="LENS MEMBER"
                                 android:textColor="#FFFFFF"
-                                android:textSize="10sp"
+                                android:textSize="11sp"
                                 android:textStyle="bold"
                                 android:letterSpacing="0.15"
                                 android:paddingStart="12dp"
@@ -398,6 +398,7 @@
                     android:orientation="horizontal"
                     android:background="@drawable/bg_glass_card_pill"
                     android:gravity="center_vertical"
+                    android:paddingStart="6dp"
                     android:paddingEnd="6dp">
 
                     <EditText
@@ -408,6 +409,7 @@
                         android:background="@null"
                         android:hint="@string/vip_redeem_label"
                         android:inputType="textCapCharacters"
+                        android:importantForAutofill="no"
                         android:drawableStart="@drawable/ic_confirmation_number"
                         android:drawablePadding="12dp"
                         android:paddingStart="24dp"

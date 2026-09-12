@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- MergeRootFrame doesn't apply here: this layout is set directly via
+     ActHome.setContentView(R.layout.act_home), not inflated with <include> into a
+     parent, so a <merge> root would crash (there's no parent ViewGroup to merge into). -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/rootLayout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    tools:ignore="MergeRootFrame">
 
     <com.mckimquyen.views.LensView
         android:id="@+id/lensViews"

@@ -56,5 +56,5 @@
     <string name="vip_feature_support_desc">Your questions and bug reports are processed with high priority.</string>
     <string name="vip_badge_premium_member">Premium Member</string>
     <string name="vip_badge_free_member">Free Member</string>
-    <string name="vip_dialog_ok">Ok</string>
+    <string name="vip_dialog_ok">OK</string>
 </resources>

@@ -1,5 +1,6 @@
 package com.mckimquyen.util
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
 import android.content.res.Configuration
@@ -67,6 +68,10 @@ object LocaleHelper {
         preferences.edit().putString(SELECTED_LANGUAGE, language).apply()
     }
 
+    // AppBundleLocaleChanges is a false positive here: app/build.gradle's `bundle.language.enableSplit`
+    // is already `false` (language resources are not split), which is exactly what this check asks for —
+    // lint just can't see across module Gradle config into this file.
+    @SuppressLint("AppBundleLocaleChanges")
     private fun updateResources(context: Context, locale: Locale): Context {
         val configuration = context.resources.configuration
         configuration.setLocale(locale)
