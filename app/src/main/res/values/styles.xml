@@ -4,7 +4,14 @@
     <style name="AppTheme" parent="Theme.Material3.DayNight">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
+        <!-- UI-005 follow-up: colorAccent is intentionally NOT set here. Material3's own base
+             theme already maps colorAccent -> ?attr/colorSecondary; DynamicColors patches the
+             modern colorSecondary role but never re-patches the legacy colorAccent bridge attr
+             directly, so a static override here would permanently shadow the dynamic value
+             (this was a live bug: bg_button_gradient_ripple's colorAccent half stayed the old
+             static red on every device, dynamic color or not). Set colorSecondary instead, as
+             the pre-Android-12 static fallback; colorAccent then just inherits it as normal. -->
+        <item name="colorSecondary">@color/colorAccent</item>
         <!-- Material You: transparent system bars so the dynamic-colored toolbar/content shows
              through instead of the static colorPrimaryDark this theme still declares for
              back-compat (edge-to-edge is already enabled via UIUtils.setupEdgeToEdge1). -->
@@ -26,7 +33,8 @@
         <item name="android:windowNoTitle">true</item>
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
+        <!-- See AppTheme above for why colorAccent is not set directly here. -->
+        <item name="colorSecondary">@color/colorAccent</item>
         <item name="android:navigationBarColor">@android:color/transparent
         </item>
         <item name="android:enforceNavigationBarContrast" tools:targetApi="29">false</item>

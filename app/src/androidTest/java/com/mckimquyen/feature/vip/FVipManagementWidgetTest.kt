@@ -6,6 +6,7 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.runner.lifecycle.ActivityLifecycleMonitorRegistry
 import androidx.test.runner.lifecycle.Stage
+import com.google.android.material.color.MaterialColors
 import com.mckimquyen.R
 import com.mckimquyen.ui.ActSettings
 import com.roy.sdkadbmob.AdManager
@@ -51,6 +52,51 @@ class FVipManagementWidgetTest {
             val btnWatchAdVip = activity.findViewById<View>(R.id.btnWatchAdVip)
             assertNotNull("btnWatchAdVip should be present", btnWatchAdVip)
             assertEquals(View.VISIBLE, btnWatchAdVip.visibility)
+        }
+
+        scenario.close()
+    }
+
+    /** Owner request (2026-09-12): the toolbar should not show a redundant "VIP Premium" title. */
+    @Test
+    fun testToolbarHasNoTitle() {
+        val scenario = ActivityScenario.launch(ActVipManagement::class.java)
+
+        scenario.onActivity { activity ->
+            val toolbar = activity.findViewById<androidx.appcompat.widget.Toolbar>(R.id.toolbar)
+            assertTrue(
+                "toolbar must not display a title",
+                toolbar.title.isNullOrBlank()
+            )
+        }
+
+        scenario.close()
+    }
+
+    /**
+     * Owner-reported bug (2026-09-12): `bg_button_gradient_ripple`'s `?attr/colorAccent` half
+     * stayed the old static brand red on every device, dynamic color or not. Root cause: this
+     * app's own `AppTheme`/`HomeTheme` pinned `colorAccent` to a static resource, shadowing
+     * Material3's own default `colorAccent -> ?attr/colorSecondary` mapping that
+     * `DynamicColors` actually patches. Fixed by setting `colorSecondary` (the static fallback)
+     * instead and letting `colorAccent` inherit it - this proves that link now holds.
+     */
+    @Test
+    fun testColorAccentInheritsColorSecondary() {
+        val scenario = ActivityScenario.launch(ActVipManagement::class.java)
+
+        scenario.onActivity { activity ->
+            val accent = MaterialColors.getColor(activity, androidx.appcompat.R.attr.colorAccent, 0)
+            val secondary = MaterialColors.getColor(
+                activity,
+                com.google.android.material.R.attr.colorSecondary,
+                1
+            )
+            assertEquals(
+                "colorAccent must resolve to the same value as colorSecondary",
+                secondary,
+                accent
+            )
         }
 
         scenario.close()
