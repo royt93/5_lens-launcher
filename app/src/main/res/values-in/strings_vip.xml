@@ -18,7 +18,9 @@
     <string name="vip_revoke_all_confirm_title">Konfirmasi Pencabutan</string>
     <string name="vip_revoke_all_confirm_message">Apakah Anda yakin ingin mencabut VIP dan kembali ke Akun Gratis?</string>
     <string name="vip_entry_first_install">🎁 Hadiah Penginstalan Baru</string>
-    <string name="vip_entry_redeemed">VIP %1$d hari</string>
+    <plurals name="vip_entry_redeemed">
+        <item quantity="other">VIP %1$d hari</item>
+    </plurals>
     <string name="vip_success_title">Sukses</string>
     <string name="vip_failed_title">Gagal</string>
     <string name="vip_premium_title">VIP Premium</string>
@@ -28,7 +30,9 @@
     <string name="vip_active_thank_you">Terima kasih telah mendukung VIP!</string>
     <string name="vip_error_title">Kesalahan</string>
     <string name="vip_lifetime_device">VIP Seumur Hidup (Perangkat)</string>
-    <string name="vip_activation_success_message">Selamat! VIP telah berhasil diaktifkan selama %1$d hari.</string>
+    <plurals name="vip_activation_success_message">
+        <item quantity="other">Selamat! VIP telah berhasil diaktifkan selama %1$d hari.</item>
+    </plurals>
     <string name="vip_activation_failed_message">Gagal mengaktifkan VIP. Silakan periksa koneksi jaringan Anda atau coba lagi.</string>
     <string name="vip_invalid_key_message">Kode VIP yang Anda masukkan tidak valid atau sudah digunakan. Silakan verifikasi dan coba lagi.</string>
     <string name="vip_ad_reward_failed_message">Tidak dapat memuat iklan video. Silakan periksa koneksi Anda atau coba lagi nanti.</string>

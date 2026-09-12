@@ -18,7 +18,9 @@
     <string name="vip_revoke_all_confirm_title">បញ្ជាក់ការដកហូត</string>
     <string name="vip_revoke_all_confirm_message">តើអ្នកប្រាកដជាចង់ដកហូត VIP ហើយត្រឡប់ទៅប្រើគណនីឥតគិតថ្លៃវិញឬទេ?</string>
     <string name="vip_entry_first_install">🎁 កាដូដំឡើងថ្មី</string>
-    <string name="vip_entry_redeemed">VIP %1$d ថ្ងៃ</string>
+    <plurals name="vip_entry_redeemed">
+        <item quantity="other">VIP %1$d ថ្ងៃ</item>
+    </plurals>
     <string name="vip_success_title">ជោគជ័យ</string>
     <string name="vip_failed_title">បរាជ័យ</string>
     <string name="vip_premium_title">VIP កម្រិតខ្ពស់</string>
@@ -28,7 +30,9 @@
     <string name="vip_active_thank_you">សូមអរគុណសម្រាប់ការគាំទ្រ VIP!</string>
     <string name="vip_error_title">កំហុស</string>
     <string name="vip_lifetime_device">VIP មួយជីវិត (ឧបករណ៍)</string>
-    <string name="vip_activation_success_message">សូមអបអរសាទរ! VIP ត្រូវបានបើកដំណើរការដោយជោគជัยសម្រាប់រយៈពេល %1$d ថ្ងៃ។</string>
+    <plurals name="vip_activation_success_message">
+        <item quantity="other">សូមអបអរសាទរ! VIP ត្រូវបានបើកដំណើរការដោយជោគជัយសម្រាប់រយៈពេល %1$d ថ្ងៃ។</item>
+    </plurals>
     <string name="vip_activation_failed_message">មិនអាចបើកដំណើរការ VIP បានទេ។ សូមពិនិត្យមើលការភ្ជាប់បណ្តាញរបស់អ្នក ឬព្យាយាមម្តងទៀត។</string>
     <string name="vip_invalid_key_message">កូដ VIP ដែលអ្នកបានបញ្ចូលមិនត្រឹមត្រូវ ឬត្រូវបានប្រើប្រាស់រួចហើយ។ សូមផ្ទៀងផ្ទាត់ ហើយព្យាយាមម្តងទៀត។</string>
     <string name="vip_ad_reward_failed_message">មិនអាចផ្ទុកការផ្សាយពាណិជ្ជកម្មជាវីដេអូបានទេ។ សូមពិនិត្យមើលការភ្ជាប់របស់អ្នក ឬព្យាយាមម្តងទៀតនៅពេលក្រោយ។</string>

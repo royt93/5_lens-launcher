@@ -18,7 +18,9 @@
     <string name="vip_revoke_all_confirm_title">ยืนยันการเพิกถอน</string>
     <string name="vip_revoke_all_confirm_message">คุณแน่ใจหรือไม่ว่าต้องการเพิกถอนสิทธิ์ VIP และกลับไปใช้บัญชีฟรี?</string>
     <string name="vip_entry_first_install">🎁 ของขวัญต้อนรับการติดตั้งใหม่</string>
-    <string name="vip_entry_redeemed">VIP %1$d วัน</string>
+    <plurals name="vip_entry_redeemed">
+        <item quantity="other">VIP %1$d วัน</item>
+    </plurals>
     <string name="vip_success_title">สำเร็จ</string>
     <string name="vip_failed_title">ล้มเหลว</string>
     <string name="vip_premium_title">VIP พรีเมียม</string>
@@ -28,7 +30,9 @@
     <string name="vip_active_thank_you">ขอบคุณสำหรับการสนับสนุน VIP!</string>
     <string name="vip_error_title">ข้อผิดพลาด</string>
     <string name="vip_lifetime_device">VIP ตลอดชีพ (สำหรับอุปกรณ์นี้)</string>
-    <string name="vip_activation_success_message">ยินดีด้วย! เปิดใช้งาน VIP สำเร็จแล้วเป็นเวลา %1$d วัน</string>
+    <plurals name="vip_activation_success_message">
+        <item quantity="other">ยินดีด้วย! เปิดใช้งาน VIP สำเร็จแล้วเป็นเวลา %1$d วัน</item>
+    </plurals>
     <string name="vip_activation_failed_message">การเปิดใช้งาน VIP ล้มเหลว กรุณาตรวจสอบการเชื่อมต่อเครือข่ายของคุณหรือลองอีกครั้ง</string>
     <string name="vip_invalid_key_message">รหัส VIP ที่คุณป้อนไม่ถูกต้องหรือถูกใช้งานไปแล้ว กรุณาตรวจสอบและลองใหม่อีกครั้ง</string>
     <string name="vip_ad_reward_failed_message">ไม่สามารถโหลดโฆษณาวิดีโอได้ กรุณาตรวจสอบการเชื่อมต่อของคุณหรือลองอีกครั้งภายหลัง</string>

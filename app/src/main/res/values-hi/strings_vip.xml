@@ -18,7 +18,10 @@
     <string name="vip_revoke_all_confirm_title">रद्द करने की पुष्टि करें</string>
     <string name="vip_revoke_all_confirm_message">क्या आप निश्चित रूप से VIP रद्द करना चाहते हैं और निःशुल्क खाते पर वापस जाना चाहते हैं?</string>
     <string name="vip_entry_first_install">🎁 नया इंस्टॉलेशन उपहार</string>
-    <string name="vip_entry_redeemed">VIP %1$d दिन</string>
+    <plurals name="vip_entry_redeemed">
+        <item quantity="one">VIP %1$d दिन</item>
+        <item quantity="other">VIP %1$d दिन</item>
+    </plurals>
     <string name="vip_success_title">सफल</string>
     <string name="vip_failed_title">असफल</string>
     <string name="vip_premium_title">VIP प्रीमियम</string>
@@ -28,7 +31,10 @@
     <string name="vip_active_thank_you">VIP का समर्थन करने के लिए धन्यवाद!</string>
     <string name="vip_error_title">त्रुटि</string>
     <string name="vip_lifetime_device">लाइफटाइम VIP (डिवाइस)</string>
-    <string name="vip_activation_success_message">बधाई हो! VIP सफलतापूर्वक %1$d दिनों के लिए सक्रिय कर दिया गया है।</string>
+    <plurals name="vip_activation_success_message">
+        <item quantity="one">बधाई हो! VIP सफलतापूर्वक %1$d दिन के लिए सक्रिय कर दिया गया है।</item>
+        <item quantity="other">बधाई हो! VIP सफलतापूर्वक %1$d दिनों के लिए सक्रिय कर दिया गया है।</item>
+    </plurals>
     <string name="vip_activation_failed_message">VIP सक्रिय करने में विफल। कृपया अपना नेटवर्क कनेक्शन जांचें या पुनः प्रयास करें।</string>
     <string name="vip_invalid_key_message">आपके द्वारा दर्ज किया गया VIP कोड अमान्य है या पहले ही उपयोग किया जा चुका है। कृपया सत्यापित करें और पुनः प्रयास करें।</string>
     <string name="vip_ad_reward_failed_message">वीडियो विज्ञापन लोड नहीं किया जा सका। कृपया अपना कनेक्शन जांचें या बाद में पुनः प्रयास करें।</string>

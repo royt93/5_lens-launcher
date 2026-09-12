@@ -18,7 +18,11 @@
     <string name="vip_revoke_all_confirm_title">Confirmar revocación</string>
     <string name="vip_revoke_all_confirm_message">¿Está seguro de que desea revocar el VIP y volver a la cuenta gratuita?</string>
     <string name="vip_entry_first_install">🎁 Regalo por nueva instalación</string>
-    <string name="vip_entry_redeemed">VIP %1$d días</string>
+    <plurals name="vip_entry_redeemed">
+        <item quantity="one">VIP %1$d día</item>
+        <item quantity="many">VIP %1$d de días</item>
+        <item quantity="other">VIP %1$d días</item>
+    </plurals>
     <string name="vip_success_title">Éxito</string>
     <string name="vip_failed_title">Error</string>
     <string name="vip_premium_title">VIP Premium</string>
@@ -28,7 +32,11 @@
     <string name="vip_active_thank_you">¡Gracias por apoyar VIP!</string>
     <string name="vip_error_title">Error</string>
     <string name="vip_lifetime_device">VIP de por vida (Dispositivo)</string>
-    <string name="vip_activation_success_message">¡Felicidades! VIP se ha activado correctamente durante %1$d días.</string>
+    <plurals name="vip_activation_success_message">
+        <item quantity="one">¡Felicidades! VIP se ha activado correctamente durante %1$d día.</item>
+        <item quantity="many">¡Felicidades! VIP se ha activado correctamente durante %1$d de días.</item>
+        <item quantity="other">¡Felicidades! VIP se ha activado correctamente durante %1$d días.</item>
+    </plurals>
     <string name="vip_activation_failed_message">Error al activar VIP. Compruebe su conexión de red o inténtelo de nuevo.</string>
     <string name="vip_invalid_key_message">El código VIP ingresado no es válido o ya ha sido utilizado. Verifique e inténtelo de nuevo.</string>
     <string name="vip_ad_reward_failed_message">No se pudo cargar el anuncio de video. Compruebe su conexión o inténtelo de nuevo más tarde.</string>

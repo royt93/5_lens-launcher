@@ -18,7 +18,12 @@
     <string name="vip_revoke_all_confirm_title">Подтверждение отзыва</string>
     <string name="vip_revoke_all_confirm_message">Вы уверены, что хотите отозвать VIP статус и вернуться к бесплатному аккаунту?</string>
     <string name="vip_entry_first_install">🎁 Подарок за первую установку</string>
-    <string name="vip_entry_redeemed">VIP на %1$d дней</string>
+    <plurals name="vip_entry_redeemed">
+        <item quantity="one">VIP на %1$d день</item>
+        <item quantity="few">VIP на %1$d дня</item>
+        <item quantity="many">VIP на %1$d дней</item>
+        <item quantity="other">VIP на %1$d дня</item>
+    </plurals>
     <string name="vip_success_title">Успешно</string>
     <string name="vip_failed_title">Ошибка</string>
     <string name="vip_premium_title">VIP Премиум</string>
@@ -28,7 +33,12 @@
     <string name="vip_active_thank_you">Спасибо за поддержку VIP статуса!</string>
     <string name="vip_error_title">Ошибка</string>
     <string name="vip_lifetime_device">Вечный VIP (на устройство)</string>
-    <string name="vip_activation_success_message">Поздравляем! VIP статус успешно активирован на %1$d дней.</string>
+    <plurals name="vip_activation_success_message">
+        <item quantity="one">Поздравляем! VIP статус успешно активирован на %1$d день.</item>
+        <item quantity="few">Поздравляем! VIP статус успешно активирован на %1$d дня.</item>
+        <item quantity="many">Поздравляем! VIP статус успешно активирован на %1$d дней.</item>
+        <item quantity="other">Поздравляем! VIP статус успешно активирован на %1$d дня.</item>
+    </plurals>
     <string name="vip_activation_failed_message">Не удалось активировать VIP статус. Проверьте сетевое подключение или повторите попытку.</string>
     <string name="vip_invalid_key_message">Введенный VIP код недействителен или уже использован. Проверьте его и повторите попытку.</string>
     <string name="vip_ad_reward_failed_message">Не удалось загрузить видеорекламу. Проверьте подключение или повторите попытку позже.</string>

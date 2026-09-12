@@ -18,7 +18,11 @@
     <string name="vip_revoke_all_confirm_title">Confirmer la révocation</string>
     <string name="vip_revoke_all_confirm_message">Êtes-vous sûr de vouloir révoquer le VIP et de retourner au compte gratuit ?</string>
     <string name="vip_entry_first_install">🎁 Cadeau de nouvelle installation</string>
-    <string name="vip_entry_redeemed">VIP %1$d jours</string>
+    <plurals name="vip_entry_redeemed">
+        <item quantity="one">VIP %1$d jour</item>
+        <item quantity="many">VIP %1$d de jours</item>
+        <item quantity="other">VIP %1$d jours</item>
+    </plurals>
     <string name="vip_success_title">Succès</string>
     <string name="vip_failed_title">Échec</string>
     <string name="vip_premium_title">VIP Premium</string>
@@ -28,7 +32,11 @@
     <string name="vip_active_thank_you">Merci de soutenir le VIP !</string>
     <string name="vip_error_title">Erreur</string>
     <string name="vip_lifetime_device">VIP à vie (Appareil)</string>
-    <string name="vip_activation_success_message">Félicitations ! Le VIP a été activé avec succès pour %1$d jours.</string>
+    <plurals name="vip_activation_success_message">
+        <item quantity="one">Félicitations ! Le VIP a été activé avec succès pour %1$d jour.</item>
+        <item quantity="many">Félicitations ! Le VIP a été activé avec succès pour %1$d de jours.</item>
+        <item quantity="other">Félicitations ! Le VIP a été activé avec succès pour %1$d jours.</item>
+    </plurals>
     <string name="vip_activation_failed_message">Échec de l\'activation du VIP. Veuillez vérifier votre connexion réseau ou réessayer.</string>
     <string name="vip_invalid_key_message">Le code VIP saisi est invalide ou a déjà été utilisé. Veuillez vérifier et réessayer.</string>
     <string name="vip_ad_reward_failed_message">Impossible de charger la publicité vidéo. Veuillez vérifier votre connexion ou réessayer plus tard.</string>

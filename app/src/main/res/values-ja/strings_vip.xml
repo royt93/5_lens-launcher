@@ -18,7 +18,9 @@
     <string name="vip_revoke_all_confirm_title">無効化の確認</string>
     <string name="vip_revoke_all_confirm_message">本当にVIPを無効化し、無料アカウントに戻しますか？</string>
     <string name="vip_entry_first_install">🎁 新規インストール特典</string>
-    <string name="vip_entry_redeemed">VIP %1$d 日間</string>
+    <plurals name="vip_entry_redeemed">
+        <item quantity="other">VIP %1$d 日間</item>
+    </plurals>
     <string name="vip_success_title">成功</string>
     <string name="vip_failed_title">失敗</string>
     <string name="vip_premium_title">VIPプレミアム</string>
@@ -28,7 +30,9 @@
     <string name="vip_active_thank_you">VIPのサポートありがとうございます！</string>
     <string name="vip_error_title">エラー</string>
     <string name="vip_lifetime_device">永久VIP (端末)</string>
-    <string name="vip_activation_success_message">おめでとうございます！VIPが %1$d 日間正常に有効化されました。</string>
+    <plurals name="vip_activation_success_message">
+        <item quantity="other">おめでとうございます！VIPが %1$d 日間正常に有効化されました。</item>
+    </plurals>
     <string name="vip_activation_failed_message">VIPの有効化に失敗しました。ネットワーク接続を確認するか、もう一度お試しください。</string>
     <string name="vip_invalid_key_message">入力されたVIPコードが無効か、すでに使用されています。確認してもう一度お試しください。</string>
     <string name="vip_ad_reward_failed_message">動画広告を読み込めませんでした。接続を確認するか、後でもう一度お試しください。</string>

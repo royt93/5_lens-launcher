@@ -19,7 +19,10 @@
     <string name="vip_revoke_all_confirm_title">Confirm Revoke</string>
     <string name="vip_revoke_all_confirm_message">Are you sure you want to revoke VIP and return to Free account?</string>
     <string name="vip_entry_first_install">🎁 New Install Gift</string>
-    <string name="vip_entry_redeemed">VIP %1$d days</string>
+    <plurals name="vip_entry_redeemed">
+        <item quantity="one">VIP %1$d day</item>
+        <item quantity="other">VIP %1$d days</item>
+    </plurals>
     <string name="vip_success_title">Success</string>
     <string name="vip_failed_title">Failed</string>
 
@@ -30,7 +33,10 @@
     <string name="vip_active_thank_you">Thank you for supporting VIP!</string>
     <string name="vip_error_title">Error</string>
     <string name="vip_lifetime_device">Lifetime VIP (Device)</string>
-    <string name="vip_activation_success_message">Congratulations! VIP has been successfully activated for %1$d days.</string>
+    <plurals name="vip_activation_success_message">
+        <item quantity="one">Congratulations! VIP has been successfully activated for %1$d day.</item>
+        <item quantity="other">Congratulations! VIP has been successfully activated for %1$d days.</item>
+    </plurals>
     <string name="vip_activation_failed_message">Failed to activate VIP. Please check your network connection or try again.</string>
     <string name="vip_invalid_key_message">The VIP code you entered is invalid or has already been used. Please verify and try again.</string>
     <string name="vip_ad_reward_failed_message">Could not load video advertisement. Please check your connection or try again later.</string>

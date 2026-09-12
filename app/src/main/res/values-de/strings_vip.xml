@@ -18,7 +18,10 @@
     <string name="vip_revoke_all_confirm_title">Entzug bestätigen</string>
     <string name="vip_revoke_all_confirm_message">Sind Sie sicher, dass Sie den VIP-Status entziehen und zum kostenlosen Konto zurückkehren möchten?</string>
     <string name="vip_entry_first_install">🎁 Geschenk zur Erstinstallation</string>
-    <string name="vip_entry_redeemed">VIP %1$d Tage</string>
+    <plurals name="vip_entry_redeemed">
+        <item quantity="one">VIP %1$d Tag</item>
+        <item quantity="other">VIP %1$d Tage</item>
+    </plurals>
     <string name="vip_success_title">Erfolgreich</string>
     <string name="vip_failed_title">Fehlgeschlagen</string>
     <string name="vip_premium_title">VIP Premium</string>
@@ -28,7 +31,10 @@
     <string name="vip_active_thank_you">Vielen Dank für Ihre Unterstützung von VIP!</string>
     <string name="vip_error_title">Fehler</string>
     <string name="vip_lifetime_device">Lebenslanges VIP (Gerät)</string>
-    <string name="vip_activation_success_message">Herzlichen Glückwunsch! VIP wurde erfolgreich für %1$d Tage aktiviert.</string>
+    <plurals name="vip_activation_success_message">
+        <item quantity="one">Herzlichen Glückwunsch! VIP wurde erfolgreich für %1$d Tag aktiviert.</item>
+        <item quantity="other">Herzlichen Glückwunsch! VIP wurde erfolgreich für %1$d Tage aktiviert.</item>
+    </plurals>
     <string name="vip_activation_failed_message">Aktivierung von VIP fehlgeschlagen. Bitte überprüfen Sie Ihre Netzwerkverbindung oder versuchen Sie es erneut.</string>
     <string name="vip_invalid_key_message">Der eingegebene VIP-Code ist ungültig oder wurde bereits verwendet. Bitte überprüfen Sie ihn und versuchen Sie es erneut.</string>
     <string name="vip_ad_reward_failed_message">Videoanzeige konnte nicht geladen werden. Bitte überprüfen Sie Ihre Verbindung oder versuchen Sie es später noch einmal.</string>

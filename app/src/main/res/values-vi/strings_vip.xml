@@ -19,7 +19,9 @@
     <string name="vip_revoke_all_confirm_title">Xác nhận thu hồi</string>
     <string name="vip_revoke_all_confirm_message">Bạn có chắc chắn muốn thu hồi VIP và quay về tài khoản miễn phí không?</string>
     <string name="vip_entry_first_install">🎁 Quà tặng cài đặt mới</string>
-    <string name="vip_entry_redeemed">VIP %1$d ngày</string>
+    <plurals name="vip_entry_redeemed">
+        <item quantity="other">VIP %1$d ngày</item>
+    </plurals>
     <string name="vip_success_title">Thành công</string>
     <string name="vip_failed_title">Thất bại</string>
 
@@ -30,7 +32,9 @@
     <string name="vip_active_thank_you">Cảm ơn bạn đã nâng cấp VIP!</string>
     <string name="vip_error_title">Lỗi</string>
     <string name="vip_lifetime_device">VIP trọn đời (Thiết bị)</string>
-    <string name="vip_activation_success_message">Chúc mừng! Bạn đã kích hoạt thành công %1$d ngày VIP.</string>
+    <plurals name="vip_activation_success_message">
+        <item quantity="other">Chúc mừng! Bạn đã kích hoạt thành công %1$d ngày VIP.</item>
+    </plurals>
     <string name="vip_activation_failed_message">Kích hoạt VIP không thành công. Vui lòng kiểm tra lại mã hoặc kết nối mạng.</string>
     <string name="vip_invalid_key_message">Mã VIP bạn nhập không hợp lệ hoặc đã được sử dụng. Vui lòng kiểm tra và thử lại.</string>
     <string name="vip_ad_reward_failed_message">Không thể tải video quảng cáo. Vui lòng kiểm tra kết nối mạng hoặc thử lại sau.</string>

@@ -18,7 +18,14 @@
     <string name="vip_revoke_all_confirm_title">تأكيد الإلغاء</string>
     <string name="vip_revoke_all_confirm_message">هل أنت متأكد من رغبتك في إلغاء VIP والعودة إلى الحساب المجاني؟</string>
     <string name="vip_entry_first_install">🎁 هدية تثبيت جديدة</string>
-    <string name="vip_entry_redeemed">VIP لمدة %1$d أيام</string>
+    <plurals name="vip_entry_redeemed">
+        <item quantity="zero">VIP بدون أيام</item>
+        <item quantity="one">VIP ليوم واحد</item>
+        <item quantity="two">VIP ليومين</item>
+        <item quantity="few">VIP لمدة %1$d أيام</item>
+        <item quantity="many">VIP لمدة %1$d يومًا</item>
+        <item quantity="other">VIP لمدة %1$d يوم</item>
+    </plurals>
     <string name="vip_success_title">ناجح</string>
     <string name="vip_failed_title">فشل</string>
     <string name="vip_premium_title">VIP بريميوم</string>
@@ -28,7 +35,14 @@
     <string name="vip_active_thank_you">شكرًا لك على دعم VIP!</string>
     <string name="vip_error_title">خطأ</string>
     <string name="vip_lifetime_device">VIP مدى الحياة (الجهاز)</string>
-    <string name="vip_activation_success_message">تهانينا! تم تفعيل VIP بنجاح لمدة %1$d أيام.</string>
+    <plurals name="vip_activation_success_message">
+        <item quantity="zero">تهانينا! تم تفعيل VIP بنجاح.</item>
+        <item quantity="one">تهانينا! تم تفعيل VIP بنجاح ليوم واحد.</item>
+        <item quantity="two">تهانينا! تم تفعيل VIP بنجاح ليومين.</item>
+        <item quantity="few">تهانينا! تم تفعيل VIP بنجاح لمدة %1$d أيام.</item>
+        <item quantity="many">تهانينا! تم تفعيل VIP بنجاح لمدة %1$d يومًا.</item>
+        <item quantity="other">تهانينا! تم تفعيل VIP بنجاح لمدة %1$d يوم.</item>
+    </plurals>
     <string name="vip_activation_failed_message">فشل تفعيل VIP. يرجى التحقق من اتصال الشبكة أو المحاولة مرة أخرى.</string>
     <string name="vip_invalid_key_message">رمز VIP الذي أدخلته غير صالح أو تم استخدامه بالفعل. يرجى التحقق والمحاولة مرة أخرى.</string>
     <string name="vip_ad_reward_failed_message">تعذر تحميل إعلان الفيديو. يرجى التحقق من الاتصال أو المحاولة مرة أخرى لاحقًا.</string>

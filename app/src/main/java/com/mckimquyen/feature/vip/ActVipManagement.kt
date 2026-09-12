@@ -101,7 +101,7 @@ class ActVipManagement : AppCompatActivity() {
                     if (success) {
                         showMaterialDialog(
                             getString(R.string.vip_success_title),
-                            getString(R.string.vip_activation_success_message, days),
+                            resources.getQuantityString(R.plurals.vip_activation_success_message, days, days),
                             R.drawable.ic_star_24dp
                         )
                         binding.edtVipKey.text?.clear()
@@ -210,7 +210,7 @@ class ActVipManagement : AppCompatActivity() {
             if (success) {
                 showMaterialDialog(
                     getString(R.string.vip_success_title),
-                    getString(R.string.vip_activation_success_message, 3),
+                    resources.getQuantityString(R.plurals.vip_activation_success_message, 3, 3),
                     R.drawable.ic_star_24dp
                 )
                 handleVipSuccess(3)
@@ -284,7 +284,7 @@ class ActVipManagement : AppCompatActivity() {
             } else {
                 val days = vipPrefs.getVipDays()
                 if (days > 0) {
-                    binding.tvActiveVipLabel.text = getString(R.string.vip_entry_redeemed, days)
+                    binding.tvActiveVipLabel.text = resources.getQuantityString(R.plurals.vip_entry_redeemed, days, days)
                 } else {
                     binding.tvActiveVipLabel.text = getString(R.string.vip_active)
                 }

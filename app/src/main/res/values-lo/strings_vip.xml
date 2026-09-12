@@ -18,7 +18,9 @@
     <string name="vip_revoke_all_confirm_title">ຢືນຢັນການຖອນສິດ</string>
     <string name="vip_revoke_all_confirm_message">ທ່ານແນ່ໃຈຫຼືບໍ່ວ່າຕ້ອງການຖອນສິດ VIP ແລະກັບໄປໃຊ້ບັນຊີຟຣີ?</string>
     <string name="vip_entry_first_install">🎁 ຂອງຂວັນຕ້ອນຮັບການຕິດຕັ້ງໃໝ່</string>
-    <string name="vip_entry_redeemed">VIP %1$d ວັນ</string>
+    <plurals name="vip_entry_redeemed">
+        <item quantity="other">VIP %1$d ວັນ</item>
+    </plurals>
     <string name="vip_success_title">ສຳເລັດ</string>
     <string name="vip_failed_title">ຫຼົ້ມເຫຼວ</string>
     <string name="vip_premium_title">VIP ພຣີມຽມ</string>
@@ -28,7 +30,9 @@
     <string name="vip_active_thank_you">ຂອບໃຈສໍາລັບການສະໜັບສະໜູນ VIP!</string>
     <string name="vip_error_title">ຂໍ້ຜິດພາດ</string>
     <string name="vip_lifetime_device">VIP ຕະຫຼອດຊີບ (ອຸປະກອນ)</string>
-    <string name="vip_activation_success_message">ຂໍສະແດງຄວາມຍິນດີ! ເປີດໃຊ້ VIP ສຳເລັດແລ້ວເປັນເວລາ %1$d ວັນ.</string>
+    <plurals name="vip_activation_success_message">
+        <item quantity="other">ຂໍສະແດງຄວາມຍິນດີ! ເປີດໃຊ້ VIP ສຳເລັດແລ້ວເປັນເວລາ %1$d ວັນ.</item>
+    </plurals>
     <string name="vip_activation_failed_message">ການເປີດໃຊ້ VIP ຫຼົ້ມເຫຼວ. ກະລຸນາກວດສອບການເຊື່ອມຕໍ່ເຄືອຂ່າຍຂອງທ່ານ ຫຼື ລອງໃໝ່ອີກຄັ້ງ.</string>
     <string name="vip_invalid_key_message">ລະຫັດ VIP ທີ່ທ່ານປ້ອນບໍ່ຖືກຕ້ອງ ຫຼື ຖືກໃຊ້ໄປແລ້ວ. ກະລຸນາກວດສອບ ແລະ ລອງໃໝ່.</string>
     <string name="vip_ad_reward_failed_message">ບໍ່ສາມາດໂຫຼດໂຄສະນາວິດີໂອໄດ້. ກະລຸນາກວດສອບການເຊື່ອມຕໍ່ຂອງທ່ານ ຫຼື ລອງໃໝ່ພາຍຫຼັງ.</string>
