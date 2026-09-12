@@ -1,6 +1,6 @@
 package com.mckimquyen.util
 
-import android.net.Uri
+import androidx.core.net.toUri
 
 /**
  * Exact-match host allowlist for content loaded inside SuperWebViewActivity.
@@ -13,7 +13,7 @@ val ALLOWED_WEBVIEW_HOSTS = setOf(
 fun isAllowedWebViewUrl(url: String?): Boolean {
     if (url.isNullOrBlank()) return false
     val uri = try {
-        Uri.parse(url)
+        url.toUri()
     } catch (_: Exception) {
         return false
     }

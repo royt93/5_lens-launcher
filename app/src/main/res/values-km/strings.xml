@@ -83,4 +83,13 @@
     <string name="no_apps_found">រកមិនឃើញកម្មវិធី</string>
     <string name="search_empty_state">បញ្ចូលឈ្មោះកម្មវិធីដើម្បីស្វែងរក</string>
     <string name="search_open_app">បើក %1$s</string>
+    <string name="about_features_header">✨ លក្ខណៈពិសេសសំខាន់ៗ</string>
+    <string name="about_feature_equispaced_grid">• ក្រឡាចត្រង្គដែលមានចន្លោះស្មើគ្នា - បង្ហាញកម្មវិធីទាំងអស់ដោយមិនគិតពីទំហំអេក្រង់</string>
+    <string name="about_feature_fisheye_lens">• កញ្ចក់ Fisheye - ពង្រីក និងផ្លាស់ទីដោយកាយវិការប៉ះ</string>
+    <string name="about_feature_full_settings">• ការកំណត់ពេញលេញ - កែសម្រួលកញ្ចក់ រូបតំណាង ពណ៌ និងច្រើនទៀត</string>
+    <string name="about_section_header">📱 អំពី</string>
+    <string name="about_credits_header">ℹ️ ព័ត៌មាន</string>
+    <string name="about_made_with_love">បង្កើតឡើងដោយ ❤️</string>
+    <string name="ads_action_disclosure">សូមចំណាំ៖ សកម្មភាពនេះអាចបង្ហាញការផ្សាយពាណិជ្ជកម្ម</string>
+    <string name="ad_label">ការផ្សាយពាណិជ្ជកម្ម</string>
 </resources>

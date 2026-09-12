@@ -83,7 +83,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="✨ Key Features"
+                            android:text="@string/about_features_header"
                             android:textColor="?attr/colorPrimary"
                             android:textSize="18sp"
                             android:textStyle="bold" />
@@ -92,7 +92,7 @@
                             android:id="@+id/iconFeatures"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="▼"
+                            android:text="@string/about_expand_indicator"
                             android:textColor="?attr/colorPrimary"
                             android:textSize="16sp" />
 
@@ -111,20 +111,20 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:paddingBottom="8dp"
-                            android:text="• Equispaced Grid - displays all apps regardless of screen size"
+                            android:text="@string/about_feature_equispaced_grid"
                             android:textSize="14sp" />
 
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:paddingBottom="8dp"
-                            android:text="• Fisheye Lens - zoom and pan with touch gestures"
+                            android:text="@string/about_feature_fisheye_lens"
                             android:textSize="14sp" />
 
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="• Full Settings - customize lens, icons, colors and more"
+                            android:text="@string/about_feature_full_settings"
                             android:textSize="14sp" />
 
                     </LinearLayout>
@@ -158,7 +158,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="📱 About"
+                            android:text="@string/about_section_header"
                             android:textColor="?attr/colorPrimary"
                             android:textSize="18sp"
                             android:textStyle="bold" />
@@ -167,7 +167,7 @@
                             android:id="@+id/iconAbout"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="▼"
+                            android:text="@string/about_expand_indicator"
                             android:textColor="?attr/colorPrimary"
                             android:textSize="16sp" />
 
@@ -221,7 +221,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="ℹ️ Info"
+                            android:text="@string/about_credits_header"
                             android:textColor="?attr/colorPrimary"
                             android:textSize="18sp"
                             android:textStyle="bold" />
@@ -230,7 +230,7 @@
                             android:id="@+id/iconCredits"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="▼"
+                            android:text="@string/about_expand_indicator"
                             android:textColor="?attr/colorPrimary"
                             android:textSize="16sp" />
 
@@ -259,13 +259,13 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:paddingBottom="4dp"
-                            android:text="Made with ❤️"
+                            android:text="@string/about_made_with_love"
                             android:textSize="13sp" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Fisheye Lens Launcher"
+                            android:text="@string/about_app_tagline"
                             android:textSize="13sp" />
 
                     </LinearLayout>

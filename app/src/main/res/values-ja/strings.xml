@@ -83,4 +83,13 @@
     <string name="no_apps_found">アプリが見つかりません</string>
     <string name="search_empty_state">検索するアプリ名を入力してください</string>
     <string name="search_open_app">%1$s を開く</string>
+    <string name="about_features_header">✨ 主な機能</string>
+    <string name="about_feature_equispaced_grid">• 均等グリッド - 画面サイズに関係なくすべてのアプリを表示</string>
+    <string name="about_feature_fisheye_lens">• フィッシュアイレンズ - タッチ操作でズーム&amp;パン</string>
+    <string name="about_feature_full_settings">• 詳細設定 - レンズ、アイコン、色などをカスタマイズ</string>
+    <string name="about_section_header">📱 このアプリについて</string>
+    <string name="about_credits_header">ℹ️ 情報</string>
+    <string name="about_made_with_love">❤️ を込めて作成</string>
+    <string name="ads_action_disclosure">ご注意: この操作で広告が表示される場合があります</string>
+    <string name="ad_label">広告</string>
 </resources>

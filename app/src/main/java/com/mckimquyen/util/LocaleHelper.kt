@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
 import android.content.res.Configuration
+import androidx.core.content.edit
 import androidx.preference.PreferenceManager
 import java.util.Locale
 
@@ -50,7 +51,7 @@ object LocaleHelper {
 
     fun setLanguageSelected(context: Context) {
         val preferences = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
-        preferences.edit().putBoolean(IS_LANGUAGE_SELECTED, true).apply()
+        preferences.edit { putBoolean(IS_LANGUAGE_SELECTED, true) }
     }
 
     fun setLocale(context: Context, language: String): Context {
@@ -65,7 +66,7 @@ object LocaleHelper {
 
     private fun persist(context: Context, language: String) {
         val preferences = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
-        preferences.edit().putString(SELECTED_LANGUAGE, language).apply()
+        preferences.edit { putString(SELECTED_LANGUAGE, language) }
     }
 
     // AppBundleLocaleChanges is a false positive here: app/build.gradle's `bundle.language.enableSplit`

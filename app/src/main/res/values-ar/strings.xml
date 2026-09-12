@@ -83,4 +83,13 @@
     <string name="no_apps_found">لم يتم العثور على تطبيقات</string>
     <string name="search_empty_state">اكتب اسم تطبيق للبحث</string>
     <string name="search_open_app">فتح %1$s</string>
+    <string name="about_features_header">✨ الميزات الرئيسية</string>
+    <string name="about_feature_equispaced_grid">• شبكة متساوية المسافات - تعرض جميع التطبيقات بغض النظر عن حجم الشاشة</string>
+    <string name="about_feature_fisheye_lens">• عدسة عين السمكة - تكبير وتحريك بإيماءات اللمس</string>
+    <string name="about_feature_full_settings">• إعدادات كاملة - تخصيص العدسة والأيقونات والألوان والمزيد</string>
+    <string name="about_section_header">📱 حول</string>
+    <string name="about_credits_header">ℹ️ معلومات</string>
+    <string name="about_made_with_love">صُنع بـ ❤️</string>
+    <string name="ads_action_disclosure">يرجى الملاحظة: قد يعرض هذا الإجراء إعلانات</string>
+    <string name="ad_label">إعلان</string>
 </resources>

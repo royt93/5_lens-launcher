@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Overdraw is a lint false positive here: selectableItemBackground is a ripple drawable —
+     fully transparent except during a touch ripple — not an opaque fill, so there is no real
+     double-paint. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="?attr/selectableItemBackground"
+    tools:ignore="Overdraw"
     android:clickable="true"
     android:focusable="true"
     android:gravity="center_vertical"

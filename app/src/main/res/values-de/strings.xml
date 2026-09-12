@@ -83,4 +83,13 @@
     <string name="no_apps_found">Keine Apps gefunden</string>
     <string name="search_empty_state">App-Namen zum Suchen eingeben</string>
     <string name="search_open_app">%1$s öffnen</string>
+    <string name="about_features_header">✨ Hauptfunktionen</string>
+    <string name="about_feature_equispaced_grid">• Gleichmäßiges Raster – zeigt alle Apps unabhängig von der Bildschirmgröße an</string>
+    <string name="about_feature_fisheye_lens">• Fisheye-Linse – zoomen und verschieben mit Touch-Gesten</string>
+    <string name="about_feature_full_settings">• Vollständige Einstellungen – Linse, Symbole, Farben und mehr anpassen</string>
+    <string name="about_section_header">📱 Über</string>
+    <string name="about_credits_header">ℹ️ Info</string>
+    <string name="about_made_with_love">Mit ❤️ gemacht</string>
+    <string name="ads_action_disclosure">Hinweis: Diese Aktion kann Werbung anzeigen</string>
+    <string name="ad_label">Anzeige</string>
 </resources>

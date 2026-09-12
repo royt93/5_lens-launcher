@@ -83,4 +83,13 @@
     <string name="no_apps_found">Aucune appli trouvée</string>
     <string name="search_empty_state">Saisissez le nom de l’appli à rechercher</string>
     <string name="search_open_app">Ouvrir %1$s</string>
+    <string name="about_features_header">✨ Fonctionnalités clés</string>
+    <string name="about_feature_equispaced_grid">• Grille équiespacée - affiche toutes les applications quelle que soit la taille de l\'écran</string>
+    <string name="about_feature_fisheye_lens">• Lentille fisheye - zoomez et déplacez-vous avec des gestes tactiles</string>
+    <string name="about_feature_full_settings">• Réglages complets - personnalisez la lentille, les icônes, les couleurs et plus encore</string>
+    <string name="about_section_header">📱 À propos</string>
+    <string name="about_credits_header">ℹ️ Infos</string>
+    <string name="about_made_with_love">Fait avec ❤️</string>
+    <string name="ads_action_disclosure">Remarque : cette action peut afficher des publicités</string>
+    <string name="ad_label">Annonce</string>
 </resources>

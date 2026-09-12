@@ -4,11 +4,11 @@ import android.app.*
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import android.view.*
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import com.mckimquyen.R
 import com.mckimquyen.util.isValid
 import com.mckimquyen.views.SuperWebViewActivity
@@ -39,7 +39,7 @@ fun Context.launchSystemSetting(
     packageName: String,
 ) {
     val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-    intent.data = Uri.parse("package:$packageName")
+    intent.data = "package:$packageName".toUri()
     this.startActivity(intent)
 }
 
@@ -52,7 +52,7 @@ fun Context?.sendEmail(
         val emailIntent = Intent(Intent.ACTION_SENDTO)
         val emails = context.resources.getStringArray(R.array.support_emails)
         val emailAddresses = emails.joinToString(",")
-        emailIntent.data = Uri.parse("mailto:$emailAddresses")
+        emailIntent.data = "mailto:$emailAddresses".toUri()
         context.startActivity(Intent.createChooser(emailIntent, "Send feedback"))
     }
 }
@@ -83,7 +83,7 @@ fun Context?.openUrlInBrowser(
 //            this.startActivity(defaultBrowser)
 //            this.tranIn()
             val i = Intent(Intent.ACTION_VIEW)
-            i.data = Uri.parse(url)
+            i.data = url.toUri()
             this.startActivity(i)
         } catch (e: Exception) {
             e.printStackTrace()

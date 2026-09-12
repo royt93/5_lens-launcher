@@ -6,7 +6,6 @@ import android.animation.ValueAnimator
 import android.content.Context
 import android.content.Intent
 import android.net.ConnectivityManager
-import android.net.Uri
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.view.HapticFeedbackConstants
@@ -14,6 +13,8 @@ import android.view.View
 import android.view.animation.DecelerateInterpolator
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.graphics.toColorInt
+import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.mckimquyen.R
@@ -197,7 +198,7 @@ class ActVipManagement : AppCompatActivity() {
         }
 
         binding.tvPrivacyPolicy.setOnClickListener {
-            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(AdKeys.PRIVACY_POLICY_URL)))
+            startActivity(Intent(Intent.ACTION_VIEW, AdKeys.PRIVACY_POLICY_URL.toUri()))
         }
     }
 
@@ -235,8 +236,8 @@ class ActVipManagement : AppCompatActivity() {
 
         if (isActive) {
             binding.tvStatusBadge.text = getString(R.string.vip_badge_premium_member)
-            binding.tvStatusBadge.setBackgroundTintList(android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#20000000")))
-            binding.tvStatusBadge.setTextColor(android.graphics.Color.parseColor("#1C1C1E"))
+            binding.tvStatusBadge.setBackgroundTintList(android.content.res.ColorStateList.valueOf("#20000000".toColorInt()))
+            binding.tvStatusBadge.setTextColor("#1C1C1E".toColorInt())
 
             binding.btnWatchAdVip.isEnabled = false
             binding.btnWatchAdVip.text = getString(R.string.vip_ad_disabled_active)
@@ -244,10 +245,10 @@ class ActVipManagement : AppCompatActivity() {
 
             binding.tvStatusTitle.text = getString(R.string.vip_active)
             binding.layoutStatusHeaderBg.setBackgroundResource(R.drawable.bg_vip_status_header_active)
-            binding.imgCrown.setColorFilter(android.graphics.Color.parseColor("#FFFFFF"), android.graphics.PorterDuff.Mode.SRC_IN)
-            binding.tvStatusTitle.setTextColor(android.graphics.Color.parseColor("#1C1C1E"))
+            binding.imgCrown.setColorFilter("#FFFFFF".toColorInt(), android.graphics.PorterDuff.Mode.SRC_IN)
+            binding.tvStatusTitle.setTextColor("#1C1C1E".toColorInt())
             binding.tvStatusSubtitle.text = getString(R.string.vip_active_thank_you)
-            binding.tvStatusSubtitle.setTextColor(android.graphics.Color.parseColor("#3A3A3C"))
+            binding.tvStatusSubtitle.setTextColor("#3A3A3C".toColorInt())
             binding.tvStatusSubtitle.isVisible = true
             binding.layoutActiveVipInfo.isVisible = true
             
@@ -297,8 +298,8 @@ class ActVipManagement : AppCompatActivity() {
             }
         } else {
             binding.tvStatusBadge.text = getString(R.string.vip_badge_free_member)
-            binding.tvStatusBadge.setBackgroundTintList(android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#15FFFFFF")))
-            binding.tvStatusBadge.setTextColor(android.graphics.Color.parseColor("#FFFFFF"))
+            binding.tvStatusBadge.setBackgroundTintList(android.content.res.ColorStateList.valueOf("#15FFFFFF".toColorInt()))
+            binding.tvStatusBadge.setTextColor("#FFFFFF".toColorInt())
 
             binding.btnWatchAdVip.isEnabled = true
             binding.btnWatchAdVip.text = getString(R.string.vip_watch_ad_3d)
@@ -306,9 +307,9 @@ class ActVipManagement : AppCompatActivity() {
 
             binding.tvStatusTitle.text = getString(R.string.vip_free_user)
             binding.layoutStatusHeaderBg.setBackgroundResource(R.drawable.bg_vip_status_header_free)
-            binding.imgCrown.setColorFilter(android.graphics.Color.parseColor("#ECEFF1"), android.graphics.PorterDuff.Mode.SRC_IN)
-            binding.tvStatusTitle.setTextColor(android.graphics.Color.parseColor("#FFFFFF"))
-            binding.tvStatusSubtitle.setTextColor(android.graphics.Color.parseColor("#B0BEC5"))
+            binding.imgCrown.setColorFilter("#ECEFF1".toColorInt(), android.graphics.PorterDuff.Mode.SRC_IN)
+            binding.tvStatusTitle.setTextColor("#FFFFFF".toColorInt())
+            binding.tvStatusSubtitle.setTextColor("#B0BEC5".toColorInt())
             binding.tvStatusSubtitle.isVisible = false
             binding.layoutActiveVipInfo.isVisible = false
             countDownTimer?.cancel()
@@ -350,7 +351,7 @@ class ActVipManagement : AppCompatActivity() {
                 }
                 .start()
         } else {
-            button.setTextColor(android.graphics.Color.parseColor("#9E9E9E"))
+            button.setTextColor("#9E9E9E".toColorInt())
             button.animate()
                 .scaleX(1.0f)
                 .scaleY(1.0f)

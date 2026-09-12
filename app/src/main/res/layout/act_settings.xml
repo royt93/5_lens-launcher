@@ -1,11 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Overdraw: the theme's own windowBackground (Material3 default, colorSurface-derived)
+     differs from the colorPrimary painted here, so this isn't a same-color duplicate — it's an
+     intentional override. The "real" fix (move colorPrimary into the theme's windowBackground)
+     would touch AppTheme.NoActionBar, shared by ActAbout/SuperWebViewActivity/ActVipManagement,
+     which currently rely on its default background — verifying that wouldn't visually regress
+     those screens is out of scope here, so this is left as a one-paint-at-window-creation cost
+     rather than risk a cross-activity visual change. -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/rootLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/colorPrimary">
+    android:background="?attr/colorPrimary"
+    tools:ignore="Overdraw">
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -67,7 +75,7 @@
                                 android:layout_marginStart="4dp"
                                 android:fontFamily="sans-serif-medium"
                                 android:includeFontPadding="false"
-                                android:text="VIP"
+                                tools:text="VIP"
                                 android:textColor="@android:color/black"
                                 android:textSize="12sp"
                                 android:textStyle="bold" />
@@ -157,7 +165,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text="Please note: this action may show ads"
+                android:text="@string/ads_action_disclosure"
                 android:textColor="@color/colorWhite" />
         </LinearLayout>
     </FrameLayout>

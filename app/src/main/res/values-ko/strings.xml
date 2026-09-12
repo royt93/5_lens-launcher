@@ -83,4 +83,13 @@
     <string name="no_apps_found">앱을 찾을 수 없습니다</string>
     <string name="search_empty_state">검색할 앱 이름을 입력하세요</string>
     <string name="search_open_app">%1$s 열기</string>
+    <string name="about_features_header">✨ 주요 기능</string>
+    <string name="about_feature_equispaced_grid">• 균등 격자 - 화면 크기에 관계없이 모든 앱 표시</string>
+    <string name="about_feature_fisheye_lens">• 피시아이 렌즈 - 터치 제스처로 확대/축소 및 이동</string>
+    <string name="about_feature_full_settings">• 전체 설정 - 렌즈, 아이콘, 색상 등을 사용자 지정</string>
+    <string name="about_section_header">📱 정보</string>
+    <string name="about_credits_header">ℹ️ 정보</string>
+    <string name="about_made_with_love">❤️로 제작됨</string>
+    <string name="ads_action_disclosure">참고: 이 작업은 광고를 표시할 수 있습니다</string>
+    <string name="ad_label">광고</string>
 </resources>

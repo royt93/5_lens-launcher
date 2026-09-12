@@ -83,4 +83,13 @@
     <string name="no_apps_found">ບໍ່ພົບແອັບ</string>
     <string name="search_empty_state">ພິມຊື່ແອັບເພື່ອຄົ້ນຫາ</string>
     <string name="search_open_app">ເປີດ %1$s</string>
+    <string name="about_features_header">✨ ຄຸນສົມບັດຫຼັກ</string>
+    <string name="about_feature_equispaced_grid">• ຕາຂ່າຍໄລຍະເທົ່າກັນ - ສະແດງແອັບທັງໝົດໂດຍບໍ່ຄຳນຶງເຖິງຂະໜາດຈໍ</string>
+    <string name="about_feature_fisheye_lens">• ເລນສ໌ Fisheye - ຊູມ ແລະ ເລື່ອນດ້ວຍທ່າທາງສຳຜັດ</string>
+    <string name="about_feature_full_settings">• ການຕັ້ງຄ່າແບບເຕັມ - ປັບແຕ່ງເລນສ໌, ໄອຄອນ, ສີ ແລະ ອື່ນໆ</string>
+    <string name="about_section_header">📱 ກ່ຽວກັບ</string>
+    <string name="about_credits_header">ℹ️ ຂໍ້ມູນ</string>
+    <string name="about_made_with_love">ສ້າງດ້ວຍ ❤️</string>
+    <string name="ads_action_disclosure">ໂປດຊາບ: ການກະທຳນີ້ອາດສະແດງໂຄສະນາ</string>
+    <string name="ad_label">ໂຄສະນາ</string>
 </resources>

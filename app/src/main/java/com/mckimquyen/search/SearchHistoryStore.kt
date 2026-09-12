@@ -1,6 +1,7 @@
 package com.mckimquyen.search
 
 import android.content.Context
+import androidx.core.content.edit
 
 /** Small local-only MRU list. No usage data leaves the device. */
 class SearchHistoryStore(context: Context) {
@@ -17,11 +18,11 @@ class SearchHistoryStore(context: Context) {
             add(componentKey)
             addAll(recentKeys().filterNot { it == componentKey })
         }.take(MAX_RECENT)
-        preferences.edit().putString(KEY_RECENT, updated.joinToString(SEPARATOR)).apply()
+        preferences.edit { putString(KEY_RECENT, updated.joinToString(SEPARATOR)) }
     }
 
     fun clear() {
-        preferences.edit().remove(KEY_RECENT).apply()
+        preferences.edit { remove(KEY_RECENT) }
     }
 
     private companion object {

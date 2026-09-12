@@ -83,4 +83,13 @@
     <string name="no_apps_found">未找到应用</string>
     <string name="search_empty_state">输入应用名称进行搜索</string>
     <string name="search_open_app">打开 %1$s</string>
+    <string name="about_features_header">✨ 主要功能</string>
+    <string name="about_feature_equispaced_grid">• 等距网格 - 无论屏幕尺寸如何都能显示所有应用</string>
+    <string name="about_feature_fisheye_lens">• 鱼眼镜头 - 使用触摸手势缩放和平移</string>
+    <string name="about_feature_full_settings">• 完整设置 - 自定义镜头、图标、颜色等</string>
+    <string name="about_section_header">📱 关于</string>
+    <string name="about_credits_header">ℹ️ 信息</string>
+    <string name="about_made_with_love">用 ❤️ 制作</string>
+    <string name="ads_action_disclosure">请注意：此操作可能会显示广告</string>
+    <string name="ad_label">广告</string>
 </resources>

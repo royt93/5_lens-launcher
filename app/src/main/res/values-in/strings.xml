@@ -83,4 +83,13 @@
     <string name="no_apps_found">Aplikasi tidak ditemukan</string>
     <string name="search_empty_state">Ketik nama aplikasi untuk mencari</string>
     <string name="search_open_app">Buka %1$s</string>
+    <string name="about_features_header">✨ Fitur Utama</string>
+    <string name="about_feature_equispaced_grid">• Kisi Berjarak Sama - menampilkan semua aplikasi terlepas dari ukuran layar</string>
+    <string name="about_feature_fisheye_lens">• Lensa Fisheye - perbesar dan geser dengan gestur sentuh</string>
+    <string name="about_feature_full_settings">• Pengaturan Lengkap - sesuaikan lensa, ikon, warna, dan lainnya</string>
+    <string name="about_section_header">📱 Tentang</string>
+    <string name="about_credits_header">ℹ️ Info</string>
+    <string name="about_made_with_love">Dibuat dengan ❤️</string>
+    <string name="ads_action_disclosure">Harap diperhatikan: tindakan ini dapat menampilkan iklan</string>
+    <string name="ad_label">Iklan</string>
 </resources>

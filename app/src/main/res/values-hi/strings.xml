@@ -83,4 +83,13 @@
     <string name="no_apps_found">कोई ऐप नहीं मिला</string>
     <string name="search_empty_state">खोजने के लिए ऐप का नाम लिखें</string>
     <string name="search_open_app">%1$s खोलें</string>
+    <string name="about_features_header">✨ मुख्य विशेषताएं</string>
+    <string name="about_feature_equispaced_grid">• समान दूरी वाली ग्रिड - स्क्रीन आकार की परवाह किए बिना सभी ऐप्स दिखाता है</string>
+    <string name="about_feature_fisheye_lens">• फिशआई लेंस - टच जेस्चर से ज़ूम और पैन करें</string>
+    <string name="about_feature_full_settings">• पूर्ण सेटिंग्स - लेंस, आइकन, रंग और बहुत कुछ अनुकूलित करें</string>
+    <string name="about_section_header">📱 परिचय</string>
+    <string name="about_credits_header">ℹ️ जानकारी</string>
+    <string name="about_made_with_love">❤️ के साथ बनाया गया</string>
+    <string name="ads_action_disclosure">कृपया ध्यान दें: इस क्रिया से विज्ञापन दिख सकते हैं</string>
+    <string name="ad_label">विज्ञापन</string>
 </resources>

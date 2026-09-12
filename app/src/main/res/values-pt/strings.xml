@@ -83,4 +83,13 @@
     <string name="no_apps_found">Nenhum app encontrado</string>
     <string name="search_empty_state">Digite o nome de um app para pesquisar</string>
     <string name="search_open_app">Abrir %1$s</string>
+    <string name="about_features_header">✨ Principais recursos</string>
+    <string name="about_feature_equispaced_grid">• Grade equiespaçada - exibe todos os apps independentemente do tamanho da tela</string>
+    <string name="about_feature_fisheye_lens">• Lente olho de peixe - amplie e navegue com gestos de toque</string>
+    <string name="about_feature_full_settings">• Configurações completas - personalize lente, ícones, cores e muito mais</string>
+    <string name="about_section_header">📱 Sobre</string>
+    <string name="about_credits_header">ℹ️ Informações</string>
+    <string name="about_made_with_love">Feito com ❤️</string>
+    <string name="ads_action_disclosure">Atenção: esta ação pode exibir anúncios</string>
+    <string name="ad_label">Anúncio</string>
 </resources>

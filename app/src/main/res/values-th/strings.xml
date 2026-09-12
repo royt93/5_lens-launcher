@@ -83,4 +83,13 @@
     <string name="no_apps_found">ไม่พบแอป</string>
     <string name="search_empty_state">พิมพ์ชื่อแอปเพื่อค้นหา</string>
     <string name="search_open_app">เปิด %1$s</string>
+    <string name="about_features_header">✨ คุณสมบัติเด่น</string>
+    <string name="about_feature_equispaced_grid">• กริดระยะห่างเท่ากัน - แสดงแอปทั้งหมดโดยไม่คำนึงถึงขนาดหน้าจอ</string>
+    <string name="about_feature_fisheye_lens">• เลนส์ฟิชอาย - ซูมและเลื่อนด้วยท่าทางสัมผัส</string>
+    <string name="about_feature_full_settings">• การตั้งค่าแบบเต็ม - ปรับแต่งเลนส์ ไอคอน สี และอื่นๆ</string>
+    <string name="about_section_header">📱 เกี่ยวกับ</string>
+    <string name="about_credits_header">ℹ️ ข้อมูล</string>
+    <string name="about_made_with_love">สร้างด้วย ❤️</string>
+    <string name="ads_action_disclosure">โปรดทราบ: การกระทำนี้อาจแสดงโฆษณา</string>
+    <string name="ad_label">โฆษณา</string>
 </resources>

@@ -5,6 +5,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.util.LruCache
 import android.util.Log
+import androidx.core.graphics.scale
 
 /**
  * LruCache để quản lý Bitmap icons của apps, tránh OutOfMemoryError
@@ -128,7 +129,7 @@ object BitmapCache {
                 val originalHeight = bitmap.height
                 val originalSizeKb = bitmap.byteCount / 1024
                 val optimizedBitmap = if (bitmap.width > TARGET_ICON_SIZE || bitmap.height > TARGET_ICON_SIZE) {
-                    Bitmap.createScaledBitmap(bitmap, TARGET_ICON_SIZE, TARGET_ICON_SIZE, true)
+                    bitmap.scale(TARGET_ICON_SIZE, TARGET_ICON_SIZE)
                 } else {
                     bitmap
                 }

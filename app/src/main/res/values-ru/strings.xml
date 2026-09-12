@@ -83,4 +83,13 @@
     <string name="no_apps_found">Приложения не найдены</string>
     <string name="search_empty_state">Введите название приложения</string>
     <string name="search_open_app">Открыть %1$s</string>
+    <string name="about_features_header">✨ Основные функции</string>
+    <string name="about_feature_equispaced_grid">• Равномерная сетка - показывает все приложения независимо от размера экрана</string>
+    <string name="about_feature_fisheye_lens">• Линза «рыбий глаз» - масштабирование и перемещение жестами</string>
+    <string name="about_feature_full_settings">• Полные настройки - настройка линзы, значков, цветов и многого другого</string>
+    <string name="about_section_header">📱 О приложении</string>
+    <string name="about_credits_header">ℹ️ Информация</string>
+    <string name="about_made_with_love">Сделано с ❤️</string>
+    <string name="ads_action_disclosure">Обратите внимание: это действие может показать рекламу</string>
+    <string name="ad_label">Реклама</string>
 </resources>

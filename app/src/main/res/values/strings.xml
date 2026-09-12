@@ -56,9 +56,20 @@
     <string name="error_too_many_apps">Failed to Load Apps</string>
     <string name="snackbar_reset_successful">Values Reset To Default</string>
     <string name="about"><![CDATA[Fisheye Launcher is a unique, efficient way to browse and launch your apps.<br><br>Instead of scrolling long lists or swiping through multiple pages, Fisheye Launcher implements two unique features:<br><br><b>• An Equispaced Grid that displays all of your apps, regardless of screen size or app count.<br><br>• A Graphical Fisheye Lens to quickly zoom, pan and launch apps using touch gestures.</b><br><br>Fisheye Launcher also includes a full Settings menu to tweak all aspects of the Lens; Distortion, Scaling, Icon Size, Haptic Feedback, etc.</a>]]></string>
+    <string name="about_features_header">✨ Key Features</string>
+    <string name="about_expand_indicator" translatable="false">▼</string>
+    <string name="about_feature_equispaced_grid">• Equispaced Grid - displays all apps regardless of screen size</string>
+    <string name="about_feature_fisheye_lens">• Fisheye Lens - zoom and pan with touch gestures</string>
+    <string name="about_feature_full_settings">• Full Settings - customize lens, icons, colors and more</string>
+    <string name="about_section_header">📱 About</string>
+    <string name="about_credits_header">ℹ️ Info</string>
+    <string name="about_made_with_love">Made with ❤️</string>
+    <string name="about_app_tagline" translatable="false">Fisheye Lens Launcher</string>
     <string name="done">Done</string>
     <string name="cancel">Cancel</string>
     <string name="back">Back</string>
+    <string name="ads_action_disclosure">Please note: this action may show ads</string>
+    <string name="ad_label">Ad</string>
     <string name="rate_app">Rate app</string>
     <string name="more_app">More app</string>
     <string name="share_app">Share app</string>

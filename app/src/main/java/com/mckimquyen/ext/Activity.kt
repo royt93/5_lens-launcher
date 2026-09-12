@@ -10,7 +10,6 @@ import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.content.res.Resources
 import android.graphics.Point
-import android.net.Uri
 import android.os.Build
 import android.provider.AlarmClock
 import android.provider.CalendarContract
@@ -18,6 +17,8 @@ import android.provider.Telephony
 import android.util.Log
 import android.view.*
 import android.widget.Toast
+import androidx.core.content.edit
+import androidx.core.net.toUri
 import com.google.android.play.core.review.ReviewException
 import com.google.android.play.core.review.ReviewInfo
 import com.google.android.play.core.review.ReviewManagerFactory
@@ -50,7 +51,7 @@ fun Activity.searchIconPack() {
     try {
         this.startActivity(
             Intent(
-                Intent.ACTION_VIEW, Uri.parse(url)
+                Intent.ACTION_VIEW, url.toUri()
             )
         )
     } catch (ex: Exception) {
@@ -80,7 +81,7 @@ fun Activity.uninstallApp(
     packageName: String,
 ) {
     val intent = Intent(Intent.ACTION_DELETE)
-    intent.data = Uri.parse("package:$packageName")
+    intent.data = "package:$packageName".toUri()
     this.startActivity(intent)
 }
 
@@ -171,7 +172,7 @@ fun Activity.rateAppInApp(forceRateInApp: Boolean = false) {
                     val reviewInfo: ReviewInfo = task.result
                     reviewManager.launchReviewFlow(this, reviewInfo)
                     // Use commit() instead of apply() to ensure synchronous write
-                    sharedPreferences.edit().putLong("last_review_time", currentTime).commit()
+                    sharedPreferences.edit(commit = true) { putLong("last_review_time", currentTime) }
                 } else {
                     @ReviewErrorCode val reviewErrorCode = (task.exception as ReviewException).errorCode
                     Log.e("rateAppInApp", "Review request error: $reviewErrorCode")
@@ -190,7 +191,7 @@ fun Activity.rateApp(
     try {
         this.startActivity(
             Intent(
-                Intent.ACTION_VIEW, Uri.parse("market://details?id=$packageName")
+                Intent.ACTION_VIEW, "market://details?id=$packageName".toUri()
             )
         )
     } catch (e: android.content.ActivityNotFoundException) {
@@ -198,7 +199,7 @@ fun Activity.rateApp(
         this.startActivity(
             Intent(
                 Intent.ACTION_VIEW,
-                Uri.parse("http://play.google.com/store/apps/details?id=$packageName")
+                "http://play.google.com/store/apps/details?id=$packageName".toUri()
             )
         )
     }
@@ -209,7 +210,7 @@ fun Activity.moreApp(
 ) {
     try {
         val uri = "https://play.google.com/store/apps/developer?id=$nameOfDeveloper"
-        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(uri))
+        val intent = Intent(Intent.ACTION_VIEW, uri.toUri())
         this.startActivity(intent)
     } catch (_: Exception) {
         //do nothing
@@ -254,7 +255,7 @@ fun Activity?.likeFacebookFanpage(
         try {
             val facebookIntent = Intent(Intent.ACTION_VIEW)
             val facebookUrl = getFacebookPageURL()
-            facebookIntent.data = Uri.parse(facebookUrl)
+            facebookIntent.data = facebookUrl.toUri()
             startActivity(facebookIntent)
         } catch (e: Exception) {
             Toast.makeText(
@@ -290,7 +291,7 @@ fun Activity.playYoutube(
     if (url.isNullOrEmpty()) {
         return
     }
-    this.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+    this.startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
 }
 
 fun Activity.playYoutubeWithId(

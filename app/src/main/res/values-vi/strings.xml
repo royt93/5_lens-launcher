@@ -101,4 +101,13 @@
     <string name="no_apps_found">Không tìm thấy ứng dụng</string>
     <string name="search_empty_state">Nhập tên ứng dụng để tìm kiếm</string>
     <string name="search_open_app">Mở %1$s</string>
+    <string name="about_features_header">✨ Tính năng nổi bật</string>
+    <string name="about_feature_equispaced_grid">• Lưới đều - hiển thị mọi ứng dụng bất kể kích thước màn hình</string>
+    <string name="about_feature_fisheye_lens">• Ống kính mắt cá - phóng to, di chuyển bằng cử chỉ chạm</string>
+    <string name="about_feature_full_settings">• Cài đặt đầy đủ - tùy chỉnh ống kính, biểu tượng, màu sắc và hơn thế nữa</string>
+    <string name="about_section_header">📱 Giới thiệu</string>
+    <string name="about_credits_header">ℹ️ Thông tin</string>
+    <string name="about_made_with_love">Được tạo với ❤️</string>
+    <string name="ads_action_disclosure">Lưu ý: thao tác này có thể hiển thị quảng cáo</string>
+    <string name="ad_label">Quảng cáo</string>
 </resources>

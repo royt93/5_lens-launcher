@@ -1,11 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Overdraw: same reasoning as act_settings.xml — this activity shares AppTheme.NoActionBar
+     with ActAbout/SuperWebViewActivity, whose layouts rely on that theme's default background,
+     so moving colorPrimary into the theme instead of painting it here is out of scope (would
+     need verifying those other screens don't visually regress). -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/rootLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/colorPrimary">
+    android:background="?attr/colorPrimary"
+    tools:ignore="Overdraw">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -110,7 +115,7 @@
                                 android:layout_height="wrap_content"
                                 android:background="@drawable/bg_vip_pill_badge"
                                 android:backgroundTint="#15FFFFFF"
-                                android:text="LENS MEMBER"
+                                tools:text="LENS MEMBER"
                                 android:textColor="#FFFFFF"
                                 android:textSize="11sp"
                                 android:textStyle="bold"

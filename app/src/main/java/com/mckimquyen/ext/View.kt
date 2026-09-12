@@ -11,6 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.FrameLayout
+import androidx.core.graphics.createBitmap
 import androidx.core.view.ViewCompat
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
@@ -88,7 +89,7 @@ fun Drawable.toBitmap(): Bitmap {
     val width = if (bounds.isEmpty) intrinsicWidth else bounds.width()
     val height = if (bounds.isEmpty) intrinsicHeight else bounds.height()
 
-    return Bitmap.createBitmap(width.nonZero(), height.nonZero(), Bitmap.Config.ARGB_8888).also {
+    return createBitmap(width.nonZero(), height.nonZero(), Bitmap.Config.ARGB_8888).also {
         val canvas = Canvas(it)
         setBounds(0, 0, canvas.width, canvas.height)
         draw(canvas)
