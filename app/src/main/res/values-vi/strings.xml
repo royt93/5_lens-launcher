@@ -1,12 +1,10 @@
 <resources>
     <string name="activity_title_about">Giới thiệu</string>
-    <string name="activity_title_arranger">Sắp xếp &amp; Hiển thị</string>
     <string name="activity_title_settings">Cài đặt</string>
     <string name="activity_title_apps">Ứng dụng</string>
     <string name="tab_lens">Thấu kính</string>
     <string name="tab_apps">Ứng dụng</string>
     <string name="tab_settings">Cài đặt</string>
-    <string name="setting_lens_diameter">Đường kính thấu kính</string>
     <string name="setting_min_icon_size">Kích thước biểu tượng</string>
     <string name="setting_distortion_factor">Hệ số biến dạng</string>
     <string name="setting_scale_factor">Hệ số tỷ lệ</string>
@@ -17,14 +15,12 @@
     <string name="setting_show_touch_selection">Hiện lựa chọn chạm</string>
     <string name="setting_show_search_bar">Hiện thanh tìm kiếm</string>
     <string name="setting_show_new_app_tag">Hiện nhãn ứng dụng mới</string>
-    <string name="setting_background_color">Màu nền</string>
     <string name="setting_highlight_color">Màu nổi bật</string>
     <string name="setting_icon_pack">Gói biểu tượng</string>
     <string name="setting_home_launcher">Trình khởi chạy mặc định</string>
     <string name="setting_night_mode">Giao diện chế độ tối</string>
     <string name="setting_background">Hình nền</string>
     <string name="setting_default_icon_pack">Gói biểu tượng mặc định</string>
-    <string name="setting_default_sort_selected">@string/setting_sort_type_label_ascending</string>
     <string name="setting_sort_type_label_ascending">Tên ứng dụng (Tăng dần)</string>
     <string name="setting_sort_type_label_descending">Tên ứng dụng (Giảm dần)</string>
     <string name="setting_sort_type_install_date_ascending">Mới nhất trước</string>
@@ -33,13 +29,10 @@
     <string name="setting_sort_type_open_count_descending">Mở ít nhất</string>
     <string name="setting_sort_type_icon_color_ascending">Màu sắc biểu tượng (Sáng đến Tối)</string>
     <string name="setting_sort_type_icon_color_descending">Màu sắc biểu tượng (Tối đến Sáng)</string>
-    <string name="setting_app_arranger">@string/activity_title_arranger</string>
     <string name="setting_sort_apps">Thứ tự ứng dụng</string>
     <string name="menu_title_about">Giới thiệu (Có thể có quảng cáo)</string>
     <string name="menu_title_reset_defaults">Khôi phục cài đặt mặc định</string>
-    <string name="menu_title_change_home_launcher">Thay đổi trình khởi chạy mặc định</string>
     <string name="menu_title_show_apps">Bắt đầu (Có thể có quảng cáo)</string>
-    <string name="menu_app_open"><b>Mở</b></string>
     <string name="menu_app_info">Thông tin ứng dụng</string>
     <string name="organization_add_favorite">Thêm vào yêu thích</string>
     <string name="organization_remove_favorite">Bỏ khỏi yêu thích</string>
@@ -59,17 +52,11 @@
     <string name="menu_app_uninstall">Gỡ cài đặt</string>
     <string name="error_app_not_found">Không tìm thấy ứng dụng</string>
     <string name="error_too_many_apps">Lỗi tải ứng dụng</string>
-    <string name="progress_loading_apps">Đang tải ứng dụng</string>
-    <string name="progress_loading_icons">Đang tải biểu tượng</string>
     <string name="snackbar_reset_successful">Giá trị đã được thiết lập lại mặc định</string>
     <string name="about"><![CDATA[Fisheye Launcher là một cách độc đáo và hiệu quả để duyệt và mở các ứng dụng của bạn.<br><br>Thay vì cuộn qua danh sách dài hoặc vuốt qua nhiều trang, Fisheye Launcher triển khai hai tính năng độc đáo:<br><br><b>• Lưới khoảng cách đều hiển thị tất cả ứng dụng của bạn, bất kể kích thước màn hình hay số lượng ứng dụng.<br><br>• Thấu kính Fisheye đồ họa để nhanh chóng thu phóng, xoay và mở ứng dụng bằng cử chỉ chạm.</b><br><br>Fisheye Launcher cũng bao gồm một menu Cài đặt đầy đủ để tinh chỉnh tất cả các khía cạnh của Thấu kính; Biến dạng, Tỷ lệ, Kích thước biểu tượng, Phản hồi rung, v.v.]]></string>
-    <string name="title_activity_main">MainActivity</string>
-    <string name="pro">PRO</string>
-    <string name="get_pro">Nâng cấp Fisheye Launcher PRO</string>
     <string name="done">Xong</string>
     <string name="cancel">Hủy</string>
     <string name="back">Quay lại</string>
-    <string name="start">Bắt đầu</string>
     <string name="rate_app">Đánh giá ứng dụng</string>
     <string name="more_app">Ứng dụng khác</string>
     <string name="share_app">Chia sẻ ứng dụng</string>
@@ -86,7 +73,6 @@
     <string name="github_original">Github (Gốc)</string>
     <string name="github_fork">Github (Nhánh phụ)</string>
     <string name="license">Giấy phép</string>
-    <string name="applovin_config">Cấu hình Applovin</string>
     <string name="error_title">Rất tiếc!</string>
     <string name="button_retry">Thử lại</string>
     <string name="error_message">Đã xảy ra lỗi.</string>
@@ -108,9 +94,7 @@
     <string name="choose_language_subtitle">Chọn ngôn ngữ ưa thích của bạn</string>
     <string name="setting_language_title">Ngôn ngữ ứng dụng</string>
     <string name="search_language_hint">Tìm kiếm ngôn ngữ…</string>
-    <string name="no_language_found">Không tìm thấy ngôn ngữ</string>
     <string name="search_apps_hint">Tìm ứng dụng</string>
-    <string name="clear_search">Xóa nội dung tìm kiếm</string>
     <string name="recent_apps">Ứng dụng gần đây</string>
     <string name="clear_recent_apps">Xóa</string>
     <string name="recent_apps_cleared">Đã xóa ứng dụng gần đây</string>

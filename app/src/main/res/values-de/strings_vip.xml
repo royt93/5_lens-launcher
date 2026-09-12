@@ -7,7 +7,6 @@
     <string name="vip_expires_at">Läuft ab am: %1$s</string>
     <string name="vip_remaining">%1$dd %2$02dh %3$02dm %4$02ds</string>
     <string name="vip_redeem_label">VIP-Code eingeben</string>
-    <string name="vip_redeem_hint">Z.B. LOITP_30</string>
     <string name="vip_redeem_button">Aktivieren</string>
     <string name="vip_watch_ad_3d">Werbung ansehen → 3 Tage VIP</string>
     <string name="vip_buy_30d_locked">30 Tage VIP kaufen — demnächst</string>
@@ -20,19 +19,8 @@
     <string name="vip_revoke_all_confirm_message">Sind Sie sicher, dass Sie den VIP-Status entziehen und zum kostenlosen Konto zurückkehren möchten?</string>
     <string name="vip_entry_first_install">🎁 Geschenk zur Erstinstallation</string>
     <string name="vip_entry_redeemed">VIP %1$d Tage</string>
-    <string name="vip_verifying_title">Verifizieren…</string>
     <string name="vip_success_title">Erfolgreich</string>
     <string name="vip_failed_title">Fehlgeschlagen</string>
-    <string name="vip_member_yes">VIP-Mitglied: Ja</string>
-    <string name="vip_member_no">VIP-Mitglied: Nein</string>
-    <string name="vip_expires_at_format">Läuft ab am: %1$s</string>
-    <string name="vip_added_success">Zu VIP hinzugefügt</string>
-    <string name="vip_removed_success">Aus VIP entfernt</string>
-    <string name="vip_3d_activated">3 Tage VIP aktiviert!</string>
-    <string name="vip_add_btn">VIP hinzufügen</string>
-    <string name="vip_remove_btn">VIP entfernen</string>
-    <string name="vip_unlock_key_btn">VIP mit Key freischalten</string>
-    <string name="vip_manage_desc">Verwalten Sie Ihren VIP-Status unten.</string>
     <string name="vip_premium_title">VIP Premium</string>
     <string name="vip_badge_active">Aktiv</string>
     <string name="vip_badge_get">VIP holen</string>

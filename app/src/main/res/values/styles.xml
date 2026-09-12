@@ -52,11 +52,6 @@
         <item name="android:textColorAlertDialogListItem">@color/colorPrimary</item>
     </style>
 
-    <!-- Rounded Dialog Theme for Color Chooser -->
-    <style name="RoundedDialogTheme" parent="Theme.AppCompat.Light.Dialog.Alert">
-        <item name="android:windowBackground">@drawable/bg_dialog_rounded</item>
-    </style>
-
     <!-- Popup Menu Style -->
     <style name="RoundedPopupMenuStyle" parent="Widget.AppCompat.PopupMenu">
         <item name="android:popupBackground">@drawable/bg_popup_menu</item>

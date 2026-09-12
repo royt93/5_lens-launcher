@@ -7,7 +7,6 @@
     <string name="vip_expires_at">Kedaluwarsa: %1$s</string>
     <string name="vip_remaining">%1$dd %2$02dh %3$02dm %4$02ds</string>
     <string name="vip_redeem_label">Masukkan kode VIP</string>
-    <string name="vip_redeem_hint">Misal, LOITP_30</string>
     <string name="vip_redeem_button">Aktifkan</string>
     <string name="vip_watch_ad_3d">Tonton iklan → 3 hari VIP</string>
     <string name="vip_buy_30d_locked">Beli VIP 30 Hari — segera hadir</string>
@@ -20,19 +19,8 @@
     <string name="vip_revoke_all_confirm_message">Apakah Anda yakin ingin mencabut VIP dan kembali ke Akun Gratis?</string>
     <string name="vip_entry_first_install">🎁 Hadiah Penginstalan Baru</string>
     <string name="vip_entry_redeemed">VIP %1$d hari</string>
-    <string name="vip_verifying_title">Memverifikasi…</string>
     <string name="vip_success_title">Sukses</string>
     <string name="vip_failed_title">Gagal</string>
-    <string name="vip_member_yes">Anggota VIP: Ya</string>
-    <string name="vip_member_no">Anggota VIP: Tidak</string>
-    <string name="vip_expires_at_format">Kedaluwarsa pada: %1$s</string>
-    <string name="vip_added_success">Ditambahkan ke VIP</string>
-    <string name="vip_removed_success">Dihapus dari VIP</string>
-    <string name="vip_3d_activated">VIP 3 Hari Diaktifkan!</string>
-    <string name="vip_add_btn">Tambah VIP</string>
-    <string name="vip_remove_btn">Hapus VIP</string>
-    <string name="vip_unlock_key_btn">Buka Kunci VIP dengan Kunci</string>
-    <string name="vip_manage_desc">Kelola status VIP Anda di bawah ini.</string>
     <string name="vip_premium_title">VIP Premium</string>
     <string name="vip_badge_active">Aktif</string>
     <string name="vip_badge_get">Dapatkan VIP</string>

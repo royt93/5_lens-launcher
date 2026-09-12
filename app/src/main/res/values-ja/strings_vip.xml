@@ -7,7 +7,6 @@
     <string name="vip_expires_at">有効期限: %1$s</string>
     <string name="vip_remaining">%1$dd %2$02dh %3$02dm %4$02ds</string>
     <string name="vip_redeem_label">VIPコードを入力</string>
-    <string name="vip_redeem_hint">例: LOITP_30</string>
     <string name="vip_redeem_button">有効化</string>
     <string name="vip_watch_ad_3d">広告を見る → 3日間のVIP</string>
     <string name="vip_buy_30d_locked">30日間のVIPを購入 — 近日公開</string>
@@ -20,19 +19,8 @@
     <string name="vip_revoke_all_confirm_message">本当にVIPを無効化し、無料アカウントに戻しますか？</string>
     <string name="vip_entry_first_install">🎁 新規インストール特典</string>
     <string name="vip_entry_redeemed">VIP %1$d 日間</string>
-    <string name="vip_verifying_title">確認中…</string>
     <string name="vip_success_title">成功</string>
     <string name="vip_failed_title">失敗</string>
-    <string name="vip_member_yes">VIP会員: はい</string>
-    <string name="vip_member_no">VIP会員: いいえ</string>
-    <string name="vip_expires_at_format">有効期限: %1$s</string>
-    <string name="vip_added_success">VIPに追加されました</string>
-    <string name="vip_removed_success">VIPから削除されました</string>
-    <string name="vip_3d_activated">3日間のVIPが有効になりました！</string>
-    <string name="vip_add_btn">VIPを追加</string>
-    <string name="vip_remove_btn">VIPを削除</string>
-    <string name="vip_unlock_key_btn">キーでVIPを解除</string>
-    <string name="vip_manage_desc">以下でVIPステータスを管理します。</string>
     <string name="vip_premium_title">VIPプレミアム</string>
     <string name="vip_badge_active">有効</string>
     <string name="vip_badge_get">VIPを取得</string>

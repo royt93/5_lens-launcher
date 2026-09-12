@@ -7,7 +7,6 @@
     <string name="vip_expires_at">تاريخ الانتهاء: %1$s</string>
     <string name="vip_remaining">%1$dd %2$02dh %3$02dm %4$02ds</string>
     <string name="vip_redeem_label">أدخل رمز VIP</string>
-    <string name="vip_redeem_hint">مثال، LOITP_30</string>
     <string name="vip_redeem_button">تفعيل</string>
     <string name="vip_watch_ad_3d">شاهد إعلانًا ← VIP لمدة 3 أيام</string>
     <string name="vip_buy_30d_locked">شراء VIP لمدة 30 يومًا — قريبًا</string>
@@ -20,19 +19,8 @@
     <string name="vip_revoke_all_confirm_message">هل أنت متأكد من رغبتك في إلغاء VIP والعودة إلى الحساب المجاني؟</string>
     <string name="vip_entry_first_install">🎁 هدية تثبيت جديدة</string>
     <string name="vip_entry_redeemed">VIP لمدة %1$d أيام</string>
-    <string name="vip_verifying_title">جاري التحقق…</string>
     <string name="vip_success_title">ناجح</string>
     <string name="vip_failed_title">فشل</string>
-    <string name="vip_member_yes">عضو VIP: نعم</string>
-    <string name="vip_member_no">عضو VIP: لا</string>
-    <string name="vip_expires_at_format">ينتهي في: %1$s</string>
-    <string name="vip_added_success">تمت الإضافة إلى VIP</string>
-    <string name="vip_removed_success">تمت الإزالة من VIP</string>
-    <string name="vip_3d_activated">تم تفعيل VIP لمدة 3 أيام!</string>
-    <string name="vip_add_btn">إضافة VIP</string>
-    <string name="vip_remove_btn">إزالة VIP</string>
-    <string name="vip_unlock_key_btn">إلغاء قفل VIP بالمفتاح</string>
-    <string name="vip_manage_desc">إدارة حالة VIP الخاصة بك أدناه.</string>
     <string name="vip_premium_title">VIP بريميوم</string>
     <string name="vip_badge_active">نشط</string>
     <string name="vip_badge_get">احصل على VIP</string>

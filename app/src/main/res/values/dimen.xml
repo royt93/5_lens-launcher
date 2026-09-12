@@ -5,11 +5,8 @@
     <dimen name="radius_touch_selection">50dp</dimen>
     <dimen name="stroke_width_touch_selection">3dp</dimen>
     <dimen name="text_size_lens">14sp</dimen>
-    <dimen name="text_stroke_lens">1dp</dimen>
     <dimen name="margin_lens_text">8dp</dimen>
     <dimen name="shadow_text">1dp</dimen>
-    <dimen name="offset_system_vertical">80dp</dimen>
-    <dimen name="offset_system_horizontal">0dp</dimen>
     <dimen name="radius_new_app_tag">3dp</dimen>
     <dimen name="margin_new_app_tag">6dp</dimen>
     <dimen name="height_lens_preview">360dp</dimen>
@@ -19,21 +16,14 @@
     <dimen name="radius_highlight_color_switch">16dp</dimen>
 
     <!-- About Dimensions -->
-    <dimen name="text_size_about">32sp</dimen>
-    <dimen name="padding_about">32dp</dimen>
-    <dimen name="header_margin_about">16dp</dimen>
 
     <!-- App Recycler Item Dimensions -->
     <dimen name="width_app_icon">48dp</dimen>
     <dimen name="height_app_action_button">64dp</dimen>
-    <dimen name="radius_corner_card">4dp</dimen>
     <dimen name="margin_app">8dp</dimen>
 
     <!-- General -->
     <dimen name="margin_fab">16dp</dimen>
     <dimen name="activity_horizontal_margin">16dp</dimen>
-    <dimen name="activity_horizontal_margin_apps">8dp</dimen>
-    <dimen name="activity_vertical_margin">16dp</dimen>
 
-    <dimen name="margin_padding_small">8dp</dimen>
 </resources>

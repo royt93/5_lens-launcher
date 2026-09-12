@@ -1,12 +1,10 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="activity_title_about">About</string>
-    <string name="activity_title_arranger">Order &amp; Visibility</string>
     <string name="activity_title_settings">Settings</string>
     <string name="activity_title_apps">Apps</string>
     <string name="tab_lens">Lens</string>
     <string name="tab_apps">Apps</string>
     <string name="tab_settings">Settings</string>
-    <string name="setting_lens_diameter">Lens Diameter</string>
     <string name="setting_min_icon_size">Icon Size</string>
     <string name="setting_distortion_factor">Distortion Factor</string>
     <string name="setting_scale_factor">Scale Factor</string>
@@ -18,14 +16,12 @@
     <!-- UI-001 ships in the app's maintained English/Vietnamese locales first. -->
     <string name="setting_show_search_bar" tools:ignore="MissingTranslation">Show Search Bar</string>
     <string name="setting_show_new_app_tag">Show New App Tag</string>
-    <string name="setting_background_color">Background Color</string>
     <string name="setting_highlight_color">Highlight Color</string>
     <string name="setting_icon_pack">Icon Pack</string>
     <string name="setting_home_launcher">Home Launcher</string>
     <string name="setting_night_mode">Night Mode Theme</string>
     <string name="setting_background">Background</string>
     <string name="setting_default_icon_pack">Default Icon Pack</string>
-    <string name="setting_default_sort_selected">@string/setting_sort_type_label_ascending</string>
     <string name="setting_sort_type_label_ascending">App Name (Ascending)</string>
     <string name="setting_sort_type_label_descending">App Name (Descending)</string>
     <string name="setting_sort_type_install_date_ascending">Newest First</string>
@@ -34,13 +30,10 @@
     <string name="setting_sort_type_open_count_descending">Least Opened</string>
     <string name="setting_sort_type_icon_color_ascending">Icon Color (Light to Dark)</string>
     <string name="setting_sort_type_icon_color_descending">Icon Color (Dark to Light)</string>
-    <string name="setting_app_arranger">@string/activity_title_arranger</string>
     <string name="setting_sort_apps">App Order</string>
     <string name="menu_title_about">About (Ads may appear)</string>
     <string name="menu_title_reset_defaults">Reset Default Settings</string>
-    <string name="menu_title_change_home_launcher">Change Home Launcher</string>
     <string name="menu_title_show_apps">Start (Ads may appear)</string>
-    <string name="menu_app_open"><b>Open</b></string>
     <string name="menu_app_info">App Info</string>
     <!-- FEAT-002 ships in the app's maintained English/Vietnamese locales first. -->
     <string name="organization_add_favorite" tools:ignore="MissingTranslation">Add to favorites</string>
@@ -61,17 +54,11 @@
     <string name="menu_app_uninstall">Uninstall</string>
     <string name="error_app_not_found">App Not Found</string>
     <string name="error_too_many_apps">Failed to Load Apps</string>
-    <string name="progress_loading_apps">Loading Apps</string>
-    <string name="progress_loading_icons">Loading Icons</string>
     <string name="snackbar_reset_successful">Values Reset To Default</string>
     <string name="about"><![CDATA[Fisheye Launcher is a unique, efficient way to browse and launch your apps.<br><br>Instead of scrolling long lists or swiping through multiple pages, Fisheye Launcher implements two unique features:<br><br><b>• An Equispaced Grid that displays all of your apps, regardless of screen size or app count.<br><br>• A Graphical Fisheye Lens to quickly zoom, pan and launch apps using touch gestures.</b><br><br>Fisheye Launcher also includes a full Settings menu to tweak all aspects of the Lens; Distortion, Scaling, Icon Size, Haptic Feedback, etc.</a>]]></string>
-    <string name="title_activity_main">MainActivity</string>
-    <string name="pro">PRO</string>
-    <string name="get_pro">Get Fisheye Launcher PRO</string>
     <string name="done">Done</string>
     <string name="cancel">Cancel</string>
     <string name="back">Back</string>
-    <string name="start">Start</string>
     <string name="rate_app">Rate app</string>
     <string name="more_app">More app</string>
     <string name="share_app">Share app</string>
@@ -88,7 +75,6 @@
     <string name="github_original">Github (Original)</string>
     <string name="github_fork">Github (Forked)</string>
     <string name="license">License</string>
-    <string name="applovin_config">Applovin config</string>
     <string name="error_title">Oops!</string>
     <string name="button_retry">Try again</string>
     <string name="error_message">Something went wrong.</string>
@@ -115,9 +101,7 @@
     <string name="choose_language_subtitle">Choose your preferred language</string>
     <string name="setting_language_title">App Language</string>
     <string name="search_language_hint">Search language…</string>
-    <string name="no_language_found">No language found</string>
     <string name="search_apps_hint">Search apps</string>
-    <string name="clear_search">Clear search</string>
     <string name="recent_apps">Recent apps</string>
     <string name="clear_recent_apps">Clear</string>
     <string name="recent_apps_cleared">Recent apps cleared</string>

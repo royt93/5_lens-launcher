@@ -7,7 +7,6 @@
     <string name="vip_expires_at">만료일: %1$s</string>
     <string name="vip_remaining">%1$dd %2$02dh %3$02dm %4$02ds</string>
     <string name="vip_redeem_label">VIP 코드 입력</string>
-    <string name="vip_redeem_hint">예: LOITP_30</string>
     <string name="vip_redeem_button">활성화</string>
     <string name="vip_watch_ad_3d">광고 시청 → 3일 VIP</string>
     <string name="vip_buy_30d_locked">30일 VIP 구매 — 준비 중</string>
@@ -20,19 +19,8 @@
     <string name="vip_revoke_all_confirm_message">VIP 권한을 취소하고 무료 계정으로 돌아가시겠습니까?</string>
     <string name="vip_entry_first_install">🎁 신규 설치 선물</string>
     <string name="vip_entry_redeemed">VIP %1$d 일</string>
-    <string name="vip_verifying_title">확인 중…</string>
     <string name="vip_success_title">성공</string>
     <string name="vip_failed_title">실패</string>
-    <string name="vip_member_yes">VIP 회원: 예</string>
-    <string name="vip_member_no">VIP 회원: 아니요</string>
-    <string name="vip_expires_at_format">만료일: %1$s</string>
-    <string name="vip_added_success">VIP에 추가됨</string>
-    <string name="vip_removed_success">VIP에서 제거됨</string>
-    <string name="vip_3d_activated">3일 VIP 활성화 완료!</string>
-    <string name="vip_add_btn">VIP 추가</string>
-    <string name="vip_remove_btn">VIP 제거</string>
-    <string name="vip_unlock_key_btn">키로 VIP 잠금 해제</string>
-    <string name="vip_manage_desc">아래에서 VIP 상태를 관리하세요.</string>
     <string name="vip_premium_title">VIP 프리미엄</string>
     <string name="vip_badge_active">활성</string>
     <string name="vip_badge_get">VIP 받기</string>

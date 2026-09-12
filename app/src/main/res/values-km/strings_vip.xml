@@ -7,7 +7,6 @@
     <string name="vip_expires_at">ផុតកំណត់៖ %1$s</string>
     <string name="vip_remaining">%1$dd %2$02dh %3$02dm %4$02ds</string>
     <string name="vip_redeem_label">បញ្ចូលកូដ VIP</string>
-    <string name="vip_redeem_hint">ឧទាហរណ៍៖ LOITP_30</string>
     <string name="vip_redeem_button">បើកដំណើរការ</string>
     <string name="vip_watch_ad_3d">មើលការផ្សាយពាណិជ្ជកម្ម → ទទួលបាន VIP 3 ថ្ងៃ</string>
     <string name="vip_buy_30d_locked">ទិញ VIP 30 ថ្ងៃ — នឹងមកដល់ឆាប់ៗនេះ</string>
@@ -20,19 +19,8 @@
     <string name="vip_revoke_all_confirm_message">តើអ្នកប្រាកដជាចង់ដកហូត VIP ហើយត្រឡប់ទៅប្រើគណនីឥតគិតថ្លៃវិញឬទេ?</string>
     <string name="vip_entry_first_install">🎁 កាដូដំឡើងថ្មី</string>
     <string name="vip_entry_redeemed">VIP %1$d ថ្ងៃ</string>
-    <string name="vip_verifying_title">កំពុងផ្ទៀងផ្ទាត់…</string>
     <string name="vip_success_title">ជោគជ័យ</string>
     <string name="vip_failed_title">បរាជ័យ</string>
-    <string name="vip_member_yes">សមាជិក VIP៖ បាទ/ចាស</string>
-    <string name="vip_member_no">សមាជិក VIP៖ ទេ</string>
-    <string name="vip_expires_at_format">ផុតកំណត់នៅ៖ %1$s</string>
-    <string name="vip_added_success">បានបន្ថែមទៅ VIP</string>
-    <string name="vip_removed_success">បានលុបចេញពី VIP</string>
-    <string name="vip_3d_activated">បានបើកដំណើរការ VIP 3 ថ្ងៃហើយ!</string>
-    <string name="vip_add_btn">បន្ថែម VIP</string>
-    <string name="vip_remove_btn">លុប VIP</string>
-    <string name="vip_unlock_key_btn">ដោះសោ VIP ដោយប្រើសោ</string>
-    <string name="vip_manage_desc">គ្រប់គ្រងស្ថានភាព VIP របស់អ្នកនៅខាងក្រោម។</string>
     <string name="vip_premium_title">VIP កម្រិតខ្ពស់</string>
     <string name="vip_badge_active">សកម្ម</string>
     <string name="vip_badge_get">ទទួលបាន VIP</string>

@@ -3,6 +3,5 @@
 
     <!-- General -->
     <dimen name="activity_horizontal_margin">64dp</dimen>
-    <dimen name="activity_horizontal_margin_apps">56dp</dimen>
 
 </resources>
