@@ -9,6 +9,8 @@ import android.provider.Settings
 import android.view.*
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
+import androidx.appcompat.R as AppCompatR
+import com.google.android.material.color.MaterialColors
 import com.mckimquyen.R
 import com.mckimquyen.util.isValid
 import com.mckimquyen.views.SuperWebViewActivity
@@ -135,7 +137,11 @@ fun Context.showDialog2(
     // Set rounded background
     dialog.window?.setBackgroundDrawableResource(R.drawable.bg_dialog_rounded)
 
-    val color = ContextCompat.getColor(this, R.color.colorPrimary)
+    val color = MaterialColors.getColor(
+        this,
+        AppCompatR.attr.colorPrimary,
+        ContextCompat.getColor(this, R.color.colorPrimary)
+    )
     dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(color)
     dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(color)
     return dialog

@@ -120,6 +120,48 @@ class AppSearchEngineTest {
     }
 
     @Test
+    fun `single-character typo still finds the app via fuzzy fallback`() {
+        val chrome = app("Chrome", "com.android.chrome", "Main")
+        assertEquals("Chrome", AppSearchEngine.search(listOf(chrome), "chrme").single().label)
+    }
+
+    @Test
+    fun `fuzzy match ranks below every exact and substring match`() {
+        val exactSubstring = app("Chrme Notes", "pkg.substring", "Main") // literally contains "chrme"
+        val fuzzyOnly = app("Chrome", "pkg.fuzzy", "Main")
+
+        assertEquals(
+            listOf(exactSubstring, fuzzyOnly),
+            AppSearchEngine.search(listOf(fuzzyOnly, exactSubstring), "chrme")
+        )
+    }
+
+    @Test
+    fun `two-character typo on a long word still fuzzy matches`() {
+        val app = app("Calculator", "pkg.calc", "Main")
+        assertEquals("Calculator", AppSearchEngine.search(listOf(app), "calculatr").single().label)
+        assertEquals("Calculator", AppSearchEngine.search(listOf(app), "calxulator").single().label)
+    }
+
+    @Test
+    fun `short token never fuzzy matches to avoid noisy results`() {
+        // "ab" (2 chars) is below MIN_FUZZY_TOKEN_LENGTH; must not fuzzy-match "Camera".
+        assertTrue(AppSearchEngine.search(listOf(app("Camera", "pkg", "Main")), "ab").isEmpty())
+    }
+
+    @Test
+    fun `edit distance beyond threshold is rejected not fuzzy matched`() {
+        // "xyz" vs "Camera": way more than 2 edits apart, must not match.
+        assertTrue(AppSearchEngine.search(listOf(app("Camera", "pkg", "Main")), "xyz").isEmpty())
+    }
+
+    @Test
+    fun `fuzzy matching preserves accent and case insensitivity`() {
+        val app = app("Điện Thoại", "pkg.dienthoai", "Main")
+        assertEquals("Điện Thoại", AppSearchEngine.search(listOf(app), "dien thoal").single().label)
+    }
+
+    @Test
     fun `hidden apps and unmatched multi-token queries are excluded`() {
         val hidden = app("Secret Camera", "com.vendor.secret", "Main", visible = false)
         val visible = app("Camera", "com.vendor.camera", "Main")

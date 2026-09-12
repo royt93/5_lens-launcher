@@ -4,7 +4,6 @@ import static com.mckimquyen.util.CKt.PKG_NAME;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.ColorStateList;
 import android.view.ContextThemeWrapper;
 import android.graphics.Color;
 import android.graphics.Rect;
@@ -15,7 +14,6 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -26,10 +24,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
-import androidx.core.view.ViewCompat;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.color.MaterialColors;
 import com.google.android.material.snackbar.Snackbar;
 import com.mckimquyen.R;
 import com.mckimquyen.ext.Biometric;
@@ -96,6 +94,33 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
      */
     public App getItemForPosition(int position) {
         return mApps.get(position);
+    }
+
+    /**
+     * UI-005: resolves the Material You dynamic colorPrimary at call time instead of the static
+     * @color/colorPrimary resource, so hide/lock icon tints track the wallpaper-derived palette.
+     */
+    private static int resolveDynamicPrimaryColor(Context context) {
+        return MaterialColors.getColor(
+                context,
+                androidx.appcompat.R.attr.colorPrimary,
+                ContextCompat.getColor(context, R.color.colorPrimary)
+        );
+    }
+
+    /**
+     * UI-006: pure lock-icon-state logic, pulled out of the view-binding code so it's unit
+     * testable without a device/Robolectric. isAppOpened == true means "unlocked" (tapping it
+     * LOCKS the app); false means "locked" (tapping it UNLOCKS the app).
+     */
+    @androidx.annotation.DrawableRes
+    static int lockIconResFor(boolean isAppOpened) {
+        return isAppOpened ? R.drawable.ic_lock_open_24dp : R.drawable.ic_lock_24dp;
+    }
+
+    @androidx.annotation.StringRes
+    static int lockContentDescriptionResFor(boolean isAppOpened) {
+        return isAppOpened ? R.string.lock : R.string.unlock;
     }
 
     /**
@@ -198,7 +223,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
         TextView tvAppOrganization;
         ImageView ivAppIcon;        // Icon app
         ImageView ivAppHide;        // Button ẩn/hiện app
-        Button btAppLock;           // Button khóa/mở app (biometric)
+        ImageView btAppLock;        // Button khóa/mở app (biometric) — icon, tint signals state
         ImageView ivAppMenu;        // Menu button (3 dots)
 
         // ====================================================================
@@ -265,21 +290,9 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
                 boolean isAppOpened = mApp.isOpened();
                 btAppLock.setVisibility(View.VISIBLE);
 
-                if (isAppOpened) {
-                    // App đang UNLOCKED (có thể mở được)
-                    btAppLock.setText(R.string.lock);
-                    ViewCompat.setBackgroundTintList(
-                            btAppLock,
-                            ColorStateList.valueOf(Color.GRAY)
-                    );
-                } else {
-                    // App đang LOCKED (cần biometric để mở)
-                    btAppLock.setText(R.string.unlock);
-                    ViewCompat.setBackgroundTintList(
-                            btAppLock,
-                            ColorStateList.valueOf(ContextCompat.getColor(mContext, R.color.colorPrimary))
-                    );
-                }
+                btAppLock.setImageResource(lockIconResFor(isAppOpened));
+                btAppLock.setColorFilter(isAppOpened ? Color.GRAY : resolveDynamicPrimaryColor(mContext));
+                btAppLock.setContentDescription(mContext.getString(lockContentDescriptionResFor(isAppOpened)));
             } else {
                 // Device không có biometric -> ẩn lock button
                 btAppLock.setVisibility(View.GONE);
@@ -296,7 +309,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
             } else {
                 // App đang HIDDEN trong launcher
                 ivAppHide.setImageResource(R.drawable.ic_visibility_off_grey_24dp);
-                ivAppHide.setColorFilter(ContextCompat.getColor(mContext, R.color.colorPrimary));
+                ivAppHide.setColorFilter(resolveDynamicPrimaryColor(mContext));
             }
 
             // ================================================================
@@ -414,7 +427,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
                 // Đang visible -> chuyển sang hidden
                 Snackbar.make(cvAppContainer, mApp.getLabel() + " is now hidden", Snackbar.LENGTH_LONG).show();
                 ivAppHide.setImageResource(R.drawable.ic_visibility_off_grey_24dp);
-                ivAppHide.setColorFilter(ContextCompat.getColor(mContext, R.color.colorPrimary));
+                ivAppHide.setColorFilter(resolveDynamicPrimaryColor(mContext));
             } else {
                 // Đang hidden -> chuyển sang visible
                 Snackbar.make(cvAppContainer, mApp.getLabel() + " is now visible", Snackbar.LENGTH_LONG).show();
@@ -461,23 +474,17 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
                             AppPersistent.setAppOpened(pkgName, name, !isAppOpened);
 
                             // Update UI
+                            boolean isNowOpened = !isAppOpened;
                             if (isAppOpened) {
                                 // Đang unlocked -> chuyển sang locked
                                 Snackbar.make(cvAppContainer, label + " is now locked", Snackbar.LENGTH_LONG).show();
-                                btAppLock.setText(R.string.unlock);
-                                ViewCompat.setBackgroundTintList(
-                                        btAppLock,
-                                        ColorStateList.valueOf(ContextCompat.getColor(mContext, R.color.colorPrimary))
-                                );
                             } else {
                                 // Đang locked -> chuyển sang unlocked
                                 Snackbar.make(cvAppContainer, label + " is now unlocked", Snackbar.LENGTH_LONG).show();
-                                btAppLock.setText(R.string.lock);
-                                ViewCompat.setBackgroundTintList(
-                                        btAppLock,
-                                        ColorStateList.valueOf(Color.GRAY)
-                                );
                             }
+                            btAppLock.setImageResource(lockIconResFor(isNowOpened));
+                            btAppLock.setColorFilter(isNowOpened ? Color.GRAY : resolveDynamicPrimaryColor(mContext));
+                            btAppLock.setContentDescription(mContext.getString(lockContentDescriptionResFor(isNowOpened)));
 
                             // Đồng bộ trạng thái vào Adapter list
                             int position = getBindingAdapterPosition();

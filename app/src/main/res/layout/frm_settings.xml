@@ -18,7 +18,7 @@
         android:padding="0dp">
 
         <!-- General Settings Card -->
-        <androidx.cardview.widget.CardView
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:cardCornerRadius="20dp"
@@ -70,7 +70,7 @@
                             android:id="@+id/tvSelectedHomeLauncher"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/colorPrimary"
+                            android:textColor="?attr/colorPrimary"
                             android:textSize="14sp"
                             tools:text="@string/app_name" />
 
@@ -120,7 +120,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/setting_default_icon_pack"
-                            android:textColor="@color/colorPrimary"
+                            android:textColor="?attr/colorPrimary"
                             android:textSize="14sp" />
 
                         <androidx.appcompat.widget.AppCompatButton
@@ -184,7 +184,7 @@
                             android:id="@+id/tvSelectedNightMode"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/colorPrimary"
+                            android:textColor="?attr/colorPrimary"
                             android:textSize="14sp"
                             tools:text="@string/app_name" />
 
@@ -233,7 +233,7 @@
                             android:id="@+id/tvSelectedLanguage"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/colorPrimary"
+                            android:textColor="?attr/colorPrimary"
                             android:textSize="14sp"
                             tools:text="English" />
 
@@ -282,7 +282,7 @@
                             android:id="@+id/tvVipStatusSummary"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/colorPrimary"
+                            android:textColor="?attr/colorPrimary"
                             android:textSize="14sp"
                             tools:text="Free User" />
 
@@ -292,10 +292,10 @@
 
             </LinearLayout>
 
-        </androidx.cardview.widget.CardView>
+        </com.google.android.material.card.MaterialCardView>
 
         <!-- Appearance Card -->
-        <androidx.cardview.widget.CardView
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:cardCornerRadius="20dp"
@@ -347,7 +347,7 @@
                             android:id="@+id/tvSelectedBackground"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/colorPrimary"
+                            android:textColor="?attr/colorPrimary"
                             android:textSize="14sp"
                             tools:text="#FFFFFF" />
 
@@ -403,7 +403,7 @@
                             android:id="@+id/tvSelectedHighlightColor"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/colorPrimary"
+                            android:textColor="?attr/colorPrimary"
                             android:textSize="14sp"
                             tools:text="#FFFFFF" />
 
@@ -420,10 +420,10 @@
 
             </LinearLayout>
 
-        </androidx.cardview.widget.CardView>
+        </com.google.android.material.card.MaterialCardView>
 
         <!-- Behavior Card -->
-        <androidx.cardview.widget.CardView
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:cardCornerRadius="20dp"
@@ -682,7 +682,7 @@
 
             </LinearLayout>
 
-        </androidx.cardview.widget.CardView>
+        </com.google.android.material.card.MaterialCardView>
 
     </LinearLayout>
 

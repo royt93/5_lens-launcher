@@ -162,7 +162,7 @@ class FrmLens : Fragment(), LensInterface {
 
     private fun resetToDefault() {
         utilSettings?.let { us ->
-            us.save(UtilSettings.KEY_ICON_SIZE, UtilSettings.DEFAULT_ICON_SIZE)
+            us.save(UtilSettings.KEY_ICON_SIZE, us.autoDefaultIconSize)
             us.save(UtilSettings.KEY_DISTORTION_FACTOR, UtilSettings.DEFAULT_DISTORTION_FACTOR)
             us.save(UtilSettings.KEY_SCALE_FACTOR, UtilSettings.DEFAULT_SCALE_FACTOR)
             us.save(UtilSettings.KEY_ANIMATION_TIME, UtilSettings.DEFAULT_ANIMATION_TIME)

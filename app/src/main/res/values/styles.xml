@@ -47,9 +47,9 @@
 
     <style name="LightAlertDialogCustom" parent="Theme.AppCompat.Light.Dialog.Alert">
         <item name="android:background">@color/colorWhite</item>
-        <item name="android:textColor">@color/colorPrimary</item>
+        <item name="android:textColor">?attr/colorPrimary</item>
         <item name="android:textColorPrimary">@color/colorBlack</item>
-        <item name="android:textColorAlertDialogListItem">@color/colorPrimary</item>
+        <item name="android:textColorAlertDialogListItem">?attr/colorPrimary</item>
     </style>
 
     <!-- Popup Menu Style -->
@@ -67,11 +67,13 @@
         <item name="popupMenuStyle">@style/RoundedPopupMenuStyle</item>
     </style>
 
-    <!-- Material 3 styled Dialog Theme with Crimson Accent Colors based on Material Components -->
-    <style name="MaterialYouDialogTheme" parent="Theme.MaterialComponents.DayNight.Dialog.Alert">
+    <!-- UI-005: ThemeOverlay (not a standalone Theme) so this inherits colorPrimary/colorAccent
+         from the activity context it wraps (MaterialAlertDialogBuilder(activity, this)) instead
+         of re-declaring them statically - the activity's theme is already dynamic-color-patched
+         by DynamicColors.applyToActivitiesIfAvailable(), which only patches Activities, not a
+         standalone Theme.* resource used directly as a dialog theme. -->
+    <style name="MaterialYouDialogTheme" parent="ThemeOverlay.Material3.MaterialAlertDialog">
         <item name="dialogCornerRadius">28dp</item>
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorAccent">@color/colorPrimary</item>
         <item name="buttonBarButtonStyle">@style/DialogButtonNoAllCapsStyle</item>
         <item name="android:buttonBarButtonStyle">@style/DialogButtonNoAllCapsStyle</item>
     </style>
@@ -81,8 +83,10 @@
         <item name="android:textAllCaps">false</item>
     </style>
 
-    <!-- Transparent Bottom Sheet Dialog Style -->
-    <style name="TransBottomSheetDialog" parent="Theme.Design.BottomSheetDialog">
+    <!-- UI-005: ThemeOverlay.Material3.BottomSheetDialog (not the legacy Theme.Design one) so
+         this bottom sheet inherits the dynamic-color-patched colorPrimary from the activity
+         context it wraps, instead of Theme.Design's fixed pre-Material3 defaults. -->
+    <style name="TransBottomSheetDialog" parent="ThemeOverlay.Material3.BottomSheetDialog">
         <item name="bottomSheetStyle">@style/TransBottomSheetStyle</item>
     </style>
     <style name="TransBottomSheetStyle" parent="Widget.Design.BottomSheet.Modal">

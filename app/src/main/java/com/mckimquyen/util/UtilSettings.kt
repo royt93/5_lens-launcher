@@ -17,10 +17,22 @@ import com.mckimquyen.enums.SortType
  */
 class UtilSettings(context: Context) {
     // Sử dụng Application Context thay vì giữ Activity Context để tránh memory leak
-    private val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
+    private val appContext: Context = context.applicationContext
+    private val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(appContext)
 
     companion object {
         const val DEFAULT_ICON_SIZE = 18.0f
+
+        // Auto-detected default icon size: DEFAULT_ICON_SIZE was tuned on a ~360dp-wide phone;
+        // scale it by the device's smallestScreenWidthDp so a first run on a tablet/foldable
+        // doesn't get a phone-sized icon by coincidence. Only used when KEY_ICON_SIZE has never
+        // been saved - once the user picks (or resets to) a value, that value always wins.
+        private const val ICON_SIZE_BASELINE_SWDP = 360
+
+        @JvmStatic
+        fun calculateAutoDefaultIconSize(smallestScreenWidthDp: Int): Float =
+            (DEFAULT_ICON_SIZE * smallestScreenWidthDp / ICON_SIZE_BASELINE_SWDP)
+                .coerceIn(MIN_ICON_SIZE, MAX_ICON_SIZE.toFloat() + MIN_ICON_SIZE)
         const val DEFAULT_DISTORTION_FACTOR = 2.5f
         const val DEFAULT_SCALE_FACTOR = 1.0f
         const val DEFAULT_ANIMATION_TIME: Long = 200
@@ -118,8 +130,12 @@ class UtilSettings(context: Context) {
             else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
         }
 
+    /** Auto-detected default for this device; see [calculateAutoDefaultIconSize]. */
+    val autoDefaultIconSize: Float
+        get() = calculateAutoDefaultIconSize(appContext.resources.configuration.smallestScreenWidthDp)
+
     fun getFloat(name: String?): Float = when (name) {
-        KEY_ICON_SIZE -> getFloatWithValidation(name, DEFAULT_ICON_SIZE, MIN_ICON_SIZE, MAX_ICON_SIZE.toFloat() + MIN_ICON_SIZE)
+        KEY_ICON_SIZE -> getFloatWithValidation(name, autoDefaultIconSize, MIN_ICON_SIZE, MAX_ICON_SIZE.toFloat() + MIN_ICON_SIZE)
         KEY_DISTORTION_FACTOR -> getFloatWithValidation(name, DEFAULT_DISTORTION_FACTOR, MIN_DISTORTION_FACTOR, MAX_DISTORTION_FACTOR / 2f + MIN_DISTORTION_FACTOR)
         KEY_SCALE_FACTOR -> getFloatWithValidation(name, DEFAULT_SCALE_FACTOR, MIN_SCALE_FACTOR, MAX_SCALE_FACTOR / 2f + MIN_SCALE_FACTOR)
         else -> prefs.getFloat(name, DEFAULT_FLOAT)

@@ -351,7 +351,13 @@ class ActVipManagement : AppCompatActivity() {
                 }
                 .start()
         } else {
-            button.setTextColor("#9E9E9E".toColorInt())
+            button.setTextColor(
+                com.google.android.material.color.MaterialColors.getColor(
+                    button,
+                    com.google.android.material.R.attr.colorOnSurfaceVariant,
+                    "#9E9E9E".toColorInt()
+                )
+            )
             button.animate()
                 .scaleX(1.0f)
                 .scaleY(1.0f)

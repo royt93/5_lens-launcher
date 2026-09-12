@@ -3,5 +3,5 @@
     <size
         android:width="24dp"
         android:height="24dp" /> <!-- Customize the thumb size -->
-    <solid android:color="@color/colorPrimary" /> <!-- Color of the thumb -->
+    <solid android:color="?attr/colorPrimary" /> <!-- Color of the thumb -->
 </shape>

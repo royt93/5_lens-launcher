@@ -77,7 +77,7 @@
                             android:id="@+id/tvValueMinIconSize"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/colorPrimary"
+                            android:textColor="?attr/colorPrimary"
                             android:textStyle="bold"
                             android:textSize="14sp"
                             tools:text="50" />
@@ -152,7 +152,7 @@
                             android:id="@+id/tvValueDistortionFactor"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/colorPrimary"
+                            android:textColor="?attr/colorPrimary"
                             android:textStyle="bold"
                             android:textSize="14sp"
                             tools:text="1.0" />
@@ -227,7 +227,7 @@
                             android:id="@+id/tvValueScaleFactor"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/colorPrimary"
+                            android:textColor="?attr/colorPrimary"
                             android:textStyle="bold"
                             android:textSize="14sp"
                             tools:text="1.5" />
@@ -301,7 +301,7 @@
                             android:id="@+id/tvValueAnimationTime"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/colorPrimary"
+                            android:textColor="?attr/colorPrimary"
                             android:textStyle="bold"
                             android:textSize="14sp"
                             tools:text="300ms" />

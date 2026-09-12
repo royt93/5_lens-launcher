@@ -24,7 +24,7 @@
         android:layout_marginBottom="4dp"
         android:text="@string/choose_language_title"
         android:textSize="20sp"
-        android:textColor="@color/colorPrimary"
+        android:textColor="?attr/colorPrimary"
         android:textStyle="bold" />
 
     <!-- Subtitle -->

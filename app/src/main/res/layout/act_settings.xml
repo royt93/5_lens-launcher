@@ -85,6 +85,7 @@
 
                     <com.google.android.material.tabs.TabLayout
                         android:id="@+id/tabs"
+                        style="@style/Widget.Material3.TabLayout.Secondary"
                         android:layout_width="match_parent"
                         android:layout_height="?attr/actionBarSize"
                         android:layout_gravity="bottom"
@@ -135,7 +136,7 @@
             android:id="@+id/flAdOpenApp"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/colorPrimary"
+            android:background="?attr/colorPrimary"
             android:orientation="vertical"
             android:padding="16dp"
             tools:visibility="invisible">

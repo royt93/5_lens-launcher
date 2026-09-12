@@ -20,6 +20,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -130,6 +131,12 @@ public class ActHome extends ActBase {
         searchView = findViewById(R.id.searchView);
         searchView.setupWithSearchBar(searchBar);
         appSearch = searchView.getEditText();
+        // UI-002: the 50%-opacity scrim behind the search panel is set declaratively via
+        // app:backgroundTint="@color/search_view_scrim_background" in act_home.xml -
+        // com.google.android.material.search.SearchView reads its panel background only from
+        // that XML attribute at inflate time and exposes no public runtime setter for it. The
+        // result list itself sits in an opaque MaterialCardView so readability never depends on
+        // what's behind the scrim.
         recentHeader = findViewById(R.id.recentHeader);
         noSearchResults = findViewById(R.id.tvNoSearchResults);
         searchResults = findViewById(R.id.rvSearchResults);
@@ -150,6 +157,9 @@ public class ActHome extends ActBase {
         searchResultAdapter = new SearchResultAdapter(this::launchSearchResult);
         searchResults.setLayoutManager(new LinearLayoutManager(this));
         searchResults.setAdapter(searchResultAdapter);
+        // UI-002: one shared divider between flat rows instead of a per-row card, matching
+        // Pixel Launcher's search list and keeping layout nesting shallow (see LINT-008).
+        searchResults.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
 
         appSearch.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- UI-002: SearchView only reads its panel background color from the "backgroundTint" XML
+     attribute at inflate time (com.google.android.material.search.SearchView has no public
+     setter for it at runtime - its backing field is private). android:alpha on a themed color
+     item (API 23+) lets this stay dynamic-color-aware while still landing at 50% opacity. -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:alpha="0.5"
+        android:color="?attr/colorSurfaceContainerHigh" />
+</selector>

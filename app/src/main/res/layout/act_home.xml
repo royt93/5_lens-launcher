@@ -46,56 +46,70 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:hint="@string/search_apps_hint"
+            app:backgroundTint="@color/search_view_scrim_background"
             app:layout_anchor="@id/searchBar">
 
-            <LinearLayout
+            <!-- UI-002: SearchView's own background is dimmed to 50% alpha at runtime
+                 (ActHome.setupViews) so the fisheye grid stays partially visible behind it; the
+                 result list lives in this opaque card so text contrast never depends on what's
+                 behind the scrim. -->
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="8dp"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="4dp">
 
                 <LinearLayout
-                    android:id="@+id/recentHeader"
                     android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="8dp"
-                    android:visibility="gone">
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:id="@+id/recentHeader"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="8dp"
+                        android:visibility="gone">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/recent_apps"
+                            android:textStyle="bold" />
+
+                        <Button
+                            android:id="@+id/btClearSearchHistory"
+                            style="?attr/borderlessButtonStyle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="48dp"
+                            android:text="@string/clear_recent_apps"
+                            android:textAllCaps="false" />
+                    </LinearLayout>
 
                     <TextView
-                        android:layout_width="0dp"
+                        android:id="@+id/tvNoSearchResults"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/recent_apps"
-                        android:textStyle="bold" />
+                        android:gravity="center"
+                        android:minHeight="96dp"
+                        android:padding="16dp"
+                        android:text="@string/no_apps_found"
+                        android:visibility="gone" />
 
-                    <Button
-                        android:id="@+id/btClearSearchHistory"
-                        style="?attr/borderlessButtonStyle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="48dp"
-                        android:text="@string/clear_recent_apps"
-                        android:textAllCaps="false" />
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rvSearchResults"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:nestedScrollingEnabled="true"
+                        android:overScrollMode="ifContentScrolls" />
                 </LinearLayout>
-
-                <TextView
-                    android:id="@+id/tvNoSearchResults"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:minHeight="96dp"
-                    android:padding="16dp"
-                    android:text="@string/no_apps_found"
-                    android:visibility="gone" />
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/rvSearchResults"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:nestedScrollingEnabled="true"
-                    android:overScrollMode="ifContentScrolls" />
-            </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
         </com.google.android.material.search.SearchView>
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </FrameLayout>
