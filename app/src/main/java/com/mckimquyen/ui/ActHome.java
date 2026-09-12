@@ -197,6 +197,16 @@ public class ActHome extends ActBase {
         searchView.addTransitionListener((view, previousState, newState) -> {
             if (newState == SearchView.TransitionState.SHOWN) {
                 updateSearchResults(appSearch.getText());
+                // UI-007 fix: SearchBar was never actually hidden by the morph transition - it
+                // relied on the (now translucent, see UI-007) SearchView panel fully covering it.
+                // At the lighter 0.35 alpha this let the SearchBar's own hint text ("Tìm ứng
+                // dụng") show through, doubled up with the real SearchView edit text's hint at
+                // almost the same position - a confusing ghosted-text overlap. Hide it once the
+                // expand morph settles (kept visible during SHOWING so the animation still has
+                // its start-anchor); restored at HIDDEN below.
+                searchBar.setVisibility(View.INVISIBLE);
+            } else if (newState == SearchView.TransitionState.HIDDEN) {
+                searchBar.setVisibility(View.VISIBLE);
             }
             // UI-002 follow-up: real frosted-glass blur behind the search panel (Android 12+),
             // instead of relying on the flat scrim alone to hide detail - owner reported the

@@ -37,6 +37,14 @@ class AppSearchWidgetTest {
         }
     }
 
+    private fun waitUntilVisibility(view: View, visibility: Int, timeoutMs: Long = 5_000) {
+        val deadline = System.currentTimeMillis() + timeoutMs
+        while (System.currentTimeMillis() < deadline) {
+            if (view.visibility == visibility) return
+            Thread.sleep(50)
+        }
+    }
+
     @Test
     fun searchSupportsFocusInputNoResultAndClear() {
         ActivityScenario.launch(ActHome::class.java).use { scenario ->
@@ -190,6 +198,53 @@ class AppSearchWidgetTest {
                 assertTrue(
                     "lens grid blur must be cleared once search is fully hidden",
                     !activity.lensBlurActive
+                )
+            }
+        }
+    }
+
+    /**
+     * UI-007 fix: `SearchBar` was never actually hidden by the SearchBar->SearchView morph - it
+     * relied entirely on the SearchView panel being opaque enough to cover it. Once UI-007 made
+     * that panel translucent (real blur behind it instead), the SearchBar's own hint text
+     * ("Tìm ứng dụng") started showing through, doubled up with the live SearchView edit text's
+     * hint at almost the same on-screen position - a confusing ghosted-text overlap the owner
+     * caught live on TECNO KJ7. Fixed by explicitly hiding SearchBar once SHOWN, restoring it at
+     * HIDDEN.
+     */
+    @Test
+    fun searchBarIsHiddenWhileSearchViewShown_toAvoidGhostedOverlappingHintText() {
+        ActivityScenario.launch(ActHome::class.java).use { scenario ->
+            var searchView: SearchView? = null
+            var searchBar: View? = null
+            scenario.onActivity { activity ->
+                searchBar = activity.findViewById(R.id.searchBar)
+                assertEquals(View.VISIBLE, searchBar!!.visibility)
+                searchView = activity.findViewById(R.id.searchView)
+                searchView!!.show()
+            }
+            waitUntilShowing(searchView!!, true)
+            // isShowing() flips true as soon as the SHOWING morph starts, before it settles into
+            // SHOWN (where production code hides SearchBar) - poll for the real end state instead
+            // of asserting immediately after isShowing().
+            waitUntilVisibility(searchBar!!, View.INVISIBLE)
+            scenario.onActivity {
+                assertEquals(
+                    "SearchBar must be hidden once SearchView is fully shown, or its hint text " +
+                        "ghosts through the (intentionally translucent) panel on top of it",
+                    View.INVISIBLE,
+                    searchBar!!.visibility
+                )
+            }
+
+            scenario.onActivity { searchView!!.hide() }
+            waitUntilShowing(searchView!!, false)
+            waitUntilVisibility(searchBar!!, View.VISIBLE)
+            scenario.onActivity {
+                assertEquals(
+                    "SearchBar must reappear once SearchView is fully hidden",
+                    View.VISIBLE,
+                    searchBar!!.visibility
                 )
             }
         }
