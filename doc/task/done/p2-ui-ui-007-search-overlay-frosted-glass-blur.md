@@ -52,3 +52,19 @@ Two-tier approach, since `RenderEffect` (real blur) requires API 31:
 Self-audited **9.5/10** (2026-09-13, Pixel 7 Pro). Deduction: pre-31 fallback tier (0.85 flat
 scrim) wasn't separately live-smoke-tested this round (both real devices available, TECNO KJ7 and
 Pixel 7 Pro, are API 31+).
+
+## Follow-up fix (same day, caught live by owner on TECNO KJ7)
+
+Making the panel translucent exposed a second, pre-existing issue: `SearchBar` (the collapsed
+pill) was never actually hidden by the morph transition - it relied entirely on the SearchView
+panel being opaque enough to cover it. At the lighter 0.35 alpha, `SearchBar`'s own hint text
+("Tìm ứng dụng") started showing through, doubled up with the live `SearchView` edit text's hint
+at almost the same position - a ghosted overlap the owner caught directly on-device.
+
+Fixed by explicitly hiding `SearchBar` once `SHOWN` settles (kept visible during `SHOWING` so the
+morph animation still has its start-anchor), restoring it at `HIDDEN`. One new widget test
+(`searchBarIsHiddenWhileSearchViewShown_toAvoidGhostedOverlappingHintText`) proves it - itself hit
+the same `isShowing()`-flips-early race the blur test caught above, fixed the same way (poll for
+the real end state, don't assert right after `isShowing()`). 130/131 instrumented tests pass on
+Pixel 7 Pro (the 1 failure is the same pre-existing `ActSettingsLayoutTest` font-scale difference
+noted above); live screenshot confirms only one "Tìm ứng dụng" renders now.
