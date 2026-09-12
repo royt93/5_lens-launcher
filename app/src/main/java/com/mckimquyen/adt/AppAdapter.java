@@ -27,6 +27,7 @@ import androidx.appcompat.widget.PopupMenu;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.ViewCompat;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.snackbar.Snackbar;
@@ -104,9 +105,11 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
      * @param newApps Danh sách apps mới
      */
     public void updateApps(List<App> newApps) {
+        List<App> oldApps = new ArrayList<>(mApps);
         mApps.clear();
         mApps.addAll(newApps);
-        notifyDataSetChanged();
+        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new AppDiffCallback(oldApps, mApps));
+        diffResult.dispatchUpdatesTo(this);
     }
 
     public boolean moveItem(int fromPosition, int toPosition) {

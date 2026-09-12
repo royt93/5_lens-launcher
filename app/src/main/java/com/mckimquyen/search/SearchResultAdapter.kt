@@ -5,8 +5,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.mckimquyen.R
+import com.mckimquyen.adt.AppDiffCallback
 import com.mckimquyen.app.RAppsSingleton
 import com.mckimquyen.model.App
 
@@ -20,9 +22,11 @@ class SearchResultAdapter(
     private val apps = mutableListOf<App>()
 
     fun submitList(newApps: List<App>) {
+        val oldApps = apps.toList()
         apps.clear()
         apps.addAll(newApps)
-        notifyDataSetChanged()
+        val diffResult = DiffUtil.calculateDiff(AppDiffCallback(oldApps, apps))
+        diffResult.dispatchUpdatesTo(this)
     }
 
     fun firstOrNull(): App? = apps.firstOrNull()
