@@ -381,11 +381,8 @@ class ActVipManagement : AppCompatActivity() {
                 if (isFinishing) return
                 
                 val nowMs = System.currentTimeMillis()
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
-                    binding.progressVip.setProgress(computeElapsedProgress(grantedAtMs, expiryMs, nowMs), true)
-                } else {
-                    binding.progressVip.progress = computeElapsedProgress(grantedAtMs, expiryMs, nowMs)
-                }
+                // minSdk is 25, so SDK_INT is always >= N (API 24) — the animated overload is always available.
+                binding.progressVip.setProgress(computeElapsedProgress(grantedAtMs, expiryMs, nowMs), true)
 
                 val seconds = (millisUntilFinished / 1000) % 60
                 val minutes = (millisUntilFinished / (1000 * 60)) % 60

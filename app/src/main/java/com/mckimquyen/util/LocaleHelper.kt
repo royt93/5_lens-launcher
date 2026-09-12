@@ -1,10 +1,8 @@
 package com.mckimquyen.util
 
-import android.annotation.TargetApi
 import android.content.Context
 import android.content.SharedPreferences
 import android.content.res.Configuration
-import android.os.Build
 import androidx.preference.PreferenceManager
 import java.util.Locale
 
@@ -60,11 +58,8 @@ object LocaleHelper {
         val locale = Locale.forLanguageTag(language)
         Locale.setDefault(locale)
 
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            updateResources(context, locale)
-        } else {
-            updateResourcesLegacy(context, locale)
-        }
+        // minSdk is 25, so SDK_INT is always >= N (API 24) — the pre-N legacy path can't run.
+        return updateResources(context, locale)
     }
 
     private fun persist(context: Context, language: String) {
@@ -72,23 +67,10 @@ object LocaleHelper {
         preferences.edit().putString(SELECTED_LANGUAGE, language).apply()
     }
 
-    @TargetApi(Build.VERSION_CODES.N)
     private fun updateResources(context: Context, locale: Locale): Context {
         val configuration = context.resources.configuration
         configuration.setLocale(locale)
         configuration.setLayoutDirection(locale)
         return context.createConfigurationContext(configuration)
-    }
-
-    @Suppress("DEPRECATION")
-    private fun updateResourcesLegacy(context: Context, locale: Locale): Context {
-        val resources = context.resources
-        val configuration = resources.configuration
-        configuration.locale = locale
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            configuration.setLayoutDirection(locale)
-        }
-        resources.updateConfiguration(configuration, resources.displayMetrics)
-        return context
     }
 }

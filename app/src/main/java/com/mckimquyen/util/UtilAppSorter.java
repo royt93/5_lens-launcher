@@ -53,7 +53,7 @@ public class UtilAppSorter {
     }
 
     private static void sortByLabelAscending(ArrayList<App> apps) {
-        apps.sort(Comparator.comparing(app -> app.getLabel().toString().toLowerCase()));
+        apps.sort(Comparator.comparing(app -> app.getLabel().toString().toLowerCase(java.util.Locale.getDefault())));
     }
 
     private static void sortByLabelDescending(ArrayList<App> apps) {

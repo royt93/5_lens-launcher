@@ -7,17 +7,13 @@
     android:layout_height="match_parent"
     android:background="?attr/colorPrimary">
 
-    <FrameLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="?android:colorBackground">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:clipChildren="false"
-            android:clipToPadding="false">
+        android:background="?android:colorBackground"
+        android:orientation="vertical"
+        android:clipChildren="false"
+        android:clipToPadding="false">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
@@ -554,5 +550,4 @@
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 </LinearLayout>
-</FrameLayout>
 </FrameLayout>

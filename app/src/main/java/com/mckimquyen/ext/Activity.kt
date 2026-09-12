@@ -143,6 +143,7 @@ fun Activity?.sendSMS(
     this.startActivity(sendIntent)
 }
 
+@SuppressLint("ApplySharedPref") // commit() is intentional here — see comment below
 fun Activity.rateAppInApp(forceRateInApp: Boolean = false) {
     // Bypass in test environments to prevent Play Core review dialog from hanging instrumentation tests
     try {

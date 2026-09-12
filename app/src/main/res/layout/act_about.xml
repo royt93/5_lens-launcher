@@ -57,19 +57,15 @@
             android:padding="16dp">
 
             <!-- Features Card -->
-            <FrameLayout
+            <LinearLayout
                 android:id="@+id/cardFeatures"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
                 android:alpha="0"
                 android:background="@drawable/bg_about_card"
-                android:elevation="4dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                android:elevation="4dp"
+                android:orientation="vertical">
 
                     <!-- Header -->
                     <LinearLayout
@@ -133,24 +129,18 @@
 
                     </LinearLayout>
 
-                </LinearLayout>
-
-            </FrameLayout>
+            </LinearLayout>
 
             <!-- About Card -->
-            <FrameLayout
+            <LinearLayout
                 android:id="@+id/cardAbout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
                 android:alpha="0"
                 android:background="@drawable/bg_about_card"
-                android:elevation="4dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                android:elevation="4dp"
+                android:orientation="vertical">
 
                     <!-- Header -->
                     <LinearLayout
@@ -203,23 +193,17 @@
 
                     </LinearLayout>
 
-                </LinearLayout>
-
-            </FrameLayout>
+            </LinearLayout>
 
             <!-- Credits Card -->
-            <FrameLayout
+            <LinearLayout
                 android:id="@+id/cardCredits"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:alpha="0"
                 android:background="@drawable/bg_about_card"
-                android:elevation="4dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                android:elevation="4dp"
+                android:orientation="vertical">
 
                     <!-- Header -->
                     <LinearLayout
@@ -286,9 +270,7 @@
 
                     </LinearLayout>
 
-                </LinearLayout>
-
-            </FrameLayout>
+            </LinearLayout>
 
         </LinearLayout>
 

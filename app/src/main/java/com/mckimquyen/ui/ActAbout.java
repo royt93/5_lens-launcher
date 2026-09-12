@@ -81,8 +81,8 @@ public class ActAbout extends ActBase {
                         WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS,
                         WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS);
             }
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            // Android 6.0+ (API 23-29)
+        } else {
+            // minSdk is 25, so SDK_INT is always >= M (API 23) here
             View decorView = getWindow().getDecorView();
             int flags = decorView.getSystemUiVisibility();
             // Add SYSTEM_UI_FLAG_LIGHT_STATUS_BAR to use dark icons
