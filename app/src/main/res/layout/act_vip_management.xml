@@ -274,114 +274,129 @@
                             android:layout_marginBottom="16dp" />
 
                         <!-- Feature 1: No Ads -->
-                        <LinearLayout
+                        <androidx.constraintlayout.widget.ConstraintLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:gravity="center_vertical"
                             android:layout_marginBottom="12dp">
 
                             <ImageView
+                                android:id="@+id/imgFeatureNoAds"
                                 android:layout_width="24dp"
                                 android:layout_height="24dp"
                                 android:src="@drawable/ic_star_24dp"
                                 app:tint="#FFB300"
-                                android:layout_marginEnd="12dp" />
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toTopOf="parent"
+                                app:layout_constraintBottom_toBottomOf="parent" />
 
-                            <LinearLayout
-                                android:layout_width="match_parent"
+                            <TextView
+                                android:id="@+id/tvFeatureNoAdsTitle"
+                                android:layout_width="0dp"
                                 android:layout_height="wrap_content"
-                                android:orientation="vertical">
+                                android:layout_marginStart="12dp"
+                                android:text="@string/vip_feature_no_ads_title"
+                                android:textSize="14sp"
+                                android:textStyle="bold"
+                                android:textColor="?android:attr/textColorPrimary"
+                                app:layout_constraintStart_toEndOf="@id/imgFeatureNoAds"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintTop_toTopOf="parent" />
 
-                                <TextView
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:text="@string/vip_feature_no_ads_title"
-                                    android:textSize="14sp"
-                                    android:textStyle="bold"
-                                    android:textColor="?android:attr/textColorPrimary" />
-
-                                <TextView
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:text="@string/vip_feature_no_ads_desc"
-                                    android:textSize="12sp"
-                                    android:textColor="?android:attr/textColorSecondary" />
-                            </LinearLayout>
-                        </LinearLayout>
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="12dp"
+                                android:text="@string/vip_feature_no_ads_desc"
+                                android:textSize="12sp"
+                                android:textColor="?android:attr/textColorSecondary"
+                                app:layout_constraintStart_toEndOf="@id/imgFeatureNoAds"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintTop_toBottomOf="@id/tvFeatureNoAdsTitle"
+                                app:layout_constraintBottom_toBottomOf="parent" />
+                        </androidx.constraintlayout.widget.ConstraintLayout>
 
                         <!-- Feature 2: High Performance / Premium Customization -->
-                        <LinearLayout
+                        <androidx.constraintlayout.widget.ConstraintLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:gravity="center_vertical"
                             android:layout_marginBottom="12dp">
 
                             <ImageView
+                                android:id="@+id/imgFeatureCustomization"
                                 android:layout_width="24dp"
                                 android:layout_height="24dp"
                                 android:src="@drawable/ic_color_lens_24dp"
                                 app:tint="#FFB300"
-                                android:layout_marginEnd="12dp" />
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toTopOf="parent"
+                                app:layout_constraintBottom_toBottomOf="parent" />
 
-                            <LinearLayout
-                                android:layout_width="match_parent"
+                            <TextView
+                                android:id="@+id/tvFeatureCustomizationTitle"
+                                android:layout_width="0dp"
                                 android:layout_height="wrap_content"
-                                android:orientation="vertical">
+                                android:layout_marginStart="12dp"
+                                android:text="@string/vip_feature_customization_title"
+                                android:textSize="14sp"
+                                android:textStyle="bold"
+                                android:textColor="?android:attr/textColorPrimary"
+                                app:layout_constraintStart_toEndOf="@id/imgFeatureCustomization"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintTop_toTopOf="parent" />
 
-                                <TextView
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:text="@string/vip_feature_customization_title"
-                                    android:textSize="14sp"
-                                    android:textStyle="bold"
-                                    android:textColor="?android:attr/textColorPrimary" />
-
-                                <TextView
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:text="@string/vip_feature_customization_desc"
-                                    android:textSize="12sp"
-                                    android:textColor="?android:attr/textColorSecondary" />
-                            </LinearLayout>
-                        </LinearLayout>
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="12dp"
+                                android:text="@string/vip_feature_customization_desc"
+                                android:textSize="12sp"
+                                android:textColor="?android:attr/textColorSecondary"
+                                app:layout_constraintStart_toEndOf="@id/imgFeatureCustomization"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintTop_toBottomOf="@id/tvFeatureCustomizationTitle"
+                                app:layout_constraintBottom_toBottomOf="parent" />
+                        </androidx.constraintlayout.widget.ConstraintLayout>
 
                         <!-- Feature 3: Priority Support -->
-                        <LinearLayout
+                        <androidx.constraintlayout.widget.ConstraintLayout
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:gravity="center_vertical">
+                            android:layout_height="wrap_content">
 
                             <ImageView
+                                android:id="@+id/imgFeatureSupport"
                                 android:layout_width="24dp"
                                 android:layout_height="24dp"
                                 android:src="@drawable/ic_feedback_24dp"
                                 app:tint="#FFB300"
-                                android:layout_marginEnd="12dp" />
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toTopOf="parent"
+                                app:layout_constraintBottom_toBottomOf="parent" />
 
-                            <LinearLayout
-                                android:layout_width="match_parent"
+                            <TextView
+                                android:id="@+id/tvFeatureSupportTitle"
+                                android:layout_width="0dp"
                                 android:layout_height="wrap_content"
-                                android:orientation="vertical">
+                                android:layout_marginStart="12dp"
+                                android:text="@string/vip_feature_support_title"
+                                android:textSize="14sp"
+                                android:textStyle="bold"
+                                android:textColor="?android:attr/textColorPrimary"
+                                app:layout_constraintStart_toEndOf="@id/imgFeatureSupport"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintTop_toTopOf="parent" />
 
-                                <TextView
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:text="@string/vip_feature_support_title"
-                                    android:textSize="14sp"
-                                    android:textStyle="bold"
-                                    android:textColor="?android:attr/textColorPrimary" />
-
-                                <TextView
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:text="@string/vip_feature_support_desc"
-                                    android:textSize="12sp"
-                                    android:textColor="?android:attr/textColorSecondary" />
-                            </LinearLayout>
-                        </LinearLayout>
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="12dp"
+                                android:text="@string/vip_feature_support_desc"
+                                android:textSize="12sp"
+                                android:textColor="?android:attr/textColorSecondary"
+                                app:layout_constraintStart_toEndOf="@id/imgFeatureSupport"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintTop_toBottomOf="@id/tvFeatureSupportTitle"
+                                app:layout_constraintBottom_toBottomOf="parent" />
+                        </androidx.constraintlayout.widget.ConstraintLayout>
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
             </LinearLayout>
