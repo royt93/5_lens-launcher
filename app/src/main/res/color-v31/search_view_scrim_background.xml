@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- UI-002 follow-up: on API 31+, ActHome.setLensBlurred() applies a real RenderEffect blur to
+     the lens grid behind the search panel, which already hides distracting icon/grid detail -
+     so this tint only needs to add a light dimming pass on top, not carry the whole "hide
+     detail" job like the pre-31 fallback (res/color/search_view_scrim_background.xml) does. -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:alpha="0.35"
+        android:color="?attr/colorSurfaceContainerHigh" />
+</selector>

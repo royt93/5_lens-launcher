@@ -128,7 +128,7 @@ class AppSearchWidgetTest {
      * readable regardless of what's behind the scrim.
      */
     @Test
-    fun searchScrimIsHalfOpaque_andResultsSitOnAnOpaqueCard() {
+    fun searchScrimIsDimmedNotOpaqueOrTransparent_andResultsSitOnAnOpaqueCard() {
         ActivityScenario.launch(ActHome::class.java).use { scenario ->
             scenario.onActivity { activity ->
                 val resolvedScrim = ContextCompat.getColorStateList(
@@ -136,9 +136,13 @@ class AppSearchWidgetTest {
                     R.color.search_view_scrim_background
                 )!!.defaultColor
                 val alpha = Color.alpha(resolvedScrim)
+                // UI-002 follow-up: two-tier design - API 31+ pairs a lighter scrim (~0.35) with
+                // a real RenderEffect blur (ActHome.setLensBlurred) to hide detail behind the
+                // panel; pre-31 devices have no blur API, so they lean on a heavier scrim
+                // (~0.85) alone. Either way it must be dimmed, never fully opaque/transparent.
                 assertTrue(
-                    "scrim alpha should be roughly half-opaque (~128/255), was $alpha",
-                    alpha in 100..155
+                    "scrim alpha should be dimmed (neither ~0 nor ~255), was $alpha",
+                    alpha in 60..240
                 )
 
                 val results = activity.findViewById<RecyclerView>(R.id.rvSearchResults)
@@ -154,6 +158,119 @@ class AppSearchWidgetTest {
                 assertTrue("result list must sit inside an opaque MaterialCardView panel", foundCard)
             }
         }
+    }
+
+    /**
+     * UI-002 follow-up: on Android 12+, showing/hiding the search overlay must toggle a real
+     * blur behind it (`ActHome.setLensBlurred`), not just rely on the scrim's own opacity.
+     * Pre-12 devices have no RenderEffect API at all - the check is skipped there, matching the
+     * production code's own version guard.
+     */
+    @Test
+    fun searchShowingAppliesBlur_andHidingClearsIt() {
+        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S) return
+
+        ActivityScenario.launch(ActHome::class.java).use { scenario ->
+            var searchView: SearchView? = null
+            scenario.onActivity { activity ->
+                searchView = activity.findViewById(R.id.searchView)
+                searchView!!.show()
+            }
+            waitUntilShowing(searchView!!, true)
+            scenario.onActivity { activity ->
+                assertTrue(
+                    "lens grid must be blurred while search is showing",
+                    activity.lensBlurActive
+                )
+            }
+
+            scenario.onActivity { searchView!!.hide() }
+            waitUntilShowing(searchView!!, false)
+            scenario.onActivity { activity ->
+                assertTrue(
+                    "lens grid blur must be cleared once search is fully hidden",
+                    !activity.lensBlurActive
+                )
+            }
+        }
+    }
+
+    /** SEARCH-002: calculator quick action renders above the normal results. */
+    @Test
+    fun quickActionRowShowsCalculatorResult() {
+        ActivityScenario.launch(ActHome::class.java).use { scenario ->
+            var searchView: SearchView? = null
+            scenario.onActivity { activity ->
+                searchView = activity.findViewById(R.id.searchView)
+                searchView!!.show()
+            }
+            waitUntilShowing(searchView!!, true)
+
+            scenario.onActivity { searchView!!.editText.setText("12*7") }
+
+            scenario.onActivity { activity ->
+                val row = activity.findViewById<View>(R.id.quickActionRow)
+                val label = activity.findViewById<TextView>(R.id.tvQuickActionLabel)
+                val value = activity.findViewById<TextView>(R.id.tvQuickActionValue)
+                assertEquals(View.VISIBLE, row.visibility)
+                assertEquals("12*7", label.text.toString())
+                assertEquals("84", value.text.toString())
+            }
+        }
+    }
+
+    /** A query that matches no quick-action sub-parser must keep the row hidden. */
+    @Test
+    fun quickActionRowHiddenForOrdinaryAppQuery() {
+        ActivityScenario.launch(ActHome::class.java).use { scenario ->
+            var searchView: SearchView? = null
+            scenario.onActivity { activity ->
+                searchView = activity.findViewById(R.id.searchView)
+                searchView!!.show()
+            }
+            waitUntilShowing(searchView!!, true)
+
+            scenario.onActivity { searchView!!.editText.setText("definitely-missing-app") }
+
+            scenario.onActivity { activity ->
+                val row = activity.findViewById<View>(R.id.quickActionRow)
+                assertEquals(View.GONE, row.visibility)
+            }
+        }
+    }
+
+    /** SEARCH-002: a mapped Settings keyword shows the quick action row, ready to deep-link. */
+    @Test
+    fun quickActionRowShowsSettingsShortcut() {
+        ActivityScenario.launch(ActHome::class.java).use { scenario ->
+            var searchView: SearchView? = null
+            scenario.onActivity { activity ->
+                searchView = activity.findViewById(R.id.searchView)
+                searchView!!.show()
+            }
+            waitUntilShowing(searchView!!, true)
+
+            scenario.onActivity { searchView!!.editText.setText("wifi") }
+
+            scenario.onActivity { activity ->
+                val row = activity.findViewById<View>(R.id.quickActionRow)
+                val label = activity.findViewById<TextView>(R.id.tvQuickActionLabel)
+                assertEquals(View.VISIBLE, row.visibility)
+                assertEquals("wifi", label.text.toString())
+                assertTrue("row must be clickable", row.isClickable || row.hasOnClickListeners())
+            }
+        }
+    }
+
+    /**
+     * SEARCH-002: `resolveBattery` needs a real Context (sticky broadcast), so it's covered here
+     * instead of in the pure unit tests.
+     */
+    @Test
+    fun quickActionBatteryResolvesARealPercentageOnDevice() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val result = com.mckimquyen.search.QuickActionEngine.resolveBattery(context, "pin")
+        assertTrue("expected a battery percentage like '42%', got $result", result != null && result.value.endsWith("%"))
     }
 
     @Test

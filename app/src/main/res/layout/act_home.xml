@@ -66,6 +66,47 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
+                    <!-- SEARCH-002: calculator / unit conversion / timer / battery % / settings
+                         deep-link quick action, shown above normal app results when the typed
+                         query matches one of those patterns. -->
+                    <LinearLayout
+                        android:id="@+id/quickActionRow"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:background="?attr/selectableItemBackground"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp"
+                        android:visibility="gone"
+                        tools:visibility="visible">
+
+                        <TextView
+                            android:id="@+id/tvQuickActionLabel"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:ellipsize="end"
+                            android:maxLines="1"
+                            tools:text="12*7" />
+
+                        <TextView
+                            android:id="@+id/tvQuickActionValue"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
+                            android:textColor="?attr/colorPrimary"
+                            android:textStyle="bold"
+                            tools:text="= 84" />
+                    </LinearLayout>
+
+                    <View
+                        android:id="@+id/quickActionDivider"
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/colorDivider"
+                        android:visibility="gone" />
+
                     <LinearLayout
                         android:id="@+id/recentHeader"
                         android:layout_width="match_parent"

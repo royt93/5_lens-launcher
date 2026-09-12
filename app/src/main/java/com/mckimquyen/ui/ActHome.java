@@ -2,9 +2,15 @@ package com.mckimquyen.ui;
 
 import static com.mckimquyen.ext.ActivityKt.rateAppInApp;
 
+import android.content.ActivityNotFoundException;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.RenderEffect;
+import android.graphics.Shader;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -33,6 +39,8 @@ import com.mckimquyen.enums.BackgroundMode;
 import com.mckimquyen.model.App;
 import com.mckimquyen.model.AppPersistent;
 import com.mckimquyen.search.AppSearchEngine;
+import com.mckimquyen.search.QuickAction;
+import com.mckimquyen.search.QuickActionEngine;
 import com.mckimquyen.search.SearchHistoryStore;
 import com.mckimquyen.search.SearchResultAdapter;
 import com.mckimquyen.util.Logger;
@@ -49,6 +57,11 @@ import me.zhanghai.android.materialprogressbar.MaterialProgressBar;
 //2023.03.19 tried to convert kotlin but failed
 public class ActHome extends ActBase {
 
+    // UI-002 follow-up: frosted-glass blur radius (dp-independent, RenderEffect takes raw px)
+    // behind the search overlay on Android 12+; pre-12 devices fall back to a more opaque flat
+    // scrim instead (res/color-v31/search_view_scrim_background.xml vs the default).
+    private static final float SEARCH_BLUR_RADIUS_PX = 25f;
+
     LensView lensViews;
     MaterialProgressBar progressBarHome;
     private ArrayList<App> listApp;
@@ -58,6 +71,13 @@ public class ActHome extends ActBase {
     private View recentHeader;
     private TextView noSearchResults;
     private RecyclerView searchResults;
+    private View quickActionRow;
+    private View quickActionDivider;
+    private TextView tvQuickActionLabel;
+    private TextView tvQuickActionValue;
+    // Package-visible (not private) so AppSearchWidgetTest can assert on it directly -
+    // View.getRenderEffect() has no Kotlin-friendly getter to read the value back through.
+    boolean lensBlurActive = false;
     private SearchResultAdapter searchResultAdapter;
     private SearchHistoryStore searchHistoryStore;
 
@@ -140,6 +160,10 @@ public class ActHome extends ActBase {
         recentHeader = findViewById(R.id.recentHeader);
         noSearchResults = findViewById(R.id.tvNoSearchResults);
         searchResults = findViewById(R.id.rvSearchResults);
+        quickActionRow = findViewById(R.id.quickActionRow);
+        quickActionDivider = findViewById(R.id.quickActionDivider);
+        tvQuickActionLabel = findViewById(R.id.tvQuickActionLabel);
+        tvQuickActionValue = findViewById(R.id.tvQuickActionValue);
 
         // Hide progress bar in test environments to prevent indeterminate animation loops from hanging tests
         boolean isTestEnv = false;
@@ -174,6 +198,18 @@ public class ActHome extends ActBase {
             if (newState == SearchView.TransitionState.SHOWN) {
                 updateSearchResults(appSearch.getText());
             }
+            // UI-002 follow-up: real frosted-glass blur behind the search panel (Android 12+),
+            // instead of relying on the flat scrim alone to hide detail - owner reported the
+            // lens grid/icons showing plainly through the scrim looked visually busy.
+            if (newState == SearchView.TransitionState.SHOWING) {
+                setLensBlurred(true);
+            } else if (newState == SearchView.TransitionState.HIDING) {
+                // Symmetric with SHOWING above: SearchView.isShowing() already flips to false as
+                // soon as HIDING starts (not once HIDDEN completes), so clearing here - not on
+                // HIDDEN - keeps setLensBlurred() in step with what callers observe via
+                // isShowing() and avoids a race where blur stays applied after hide() returns.
+                setLensBlurred(false);
+            }
         });
         appSearch.setOnEditorActionListener((view, actionId, event) -> {
             boolean isEnterKey = event != null
@@ -205,6 +241,8 @@ public class ActHome extends ActBase {
             return;
         }
 
+        updateQuickAction(query);
+
         ArrayList<App> apps = listApp == null ? new ArrayList<>() : listApp;
         java.util.List<App> results = AppSearchEngine.search(apps, query, searchHistoryStore.recentKeys());
         boolean isEmptyQuery = AppSearchEngine.normalize(query).isEmpty();
@@ -218,6 +256,60 @@ public class ActHome extends ActBase {
         searchResults.setVisibility(results.isEmpty() ? View.GONE : View.VISIBLE);
         noSearchResults.setText(isEmptyQuery ? R.string.search_empty_state : R.string.no_apps_found);
         noSearchResults.setVisibility(results.isEmpty() ? View.VISIBLE : View.GONE);
+    }
+
+    /**
+     * UI-002 follow-up: blur the lens grid behind the search overlay on Android 12+
+     * ({@link RenderEffect} requires API 31). Pre-31 devices have no equivalent API - they rely
+     * solely on the more opaque flat scrim ({@code res/color/search_view_scrim_background.xml})
+     * for the same "hide distracting detail" job.
+     */
+    private void setLensBlurred(boolean blurred) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+            return;
+        }
+        lensBlurActive = blurred;
+        lensViews.setRenderEffect(
+                blurred
+                        ? RenderEffect.createBlurEffect(SEARCH_BLUR_RADIUS_PX, SEARCH_BLUR_RADIUS_PX, Shader.TileMode.CLAMP)
+                        : null
+        );
+    }
+
+    /**
+     * SEARCH-002: show/hide/populate the calculator/unit-conversion/timer/battery%/settings
+     * quick-action row above the normal app results, based on what the typed query resolves to.
+     */
+    private void updateQuickAction(CharSequence query) {
+        QuickAction action = QuickActionEngine.resolve(this, query);
+        boolean show = action != null;
+        quickActionRow.setVisibility(show ? View.VISIBLE : View.GONE);
+        quickActionDivider.setVisibility(show ? View.VISIBLE : View.GONE);
+        if (!show) {
+            quickActionRow.setOnClickListener(null);
+            return;
+        }
+
+        if (action instanceof QuickAction.Info info) {
+            tvQuickActionLabel.setText(info.getLabel());
+            tvQuickActionValue.setText(info.getValue());
+            quickActionRow.setOnClickListener(v -> {
+                ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+                clipboard.setPrimaryClip(ClipData.newPlainText(info.getLabel(), info.getValue()));
+                Toast.makeText(this, info.getValue(), Toast.LENGTH_SHORT).show();
+            });
+        } else if (action instanceof QuickAction.Action quickAction) {
+            tvQuickActionLabel.setText(quickAction.getLabel());
+            tvQuickActionValue.setText("");
+            quickActionRow.setOnClickListener(v -> {
+                try {
+                    startActivity(quickAction.getIntent());
+                    hideSearch();
+                } catch (ActivityNotFoundException e) {
+                    Toast.makeText(this, R.string.error_app_not_found, Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
     }
 
     private void launchSearchResult(App app, View source) {

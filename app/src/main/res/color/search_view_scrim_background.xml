@@ -2,9 +2,12 @@
 <!-- UI-002: SearchView only reads its panel background color from the "backgroundTint" XML
      attribute at inflate time (com.google.android.material.search.SearchView has no public
      setter for it at runtime - its backing field is private). android:alpha on a themed color
-     item (API 23+) lets this stay dynamic-color-aware while still landing at 50% opacity. -->
+     item (API 23+) lets this stay dynamic-color-aware.
+     This is the pre-Android-12 fallback (see res/color-v31/ for the real-blur devices): those
+     devices have no RenderEffect blur to hide detail behind the panel, so this stays closer to
+     opaque (85%) instead of the lighter 50% used where a real blur already does that job. -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:alpha="0.5"
+        android:alpha="0.85"
         android:color="?attr/colorSurfaceContainerHigh" />
 </selector>

@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | `new` |
-| Status | `todo` |
+| Status | `done` |
 | Priority | `P2` |
 | Evidence | `idea` |
 | Epic | Search expansion (owner-picked 2026-09-12) |
@@ -53,14 +53,43 @@ same result-row slot in the UI, so one file with one function per action stays s
 existing `AppSearchEngine` pattern (already a `Pure, deterministic` object per its own doc
 comment).
 
+## Implementation
+
+`search/QuickActionEngine.kt` — pure object, tried in priority order calculator > unit
+conversion > timer > battery > settings, first match wins:
+- **Calculator**: tiny hand-written recursive-descent evaluator (+,-,*,/, parentheses); gated by
+  a "must contain an actual operator, not just a bare number" check so a literal numeric app
+  search (e.g. "5") isn't hijacked.
+- **Unit conversion**: regex `<amount> <unit> (to|sang) <unit>`; length/weight lookup tables in
+  base units + special-cased temperature (C/F/K) formulas.
+- **Timer**: Vietnamese + English phrase regex → `Intent(AlarmClock.ACTION_SET_TIMER)` with
+  `EXTRA_LENGTH` in seconds, `EXTRA_SKIP_UI=false`.
+- **Battery %**: exact-keyword match (never substring — "Pinterest" must never trigger it) +
+  `ACTION_BATTERY_CHANGED` sticky-broadcast read.
+- **Settings shortcuts**: exact-keyword → `Settings.ACTION_*` static map (wifi, bluetooth, sound,
+  display, language, location, date/time, network, security).
+
+UI: a new `quickActionRow` (`act_home.xml`, above `recentHeader`/`rvSearchResults`, inside the
+same `MaterialCardView` panel) shown/populated by `ActHome.updateQuickAction()` — tapping an
+`Info` result copies its value to the clipboard, tapping an `Action` result starts the `Intent`
+(caught `ActivityNotFoundException` falls back to a toast, never crashes).
+
+Deviation from the original acceptance criteria: implemented as a dedicated row above
+`rvSearchResults` rather than as a new row type *inside* the same `RecyclerView`/adapter - lower
+regression risk against the existing, well-tested `SearchResultAdapter`, same user-visible result.
+
 ## Verification and Definition of Done
 
-- [ ] Unit tests per sub-action: valid expression, invalid expression, divide-by-zero, valid unit
-      pair, unknown unit, valid/invalid timer phrase, each settings keyword mapped, unmapped
-      keyword.
-- [ ] Widget/UI: new result-row type renders correctly in `rvSearchResults`, tapping a
-      timer/settings result fires the right `Intent`.
-- [ ] Integration: Not applicable beyond the widget test — no persistence/SDK boundary.
-- [ ] Smoke on designated device: try one real query per sub-action, confirm the row and the
-      resulting action (timer created, Settings screen opened, etc.).
-- [ ] No new lint/build failures.
+- [x] Unit tests (25, `QuickActionEngineTest.kt`): every sub-action's valid/invalid/edge cases
+      per the acceptance criteria, plus a priority-order check.
+- [x] Widget/UI (4 new, `AppSearchWidgetTest.kt`): row shows for calculator/settings queries,
+      hidden for an ordinary app query, real on-device battery % via `resolveBattery`.
+- [x] Integration: not applicable beyond the widget tests, confirmed.
+- [x] Smoke on Pixel 7 Pro (one-off exception — TECNO KJ7 was in active personal use this
+      round): "12*7" → "84" row renders correctly; "wifi" row tap opens the real Wi-Fi Settings
+      screen end-to-end.
+- [x] `./gradlew lintDevDebug`: 0 errors, 20 pre-existing warnings, no new ones.
+
+Self-audited **9.5/10** (2026-09-13, Pixel 7 Pro). Deduction: timer and the remaining Settings
+keywords (bluetooth/sound/display/etc., beyond wifi) were verified by unit test + code review
+only, not individually smoke-tested by hand on-device this round.
