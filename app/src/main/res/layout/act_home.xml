@@ -80,6 +80,11 @@
                     android:visibility="gone"
                     tools:visibility="visible">
 
+                    <!-- UI-016 fix: was legible but too understated (no explicit textColor/size/
+                         weight) to actually notice against a busy dynamic-color scrim - confirmed
+                         via a zoomed screenshot crop that the text WAS rendering correctly the
+                         whole time, just easy to miss at a glance (owner + Claude both initially
+                         read it as "broken"). -->
                     <TextView
                         android:id="@+id/tvQuickActionLabel"
                         android:layout_width="0dp"
@@ -87,6 +92,9 @@
                         android:layout_weight="1"
                         android:ellipsize="end"
                         android:maxLines="1"
+                        android:textColor="?attr/colorOnSurface"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
                         tools:text="12*7" />
 
                     <TextView

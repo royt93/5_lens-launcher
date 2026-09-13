@@ -450,7 +450,11 @@ public class ActHome extends ActBase {
             });
         } else if (action instanceof QuickAction.Action quickAction) {
             tvQuickActionLabel.setText(quickAction.getLabel());
-            tvQuickActionValue.setText("");
+            // UI-016: was empty - the row looked like dead space with nothing on the right,
+            // compounding why this row read as "not working" (it did; it was just too
+            // understated to notice). A trailing chevron signals "this opens something" the
+            // same way a tappable list row conventionally does.
+            tvQuickActionValue.setText("›");
             quickActionRow.setOnClickListener(v -> {
                 try {
                     startActivity(quickAction.getIntent());

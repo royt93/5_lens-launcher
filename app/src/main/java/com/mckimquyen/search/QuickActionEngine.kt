@@ -1,6 +1,7 @@
 package com.mckimquyen.search
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -259,6 +260,16 @@ object QuickActionEngine {
 
     // Owner-reviewable table; some Settings.ACTION_* constants get deprecated across API levels,
     // so this deserves an occasional look when bumping compileSdk/targetSdk.
+    // UI-016: expanded from 16 to ~45 keywords after the owner asked for "Spotlight-like search
+    // everything" - true dynamic indexing of Settings' own preference screens is NOT possible for
+    // a third-party app (no public API for it; that's why every third-party launcher, Nova/
+    // Lawnchair included, ships a hardcoded keyword table like this one instead of a real index).
+    // This is that same approach, just covering many more of the settings screens people
+    // actually search for. InlinedApi suppressed: these are just string constants (safe to
+    // reference on any API level) - a device too old to have the matching Settings screen just
+    // won't resolve the Intent, already handled by the ActivityNotFoundException catch at the
+    // call site in ActHome, same as every other keyword in this table.
+    @SuppressLint("InlinedApi")
     private val SETTINGS_KEYWORDS: Map<String, String> = mapOf(
         "wifi" to Settings.ACTION_WIFI_SETTINGS,
         "bluetooth" to Settings.ACTION_BLUETOOTH_SETTINGS,
@@ -267,6 +278,8 @@ object QuickActionEngine {
         "sound" to Settings.ACTION_SOUND_SETTINGS,
         "hien thi" to Settings.ACTION_DISPLAY_SETTINGS,
         "display" to Settings.ACTION_DISPLAY_SETTINGS,
+        "do sang" to Settings.ACTION_DISPLAY_SETTINGS,
+        "brightness" to Settings.ACTION_DISPLAY_SETTINGS,
         "ngon ngu" to Settings.ACTION_LOCALE_SETTINGS,
         "language" to Settings.ACTION_LOCALE_SETTINGS,
         "vi tri" to Settings.ACTION_LOCATION_SOURCE_SETTINGS,
@@ -276,7 +289,35 @@ object QuickActionEngine {
         "mang" to Settings.ACTION_WIRELESS_SETTINGS,
         "network" to Settings.ACTION_WIRELESS_SETTINGS,
         "bao mat" to Settings.ACTION_SECURITY_SETTINGS,
-        "security" to Settings.ACTION_SECURITY_SETTINGS
+        "security" to Settings.ACTION_SECURITY_SETTINGS,
+        "bo nho" to Settings.ACTION_INTERNAL_STORAGE_SETTINGS,
+        "storage" to Settings.ACTION_INTERNAL_STORAGE_SETTINGS,
+        "tiet kiem pin" to Settings.ACTION_BATTERY_SAVER_SETTINGS,
+        "battery saver" to Settings.ACTION_BATTERY_SAVER_SETTINGS,
+        "thong bao" to Settings.ACTION_ALL_APPS_NOTIFICATION_SETTINGS,
+        "notification" to Settings.ACTION_ALL_APPS_NOTIFICATION_SETTINGS,
+        "notifications" to Settings.ACTION_ALL_APPS_NOTIFICATION_SETTINGS,
+        "tro nang" to Settings.ACTION_ACCESSIBILITY_SETTINGS,
+        "accessibility" to Settings.ACTION_ACCESSIBILITY_SETTINGS,
+        "che do may bay" to Settings.ACTION_AIRPLANE_MODE_SETTINGS,
+        "airplane mode" to Settings.ACTION_AIRPLANE_MODE_SETTINGS,
+        "nfc" to Settings.ACTION_NFC_SETTINGS,
+        "vpn" to Settings.ACTION_VPN_SETTINGS,
+        "quan ly ung dung" to Settings.ACTION_APPLICATION_SETTINGS,
+        "app manager" to Settings.ACTION_APPLICATION_SETTINGS,
+        "nha phat trien" to Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS,
+        "developer options" to Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS,
+        "dong bo" to Settings.ACTION_SYNC_SETTINGS,
+        "sync" to Settings.ACTION_SYNC_SETTINGS,
+        "tai khoan" to Settings.ACTION_SYNC_SETTINGS,
+        "accounts" to Settings.ACTION_SYNC_SETTINGS,
+        "print" to Settings.ACTION_PRINT_SETTINGS,
+        "ban phim" to Settings.ACTION_INPUT_METHOD_SETTINGS,
+        "keyboard" to Settings.ACTION_INPUT_METHOD_SETTINGS,
+        "thong tin may" to Settings.ACTION_DEVICE_INFO_SETTINGS,
+        "about phone" to Settings.ACTION_DEVICE_INFO_SETTINGS,
+        "cap nhat he thong" to Settings.ACTION_SYSTEM_UPDATE_SETTINGS,
+        "system update" to Settings.ACTION_SYSTEM_UPDATE_SETTINGS
     )
 
     internal fun resolveSettingsShortcut(raw: String): QuickAction.Action? {
