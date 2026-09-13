@@ -14,7 +14,7 @@
     <string name="setting_show_name_app_hover">Show Name on App Hover</string>
     <string name="setting_show_touch_selection">Show Touch Selection</string>
     <!-- UI-001 ships in the app's maintained English/Vietnamese locales first. -->
-    <string name="setting_show_search_bar" tools:ignore="MissingTranslation">Show Search Bar</string>
+    <string name="setting_show_search_bar">Show Search Bar</string>
     <string name="setting_show_new_app_tag">Show New App Tag</string>
     <string name="setting_highlight_color">Highlight Color</string>
     <string name="setting_icon_pack">Icon Pack</string>
@@ -36,21 +36,21 @@
     <string name="menu_title_show_apps">Start (Ads may appear)</string>
     <string name="menu_app_info">App Info</string>
     <!-- FEAT-002 ships in the app's maintained English/Vietnamese locales first. -->
-    <string name="organization_add_favorite" tools:ignore="MissingTranslation">Add to favorites</string>
-    <string name="organization_remove_favorite" tools:ignore="MissingTranslation">Remove from favorites</string>
-    <string name="organization_set_folder" tools:ignore="MissingTranslation">Set folder</string>
-    <string name="organization_folder_hint" tools:ignore="MissingTranslation">Folder name</string>
-    <string name="organization_folder_label" tools:ignore="MissingTranslation">Folder: %1$s</string>
-    <string name="organization_clear_folder" tools:ignore="MissingTranslation">Clear</string>
-    <string name="organization_pin_start" tools:ignore="MissingTranslation">Pin to first zone</string>
-    <string name="organization_pin_end" tools:ignore="MissingTranslation">Pin to last zone</string>
-    <string name="organization_unpin" tools:ignore="MissingTranslation">Remove pin</string>
-    <string name="organization_favorite_label" tools:ignore="MissingTranslation">Favorite</string>
-    <string name="organization_pinned_start_label" tools:ignore="MissingTranslation">Pinned first</string>
-    <string name="organization_pinned_end_label" tools:ignore="MissingTranslation">Pinned last</string>
-    <string name="organization_saved" tools:ignore="MissingTranslation">Organization updated</string>
-    <string name="organization_move_earlier" tools:ignore="MissingTranslation">Move earlier</string>
-    <string name="organization_move_later" tools:ignore="MissingTranslation">Move later</string>
+    <string name="organization_add_favorite">Add to favorites</string>
+    <string name="organization_remove_favorite">Remove from favorites</string>
+    <string name="organization_set_folder">Set folder</string>
+    <string name="organization_folder_hint">Folder name</string>
+    <string name="organization_folder_label">Folder: %1$s</string>
+    <string name="organization_clear_folder">Clear</string>
+    <string name="organization_pin_start">Pin to first zone</string>
+    <string name="organization_pin_end">Pin to last zone</string>
+    <string name="organization_unpin">Remove pin</string>
+    <string name="organization_favorite_label">Favorite</string>
+    <string name="organization_pinned_start_label">Pinned first</string>
+    <string name="organization_pinned_end_label">Pinned last</string>
+    <string name="organization_saved">Organization updated</string>
+    <string name="organization_move_earlier">Move earlier</string>
+    <string name="organization_move_later">Move later</string>
     <string name="menu_app_uninstall">Uninstall</string>
     <string name="error_app_not_found">App Not Found</string>
     <string name="error_too_many_apps">Failed to Load Apps</string>

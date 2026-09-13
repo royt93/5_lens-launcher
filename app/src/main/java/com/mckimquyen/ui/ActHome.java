@@ -123,14 +123,18 @@ public class ActHome extends ActBase {
 
         AppEventManager.INSTANCE.getNightModeChanged().observe(this, data -> updateNightMode());
 
-        // Disable back button for launcher home screen. When SearchView is showing, its own
-        // MaterialBackHandler intercepts back first (collapsing the panel via a higher-priority
-        // dynamically-registered callback) - this callback only fires once it's fully hidden,
-        // and its no-op body is what stops the launcher from finishing via back press.
+        // UI-010 fix: this used to be an unconditional no-op, relying on SearchView's own
+        // internal MaterialBackOrchestrator to intercept back first and collapse the panel.
+        // Confirmed live on TECNO KJ7 that back does NOT close the search overlay - explicitly
+        // checking isShowing() here instead makes it work regardless of whatever SearchView is or
+        // isn't doing internally. Falls through to no-op (blocking launcher exit) otherwise, since
+        // this is the HOME activity and back should never finish it.
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
-                // Intentionally no-op.
+                if (searchView.isShowing()) {
+                    hideSearch();
+                }
             }
         });
 
@@ -335,8 +339,12 @@ public class ActHome extends ActBase {
     }
 
     private void launchSearchResult(App app, View source) {
+        // UI-010 fix: hideSearch() used to run first - its clearText() call fires the
+        // TextWatcher synchronously, wiping the result list to the empty/recent state a split
+        // second before the target app's launch animation covers the screen, i.e. a visible
+        // flash of the result the user just tapped disappearing. Launching first means whatever
+        // the user sees next is the app's own reveal animation, not our own UI clearing itself.
         searchHistoryStore.recordLaunch(AppSearchEngine.componentKey(app));
-        hideSearch();
         com.mckimquyen.util.UtilApp.launchComponent(
                 this,
                 app.getPackageName().toString(),
@@ -345,6 +353,7 @@ public class ActHome extends ActBase {
                 source,
                 new android.graphics.Rect(0, 0, source.getWidth(), source.getHeight())
         );
+        hideSearch();
     }
 
     private void hideSearch() {
