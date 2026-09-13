@@ -15,6 +15,13 @@
     <string name="setting_show_name_app_hover">Mostra nome al passaggio sull\'app</string>
     <string name="setting_show_touch_selection">Mostra selezione tocco</string>
     <string name="setting_show_search_bar">Mostra barra di ricerca</string>
+    <string name="setting_search_hint_title">Testo suggerimento ricerca</string>
+    <string name="setting_search_hint_default">Predefinito</string>
+    <string name="setting_quick_action_calculator">Mostra calcolatrice</string>
+    <string name="setting_quick_action_unit">Mostra convertitore di unità</string>
+    <string name="setting_quick_action_timer">Mostra timer</string>
+    <string name="setting_quick_action_battery">Mostra %% batteria</string>
+    <string name="setting_quick_action_settings_shortcut">Mostra scorciatoie impostazioni</string>
     <string name="setting_show_new_app_tag">Mostra tag nuova app</string>
     <string name="setting_highlight_color">Colore di evidenziazione</string>
     <string name="setting_icon_pack">Pacchetto icone</string>

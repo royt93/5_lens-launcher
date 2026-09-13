@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.provider.AlarmClock
 import android.provider.Settings
+import com.mckimquyen.util.UtilSettings
 import java.util.Locale
 
 /**
@@ -28,11 +29,14 @@ object QuickActionEngine {
     fun resolve(context: Context, query: CharSequence?): QuickAction? {
         val raw = query?.toString()?.trim().orEmpty()
         if (raw.isEmpty()) return null
-        return resolveCalculator(raw)
-            ?: resolveUnitConversion(raw)
-            ?: resolveTimer(raw)
-            ?: resolveBattery(context, raw)
-            ?: resolveSettingsShortcut(raw)
+        // UI-012: each quick-action type can be individually disabled in Settings.
+        val settings = UtilSettings(context)
+        fun enabled(key: String) = settings.getBoolean(key)
+        return (if (enabled(UtilSettings.KEY_QUICK_ACTION_CALCULATOR)) resolveCalculator(raw) else null)
+            ?: (if (enabled(UtilSettings.KEY_QUICK_ACTION_UNIT)) resolveUnitConversion(raw) else null)
+            ?: (if (enabled(UtilSettings.KEY_QUICK_ACTION_TIMER)) resolveTimer(raw) else null)
+            ?: (if (enabled(UtilSettings.KEY_QUICK_ACTION_BATTERY)) resolveBattery(context, raw) else null)
+            ?: (if (enabled(UtilSettings.KEY_QUICK_ACTION_SETTINGS)) resolveSettingsShortcut(raw) else null)
     }
 
     // ==================================================================== Calculator

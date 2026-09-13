@@ -38,6 +38,12 @@ class FrmSettings : Fragment(), SettingsInterface {
     private var swShowNewAppTag: SwitchCompat? = null
     private var swShowTouchSelection: SwitchCompat? = null
     private var swShowSearchBar: SwitchCompat? = null
+    private var tvSelectedSearchHint: TextView? = null
+    private var swQuickActionCalculator: SwitchCompat? = null
+    private var swQuickActionUnit: SwitchCompat? = null
+    private var swQuickActionTimer: SwitchCompat? = null
+    private var swQuickActionBattery: SwitchCompat? = null
+    private var swQuickActionSettings: SwitchCompat? = null
     private var utilSettings: UtilSettings? = null
     private var tvVipStatusSummary: TextView? = null
     private var tvSelectedLanguage: TextView? = null
@@ -81,6 +87,12 @@ class FrmSettings : Fragment(), SettingsInterface {
         swShowNewAppTag = view.findViewById(R.id.swShowNewAppTag)
         swShowTouchSelection = view.findViewById(R.id.swShowTouchSelection)
         swShowSearchBar = view.findViewById(R.id.swShowSearchBar)
+        tvSelectedSearchHint = view.findViewById(R.id.tvSelectedSearchHint)
+        swQuickActionCalculator = view.findViewById(R.id.swQuickActionCalculator)
+        swQuickActionUnit = view.findViewById(R.id.swQuickActionUnit)
+        swQuickActionTimer = view.findViewById(R.id.swQuickActionTimer)
+        swQuickActionBattery = view.findViewById(R.id.swQuickActionBattery)
+        swQuickActionSettings = view.findViewById(R.id.swQuickActionSettings)
         tvVipStatusSummary = view.findViewById(R.id.tvVipStatusSummary)
         tvSelectedLanguage = view.findViewById(R.id.tvSelectedLanguage)
 
@@ -117,6 +129,15 @@ class FrmSettings : Fragment(), SettingsInterface {
         view.findViewById<View>(R.id.swShowNewAppTagParent).setOnClickListener(null)
         view.findViewById<View>(R.id.rlSwitchShowTouchSelectionParent).setOnClickListener(null)
         view.findViewById<View>(R.id.rlSwitchShowSearchBarParent).setOnClickListener(null)
+        view.findViewById<View>(R.id.rlSwitchQuickActionCalculatorParent).setOnClickListener(null)
+        view.findViewById<View>(R.id.rlSwitchQuickActionUnitParent).setOnClickListener(null)
+        view.findViewById<View>(R.id.rlSwitchQuickActionTimerParent).setOnClickListener(null)
+        view.findViewById<View>(R.id.rlSwitchQuickActionBatteryParent).setOnClickListener(null)
+        view.findViewById<View>(R.id.rlSwitchQuickActionSettingsParent).setOnClickListener(null)
+
+        view.findViewById<View>(R.id.llSearchHintText).setOnClickListener {
+            showSearchHintDialog()
+        }
 
         swVibrateAppHover?.setOnCheckedChangeListener { _, isChecked ->
             utilSettings?.save(UtilSettings.KEY_VIBRATE_APP_HOVER, isChecked)
@@ -136,6 +157,45 @@ class FrmSettings : Fragment(), SettingsInterface {
         swShowSearchBar?.setOnCheckedChangeListener { _, isChecked ->
             utilSettings?.save(UtilSettings.KEY_SHOW_SEARCH_BAR, isChecked)
         }
+        swQuickActionCalculator?.setOnCheckedChangeListener { _, isChecked ->
+            utilSettings?.save(UtilSettings.KEY_QUICK_ACTION_CALCULATOR, isChecked)
+        }
+        swQuickActionUnit?.setOnCheckedChangeListener { _, isChecked ->
+            utilSettings?.save(UtilSettings.KEY_QUICK_ACTION_UNIT, isChecked)
+        }
+        swQuickActionTimer?.setOnCheckedChangeListener { _, isChecked ->
+            utilSettings?.save(UtilSettings.KEY_QUICK_ACTION_TIMER, isChecked)
+        }
+        swQuickActionBattery?.setOnCheckedChangeListener { _, isChecked ->
+            utilSettings?.save(UtilSettings.KEY_QUICK_ACTION_BATTERY, isChecked)
+        }
+        swQuickActionSettings?.setOnCheckedChangeListener { _, isChecked ->
+            utilSettings?.save(UtilSettings.KEY_QUICK_ACTION_SETTINGS, isChecked)
+        }
+    }
+
+    private fun showSearchHintDialog() {
+        val context = requireContext()
+        val current = utilSettings?.getString(UtilSettings.KEY_SEARCH_HINT_TEXT).orEmpty()
+        val input = android.widget.EditText(context).apply {
+            setText(current)
+            hint = getString(R.string.search_apps_hint)
+            setSelection(text.length)
+        }
+        val paddingPx = (16 * resources.displayMetrics.density).toInt()
+        val container = android.widget.FrameLayout(context).apply {
+            setPadding(paddingPx, paddingPx / 2, paddingPx, 0)
+            addView(input)
+        }
+        com.google.android.material.dialog.MaterialAlertDialogBuilder(context)
+            .setTitle(R.string.setting_search_hint_title)
+            .setView(container)
+            .setPositiveButton(R.string.done) { _, _ ->
+                utilSettings?.save(UtilSettings.KEY_SEARCH_HINT_TEXT, input.text.toString().trim())
+                assignValues()
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
     }
 
     private fun assignValues() {
@@ -191,6 +251,17 @@ class FrmSettings : Fragment(), SettingsInterface {
             swShowNewAppTag?.isChecked = us.getBoolean(UtilSettings.KEY_SHOW_NEW_APP_TAG)
             swShowTouchSelection?.isChecked = us.getBoolean(UtilSettings.KEY_SHOW_TOUCH_SELECTION)
             swShowSearchBar?.isChecked = us.getBoolean(UtilSettings.KEY_SHOW_SEARCH_BAR)
+            swQuickActionCalculator?.isChecked = us.getBoolean(UtilSettings.KEY_QUICK_ACTION_CALCULATOR)
+            swQuickActionUnit?.isChecked = us.getBoolean(UtilSettings.KEY_QUICK_ACTION_UNIT)
+            swQuickActionTimer?.isChecked = us.getBoolean(UtilSettings.KEY_QUICK_ACTION_TIMER)
+            swQuickActionBattery?.isChecked = us.getBoolean(UtilSettings.KEY_QUICK_ACTION_BATTERY)
+            swQuickActionSettings?.isChecked = us.getBoolean(UtilSettings.KEY_QUICK_ACTION_SETTINGS)
+            val customHint = us.getString(UtilSettings.KEY_SEARCH_HINT_TEXT)
+            tvSelectedSearchHint?.text = if (customHint.isNullOrEmpty()) {
+                getString(R.string.setting_search_hint_default)
+            } else {
+                customHint
+            }
 
             // Language
             val currentLang = com.mckimquyen.util.LocaleHelper.getLanguage(requireContext())
@@ -239,6 +310,12 @@ class FrmSettings : Fragment(), SettingsInterface {
             us.save(UtilSettings.KEY_SHOW_NAME_APP_HOVER, true)
             us.save(UtilSettings.KEY_SHOW_TOUCH_SELECTION, false)
             us.save(UtilSettings.KEY_SHOW_SEARCH_BAR, UtilSettings.DEFAULT_SHOW_SEARCH_BAR)
+            us.save(UtilSettings.KEY_QUICK_ACTION_CALCULATOR, UtilSettings.DEFAULT_QUICK_ACTION_ENABLED)
+            us.save(UtilSettings.KEY_QUICK_ACTION_UNIT, UtilSettings.DEFAULT_QUICK_ACTION_ENABLED)
+            us.save(UtilSettings.KEY_QUICK_ACTION_TIMER, UtilSettings.DEFAULT_QUICK_ACTION_ENABLED)
+            us.save(UtilSettings.KEY_QUICK_ACTION_BATTERY, UtilSettings.DEFAULT_QUICK_ACTION_ENABLED)
+            us.save(UtilSettings.KEY_QUICK_ACTION_SETTINGS, UtilSettings.DEFAULT_QUICK_ACTION_ENABLED)
+            us.save(UtilSettings.KEY_SEARCH_HINT_TEXT, "")
             us.save(UtilSettings.KEY_SHOW_NEW_APP_TAG, true)
             us.save(UtilSettings.DEFAULT_BACKGROUND_MODE)
             us.save(UtilSettings.KEY_BACKGROUND_COLOR, UtilSettings.DEFAULT_BACKGROUND_COLOR)

@@ -15,6 +15,13 @@
     <string name="setting_show_name_app_hover">悬停在应用上时显示名称</string>
     <string name="setting_show_touch_selection">显示触摸选择</string>
     <string name="setting_show_search_bar">显示搜索栏</string>
+    <string name="setting_search_hint_title">搜索提示文字</string>
+    <string name="setting_search_hint_default">默认</string>
+    <string name="setting_quick_action_calculator">显示计算器</string>
+    <string name="setting_quick_action_unit">显示单位换算器</string>
+    <string name="setting_quick_action_timer">显示计时器</string>
+    <string name="setting_quick_action_battery">显示电池百分比</string>
+    <string name="setting_quick_action_settings_shortcut">显示设置快捷方式</string>
     <string name="setting_show_new_app_tag">显示新应用标签</string>
     <string name="setting_highlight_color">高亮颜色</string>
     <string name="setting_icon_pack">图标包</string>

@@ -15,6 +15,13 @@
     <string name="setting_show_touch_selection">Show Touch Selection</string>
     <!-- UI-001 ships in the app's maintained English/Vietnamese locales first. -->
     <string name="setting_show_search_bar">Show Search Bar</string>
+    <string name="setting_search_hint_title">Search hint text</string>
+    <string name="setting_search_hint_default">Default</string>
+    <string name="setting_quick_action_calculator">Show Calculator</string>
+    <string name="setting_quick_action_unit">Show Unit Converter</string>
+    <string name="setting_quick_action_timer">Show Timer</string>
+    <string name="setting_quick_action_battery">Show Battery %%</string>
+    <string name="setting_quick_action_settings_shortcut">Show Settings Shortcuts</string>
     <string name="setting_show_new_app_tag">Show New App Tag</string>
     <string name="setting_highlight_color">Highlight Color</string>
     <string name="setting_icon_pack">Icon Pack</string>

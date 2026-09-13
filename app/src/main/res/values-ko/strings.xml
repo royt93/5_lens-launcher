@@ -15,6 +15,13 @@
     <string name="setting_show_name_app_hover">앱에 마우스 호버 시 이름 표시</string>
     <string name="setting_show_touch_selection">터치 선택 표시</string>
     <string name="setting_show_search_bar">검색창 표시</string>
+    <string name="setting_search_hint_title">검색 힌트 텍스트</string>
+    <string name="setting_search_hint_default">기본값</string>
+    <string name="setting_quick_action_calculator">계산기 표시</string>
+    <string name="setting_quick_action_unit">단위 변환기 표시</string>
+    <string name="setting_quick_action_timer">타이머 표시</string>
+    <string name="setting_quick_action_battery">배터리 %% 표시</string>
+    <string name="setting_quick_action_settings_shortcut">설정 바로가기 표시</string>
     <string name="setting_show_new_app_tag">새 앱 태그 표시</string>
     <string name="setting_highlight_color">강조 색상</string>
     <string name="setting_icon_pack">아이콘 팩</string>

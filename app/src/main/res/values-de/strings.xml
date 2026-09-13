@@ -15,6 +15,13 @@
     <string name="setting_show_name_app_hover">Name beim Zeigen auf App anzeigen</string>
     <string name="setting_show_touch_selection">Berührungsauswahl anzeigen</string>
     <string name="setting_show_search_bar">Suchleiste anzeigen</string>
+    <string name="setting_search_hint_title">Suchhinweistext</string>
+    <string name="setting_search_hint_default">Standard</string>
+    <string name="setting_quick_action_calculator">Rechner anzeigen</string>
+    <string name="setting_quick_action_unit">Einheitenumrechner anzeigen</string>
+    <string name="setting_quick_action_timer">Timer anzeigen</string>
+    <string name="setting_quick_action_battery">Akkustand anzeigen</string>
+    <string name="setting_quick_action_settings_shortcut">Einstellungsverknüpfungen anzeigen</string>
     <string name="setting_show_new_app_tag">Neues App-Tag anzeigen</string>
     <string name="setting_highlight_color">Hervorhebungsfarbe</string>
     <string name="setting_icon_pack">Symbolpaket</string>

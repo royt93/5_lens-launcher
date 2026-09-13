@@ -15,6 +15,13 @@
     <string name="setting_show_name_app_hover">ホバー時に名前を表示</string>
     <string name="setting_show_touch_selection">タッチ選択範囲を表示</string>
     <string name="setting_show_search_bar">検索バーを表示</string>
+    <string name="setting_search_hint_title">検索ヒントテキスト</string>
+    <string name="setting_search_hint_default">デフォルト</string>
+    <string name="setting_quick_action_calculator">電卓を表示</string>
+    <string name="setting_quick_action_unit">単位変換を表示</string>
+    <string name="setting_quick_action_timer">タイマーを表示</string>
+    <string name="setting_quick_action_battery">バッテリー％を表示</string>
+    <string name="setting_quick_action_settings_shortcut">設定ショートカットを表示</string>
     <string name="setting_show_new_app_tag">新着アプリタグを表示</string>
     <string name="setting_highlight_color">ハイライトカラー</string>
     <string name="setting_icon_pack">アイコンパック</string>

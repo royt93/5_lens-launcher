@@ -14,6 +14,13 @@
     <string name="setting_show_name_app_hover">Hiện tên khi di chuột qua ứng dụng</string>
     <string name="setting_show_touch_selection">Hiện lựa chọn chạm</string>
     <string name="setting_show_search_bar">Hiện thanh tìm kiếm</string>
+    <string name="setting_search_hint_title">Chữ gợi ý tìm kiếm</string>
+    <string name="setting_search_hint_default">Mặc định</string>
+    <string name="setting_quick_action_calculator">Hiện máy tính</string>
+    <string name="setting_quick_action_unit">Hiện đổi đơn vị</string>
+    <string name="setting_quick_action_timer">Hiện hẹn giờ</string>
+    <string name="setting_quick_action_battery">Hiện phần trăm pin</string>
+    <string name="setting_quick_action_settings_shortcut">Hiện lối tắt cài đặt</string>
     <string name="setting_show_new_app_tag">Hiện nhãn ứng dụng mới</string>
     <string name="setting_highlight_color">Màu nổi bật</string>
     <string name="setting_icon_pack">Gói biểu tượng</string>

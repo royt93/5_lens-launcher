@@ -15,6 +15,13 @@
     <string name="setting_show_name_app_hover">Afficher le nom au survol</string>
     <string name="setting_show_touch_selection">Afficher la sélection tactile</string>
     <string name="setting_show_search_bar">Afficher la barre de recherche</string>
+    <string name="setting_search_hint_title">Texte d\'indication de recherche</string>
+    <string name="setting_search_hint_default">Par défaut</string>
+    <string name="setting_quick_action_calculator">Afficher la calculatrice</string>
+    <string name="setting_quick_action_unit">Afficher le convertisseur d\'unités</string>
+    <string name="setting_quick_action_timer">Afficher le minuteur</string>
+    <string name="setting_quick_action_battery">Afficher le %% de batterie</string>
+    <string name="setting_quick_action_settings_shortcut">Afficher les raccourcis des paramètres</string>
     <string name="setting_show_new_app_tag">Afficher le badge de nouvelle appli</string>
     <string name="setting_highlight_color">Couleur de surbrillance</string>
     <string name="setting_icon_pack">Pack d\'icônes</string>

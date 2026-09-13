@@ -15,6 +15,13 @@
     <string name="setting_show_name_app_hover">ऐप पर होवर करने पर नाम दिखाएं</string>
     <string name="setting_show_touch_selection">स्पर्श चयन दिखाएं</string>
     <string name="setting_show_search_bar">खोज बार दिखाएं</string>
+    <string name="setting_search_hint_title">खोज संकेत टेक्स्ट</string>
+    <string name="setting_search_hint_default">डिफ़ॉल्ट</string>
+    <string name="setting_quick_action_calculator">कैलकुलेटर दिखाएं</string>
+    <string name="setting_quick_action_unit">इकाई परिवर्तक दिखाएं</string>
+    <string name="setting_quick_action_timer">टाइमर दिखाएं</string>
+    <string name="setting_quick_action_battery">बैटरी %% दिखाएं</string>
+    <string name="setting_quick_action_settings_shortcut">सेटिंग्स शॉर्टकट दिखाएं</string>
     <string name="setting_show_new_app_tag">नया ऐप टैग दिखाएं</string>
     <string name="setting_highlight_color">हाईलाइट का रंग</string>
     <string name="setting_icon_pack">आइकन पैक</string>

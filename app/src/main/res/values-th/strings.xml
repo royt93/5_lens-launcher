@@ -15,6 +15,13 @@
     <string name="setting_show_name_app_hover">แสดงชื่อเมื่อวางนิ้วเหนือแอป</string>
     <string name="setting_show_touch_selection">แสดงการเลือกสัมผัส</string>
     <string name="setting_show_search_bar">แสดงแถบค้นหา</string>
+    <string name="setting_search_hint_title">ข้อความคำแนะนำการค้นหา</string>
+    <string name="setting_search_hint_default">ค่าเริ่มต้น</string>
+    <string name="setting_quick_action_calculator">แสดงเครื่องคิดเลข</string>
+    <string name="setting_quick_action_unit">แสดงตัวแปลงหน่วย</string>
+    <string name="setting_quick_action_timer">แสดงตัวจับเวลา</string>
+    <string name="setting_quick_action_battery">แสดงเปอร์เซ็นต์แบตเตอรี่</string>
+    <string name="setting_quick_action_settings_shortcut">แสดงทางลัดการตั้งค่า</string>
     <string name="setting_show_new_app_tag">แสดงป้ายกำกับแอปใหม่</string>
     <string name="setting_highlight_color">สีไฮไลต์</string>
     <string name="setting_icon_pack">ชุดไอคอน</string>

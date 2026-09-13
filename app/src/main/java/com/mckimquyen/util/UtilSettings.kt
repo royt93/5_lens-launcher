@@ -42,6 +42,9 @@ class UtilSettings(context: Context) {
         const val DEFAULT_SHOW_TOUCH_SELECTION = false
         const val DEFAULT_SHOW_NEW_APP_TAG = true
         const val DEFAULT_SHOW_SEARCH_BAR = true
+        // UI-012: each SEARCH-002 quick-action type can be individually toggled off; all on by
+        // default so this is purely additive for existing users.
+        const val DEFAULT_QUICK_ACTION_ENABLED = true
         const val DEFAULT_BACKGROUND = "Wallpaper"
         const val DEFAULT_BACKGROUND_COLOR = "#FFF8BBD0"
         const val DEFAULT_HIGHLIGHT_COLOR = "#FFF50057"
@@ -78,6 +81,13 @@ class UtilSettings(context: Context) {
         const val KEY_SHOW_TOUCH_SELECTION = "show_touch_selection"
         const val KEY_SHOW_NEW_APP_TAG = "show_new_tag_app"
         const val KEY_SHOW_SEARCH_BAR = "show_search_bar"
+        // UI-012: per-quick-action toggles + custom search hint text.
+        const val KEY_QUICK_ACTION_CALCULATOR = "quick_action_calculator_enabled"
+        const val KEY_QUICK_ACTION_UNIT = "quick_action_unit_enabled"
+        const val KEY_QUICK_ACTION_TIMER = "quick_action_timer_enabled"
+        const val KEY_QUICK_ACTION_BATTERY = "quick_action_battery_enabled"
+        const val KEY_QUICK_ACTION_SETTINGS = "quick_action_settings_enabled"
+        const val KEY_SEARCH_HINT_TEXT = "search_hint_text"
         const val KEY_BACKGROUND = "background"
         const val KEY_BACKGROUND_COLOR = "background_color"
         const val KEY_HIGHLIGHT_COLOR = "show_touch_selection_color"
@@ -175,6 +185,9 @@ class UtilSettings(context: Context) {
         KEY_SHOW_TOUCH_SELECTION -> prefs.getBoolean(name, DEFAULT_SHOW_TOUCH_SELECTION)
         KEY_SHOW_NEW_APP_TAG -> prefs.getBoolean(name, DEFAULT_SHOW_NEW_APP_TAG)
         KEY_SHOW_SEARCH_BAR -> prefs.getBoolean(name, DEFAULT_SHOW_SEARCH_BAR)
+        KEY_QUICK_ACTION_CALCULATOR, KEY_QUICK_ACTION_UNIT, KEY_QUICK_ACTION_TIMER,
+        KEY_QUICK_ACTION_BATTERY, KEY_QUICK_ACTION_SETTINGS ->
+            prefs.getBoolean(name, DEFAULT_QUICK_ACTION_ENABLED)
         else -> prefs.getBoolean(name, DEFAULT_BOOLEAN)
     }
 

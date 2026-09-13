@@ -261,6 +261,29 @@ public class ActHome extends ActBase {
         });
     }
 
+    /** UI-012: re-read on every resume (matches updateSearchBarVisibility's pattern) so toggling
+     *  a quick action off/on in Settings, or changing the custom hint, applies immediately. */
+    private void updateSearchCustomization() {
+        UtilSettings settings = new UtilSettings(this);
+        String customHint = settings.getString(UtilSettings.KEY_SEARCH_HINT_TEXT);
+        String hint = (customHint == null || customHint.isEmpty())
+                ? getString(R.string.search_apps_hint)
+                : customHint;
+        searchBar.setHint(hint);
+        searchView.setHint(hint);
+
+        findViewById(R.id.tileCalculator).setVisibility(
+                settings.getBoolean(UtilSettings.KEY_QUICK_ACTION_CALCULATOR) ? View.VISIBLE : View.GONE);
+        findViewById(R.id.tileUnitConvert).setVisibility(
+                settings.getBoolean(UtilSettings.KEY_QUICK_ACTION_UNIT) ? View.VISIBLE : View.GONE);
+        findViewById(R.id.tileTimer).setVisibility(
+                settings.getBoolean(UtilSettings.KEY_QUICK_ACTION_TIMER) ? View.VISIBLE : View.GONE);
+        findViewById(R.id.tileBattery).setVisibility(
+                settings.getBoolean(UtilSettings.KEY_QUICK_ACTION_BATTERY) ? View.VISIBLE : View.GONE);
+        findViewById(R.id.tileWifi).setVisibility(
+                settings.getBoolean(UtilSettings.KEY_QUICK_ACTION_SETTINGS) ? View.VISIBLE : View.GONE);
+    }
+
     private void updateSearchResults(CharSequence query) {
         if (!searchView.isShowing() && query.length() == 0) {
             return;
@@ -403,6 +426,7 @@ public class ActHome extends ActBase {
         Log.d("roy93~", "onResume");
         updateColor();
         updateSearchBarVisibility();
+        updateSearchCustomization();
         setupTransparentSystemBarsForLollipop();
         // UI-009 fix: setupTransparentSystemBarsForLollipop() unconditionally forces transparent
         // bars - if the task is paused/resumed (e.g. Home button, or launching an app from a

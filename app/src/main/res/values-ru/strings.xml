@@ -15,6 +15,13 @@
     <string name="setting_show_name_app_hover">Показывать имя при наведении</string>
     <string name="setting_show_touch_selection">Показывать выбор касанием</string>
     <string name="setting_show_search_bar">Показать строку поиска</string>
+    <string name="setting_search_hint_title">Текст подсказки поиска</string>
+    <string name="setting_search_hint_default">По умолчанию</string>
+    <string name="setting_quick_action_calculator">Показать калькулятор</string>
+    <string name="setting_quick_action_unit">Показать конвертер единиц</string>
+    <string name="setting_quick_action_timer">Показать таймер</string>
+    <string name="setting_quick_action_battery">Показать заряд батареи</string>
+    <string name="setting_quick_action_settings_shortcut">Показать ярлыки настроек</string>
     <string name="setting_show_new_app_tag">Показывать метку нового приложения</string>
     <string name="setting_highlight_color">Цвет выделения</string>
     <string name="setting_icon_pack">Пакет значков</string>

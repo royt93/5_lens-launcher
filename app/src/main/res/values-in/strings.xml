@@ -15,6 +15,13 @@
     <string name="setting_show_name_app_hover">Tampilkan Nama saat Melayang</string>
     <string name="setting_show_touch_selection">Tampilkan Pilihan Sentuh</string>
     <string name="setting_show_search_bar">Tampilkan bilah pencarian</string>
+    <string name="setting_search_hint_title">Teks petunjuk pencarian</string>
+    <string name="setting_search_hint_default">Default</string>
+    <string name="setting_quick_action_calculator">Tampilkan kalkulator</string>
+    <string name="setting_quick_action_unit">Tampilkan konverter satuan</string>
+    <string name="setting_quick_action_timer">Tampilkan timer</string>
+    <string name="setting_quick_action_battery">Tampilkan %% baterai</string>
+    <string name="setting_quick_action_settings_shortcut">Tampilkan pintasan pengaturan</string>
     <string name="setting_show_new_app_tag">Tampilkan Label Aplikasi Baru</string>
     <string name="setting_highlight_color">Warna Sorotan</string>
     <string name="setting_icon_pack">Paket Ikon</string>

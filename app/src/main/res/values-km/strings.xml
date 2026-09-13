@@ -15,6 +15,13 @@
     <string name="setting_show_name_app_hover">បង្ហាញឈ្មោះពេលដាក់លើកម្មវិធី</string>
     <string name="setting_show_touch_selection">បង្ហាញការជ្រើសរើសដោយការប៉ះ</string>
     <string name="setting_show_search_bar">បង្ហាញរបារស្វែងរក</string>
+    <string name="setting_search_hint_title">អត្ថបទណែនាំស្វែងរក</string>
+    <string name="setting_search_hint_default">លំនាំដើម</string>
+    <string name="setting_quick_action_calculator">បង្ហាញម៉ាស៊ីនគិតលេខ</string>
+    <string name="setting_quick_action_unit">បង្ហាញកម្មវិធីបំប្លែងឯកតា</string>
+    <string name="setting_quick_action_timer">បង្ហាញកម្មវិធីកំណត់ពេល</string>
+    <string name="setting_quick_action_battery">បង្ហាញភាគរយថ្ម</string>
+    <string name="setting_quick_action_settings_shortcut">បង្ហាញផ្លូវកាត់ការកំណត់</string>
     <string name="setting_show_new_app_tag">បង្ហាញស្លាកកម្មវិធីថ្មី</string>
     <string name="setting_highlight_color">ពណ៌លេចធ្លោ</string>
     <string name="setting_icon_pack">កញ្ចប់រូបតំណាង</string>
