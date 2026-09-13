@@ -37,6 +37,7 @@
 - ❌ TEST-001 (CI trustworthy gates) declined by owner (2026-09-07): owner does not want CI-gate process work in this loop. TEST-002 and AUDIT-001 remain blocked as a consequence (they depend on TEST-001); this is a standing decision, not a scheduling delay.
 - ❌ STORE-001/002 confirmed out of scope (2026-09-07, owner decision): `store-assets` is internal tooling, not the shipped app, and stays excluded per the existing skip decision below — the loop only picks app-facing stories.
 - ⚠️ Device policy update (2026-09-12, owner decision): the 2026-09-07 self-select authorization above is **revoked**. Owner reissued the hard ban — only the Samsung S24 Ultra (SM_S928B, serial `R5CX613VZBR`) may be used for build/run/install/smoke; no other physical device or emulator, even when S24 Ultra isn't connected. Triggered by an incident during LEAK-001 where `./gradlew connectedDevDebugAndroidTest` fanned out to a second attached device (Gradle's connected-test task cannot be scoped to one serial); corrected by re-running verification via direct `adb shell am instrument` against only S24 Ultra. Applies from LEAK-001 onward.
+- ⚠️ Device exception (2026-09-13, owner decision): S24 Ultra `R5CX613VZBR` is damaged and unavailable. For `SEARCH-005` only, owner authorizes Pixel 7 Pro (`cheetah`, serial `2B051FDH3006MU`) as the designated build/run/install/smoke device; TECNO remains fallback only if Pixel is unavailable. This exception is recorded per story and does not silently change the general S24 policy.
 - ❌ A11Y-001 declined by owner (2026-09-12): offered as the recommended next pick right after LEAK-001 shipped; owner declined ("A11Y-00 nên skip, tôi không thích") with no further rationale. `FEAT-003`, `FEAT-004`, and the `FISH-*` "Fisheye Smart" line all depend on A11Y-001 and stay blocked as a consequence — this is a standing decision, not a scheduling delay. `DISPLAY-001` picked instead for this round.
 
 ## ✅ Implemented
@@ -89,6 +90,7 @@
 
 - SEC-001 — Local signing remediation is complete. Play Console rotation/revocation, CI secret replacement, non-production upload validation and coordinated Git-history cleanup require publisher-owner access.
 - ADS-001 — Consent-driven advertising state machine handed to the Ad SDK team (2026-09-06); excluded from this repo's code-loop until they deliver. VIP-001 stays blocked on this dependency.
+- SEARCH-005 — Contacts search + quick call/message implementation and targeted Pixel 7 Pro verification pass after the owner-approved one-story device exception (2026-09-13). Code is push-qualified at audit 9.1/10; production release still awaits Play Console/privacy-policy contacts declarations.
 
 ## 📋 Picked
 
@@ -115,7 +117,7 @@
 
 - Accessible list mode, large-screen support, store asset automation, local insights, privacy-first monetization, and five Fisheye Smart concepts remain captured as individual `idea` stories in `todo`.
 - ✅ Material You full revamp (owner decision, 2026-09-12): scoped and split into `UI-002`/`UI-003`/`UI-004`/`UI-006`, all shipped this session (see Implemented). `UI-005` (dynamic color audit, found along the way) also shipped.
-- Search expansion (owner decision, 2026-09-12): scoped and split into `SEARCH-001`/`SEARCH-002`/`SEARCH-003`/`SEARCH-004`/`SEARCH-006` (**all shipped**, see Implemented), `SEARCH-005` (contacts — `READ_CONTACTS`, **explicitly NOT started**: needs owner + Play Console Data Safety form + privacy-policy update first, a real external gate distinct from an in-chat "go ahead" — see its story file). `SEARCH-004`'s own CAMERA/location Play Console Data Safety form update is likewise still owner-pending before a production release (code shipped to dev regardless).
+- Search expansion (owner decision, 2026-09-12): scoped and split into `SEARCH-001`/`SEARCH-002`/`SEARCH-003`/`SEARCH-004`/`SEARCH-006` (**all shipped**, see Implemented). `SEARCH-005` (contacts — `READ_CONTACTS`) is now `inprogress` after owner dev-loop sign-off on 2026-09-13; Pixel 7 Pro verification is recorded under the owner-approved S24 replacement exception, while Play Console/privacy-policy contacts declarations remain required before production release. `SEARCH-004`'s own CAMERA/location Play Console Data Safety form update is likewise still owner-pending before a production release (code shipped to dev regardless).
 - ✅ Icon size default now auto-scales to device (`smallestScreenWidthDp`) instead of a fixed 18dp — `UtilSettings.calculateAutoDefaultIconSize`, live-verified on TECNO KJ7 (showed 18dp, matching this device's ~360dp baseline).
 
 ## Recommended delivery waves

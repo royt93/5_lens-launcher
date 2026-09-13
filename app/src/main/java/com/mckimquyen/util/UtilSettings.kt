@@ -95,6 +95,7 @@ class UtilSettings(context: Context) {
         const val KEY_QUICK_ACTION_WIFI_SSID = "quick_action_wifi_ssid_enabled"
         const val KEY_FLASHLIGHT_PERMISSION_REQUESTED = "flashlight_permission_requested"
         const val KEY_WIFI_SSID_PERMISSION_REQUESTED = "wifi_ssid_permission_requested"
+        const val KEY_CONTACTS_PERMISSION_REQUESTED = "contacts_permission_requested"
         const val KEY_BACKGROUND = "background"
         const val KEY_BACKGROUND_COLOR = "background_color"
         const val KEY_HIGHLIGHT_COLOR = "show_touch_selection_color"

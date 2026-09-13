@@ -55,6 +55,11 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
+    <!-- SEARCH-005: contacts quick action. Runtime-only and requested only from explicit
+         contact-search queries such as "contact Anna", "call Anna", or "message Anna";
+         contact rows are queried on demand and never cached by this app. -->
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+
     <!-- SEARCH-004: the CAMERA permission above would otherwise tell Google Play this app
          requires camera/flash hardware, excluding devices (and ChromeOS) without either - the
          flashlight quick action is optional (resolveFlashlightToggle degrades gracefully with

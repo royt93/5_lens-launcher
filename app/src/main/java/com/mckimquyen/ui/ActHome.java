@@ -49,6 +49,8 @@ import com.mckimquyen.enums.BackgroundMode;
 import com.mckimquyen.model.App;
 import com.mckimquyen.model.AppPersistent;
 import com.mckimquyen.search.AppSearchEngine;
+import com.mckimquyen.search.ContactSearchEngine;
+import com.mckimquyen.search.ContactSearchResult;
 import com.mckimquyen.search.QuickAction;
 import com.mckimquyen.search.QuickActionEngine;
 import com.mckimquyen.search.SearchHistoryStore;
@@ -70,6 +72,7 @@ public class ActHome extends ActBase {
     // SEARCH-004: request codes for the two permission-gated quick actions.
     private static final int REQUEST_CODE_CAMERA = 1001;
     private static final int REQUEST_CODE_WIFI_SSID = 1002;
+    private static final int REQUEST_CODE_CONTACTS = 1003;
 
     LensView lensViews;
     MaterialProgressBar progressBarHome;
@@ -88,6 +91,12 @@ public class ActHome extends ActBase {
     private View quickActionDivider;
     private TextView tvQuickActionLabel;
     private TextView tvQuickActionValue;
+    private View contactActionRow;
+    private View contactActionDivider;
+    private TextView tvContactResultName;
+    private TextView tvContactResultPhone;
+    private Button btContactCall;
+    private Button btContactMessage;
     private SearchResultAdapter searchResultAdapter;
     private SearchHistoryStore searchHistoryStore;
 
@@ -213,6 +222,12 @@ public class ActHome extends ActBase {
         quickActionDivider = findViewById(R.id.quickActionDivider);
         tvQuickActionLabel = findViewById(R.id.tvQuickActionLabel);
         tvQuickActionValue = findViewById(R.id.tvQuickActionValue);
+        contactActionRow = findViewById(R.id.contactActionRow);
+        contactActionDivider = findViewById(R.id.contactActionDivider);
+        tvContactResultName = findViewById(R.id.tvContactResultName);
+        tvContactResultPhone = findViewById(R.id.tvContactResultPhone);
+        btContactCall = findViewById(R.id.btContactCall);
+        btContactMessage = findViewById(R.id.btContactMessage);
 
         // Hide progress bar in test environments to prevent indeterminate animation loops from hanging tests
         boolean isTestEnv = false;
@@ -352,6 +367,7 @@ public class ActHome extends ActBase {
         }
 
         updateQuickAction(query);
+        updateContactAction(query);
 
         ArrayList<App> apps = listApp == null ? new ArrayList<>() : listApp;
         java.util.List<App> engineResults = AppSearchEngine.search(apps, query, searchHistoryStore.recentKeys());
@@ -380,7 +396,8 @@ public class ActHome extends ActBase {
         // SEARCH-006: only once every local result set (apps, shortcuts, quick actions) is empty -
         // never alongside real local results.
         boolean showWebFallback = !isEmptyQuery && !hasResults
-                && quickActionRow.getVisibility() != View.VISIBLE;
+                && quickActionRow.getVisibility() != View.VISIBLE
+                && contactActionRow.getVisibility() != View.VISIBLE;
         webSearchFallback.setVisibility(showWebFallback ? View.VISIBLE : View.GONE);
         if (showWebFallback) {
             webSearchFallback.setText(getString(R.string.web_search_fallback, query.toString()));
@@ -528,6 +545,60 @@ public class ActHome extends ActBase {
         );
     }
 
+    private void updateContactAction(CharSequence query) {
+        boolean showPermissionRequest = ContactSearchEngine.shouldShowPermissionRequest(this, query);
+        ContactSearchResult contact = showPermissionRequest
+                ? null
+                : ContactSearchEngine.firstContactForQuery(this, query);
+        boolean show = showPermissionRequest || contact != null;
+        contactActionRow.setVisibility(show ? View.VISIBLE : View.GONE);
+        contactActionDivider.setVisibility(show ? View.VISIBLE : View.GONE);
+        if (!show) {
+            contactActionRow.setOnClickListener(null);
+            btContactCall.setOnClickListener(null);
+            btContactMessage.setOnClickListener(null);
+            return;
+        }
+
+        if (showPermissionRequest) {
+            tvContactResultName.setText(R.string.contact_search_permission_label);
+            tvContactResultPhone.setText(R.string.contact_search_permission_rationale);
+            contactActionRow.setContentDescription(getString(R.string.contact_search_permission_rationale));
+            btContactCall.setText(R.string.contact_search_allow);
+            btContactMessage.setVisibility(View.GONE);
+            contactActionRow.setOnClickListener(v -> requestContactsPermission());
+            btContactCall.setOnClickListener(v -> requestContactsPermission());
+            return;
+        }
+
+        btContactCall.setText(R.string.contact_search_call);
+        btContactMessage.setVisibility(View.VISIBLE);
+        tvContactResultName.setText(contact.getDisplayName());
+        tvContactResultPhone.setText(contact.getPhoneNumber());
+        contactActionRow.setContentDescription(getString(R.string.search_open_contact, contact.getDisplayName()));
+        contactActionRow.setOnClickListener(v -> startContactIntent(contact.dialIntent()));
+        btContactCall.setOnClickListener(v -> startContactIntent(contact.dialIntent()));
+        btContactMessage.setOnClickListener(v -> startContactIntent(contact.messageIntent()));
+    }
+
+    private void requestContactsPermission() {
+        new UtilSettings(this).save(UtilSettings.KEY_CONTACTS_PERMISSION_REQUESTED, true);
+        ActivityCompat.requestPermissions(
+                this,
+                new String[]{Manifest.permission.READ_CONTACTS},
+                REQUEST_CODE_CONTACTS
+        );
+    }
+
+    private void startContactIntent(Intent intent) {
+        try {
+            startActivity(intent);
+            hideSearch();
+        } catch (ActivityNotFoundException e) {
+            Toast.makeText(this, R.string.error_app_not_found, Toast.LENGTH_SHORT).show();
+        }
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -540,6 +611,8 @@ public class ActHome extends ActBase {
             }
         } else if (requestCode == REQUEST_CODE_WIFI_SSID) {
             updateQuickAction(appSearch.getText());
+        } else if (requestCode == REQUEST_CODE_CONTACTS) {
+            updateContactAction(appSearch.getText());
         }
     }
 

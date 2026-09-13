@@ -1,6 +1,7 @@
 package com.mckimquyen.ui
 
 import android.graphics.Color
+import android.Manifest
 import android.view.View
 import android.widget.TextView
 import androidx.core.content.ContextCompat
@@ -13,6 +14,8 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.google.android.material.search.SearchBar
 import com.google.android.material.search.SearchView
 import com.mckimquyen.R
+import com.mckimquyen.search.ContactSearchEngine
+import com.mckimquyen.search.ContactSearchResult
 import com.mckimquyen.util.UtilSettings
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -274,6 +277,87 @@ class AppSearchWidgetTest {
                 assertEquals("12*7", label.text.toString())
                 assertEquals("84", value.text.toString())
             }
+        }
+    }
+
+    /** SEARCH-005: explicit contact queries show a permission affordance, not web fallback. */
+    @Test
+    fun contactSearchShowsRuntimePermissionRowOnlyForExplicitContactQuery() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        PreferenceManager.getDefaultSharedPreferences(context)
+            .edit()
+            .putBoolean(UtilSettings.KEY_CONTACTS_PERMISSION_REQUESTED, false)
+            .commit()
+        InstrumentationRegistry.getInstrumentation().uiAutomation.executeShellCommand(
+            "pm revoke ${context.packageName} ${Manifest.permission.READ_CONTACTS}"
+        ).close()
+
+        ActivityScenario.launch(ActHome::class.java).use { scenario ->
+            var searchView: SearchView? = null
+            scenario.onActivity { activity ->
+                searchView = activity.findViewById(R.id.searchView)
+                searchView!!.show()
+            }
+            waitUntilShowing(searchView!!, true)
+
+            scenario.onActivity { searchView!!.editText.setText("jane") }
+            scenario.onActivity { activity ->
+                assertEquals(View.GONE, activity.findViewById<View>(R.id.contactActionRow).visibility)
+            }
+
+            scenario.onActivity { searchView!!.editText.setText("contact jane") }
+            scenario.onActivity { activity ->
+                assertEquals(View.VISIBLE, activity.findViewById<View>(R.id.contactActionRow).visibility)
+                assertEquals(
+                    activity.getString(R.string.contact_search_permission_label),
+                    activity.findViewById<TextView>(R.id.tvContactResultName).text.toString()
+                )
+                assertEquals(View.GONE, activity.findViewById<View>(R.id.tvWebSearchFallback).visibility)
+            }
+        }
+    }
+
+    /** SEARCH-005: granted contact search renders an ephemeral contact row with both actions. */
+    @Test
+    fun contactSearchResultRowShowsCallAndMessageActionsWhenGranted() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        InstrumentationRegistry.getInstrumentation().uiAutomation.executeShellCommand(
+            "pm grant ${context.packageName} ${Manifest.permission.READ_CONTACTS}"
+        ).close()
+        ContactSearchEngine.setContactsForTesting(
+            listOf(ContactSearchResult("Jane Nguyen", "+84 912 345 678"))
+        )
+
+        try {
+            ActivityScenario.launch(ActHome::class.java).use { scenario ->
+                var searchView: SearchView? = null
+                scenario.onActivity { activity ->
+                    searchView = activity.findViewById(R.id.searchView)
+                    searchView!!.show()
+                }
+                waitUntilShowing(searchView!!, true)
+
+                scenario.onActivity { searchView!!.editText.setText("call jane") }
+                scenario.onActivity { activity ->
+                    assertEquals(View.VISIBLE, activity.findViewById<View>(R.id.contactActionRow).visibility)
+                    assertEquals(
+                        "Jane Nguyen",
+                        activity.findViewById<TextView>(R.id.tvContactResultName).text.toString()
+                    )
+                    assertEquals(
+                        "+84 912 345 678",
+                        activity.findViewById<TextView>(R.id.tvContactResultPhone).text.toString()
+                    )
+                    assertEquals(View.VISIBLE, activity.findViewById<View>(R.id.btContactCall).visibility)
+                    assertEquals(View.VISIBLE, activity.findViewById<View>(R.id.btContactMessage).visibility)
+                    assertEquals(View.GONE, activity.findViewById<View>(R.id.tvWebSearchFallback).visibility)
+                }
+            }
+        } finally {
+            ContactSearchEngine.setContactsForTesting(null)
+            InstrumentationRegistry.getInstrumentation().uiAutomation.executeShellCommand(
+                "pm revoke ${context.packageName} ${Manifest.permission.READ_CONTACTS}"
+            ).close()
         }
     }
 

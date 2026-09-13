@@ -114,6 +114,74 @@
                     android:background="@color/colorDivider"
                     android:visibility="gone" />
 
+                <!-- SEARCH-005: explicit contact-search row. It is separate from the app-result
+                     RecyclerView so contact data is never mixed into the persisted App model or
+                     search history. -->
+                <LinearLayout
+                    android:id="@+id/contactActionRow"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
+                    android:gravity="center_vertical"
+                    android:minHeight="64dp"
+                    android:orientation="horizontal"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="12dp"
+                    android:visibility="gone"
+                    tools:visibility="visible">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/tvContactResultName"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:ellipsize="end"
+                            android:maxLines="1"
+                            android:textColor="?attr/colorOnSurface"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            tools:text="Jane Nguyen" />
+
+                        <TextView
+                            android:id="@+id/tvContactResultPhone"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:ellipsize="middle"
+                            android:maxLines="1"
+                            android:textColor="?attr/colorOnSurfaceVariant"
+                            android:textSize="12sp"
+                            tools:text="+84 912 345 678" />
+                    </LinearLayout>
+
+                    <Button
+                        android:id="@+id/btContactCall"
+                        style="?attr/borderlessButtonStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="48dp"
+                        android:text="@string/contact_search_call"
+                        android:textAllCaps="false" />
+
+                    <Button
+                        android:id="@+id/btContactMessage"
+                        style="?attr/borderlessButtonStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="48dp"
+                        android:text="@string/contact_search_message"
+                        android:textAllCaps="false" />
+                </LinearLayout>
+
+                <View
+                    android:id="@+id/contactActionDivider"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/colorDivider"
+                    android:visibility="gone" />
+
                 <!-- UI-011: permanent quick-action shortcuts on a blank query. Calculator/unit
                      conversion/timer prefill a working example into the search box (the
                      contextual quickActionRow above then does the real execution, same as if the

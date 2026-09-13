@@ -129,6 +129,12 @@
     <string name="recent_apps_cleared">Recent apps cleared</string>
     <string name="no_apps_found">No apps found</string>
     <string name="web_search_fallback">Search the web for \"%1$s\"</string>
+    <string name="contact_search_allow" translatable="false">Allow Contacts</string>
+    <string name="contact_search_permission_label" translatable="false">Search contacts</string>
+    <string name="contact_search_permission_rationale" translatable="false">Use Contacts for this search</string>
+    <string name="contact_search_call" translatable="false">Call</string>
+    <string name="contact_search_message" translatable="false">Message</string>
+    <string name="search_open_contact" translatable="false">Open contact %1$s</string>
     <string name="search_empty_state">Type an app name to search</string>
     <string name="search_results_section">Matching apps</string>
     <string name="all_apps_section">All apps</string>
