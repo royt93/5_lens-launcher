@@ -31,6 +31,7 @@ import android.widget.Toast;
 import androidx.activity.OnBackPressedCallback;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.graphics.Insets;
 import androidx.core.graphics.ColorUtils;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -119,22 +120,8 @@ public class ActHome extends ActBase {
         super.onCreate(savedInstanceState);
         UIUtils.INSTANCE.setupEdgeToEdge1(getWindow());
         setContentView(R.layout.act_home);
-        // UI-014/UI-015: rootLayout itself is no longer inset-padded at all - it and its direct
-        // children (lensViews, searchCoordinator/searchView) all now extend genuinely
-        // edge-to-edge on every side, so searchView's scrim reaches the true top edge (mirrors
-        // UI-013's bottom fix). lensViews and searchBar each need their own top clearance
-        // restored though - as a MARGIN, not padding. UI-014 first tried setupEdgeToEdge2
-        // (setPadding) directly on lensViews, but LensView is a leaf custom View that never
-        // reads its own getPaddingTop() in onDraw/onTouchEvent - padding on a leaf view changes
-        // nothing about its actual laid-out bounds, so the fisheye grid kept drawing from y=0,
-        // ending up hidden (and unclickable - touches went to searchCoordinator instead) behind
-        // the search pill. A margin, unlike self-padding, genuinely shrinks/shifts a match_parent
-        // child's laid-out bounds (confirmed live on Pixel 7 Pro: grid icons no longer hide under
-        // or lose touch to the pill). searchView (the expanded search panel) still gets neither -
-        // that's the intended UI-014 fix, unaffected by this correction.
-        applyStatusBarInsetAsTopMargin(findViewById(R.id.lensViews));
-        applyStatusBarInsetAsTopMargin(findViewById(R.id.searchBar));
         setupViews();
+        applyHomeColumnInsets(findViewById(R.id.rootLayout));
         setupSearch();
         // updateColor();
         PackageManager mPackageManager = getPackageManager();
@@ -182,20 +169,35 @@ public class ActHome extends ActBase {
     }
 
     /**
-     * UI-014: adds the status bar inset to view's existing static topMargin (its XML
-     * android:layout_marginTop, e.g. searchBar's 12dp) instead of overwriting it via padding -
-     * keeps the pill's own shape/content undisturbed while still positioning it below the status
-     * bar now that rootLayout no longer supplies that clearance itself.
+     * UI-017: collapsed home is a real top-search + app-grid column. LensView is a leaf custom
+     * view, so padding does not move its drawing/touch geometry; margins change its laid-out
+     * bounds and keep icons clear of both the search bar and system navigation.
      */
-    private void applyStatusBarInsetAsTopMargin(View view) {
-        int baseTopMargin = ((ViewGroup.MarginLayoutParams) view.getLayoutParams()).topMargin;
-        ViewCompat.setOnApplyWindowInsetsListener(view, (v, insets) -> {
-            int statusBarInset = insets.getInsets(WindowInsetsCompat.Type.systemBars()).top;
-            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
-            params.topMargin = baseTopMargin + statusBarInset;
-            v.setLayoutParams(params);
+    private void applyHomeColumnInsets(View rootView) {
+        ViewGroup.MarginLayoutParams searchParams =
+                (ViewGroup.MarginLayoutParams) searchBar.getLayoutParams();
+        int searchBaseTopMargin = searchParams.topMargin;
+        int lensSearchGap = getResources().getDimensionPixelSize(R.dimen.home_search_to_grid_gap);
+
+        ViewCompat.setOnApplyWindowInsetsListener(rootView, (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            ViewGroup.MarginLayoutParams updatedSearchParams =
+                    (ViewGroup.MarginLayoutParams) searchBar.getLayoutParams();
+            updatedSearchParams.topMargin = searchBaseTopMargin + systemBars.top;
+            searchBar.setLayoutParams(updatedSearchParams);
+
+            searchBar.post(() -> {
+                ViewGroup.MarginLayoutParams updatedLensParams =
+                        (ViewGroup.MarginLayoutParams) lensViews.getLayoutParams();
+                updatedLensParams.topMargin = updatedSearchParams.topMargin
+                        + searchBar.getHeight()
+                        + lensSearchGap;
+                updatedLensParams.bottomMargin = systemBars.bottom;
+                lensViews.setLayoutParams(updatedLensParams);
+            });
             return insets;
         });
+        ViewCompat.requestApplyInsets(rootView);
     }
 
     private void setupViews() {

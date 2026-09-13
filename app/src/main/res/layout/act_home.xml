@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- MergeRootFrame doesn't apply here: this layout is set directly via
-     ActHome.setContentView(R.layout.act_home), not inflated with <include> into a
-     parent, so a <merge> root would crash (there's no parent ViewGroup to merge into). -->
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- CoordinatorLayout is the Material SearchBar/SearchView host and also lets the collapsed
+     launcher behave like a top-search + app-grid column instead of a full-screen overlay stack. -->
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/rootLayout"
@@ -15,6 +14,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:hapticFeedbackEnabled="true"
+        android:layout_marginTop="72dp"
         android:visibility="invisible"
         tools:visibility="visible" />
 
@@ -25,29 +25,25 @@
         android:layout_gravity="center" />
 
     <!-- Material You: real SearchBar->SearchView morph, replaces the old plain pill + CardView.
-         setupWithSearchBar() (ActHome.setupViews) wires the tap-to-expand animation and back-
-         press collapse; CoordinatorLayout is required for app:layout_anchor to work. -->
-    <androidx.coordinatorlayout.widget.CoordinatorLayout
-        android:id="@+id/searchCoordinator"
+         The collapsed launcher is now a top-search + app-grid column: LensView gets a runtime
+         top margin equal to system-bar inset + SearchBar height + spacing, so icons never sit
+         invisibly below the search affordance. SearchView remains full-screen only while open. -->
+    <com.google.android.material.search.SearchBar
+        android:id="@+id/searchBar"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="48dp"
+        android:layout_gravity="top"
+        android:layout_marginHorizontal="32dp"
+        android:layout_marginTop="10dp"
+        android:hint="@string/search_apps_hint" />
 
-        <com.google.android.material.search.SearchBar
-            android:id="@+id/searchBar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="top"
-            android:layout_marginHorizontal="16dp"
-            android:layout_marginTop="12dp"
-            android:hint="@string/search_apps_hint" />
-
-        <com.google.android.material.search.SearchView
-            android:id="@+id/searchView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:hint="@string/search_apps_hint"
-            app:backgroundTint="@color/search_view_scrim_background"
-            app:layout_anchor="@id/searchBar">
+    <com.google.android.material.search.SearchView
+        android:id="@+id/searchView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:hint="@string/search_apps_hint"
+        app:backgroundTint="@color/search_view_scrim_background"
+        app:layout_anchor="@id/searchBar">
 
             <!-- UI-011: content sits directly on SearchView's own scrim - no secondary
                  MaterialCardView. A rounded card nested inside a panel that already has its own
@@ -348,6 +344,5 @@
                     android:nestedScrollingEnabled="true"
                     android:overScrollMode="ifContentScrolls" />
             </LinearLayout>
-        </com.google.android.material.search.SearchView>
-    </androidx.coordinatorlayout.widget.CoordinatorLayout>
-</FrameLayout>
+    </com.google.android.material.search.SearchView>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
