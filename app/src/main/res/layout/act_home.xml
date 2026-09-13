@@ -55,9 +55,13 @@
                  the official Material3 full-screen-search spec puts content straight on the
                  panel. Text contrast no longer depends on an opaque card because the scrim
                  itself (res/color/search_view_scrim_background.xml) is near-opaque. -->
+            <!-- UI-015: match_parent (was wrap_content) so rvSearchResults below can use
+                 layout_weight to fill all remaining height instead of a hand-computed pixel cap -
+                 the old cap (64dp/row, capped at 384dp = 6 rows) left most of the screen as dead
+                 scrim space once UI-011's all-apps fallback could show dozens of apps. -->
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_marginTop="8dp"
                 android:orientation="vertical">
 
@@ -263,7 +267,8 @@
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rvSearchResults"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
                     android:nestedScrollingEnabled="true"
                     android:overScrollMode="ifContentScrolls" />
             </LinearLayout>

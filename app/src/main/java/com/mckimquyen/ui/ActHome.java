@@ -110,19 +110,20 @@ public class ActHome extends ActBase {
         super.onCreate(savedInstanceState);
         UIUtils.INSTANCE.setupEdgeToEdge1(getWindow());
         setContentView(R.layout.act_home);
-        // UI-014: rootLayout itself is no longer inset-padded at all - it and its direct
+        // UI-014/UI-015: rootLayout itself is no longer inset-padded at all - it and its direct
         // children (lensViews, searchCoordinator/searchView) all now extend genuinely
-        // edge-to-edge on every side. lensViews (the home grid) gets its own targeted top
-        // padding below instead, so it still clears the status bar as before - but searchView
-        // (the expanded search panel) gets none, so its own scrim background now physically
-        // reaches the true top edge too, not just the bottom (UI-013). setSearchSystemBarsHarmonized()'s
-        // Window.setStatusBarColor/setNavigationBarColor calls are kept as a fallback for OS
-        // versions/nav modes where a real paintable bar surface still exists (belt-and-suspenders,
-        // not the primary mechanism anymore).
-        UIUtils.INSTANCE.setupEdgeToEdge2(findViewById(R.id.lensViews), true, false);
-        // searchBar (the collapsed pill) needs the same top clearance, but as a MARGIN, not
-        // padding - setupEdgeToEdge2 uses setPadding(), which on a MaterialCardView-shaped widget
-        // would inset its own internal icon/hint text instead of moving the whole pill down.
+        // edge-to-edge on every side, so searchView's scrim reaches the true top edge (mirrors
+        // UI-013's bottom fix). lensViews and searchBar each need their own top clearance
+        // restored though - as a MARGIN, not padding. UI-014 first tried setupEdgeToEdge2
+        // (setPadding) directly on lensViews, but LensView is a leaf custom View that never
+        // reads its own getPaddingTop() in onDraw/onTouchEvent - padding on a leaf view changes
+        // nothing about its actual laid-out bounds, so the fisheye grid kept drawing from y=0,
+        // ending up hidden (and unclickable - touches went to searchCoordinator instead) behind
+        // the search pill. A margin, unlike self-padding, genuinely shrinks/shifts a match_parent
+        // child's laid-out bounds (confirmed live on Pixel 7 Pro: grid icons no longer hide under
+        // or lose touch to the pill). searchView (the expanded search panel) still gets neither -
+        // that's the intended UI-014 fix, unaffected by this correction.
+        applyStatusBarInsetAsTopMargin(findViewById(R.id.lensViews));
         applyStatusBarInsetAsTopMargin(findViewById(R.id.searchBar));
         setupViews();
         setupSearch();
@@ -368,11 +369,6 @@ public class ActHome extends ActBase {
         // GhostView fade-out overlays rendering on top of the new content, i.e. the exact
         // "overlapping UI" bug this whole revamp exists to remove. Plain visibility swaps instead.
         searchResultAdapter.submitList(results);
-        int resultHeightDp = Math.min(results.size() * 64, 384);
-        searchResults.getLayoutParams().height = Math.round(
-                resultHeightDp * getResources().getDisplayMetrics().density
-        );
-        searchResults.requestLayout();
         recentHeader.setVisibility(isEmptyQuery && hasResults && !showAllAppsFallback ? View.VISIBLE : View.GONE);
         allAppsHeader.setVisibility(showAllAppsFallback ? View.VISIBLE : View.GONE);
         resultsSectionHeader.setVisibility(!isEmptyQuery && hasResults ? View.VISIBLE : View.GONE);
