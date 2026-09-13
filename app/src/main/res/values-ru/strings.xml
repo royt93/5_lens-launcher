@@ -99,6 +99,12 @@
     <string name="no_apps_found">Приложения не найдены</string>
     <string name="search_empty_state">Введите название приложения</string>
     <string name="search_results_section">Подходящие приложения</string>
+    <string name="all_apps_section">Все приложения</string>
+    <string name="quick_action_calculator_label">Калькулятор</string>
+    <string name="quick_action_unit_label">Конвертер единиц</string>
+    <string name="quick_action_timer_label">Таймер</string>
+    <string name="quick_action_battery_label">Батарея</string>
+    <string name="quick_action_wifi_label">Wi-Fi</string>
     <string name="search_open_app">Открыть %1$s</string>
     <string name="about_features_header">✨ Основные функции</string>
     <string name="about_feature_equispaced_grid">• Равномерная сетка - показывает все приложения независимо от размера экрана</string>

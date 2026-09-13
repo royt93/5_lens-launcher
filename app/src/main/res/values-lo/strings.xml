@@ -99,6 +99,12 @@
     <string name="no_apps_found">ບໍ່ພົບແອັບ</string>
     <string name="search_empty_state">ພິມຊື່ແອັບເພື່ອຄົ້ນຫາ</string>
     <string name="search_results_section">ແອັບທີ່ກົງກັນ</string>
+    <string name="all_apps_section">ແອັບທັງໝົດ</string>
+    <string name="quick_action_calculator_label">ເຄື່ອງຄິດເລກ</string>
+    <string name="quick_action_unit_label">ແປງໜ່ວຍ</string>
+    <string name="quick_action_timer_label">ໂຕນເວລາ</string>
+    <string name="quick_action_battery_label">ແບັດເຕີຣີ</string>
+    <string name="quick_action_wifi_label">ວາຍຟາຍ</string>
     <string name="search_open_app">ເປີດ %1$s</string>
     <string name="about_features_header">✨ ຄຸນສົມບັດຫຼັກ</string>
     <string name="about_feature_equispaced_grid">• ຕາຂ່າຍໄລຍະເທົ່າກັນ - ສະແດງແອັບທັງໝົດໂດຍບໍ່ຄຳນຶງເຖິງຂະໜາດຈໍ</string>

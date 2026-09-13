@@ -99,6 +99,12 @@
     <string name="no_apps_found">لم يتم العثور على تطبيقات</string>
     <string name="search_empty_state">اكتب اسم تطبيق للبحث</string>
     <string name="search_results_section">التطبيقات المطابقة</string>
+    <string name="all_apps_section">كل التطبيقات</string>
+    <string name="quick_action_calculator_label">الآلة الحاسبة</string>
+    <string name="quick_action_unit_label">تحويل الوحدات</string>
+    <string name="quick_action_timer_label">المؤقت</string>
+    <string name="quick_action_battery_label">البطارية</string>
+    <string name="quick_action_wifi_label">واي فاي</string>
     <string name="search_open_app">فتح %1$s</string>
     <string name="about_features_header">✨ الميزات الرئيسية</string>
     <string name="about_feature_equispaced_grid">• شبكة متساوية المسافات - تعرض جميع التطبيقات بغض النظر عن حجم الشاشة</string>

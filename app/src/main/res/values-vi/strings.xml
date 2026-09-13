@@ -101,6 +101,12 @@
     <string name="no_apps_found">Không tìm thấy ứng dụng</string>
     <string name="search_empty_state">Nhập tên ứng dụng để tìm kiếm</string>
     <string name="search_results_section">Ứng dụng phù hợp</string>
+    <string name="all_apps_section">Tất cả ứng dụng</string>
+    <string name="quick_action_calculator_label">Máy tính</string>
+    <string name="quick_action_unit_label">Đổi đơn vị</string>
+    <string name="quick_action_timer_label">Hẹn giờ</string>
+    <string name="quick_action_battery_label">Pin</string>
+    <string name="quick_action_wifi_label">WiFi</string>
     <string name="search_open_app">Mở %1$s</string>
     <string name="about_features_header">✨ Tính năng nổi bật</string>
     <string name="about_feature_equispaced_grid">• Lưới đều - hiển thị mọi ứng dụng bất kể kích thước màn hình</string>

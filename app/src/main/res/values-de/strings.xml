@@ -99,6 +99,12 @@
     <string name="no_apps_found">Keine Apps gefunden</string>
     <string name="search_empty_state">App-Namen zum Suchen eingeben</string>
     <string name="search_results_section">Passende Apps</string>
+    <string name="all_apps_section">Alle Apps</string>
+    <string name="quick_action_calculator_label">Rechner</string>
+    <string name="quick_action_unit_label">Einheiten umrechnen</string>
+    <string name="quick_action_timer_label">Timer</string>
+    <string name="quick_action_battery_label">Akku</string>
+    <string name="quick_action_wifi_label">WLAN</string>
     <string name="search_open_app">%1$s öffnen</string>
     <string name="about_features_header">✨ Hauptfunktionen</string>
     <string name="about_feature_equispaced_grid">• Gleichmäßiges Raster – zeigt alle Apps unabhängig von der Bildschirmgröße an</string>

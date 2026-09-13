@@ -99,6 +99,12 @@
     <string name="no_apps_found">कोई ऐप नहीं मिला</string>
     <string name="search_empty_state">खोजने के लिए ऐप का नाम लिखें</string>
     <string name="search_results_section">मिलती-जुलती ऐप्स</string>
+    <string name="all_apps_section">सभी ऐप्स</string>
+    <string name="quick_action_calculator_label">कैलकुलेटर</string>
+    <string name="quick_action_unit_label">इकाई बदलें</string>
+    <string name="quick_action_timer_label">टाइमर</string>
+    <string name="quick_action_battery_label">बैटरी</string>
+    <string name="quick_action_wifi_label">वाई-फाई</string>
     <string name="search_open_app">%1$s खोलें</string>
     <string name="about_features_header">✨ मुख्य विशेषताएं</string>
     <string name="about_feature_equispaced_grid">• समान दूरी वाली ग्रिड - स्क्रीन आकार की परवाह किए बिना सभी ऐप्स दिखाता है</string>

@@ -119,5 +119,11 @@
     <string name="no_apps_found">No apps found</string>
     <string name="search_empty_state">Type an app name to search</string>
     <string name="search_results_section">Matching apps</string>
+    <string name="all_apps_section">All apps</string>
+    <string name="quick_action_calculator_label">Calculator</string>
+    <string name="quick_action_unit_label">Convert units</string>
+    <string name="quick_action_timer_label">Timer</string>
+    <string name="quick_action_battery_label">Battery</string>
+    <string name="quick_action_wifi_label">WiFi</string>
     <string name="search_open_app">Open %1$s</string>
 </resources>

@@ -2,7 +2,6 @@ package com.mckimquyen.ui
 
 import android.graphics.Color
 import android.view.View
-import android.view.ViewParent
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.preference.PreferenceManager
@@ -11,7 +10,6 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import com.google.android.material.card.MaterialCardView
 import com.google.android.material.search.SearchBar
 import com.google.android.material.search.SearchView
 import com.mckimquyen.R
@@ -133,11 +131,14 @@ class AppSearchWidgetTest {
     /**
      * UI-009: replaced the old two-tier scrim+blur design (real RenderEffect blur caused visible
      * jank on the SearchBar<->SearchView morph) with a single near-opaque tonal scrim on every
-     * API level - no blur to compensate for, so one opacity value covers all devices. The result
-     * list itself still sits on an opaque card so its text is always readable regardless.
+     * API level - no blur to compensate for, so one opacity value covers all devices.
+     * UI-011 follow-up: the result list's own MaterialCardView panel was removed (owner feedback:
+     * a rounded card nested inside a panel that already has its own full-bleed scrim read as "a
+     * frame inside a frame") - content now sits directly on the scrim per the Material3
+     * full-screen-search spec, so text contrast relies on the scrim being near-opaque instead.
      */
     @Test
-    fun searchScrimIsDimmedNotOpaqueOrTransparent_andResultsSitOnAnOpaqueCard() {
+    fun searchScrimIsDimmedNotOpaqueOrTransparent() {
         ActivityScenario.launch(ActHome::class.java).use { scenario ->
             scenario.onActivity { activity ->
                 val resolvedScrim = ContextCompat.getColorStateList(
@@ -149,18 +150,6 @@ class AppSearchWidgetTest {
                     "scrim alpha should be dimmed (neither ~0 nor fully opaque), was $alpha",
                     alpha in 60..250
                 )
-
-                val results = activity.findViewById<RecyclerView>(R.id.rvSearchResults)
-                var parent: ViewParent? = results.parent
-                var foundCard = false
-                while (parent != null) {
-                    if (parent is MaterialCardView) {
-                        foundCard = true
-                        break
-                    }
-                    parent = parent.parent
-                }
-                assertTrue("result list must sit inside an opaque MaterialCardView panel", foundCard)
             }
         }
     }
@@ -380,9 +369,55 @@ class AppSearchWidgetTest {
             }
             waitUntilShowing(searchView!!, true)
             scenario.onActivity { activity ->
-                assertEquals(View.VISIBLE, activity.findViewById<View>(R.id.tvNoSearchResults).visibility)
+                // UI-011: a blank query with no recent history now falls back to the full app
+                // list (real hardware always has at least one app installed) instead of an empty
+                // state - tvNoSearchResults only remains reachable for a genuinely empty device.
+                assertEquals(View.GONE, activity.findViewById<View>(R.id.tvNoSearchResults).visibility)
                 assertEquals(View.GONE, activity.findViewById<View>(R.id.recentHeader).visibility)
                 assertEquals(View.GONE, activity.findViewById<View>(R.id.resultsSectionHeader).visibility)
+                assertEquals(View.VISIBLE, activity.findViewById<View>(R.id.allAppsHeader).visibility)
+                assertEquals(View.VISIBLE, activity.findViewById<View>(R.id.rvSearchResults).visibility)
+            }
+        }
+    }
+
+    /** UI-011: the permanent quick-action grid only shows for a blank query. */
+    @Test
+    fun emptyQuickActionsGridShowsOnBlankQuery_hidesWhileTyping() {
+        ActivityScenario.launch(ActHome::class.java).use { scenario ->
+            var searchView: SearchView? = null
+            scenario.onActivity { activity ->
+                searchView = activity.findViewById(R.id.searchView)
+                searchView!!.show()
+            }
+            waitUntilShowing(searchView!!, true)
+            scenario.onActivity { activity ->
+                assertEquals(View.VISIBLE, activity.findViewById<View>(R.id.llEmptyQuickActions).visibility)
+            }
+
+            scenario.onActivity { searchView!!.editText.setText("a") }
+            scenario.onActivity { activity ->
+                assertEquals(View.GONE, activity.findViewById<View>(R.id.llEmptyQuickActions).visibility)
+            }
+        }
+    }
+
+    /** UI-011: tapping a quick-action tile prefills its example query, ready to run/edit. */
+    @Test
+    fun tappingWifiTilePrefillsExampleQuery() {
+        ActivityScenario.launch(ActHome::class.java).use { scenario ->
+            var searchView: SearchView? = null
+            scenario.onActivity { activity ->
+                searchView = activity.findViewById(R.id.searchView)
+                searchView!!.show()
+            }
+            waitUntilShowing(searchView!!, true)
+            scenario.onActivity { activity ->
+                activity.findViewById<View>(R.id.tileWifi).performClick()
+            }
+            scenario.onActivity { activity ->
+                assertEquals("wifi", searchView!!.editText.text.toString())
+                assertEquals(View.VISIBLE, activity.findViewById<View>(R.id.quickActionRow).visibility)
             }
         }
     }

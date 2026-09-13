@@ -99,6 +99,12 @@
     <string name="no_apps_found">未找到应用</string>
     <string name="search_empty_state">输入应用名称进行搜索</string>
     <string name="search_results_section">匹配的应用</string>
+    <string name="all_apps_section">所有应用</string>
+    <string name="quick_action_calculator_label">计算器</string>
+    <string name="quick_action_unit_label">单位换算</string>
+    <string name="quick_action_timer_label">计时器</string>
+    <string name="quick_action_battery_label">电池</string>
+    <string name="quick_action_wifi_label">WiFi</string>
     <string name="search_open_app">打开 %1$s</string>
     <string name="about_features_header">✨ 主要功能</string>
     <string name="about_feature_equispaced_grid">• 等距网格 - 无论屏幕尺寸如何都能显示所有应用</string>

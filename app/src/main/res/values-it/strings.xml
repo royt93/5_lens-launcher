@@ -99,6 +99,12 @@
     <string name="no_apps_found">Nessuna app trovata</string>
     <string name="search_empty_state">Digita il nome di una app da cercare</string>
     <string name="search_results_section">App corrispondenti</string>
+    <string name="all_apps_section">Tutte le app</string>
+    <string name="quick_action_calculator_label">Calcolatrice</string>
+    <string name="quick_action_unit_label">Converti unità</string>
+    <string name="quick_action_timer_label">Timer</string>
+    <string name="quick_action_battery_label">Batteria</string>
+    <string name="quick_action_wifi_label">WiFi</string>
     <string name="search_open_app">Apri %1$s</string>
     <string name="about_features_header">✨ Funzionalità principali</string>
     <string name="about_feature_equispaced_grid">• Griglia equidistante - mostra tutte le app indipendentemente dalla dimensione dello schermo</string>

@@ -64,7 +64,9 @@ public class ActHome extends ActBase {
     private SearchView searchView;
     private EditText appSearch;
     private View recentHeader;
+    private View allAppsHeader;
     private View resultsSectionHeader;
+    private View llEmptyQuickActions;
     private TextView noSearchResults;
     private RecyclerView searchResults;
     private View quickActionRow;
@@ -148,14 +150,16 @@ public class ActHome extends ActBase {
         searchView = findViewById(R.id.searchView);
         searchView.setupWithSearchBar(searchBar);
         appSearch = searchView.getEditText();
-        // UI-002: the 50%-opacity scrim behind the search panel is set declaratively via
+        // UI-009/UI-011: the near-opaque scrim behind the search panel is set declaratively via
         // app:backgroundTint="@color/search_view_scrim_background" in act_home.xml -
         // com.google.android.material.search.SearchView reads its panel background only from
-        // that XML attribute at inflate time and exposes no public runtime setter for it. The
-        // result list itself sits in an opaque MaterialCardView so readability never depends on
-        // what's behind the scrim.
+        // that XML attribute at inflate time and exposes no public runtime setter for it. Content
+        // sits directly on that scrim (no secondary card, see UI-011) since the scrim is already
+        // near-opaque, so text contrast doesn't depend on an extra opaque layer.
         recentHeader = findViewById(R.id.recentHeader);
+        allAppsHeader = findViewById(R.id.allAppsHeader);
         resultsSectionHeader = findViewById(R.id.resultsSectionHeader);
+        llEmptyQuickActions = findViewById(R.id.llEmptyQuickActions);
         noSearchResults = findViewById(R.id.tvNoSearchResults);
         searchResults = findViewById(R.id.rvSearchResults);
         quickActionRow = findViewById(R.id.quickActionRow);
@@ -239,6 +243,22 @@ public class ActHome extends ActBase {
             updateSearchResults(appSearch.getText());
             Toast.makeText(this, R.string.recent_apps_cleared, Toast.LENGTH_SHORT).show();
         });
+
+        // UI-011: each tile prefills a working example into the search box instead of executing
+        // directly - the existing contextual quickActionRow (already wired above) then shows the
+        // real result exactly as if the user had typed it, so there's only one execution path.
+        prefillOnTap(R.id.tileCalculator, "12*7");
+        prefillOnTap(R.id.tileUnitConvert, "10 km to mi");
+        prefillOnTap(R.id.tileTimer, "hẹn giờ 5 phút");
+        prefillOnTap(R.id.tileBattery, "pin");
+        prefillOnTap(R.id.tileWifi, "wifi");
+    }
+
+    private void prefillOnTap(int tileViewId, String exampleQuery) {
+        findViewById(tileViewId).setOnClickListener(v -> {
+            appSearch.setText(exampleQuery);
+            appSearch.setSelection(exampleQuery.length());
+        });
     }
 
     private void updateSearchResults(CharSequence query) {
@@ -249,8 +269,13 @@ public class ActHome extends ActBase {
         updateQuickAction(query);
 
         ArrayList<App> apps = listApp == null ? new ArrayList<>() : listApp;
-        java.util.List<App> results = AppSearchEngine.search(apps, query, searchHistoryStore.recentKeys());
+        java.util.List<App> engineResults = AppSearchEngine.search(apps, query, searchHistoryStore.recentKeys());
         boolean isEmptyQuery = AppSearchEngine.normalize(query).isEmpty();
+        // UI-011: a blank query with no recent/favorite apps used to show a bare empty state.
+        // Falling back to the full (alphabetical) app list instead means the panel is only ever
+        // truly empty if the device has zero visible apps at all.
+        boolean showAllAppsFallback = isEmptyQuery && engineResults.isEmpty() && !apps.isEmpty();
+        java.util.List<App> results = showAllAppsFallback ? sortedByLabel(apps) : engineResults;
         boolean hasResults = !results.isEmpty();
 
         // UI-009 note: a TransitionManager.beginDelayedTransition crossfade was tried here for
@@ -264,11 +289,21 @@ public class ActHome extends ActBase {
                 resultHeightDp * getResources().getDisplayMetrics().density
         );
         searchResults.requestLayout();
-        recentHeader.setVisibility(isEmptyQuery && hasResults ? View.VISIBLE : View.GONE);
+        recentHeader.setVisibility(isEmptyQuery && hasResults && !showAllAppsFallback ? View.VISIBLE : View.GONE);
+        allAppsHeader.setVisibility(showAllAppsFallback ? View.VISIBLE : View.GONE);
         resultsSectionHeader.setVisibility(!isEmptyQuery && hasResults ? View.VISIBLE : View.GONE);
+        llEmptyQuickActions.setVisibility(isEmptyQuery ? View.VISIBLE : View.GONE);
         searchResults.setVisibility(hasResults ? View.VISIBLE : View.GONE);
         noSearchResults.setText(isEmptyQuery ? R.string.search_empty_state : R.string.no_apps_found);
         noSearchResults.setVisibility(hasResults ? View.GONE : View.VISIBLE);
+    }
+
+    /** UI-011: all-apps fallback list, sorted alphabetically regardless of the lens grid's own
+     *  sort setting (e.g. icon-color sort) - a text list should read A-Z. */
+    private java.util.List<App> sortedByLabel(java.util.List<App> apps) {
+        java.util.List<App> sorted = new ArrayList<>(apps);
+        sorted.sort(java.util.Comparator.comparing(a -> AppSearchEngine.normalize(a.getLabel())));
+        return sorted;
     }
 
     /**

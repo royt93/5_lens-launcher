@@ -108,4 +108,22 @@
     <style name="TransBottomSheetStyle" parent="Widget.Design.BottomSheet.Modal">
         <item name="android:background">@android:color/transparent</item>
     </style>
+
+    <!-- UI-011: one tile in the blank-query permanent quick-action row (calculator/unit
+         conversion/timer/battery/wifi) - single TextView + compound top drawable (not an
+         ImageView+TextView pair) per lint's UseCompoundDrawables. -->
+    <style name="EmptyQuickActionTile">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:background">?attr/selectableItemBackgroundBorderless</item>
+        <item name="android:drawablePadding">4dp</item>
+        <item name="drawableTint">?attr/colorPrimary</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:gravity">center</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:paddingTop">8dp</item>
+        <item name="android:paddingBottom">8dp</item>
+        <item name="android:textSize">11sp</item>
+    </style>
 </resources>

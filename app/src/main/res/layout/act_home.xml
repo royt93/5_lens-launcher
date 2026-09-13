@@ -49,145 +49,206 @@
             app:backgroundTint="@color/search_view_scrim_background"
             app:layout_anchor="@id/searchBar">
 
-            <!-- UI-002: SearchView's own background is dimmed to 50% alpha at runtime
-                 (ActHome.setupViews) so the fisheye grid stays partially visible behind it; the
-                 result list lives in this opaque card so text contrast never depends on what's
-                 behind the scrim. -->
-            <com.google.android.material.card.MaterialCardView
+            <!-- UI-011: content sits directly on SearchView's own scrim - no secondary
+                 MaterialCardView. A rounded card nested inside a panel that already has its own
+                 full-bleed scrim background read as "a frame inside a frame" (owner feedback);
+                 the official Material3 full-screen-search spec puts content straight on the
+                 panel. Text contrast no longer depends on an opaque card because the scrim
+                 itself (res/color/search_view_scrim_background.xml) is near-opaque. -->
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
                 android:layout_marginTop="8dp"
-                app:cardCornerRadius="20dp"
-                app:cardElevation="4dp">
+                android:orientation="vertical">
 
+                <!-- SEARCH-002: calculator / unit conversion / timer / battery % / settings
+                     deep-link quick action, shown above normal app results when the typed
+                     query matches one of those patterns. -->
                 <LinearLayout
+                    android:id="@+id/quickActionRow"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                    android:layout_height="56dp"
+                    android:background="?attr/selectableItemBackground"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:visibility="gone"
+                    tools:visibility="visible">
 
-                    <!-- SEARCH-002: calculator / unit conversion / timer / battery % / settings
-                         deep-link quick action, shown above normal app results when the typed
-                         query matches one of those patterns. -->
-                    <LinearLayout
-                        android:id="@+id/quickActionRow"
-                        android:layout_width="match_parent"
-                        android:layout_height="56dp"
-                        android:background="?attr/selectableItemBackground"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal"
-                        android:paddingStart="16dp"
-                        android:paddingEnd="16dp"
-                        android:visibility="gone"
-                        tools:visibility="visible">
-
-                        <TextView
-                            android:id="@+id/tvQuickActionLabel"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:ellipsize="end"
-                            android:maxLines="1"
-                            tools:text="12*7" />
-
-                        <TextView
-                            android:id="@+id/tvQuickActionValue"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="12dp"
-                            android:textColor="?attr/colorPrimary"
-                            android:textStyle="bold"
-                            tools:text="= 84" />
-                    </LinearLayout>
-
-                    <View
-                        android:id="@+id/quickActionDivider"
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="@color/colorDivider"
-                        android:visibility="gone" />
-
-                    <!-- UI-009: recent-apps section header, icon+caption pattern so the three
-                         search states (no data / recent data / valid results) are visually
-                         distinct sections instead of an unlabeled list. -->
-                    <LinearLayout
-                        android:id="@+id/recentHeader"
-                        android:layout_width="match_parent"
-                        android:layout_height="48dp"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal"
-                        android:paddingStart="16dp"
-                        android:paddingEnd="8dp"
-                        android:visibility="gone">
-
-                        <ImageView
-                            android:layout_width="18dp"
-                            android:layout_height="18dp"
-                            android:layout_marginEnd="8dp"
-                            android:importantForAccessibility="no"
-                            android:src="@drawable/ic_history_24dp"
-                            app:tint="?attr/colorPrimary" />
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="@string/recent_apps"
-                            android:textColor="?attr/colorPrimary"
-                            android:textStyle="bold" />
-
-                        <Button
-                            android:id="@+id/btClearSearchHistory"
-                            style="?attr/borderlessButtonStyle"
-                            android:layout_width="wrap_content"
-                            android:layout_height="48dp"
-                            android:text="@string/clear_recent_apps"
-                            android:textAllCaps="false" />
-                    </LinearLayout>
-
-                    <!-- UI-009: results section header, shown only for a non-empty query with
-                         matches (distinct from recentHeader, which covers the blank-query state).
-                         Single TextView + compound drawable (not icon+TextView in a LinearLayout)
-                         per lint's UseCompoundDrawables. -->
                     <TextView
-                        android:id="@+id/resultsSectionHeader"
-                        android:layout_width="match_parent"
-                        android:layout_height="40dp"
-                        android:drawablePadding="8dp"
-                        android:gravity="center_vertical"
-                        android:paddingStart="16dp"
-                        android:paddingEnd="16dp"
-                        android:text="@string/search_results_section"
-                        app:drawableStartCompat="@drawable/ic_search_24dp"
-                        app:drawableTint="?attr/colorPrimary"
+                        android:id="@+id/tvQuickActionLabel"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        tools:text="12*7" />
+
+                    <TextView
+                        android:id="@+id/tvQuickActionValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
                         android:textColor="?attr/colorPrimary"
                         android:textStyle="bold"
-                        android:visibility="gone"
-                        tools:visibility="visible" />
-
-                    <!-- UI-009: empty/no-match state - icon above text via compound drawable
-                         (was a nested ImageView+TextView) per lint's UseCompoundDrawables. -->
-                    <TextView
-                        android:id="@+id/tvNoSearchResults"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:drawablePadding="8dp"
-                        android:gravity="center"
-                        android:minHeight="120dp"
-                        android:padding="16dp"
-                        android:text="@string/no_apps_found"
-                        android:visibility="gone"
-                        app:drawableTint="?attr/colorOutline"
-                        app:drawableTopCompat="@drawable/ic_search_24dp" />
-
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/rvSearchResults"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:nestedScrollingEnabled="true"
-                        android:overScrollMode="ifContentScrolls" />
+                        tools:text="= 84" />
                 </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+
+                <View
+                    android:id="@+id/quickActionDivider"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/colorDivider"
+                    android:visibility="gone" />
+
+                <!-- UI-011: permanent quick-action shortcuts on a blank query. Calculator/unit
+                     conversion/timer prefill a working example into the search box (the
+                     contextual quickActionRow above then does the real execution, same as if the
+                     user typed it) instead of each tile needing its own execution path; wifi/
+                     battery act on plain single-word triggers so prefilling them behaves the
+                     same way and needs no special-casing. -->
+                <LinearLayout
+                    android:id="@+id/llEmptyQuickActions"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="4dp"
+                    android:visibility="gone"
+                    tools:visibility="visible">
+
+                    <TextView
+                        android:id="@+id/tileCalculator"
+                        style="@style/EmptyQuickActionTile"
+                        android:text="@string/quick_action_calculator_label"
+                        app:drawableTopCompat="@drawable/ic_calculate_24dp" />
+
+                    <TextView
+                        android:id="@+id/tileUnitConvert"
+                        style="@style/EmptyQuickActionTile"
+                        android:text="@string/quick_action_unit_label"
+                        app:drawableTopCompat="@drawable/ic_swap_horiz_24dp" />
+
+                    <TextView
+                        android:id="@+id/tileTimer"
+                        style="@style/EmptyQuickActionTile"
+                        android:text="@string/quick_action_timer_label"
+                        app:drawableTopCompat="@drawable/ic_timer_24dp" />
+
+                    <TextView
+                        android:id="@+id/tileBattery"
+                        style="@style/EmptyQuickActionTile"
+                        android:text="@string/quick_action_battery_label"
+                        app:drawableTopCompat="@drawable/ic_battery_24dp" />
+
+                    <TextView
+                        android:id="@+id/tileWifi"
+                        style="@style/EmptyQuickActionTile"
+                        android:text="@string/quick_action_wifi_label"
+                        app:drawableTopCompat="@drawable/ic_wifi_24dp" />
+                </LinearLayout>
+
+                <!-- UI-009: recent-apps section header, icon+caption pattern so the search
+                     states are visually distinct sections instead of an unlabeled list. -->
+                <LinearLayout
+                    android:id="@+id/recentHeader"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="8dp"
+                    android:visibility="gone">
+
+                    <ImageView
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:layout_marginEnd="8dp"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_history_24dp"
+                        app:tint="?attr/colorPrimary" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/recent_apps"
+                        android:textColor="?attr/colorPrimary"
+                        android:textStyle="bold" />
+
+                    <Button
+                        android:id="@+id/btClearSearchHistory"
+                        style="?attr/borderlessButtonStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="48dp"
+                        android:text="@string/clear_recent_apps"
+                        android:textAllCaps="false" />
+                </LinearLayout>
+
+                <!-- UI-011: shown when a blank query has no recent/favorite apps to surface -
+                     the fallback list below is the full app list instead of leaving the panel
+                     empty. -->
+                <TextView
+                    android:id="@+id/allAppsHeader"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:drawablePadding="8dp"
+                    android:gravity="center_vertical"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:text="@string/all_apps_section"
+                    app:drawableStartCompat="@drawable/ic_apps_24dp"
+                    app:drawableTint="?attr/colorPrimary"
+                    android:textColor="?attr/colorPrimary"
+                    android:textStyle="bold"
+                    android:visibility="gone" />
+
+                <!-- UI-009: results section header, shown only for a non-empty query with
+                     matches (distinct from recentHeader, which covers the blank-query state).
+                     Single TextView + compound drawable (not icon+TextView in a LinearLayout)
+                     per lint's UseCompoundDrawables. -->
+                <TextView
+                    android:id="@+id/resultsSectionHeader"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:drawablePadding="8dp"
+                    android:gravity="center_vertical"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:text="@string/search_results_section"
+                    app:drawableStartCompat="@drawable/ic_search_24dp"
+                    app:drawableTint="?attr/colorPrimary"
+                    android:textColor="?attr/colorPrimary"
+                    android:textStyle="bold"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
+
+                <!-- UI-009: empty/no-match state - icon above text via compound drawable
+                     (was a nested ImageView+TextView) per lint's UseCompoundDrawables. Now only
+                     reachable for a typed query with zero matches, or the (near-impossible) case
+                     of a device with no visible apps at all - UI-011's all-apps fallback covers
+                     every other blank-query case. -->
+                <TextView
+                    android:id="@+id/tvNoSearchResults"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:drawablePadding="8dp"
+                    android:gravity="center"
+                    android:minHeight="120dp"
+                    android:padding="16dp"
+                    android:text="@string/no_apps_found"
+                    android:visibility="gone"
+                    app:drawableTint="?attr/colorOutline"
+                    app:drawableTopCompat="@drawable/ic_search_24dp" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvSearchResults"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:nestedScrollingEnabled="true"
+                    android:overScrollMode="ifContentScrolls" />
+            </LinearLayout>
         </com.google.android.material.search.SearchView>
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </FrameLayout>
