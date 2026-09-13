@@ -33,7 +33,7 @@ class UtilSettingsAutoIconSizeTest {
 
     @Test
     fun `wider device scales the default up proportionally`() {
-        // 720dp smallest-width (tablet) -> double the baseline, clamped to MAX.
+        // 720dp smallest-width (tablet) -> double the baseline, rounded for the integer seekbar.
         val expected = (UtilSettings.DEFAULT_ICON_SIZE * 2f)
             .coerceAtMost(UtilSettings.MAX_ICON_SIZE + UtilSettings.MIN_ICON_SIZE)
         assertEquals(expected, UtilSettings.calculateAutoDefaultIconSize(720), 0.001f)
@@ -62,6 +62,16 @@ class UtilSettingsAutoIconSizeTest {
             settings.getFloat(UtilSettings.KEY_ICON_SIZE),
             0.001f
         )
+    }
+
+    @Test
+    fun `first construction materializes the auto default in preferences`() {
+        val settings = freshSettings()
+        val stored = PreferenceManager.getDefaultSharedPreferences(
+            RuntimeEnvironment.getApplication()
+        ).getFloat(UtilSettings.KEY_ICON_SIZE, Float.NaN)
+
+        assertEquals(settings.autoDefaultIconSize, stored, 0.001f)
     }
 
     @Test

@@ -9,6 +9,7 @@ import androidx.preference.PreferenceManager
 import com.mckimquyen.BuildConfig
 import com.mckimquyen.enums.BackgroundMode
 import com.mckimquyen.enums.SortType
+import kotlin.math.roundToInt
 
 /**
  * Utility class để quản lý SharedPreferences settings
@@ -19,6 +20,10 @@ class UtilSettings(context: Context) {
     // Sử dụng Application Context thay vì giữ Activity Context để tránh memory leak
     private val appContext: Context = context.applicationContext
     private val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(appContext)
+
+    init {
+        initializeIconSizeDefault()
+    }
 
     companion object {
         const val DEFAULT_ICON_SIZE = 18.0f
@@ -32,6 +37,8 @@ class UtilSettings(context: Context) {
         @JvmStatic
         fun calculateAutoDefaultIconSize(smallestScreenWidthDp: Int): Float =
             (DEFAULT_ICON_SIZE * smallestScreenWidthDp / ICON_SIZE_BASELINE_SWDP)
+                .roundToInt()
+                .toFloat()
                 .coerceIn(MIN_ICON_SIZE, MAX_ICON_SIZE.toFloat() + MIN_ICON_SIZE)
         const val DEFAULT_DISTORTION_FACTOR = 2.5f
         const val DEFAULT_SCALE_FACTOR = 1.0f
@@ -151,6 +158,13 @@ class UtilSettings(context: Context) {
     /** Auto-detected default for this device; see [calculateAutoDefaultIconSize]. */
     val autoDefaultIconSize: Float
         get() = calculateAutoDefaultIconSize(appContext.resources.configuration.smallestScreenWidthDp)
+
+    /** Materializes the device-specific default while preserving an explicit user choice. */
+    private fun initializeIconSizeDefault() {
+        if (!prefs.contains(KEY_ICON_SIZE)) {
+            prefs.edit { putFloat(KEY_ICON_SIZE, autoDefaultIconSize) }
+        }
+    }
 
     fun getFloat(name: String?): Float = when (name) {
         KEY_ICON_SIZE -> getFloatWithValidation(name, autoDefaultIconSize, MIN_ICON_SIZE, MAX_ICON_SIZE.toFloat() + MIN_ICON_SIZE)

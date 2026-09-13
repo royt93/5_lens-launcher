@@ -4,6 +4,8 @@ import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.mckimquyen.R
+import com.mckimquyen.util.UtilSettings
+import androidx.preference.PreferenceManager
 import org.junit.Assert.*
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -89,6 +91,28 @@ class FrmLensWidgetTest {
             assertNotNull("tvValueAnimationTime must exist", tvAnimationTime)
         }
 
+        scenario.close()
+    }
+
+    @Test
+    fun testFrmLens_initializesDeviceSpecificIconSize() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+        val expected = UtilSettings.calculateAutoDefaultIconSize(
+            context.resources.configuration.smallestScreenWidthDp
+        )
+        prefs.edit().remove(UtilSettings.KEY_ICON_SIZE).commit()
+
+        val scenario = launchFragmentInContainer<FrmLens>(themeResId = R.style.AppTheme)
+        scenario.onFragment { fragment ->
+            val view = requireNotNull(fragment.view)
+            val seekBar = requireNotNull(view.findViewById<android.widget.SeekBar>(R.id.sbMinIconSize))
+            val value = requireNotNull(view.findViewById<android.widget.TextView>(R.id.tvValueMinIconSize))
+
+            assertEquals("${expected.toInt()}dp", value.text.toString())
+            assertEquals(expected.toInt() - UtilSettings.MIN_ICON_SIZE.toInt(), seekBar.progress)
+            assertEquals(expected, prefs.getFloat(UtilSettings.KEY_ICON_SIZE, Float.NaN))
+        }
         scenario.close()
     }
 
