@@ -1,16 +1,26 @@
 package com.mckimquyen.search
 
+import android.content.Intent
+import android.graphics.Rect
+import android.view.ContextThemeWrapper
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
+import androidx.appcompat.widget.PopupMenu
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.mckimquyen.R
 import com.mckimquyen.adt.AppDiffCallback
 import com.mckimquyen.app.RAppsSingleton
 import com.mckimquyen.model.App
+import com.mckimquyen.model.AppPersistent
+import com.mckimquyen.model.PinnedZone
+import com.mckimquyen.services.BroadcastReceivers.AppsEditedReceiver
+import com.mckimquyen.util.UtilApp
 
 fun interface SearchResultClickListener {
     fun onAppClick(app: App, source: View)
@@ -43,9 +53,11 @@ class SearchResultAdapter(
     }
 
     inner class ResultViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        private val mainRow: View = itemView.findViewById(R.id.llSearchResultMainRow)
         private val icon: ImageView = itemView.findViewById(R.id.ivSearchResultIcon)
         private val label: TextView = itemView.findViewById(R.id.tvSearchResultLabel)
         private val packageName: TextView = itemView.findViewById(R.id.tvSearchResultPackage)
+        private val shortcutsRow: ViewGroup = itemView.findViewById(R.id.llSearchResultShortcuts)
 
         fun bind(app: App) {
             val appLabel = app.label.toString()
@@ -53,8 +65,101 @@ class SearchResultAdapter(
             packageName.text = app.packageName
             // CORE-002: keyed by iconCacheKey, not packageName (see BitmapCache.buildKey)
             icon.setImageBitmap(RAppsSingleton.instance.getAppIcon(app.iconCacheKey))
-            itemView.contentDescription = itemView.context.getString(R.string.search_open_app, appLabel)
-            itemView.setOnClickListener { onAppClick.onAppClick(app, itemView) }
+            mainRow.contentDescription = mainRow.context.getString(R.string.search_open_app, appLabel)
+            mainRow.setOnClickListener { onAppClick.onAppClick(app, mainRow) }
+            mainRow.setOnLongClickListener {
+                showActionMenu(app, mainRow)
+                true
+            }
+
+            bindShortcuts(app)
+        }
+
+        // ==================================================================== SEARCH-003: shortcuts
+
+        private fun bindShortcuts(app: App) {
+            val shortcuts = AppShortcutsProvider.shortcutsFor(
+                shortcutsRow.context,
+                app.packageName.toString()
+            )
+            shortcutsRow.removeAllViews()
+            if (shortcuts.isEmpty()) {
+                shortcutsRow.visibility = View.GONE
+                return
+            }
+            val inflater = LayoutInflater.from(shortcutsRow.context)
+            shortcuts.forEach { shortcut ->
+                val chip = inflater.inflate(R.layout.item_search_shortcut_chip, shortcutsRow, false)
+                chip.findViewById<ImageView>(R.id.ivShortcutIcon).setImageDrawable(shortcut.icon)
+                chip.findViewById<TextView>(R.id.tvShortcutLabel).text = shortcut.label
+                chip.contentDescription = shortcut.label
+                chip.setOnClickListener {
+                    val bounds = Rect(0, 0, chip.measuredWidth, chip.measuredHeight)
+                    val started = AppShortcutsProvider.startShortcut(chip.context, shortcut, bounds)
+                    if (!started) {
+                        Toast.makeText(chip.context, R.string.error_app_not_found, Toast.LENGTH_SHORT).show()
+                    }
+                }
+                shortcutsRow.addView(chip)
+            }
+            shortcutsRow.visibility = View.VISIBLE
+        }
+
+        // ==================================================================== SEARCH-003: row actions
+
+        private fun showActionMenu(app: App, anchor: View) {
+            val wrapper = ContextThemeWrapper(anchor.context, R.style.PopupMenuTheme)
+            val popupMenu = PopupMenu(wrapper, anchor, Gravity.END)
+            popupMenu.inflate(R.menu.menu_search_result)
+            popupMenu.menu.findItem(R.id.menuItemUnpin).isVisible = app.pinnedZone != PinnedZone.NONE
+            popupMenu.setForceShowIcon(true)
+            popupMenu.setOnMenuItemClickListener { item ->
+                when (item.itemId) {
+                    R.id.menuItemElementAppInfo -> {
+                        startActionIntent(anchor, UtilApp.appInfoIntent(app.packageName.toString()))
+                        true
+                    }
+                    R.id.menuItemElementUninstall -> {
+                        startActionIntent(anchor, UtilApp.uninstallIntent(app.packageName.toString()))
+                        true
+                    }
+                    R.id.menuItemPinStart -> {
+                        pin(app, anchor, PinnedZone.START)
+                        true
+                    }
+                    R.id.menuItemPinEnd -> {
+                        pin(app, anchor, PinnedZone.END)
+                        true
+                    }
+                    R.id.menuItemUnpin -> {
+                        pin(app, anchor, PinnedZone.NONE)
+                        true
+                    }
+                    else -> false
+                }
+            }
+            popupMenu.show()
+        }
+
+        private fun startActionIntent(anchor: View, intent: Intent) {
+            try {
+                anchor.context.startActivity(intent)
+            } catch (e: Exception) {
+                Toast.makeText(anchor.context, R.string.error_app_not_found, Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        /** Same persistence call AppAdapter's applyOrganization uses - no duplicated logic. */
+        private fun pin(app: App, anchor: View, zone: PinnedZone) {
+            AppPersistent.setOrganization(
+                app.packageName.toString(),
+                app.name.toString(),
+                app.isFavorite,
+                app.folderName,
+                zone
+            )
+            anchor.context.sendBroadcast(Intent(anchor.context, AppsEditedReceiver::class.java))
+            Toast.makeText(anchor.context, R.string.organization_saved, Toast.LENGTH_SHORT).show()
         }
     }
 }

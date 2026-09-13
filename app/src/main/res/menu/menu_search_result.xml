@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SEARCH-003: a deliberately smaller menu than menu_app.xml - only the actions that make
+     sense on a transient search result (no stable grid position, so no favorite/folder/move). -->
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/menuItemElementAppInfo"
+        android:icon="@drawable/ic_info_outline_24dp"
+        android:title="@string/menu_app_info"
+        app:iconTint="@color/colorBlack" />
+
+    <item
+        android:id="@+id/menuItemPinStart"
+        android:title="@string/organization_pin_start" />
+
+    <item
+        android:id="@+id/menuItemPinEnd"
+        android:title="@string/organization_pin_end" />
+
+    <item
+        android:id="@+id/menuItemUnpin"
+        android:title="@string/organization_unpin" />
+
+    <item
+        android:id="@+id/menuItemElementUninstall"
+        android:icon="@drawable/ic_delete_outline_24dp"
+        android:title="@string/menu_app_uninstall"
+        app:iconTint="@color/colorBlack" />
+
+</menu>

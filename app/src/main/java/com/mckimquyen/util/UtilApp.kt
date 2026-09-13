@@ -10,11 +10,13 @@ import android.content.pm.PackageManager
 import android.graphics.Rect
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import com.mckimquyen.R
 import com.mckimquyen.enums.SortType
 import com.mckimquyen.ext.Biometric
@@ -230,6 +232,26 @@ object UtilApp {
             }
         }
     }
+
+    /**
+     * SEARCH-003: shared with AppAdapter so search-result row actions and the Apps-tab popup
+     * menu build the exact same "app info" intent instead of two copies drifting apart.
+     */
+    @JvmStatic
+    fun appInfoIntent(packageName: String): Intent =
+        Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+            data = "package:$packageName".toUri()
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+
+    /** SEARCH-003: shared with AppAdapter - see [appInfoIntent]. Goes through the standard
+     *  system uninstall confirmation, never a silent PackageManager uninstall call. */
+    @JvmStatic
+    fun uninstallIntent(packageName: String): Intent =
+        Intent(Intent.ACTION_DELETE).apply {
+            data = "package:$packageName".toUri()
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
 
     /**
      * Get launcher animation options bundle

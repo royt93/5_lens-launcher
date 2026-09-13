@@ -7,8 +7,6 @@ import android.content.Intent;
 import android.view.ContextThemeWrapper;
 import android.graphics.Color;
 import android.graphics.Rect;
-import android.net.Uri;
-import android.provider.Settings;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -641,10 +639,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
             // ================================================================
             if (id == R.id.menuItemElementAppInfo) {
                 try {
-                    Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                    intent.setData(Uri.parse("package:" + mApp.getPackageName()));
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    mContext.startActivity(intent);
+                    mContext.startActivity(UtilApp.appInfoIntent(mApp.getPackageName().toString()));
                 } catch (Exception e) {
                     Toast.makeText(mContext, R.string.error_app_not_found, Toast.LENGTH_SHORT).show();
                 }
@@ -656,10 +651,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
             // ================================================================
             else if (id == R.id.menuItemElementUninstall) {
                 try {
-                    Intent intent = new Intent(Intent.ACTION_DELETE);
-                    intent.setData(Uri.parse("package:" + mApp.getPackageName()));
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    mContext.startActivity(intent);
+                    mContext.startActivity(UtilApp.uninstallIntent(mApp.getPackageName().toString()));
                 } catch (Exception e) {
                     Toast.makeText(mContext, R.string.error_app_not_found, Toast.LENGTH_SHORT).show();
                 }

@@ -1,16 +1,19 @@
 package com.mckimquyen.search
 
+import android.view.View
 import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.mckimquyen.R
 import com.mckimquyen.model.App
+import com.mckimquyen.model.PinnedZone
 import com.mckimquyen.ui.ActHome
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertSame
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -46,15 +49,93 @@ class SearchResultAdapterWidgetTest {
                     "pkg.camera",
                     holder.itemView.findViewById<TextView>(R.id.tvSearchResultPackage).text.toString()
                 )
-                assertEquals(activity.getString(R.string.search_open_app, "Camera"), holder.itemView.contentDescription)
+                // SEARCH-003: click/contentDescription live on the inner main row now, not the
+                // item root - the root also hosts the (separately clickable) shortcuts row.
+                val mainRow = holder.itemView.findViewById<android.view.View>(R.id.llSearchResultMainRow)
+                assertEquals(activity.getString(R.string.search_open_app, "Camera"), mainRow.contentDescription)
 
-                holder.itemView.performClick()
+                mainRow.performClick()
                 assertSame(first, clickedApp)
-                assertSame(holder.itemView, clickedSource)
+                assertSame(mainRow, clickedSource)
 
                 adapter.submitList(listOf(second))
                 assertEquals(1, adapter.itemCount)
                 assertSame(second, adapter.firstOrNull())
+            }
+        }
+    }
+
+    /**
+     * SEARCH-003: this test device is not set as the default launcher, so
+     * [AppShortcutsProvider.shortcutsFor] must hit its SecurityException path and return an
+     * empty list - proving apps with no (queryable) shortcuts render exactly as before, no
+     * empty affordance shown.
+     */
+    @Test
+    fun shortcutsRowStaysHiddenWhenNoShortcutsAreQueryable() {
+        ActivityScenario.launch(ActHome::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                val app = App(label = "Camera", packageName = "pkg.camera", name = "CameraActivity")
+                val adapter = SearchResultAdapter { _, _ -> }
+                adapter.submitList(listOf(app))
+
+                val holder = adapter.onCreateViewHolder(FrameLayout(activity), 0)
+                adapter.onBindViewHolder(holder, 0)
+
+                val shortcutsRow = holder.itemView.findViewById<View>(R.id.llSearchResultShortcuts)
+                assertEquals(View.GONE, shortcutsRow.visibility)
+            }
+        }
+    }
+
+    /** SEARCH-003: long-press must show the row action menu without crashing. */
+    @Test
+    fun longPressShowsActionMenuWithoutCrashing() {
+        ActivityScenario.launch(ActHome::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                val app = App(
+                    label = "Camera",
+                    packageName = "pkg.camera",
+                    name = "CameraActivity",
+                    pinnedZone = PinnedZone.START
+                )
+                val adapter = SearchResultAdapter { _, _ -> }
+                adapter.submitList(listOf(app))
+
+                val holder = adapter.onCreateViewHolder(FrameLayout(activity), 0)
+                adapter.onBindViewHolder(holder, 0)
+                val mainRow = holder.itemView.findViewById<View>(R.id.llSearchResultMainRow)
+
+                assertTrue("long click must be handled", mainRow.performLongClick())
+            }
+        }
+    }
+
+    /** SEARCH-003: the row action menu offers exactly info/pin(start/end)/unpin/uninstall. */
+    @Test
+    fun searchResultMenuResourceHasExactlyTheExpectedActions() {
+        ActivityScenario.launch(ActHome::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                val menu = android.widget.PopupMenu(activity, FrameLayout(activity)).menu
+                activity.menuInflater.inflate(R.menu.menu_search_result, menu)
+
+                val ids = (0 until menu.size()).map { menu.getItem(it).itemId }
+                assertEquals(
+                    listOf(
+                        R.id.menuItemElementAppInfo,
+                        R.id.menuItemPinStart,
+                        R.id.menuItemPinEnd,
+                        R.id.menuItemUnpin,
+                        R.id.menuItemElementUninstall
+                    ),
+                    ids
+                )
+                // No favorite/folder/move items - those need a stable grid position search
+                // results don't have.
+                assertNull(menu.findItem(R.id.menuItemFavorite))
+                assertNull(menu.findItem(R.id.menuItemFolder))
+                assertNull(menu.findItem(R.id.menuItemMoveEarlier))
+                assertNull(menu.findItem(R.id.menuItemMoveLater))
             }
         }
     }
