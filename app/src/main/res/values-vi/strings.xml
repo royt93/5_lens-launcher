@@ -106,6 +106,7 @@
     <string name="clear_recent_apps">Xóa</string>
     <string name="recent_apps_cleared">Đã xóa ứng dụng gần đây</string>
     <string name="no_apps_found">Không tìm thấy ứng dụng</string>
+    <string name="web_search_fallback">Tìm trên web cho \"%1$s\"</string>
     <string name="search_empty_state">Nhập tên ứng dụng để tìm kiếm</string>
     <string name="search_results_section">Ứng dụng phù hợp</string>
     <string name="all_apps_section">Tất cả ứng dụng</string>

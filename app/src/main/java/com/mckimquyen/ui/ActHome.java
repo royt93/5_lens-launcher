@@ -3,6 +3,7 @@ package com.mckimquyen.ui;
 import static com.mckimquyen.ext.ActivityKt.rateAppInApp;
 
 import android.content.ActivityNotFoundException;
+import android.content.Intent;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.pm.PackageManager;
@@ -68,6 +69,7 @@ public class ActHome extends ActBase {
     private View resultsSectionHeader;
     private View llEmptyQuickActions;
     private TextView noSearchResults;
+    private TextView webSearchFallback;
     private RecyclerView searchResults;
     private View quickActionRow;
     private View quickActionDivider;
@@ -170,6 +172,7 @@ public class ActHome extends ActBase {
         resultsSectionHeader = findViewById(R.id.resultsSectionHeader);
         llEmptyQuickActions = findViewById(R.id.llEmptyQuickActions);
         noSearchResults = findViewById(R.id.tvNoSearchResults);
+        webSearchFallback = findViewById(R.id.tvWebSearchFallback);
         searchResults = findViewById(R.id.rvSearchResults);
         quickActionRow = findViewById(R.id.quickActionRow);
         quickActionDivider = findViewById(R.id.quickActionDivider);
@@ -261,6 +264,21 @@ public class ActHome extends ActBase {
         prefillOnTap(R.id.tileTimer, "hẹn giờ 5 phút");
         prefillOnTap(R.id.tileBattery, "pin");
         prefillOnTap(R.id.tileWifi, "wifi");
+
+        // SEARCH-006: local search found nothing - offer the user's own default browser/search
+        // app instead of a dead end. No network call from this app itself; ACTION_WEB_SEARCH
+        // hands the query off entirely, preserving the app's own local-only search property.
+        webSearchFallback.setOnClickListener(v -> {
+            String query = appSearch.getText().toString();
+            Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
+            intent.putExtra(android.app.SearchManager.QUERY, query);
+            try {
+                startActivity(intent);
+                hideSearch();
+            } catch (ActivityNotFoundException e) {
+                Toast.makeText(this, R.string.error_app_not_found, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void prefillOnTap(int tileViewId, String exampleQuery) {
@@ -328,6 +346,15 @@ public class ActHome extends ActBase {
         searchResults.setVisibility(hasResults ? View.VISIBLE : View.GONE);
         noSearchResults.setText(isEmptyQuery ? R.string.search_empty_state : R.string.no_apps_found);
         noSearchResults.setVisibility(hasResults ? View.GONE : View.VISIBLE);
+
+        // SEARCH-006: only once every local result set (apps, shortcuts, quick actions) is empty -
+        // never alongside real local results.
+        boolean showWebFallback = !isEmptyQuery && !hasResults
+                && quickActionRow.getVisibility() != View.VISIBLE;
+        webSearchFallback.setVisibility(showWebFallback ? View.VISIBLE : View.GONE);
+        if (showWebFallback) {
+            webSearchFallback.setText(getString(R.string.web_search_fallback, query.toString()));
+        }
     }
 
     /** UI-011: all-apps fallback list, sorted alphabetically regardless of the lens grid's own

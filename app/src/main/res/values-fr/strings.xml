@@ -104,6 +104,7 @@
     <string name="clear_recent_apps">Effacer</string>
     <string name="recent_apps_cleared">Applis récentes effacées</string>
     <string name="no_apps_found">Aucune appli trouvée</string>
+    <string name="web_search_fallback">Rechercher \"%1$s\" sur le web</string>
     <string name="search_empty_state">Saisissez le nom de l’appli à rechercher</string>
     <string name="search_results_section">Applications correspondantes</string>
     <string name="all_apps_section">Toutes les applis</string>

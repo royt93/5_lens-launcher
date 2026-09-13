@@ -104,6 +104,7 @@
     <string name="clear_recent_apps">Cancella</string>
     <string name="recent_apps_cleared">App recenti cancellate</string>
     <string name="no_apps_found">Nessuna app trovata</string>
+    <string name="web_search_fallback">Cerca \"%1$s\" sul web</string>
     <string name="search_empty_state">Digita il nome di una app da cercare</string>
     <string name="search_results_section">App corrispondenti</string>
     <string name="all_apps_section">Tutte le app</string>

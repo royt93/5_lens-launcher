@@ -38,7 +38,7 @@ Release signing (`assemble*Release`, `bundle*Release`) reads `ANDROID_RELEASE_ST
 
 **Rendering**: `views/LensView` draws the fisheye-style app grid; `views/LensGridCache` precomputes and caches per-cell grid geometry (base `RectF`s) so the hot `onDraw` path (continuous while dragging) reuses geometry and a single scratch `RectF` instead of reallocating every frame (`doc/task/done/p2-perf-perf-001-lens-render-hot-path.md`).
 
-**Search**: `search/AppSearchEngine` does local/offline ranked matching over the current app snapshot; `search/SearchHistoryStore` persists recent queries; `search/SearchResultAdapter` renders results. No network or IME-suggestion dependency.
+**Search**: `search/AppSearchEngine` does local/offline ranked matching over the current app snapshot; `search/SearchHistoryStore` persists recent queries; `search/SearchResultAdapter` renders results. No network or IME-suggestion dependency for matching/ranking itself. The one exception (SEARCH-006) is the web-search fallback shown only when local results are empty: `ActHome` fires `Intent.ACTION_WEB_SEARCH` with the typed query, handing the request off entirely to the user's own default browser/search app — this app itself still makes no network call.
 
 **VIP/ads**: `feature/vip/` (`ActVipManagement`, `VipPrefs`, `VipKeys`, `AdKeys`) gates ad-related behavior; AdMob + AppLovin ad unit IDs are wired through `BuildConfig` fields set per build type in `app/build.gradle`, not hardcoded in source.
 

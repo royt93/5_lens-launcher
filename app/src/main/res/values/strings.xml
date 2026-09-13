@@ -124,6 +124,7 @@
     <string name="clear_recent_apps">Clear</string>
     <string name="recent_apps_cleared">Recent apps cleared</string>
     <string name="no_apps_found">No apps found</string>
+    <string name="web_search_fallback">Search the web for \"%1$s\"</string>
     <string name="search_empty_state">Type an app name to search</string>
     <string name="search_results_section">Matching apps</string>
     <string name="all_apps_section">All apps</string>

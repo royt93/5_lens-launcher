@@ -297,6 +297,51 @@ class AppSearchWidgetTest {
         }
     }
 
+    /** SEARCH-006: a typed query with zero local matches offers a web-search fallback. */
+    @Test
+    fun webSearchFallbackShowsForNoMatch_andCarriesTheTypedQuery() {
+        ActivityScenario.launch(ActHome::class.java).use { scenario ->
+            var searchView: SearchView? = null
+            scenario.onActivity { activity ->
+                searchView = activity.findViewById(R.id.searchView)
+                searchView!!.show()
+            }
+            waitUntilShowing(searchView!!, true)
+
+            scenario.onActivity { searchView!!.editText.setText("definitely-missing-app") }
+
+            scenario.onActivity { activity ->
+                val fallback = activity.findViewById<TextView>(R.id.tvWebSearchFallback)
+                assertEquals(View.VISIBLE, fallback.visibility)
+                assertTrue(
+                    "fallback text must carry the typed query",
+                    fallback.text.toString().contains("definitely-missing-app")
+                )
+            }
+        }
+    }
+
+    /** SEARCH-006: must never show alongside a real quick action or app match. */
+    @Test
+    fun webSearchFallbackHiddenWhenQuickActionOrAppMatchExists() {
+        ActivityScenario.launch(ActHome::class.java).use { scenario ->
+            var searchView: SearchView? = null
+            scenario.onActivity { activity ->
+                searchView = activity.findViewById(R.id.searchView)
+                searchView!!.show()
+            }
+            waitUntilShowing(searchView!!, true)
+
+            scenario.onActivity { searchView!!.editText.setText("12*7") }
+            scenario.onActivity { activity ->
+                assertEquals(
+                    View.GONE,
+                    activity.findViewById<View>(R.id.tvWebSearchFallback).visibility
+                )
+            }
+        }
+    }
+
     /** SEARCH-002: a mapped Settings keyword shows the quick action row, ready to deep-link. */
     @Test
     fun quickActionRowShowsSettingsShortcut() {

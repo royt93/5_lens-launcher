@@ -242,6 +242,24 @@
                     app:drawableTint="?attr/colorOutline"
                     app:drawableTopCompat="@drawable/ic_search_24dp" />
 
+                <!-- SEARCH-006: shown only when a typed query has zero local matches (apps,
+                     shortcuts, quick actions all empty) - never alongside real local results. -->
+                <TextView
+                    android:id="@+id/tvWebSearchFallback"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:background="?attr/selectableItemBackground"
+                    android:drawablePadding="16dp"
+                    android:gravity="center_vertical"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:textColor="?attr/colorPrimary"
+                    android:visibility="gone"
+                    app:drawableStartCompat="@drawable/ic_search_24dp"
+                    app:drawableTint="?attr/colorPrimary"
+                    tools:text="Search the web for &quot;abcxyz&quot;"
+                    tools:visibility="visible" />
+
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rvSearchResults"
                     android:layout_width="match_parent"

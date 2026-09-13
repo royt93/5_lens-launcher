@@ -104,6 +104,7 @@
     <string name="clear_recent_apps">ล้าง</string>
     <string name="recent_apps_cleared">ล้างแอปล่าสุดแล้ว</string>
     <string name="no_apps_found">ไม่พบแอป</string>
+    <string name="web_search_fallback">ค้นหา \"%1$s\" บนเว็บ</string>
     <string name="search_empty_state">พิมพ์ชื่อแอปเพื่อค้นหา</string>
     <string name="search_results_section">แอปที่ตรงกัน</string>
     <string name="all_apps_section">แอปทั้งหมด</string>

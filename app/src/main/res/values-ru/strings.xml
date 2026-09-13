@@ -104,6 +104,7 @@
     <string name="clear_recent_apps">Очистить</string>
     <string name="recent_apps_cleared">Недавние приложения удалены</string>
     <string name="no_apps_found">Приложения не найдены</string>
+    <string name="web_search_fallback">Искать \"%1$s\" в интернете</string>
     <string name="search_empty_state">Введите название приложения</string>
     <string name="search_results_section">Подходящие приложения</string>
     <string name="all_apps_section">Все приложения</string>
