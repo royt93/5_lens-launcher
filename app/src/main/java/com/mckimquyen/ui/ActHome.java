@@ -95,7 +95,16 @@ public class ActHome extends ActBase {
         super.onCreate(savedInstanceState);
         UIUtils.INSTANCE.setupEdgeToEdge1(getWindow());
         setContentView(R.layout.act_home);
-        UIUtils.INSTANCE.setupEdgeToEdge2(findViewById(R.id.rootLayout), true, true);
+        // UI-012 fix: paddingBottom was true here, which clips rootLayout's content (including
+        // searchCoordinator/searchView) short of the true bottom edge by the nav-bar inset.
+        // Under 3-button nav the system paints an actual nav bar surface there that
+        // setNavigationBarColor() can still tint, so the gap wasn't visible either way - but
+        // under gesture nav (confirmed live on Pixel 7 Pro/API 37) there is no such paintable
+        // surface, so the ONLY way to harmonize that strip is for real app content to extend
+        // into it; the search panel's own scrim now does, since it's no longer clipped there.
+        // paddingTop stays true - the status bar is a real system-painted layer regardless of
+        // nav mode, and setStatusBarColor() already covers it correctly on its own.
+        UIUtils.INSTANCE.setupEdgeToEdge2(findViewById(R.id.rootLayout), true, false);
         setupViews();
         setupSearch();
         // updateColor();

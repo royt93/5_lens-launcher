@@ -366,27 +366,48 @@ class AppSearchWidgetTest {
         }
     }
 
-    /** UI-009: blank query with no recent history - only the empty-state container shows. */
+    /**
+     * UI-009/UI-011: blank query with no recent history falls back to the full app list. Sets
+     * `RAppsSingleton`'s snapshot explicitly (matching the sibling tests in
+     * `AppSearchIntegrationTest`) instead of relying on the real device's scan having finished by
+     * the time this test runs - `RApplication`'s initial app scan is async, and racing it made
+     * this test flaky right after a fresh install/`pm clear` (device confirmed: Pixel 7 Pro).
+     */
     @Test
     fun blankQueryWithNoHistoryShowsOnlyEmptyState() {
-        ActivityScenario.launch(ActHome::class.java).use { scenario ->
-            var searchView: SearchView? = null
-            scenario.onActivity { activity ->
-                com.mckimquyen.search.SearchHistoryStore(activity).clear()
-                searchView = activity.findViewById(R.id.searchView)
-                searchView!!.show()
+        val singleton = com.mckimquyen.app.RAppsSingleton.instance
+        val originalApps = singleton.apps
+        singleton.apps = arrayListOf(
+            com.mckimquyen.model.App(
+                label = "Only App",
+                packageName = "com.example.onlyapp",
+                name = "com.example.onlyapp.MainActivity",
+                isVisible = true,
+                isOpened = true
+            )
+        )
+        try {
+            ActivityScenario.launch(ActHome::class.java).use { scenario ->
+                var searchView: SearchView? = null
+                scenario.onActivity { activity ->
+                    com.mckimquyen.search.SearchHistoryStore(activity).clear()
+                    searchView = activity.findViewById(R.id.searchView)
+                    searchView!!.show()
+                }
+                waitUntilShowing(searchView!!, true)
+                scenario.onActivity { activity ->
+                    // UI-011: a blank query with no recent history now falls back to the full app
+                    // list instead of an empty state - tvNoSearchResults only remains reachable
+                    // for a genuinely empty device.
+                    assertEquals(View.GONE, activity.findViewById<View>(R.id.tvNoSearchResults).visibility)
+                    assertEquals(View.GONE, activity.findViewById<View>(R.id.recentHeader).visibility)
+                    assertEquals(View.GONE, activity.findViewById<View>(R.id.resultsSectionHeader).visibility)
+                    assertEquals(View.VISIBLE, activity.findViewById<View>(R.id.allAppsHeader).visibility)
+                    assertEquals(View.VISIBLE, activity.findViewById<View>(R.id.rvSearchResults).visibility)
+                }
             }
-            waitUntilShowing(searchView!!, true)
-            scenario.onActivity { activity ->
-                // UI-011: a blank query with no recent history now falls back to the full app
-                // list (real hardware always has at least one app installed) instead of an empty
-                // state - tvNoSearchResults only remains reachable for a genuinely empty device.
-                assertEquals(View.GONE, activity.findViewById<View>(R.id.tvNoSearchResults).visibility)
-                assertEquals(View.GONE, activity.findViewById<View>(R.id.recentHeader).visibility)
-                assertEquals(View.GONE, activity.findViewById<View>(R.id.resultsSectionHeader).visibility)
-                assertEquals(View.VISIBLE, activity.findViewById<View>(R.id.allAppsHeader).visibility)
-                assertEquals(View.VISIBLE, activity.findViewById<View>(R.id.rvSearchResults).visibility)
-            }
+        } finally {
+            singleton.apps = originalApps
         }
     }
 

@@ -119,8 +119,12 @@ class AppSearchIntegrationTest {
                     assertSearch(activity, 1, "Recent Camera")
                     assertEquals(View.VISIBLE, activity.findViewById<View>(R.id.recentHeader).visibility)
                     activity.findViewById<View>(R.id.btClearSearchHistory).performClick()
-                    assertSearch(activity, 0)
+                    // UI-011: blank query with no recent/favorite apps now falls back to the
+                    // full app list (still just "Recent Camera" here, singleton.apps' only entry)
+                    // instead of showing zero results.
+                    assertSearch(activity, 1, "Recent Camera")
                     assertEquals(View.GONE, activity.findViewById<View>(R.id.recentHeader).visibility)
+                    assertEquals(View.VISIBLE, activity.findViewById<View>(R.id.allAppsHeader).visibility)
                     assertTrue(store.recentKeys().isEmpty())
                 }
             }
