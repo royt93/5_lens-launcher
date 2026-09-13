@@ -59,6 +59,10 @@
     <string name="organization_move_later">Pindahkan lebih akhir</string>
     <string name="menu_app_uninstall">Copot Pemasangan</string>
     <string name="error_app_not_found">Aplikasi Tidak Ditemukan</string>
+    <string name="quick_action_flashlight_on">Aktif</string>
+    <string name="quick_action_flashlight_off">Nonaktif</string>
+    <string name="quick_action_tap_to_allow">Ketuk untuk mengizinkan</string>
+    <string name="error_no_flashlight">Tidak ada senter di perangkat ini</string>
     <string name="error_too_many_apps">Gagal Memuat Aplikasi</string>
     <string name="snackbar_reset_successful">Pengaturan Telah Direset ke Default</string>
     <string name="about"><![CDATA[Fisheye Launcher adalah cara unik dan efisien untuk menjelajahi dan membuka aplikasi Anda.<br><br>Alih-alih menggulir daftar panjang atau menggeser beberapa halaman, Fisheye Launcher menerapkan dua fitur unik:<br><br><b>• Kisi Berjarak Sama yang menampilkan semua aplikasi Anda, apa pun ukuran layar atau jumlah aplikasi.<br><br>• Lensa Fisheye Grafis untuk memperbesar, menggeser, dan membuka aplikasi dengan cepat menggunakan gestur sentuh.</b><br><br>Fisheye Launcher juga menyertakan menu Pengaturan lengkap untuk menyesuaikan semua aspek Lensa; Distorsi, Skala, Ukuran Ikon, Umpan Balik Haptik, dll.]]></string>

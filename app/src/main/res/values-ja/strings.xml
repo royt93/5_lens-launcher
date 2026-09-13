@@ -59,6 +59,10 @@
     <string name="organization_move_later">後ろに移動</string>
     <string name="menu_app_uninstall">アンインストール</string>
     <string name="error_app_not_found">アプリが見つかりません</string>
+    <string name="quick_action_flashlight_on">オン</string>
+    <string name="quick_action_flashlight_off">オフ</string>
+    <string name="quick_action_tap_to_allow">タップして許可</string>
+    <string name="error_no_flashlight">この端末にはフラッシュライトがありません</string>
     <string name="error_too_many_apps">アプリの読み込みに失敗しました</string>
     <string name="snackbar_reset_successful">設定をデフォルトにリセットしました</string>
     <string name="about"><![CDATA[Fisheye Launcherは、ユニークで効率的なアプリ閲覧・起動ツールです。<br><br>長いリストのスクロールや複数ページの切り替えの代わりに、Fisheye Launcherは2つの独自機能を実装しています：<br><br><b>• 等間隔グリッド：画面サイズやアプリ数に関わらず、すべてのアプリを1画面に表示します。<br><br>• 魚眼レンズ：タッチジェスチャーを使用して、素早くズーム、パン、起動を行うことができます。</b><br><br>また、歪み、スケーリング、アイコンサイズ、触覚フィードバックなど、レンズのあらゆる側面を調整できる充実した設定メニューも含まれています。]]></string>

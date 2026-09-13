@@ -2,6 +2,7 @@ package com.mckimquyen.ui;
 
 import static com.mckimquyen.ext.ActivityKt.rateAppInApp;
 
+import android.Manifest;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.ClipData;
@@ -9,11 +10,15 @@ import android.content.ClipboardManager;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.hardware.camera2.CameraAccessException;
+import android.hardware.camera2.CameraCharacteristics;
+import android.hardware.camera2.CameraManager;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.View;
 import android.view.Window;
@@ -24,7 +29,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.ColorUtils;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -57,6 +66,10 @@ import me.zhanghai.android.materialprogressbar.MaterialProgressBar;
 
 //2023.03.19 tried to convert kotlin but failed
 public class ActHome extends ActBase {
+
+    // SEARCH-004: request codes for the two permission-gated quick actions.
+    private static final int REQUEST_CODE_CAMERA = 1001;
+    private static final int REQUEST_CODE_WIFI_SSID = 1002;
 
     LensView lensViews;
     MaterialProgressBar progressBarHome;
@@ -97,16 +110,20 @@ public class ActHome extends ActBase {
         super.onCreate(savedInstanceState);
         UIUtils.INSTANCE.setupEdgeToEdge1(getWindow());
         setContentView(R.layout.act_home);
-        // UI-012 fix: paddingBottom was true here, which clips rootLayout's content (including
-        // searchCoordinator/searchView) short of the true bottom edge by the nav-bar inset.
-        // Under 3-button nav the system paints an actual nav bar surface there that
-        // setNavigationBarColor() can still tint, so the gap wasn't visible either way - but
-        // under gesture nav (confirmed live on Pixel 7 Pro/API 37) there is no such paintable
-        // surface, so the ONLY way to harmonize that strip is for real app content to extend
-        // into it; the search panel's own scrim now does, since it's no longer clipped there.
-        // paddingTop stays true - the status bar is a real system-painted layer regardless of
-        // nav mode, and setStatusBarColor() already covers it correctly on its own.
-        UIUtils.INSTANCE.setupEdgeToEdge2(findViewById(R.id.rootLayout), true, false);
+        // UI-014: rootLayout itself is no longer inset-padded at all - it and its direct
+        // children (lensViews, searchCoordinator/searchView) all now extend genuinely
+        // edge-to-edge on every side. lensViews (the home grid) gets its own targeted top
+        // padding below instead, so it still clears the status bar as before - but searchView
+        // (the expanded search panel) gets none, so its own scrim background now physically
+        // reaches the true top edge too, not just the bottom (UI-013). setSearchSystemBarsHarmonized()'s
+        // Window.setStatusBarColor/setNavigationBarColor calls are kept as a fallback for OS
+        // versions/nav modes where a real paintable bar surface still exists (belt-and-suspenders,
+        // not the primary mechanism anymore).
+        UIUtils.INSTANCE.setupEdgeToEdge2(findViewById(R.id.lensViews), true, false);
+        // searchBar (the collapsed pill) needs the same top clearance, but as a MARGIN, not
+        // padding - setupEdgeToEdge2 uses setPadding(), which on a MaterialCardView-shaped widget
+        // would inset its own internal icon/hint text instead of moving the whole pill down.
+        applyStatusBarInsetAsTopMargin(findViewById(R.id.searchBar));
         setupViews();
         setupSearch();
         // updateColor();
@@ -152,6 +169,23 @@ public class ActHome extends ActBase {
         });
 
         rateAppInApp(this, BuildConfig.DEBUG);
+    }
+
+    /**
+     * UI-014: adds the status bar inset to view's existing static topMargin (its XML
+     * android:layout_marginTop, e.g. searchBar's 12dp) instead of overwriting it via padding -
+     * keeps the pill's own shape/content undisturbed while still positioning it below the status
+     * bar now that rootLayout no longer supplies that clearance itself.
+     */
+    private void applyStatusBarInsetAsTopMargin(View view) {
+        int baseTopMargin = ((ViewGroup.MarginLayoutParams) view.getLayoutParams()).topMargin;
+        ViewCompat.setOnApplyWindowInsetsListener(view, (v, insets) -> {
+            int statusBarInset = insets.getInsets(WindowInsetsCompat.Type.systemBars()).top;
+            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
+            params.topMargin = baseTopMargin + statusBarInset;
+            v.setLayoutParams(params);
+            return insets;
+        });
     }
 
     private void setupViews() {
@@ -429,6 +463,83 @@ public class ActHome extends ActBase {
                     Toast.makeText(this, R.string.error_app_not_found, Toast.LENGTH_SHORT).show();
                 }
             });
+        } else if (action instanceof QuickAction.FlashlightToggle toggle) {
+            tvQuickActionLabel.setText(toggle.getLabel());
+            tvQuickActionValue.setText(flashlightOn ? R.string.quick_action_flashlight_on : R.string.quick_action_flashlight_off);
+            quickActionRow.setOnClickListener(v -> toggleFlashlight());
+        } else if (action instanceof QuickAction.WifiSsidPermissionRequest permissionRequest) {
+            tvQuickActionLabel.setText(permissionRequest.getLabel());
+            tvQuickActionValue.setText(R.string.quick_action_tap_to_allow);
+            quickActionRow.setOnClickListener(v -> requestWifiSsidPermission());
+        }
+    }
+
+    /**
+     * SEARCH-004: CameraManager.setTorchMode() has no public getter for current state, so this
+     * app tracks it itself - correct as long as nothing else in the system toggles the torch
+     * behind this app's back, an accepted limitation matching how every flashlight app works.
+     */
+    private boolean flashlightOn = false;
+
+    private void toggleFlashlight() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+                != PackageManager.PERMISSION_GRANTED) {
+            new UtilSettings(this).save(UtilSettings.KEY_FLASHLIGHT_PERMISSION_REQUESTED, true);
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, REQUEST_CODE_CAMERA);
+            return;
+        }
+        performFlashlightToggle();
+    }
+
+    private void performFlashlightToggle() {
+        CameraManager cameraManager = (CameraManager) getSystemService(CAMERA_SERVICE);
+        try {
+            String torchCameraId = null;
+            for (String id : cameraManager.getCameraIdList()) {
+                Boolean hasFlash = cameraManager.getCameraCharacteristics(id)
+                        .get(CameraCharacteristics.FLASH_INFO_AVAILABLE);
+                if (Boolean.TRUE.equals(hasFlash)) {
+                    torchCameraId = id;
+                    break;
+                }
+            }
+            if (torchCameraId == null) {
+                Toast.makeText(this, R.string.error_no_flashlight, Toast.LENGTH_SHORT).show();
+                return;
+            }
+            flashlightOn = !flashlightOn;
+            cameraManager.setTorchMode(torchCameraId, flashlightOn);
+            updateQuickAction(appSearch.getText());
+        } catch (CameraAccessException e) {
+            Toast.makeText(this, R.string.error_no_flashlight, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void requestWifiSsidPermission() {
+        new UtilSettings(this).save(UtilSettings.KEY_WIFI_SSID_PERMISSION_REQUESTED, true);
+        // Android 12+ requires requesting ACCESS_COARSE_LOCATION alongside FINE (lint
+        // CoarseFineLocation) - the user may grant only coarse, in which case
+        // QuickActionEngine.resolveWifiSsid still won't read the SSID (needs FINE specifically)
+        // and silently falls through, same as an outright denial.
+        ActivityCompat.requestPermissions(
+                this,
+                new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
+                REQUEST_CODE_WIFI_SSID
+        );
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_CODE_CAMERA) {
+            boolean granted = grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED;
+            if (granted) {
+                performFlashlightToggle();
+            } else {
+                updateQuickAction(appSearch.getText());
+            }
+        } else if (requestCode == REQUEST_CODE_WIFI_SSID) {
+            updateQuickAction(appSearch.getText());
         }
     }
 

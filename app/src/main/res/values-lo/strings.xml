@@ -59,6 +59,10 @@
     <string name="organization_move_later">ຍ້າຍໄປຫຼັງ</string>
     <string name="menu_app_uninstall">ຖອນການຕິດຕັ້ງ</string>
     <string name="error_app_not_found">ບໍ່ພົບແອັບ</string>
+    <string name="quick_action_flashlight_on">ເປີດ</string>
+    <string name="quick_action_flashlight_off">ປິດ</string>
+    <string name="quick_action_tap_to_allow">ແຕະເພື່ອອະນຸຍາດ</string>
+    <string name="error_no_flashlight">ອຸປະກອນນີ້ບໍ່ມີໄຟສາຍ</string>
     <string name="error_too_many_apps">ໂຫຼດແອັບບໍ່ສຳເລັດ</string>
     <string name="snackbar_reset_successful">ຣີເຊັດຄ່າເປັນເລີ່ມຕົ້ນແລ້ວ</string>
     <string name="about"><![CDATA[Fisheye Launcher ເປັນວິທີທີ່ເປັນເອກະລັກ ແລະ ມີປະສິດທິພາບໃນການຄົ້ນຫາ ແລະ ເປີດໃຊ້ແອັບຂອງທ່ານ.<br><br>ແທນທີ່ຈະເລື່ອນລາຍການຍາວໆ ຫຼື ປັດຜ່ານຫຼາຍໆ ໜ້າ, Fisheye Launcher ໄດ້ນຳສະເໜີສອງຄຸນສົມບັດພິເສດ:<br><br><b>• ຕາຕະລາງໄລຍະຫ່າງທີ່ເທົ່າກັນເຊິ່ງສະແດງແອັບທັງໝົດຂອງທ່ານ, ໂດຍບໍ່ຄຳນຶງເຖິງຂະໜາດໜ້າຈໍ ຫຼື ຈຳນວນແອັບ.<br><br>• ເລນຕາປາແບບກຣາຟິກ (Fisheye Lens) ເພື່ອຊູມ, ເລື່ອນ ແລະ ເປີດໃຊ້ແອັບຢ່າງໄວວາໂດຍໃຊ້ທ່າທາງສໍາຜັດ.</b><br><br>Fisheye Launcher ຍັງມາພ້ອມກັບເມນູການຕັ້ງຄ່າແບບເຕັມຮູບແບບເພື່ອປັບແຕ່ງເລນໃນທຸກດ້ານ ເຊັ່ນ: ຄວາມບິດເບືອນ, ການປັບຂະໜາດ, ຂະໜາດໄອຄອນ, ການຕອບສະໜອງດ້ວຍການສັ່ນ, ແລະ ອື່ນໆ.]]></string>

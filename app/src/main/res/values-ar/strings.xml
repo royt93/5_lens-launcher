@@ -59,6 +59,10 @@
     <string name="organization_move_later">نقل إلى الخلف</string>
     <string name="menu_app_uninstall">إلغاء التثبيت</string>
     <string name="error_app_not_found">التطبيق غير موجود</string>
+    <string name="quick_action_flashlight_on">قيد التشغيل</string>
+    <string name="quick_action_flashlight_off">إيقاف</string>
+    <string name="quick_action_tap_to_allow">انقر للسماح</string>
+    <string name="error_no_flashlight">لا يوجد مصباح يدوي على هذا الجهاز</string>
     <string name="error_too_many_apps">فشل في تحميل التطبيقات</string>
     <string name="snackbar_reset_successful">تم إعادة تعيين القيم إلى الافتراضية</string>
     <string name="about"><![CDATA[يعتبر Fisheye Launcher طريقة فريدة وفعالة لتصفح وتشغيل تطبيقاتك.<br><br>بدلاً من التمرير عبر قوائم طويلة أو التمرير عبر صفحات متعددة، يطبق Fisheye Launcher ميزتين فريدتين:<br><br><b>• شبكة متساوية الأبعاد تعرض جميع تطبيقاتك، بغض النظر عن حجم الشاشة أو عدد التطبيقات.<br><br>• عدسة عين السمكة (Fisheye) رسومية للتكبير والتنقل وتشغيل التطبيقات بسرعة باستخدام إيماءات اللمس.</b><br><br>يتضمن Fisheye Launcher أيضًا قائمة إعدادات كاملة لضبط جميع جوانب العدسة؛ التشوه، القياس، حجم الأيقونة، الاستجابة اللمسية، إلخ.]]></string>

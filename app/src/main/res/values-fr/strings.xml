@@ -59,6 +59,10 @@
     <string name="organization_move_later">Déplacer plus tard</string>
     <string name="menu_app_uninstall">Désinstaller</string>
     <string name="error_app_not_found">Application non trouvée</string>
+    <string name="quick_action_flashlight_on">Activé</string>
+    <string name="quick_action_flashlight_off">Désactivé</string>
+    <string name="quick_action_tap_to_allow">Appuyez pour autoriser</string>
+    <string name="error_no_flashlight">Pas de lampe torche sur cet appareil</string>
     <string name="error_too_many_apps">Échec du chargement des applications</string>
     <string name="snackbar_reset_successful">Paramètres réinitialisés par défaut</string>
     <string name="about"><![CDATA[Fisheye Launcher est un moyen unique et efficace de parcourir et de lancer vos applications.<br><br>Au lieu de faire défiler de longues listes ou de balayer plusieurs pages, Fisheye Launcher met en œuvre deux fonctionnalités uniques :<br><br><b>• Une grille équiespacée qui affiche toutes vos applications, quels que soient la taille de l\'écran ou le nombre d\'applications.<br><br>• Une lentille graphique Fisheye (oeil de poisson) pour zoomer, faire un panoramique et lancer rapidement les applications à l\'aide de gestes tactiles.</b><br><br>Fisheye Launcher comprend également un menu complet de paramètres pour ajuster tous les aspects de la lentille : distorsion, échelle, taille des icônes, retour haptique, etc.]]></string>

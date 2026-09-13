@@ -88,6 +88,13 @@ class UtilSettings(context: Context) {
         const val KEY_QUICK_ACTION_BATTERY = "quick_action_battery_enabled"
         const val KEY_QUICK_ACTION_SETTINGS = "quick_action_settings_enabled"
         const val KEY_SEARCH_HINT_TEXT = "search_hint_text"
+        // SEARCH-004: flashlight toggle + wifi SSID quick actions, and permission-request memory
+        // so each is only ever asked for once (see QuickActionEngine.resolveFlashlightToggle/
+        // resolveWifiSsid for why "already asked" matters).
+        const val KEY_QUICK_ACTION_FLASHLIGHT = "quick_action_flashlight_enabled"
+        const val KEY_QUICK_ACTION_WIFI_SSID = "quick_action_wifi_ssid_enabled"
+        const val KEY_FLASHLIGHT_PERMISSION_REQUESTED = "flashlight_permission_requested"
+        const val KEY_WIFI_SSID_PERMISSION_REQUESTED = "wifi_ssid_permission_requested"
         const val KEY_BACKGROUND = "background"
         const val KEY_BACKGROUND_COLOR = "background_color"
         const val KEY_HIGHLIGHT_COLOR = "show_touch_selection_color"
@@ -186,8 +193,11 @@ class UtilSettings(context: Context) {
         KEY_SHOW_NEW_APP_TAG -> prefs.getBoolean(name, DEFAULT_SHOW_NEW_APP_TAG)
         KEY_SHOW_SEARCH_BAR -> prefs.getBoolean(name, DEFAULT_SHOW_SEARCH_BAR)
         KEY_QUICK_ACTION_CALCULATOR, KEY_QUICK_ACTION_UNIT, KEY_QUICK_ACTION_TIMER,
-        KEY_QUICK_ACTION_BATTERY, KEY_QUICK_ACTION_SETTINGS ->
+        KEY_QUICK_ACTION_BATTERY, KEY_QUICK_ACTION_SETTINGS,
+        KEY_QUICK_ACTION_FLASHLIGHT, KEY_QUICK_ACTION_WIFI_SSID ->
             prefs.getBoolean(name, DEFAULT_QUICK_ACTION_ENABLED)
+        // KEY_FLASHLIGHT_PERMISSION_REQUESTED / KEY_WIFI_SSID_PERMISSION_REQUESTED fall through
+        // to the else branch below - default false is exactly DEFAULT_BOOLEAN already.
         else -> prefs.getBoolean(name, DEFAULT_BOOLEAN)
     }
 

@@ -35,6 +35,33 @@
     <!-- Quyền rung phản hồi khi người dùng kích hoạt thao tác VIP/launcher -->
     <uses-permission android:name="android.permission.VIBRATE" />
 
+    <!-- SEARCH-004: bật/tắt đèn pin từ quick action tìm kiếm. Yêu cầu runtime, chỉ hỏi lần đầu
+         gõ "đèn pin"/"flashlight" (ActHome.toggleFlashlight). CameraManager.setTorchMode() đòi
+         hỏi quyền này dù không thật sự mở camera preview. -->
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <!-- SEARCH-004: xem tên mạng WiFi đang kết nối từ quick action tìm kiếm. Yêu cầu bình thường
+         (không cần runtime prompt), nhưng WifiManager.getConnectionInfo().getSSID() chỉ trả về
+         SSID thật khi app còn giữ quyền vị trí bên dưới - nếu không luôn trả "<unknown ssid>". -->
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+
+    <!-- SEARCH-004: bắt buộc để WifiManager trả về SSID thật (giới hạn quyền riêng tư của
+         Android, không dùng cho định vị GPS thật). Yêu cầu runtime, chỉ hỏi lần đầu gõ
+         "tên wifi"/"wifi ssid" (ActHome.requestWifiSsidPermission). Android 12+ (lint
+         CoarseFineLocation) bắt buộc phải xin kèm ACCESS_COARSE_LOCATION cùng lúc với FINE -
+         người dùng có thể chỉ cấp COARSE, trường hợp đó SSID vẫn không đọc được (WifiManager chỉ
+         mở khóa SSID thật khi có FINE, không phải COARSE) - QuickActionEngine.resolveWifiSsid đã
+         check đúng FINE, tự rơi về im lặng nếu chỉ có COARSE. -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+    <!-- SEARCH-004: the CAMERA permission above would otherwise tell Google Play this app
+         requires camera/flash hardware, excluding devices (and ChromeOS) without either - the
+         flashlight quick action is optional (resolveFlashlightToggle degrades gracefully with
+         no camera/flash), so both are explicitly not required. -->
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <uses-feature android:name="android.hardware.camera.flash" android:required="false" />
+
     <!-- ========================================================================
          QUERIES - Cho phép query các app khác (Android 11+)
          ======================================================================== -->

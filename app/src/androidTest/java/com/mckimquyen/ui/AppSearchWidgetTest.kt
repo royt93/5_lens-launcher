@@ -534,4 +534,57 @@ class AppSearchWidgetTest {
             }
         }
     }
+
+    // ==================================================================== SEARCH-004
+
+    /** SEARCH-004: camera already granted - the row shows the toggle's current (off) state. */
+    @get:org.junit.Rule
+    val cameraPermissionRule: androidx.test.rule.GrantPermissionRule =
+        androidx.test.rule.GrantPermissionRule.grant(android.Manifest.permission.CAMERA)
+
+    @Test
+    fun flashlightQuickActionShowsOffStateWhenCameraAlreadyGranted() {
+        ActivityScenario.launch(ActHome::class.java).use { scenario ->
+            var searchView: SearchView? = null
+            scenario.onActivity { activity ->
+                searchView = activity.findViewById(R.id.searchView)
+                searchView!!.show()
+            }
+            waitUntilShowing(searchView!!, true)
+            scenario.onActivity { searchView!!.editText.setText("flashlight") }
+            scenario.onActivity { activity ->
+                assertEquals(View.VISIBLE, activity.findViewById<View>(R.id.quickActionRow).visibility)
+                assertEquals(
+                    activity.getString(R.string.quick_action_flashlight_off),
+                    activity.findViewById<TextView>(R.id.tvQuickActionValue).text.toString()
+                )
+            }
+        }
+    }
+
+    /**
+     * SEARCH-004: wifi SSID quick action offers itself (with a "tap to allow" prompt) the first
+     * time location permission hasn't been granted or asked for yet.
+     */
+    @Test
+    fun wifiSsidQuickActionOffersPermissionRequestWhenNeverAsked() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        UtilSettings(context).save(UtilSettings.KEY_WIFI_SSID_PERMISSION_REQUESTED, false)
+        ActivityScenario.launch(ActHome::class.java).use { scenario ->
+            var searchView: SearchView? = null
+            scenario.onActivity { activity ->
+                searchView = activity.findViewById(R.id.searchView)
+                searchView!!.show()
+            }
+            waitUntilShowing(searchView!!, true)
+            scenario.onActivity { searchView!!.editText.setText("wifi name") }
+            scenario.onActivity { activity ->
+                assertEquals(View.VISIBLE, activity.findViewById<View>(R.id.quickActionRow).visibility)
+                assertTrue(
+                    "row must be clickable so tapping can request the permission",
+                    activity.findViewById<View>(R.id.quickActionRow).hasOnClickListeners()
+                )
+            }
+        }
+    }
 }

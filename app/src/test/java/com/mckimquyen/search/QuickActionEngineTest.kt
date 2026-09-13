@@ -206,4 +206,70 @@ class QuickActionEngineTest {
         assertNull(QuickActionEngine.resolveTimer("12*7"))
         assertNull(QuickActionEngine.resolveSettingsShortcut("12*7"))
     }
+
+    // ==================================================================== Flashlight toggle (SEARCH-004)
+
+    private fun context() = androidx.test.core.app.ApplicationProvider
+        .getApplicationContext<android.app.Application>()
+
+    private fun grant(permission: String) {
+        org.robolectric.Shadows.shadowOf(context()).grantPermissions(permission)
+    }
+
+    private fun deny(permission: String) {
+        org.robolectric.Shadows.shadowOf(context()).denyPermissions(permission)
+    }
+
+    @Test
+    fun `unmatched query never resolves as a flashlight toggle`() {
+        assertNull(QuickActionEngine.resolveFlashlightToggle(context(), "not a flashlight query"))
+    }
+
+    @Test
+    fun `flashlight toggle resolves when camera permission is granted`() {
+        grant(android.Manifest.permission.CAMERA)
+        val result = QuickActionEngine.resolveFlashlightToggle(context(), "flashlight")
+        assertEquals(QuickAction.FlashlightToggle("flashlight"), result)
+    }
+
+    @Test
+    fun `flashlight toggle still resolves the first time permission is denied - so it can be requested`() {
+        deny(android.Manifest.permission.CAMERA)
+        com.mckimquyen.util.UtilSettings(context())
+            .save(com.mckimquyen.util.UtilSettings.KEY_FLASHLIGHT_PERMISSION_REQUESTED, false)
+        val result = QuickActionEngine.resolveFlashlightToggle(context(), "đèn pin")
+        assertEquals(QuickAction.FlashlightToggle("đèn pin"), result)
+    }
+
+    @Test
+    fun `flashlight toggle silently stops offering itself once permission was already denied once`() {
+        deny(android.Manifest.permission.CAMERA)
+        com.mckimquyen.util.UtilSettings(context())
+            .save(com.mckimquyen.util.UtilSettings.KEY_FLASHLIGHT_PERMISSION_REQUESTED, true)
+        assertNull(QuickActionEngine.resolveFlashlightToggle(context(), "flashlight"))
+    }
+
+    // ==================================================================== Wifi SSID (SEARCH-004)
+
+    @Test
+    fun `unmatched query never resolves as a wifi ssid lookup`() {
+        assertNull(QuickActionEngine.resolveWifiSsid(context(), "not a wifi query"))
+    }
+
+    @Test
+    fun `wifi ssid asks for permission the first time it is denied`() {
+        deny(android.Manifest.permission.ACCESS_FINE_LOCATION)
+        com.mckimquyen.util.UtilSettings(context())
+            .save(com.mckimquyen.util.UtilSettings.KEY_WIFI_SSID_PERMISSION_REQUESTED, false)
+        val result = QuickActionEngine.resolveWifiSsid(context(), "wifi name")
+        assertEquals(QuickAction.WifiSsidPermissionRequest("wifi name"), result)
+    }
+
+    @Test
+    fun `wifi ssid silently stops offering itself once permission was already denied once`() {
+        deny(android.Manifest.permission.ACCESS_FINE_LOCATION)
+        com.mckimquyen.util.UtilSettings(context())
+            .save(com.mckimquyen.util.UtilSettings.KEY_WIFI_SSID_PERMISSION_REQUESTED, true)
+        assertNull(QuickActionEngine.resolveWifiSsid(context(), "ten wifi"))
+    }
 }

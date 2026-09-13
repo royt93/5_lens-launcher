@@ -1,10 +1,14 @@
 package com.mckimquyen.search
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.PackageManager
+import android.net.wifi.WifiManager
 import android.provider.AlarmClock
 import android.provider.Settings
+import androidx.core.content.ContextCompat
 import com.mckimquyen.util.UtilSettings
 import java.util.Locale
 
@@ -21,6 +25,15 @@ sealed class QuickAction {
 
     /** A value that launches an Intent when tapped - timer quick-set, Settings deep-link. */
     data class Action(val label: String, val intent: Intent) : QuickAction()
+
+    /** SEARCH-004: bật/tắt đèn pin - side effect (CameraManager.setTorchMode), not an Intent, so
+     *  ActHome owns the tap behavior directly instead of this engine building an Intent for it. */
+    data class FlashlightToggle(val label: String) : QuickAction()
+
+    /** SEARCH-004: wifi SSID needs ACCESS_FINE_LOCATION not yet granted - tapping requests it
+     *  (ActHome owns the request flow); once granted, resolve() returns [Info] with the real
+     *  SSID instead. */
+    data class WifiSsidPermissionRequest(val label: String) : QuickAction()
 }
 
 object QuickActionEngine {
@@ -36,6 +49,8 @@ object QuickActionEngine {
             ?: (if (enabled(UtilSettings.KEY_QUICK_ACTION_UNIT)) resolveUnitConversion(raw) else null)
             ?: (if (enabled(UtilSettings.KEY_QUICK_ACTION_TIMER)) resolveTimer(raw) else null)
             ?: (if (enabled(UtilSettings.KEY_QUICK_ACTION_BATTERY)) resolveBattery(context, raw) else null)
+            ?: (if (enabled(UtilSettings.KEY_QUICK_ACTION_FLASHLIGHT)) resolveFlashlightToggle(context, raw) else null)
+            ?: (if (enabled(UtilSettings.KEY_QUICK_ACTION_WIFI_SSID)) resolveWifiSsid(context, raw) else null)
             ?: (if (enabled(UtilSettings.KEY_QUICK_ACTION_SETTINGS)) resolveSettingsShortcut(raw) else null)
     }
 
@@ -268,5 +283,52 @@ object QuickActionEngine {
         val normalized = AppSearchEngine.normalize(raw)
         val action = SETTINGS_KEYWORDS[normalized] ?: return null
         return QuickAction.Action(raw.trim(), Intent(action))
+    }
+
+    // ==================================================================== Flashlight toggle
+
+    private val FLASHLIGHT_KEYWORDS = setOf(
+        "den pin", "flashlight", "flash light", "torch", "bat den pin", "tat den pin"
+    )
+
+    /**
+     * SEARCH-004: unlike every other resolver here, this one has a permission gate with memory -
+     * if [UtilSettings.KEY_FLASHLIGHT_PERMISSION_REQUESTED] is already true and CAMERA still
+     * isn't granted, the owner said no once already, so this silently stops offering the action
+     * (falls through to normal search) instead of nagging on every matching keystroke.
+     */
+    internal fun resolveFlashlightToggle(context: Context, raw: String): QuickAction.FlashlightToggle? {
+        if (AppSearchEngine.normalize(raw) !in FLASHLIGHT_KEYWORDS) return null
+        val granted = ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) ==
+            PackageManager.PERMISSION_GRANTED
+        val alreadyAsked = UtilSettings(context).getBoolean(UtilSettings.KEY_FLASHLIGHT_PERMISSION_REQUESTED)
+        if (!granted && alreadyAsked) return null
+        return QuickAction.FlashlightToggle(raw.trim())
+    }
+
+    // ==================================================================== Wifi SSID
+
+    private val WIFI_SSID_KEYWORDS = setOf(
+        "wifi ssid", "ten wifi", "wifi name", "current wifi", "mang wifi hien tai", "ten mang wifi"
+    )
+
+    /**
+     * SEARCH-004: WifiInfo.getSSID() only returns the real network name (not "<unknown ssid>")
+     * once the app also holds ACCESS_FINE_LOCATION - a deliberate Android privacy restriction,
+     * not a bug. Same permission-gate-with-memory pattern as [resolveFlashlightToggle].
+     */
+    internal fun resolveWifiSsid(context: Context, raw: String): QuickAction? {
+        if (AppSearchEngine.normalize(raw) !in WIFI_SSID_KEYWORDS) return null
+        val granted = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) ==
+            PackageManager.PERMISSION_GRANTED
+        if (!granted) {
+            val alreadyAsked = UtilSettings(context).getBoolean(UtilSettings.KEY_WIFI_SSID_PERMISSION_REQUESTED)
+            return if (alreadyAsked) null else QuickAction.WifiSsidPermissionRequest(raw.trim())
+        }
+        val wifiManager = context.applicationContext
+            .getSystemService(Context.WIFI_SERVICE) as? WifiManager ?: return null
+        val ssid = wifiManager.connectionInfo?.ssid?.trim('"')
+        if (ssid.isNullOrEmpty() || ssid == "<unknown ssid>") return null
+        return QuickAction.Info(raw.trim(), ssid)
     }
 }

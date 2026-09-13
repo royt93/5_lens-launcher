@@ -59,6 +59,10 @@
     <string name="organization_move_later">Переместить позже</string>
     <string name="menu_app_uninstall">Удалить</string>
     <string name="error_app_not_found">Приложение не найдено</string>
+    <string name="quick_action_flashlight_on">Включено</string>
+    <string name="quick_action_flashlight_off">Выключено</string>
+    <string name="quick_action_tap_to_allow">Нажмите, чтобы разрешить</string>
+    <string name="error_no_flashlight">На этом устройстве нет фонарика</string>
     <string name="error_too_many_apps">Не удалось загрузить приложения</string>
     <string name="snackbar_reset_successful">Настройки сброшены по умолчанию</string>
     <string name="about"><![CDATA[Fisheye Launcher — это уникальный и эффективный способ поиска и запуска ваших приложений.<br><br>Вместо прокрутки длинных списков или перелистывания множества страниц Fisheye Launcher предлагает две уникальные функции:<br><br><b>• Сетка с равными интервалами, отображающая все ваши приложения независимо от размера экрана или количества приложений.<br><br>• Графический объектив Рыбий глаз (Fisheye) для быстрого масштабирования, панорамирования и запуска приложений с помощью жестов касания.</b><br><br>Fisheye Launcher также включает полное меню настроек для точной настройки всех аспектов объектива: искажение, масштабирование, размер значков, виброотклик и т. д.]]></string>

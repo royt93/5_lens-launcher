@@ -60,6 +60,10 @@
     <string name="organization_move_later">Move later</string>
     <string name="menu_app_uninstall">Uninstall</string>
     <string name="error_app_not_found">App Not Found</string>
+    <string name="quick_action_flashlight_on">On</string>
+    <string name="quick_action_flashlight_off">Off</string>
+    <string name="quick_action_tap_to_allow">Tap to allow</string>
+    <string name="error_no_flashlight">No flashlight on this device</string>
     <string name="error_too_many_apps">Failed to Load Apps</string>
     <string name="snackbar_reset_successful">Values Reset To Default</string>
     <string name="about"><![CDATA[Fisheye Launcher is a unique, efficient way to browse and launch your apps.<br><br>Instead of scrolling long lists or swiping through multiple pages, Fisheye Launcher implements two unique features:<br><br><b>• An Equispaced Grid that displays all of your apps, regardless of screen size or app count.<br><br>• A Graphical Fisheye Lens to quickly zoom, pan and launch apps using touch gestures.</b><br><br>Fisheye Launcher also includes a full Settings menu to tweak all aspects of the Lens; Distortion, Scaling, Icon Size, Haptic Feedback, etc.</a>]]></string>

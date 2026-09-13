@@ -59,6 +59,10 @@
     <string name="organization_move_later">ย้ายไปถัดไป</string>
     <string name="menu_app_uninstall">ถอนการติดตั้ง</string>
     <string name="error_app_not_found">ไม่พบแอป</string>
+    <string name="quick_action_flashlight_on">เปิด</string>
+    <string name="quick_action_flashlight_off">ปิด</string>
+    <string name="quick_action_tap_to_allow">แตะเพื่ออนุญาต</string>
+    <string name="error_no_flashlight">อุปกรณ์นี้ไม่มีไฟฉาย</string>
     <string name="error_too_many_apps">โหลดแอปไม่สำเร็จ</string>
     <string name="snackbar_reset_successful">รีเซ็ตค่าเป็นเริ่มต้นเรียบร้อยแล้ว</string>
     <string name="about"><![CDATA[Fisheye Launcher เป็นวิธีที่ไม่เหมือนใครและมีประสิทธิภาพในการเรียกดูและเปิดใช้งานแอปของคุณ<br><br>แทนที่จะต้องเลื่อนรายการยาวๆ หรือปัดผ่านหลายๆ หน้า Fisheye Launcher ได้นำเสนอคุณลักษณะพิเศษสองประการ:<br><br><b>• ตารางระยะห่างที่เท่ากันซึ่งแสดงแอปทั้งหมดของคุณ โดยไม่คำนึงถึงขนาดหน้าจอหรือจำนวนแอป<br><br>• เลนส์ตาปลาแบบกราฟิกเพื่อซูม เลื่อน และเปิดใช้งานแอปอย่างรวดเร็วโดยใช้ท่าทางการสัมผัส</b><br><br>Fisheye Launcher ยังมาพร้อมกับเมนูการตั้งค่าแบบเต็มรูปแบบเพื่อปรับแต่งเลนส์ในทุกด้าน เช่น ความบิดเบี้ยว, การปรับขนาด, ขนาดไอคอน, การตอบสนองด้วยการสั่น ฯลฯ]]></string>
