@@ -82,6 +82,7 @@
     <string name="recent_apps_cleared">Applis récentes effacées</string>
     <string name="no_apps_found">Aucune appli trouvée</string>
     <string name="search_empty_state">Saisissez le nom de l’appli à rechercher</string>
+    <string name="search_results_section">Applications correspondantes</string>
     <string name="search_open_app">Ouvrir %1$s</string>
     <string name="about_features_header">✨ Fonctionnalités clés</string>
     <string name="about_feature_equispaced_grid">• Grille équiespacée - affiche toutes les applications quelle que soit la taille de l\'écran</string>

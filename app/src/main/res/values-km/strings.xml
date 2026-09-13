@@ -82,6 +82,7 @@
     <string name="recent_apps_cleared">បានសម្អាតកម្មវិធីថ្មីៗ</string>
     <string name="no_apps_found">រកមិនឃើញកម្មវិធី</string>
     <string name="search_empty_state">បញ្ចូលឈ្មោះកម្មវិធីដើម្បីស្វែងរក</string>
+    <string name="search_results_section">កម្មវិធីដែលត្រូវគ្នា</string>
     <string name="search_open_app">បើក %1$s</string>
     <string name="about_features_header">✨ លក្ខណៈពិសេសសំខាន់ៗ</string>
     <string name="about_feature_equispaced_grid">• ក្រឡាចត្រង្គដែលមានចន្លោះស្មើគ្នា - បង្ហាញកម្មវិធីទាំងអស់ដោយមិនគិតពីទំហំអេក្រង់</string>

@@ -82,6 +82,7 @@
     <string name="recent_apps_cleared">Aplikasi terbaru dihapus</string>
     <string name="no_apps_found">Aplikasi tidak ditemukan</string>
     <string name="search_empty_state">Ketik nama aplikasi untuk mencari</string>
+    <string name="search_results_section">Aplikasi yang cocok</string>
     <string name="search_open_app">Buka %1$s</string>
     <string name="about_features_header">✨ Fitur Utama</string>
     <string name="about_feature_equispaced_grid">• Kisi Berjarak Sama - menampilkan semua aplikasi terlepas dari ukuran layar</string>

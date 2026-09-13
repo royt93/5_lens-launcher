@@ -8,9 +8,6 @@ import android.content.ClipboardManager;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.graphics.RenderEffect;
-import android.graphics.Shader;
-import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -26,10 +23,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
+import androidx.core.graphics.ColorUtils;
+import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.color.MaterialColors;
 import com.google.android.material.search.SearchBar;
 import com.google.android.material.search.SearchView;
 import com.mckimquyen.BuildConfig;
@@ -57,11 +57,6 @@ import me.zhanghai.android.materialprogressbar.MaterialProgressBar;
 //2023.03.19 tried to convert kotlin but failed
 public class ActHome extends ActBase {
 
-    // UI-002 follow-up: frosted-glass blur radius (dp-independent, RenderEffect takes raw px)
-    // behind the search overlay on Android 12+; pre-12 devices fall back to a more opaque flat
-    // scrim instead (res/color-v31/search_view_scrim_background.xml vs the default).
-    private static final float SEARCH_BLUR_RADIUS_PX = 25f;
-
     LensView lensViews;
     MaterialProgressBar progressBarHome;
     private ArrayList<App> listApp;
@@ -69,15 +64,13 @@ public class ActHome extends ActBase {
     private SearchView searchView;
     private EditText appSearch;
     private View recentHeader;
+    private View resultsSectionHeader;
     private TextView noSearchResults;
     private RecyclerView searchResults;
     private View quickActionRow;
     private View quickActionDivider;
     private TextView tvQuickActionLabel;
     private TextView tvQuickActionValue;
-    // Package-visible (not private) so AppSearchWidgetTest can assert on it directly -
-    // View.getRenderEffect() has no Kotlin-friendly getter to read the value back through.
-    boolean lensBlurActive = false;
     private SearchResultAdapter searchResultAdapter;
     private SearchHistoryStore searchHistoryStore;
 
@@ -158,6 +151,7 @@ public class ActHome extends ActBase {
         // result list itself sits in an opaque MaterialCardView so readability never depends on
         // what's behind the scrim.
         recentHeader = findViewById(R.id.recentHeader);
+        resultsSectionHeader = findViewById(R.id.resultsSectionHeader);
         noSearchResults = findViewById(R.id.tvNoSearchResults);
         searchResults = findViewById(R.id.rvSearchResults);
         quickActionRow = findViewById(R.id.quickActionRow);
@@ -208,17 +202,14 @@ public class ActHome extends ActBase {
             } else if (newState == SearchView.TransitionState.HIDDEN) {
                 searchBar.setVisibility(View.VISIBLE);
             }
-            // UI-002 follow-up: real frosted-glass blur behind the search panel (Android 12+),
-            // instead of relying on the flat scrim alone to hide detail - owner reported the
-            // lens grid/icons showing plainly through the scrim looked visually busy.
+            // UI-009: status/nav bar color now matches the search scrim (same
+            // ?attr/colorSurfaceContainerHigh tone) so the whole screen reads as one continuous
+            // surface while search is open. Toggled on SHOWING/HIDING (not SHOWN/HIDDEN) to match
+            // SearchView.isShowing() semantics, same reasoning as the old blur toggle it replaces.
             if (newState == SearchView.TransitionState.SHOWING) {
-                setLensBlurred(true);
+                setSearchSystemBarsHarmonized(true);
             } else if (newState == SearchView.TransitionState.HIDING) {
-                // Symmetric with SHOWING above: SearchView.isShowing() already flips to false as
-                // soon as HIDING starts (not once HIDDEN completes), so clearing here - not on
-                // HIDDEN - keeps setLensBlurred() in step with what callers observe via
-                // isShowing() and avoids a race where blur stays applied after hide() returns.
-                setLensBlurred(false);
+                setSearchSystemBarsHarmonized(false);
             }
         });
         appSearch.setOnEditorActionListener((view, actionId, event) -> {
@@ -256,34 +247,55 @@ public class ActHome extends ActBase {
         ArrayList<App> apps = listApp == null ? new ArrayList<>() : listApp;
         java.util.List<App> results = AppSearchEngine.search(apps, query, searchHistoryStore.recentKeys());
         boolean isEmptyQuery = AppSearchEngine.normalize(query).isEmpty();
+        boolean hasResults = !results.isEmpty();
+
+        // UI-009 note: a TransitionManager.beginDelayedTransition crossfade was tried here for
+        // the state switch, but onTextChanged can fire once per keystroke (adb `input text` and
+        // some IMEs commit char-by-char) - overlapping beginDelayedTransition calls left stuck
+        // GhostView fade-out overlays rendering on top of the new content, i.e. the exact
+        // "overlapping UI" bug this whole revamp exists to remove. Plain visibility swaps instead.
         searchResultAdapter.submitList(results);
         int resultHeightDp = Math.min(results.size() * 64, 384);
         searchResults.getLayoutParams().height = Math.round(
                 resultHeightDp * getResources().getDisplayMetrics().density
         );
         searchResults.requestLayout();
-        recentHeader.setVisibility(isEmptyQuery && !results.isEmpty() ? View.VISIBLE : View.GONE);
-        searchResults.setVisibility(results.isEmpty() ? View.GONE : View.VISIBLE);
+        recentHeader.setVisibility(isEmptyQuery && hasResults ? View.VISIBLE : View.GONE);
+        resultsSectionHeader.setVisibility(!isEmptyQuery && hasResults ? View.VISIBLE : View.GONE);
+        searchResults.setVisibility(hasResults ? View.VISIBLE : View.GONE);
         noSearchResults.setText(isEmptyQuery ? R.string.search_empty_state : R.string.no_apps_found);
-        noSearchResults.setVisibility(results.isEmpty() ? View.VISIBLE : View.GONE);
+        noSearchResults.setVisibility(hasResults ? View.GONE : View.VISIBLE);
     }
 
     /**
-     * UI-002 follow-up: blur the lens grid behind the search overlay on Android 12+
-     * ({@link RenderEffect} requires API 31). Pre-31 devices have no equivalent API - they rely
-     * solely on the more opaque flat scrim ({@code res/color/search_view_scrim_background.xml})
-     * for the same "hide distracting detail" job.
+     * UI-009: replaces the old real-blur approach (RenderEffect on lensViews), which recomputed
+     * every frame during the SearchBar<->SearchView morph and caused visible transition jank.
+     * Instead, paint the status/navigation bars the exact same tonal color as the search scrim
+     * (res/color/search_view_scrim_background.xml's ?attr/colorSurfaceContainerHigh) so the whole
+     * screen - bars included - reads as one continuous surface, with zero per-frame cost.
      */
-    private void setLensBlurred(boolean blurred) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-            return;
+    private void setSearchSystemBarsHarmonized(boolean showing) {
+        Window window = getWindow();
+        WindowInsetsControllerCompat controller =
+                new WindowInsetsControllerCompat(window, window.getDecorView());
+        if (showing) {
+            int scrimColor = MaterialColors.getColor(this, R.attr.colorSurfaceContainerHigh, Color.BLACK);
+            window.setStatusBarColor(scrimColor);
+            window.setNavigationBarColor(scrimColor);
+            // Dynamic color can land on a light or dark tone depending on wallpaper/day-night, so
+            // bar icon contrast is picked from the actual color instead of being hardcoded.
+            boolean lightIcons = ColorUtils.calculateLuminance(scrimColor) > 0.5;
+            controller.setAppearanceLightStatusBars(lightIcons);
+            controller.setAppearanceLightNavigationBars(lightIcons);
+        } else {
+            window.setStatusBarColor(Color.TRANSPARENT);
+            window.setNavigationBarColor(Color.TRANSPARENT);
+            // Restore the defaults in effect the rest of the time: status bar was never
+            // explicitly themed (system default = light/white icons); nav bar is statically
+            // android:windowLightNavigationBar=true in AppTheme (dark icons).
+            controller.setAppearanceLightStatusBars(false);
+            controller.setAppearanceLightNavigationBars(true);
         }
-        lensBlurActive = blurred;
-        lensViews.setRenderEffect(
-                blurred
-                        ? RenderEffect.createBlurEffect(SEARCH_BLUR_RADIUS_PX, SEARCH_BLUR_RADIUS_PX, Shader.TileMode.CLAMP)
-                        : null
-        );
     }
 
     /**
@@ -348,6 +360,14 @@ public class ActHome extends ActBase {
         updateColor();
         updateSearchBarVisibility();
         setupTransparentSystemBarsForLollipop();
+        // UI-009 fix: setupTransparentSystemBarsForLollipop() unconditionally forces transparent
+        // bars - if the task is paused/resumed (e.g. Home button, or launching an app from a
+        // search result) while SearchView is still showing, that clobbers the harmonized scrim
+        // color set by setSearchSystemBarsHarmonized(), leaving the wallpaper showing through
+        // behind the search panel instead of the matching tonal color.
+        if (searchView.isShowing()) {
+            setSearchSystemBarsHarmonized(true);
+        }
         if (RAppsSingleton.getInstance().getApps() != null && !RAppsSingleton.getInstance().getApps().isEmpty()) {
             assignApps(Objects.requireNonNull(RAppsSingleton.getInstance().getApps()));
         }

@@ -82,6 +82,7 @@
     <string name="recent_apps_cleared">최근 앱을 지웠습니다</string>
     <string name="no_apps_found">앱을 찾을 수 없습니다</string>
     <string name="search_empty_state">검색할 앱 이름을 입력하세요</string>
+    <string name="search_results_section">일치하는 앱</string>
     <string name="search_open_app">%1$s 열기</string>
     <string name="about_features_header">✨ 주요 기능</string>
     <string name="about_feature_equispaced_grid">• 균등 격자 - 화면 크기에 관계없이 모든 앱 표시</string>

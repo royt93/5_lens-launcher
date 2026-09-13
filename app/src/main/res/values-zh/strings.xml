@@ -82,6 +82,7 @@
     <string name="recent_apps_cleared">已清除最近使用的应用</string>
     <string name="no_apps_found">未找到应用</string>
     <string name="search_empty_state">输入应用名称进行搜索</string>
+    <string name="search_results_section">匹配的应用</string>
     <string name="search_open_app">打开 %1$s</string>
     <string name="about_features_header">✨ 主要功能</string>
     <string name="about_feature_equispaced_grid">• 等距网格 - 无论屏幕尺寸如何都能显示所有应用</string>

@@ -82,6 +82,7 @@
     <string name="recent_apps_cleared">Apps recentes removidos</string>
     <string name="no_apps_found">Nenhum app encontrado</string>
     <string name="search_empty_state">Digite o nome de um app para pesquisar</string>
+    <string name="search_results_section">Apps correspondentes</string>
     <string name="search_open_app">Abrir %1$s</string>
     <string name="about_features_header">✨ Principais recursos</string>
     <string name="about_feature_equispaced_grid">• Grade equiespaçada - exibe todos os apps independentemente do tamanho da tela</string>

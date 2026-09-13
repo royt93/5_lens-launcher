@@ -82,6 +82,7 @@
     <string name="recent_apps_cleared">Недавние приложения удалены</string>
     <string name="no_apps_found">Приложения не найдены</string>
     <string name="search_empty_state">Введите название приложения</string>
+    <string name="search_results_section">Подходящие приложения</string>
     <string name="search_open_app">Открыть %1$s</string>
     <string name="about_features_header">✨ Основные функции</string>
     <string name="about_feature_equispaced_grid">• Равномерная сетка - показывает все приложения независимо от размера экрана</string>

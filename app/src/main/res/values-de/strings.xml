@@ -82,6 +82,7 @@
     <string name="recent_apps_cleared">Zuletzt verwendete Apps gelöscht</string>
     <string name="no_apps_found">Keine Apps gefunden</string>
     <string name="search_empty_state">App-Namen zum Suchen eingeben</string>
+    <string name="search_results_section">Passende Apps</string>
     <string name="search_open_app">%1$s öffnen</string>
     <string name="about_features_header">✨ Hauptfunktionen</string>
     <string name="about_feature_equispaced_grid">• Gleichmäßiges Raster – zeigt alle Apps unabhängig von der Bildschirmgröße an</string>

@@ -82,6 +82,7 @@
     <string name="recent_apps_cleared">تم مسح التطبيقات الحديثة</string>
     <string name="no_apps_found">لم يتم العثور على تطبيقات</string>
     <string name="search_empty_state">اكتب اسم تطبيق للبحث</string>
+    <string name="search_results_section">التطبيقات المطابقة</string>
     <string name="search_open_app">فتح %1$s</string>
     <string name="about_features_header">✨ الميزات الرئيسية</string>
     <string name="about_feature_equispaced_grid">• شبكة متساوية المسافات - تعرض جميع التطبيقات بغض النظر عن حجم الشاشة</string>

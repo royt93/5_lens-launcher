@@ -107,6 +107,9 @@
                         android:background="@color/colorDivider"
                         android:visibility="gone" />
 
+                    <!-- UI-009: recent-apps section header, icon+caption pattern so the three
+                         search states (no data / recent data / valid results) are visually
+                         distinct sections instead of an unlabeled list. -->
                     <LinearLayout
                         android:id="@+id/recentHeader"
                         android:layout_width="match_parent"
@@ -117,11 +120,20 @@
                         android:paddingEnd="8dp"
                         android:visibility="gone">
 
+                        <ImageView
+                            android:layout_width="18dp"
+                            android:layout_height="18dp"
+                            android:layout_marginEnd="8dp"
+                            android:importantForAccessibility="no"
+                            android:src="@drawable/ic_history_24dp"
+                            app:tint="?attr/colorPrimary" />
+
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:text="@string/recent_apps"
+                            android:textColor="?attr/colorPrimary"
                             android:textStyle="bold" />
 
                         <Button
@@ -133,15 +145,40 @@
                             android:textAllCaps="false" />
                     </LinearLayout>
 
+                    <!-- UI-009: results section header, shown only for a non-empty query with
+                         matches (distinct from recentHeader, which covers the blank-query state).
+                         Single TextView + compound drawable (not icon+TextView in a LinearLayout)
+                         per lint's UseCompoundDrawables. -->
+                    <TextView
+                        android:id="@+id/resultsSectionHeader"
+                        android:layout_width="match_parent"
+                        android:layout_height="40dp"
+                        android:drawablePadding="8dp"
+                        android:gravity="center_vertical"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp"
+                        android:text="@string/search_results_section"
+                        app:drawableStartCompat="@drawable/ic_search_24dp"
+                        app:drawableTint="?attr/colorPrimary"
+                        android:textColor="?attr/colorPrimary"
+                        android:textStyle="bold"
+                        android:visibility="gone"
+                        tools:visibility="visible" />
+
+                    <!-- UI-009: empty/no-match state - icon above text via compound drawable
+                         (was a nested ImageView+TextView) per lint's UseCompoundDrawables. -->
                     <TextView
                         android:id="@+id/tvNoSearchResults"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:drawablePadding="8dp"
                         android:gravity="center"
-                        android:minHeight="96dp"
+                        android:minHeight="120dp"
                         android:padding="16dp"
                         android:text="@string/no_apps_found"
-                        android:visibility="gone" />
+                        android:visibility="gone"
+                        app:drawableTint="?attr/colorOutline"
+                        app:drawableTopCompat="@drawable/ic_search_24dp" />
 
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/rvSearchResults"

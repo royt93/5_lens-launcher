@@ -131,9 +131,10 @@ class AppSearchWidgetTest {
     }
 
     /**
-     * UI-002: the search overlay's backdrop must be dimmed (not fully opaque, not fully
-     * transparent) while the result list itself stays on an opaque card so its text is always
-     * readable regardless of what's behind the scrim.
+     * UI-009: replaced the old two-tier scrim+blur design (real RenderEffect blur caused visible
+     * jank on the SearchBar<->SearchView morph) with a single near-opaque tonal scrim on every
+     * API level - no blur to compensate for, so one opacity value covers all devices. The result
+     * list itself still sits on an opaque card so its text is always readable regardless.
      */
     @Test
     fun searchScrimIsDimmedNotOpaqueOrTransparent_andResultsSitOnAnOpaqueCard() {
@@ -144,13 +145,9 @@ class AppSearchWidgetTest {
                     R.color.search_view_scrim_background
                 )!!.defaultColor
                 val alpha = Color.alpha(resolvedScrim)
-                // UI-002 follow-up: two-tier design - API 31+ pairs a lighter scrim (~0.35) with
-                // a real RenderEffect blur (ActHome.setLensBlurred) to hide detail behind the
-                // panel; pre-31 devices have no blur API, so they lean on a heavier scrim
-                // (~0.85) alone. Either way it must be dimmed, never fully opaque/transparent.
                 assertTrue(
-                    "scrim alpha should be dimmed (neither ~0 nor ~255), was $alpha",
-                    alpha in 60..240
+                    "scrim alpha should be dimmed (neither ~0 nor fully opaque), was $alpha",
+                    alpha in 60..250
                 )
 
                 val results = activity.findViewById<RecyclerView>(R.id.rvSearchResults)
@@ -169,15 +166,12 @@ class AppSearchWidgetTest {
     }
 
     /**
-     * UI-002 follow-up: on Android 12+, showing/hiding the search overlay must toggle a real
-     * blur behind it (`ActHome.setLensBlurred`), not just rely on the scrim's own opacity.
-     * Pre-12 devices have no RenderEffect API at all - the check is skipped there, matching the
-     * production code's own version guard.
+     * UI-009: while search is showing, the status/navigation bars must be painted the exact same
+     * tonal color as the search scrim (not left transparent), so the whole screen reads as one
+     * continuous surface; both must revert to transparent once fully hidden.
      */
     @Test
-    fun searchShowingAppliesBlur_andHidingClearsIt() {
-        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S) return
-
+    fun searchShowingHarmonizesSystemBarColors_andHidingRevertsToTransparent() {
         ActivityScenario.launch(ActHome::class.java).use { scenario ->
             var searchView: SearchView? = null
             scenario.onActivity { activity ->
@@ -186,18 +180,31 @@ class AppSearchWidgetTest {
             }
             waitUntilShowing(searchView!!, true)
             scenario.onActivity { activity ->
+                val window = activity.window
                 assertTrue(
-                    "lens grid must be blurred while search is showing",
-                    activity.lensBlurActive
+                    "status bar must not be transparent while search is showing",
+                    window.statusBarColor != android.graphics.Color.TRANSPARENT
+                )
+                assertEquals(
+                    "status and navigation bar must share the same harmonized color",
+                    window.statusBarColor,
+                    window.navigationBarColor
                 )
             }
 
             scenario.onActivity { searchView!!.hide() }
             waitUntilShowing(searchView!!, false)
             scenario.onActivity { activity ->
-                assertTrue(
-                    "lens grid blur must be cleared once search is fully hidden",
-                    !activity.lensBlurActive
+                val window = activity.window
+                assertEquals(
+                    "status bar must revert to transparent once search is fully hidden",
+                    android.graphics.Color.TRANSPARENT,
+                    window.statusBarColor
+                )
+                assertEquals(
+                    "navigation bar must revert to transparent once search is fully hidden",
+                    android.graphics.Color.TRANSPARENT,
+                    window.navigationBarColor
                 )
             }
         }
@@ -326,6 +333,80 @@ class AppSearchWidgetTest {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val result = com.mckimquyen.search.QuickActionEngine.resolveBattery(context, "pin")
         assertTrue("expected a battery percentage like '42%', got $result", result != null && result.value.endsWith("%"))
+    }
+
+    /**
+     * UI-009 regression: onResume() unconditionally forced transparent system bars, which
+     * clobbered the harmonized scrim color if the activity paused/resumed (Home button, app
+     * switch) while SearchView was still showing - caught live on TECNO KJ7 (wallpaper showed
+     * through behind the search panel instead of the matching tonal color after a resume).
+     */
+    @Test
+    fun systemBarsStayHarmonizedAcrossPauseAndResumeWhileSearchIsShowing() {
+        ActivityScenario.launch(ActHome::class.java).use { scenario ->
+            var searchView: SearchView? = null
+            scenario.onActivity { activity ->
+                searchView = activity.findViewById(R.id.searchView)
+                searchView!!.show()
+            }
+            waitUntilShowing(searchView!!, true)
+
+            scenario.moveToState(androidx.lifecycle.Lifecycle.State.CREATED)
+            scenario.moveToState(androidx.lifecycle.Lifecycle.State.RESUMED)
+
+            scenario.onActivity { activity ->
+                assertTrue(
+                    "status bar must stay harmonized (not transparent) after a resume while search is showing",
+                    activity.window.statusBarColor != android.graphics.Color.TRANSPARENT
+                )
+                assertEquals(
+                    "status and navigation bar must still share the same harmonized color after resume",
+                    activity.window.statusBarColor,
+                    activity.window.navigationBarColor
+                )
+            }
+        }
+    }
+
+    /** UI-009: blank query with no recent history - only the empty-state container shows. */
+    @Test
+    fun blankQueryWithNoHistoryShowsOnlyEmptyState() {
+        ActivityScenario.launch(ActHome::class.java).use { scenario ->
+            var searchView: SearchView? = null
+            scenario.onActivity { activity ->
+                com.mckimquyen.search.SearchHistoryStore(activity).clear()
+                searchView = activity.findViewById(R.id.searchView)
+                searchView!!.show()
+            }
+            waitUntilShowing(searchView!!, true)
+            scenario.onActivity { activity ->
+                assertEquals(View.VISIBLE, activity.findViewById<View>(R.id.tvNoSearchResults).visibility)
+                assertEquals(View.GONE, activity.findViewById<View>(R.id.recentHeader).visibility)
+                assertEquals(View.GONE, activity.findViewById<View>(R.id.resultsSectionHeader).visibility)
+            }
+        }
+    }
+
+    /** UI-009: a typed query with matches shows the "matching apps" section header, not recentHeader. */
+    @Test
+    fun nonEmptyQueryWithMatchesShowsResultsSectionHeader_notRecentHeader() {
+        ActivityScenario.launch(ActHome::class.java).use { scenario ->
+            var searchView: SearchView? = null
+            scenario.onActivity { activity ->
+                searchView = activity.findViewById(R.id.searchView)
+                searchView!!.show()
+            }
+            waitUntilShowing(searchView!!, true)
+            scenario.onActivity { searchView!!.editText.setText("a") }
+            scenario.onActivity { activity ->
+                val hasResults = activity.findViewById<RecyclerView>(R.id.rvSearchResults).visibility == View.VISIBLE
+                if (hasResults) {
+                    assertEquals(View.VISIBLE, activity.findViewById<View>(R.id.resultsSectionHeader).visibility)
+                    assertEquals(View.GONE, activity.findViewById<View>(R.id.recentHeader).visibility)
+                    assertEquals(View.GONE, activity.findViewById<View>(R.id.tvNoSearchResults).visibility)
+                }
+            }
+        }
     }
 
     @Test
