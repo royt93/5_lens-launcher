@@ -53,7 +53,15 @@
         <item name="actionOverflowMenuStyle">@style/RoundedOverflowMenuStyle</item>
     </style>
 
-    <style name="LightAlertDialogCustom" parent="Theme.AppCompat.Light.Dialog.Alert">
+    <!-- UI-005 follow-up (2026-09-13): was parent="Theme.AppCompat.Light.Dialog.Alert" - a full
+         standalone Theme, not an overlay. Its own ancestry (Theme.AppCompat.Light) redeclares
+         colorPrimary/colorAccent/textColorPrimary with AppCompat's generic static defaults,
+         which silently overrode whatever this dialog should have inherited from the wrapped
+         Activity context - a live bug: the dialog title rendered in a near-invisible pale
+         color on the white background. ThemeOverlay.AppCompat.Dialog.Alert is the thin-overlay
+         equivalent (only sets window min-width dimens) - it lets colorPrimary/colorAccent flow
+         through from the Activity (dynamic-color-patched) instead of being shadowed. -->
+    <style name="LightAlertDialogCustom" parent="ThemeOverlay.AppCompat.Dialog.Alert">
         <item name="android:background">@color/colorWhite</item>
         <item name="android:textColor">?attr/colorPrimary</item>
         <item name="android:textColorPrimary">@color/colorBlack</item>
