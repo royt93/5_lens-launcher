@@ -132,16 +132,16 @@ class AppSearchWidgetTest {
     }
 
     /**
-     * UI-009: replaced the old two-tier scrim+blur design (real RenderEffect blur caused visible
-     * jank on the SearchBar<->SearchView morph) with a single near-opaque tonal scrim on every
-     * API level - no blur to compensate for, so one opacity value covers all devices.
+     * UI-009/UI-018: replaced the old two-tier scrim+blur design (real RenderEffect blur caused
+     * visible jank on the SearchBar<->SearchView morph) with a single opaque tonal surface on
+     * every API level - no blur and no ghosted launcher icons behind search results.
      * UI-011 follow-up: the result list's own MaterialCardView panel was removed (owner feedback:
      * a rounded card nested inside a panel that already has its own full-bleed scrim read as "a
      * frame inside a frame") - content now sits directly on the scrim per the Material3
      * full-screen-search spec, so text contrast relies on the scrim being near-opaque instead.
      */
     @Test
-    fun searchScrimIsDimmedNotOpaqueOrTransparent() {
+    fun searchScrimIsOpaqueSoLauncherIconsDoNotGhostThrough() {
         ActivityScenario.launch(ActHome::class.java).use { scenario ->
             scenario.onActivity { activity ->
                 val resolvedScrim = ContextCompat.getColorStateList(
@@ -149,10 +149,7 @@ class AppSearchWidgetTest {
                     R.color.search_view_scrim_background
                 )!!.defaultColor
                 val alpha = Color.alpha(resolvedScrim)
-                assertTrue(
-                    "scrim alpha should be dimmed (neither ~0 nor fully opaque), was $alpha",
-                    alpha in 60..250
-                )
+                assertEquals("search surface must be opaque to avoid ghosted launcher icons", 255, alpha)
             }
         }
     }

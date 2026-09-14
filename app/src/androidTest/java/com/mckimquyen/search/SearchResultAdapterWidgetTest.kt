@@ -2,6 +2,7 @@ package com.mckimquyen.search
 
 import android.view.View
 import android.widget.FrameLayout
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -9,6 +10,7 @@ import com.mckimquyen.R
 import com.mckimquyen.model.App
 import com.mckimquyen.model.PinnedZone
 import com.mckimquyen.ui.ActHome
+import com.mckimquyen.util.BitmapCache
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -84,6 +86,38 @@ class SearchResultAdapterWidgetTest {
 
                 val shortcutsRow = holder.itemView.findViewById<View>(R.id.llSearchResultShortcuts)
                 assertEquals(View.GONE, shortcutsRow.visibility)
+            }
+        }
+    }
+
+    @Test
+    fun cacheMissStillShowsPlaceholderIconImmediately() {
+        ActivityScenario.launch(ActHome::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                BitmapCache.clear()
+                val app = App(
+                    label = "Missing Icon",
+                    packageName = "pkg.missing.icon",
+                    name = "MissingIconActivity",
+                    iconCacheKey = "missing-icon-cache-key"
+                )
+                val adapter = SearchResultAdapter { _, _ -> }
+                adapter.submitList(listOf(app))
+
+                val holder = adapter.onCreateViewHolder(FrameLayout(activity), 0)
+                adapter.onBindViewHolder(holder, 0)
+
+                val icon = holder.itemView.findViewById<ImageView>(R.id.ivSearchResultIcon)
+                assertTrue(
+                    "Search result rows must never render a blank icon while cache reloads",
+                    icon.drawable != null
+                )
+
+                adapter.onViewRecycled(holder)
+                assertTrue(
+                    "Recycled rows must reset to a placeholder instead of carrying a blank bitmap",
+                    icon.drawable != null
+                )
             }
         }
     }

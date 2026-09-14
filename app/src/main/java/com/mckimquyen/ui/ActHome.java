@@ -183,17 +183,24 @@ public class ActHome extends ActBase {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             ViewGroup.MarginLayoutParams updatedSearchParams =
                     (ViewGroup.MarginLayoutParams) searchBar.getLayoutParams();
-            updatedSearchParams.topMargin = searchBaseTopMargin + systemBars.top;
-            searchBar.setLayoutParams(updatedSearchParams);
+            int targetSearchTopMargin = searchBaseTopMargin + systemBars.top;
+            if (updatedSearchParams.topMargin != targetSearchTopMargin) {
+                updatedSearchParams.topMargin = targetSearchTopMargin;
+                searchBar.setLayoutParams(updatedSearchParams);
+            }
 
             searchBar.post(() -> {
                 ViewGroup.MarginLayoutParams updatedLensParams =
                         (ViewGroup.MarginLayoutParams) lensViews.getLayoutParams();
-                updatedLensParams.topMargin = updatedSearchParams.topMargin
+                int targetLensTopMargin = targetSearchTopMargin
                         + searchBar.getHeight()
                         + lensSearchGap;
-                updatedLensParams.bottomMargin = systemBars.bottom;
-                lensViews.setLayoutParams(updatedLensParams);
+                if (updatedLensParams.topMargin != targetLensTopMargin
+                        || updatedLensParams.bottomMargin != systemBars.bottom) {
+                    updatedLensParams.topMargin = targetLensTopMargin;
+                    updatedLensParams.bottomMargin = systemBars.bottom;
+                    lensViews.setLayoutParams(updatedLensParams);
+                }
             });
             return insets;
         });
@@ -279,9 +286,12 @@ public class ActHome extends ActBase {
             // surface while search is open. Toggled on SHOWING/HIDING (not SHOWN/HIDDEN) to match
             // SearchView.isShowing() semantics, same reasoning as the old blur toggle it replaces.
             if (newState == SearchView.TransitionState.SHOWING) {
+                lensViews.setVisibility(View.INVISIBLE);
                 setSearchSystemBarsHarmonized(true);
             } else if (newState == SearchView.TransitionState.HIDING) {
                 setSearchSystemBarsHarmonized(false);
+            } else if (newState == SearchView.TransitionState.HIDDEN && listApp != null && !listApp.isEmpty()) {
+                lensViews.setVisibility(View.VISIBLE);
             }
         });
         appSearch.setOnEditorActionListener((view, actionId, event) -> {
@@ -756,7 +766,7 @@ public class ActHome extends ActBase {
         }
 
         progressBarHome.setVisibility(View.INVISIBLE);
-        lensViews.setVisibility(View.VISIBLE);
+        lensViews.setVisibility(searchView.isShowing() ? View.INVISIBLE : View.VISIBLE);
         listApp = visibleApps;
         Logger.d("ActHome: Setting " + listApp.size() + " apps to lensViews");
         lensViews.setApps(listApp);

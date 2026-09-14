@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- UI-009: real RenderEffect blur (UI-007) caused visible jank on the SearchBar<->SearchView
+<!-- UI-009/UI-018: real RenderEffect blur (UI-007) caused visible jank on the SearchBar<->SearchView
      morph animation because it recomputed every frame while the panel was transforming. Replaced
-     with a single tonal-M3 scrim on all API levels - no blur to compensate for, so one opacity
-     (near-opaque) does the whole "hide the lens grid" job cheaply, and the exact same
+     with a single opaque tonal-M3 surface on all API levels - no blur to compensate for, so it
+     hides the lens grid cheaply instead of letting ghost icons show through the list, and the same
      ?attr/colorSurfaceContainerHigh value is reused for the status/navigation bar color
      (ActHome.setSearchSystemBarsHarmonized) so the whole screen reads as one continuous surface. -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:alpha="0.96"
+        android:alpha="1.0"
         android:color="?attr/colorSurfaceContainerHigh" />
 </selector>

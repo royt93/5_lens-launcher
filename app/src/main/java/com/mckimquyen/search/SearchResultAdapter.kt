@@ -1,6 +1,7 @@
 package com.mckimquyen.search
 
 import android.content.Intent
+import android.app.Application
 import android.graphics.Rect
 import android.view.ContextThemeWrapper
 import android.view.Gravity
@@ -21,6 +22,12 @@ import com.mckimquyen.model.AppPersistent
 import com.mckimquyen.model.PinnedZone
 import com.mckimquyen.services.BroadcastReceivers.AppsEditedReceiver
 import com.mckimquyen.util.UtilApp
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 fun interface SearchResultClickListener {
     fun onAppClick(app: App, source: View)
@@ -30,6 +37,10 @@ class SearchResultAdapter(
     private val onAppClick: SearchResultClickListener
 ) : RecyclerView.Adapter<SearchResultAdapter.ResultViewHolder>() {
     private val apps = mutableListOf<App>()
+    private val adapterScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+    private val shortcutsByPackage = mutableMapOf<String, List<QuickShortcut>>()
+    private val loadingIconKeys = mutableSetOf<String>()
+    private val loadingShortcutPackages = mutableSetOf<String>()
 
     fun submitList(newApps: List<App>) {
         val oldApps = apps.toList()
@@ -52,6 +63,16 @@ class SearchResultAdapter(
         holder.bind(apps[position])
     }
 
+    override fun onViewRecycled(holder: ResultViewHolder) {
+        holder.clear()
+        super.onViewRecycled(holder)
+    }
+
+    override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+        adapterScope.cancel()
+        super.onDetachedFromRecyclerView(recyclerView)
+    }
+
     inner class ResultViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val mainRow: View = itemView.findViewById(R.id.llSearchResultMainRow)
         private val icon: ImageView = itemView.findViewById(R.id.ivSearchResultIcon)
@@ -64,7 +85,7 @@ class SearchResultAdapter(
             label.text = appLabel
             packageName.text = app.packageName
             // CORE-002: keyed by iconCacheKey, not packageName (see BitmapCache.buildKey)
-            icon.setImageBitmap(RAppsSingleton.instance.getAppIcon(app.iconCacheKey))
+            bindIcon(app)
             mainRow.contentDescription = mainRow.context.getString(R.string.search_open_app, appLabel)
             mainRow.setOnClickListener { onAppClick.onAppClick(app, mainRow) }
             mainRow.setOnLongClickListener {
@@ -75,13 +96,73 @@ class SearchResultAdapter(
             bindShortcuts(app)
         }
 
+        fun clear() {
+            icon.setImageResource(R.mipmap.ic_launcher)
+            shortcutsRow.removeAllViews()
+            shortcutsRow.visibility = View.GONE
+        }
+
+        private fun bindIcon(app: App) {
+            val iconKey = app.iconCacheKey
+            RAppsSingleton.instance.getAppIcon(iconKey)?.let {
+                icon.setImageBitmap(it)
+                return
+            }
+            app.icon?.let {
+                icon.setImageBitmap(it)
+                return
+            }
+
+            icon.setImageResource(R.mipmap.ic_launcher)
+            val application = itemView.context.applicationContext as? Application ?: return
+            val packageName = app.packageName.toString()
+            val iconResId = app.iconResId
+            if (iconKey.isBlank() || packageName.isBlank() || !loadingIconKeys.add(iconKey)) return
+            adapterScope.launch {
+                val loadedIcon = withContext(Dispatchers.IO) {
+                    UtilApp.loadSingleAppIcon(application, packageName, iconResId)
+                }
+                loadingIconKeys.remove(iconKey)
+                if (loadedIcon == null) return@launch
+                RAppsSingleton.instance.setAppIcon(iconKey, loadedIcon)
+                val position = bindingAdapterPosition
+                if (position != RecyclerView.NO_POSITION
+                    && apps.getOrNull(position)?.iconCacheKey == iconKey) {
+                    icon.setImageBitmap(loadedIcon)
+                }
+            }
+        }
+
         // ==================================================================== SEARCH-003: shortcuts
 
         private fun bindShortcuts(app: App) {
-            val shortcuts = AppShortcutsProvider.shortcutsFor(
-                shortcutsRow.context,
-                app.packageName.toString()
-            )
+            val packageName = app.packageName.toString()
+            val cachedShortcuts = shortcutsByPackage[packageName]
+            if (cachedShortcuts != null) {
+                renderShortcuts(cachedShortcuts)
+                return
+            }
+
+            shortcutsRow.removeAllViews()
+            shortcutsRow.visibility = View.GONE
+            if (packageName.isBlank() || !loadingShortcutPackages.add(packageName)) return
+
+            val appContext = shortcutsRow.context.applicationContext
+            adapterScope.launch {
+                val shortcuts = withContext(Dispatchers.IO) {
+                    AppShortcutsProvider.shortcutsFor(appContext, packageName)
+                }
+                shortcutsByPackage[packageName] = shortcuts
+                loadingShortcutPackages.remove(packageName)
+                val position = bindingAdapterPosition
+                if (position != RecyclerView.NO_POSITION
+                    && apps.getOrNull(position)?.packageName?.toString() == packageName) {
+                    renderShortcuts(shortcuts)
+                }
+            }
+        }
+
+        private fun renderShortcuts(shortcuts: List<QuickShortcut>) {
             shortcutsRow.removeAllViews()
             if (shortcuts.isEmpty()) {
                 shortcutsRow.visibility = View.GONE
