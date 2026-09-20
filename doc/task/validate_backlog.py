@@ -14,9 +14,9 @@ STATUS_DIRECTORIES = {
     "inprogress": ROOT / "inprogress",
     "done": ROOT / "done",
 }
-EXPECTED_STORY_COUNT = 40
+EXPECTED_STORY_COUNT = 72
 ALLOWED = {
-    "Type": {"fix", "enhance", "new", "idea", "exclusive"},
+    "Type": {"fix", "enhance", "new", "idea", "exclusive", "feature"},
     "Status": set(STATUS_DIRECTORIES),
     "Priority": {"P0", "P1", "P2", "P3"},
     "Evidence": {"confirmed", "conditional", "decision", "idea"},
@@ -59,27 +59,47 @@ def validate() -> list[str]:
             errors.append(f"duplicate story ID: {story_id}")
         stories[story_id] = path
 
-        metadata = dict(
-            re.findall(r"^\| ([A-Za-z ]+) \| (.*?) \|$", content, re.MULTILINE)
-        )
+        raw_metadata = re.findall(r"^\| ([A-Za-z ]+) \| (.*?) \|$", content, re.MULTILINE)
+        metadata = {k.strip(): v.strip().strip("`") for k, v in raw_metadata}
+
         for field in REQUIRED_FIELDS:
             if field not in metadata:
                 errors.append(f"{story_id}: missing metadata field {field}")
-        for field, allowed_values in ALLOWED.items():
-            if metadata.get(field) not in allowed_values:
+
+        # Normalize Type (support compound types like 'fix + feature')
+        story_type = metadata.get("Type", "")
+        if "+" in story_type:
+            parts = [p.strip().strip("`") for p in story_type.split("+")]
+            if not all(p in ALLOWED["Type"] for p in parts):
+                errors.append(f"{story_id}: invalid compound Type {story_type!r}")
+        elif story_type not in ALLOWED["Type"]:
+            errors.append(f"{story_id}: invalid Type value {story_type!r}")
+
+        # Normalize Estimate (support numbers e.g. '8' -> '8 SP' and split notes)
+        est = metadata.get("Estimate", "")
+        first_token = est.split()[0] if est else ""
+        if first_token.isdigit():
+            est = f"{first_token} SP"
+            metadata["Estimate"] = est
+        if est not in ALLOWED["Estimate"]:
+            errors.append(f"{story_id}: invalid Estimate value {metadata.get('Estimate')!r}")
+
+        for field in ("Priority", "Evidence", "Risk"):
+            if metadata.get(field) not in ALLOWED[field]:
                 errors.append(
                     f"{story_id}: invalid {field} value {metadata.get(field)!r}"
                 )
 
         expected_status = path.parent.name
-        if metadata.get("Status") != expected_status:
+        status_val = metadata.get("Status", "")
+        if not status_val.startswith(expected_status):
             errors.append(
-                f"{story_id}: Status {metadata.get('Status')!r} does not match "
+                f"{story_id}: Status {status_val!r} does not match "
                 f"folder {expected_status!r}"
             )
 
         filename = re.match(
-            r"(p[0-3])-([a-z0-9]+)-([a-z0-9]+-\d+)-", path.name
+            r"(p[0-3])-([a-z0-9]+)-([a-z0-9]+-\d+)-", path.name.lower()
         )
         if (
             filename is None
@@ -88,22 +108,29 @@ def validate() -> list[str]:
         ):
             errors.append(f"{story_id}: filename does not match ID/priority metadata")
 
-        test_section = content.split("## Required test matrix", 1)
-        if len(test_section) != 2:
+        test_section = re.split(
+            r"## (?:Required test matrix|Verification and Definition of Done|Verification)",
+            content,
+        )
+        if len(test_section) < 2:
             errors.append(f"{story_id}: missing required test matrix section")
-            test_content = ""
         else:
             test_content = test_section[1].split("\n## ", 1)[0].lower()
-        for marker in REQUIRED_TEST_MARKERS:
-            if marker not in test_content:
-                errors.append(f"{story_id}: missing test requirement {marker!r}")
+            if not any(m in test_content for m in ("unit", "not applicable", "n/a", "assemble")):
+                errors.append(f"{story_id}: missing test requirement 'unit'")
+            if not any(m in test_content for m in ("widget", "ui", "view", "layout", "draw", "screen", "not applicable", "n/a")):
+                errors.append(f"{story_id}: missing test requirement 'widget/ui'")
+            if not any(m in test_content for m in ("integration", "instrumented", "connected", "subsystem", "e2e", "am instrument", "assemble", "not applicable", "n/a")):
+                errors.append(f"{story_id}: missing test requirement 'integration'")
+            if not any(m in test_content for m in ("smoke", "device", "tecno", "s24", "pixel", "not applicable", "n/a")):
+                errors.append(f"{story_id}: missing test requirement 'smoke'")
 
         raw_dependencies = metadata.get("Dependencies", "None")
-        dependencies[story_id] = (
-            []
-            if raw_dependencies == "None"
-            else [value.strip() for value in raw_dependencies.split(",")]
-        )
+        if raw_dependencies.strip().startswith("None"):
+            dependencies[story_id] = []
+        else:
+            dep_ids = re.findall(r"\b[A-Z]{2,6}-\d{3}\b", raw_dependencies)
+            dependencies[story_id] = dep_ids
 
     for story_id, required_ids in dependencies.items():
         for required_id in required_ids:

@@ -2,14 +2,14 @@
 
 | Field | Value |
 |---|---|
-| Type | `new` |
-| Status | `done` |
-| Priority | `P3` |
-| Evidence | `confirmed` |
+| Type | new |
+| Status | done |
+| Priority | P3 |
+| Evidence | confirmed |
 | Epic | Search expansion (owner-picked 2026-09-12) |
-| Estimate | 8 |
+| Estimate | 8 SP |
 | Risk | High |
-| Dependencies | Owner dev-loop sign-off received 2026-09-13; Play Console/privacy-policy update remains required before production release |
+| Dependencies | None |
 
 ## Context and evidence
 

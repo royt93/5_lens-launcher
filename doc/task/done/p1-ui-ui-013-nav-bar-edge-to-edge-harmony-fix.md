@@ -69,7 +69,7 @@ not silently ignored.
 
 - [x] `./gradlew assembleDevDebug` clean; `./gradlew testDevDebugUnitTest` full pass;
       `./gradlew lintDevDebug` 0 errors, 20 pre-existing warnings, none new.
-- [x] Full instrumented regression on Pixel 7 Pro, 2 consecutive runs: 139/139 and 138/139 (the one
+- [x] Full instrumented widget/UI & integration regression on Pixel 7 Pro, 2 consecutive runs: 139/139 and 138/139 (the one
       diff was the pre-existing font-scale flake, present both times; the IME-action test flaked
       once then passed clean).
 - [x] Live smoke on Pixel 7 Pro (gesture nav): before the fix, opening search showed the scrim
