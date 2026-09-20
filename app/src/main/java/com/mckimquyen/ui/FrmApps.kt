@@ -19,8 +19,8 @@ import com.mckimquyen.app.RAppsSingleton.Companion.instance
 import com.mckimquyen.itf.AppsInterface
 import com.mckimquyen.model.App
 import com.mckimquyen.services.BroadcastReceivers.AppsEditedReceiver
+import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.mckimquyen.util.UtilSettings
-import me.zhanghai.android.materialprogressbar.MaterialProgressBar
 
 class FrmApps : Fragment(), AppsInterface {
 
@@ -29,7 +29,7 @@ class FrmApps : Fragment(), AppsInterface {
     }
 
     private var rvApps: RecyclerView? = null
-    private var progressBarApps: MaterialProgressBar? = null
+    private var progressBarApps: CircularProgressIndicator? = null
     private var utilSettings: UtilSettings? = null
     private var appAdapter: AppAdapter? = null
     private var indexScrolledItem = 0

@@ -375,9 +375,6 @@ dependencies {
     implementation 'androidx.preference:preference-ktx:1.2.1'
     implementation 'androidx.webkit:webkit:1.14.0'
 
-    // Material Dialogs - giữ version cũ vì version mới có breaking changes
-    implementation 'com.afollestad.material-dialogs:core:0.9.6.0'
-    implementation 'com.afollestad.material-dialogs:commons:0.9.6.0'
 
     // ========================================================================
     // ARCHITECTURE COMPONENTS

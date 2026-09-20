@@ -1,16 +1,13 @@
 package com.mckimquyen.ext
 
-import android.app.*
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.provider.Settings
-import android.view.*
-import androidx.core.content.ContextCompat
+import androidx.appcompat.app.AlertDialog
 import androidx.core.net.toUri
-import androidx.appcompat.R as AppCompatR
-import com.google.android.material.color.MaterialColors
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.mckimquyen.R
 import com.mckimquyen.util.isValid
 import com.mckimquyen.views.SuperWebViewActivity
@@ -103,16 +100,12 @@ fun Context.showDialog2(
     isCancelable: Boolean = true,  // Add parameter to control cancelable behavior
     onDismiss: Runnable? = null,  // Add callback for dismiss event
 ): AlertDialog {
-    val builder = AlertDialog.Builder(ContextThemeWrapper(this, R.style.LightAlertDialogCustom))
+    val builder = MaterialAlertDialogBuilder(this, R.style.MaterialYouDialogTheme)
 
-    if (title.isNullOrEmpty()) {
-        // do nothing
-    } else {
+    if (!title.isNullOrEmpty()) {
         builder.setTitle(title)
     }
-    if (msg.isNullOrEmpty()) {
-        // do nothing
-    } else {
+    if (!msg.isNullOrEmpty()) {
         builder.setMessage(msg)
     }
 
@@ -133,16 +126,5 @@ fun Context.showDialog2(
     }
 
     dialog.show()
-
-    // Set rounded background
-    dialog.window?.setBackgroundDrawableResource(R.drawable.bg_dialog_rounded)
-
-    val color = MaterialColors.getColor(
-        this,
-        AppCompatR.attr.colorPrimary,
-        ContextCompat.getColor(this, R.color.colorPrimary)
-    )
-    dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(color)
-    dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(color)
     return dialog
 }

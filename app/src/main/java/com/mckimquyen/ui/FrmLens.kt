@@ -6,16 +6,15 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.SeekBar
-import android.widget.SeekBar.OnSeekBarChangeListener
 import android.widget.TextView
-import androidx.appcompat.widget.AppCompatSeekBar
 import androidx.fragment.app.Fragment
+import com.google.android.material.slider.Slider
 import com.mckimquyen.R
 import com.mckimquyen.enums.DrawType
 import com.mckimquyen.itf.LensInterface
 import com.mckimquyen.util.UtilSettings
 import com.mckimquyen.views.LensView
+import java.util.Locale
 
 class FrmLens : Fragment(), LensInterface {
     companion object {
@@ -23,13 +22,13 @@ class FrmLens : Fragment(), LensInterface {
     }
 
     private var lensViewsSettings: LensView? = null
-    private var sbMinIconSize: AppCompatSeekBar? = null
+    private var sbMinIconSize: Slider? = null
     private var tvValueMinIconSize: TextView? = null
-    private var sbDistortionFactor: AppCompatSeekBar? = null
+    private var sbDistortionFactor: Slider? = null
     private var tvValueDistortionFactor: TextView? = null
-    private var sbScaleFactor: AppCompatSeekBar? = null
+    private var sbScaleFactor: Slider? = null
     private var tvValueScaleFactor: TextView? = null
-    private var sbAnimationTime: AppCompatSeekBar? = null
+    private var sbAnimationTime: Slider? = null
     private var tvValueAnimationTime: TextView? = null
     private var utilSettings: UtilSettings? = null
 
@@ -72,86 +71,62 @@ class FrmLens : Fragment(), LensInterface {
 
         lensViewsSettings?.setDrawType(DrawType.CIRCLES)
 
-        sbMinIconSize?.apply {
-            max = UtilSettings.MAX_ICON_SIZE
-            setOnSeekBarChangeListener(object : OnSeekBarChangeListener {
-                @SuppressLint("SetTextI18n")
-                override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
-                    val value = progress + UtilSettings.MIN_ICON_SIZE.toInt()
-                    tvValueMinIconSize?.text = "${value}dp"
-                    utilSettings?.save(UtilSettings.KEY_ICON_SIZE, value.toFloat())
-                    lensViewsSettings?.invalidate()
-                }
-
-                override fun onStartTrackingTouch(seekBar: SeekBar) {}
-                override fun onStopTrackingTouch(seekBar: SeekBar) {}
-            })
+        sbMinIconSize?.addOnChangeListener { _, value, fromUser ->
+            tvValueMinIconSize?.text = "${value.toInt()}dp"
+            if (fromUser) {
+                utilSettings?.save(UtilSettings.KEY_ICON_SIZE, value)
+                lensViewsSettings?.invalidate()
+            }
         }
 
-        sbDistortionFactor?.apply {
-            max = UtilSettings.MAX_DISTORTION_FACTOR
-            setOnSeekBarChangeListener(object : OnSeekBarChangeListener {
-                override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
-                    val value = progress / 2.0f + UtilSettings.MIN_DISTORTION_FACTOR
-                    tvValueDistortionFactor?.text = value.toString()
-                    utilSettings?.save(UtilSettings.KEY_DISTORTION_FACTOR, value)
-                    lensViewsSettings?.invalidate()
-                }
-
-                override fun onStartTrackingTouch(seekBar: SeekBar) {}
-                override fun onStopTrackingTouch(seekBar: SeekBar) {}
-            })
+        sbDistortionFactor?.addOnChangeListener { _, value, fromUser ->
+            tvValueDistortionFactor?.text = String.format(Locale.US, "%.1f", value)
+            if (fromUser) {
+                utilSettings?.save(UtilSettings.KEY_DISTORTION_FACTOR, value)
+                lensViewsSettings?.invalidate()
+            }
         }
 
-        sbScaleFactor?.apply {
-            max = UtilSettings.MAX_SCALE_FACTOR
-            setOnSeekBarChangeListener(object : OnSeekBarChangeListener {
-                override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
-                    val value = progress / 5.0f + UtilSettings.MIN_SCALE_FACTOR
-                    tvValueScaleFactor?.text = value.toString()
-                    utilSettings?.save(UtilSettings.KEY_SCALE_FACTOR, value)
-                    lensViewsSettings?.invalidate()
-                }
-
-                override fun onStartTrackingTouch(seekBar: SeekBar) {}
-                override fun onStopTrackingTouch(seekBar: SeekBar) {}
-            })
+        sbScaleFactor?.addOnChangeListener { _, value, fromUser ->
+            tvValueScaleFactor?.text = String.format(Locale.US, "%.1f", value)
+            if (fromUser) {
+                utilSettings?.save(UtilSettings.KEY_SCALE_FACTOR, value)
+                lensViewsSettings?.invalidate()
+            }
         }
 
-        sbAnimationTime?.apply {
-            max = UtilSettings.MAX_ANIMATION_TIME
-            setOnSeekBarChangeListener(object : OnSeekBarChangeListener {
-                @SuppressLint("SetTextI18n")
-                override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
-                    val value = progress / 2L + UtilSettings.MIN_ANIMATION_TIME
-                    tvValueAnimationTime?.text = "${value}ms"
-                    utilSettings?.save(UtilSettings.KEY_ANIMATION_TIME, value)
-                }
-
-                override fun onStartTrackingTouch(seekBar: SeekBar) {}
-                override fun onStopTrackingTouch(seekBar: SeekBar) {}
-            })
+        sbAnimationTime?.addOnChangeListener { _, value, fromUser ->
+            tvValueAnimationTime?.text = "${value.toLong()}ms"
+            if (fromUser) {
+                utilSettings?.save(UtilSettings.KEY_ANIMATION_TIME, value.toLong())
+            }
         }
     }
 
     @SuppressLint("SetTextI18n")
     private fun assignValues() {
         utilSettings?.let { us ->
-            val iconSize = us.getFloat(UtilSettings.KEY_ICON_SIZE).toInt()
-            sbMinIconSize?.progress = iconSize - UtilSettings.MIN_ICON_SIZE.toInt()
-            tvValueMinIconSize?.text = "${iconSize}dp"
+            val iconSize = us.getFloat(UtilSettings.KEY_ICON_SIZE)
+            val minIcon = UtilSettings.MIN_ICON_SIZE
+            val maxIcon = UtilSettings.MAX_ICON_SIZE.toFloat() + UtilSettings.MIN_ICON_SIZE
+            val validIcon = iconSize.coerceIn(minIcon, maxIcon)
+            sbMinIconSize?.value = validIcon
+            tvValueMinIconSize?.text = "${validIcon.toInt()}dp"
 
             val distortion = us.getFloat(UtilSettings.KEY_DISTORTION_FACTOR)
-            sbDistortionFactor?.progress = (2.0f * (distortion - UtilSettings.MIN_DISTORTION_FACTOR)).toInt()
-            tvValueDistortionFactor?.text = distortion.toString()
+            val validDistortion = distortion.coerceIn(0.5f, 5.0f)
+            sbDistortionFactor?.value = validDistortion
+            tvValueDistortionFactor?.text = String.format(Locale.US, "%.1f", validDistortion)
 
             val scale = us.getFloat(UtilSettings.KEY_SCALE_FACTOR)
-            sbScaleFactor?.progress = (5.0f * (scale - UtilSettings.MIN_SCALE_FACTOR)).toInt()
-            tvValueScaleFactor?.text = scale.toString()
+            val validScale = scale.coerceIn(1.0f, 2.0f)
+            sbScaleFactor?.value = validScale
+            tvValueScaleFactor?.text = String.format(Locale.US, "%.1f", validScale)
 
-            val animTime = us.getLong(UtilSettings.KEY_ANIMATION_TIME)
-            sbAnimationTime?.progress = (2 * (animTime - UtilSettings.MIN_ANIMATION_TIME)).toInt()
-            tvValueAnimationTime?.text = "${animTime}ms"
+            val animTime = us.getLong(UtilSettings.KEY_ANIMATION_TIME).toFloat()
+            val validAnim = animTime.coerceIn(100.0f, 400.0f)
+            sbAnimationTime?.value = validAnim
+            tvValueAnimationTime?.text = "${validAnim.toLong()}ms"
         }
     }
 

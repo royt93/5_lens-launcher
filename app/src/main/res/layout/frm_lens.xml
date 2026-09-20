@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Overdraw is a lint false positive here: this is a Fragment (one page of ActSettings'
-     ViewPager2), not a full-screen Activity content view, so it doesn't share the window's
-     background paint the way lint assumes — each page needs its own opaque background so
-     adjacent pages don't show through during swipe. -->
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -17,11 +14,15 @@
         android:padding="16dp">
 
         <!-- Preview Card -->
-        <androidx.cardview.widget.CardView
+        <com.google.android.material.card.MaterialCardView
+            style="@style/Widget.Material3.CardView.Filled"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
-            android:elevation="6dp">
+            app:cardBackgroundColor="?attr/colorSurfaceContainerLow"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp">
 
             <com.mckimquyen.views.LensView
                 android:id="@+id/lensViewsSettings"
@@ -29,15 +30,18 @@
                 android:layout_height="@dimen/height_lens_preview"
                 android:background="@drawable/bg_lens_preview_card" />
 
-        </androidx.cardview.widget.CardView>
+        </com.google.android.material.card.MaterialCardView>
 
         <!-- Min Icon Size Card -->
-        <androidx.cardview.widget.CardView
+        <com.google.android.material.card.MaterialCardView
+            style="@style/Widget.Material3.CardView.Filled"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp"
-            android:background="@drawable/bg_lens_setting_card"
-            android:elevation="2dp">
+            app:cardBackgroundColor="?attr/colorSurfaceContainerLow"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -50,14 +54,15 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:layout_marginBottom="12dp">
+                    android:layout_marginBottom="8dp">
 
                     <ImageView
                         android:layout_width="40dp"
                         android:layout_height="40dp"
                         android:src="@drawable/ic_icon_size_24dp"
                         android:padding="8dp"
-                        android:contentDescription="@string/app_name" />
+                        app:tint="?attr/colorPrimary"
+                        android:contentDescription="@string/setting_min_icon_size" />
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -66,21 +71,20 @@
                         android:orientation="vertical"
                         android:layout_marginStart="12dp">
 
-                        <androidx.appcompat.widget.AppCompatTextView
+                        <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/setting_min_icon_size"
-                            android:textStyle="bold"
-                            android:textSize="16sp" />
+                            android:textAppearance="?attr/textAppearanceTitleMedium"
+                            android:textColor="?attr/colorOnSurface" />
 
-                        <androidx.appcompat.widget.AppCompatTextView
+                        <TextView
                             android:id="@+id/tvValueMinIconSize"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textColor="?attr/colorPrimary"
-                            android:textStyle="bold"
-                            android:textSize="14sp"
-                            tools:text="50" />
+                            android:textAppearance="?attr/textAppearanceTitleSmall"
+                            tools:text="50dp" />
 
                     </LinearLayout>
 
@@ -91,28 +95,31 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
 
-                    <androidx.appcompat.widget.AppCompatSeekBar
+                    <com.google.android.material.slider.Slider
                         android:id="@+id/sbMinIconSize"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:background="@drawable/rounded_background"
-                        android:contentDescription="@string/app_name"
-                        android:progressDrawable="@drawable/custom_seekbar"
-                        android:thumb="@drawable/custom_thumb" />
+                        android:contentDescription="@string/setting_min_icon_size"
+                        android:valueFrom="10.0"
+                        android:valueTo="55.0"
+                        android:stepSize="1.0" />
 
                 </RelativeLayout>
 
             </LinearLayout>
 
-        </androidx.cardview.widget.CardView>
+        </com.google.android.material.card.MaterialCardView>
 
         <!-- Distortion Factor Card -->
-        <androidx.cardview.widget.CardView
+        <com.google.android.material.card.MaterialCardView
+            style="@style/Widget.Material3.CardView.Filled"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp"
-            android:background="@drawable/bg_lens_setting_card"
-            android:elevation="2dp">
+            app:cardBackgroundColor="?attr/colorSurfaceContainerLow"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -125,14 +132,15 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:layout_marginBottom="12dp">
+                    android:layout_marginBottom="8dp">
 
                     <ImageView
                         android:layout_width="40dp"
                         android:layout_height="40dp"
                         android:src="@drawable/ic_lens_distortion_24dp"
                         android:padding="8dp"
-                        android:contentDescription="@string/app_name" />
+                        app:tint="?attr/colorPrimary"
+                        android:contentDescription="@string/setting_distortion_factor" />
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -141,20 +149,19 @@
                         android:orientation="vertical"
                         android:layout_marginStart="12dp">
 
-                        <androidx.appcompat.widget.AppCompatTextView
+                        <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/setting_distortion_factor"
-                            android:textStyle="bold"
-                            android:textSize="16sp" />
+                            android:textAppearance="?attr/textAppearanceTitleMedium"
+                            android:textColor="?attr/colorOnSurface" />
 
-                        <androidx.appcompat.widget.AppCompatTextView
+                        <TextView
                             android:id="@+id/tvValueDistortionFactor"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textColor="?attr/colorPrimary"
-                            android:textStyle="bold"
-                            android:textSize="14sp"
+                            android:textAppearance="?attr/textAppearanceTitleSmall"
                             tools:text="1.0" />
 
                     </LinearLayout>
@@ -166,28 +173,31 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
 
-                    <androidx.appcompat.widget.AppCompatSeekBar
+                    <com.google.android.material.slider.Slider
                         android:id="@+id/sbDistortionFactor"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:background="@drawable/rounded_background"
-                        android:contentDescription="@string/app_name"
-                        android:progressDrawable="@drawable/custom_seekbar"
-                        android:thumb="@drawable/custom_thumb" />
+                        android:contentDescription="@string/setting_distortion_factor"
+                        android:valueFrom="0.5"
+                        android:valueTo="5.0"
+                        android:stepSize="0.1" />
 
                 </RelativeLayout>
 
             </LinearLayout>
 
-        </androidx.cardview.widget.CardView>
+        </com.google.android.material.card.MaterialCardView>
 
         <!-- Scale Factor Card -->
-        <androidx.cardview.widget.CardView
+        <com.google.android.material.card.MaterialCardView
+            style="@style/Widget.Material3.CardView.Filled"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp"
-            android:background="@drawable/bg_lens_setting_card"
-            android:elevation="2dp">
+            app:cardBackgroundColor="?attr/colorSurfaceContainerLow"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -200,14 +210,15 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:layout_marginBottom="12dp">
+                    android:layout_marginBottom="8dp">
 
                     <ImageView
                         android:layout_width="40dp"
                         android:layout_height="40dp"
                         android:src="@drawable/ic_scale_24dp"
                         android:padding="8dp"
-                        android:contentDescription="@string/app_name" />
+                        app:tint="?attr/colorPrimary"
+                        android:contentDescription="@string/setting_scale_factor" />
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -216,20 +227,19 @@
                         android:orientation="vertical"
                         android:layout_marginStart="12dp">
 
-                        <androidx.appcompat.widget.AppCompatTextView
+                        <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/setting_scale_factor"
-                            android:textStyle="bold"
-                            android:textSize="16sp" />
+                            android:textAppearance="?attr/textAppearanceTitleMedium"
+                            android:textColor="?attr/colorOnSurface" />
 
-                        <androidx.appcompat.widget.AppCompatTextView
+                        <TextView
                             android:id="@+id/tvValueScaleFactor"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textColor="?attr/colorPrimary"
-                            android:textStyle="bold"
-                            android:textSize="14sp"
+                            android:textAppearance="?attr/textAppearanceTitleSmall"
                             tools:text="1.5" />
 
                     </LinearLayout>
@@ -241,27 +251,31 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
 
-                    <androidx.appcompat.widget.AppCompatSeekBar
+                    <com.google.android.material.slider.Slider
                         android:id="@+id/sbScaleFactor"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:background="@drawable/rounded_background"
-                        android:contentDescription="@string/app_name"
-                        android:progressDrawable="@drawable/custom_seekbar"
-                        android:thumb="@drawable/custom_thumb" />
+                        android:contentDescription="@string/setting_scale_factor"
+                        android:valueFrom="1.0"
+                        android:valueTo="2.0"
+                        android:stepSize="0.1" />
 
                 </RelativeLayout>
 
             </LinearLayout>
 
-        </androidx.cardview.widget.CardView>
+        </com.google.android.material.card.MaterialCardView>
 
         <!-- Animation Time Card -->
-        <androidx.cardview.widget.CardView
+        <com.google.android.material.card.MaterialCardView
+            style="@style/Widget.Material3.CardView.Filled"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/bg_lens_setting_card"
-            android:elevation="2dp">
+            android:layout_marginBottom="12dp"
+            app:cardBackgroundColor="?attr/colorSurfaceContainerLow"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -274,14 +288,15 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:layout_marginBottom="12dp">
+                    android:layout_marginBottom="8dp">
 
                     <ImageView
                         android:layout_width="40dp"
                         android:layout_height="40dp"
                         android:src="@drawable/ic_timer_24dp"
                         android:padding="8dp"
-                        android:contentDescription="@string/app_name" />
+                        app:tint="?attr/colorPrimary"
+                        android:contentDescription="@string/setting_animation_time" />
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -290,20 +305,19 @@
                         android:orientation="vertical"
                         android:layout_marginStart="12dp">
 
-                        <androidx.appcompat.widget.AppCompatTextView
+                        <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/setting_animation_time"
-                            android:textStyle="bold"
-                            android:textSize="16sp" />
+                            android:textAppearance="?attr/textAppearanceTitleMedium"
+                            android:textColor="?attr/colorOnSurface" />
 
-                        <androidx.appcompat.widget.AppCompatTextView
+                        <TextView
                             android:id="@+id/tvValueAnimationTime"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textColor="?attr/colorPrimary"
-                            android:textStyle="bold"
-                            android:textSize="14sp"
+                            android:textAppearance="?attr/textAppearanceTitleSmall"
                             tools:text="300ms" />
 
                     </LinearLayout>
@@ -315,20 +329,20 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
 
-                    <androidx.appcompat.widget.AppCompatSeekBar
+                    <com.google.android.material.slider.Slider
                         android:id="@+id/sbAnimationTime"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:background="@drawable/rounded_background"
-                        android:contentDescription="@string/app_name"
-                        android:progressDrawable="@drawable/custom_seekbar"
-                        android:thumb="@drawable/custom_thumb" />
+                        android:contentDescription="@string/setting_animation_time"
+                        android:valueFrom="100.0"
+                        android:valueTo="400.0"
+                        android:stepSize="10.0" />
 
                 </RelativeLayout>
 
             </LinearLayout>
 
-        </androidx.cardview.widget.CardView>
+        </com.google.android.material.card.MaterialCardView>
 
     </androidx.appcompat.widget.LinearLayoutCompat>
 

@@ -18,17 +18,20 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.graphics.drawable.GradientDrawable;
 
 import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.mckimquyen.util.Logger;
 import androidx.appcompat.widget.Toolbar;
+import androidx.appcompat.app.AlertDialog;
 import androidx.viewpager2.widget.ViewPager2;
 
-import com.afollestad.materialdialogs.MaterialDialog;
-import com.afollestad.materialdialogs.color.ColorChooserDialog;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.gms.ads.AdError;
 import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdView;
@@ -66,8 +69,7 @@ import java.util.Objects;
 import kotlin.Unit;
 
 //2023.03.19 tried to convert kotlin but failed
-public class ActSettings extends ActBase
-        implements ColorChooserDialog.ColorCallback {
+public class ActSettings extends ActBase {
 
     private static final String TAG_COLOR_BACKGROUND = "BackgroundColor";
     private static final String TAG_COLOR_HIGHLIGHT = "HighlightColor";
@@ -82,11 +84,12 @@ public class ActSettings extends ActBase
     private boolean consentResolved = false; // BUG-3: guard banner load before consent
 
     private ArrayList<App> listApp;
-    private MaterialDialog dlgSortType;
-    private MaterialDialog dlgIconPack;
-    private MaterialDialog dlgNightMode;
-    private MaterialDialog dlgBackground;
-    private android.app.AlertDialog dlgTerms;
+    private AlertDialog dlgSortType;
+    private AlertDialog dlgIconPack;
+    private AlertDialog dlgNightMode;
+    private AlertDialog dlgBackground;
+    private AlertDialog dlgHighlightColor;
+    private AlertDialog dlgTerms;
     private LensInterface lensInterface;
 
     // Flag to prevent showing Terms dialog multiple times in same session
@@ -166,12 +169,13 @@ public class ActSettings extends ActBase
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_settings, menu);
 
-        // Tint all menu icons white
+        // Tint all menu icons with colorOnPrimary
+        int tintColor = androidx.core.content.ContextCompat.getColor(this, R.color.colorOnPrimary);
         for (int i = 0; i < menu.size(); i++) {
             MenuItem item = menu.getItem(i);
             Drawable icon = item.getIcon();
             if (icon != null) {
-                icon.setColorFilter(getResources().getColor(R.color.colorWhite), PorterDuff.Mode.SRC_IN);
+                icon.setColorFilter(tintColor, PorterDuff.Mode.SRC_IN);
             }
         }
 
@@ -522,25 +526,19 @@ public class ActSettings extends ActBase
         assert utilSettings != null;
         SortType selectedSortType = utilSettings.getSortType();
         int selectedIndex = lSortType.indexOf(selectedSortType);
-        dlgSortType = new MaterialDialog.Builder(ActSettings.this).title(R.string.setting_sort_apps)
-                .items(lSortTypeString).alwaysCallSingleChoiceCallback()
-                .itemsCallbackSingleChoice(selectedIndex, (dialog, view, which, text) -> {
+        dlgSortType = new MaterialAlertDialogBuilder(this, R.style.MaterialYouDialogTheme)
+                .setTitle(R.string.setting_sort_apps)
+                .setSingleChoiceItems(lSortTypeString.toArray(new CharSequence[0]), selectedIndex, (dialog, which) -> {
                     utilSettings.save(lSortType.get(which));
                     sendEditAppsBroadcast();
-                    return true;
-                }).show();
-
-        // Apply rounded background
-        new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
-            // Fix BUG-10: Guard Activity state trước khi chạm vào Window
-            if (isDestroyed() || isFinishing()) return;
-            if (dlgSortType != null && dlgSortType.getWindow() != null) {
-                dlgSortType.getWindow().setBackgroundDrawableResource(R.drawable.bg_dialog_rounded);
-            }
-        }, 100);
+                    dialog.dismiss();
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
     }
 
     public void showIconPackDialog() {
+        dismissIconPackDialog();
         final ArrayList<UtilIconPackManager.IconPack> lAvailableIconPack = new UtilIconPackManager()
                 .getAvailableIconPacksWithIcons(true, getApplication());
         // PREF-001: lIconPackDisplay is translated UI text; lIconPackValue is the stable,
@@ -560,24 +558,19 @@ public class ActSettings extends ActBase
         assert utilSettings != null;
         String selectedValue = utilSettings.getString(UtilSettings.KEY_ICON_PACK_LABEL_NAME);
         int selectedIndex = lIconPackValue.indexOf(selectedValue);
-        dlgIconPack = new MaterialDialog.Builder(ActSettings.this).title(R.string.setting_icon_pack)
-                .items(lIconPackDisplay).alwaysCallSingleChoiceCallback()
-                .itemsCallbackSingleChoice(selectedIndex, (dialog, view, which, text) -> {
+        CharSequence[] items = lIconPackDisplay.toArray(new CharSequence[0]);
+        dlgIconPack = new MaterialAlertDialogBuilder(this, R.style.MaterialYouDialogTheme)
+                .setTitle(R.string.setting_icon_pack)
+                .setSingleChoiceItems(items, selectedIndex, (dialog, which) -> {
                     utilSettings.save(UtilSettings.KEY_ICON_PACK_LABEL_NAME, lIconPackValue.get(which));
                     if (settingsInterface != null) {
                         settingsInterface.onValuesUpdated();
                     }
                     sendUpdateAppsBroadcast();
-                    return true;
-                }).show();
-
-        // Apply rounded background
-        new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
-            if (isDestroyed() || isFinishing()) return;
-            if (dlgIconPack != null && dlgIconPack.getWindow() != null) {
-                dlgIconPack.getWindow().setBackgroundDrawableResource(R.drawable.bg_dialog_rounded);
-            }
-        }, 100);
+                    dialog.dismiss();
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
     }
 
     public void showHomeLauncherChooser() {
@@ -585,15 +578,16 @@ public class ActSettings extends ActBase
     }
 
     public void showNightModeChooser() {
+        dismissNightModeDialog();
         String[] arrAvailableNightMode = getResources().getStringArray(R.array.night_modes);
         final ArrayList<String> nightModes = new ArrayList<>();
         Collections.addAll(nightModes, arrAvailableNightMode);
         assert utilSettings != null;
         String selectedNightMode = UtilNightModeUtil.getNightModeDisplayName(utilSettings.getNightMode());
         int selectedIndex = nightModes.indexOf(selectedNightMode);
-        dlgNightMode = new MaterialDialog.Builder(ActSettings.this).title(R.string.setting_night_mode)
-                .items(R.array.night_modes).alwaysCallSingleChoiceCallback()
-                .itemsCallbackSingleChoice(selectedIndex, (dialog, view, which, text) -> {
+        dlgNightMode = new MaterialAlertDialogBuilder(this, R.style.MaterialYouDialogTheme)
+                .setTitle(R.string.setting_night_mode)
+                .setSingleChoiceItems(arrAvailableNightMode, selectedIndex, (dialog, which) -> {
                     String selection = nightModes.get(which);
                     utilSettings.save(UtilSettings.KEY_NIGHT_MODE,
                             UtilNightModeUtil.getNightModeFromDisplayName(selection));
@@ -601,36 +595,31 @@ public class ActSettings extends ActBase
                     if (settingsInterface != null) {
                         settingsInterface.onValuesUpdated();
                     }
-                    dismissBackgroundDialog();
+                    dialog.dismiss();
 
                     // Recreate activity to apply new theme
                     new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
                         if (!isDestroyed() && !isFinishing()) recreate();
                     }, 200);
-
-                    return true;
-                }).show();
-
-        // Apply rounded background
-        new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
-            if (isDestroyed() || isFinishing()) return;
-            if (dlgNightMode != null && dlgNightMode.getWindow() != null) {
-                dlgNightMode.getWindow().setBackgroundDrawableResource(R.drawable.bg_dialog_rounded);
-            }
-        }, 100);
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
     }
 
     public void showBackgroundDialog() {
+        dismissBackgroundDialog();
         // PREF-001: items(R.array.backgrounds) is UI-only display text; the persisted domain
         // value is BackgroundMode, selected by list position (declaration order matches
         // arrays.xml: WALLPAPER=0, COLOR=1), never by comparing against the displayed text.
         BackgroundMode[] backgroundModes = BackgroundMode.values();
+        String[] bgNames = getResources().getStringArray(R.array.backgrounds);
         assert utilSettings != null;
         BackgroundMode selectedBackground = utilSettings.getBackgroundMode();
         int selectedIndex = selectedBackground.ordinal();
-        dlgBackground = new MaterialDialog.Builder(ActSettings.this).title(R.string.setting_background)
-                .items(R.array.backgrounds).alwaysCallSingleChoiceCallback()
-                .itemsCallbackSingleChoice(selectedIndex, (dialog, view, which, text) -> {
+        dlgBackground = new MaterialAlertDialogBuilder(this, R.style.MaterialYouDialogTheme)
+                .setTitle(R.string.setting_background)
+                .setSingleChoiceItems(bgNames, selectedIndex, (dialog, which) -> {
+                    dialog.dismiss();
                     BackgroundMode selection = backgroundModes[which];
                     if (selection == BackgroundMode.WALLPAPER) {
                         utilSettings.save(BackgroundMode.WALLPAPER);
@@ -638,22 +627,13 @@ public class ActSettings extends ActBase
                         if (settingsInterface != null) {
                             settingsInterface.onValuesUpdated();
                         }
-                        dismissBackgroundDialog();
                         showWallpaperPicker();
                     } else if (selection == BackgroundMode.COLOR) {
-                        dismissBackgroundDialog();
                         showBackgroundColorDialog();
                     }
-                    return true;
-                }).show();
-
-        // Apply rounded background
-        new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
-            if (isDestroyed() || isFinishing()) return;
-            if (dlgBackground != null && dlgBackground.getWindow() != null) {
-                dlgBackground.getWindow().setBackgroundDrawableResource(R.drawable.bg_dialog_rounded);
-            }
-        }, 100);
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
     }
 
     public void showWallpaperPicker() {
@@ -661,62 +641,141 @@ public class ActSettings extends ActBase
         startActivity(Intent.createChooser(intent, "Select Wallpaper"));
     }
 
+    private static final String[] COLOR_HEXES = {
+            "#FFF50057",
+            "#FFF44336",
+            "#FFFF5722",
+            "#FFFF9800",
+            "#FFFFC107",
+            "#FF4CAF50",
+            "#FF009688",
+            "#FF00BCD4",
+            "#FF2196F3",
+            "#FF3F51B5",
+            "#FF673AB7",
+            "#FF9C27B0",
+            "#FF607D8B",
+            "#FF212121",
+            "#FFFFFFFF"
+    };
+
+    private static final String[] COLOR_NAMES = {
+            "Rose",
+            "Red",
+            "Deep Orange",
+            "Orange",
+            "Amber",
+            "Green",
+            "Teal",
+            "Cyan",
+            "Blue",
+            "Indigo",
+            "Deep Purple",
+            "Purple",
+            "Blue Grey",
+            "Dark Neutral",
+            "Light Neutral"
+    };
+
     public void showBackgroundColorDialog() {
-        // if (utilSettings == null) {
-        // return;
-        // }
-        // ColorChooserDialog mBackgroundColorDialog = new
-        // ColorChooserDialog.Builder(this,
-        // R.string.setting_background_color).titleSub(R.string.setting_background_color).accentMode(false).doneButton(R.string.done).cancelButton(R.string.cancel).backButton(R.string.back).preselect(Color.parseColor(utilSettings.getString(UtilSettings.KEY_BACKGROUND_COLOR))).dynamicButtonColor(false).allowUserColorInputAlpha(false).tag(TAG_COLOR_BACKGROUND).show(this);
+        if (utilSettings == null) return;
+        String currentHex = utilSettings.getString(UtilSettings.KEY_BACKGROUND_COLOR);
+        int selectedIndex = 0;
+        for (int i = 0; i < COLOR_HEXES.length; i++) {
+            if (COLOR_HEXES[i].equalsIgnoreCase(currentHex)) {
+                selectedIndex = i;
+                break;
+            }
+        }
+
+        android.widget.ArrayAdapter<String> adapter = new android.widget.ArrayAdapter<String>(
+                this,
+                android.R.layout.select_dialog_singlechoice,
+                android.R.id.text1,
+                COLOR_NAMES) {
+            @NonNull
+            @Override
+            public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+                View view = super.getView(position, convertView, parent);
+                TextView textView = view.findViewById(android.R.id.text1);
+                if (textView != null) {
+                    GradientDrawable dot = new GradientDrawable();
+                    dot.setShape(GradientDrawable.OVAL);
+                    dot.setColor(Color.parseColor(COLOR_HEXES[position]));
+                    int size = (int) (20 * getResources().getDisplayMetrics().density);
+                    dot.setSize(size, size);
+                    dot.setBounds(0, 0, size, size);
+                    textView.setCompoundDrawablesRelative(dot, null, null, null);
+                    textView.setCompoundDrawablePadding((int) (16 * getResources().getDisplayMetrics().density));
+                }
+                return view;
+            }
+        };
+
+        new MaterialAlertDialogBuilder(this, R.style.MaterialYouDialogTheme)
+                .setTitle(R.string.setting_background)
+                .setSingleChoiceItems(adapter, selectedIndex, (dialog, which) -> {
+                    String selectedHex = COLOR_HEXES[which];
+                    utilSettings.save(BackgroundMode.COLOR);
+                    utilSettings.save(UtilSettings.KEY_BACKGROUND_COLOR, selectedHex);
+                    sendBackgroundChangedBroadcast();
+                    if (settingsInterface != null) {
+                        settingsInterface.onValuesUpdated();
+                    }
+                    dialog.dismiss();
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
     }
 
     public void showHighlightColorDialog() {
-        if (utilSettings == null) {
-            return;
-        }
-        ColorChooserDialog dialog = new ColorChooserDialog.Builder(this, R.string.setting_highlight_color)
-                .titleSub(R.string.setting_highlight_color)
-                .accentMode(true)
-                .doneButton(R.string.done)
-                .cancelButton(R.string.cancel)
-                .backButton(R.string.back)
-                .preselect(Color.parseColor(utilSettings.getString(UtilSettings.KEY_HIGHLIGHT_COLOR)))
-                .dynamicButtonColor(false)
-                .allowUserColorInputAlpha(false)
-                .tag(TAG_COLOR_HIGHLIGHT)
-                .build();
-
-        dialog.show(getSupportFragmentManager(), TAG_COLOR_HIGHLIGHT);
-
-        // Apply rounded background after dialog is fully shown
-        new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
-            if (isDestroyed() || isFinishing()) return;
-            if (dialog.getDialog() != null && dialog.getDialog().getWindow() != null) {
-                dialog.getDialog().getWindow().setBackgroundDrawableResource(R.drawable.bg_dialog_rounded);
+        if (utilSettings == null) return;
+        dismissHighlightColorDialog();
+        String currentHex = utilSettings.getString(UtilSettings.KEY_HIGHLIGHT_COLOR);
+        int selectedIndex = 0;
+        for (int i = 0; i < COLOR_HEXES.length; i++) {
+            if (COLOR_HEXES[i].equalsIgnoreCase(currentHex)) {
+                selectedIndex = i;
+                break;
             }
-        }, 100);
-    }
+        }
 
-    @Override
-    public void onColorSelection(@NonNull ColorChooserDialog dialog, @ColorInt int selectedColor) {
-        if (utilSettings == null) {
-            return;
-        }
-        String hexColor = String.format("#%06X", selectedColor);
-        if (dialog.tag().equals(TAG_COLOR_BACKGROUND)) {
-            utilSettings.save(BackgroundMode.COLOR);
-            utilSettings.save(UtilSettings.KEY_BACKGROUND_COLOR, hexColor);
-            sendBackgroundChangedBroadcast();
-        } else if (dialog.tag().equals(TAG_COLOR_HIGHLIGHT)) {
-            utilSettings.save(UtilSettings.KEY_HIGHLIGHT_COLOR, hexColor);
-        }
-        if (settingsInterface != null) {
-            settingsInterface.onValuesUpdated();
-        }
-    }
+        android.widget.ArrayAdapter<String> adapter = new android.widget.ArrayAdapter<String>(
+                this,
+                android.R.layout.select_dialog_singlechoice,
+                android.R.id.text1,
+                COLOR_NAMES) {
+            @NonNull
+            @Override
+            public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+                View view = super.getView(position, convertView, parent);
+                TextView textView = view.findViewById(android.R.id.text1);
+                if (textView != null) {
+                    GradientDrawable dot = new GradientDrawable();
+                    dot.setShape(GradientDrawable.OVAL);
+                    dot.setColor(Color.parseColor(COLOR_HEXES[position]));
+                    int size = (int) (20 * getResources().getDisplayMetrics().density);
+                    dot.setSize(size, size);
+                    dot.setBounds(0, 0, size, size);
+                    textView.setCompoundDrawablesRelative(dot, null, null, null);
+                    textView.setCompoundDrawablePadding((int) (16 * getResources().getDisplayMetrics().density));
+                }
+                return view;
+            }
+        };
 
-    @Override
-    public void onColorChooserDismissed(@NonNull ColorChooserDialog dialog) {
+        dlgHighlightColor = new MaterialAlertDialogBuilder(this, R.style.MaterialYouDialogTheme)
+                .setTitle(R.string.setting_highlight_color)
+                .setSingleChoiceItems(adapter, selectedIndex, (dialog, which) -> {
+                    String selectedHex = COLOR_HEXES[which];
+                    utilSettings.save(UtilSettings.KEY_HIGHLIGHT_COLOR, selectedHex);
+                    if (settingsInterface != null) {
+                        settingsInterface.onValuesUpdated();
+                    }
+                    dialog.dismiss();
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
     }
 
     private void dismissSortTypeDialog() {
@@ -743,15 +802,21 @@ public class ActSettings extends ActBase
         }
     }
 
+    private void dismissHighlightColorDialog() {
+        if (dlgHighlightColor != null && dlgHighlightColor.isShowing()) {
+            dlgHighlightColor.dismiss();
+        }
+    }
+
     private void dismissAllDialogs() {
         dismissSortTypeDialog();
         dismissIconPackDialog();
         dismissNightModeDialog();
         dismissBackgroundDialog();
+        dismissHighlightColorDialog();
         if (dlgTerms != null && dlgTerms.isShowing()) {
             dlgTerms.dismiss();
         }
-        // Color dialogs do not need to be dismissed
     }
 
     @Override

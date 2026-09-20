@@ -1,18 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#b51939</color>
-    <color name="colorPrimaryTrans">#33b51939</color>
-    <color name="colorPrimaryDark">#b51939</color>
-    <color name="colorAccent">#b51939</color>
+    <!-- Material 3 Light Color Roles (Pre-Android 12 Fallback; Android 12+ overridden dynamically) -->
+    <color name="colorPrimary">#B51939</color>
+    <color name="colorOnPrimary">#FFFFFF</color>
+    <color name="colorPrimaryContainer">#FFDAD9</color>
+    <color name="colorOnPrimaryContainer">#40000A</color>
+    <color name="colorPrimaryDark">#900022</color>
+    <color name="colorAccent">#B51939</color>
+    <color name="colorPrimaryTrans">#33B51939</color>
+
+    <color name="colorSecondary">#775656</color>
+    <color name="colorOnSecondary">#FFFFFF</color>
+    <color name="colorSecondaryContainer">#FFDAD9</color>
+    <color name="colorOnSecondaryContainer">#2C1516</color>
+
+    <color name="colorTertiary">#725B2E</color>
+    <color name="colorOnTertiary">#FFFFFF</color>
+    <color name="colorTertiaryContainer">#FEDEA6</color>
+    <color name="colorOnTertiaryContainer">#261900</color>
+
+    <color name="colorSurface">#FFF8F6</color>
+    <color name="colorOnSurface">#221919</color>
+    <color name="colorSurfaceVariant">#F4DDDC</color>
+    <color name="colorOnSurfaceVariant">#534343</color>
+
+    <!-- Material 3 Surface Containers (Tonal elevation hierarchy) -->
+    <color name="colorSurfaceContainerLowest">#FFFFFF</color>
+    <color name="colorSurfaceContainerLow">#FFF0F0</color>
+    <color name="colorSurfaceContainer">#FAEAEC</color>
+    <color name="colorSurfaceContainerHigh">#F5E4E6</color>
+    <color name="colorSurfaceContainerHighest">#EFDEE0</color>
+
+    <color name="colorOutline">#857373</color>
+    <color name="colorOutlineVariant">#D7C1C1</color>
+    <color name="colorDivider">#D7C1C1</color>
+
+    <!-- Legacy / Compatibility Aliases mapped cleanly to M3 Roles -->
     <color name="colorBlack">#000000</color>
     <color name="colorWhite">#FFFFFF</color>
     <color name="colorTransparent">#00FFFFFF</color>
-    <color name="colorDivider">#DDDDDD</color>
-    <color name="colorValue">@color/colorBlack</color>
-    <color name="colorShadow">#80000000</color>
+    <color name="colorValue">@color/colorOnSurface</color>
+    <color name="colorShadow">#40000000</color>
     <color name="colorCircles">#A6A4A6</color>
-    <color name="colorAppTint">@color/colorBlack</color>
-    <color name="background">#FFFFFF</color>
-    <color name="dialogBackground">#FFFFFF</color>
-    <color name="searchSurface">#F2FFFFFF</color>
+    <color name="colorAppTint">@color/colorOnSurfaceVariant</color>
+    <color name="background">@color/colorSurface</color>
+    <color name="dialogBackground">@color/colorSurfaceContainer</color>
+    <color name="searchSurface">#F2FFF8F6</color>
 </resources>

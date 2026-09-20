@@ -3,31 +3,34 @@
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/cvAppContainer"
+    style="@style/Widget.Material3.CardView.Filled"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginStart="8dp"
-    android:layout_marginTop="8dp"
+    android:layout_marginTop="4dp"
     android:layout_marginEnd="8dp"
-    android:layout_marginBottom="8dp"
+    android:layout_marginBottom="4dp"
     android:foreground="?attr/selectableItemBackground"
-    android:stateListAnimator="@animator/a_raise"
-    card_view:cardCornerRadius="45dp"
-    card_view:cardElevation="4dp"
+    card_view:cardBackgroundColor="?attr/colorSurfaceContainerLow"
+    card_view:cardCornerRadius="16dp"
+    card_view:cardElevation="0dp"
+    card_view:strokeWidth="0dp"
     card_view:cardUseCompatPadding="false"
     tools:ignore="HardcodedText,contentDescription">
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:paddingVertical="4dp">
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/ivAppIcon"
             android:layout_width="@dimen/width_app_icon"
             android:layout_height="@dimen/width_app_icon"
             android:layout_marginStart="12dp"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="8dp"
             android:layout_marginEnd="12dp"
-            android:layout_marginBottom="12dp"
+            android:layout_marginBottom="8dp"
             android:background="@drawable/bg_app_icon_circle"
             android:contentDescription="ivAppIcon"
             tools:src="@drawable/ic_launcher_round" />
@@ -41,8 +44,9 @@
             android:layout_toStartOf="@+id/btAppLock"
             android:layout_toEndOf="@+id/ivAppIcon"
             android:ellipsize="end"
-            android:maxLines="3"
-            android:textStyle="bold"
+            android:maxLines="2"
+            android:textAppearance="?attr/textAppearanceTitleMedium"
+            android:textColor="?attr/colorOnSurface"
             tools:text="AppName" />
 
         <androidx.appcompat.widget.AppCompatTextView
@@ -55,7 +59,8 @@
             android:layout_toEndOf="@id/ivAppIcon"
             android:ellipsize="end"
             android:maxLines="1"
-            android:textSize="12sp"
+            android:textAppearance="?attr/textAppearanceLabelMedium"
+            android:textColor="?attr/colorOnSurfaceVariant"
             android:visibility="gone"
             tools:text="Favorite • Work • Pinned first"
             tools:visibility="visible" />
@@ -69,6 +74,7 @@
             android:layout_marginEnd="4dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:scaleType="centerInside"
+            card_view:tint="?attr/colorOnSurfaceVariant"
             tools:src="@drawable/ic_lock_24dp" />
 
         <androidx.appcompat.widget.AppCompatImageView
@@ -81,8 +87,8 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="ivAppHide"
             android:scaleType="centerInside"
-            android:src="@drawable/ic_visibility_grey_24dp"
-            android:tint="@color/colorAppTint" />
+            android:src="@drawable/ic_visibility_24dp"
+            card_view:tint="?attr/colorOnSurfaceVariant" />
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/ivAppMenu"
@@ -94,8 +100,8 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="ivAppMenu"
             android:scaleType="centerInside"
-            android:src="@drawable/ic_more_vert_grey_24dp"
-            android:tint="@color/colorAppTint" />
+            android:src="@drawable/ic_more_vert_24dp"
+            card_view:tint="?attr/colorOnSurfaceVariant" />
 
     </RelativeLayout>
 

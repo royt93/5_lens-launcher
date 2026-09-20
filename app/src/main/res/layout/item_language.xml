@@ -42,16 +42,16 @@
             android:id="@+id/tvLanguageName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@color/colorValue"
-            android:textSize="16sp"
+            android:textAppearance="?attr/textAppearanceBodyLarge"
+            android:textColor="?attr/colorOnSurface"
             android:textStyle="bold" />
 
         <TextView
             android:id="@+id/tvLanguageEnglishName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@color/colorAppTint"
-            android:textSize="12sp" />
+            android:textAppearance="?attr/textAppearanceBodySmall"
+            android:textColor="?attr/colorOnSurfaceVariant" />
 
     </LinearLayout>
 

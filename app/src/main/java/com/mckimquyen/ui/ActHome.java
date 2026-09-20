@@ -65,7 +65,7 @@ import com.mckimquyen.views.LensView;
 import java.util.ArrayList;
 import java.util.Objects;
 
-import me.zhanghai.android.materialprogressbar.MaterialProgressBar;
+import com.google.android.material.progressindicator.CircularProgressIndicator;
 
 //2023.03.19 tried to convert kotlin but failed
 public class ActHome extends ActBase {
@@ -76,7 +76,7 @@ public class ActHome extends ActBase {
     private static final int REQUEST_CODE_CONTACTS = 1003;
 
     LensView lensViews;
-    MaterialProgressBar progressBarHome;
+    CircularProgressIndicator progressBarHome;
     private ArrayList<App> listApp;
     private SearchBar searchBar;
     private SearchView searchView;

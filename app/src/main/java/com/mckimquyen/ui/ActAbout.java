@@ -35,7 +35,7 @@ public class ActAbout extends ActBase {
     View cardFeatures, cardAbout, cardCredits;
     View headerFeatures, headerAbout, headerCredits;
     View contentFeatures, contentAbout, contentCredits;
-    TextView iconFeatures, iconAbout, iconCredits;
+    ImageView iconFeatures, iconAbout, iconCredits;
 
     private Animator animator;
 
@@ -71,24 +71,9 @@ public class ActAbout extends ActBase {
     }
 
     private void setupStatusBarIconTint() {
-        // Set dark status bar icons (black icons for light status bar)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            // Android 11+ (API 30+)
-            WindowInsetsController controller = getWindow().getInsetsController();
-            if (controller != null) {
-                // Set light status bar flag to use dark (black) icons
-                controller.setSystemBarsAppearance(
-                        WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS,
-                        WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS);
-            }
-        } else {
-            // minSdk is 25, so SDK_INT is always >= M (API 23) here
-            View decorView = getWindow().getDecorView();
-            int flags = decorView.getSystemUiVisibility();
-            // Add SYSTEM_UI_FLAG_LIGHT_STATUS_BAR to use dark icons
-            flags |= View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
-            decorView.setSystemUiVisibility(flags);
-        }
+        boolean isNightMode = (getResources().getConfiguration().uiMode & android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES;
+        androidx.core.view.WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView())
+                .setAppearanceLightStatusBars(!isNightMode);
     }
 
     private void findViews() {
@@ -155,7 +140,7 @@ public class ActAbout extends ActBase {
         }
     }
 
-    private void toggleCard(View content, TextView icon) {
+    private void toggleCard(View content, ImageView icon) {
         if (content == null || icon == null)
             return;
 
@@ -230,9 +215,19 @@ public class ActAbout extends ActBase {
     }
 
     @Override
+    protected void updateNightMode() {
+        super.updateNightMode();
+        setupStatusBarIconTint();
+    }
+
+    @Override
     public void finish() {
         super.finish();
-        overridePendingTransition(R.anim.a_slide_in_right, R.anim.a_slide_out_left);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            overrideActivityTransition(OVERRIDE_TRANSITION_CLOSE, R.anim.a_slide_in_right, R.anim.a_slide_out_left);
+        } else {
+            overridePendingTransition(R.anim.a_slide_in_right, R.anim.a_slide_out_left);
+        }
     }
 
     @Override

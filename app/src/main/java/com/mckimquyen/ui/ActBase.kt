@@ -61,7 +61,7 @@ open class ActBase : BaseActivity() {
         setTaskDescription(taskDescription)
     }
 
-    protected fun updateNightMode() {
+    protected open fun updateNightMode() {
         if (utilSettings == null) {
             utilSettings = UtilSettings(this)
         }

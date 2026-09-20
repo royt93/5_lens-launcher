@@ -129,4 +129,5 @@
     <string name="about_made_with_love">Được tạo với ❤️</string>
     <string name="ads_action_disclosure">Lưu ý: thao tác này có thể hiển thị quảng cáo</string>
     <string name="ad_label">Quảng cáo</string>
+    <string name="loading">Đang tải…</string>
 </resources>

@@ -27,6 +27,8 @@ class SplashAct : BaseActivity() {
         super.onCreate(savedInstanceState)
         supportActionBar?.hide()
         UIUtils.setupEdgeToEdge1(window)
+        val isNightMode = (resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES
+        androidx.core.view.WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = !isNightMode
         setContentView(R.layout.a_splash)
         UIUtils.setupEdgeToEdge2(findViewById(R.id.rootLayout))
 

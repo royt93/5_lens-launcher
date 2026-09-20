@@ -18,11 +18,13 @@
         android:visibility="invisible"
         tools:visibility="visible" />
 
-    <me.zhanghai.android.materialprogressbar.MaterialProgressBar
+    <com.google.android.material.progressindicator.CircularProgressIndicator
         android:id="@+id/progressBarHome"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center" />
+        android:layout_gravity="center"
+        android:indeterminate="true"
+        app:indicatorColor="?attr/colorPrimary" />
 
     <!-- Material You: real SearchBar->SearchView morph, replaces the old plain pill + CardView.
          The collapsed launcher is now a top-search + app-grid column: LensView gets a runtime
@@ -103,11 +105,11 @@
                         tools:text="= 84" />
                 </LinearLayout>
 
-                <View
+                <com.google.android.material.divider.MaterialDivider
                     android:id="@+id/quickActionDivider"
                     android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="@color/colorDivider"
+                    android:layout_height="wrap_content"
+                    app:dividerColor="?attr/colorOutlineVariant"
                     android:visibility="gone" />
 
                 <!-- SEARCH-005: explicit contact-search row. It is separate from the app-result
@@ -154,28 +156,26 @@
                             tools:text="+84 912 345 678" />
                     </LinearLayout>
 
-                    <Button
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/btContactCall"
-                        style="?attr/borderlessButtonStyle"
+                        style="@style/Widget.Material3.Button.TextButton"
                         android:layout_width="wrap_content"
                         android:layout_height="48dp"
-                        android:text="@string/contact_search_call"
-                        android:textAllCaps="false" />
+                        android:text="@string/contact_search_call" />
 
-                    <Button
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/btContactMessage"
-                        style="?attr/borderlessButtonStyle"
+                        style="@style/Widget.Material3.Button.TextButton"
                         android:layout_width="wrap_content"
                         android:layout_height="48dp"
-                        android:text="@string/contact_search_message"
-                        android:textAllCaps="false" />
+                        android:text="@string/contact_search_message" />
                 </LinearLayout>
 
-                <View
+                <com.google.android.material.divider.MaterialDivider
                     android:id="@+id/contactActionDivider"
                     android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="@color/colorDivider"
+                    android:layout_height="wrap_content"
+                    app:dividerColor="?attr/colorOutlineVariant"
                     android:visibility="gone" />
 
                 <!-- UI-011: permanent quick-action shortcuts on a blank query. Calculator/unit
@@ -253,13 +253,12 @@
                         android:textColor="?attr/colorPrimary"
                         android:textStyle="bold" />
 
-                    <Button
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/btClearSearchHistory"
-                        style="?attr/borderlessButtonStyle"
+                        style="@style/Widget.Material3.Button.TextButton"
                         android:layout_width="wrap_content"
                         android:layout_height="48dp"
-                        android:text="@string/clear_recent_apps"
-                        android:textAllCaps="false" />
+                        android:text="@string/clear_recent_apps" />
                 </LinearLayout>
 
                 <!-- UI-011: shown when a blank query has no recent/favorite apps to surface -

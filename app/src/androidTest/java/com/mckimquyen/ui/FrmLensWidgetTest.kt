@@ -54,11 +54,11 @@ class FrmLensWidgetTest {
             val view = fragment.view
             assertNotNull("Fragment view should not be null", view)
 
-            // Verify the 4 SeekBars are present in the layout
-            val sbMinIconSize = view?.findViewById<android.widget.SeekBar>(R.id.sbMinIconSize)
-            val sbDistortionFactor = view?.findViewById<android.widget.SeekBar>(R.id.sbDistortionFactor)
-            val sbScaleFactor = view?.findViewById<android.widget.SeekBar>(R.id.sbScaleFactor)
-            val sbAnimationTime = view?.findViewById<android.widget.SeekBar>(R.id.sbAnimationTime)
+            // Verify the 4 Sliders are present in the layout
+            val sbMinIconSize = view?.findViewById<com.google.android.material.slider.Slider>(R.id.sbMinIconSize)
+            val sbDistortionFactor = view?.findViewById<com.google.android.material.slider.Slider>(R.id.sbDistortionFactor)
+            val sbScaleFactor = view?.findViewById<com.google.android.material.slider.Slider>(R.id.sbScaleFactor)
+            val sbAnimationTime = view?.findViewById<com.google.android.material.slider.Slider>(R.id.sbAnimationTime)
 
             assertNotNull("sbMinIconSize must exist", sbMinIconSize)
             assertNotNull("sbDistortionFactor must exist", sbDistortionFactor)
@@ -106,11 +106,11 @@ class FrmLensWidgetTest {
         val scenario = launchFragmentInContainer<FrmLens>(themeResId = R.style.AppTheme)
         scenario.onFragment { fragment ->
             val view = requireNotNull(fragment.view)
-            val seekBar = requireNotNull(view.findViewById<android.widget.SeekBar>(R.id.sbMinIconSize))
+            val slider = requireNotNull(view.findViewById<com.google.android.material.slider.Slider>(R.id.sbMinIconSize))
             val value = requireNotNull(view.findViewById<android.widget.TextView>(R.id.tvValueMinIconSize))
 
             assertEquals("${expected.toInt()}dp", value.text.toString())
-            assertEquals(expected.toInt() - UtilSettings.MIN_ICON_SIZE.toInt(), seekBar.progress)
+            assertEquals(expected, slider.value, 0.01f)
             assertEquals(expected, prefs.getFloat(UtilSettings.KEY_ICON_SIZE, Float.NaN))
         }
         scenario.close()

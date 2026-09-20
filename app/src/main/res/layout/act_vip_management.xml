@@ -25,7 +25,7 @@
         android:layout_height="wrap_content"
         android:theme="@style/AppTheme.AppBarOverlay">
 
-        <androidx.appcompat.widget.Toolbar
+        <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
@@ -58,12 +58,13 @@
                 android:orientation="vertical">
 
                 <!-- 1. Status header / Hero card -->
-                <androidx.cardview.widget.CardView
+                <com.google.android.material.card.MaterialCardView
                     android:id="@+id/cardStatusHeader"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:cardCornerRadius="24dp"
                     app:cardElevation="0dp"
+                    app:strokeWidth="0dp"
                     android:layout_marginBottom="16dp"
                     app:cardBackgroundColor="@android:color/transparent">
 
@@ -138,7 +139,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:textColor="#FFFFFF"
-                                android:textSize="24sp"
+                                android:textAppearance="?attr/textAppearanceHeadlineMedium"
                                 android:textStyle="bold"
                                 android:text="@string/vip_free_user" />
 
@@ -147,12 +148,12 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:textColor="#B0BEC5"
-                                android:textSize="14sp"
+                                android:textAppearance="?attr/textAppearanceBodyMedium"
                                 android:layout_marginTop="8dp"
                                 android:visibility="gone" />
                         </LinearLayout>
                     </FrameLayout>
-                </androidx.cardview.widget.CardView>
+                </com.google.android.material.card.MaterialCardView>
 
                 <!-- Active VIP info -->
                 <LinearLayout
@@ -168,7 +169,8 @@
                         android:id="@+id/tvActivationDate"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textSize="14sp"
+                        android:textAppearance="?attr/textAppearanceBodyMedium"
+                        android:textColor="?attr/colorOnSurfaceVariant"
                         android:layout_marginBottom="4dp" />
 
                     <!-- 3. Expiry date row -->
@@ -176,16 +178,19 @@
                         android:id="@+id/tvExpiryDate"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textSize="14sp"
+                        android:textAppearance="?attr/textAppearanceBodyMedium"
+                        android:textColor="?attr/colorOnSurfaceVariant"
                         android:layout_marginBottom="8dp" />
 
                     <!-- 4. Progress bar (elapsed) -->
-                    <ProgressBar
+                    <com.google.android.material.progressindicator.LinearProgressIndicator
                         android:id="@+id/progressVip"
-                        style="?android:attr/progressBarStyleHorizontal"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
+                        app:trackCornerRadius="4dp"
+                        app:indicatorColor="?attr/colorPrimary"
+                        app:trackColor="?attr/colorSurfaceVariant"
                         android:max="100" />
 
                     <!-- 5. Countdown text -->
@@ -193,19 +198,22 @@
                         android:id="@+id/tvCountdown"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textSize="16sp"
+                        android:textAppearance="?attr/textAppearanceTitleMedium"
+                        android:textColor="?attr/colorPrimary"
                         android:textStyle="bold"
                         android:gravity="center"
                         android:layout_marginBottom="16dp" />
 
                     <!-- 12. Active VIP card (single-entry) -->
-                    <androidx.cardview.widget.CardView
+                    <com.google.android.material.card.MaterialCardView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="16dp"
                         app:cardCornerRadius="16dp"
                         app:cardElevation="0dp"
-                        app:cardBackgroundColor="@android:color/transparent"
+                        app:strokeWidth="1dp"
+                        app:strokeColor="?attr/colorOutlineVariant"
+                        app:cardBackgroundColor="?attr/colorSurfaceContainerLow"
                         android:clipChildren="false"
                         android:clipToPadding="false">
 
@@ -215,7 +223,6 @@
                             android:orientation="horizontal"
                             android:padding="16dp"
                             android:gravity="center_vertical"
-                            android:background="@drawable/bg_glass_card_rect"
                             android:clipChildren="false"
                             android:clipToPadding="false">
 
@@ -224,30 +231,31 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:textSize="14sp"
-                                android:textColor="?android:attr/textColorSecondary"
+                                android:textAppearance="?attr/textAppearanceBodyMedium"
+                                android:textColor="?attr/colorOnSurfaceVariant"
                                 android:fontFamily="sans-serif-medium" />
 
-                            <Button
+                            <com.google.android.material.button.MaterialButton
                                 android:id="@+id/btnRevokeVip"
-                                style="?android:attr/borderlessButtonStyle"
+                                style="@style/Widget.Material3.Button.TextButton"
                                 android:layout_width="wrap_content"
-                                android:layout_height="36dp"
+                                android:layout_height="wrap_content"
+                                android:minHeight="48dp"
                                 android:textColor="?attr/colorError"
+                                app:rippleColor="?attr/colorError"
                                 android:text="@string/vip_revoke_all_button"
-                                android:textSize="13sp"
+                                android:textAppearance="?attr/textAppearanceLabelMedium"
                                 android:textStyle="bold"
                                 android:textAllCaps="false"
                                 android:paddingStart="8dp"
                                 android:paddingEnd="8dp"
-                                android:minWidth="0dp"
-                                android:minHeight="0dp" />
+                                android:minWidth="0dp" />
                         </LinearLayout>
-                    </androidx.cardview.widget.CardView>
+                    </com.google.android.material.card.MaterialCardView>
                 </LinearLayout>
 
                 <!-- VIP Features List (Spotify/YouTube Premium style) -->
-                <androidx.cardview.widget.CardView
+                <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
@@ -267,9 +275,9 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="@string/vip_features_title"
-                            android:textSize="16sp"
+                            android:textAppearance="?attr/textAppearanceTitleMedium"
                             android:textStyle="bold"
-                            android:textColor="?android:attr/textColorPrimary"
+                            android:textColor="?attr/colorOnSurface"
                             android:layout_marginBottom="16dp" />
 
                         <!-- Feature 1: No Ads -->
@@ -294,9 +302,9 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="12dp"
                                 android:text="@string/vip_feature_no_ads_title"
-                                android:textSize="14sp"
+                                android:textAppearance="?attr/textAppearanceTitleSmall"
                                 android:textStyle="bold"
-                                android:textColor="?android:attr/textColorPrimary"
+                                android:textColor="?attr/colorOnSurface"
                                 app:layout_constraintStart_toEndOf="@id/imgFeatureNoAds"
                                 app:layout_constraintEnd_toEndOf="parent"
                                 app:layout_constraintTop_toTopOf="parent" />
@@ -306,8 +314,8 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="12dp"
                                 android:text="@string/vip_feature_no_ads_desc"
-                                android:textSize="12sp"
-                                android:textColor="?android:attr/textColorSecondary"
+                                android:textAppearance="?attr/textAppearanceBodySmall"
+                                android:textColor="?attr/colorOnSurfaceVariant"
                                 app:layout_constraintStart_toEndOf="@id/imgFeatureNoAds"
                                 app:layout_constraintEnd_toEndOf="parent"
                                 app:layout_constraintTop_toBottomOf="@id/tvFeatureNoAdsTitle"
@@ -336,9 +344,9 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="12dp"
                                 android:text="@string/vip_feature_customization_title"
-                                android:textSize="14sp"
+                                android:textAppearance="?attr/textAppearanceTitleSmall"
                                 android:textStyle="bold"
-                                android:textColor="?android:attr/textColorPrimary"
+                                android:textColor="?attr/colorOnSurface"
                                 app:layout_constraintStart_toEndOf="@id/imgFeatureCustomization"
                                 app:layout_constraintEnd_toEndOf="parent"
                                 app:layout_constraintTop_toTopOf="parent" />
@@ -348,8 +356,8 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="12dp"
                                 android:text="@string/vip_feature_customization_desc"
-                                android:textSize="12sp"
-                                android:textColor="?android:attr/textColorSecondary"
+                                android:textAppearance="?attr/textAppearanceBodySmall"
+                                android:textColor="?attr/colorOnSurfaceVariant"
                                 app:layout_constraintStart_toEndOf="@id/imgFeatureCustomization"
                                 app:layout_constraintEnd_toEndOf="parent"
                                 app:layout_constraintTop_toBottomOf="@id/tvFeatureCustomizationTitle"
@@ -377,9 +385,9 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="12dp"
                                 android:text="@string/vip_feature_support_title"
-                                android:textSize="14sp"
+                                android:textAppearance="?attr/textAppearanceTitleSmall"
                                 android:textStyle="bold"
-                                android:textColor="?android:attr/textColorPrimary"
+                                android:textColor="?attr/colorOnSurface"
                                 app:layout_constraintStart_toEndOf="@id/imgFeatureSupport"
                                 app:layout_constraintEnd_toEndOf="parent"
                                 app:layout_constraintTop_toTopOf="parent" />
@@ -389,36 +397,37 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="12dp"
                                 android:text="@string/vip_feature_support_desc"
-                                android:textSize="12sp"
-                                android:textColor="?android:attr/textColorSecondary"
+                                android:textAppearance="?attr/textAppearanceBodySmall"
+                                android:textColor="?attr/colorOnSurfaceVariant"
                                 app:layout_constraintStart_toEndOf="@id/imgFeatureSupport"
                                 app:layout_constraintEnd_toEndOf="parent"
                                 app:layout_constraintTop_toBottomOf="@id/tvFeatureSupportTitle"
                                 app:layout_constraintBottom_toBottomOf="parent" />
                         </androidx.constraintlayout.widget.ConstraintLayout>
                     </LinearLayout>
-                </androidx.cardview.widget.CardView>
+                </com.google.android.material.card.MaterialCardView>
             </LinearLayout>
 
             <!-- SECTION 2: Key Verification (Search-bar style) -->
-            <androidx.cardview.widget.CardView
+            <com.google.android.material.card.MaterialCardView
                 android:id="@+id/section2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="16dp"
-                app:cardCornerRadius="100dp"
+                app:cardCornerRadius="32dp"
                 app:cardElevation="0dp"
-                app:cardBackgroundColor="@android:color/transparent">
+                app:strokeWidth="1dp"
+                app:strokeColor="?attr/colorOutlineVariant"
+                app:cardBackgroundColor="?attr/colorSurfaceContainerHigh">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="64dp"
                     android:orientation="horizontal"
-                    android:background="@drawable/bg_glass_card_pill"
                     android:gravity="center_vertical"
-                    android:paddingStart="6dp"
-                    android:paddingEnd="6dp">
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp">
 
                     <EditText
                         android:id="@+id/edtVipKey"
@@ -427,29 +436,33 @@
                         android:layout_weight="1"
                         android:background="@null"
                         android:hint="@string/vip_redeem_label"
+                        android:textColorHint="?attr/colorOnSurfaceVariant"
+                        android:textColor="?attr/colorOnSurface"
+                        android:textAppearance="?attr/textAppearanceBodyLarge"
                         android:inputType="textCapCharacters"
                         android:importantForAutofill="no"
                         android:drawableStart="@drawable/ic_confirmation_number"
+                        android:drawableTint="?attr/colorOnSurfaceVariant"
                         android:drawablePadding="12dp"
-                        android:paddingStart="24dp"
+                        android:paddingStart="16dp"
                         android:paddingEnd="12dp"
                         android:maxLines="1" />
 
-                    <Button
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnActivateVipKey"
+                        style="@style/Widget.Material3.Button"
                         android:layout_width="wrap_content"
-                        android:layout_height="44dp"
+                        android:layout_height="48dp"
                         android:text="@string/vip_redeem_button"
                         android:enabled="false"
-                        android:background="@drawable/bg_vip_button_selector"
-                        android:textColor="?attr/colorOnSurfaceVariant"
+                        app:cornerRadius="24dp"
                         android:textStyle="bold"
-                        android:textSize="14sp"
+                        android:textAppearance="?attr/textAppearanceLabelLarge"
                         android:textAllCaps="false"
                         android:paddingStart="20dp"
                         android:paddingEnd="20dp" />
                 </LinearLayout>
-            </androidx.cardview.widget.CardView>
+            </com.google.android.material.card.MaterialCardView>
 
             <!-- SECTION 3: Ads, IAP and Footer -->
             <LinearLayout
@@ -467,86 +480,130 @@
                     android:layout_height="wrap_content"
                     android:clipChildren="false"
                     android:clipToPadding="false"
-                    android:padding="8dp">
+                    android:padding="4dp">
 
-                    <Button
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnWatchAdVip"
+                        style="@style/Widget.Material3.Button"
                         android:layout_width="match_parent"
                         android:layout_height="64dp"
-                        android:drawableStart="@drawable/ic_play_circle"
+                        app:cornerRadius="16dp"
+                        app:icon="@drawable/ic_play_circle"
+                        app:iconGravity="textStart"
+                        app:iconPadding="12dp"
+                        app:iconTint="@android:color/white"
+                        android:background="@drawable/bg_vip_button_green"
                         android:text="@string/vip_watch_ad_3d"
                         android:textColor="@android:color/white"
-                        android:background="@drawable/bg_vip_button_green"
-                        android:paddingStart="32dp"
-                        android:paddingEnd="32dp"
+                        android:textAppearance="?attr/textAppearanceTitleSmall"
+                        android:textStyle="bold"
+                        android:paddingStart="24dp"
+                        android:paddingEnd="24dp"
                         android:textAllCaps="false" />
                 </FrameLayout>
 
                 <!-- 8. Buy 30-day VIP (disabled) -->
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnBuy30d"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
-                    android:drawableStart="@drawable/ic_card_giftcard"
+                    app:icon="@drawable/ic_card_giftcard"
+                    app:iconGravity="textStart"
+                    app:iconPadding="12dp"
+                    app:iconTint="?attr/colorOnSurfaceVariant"
+                    android:textColor="?attr/colorOnSurface"
                     android:enabled="false"
-                    android:layout_marginTop="16dp"
-                    android:background="@drawable/bg_vip_button_outline"
+                    android:layout_marginTop="12dp"
+                    app:cornerRadius="16dp"
+                    app:strokeColor="?attr/colorOutlineVariant"
+                    app:strokeWidth="1dp"
                     android:text="@string/vip_buy_30d_locked"
+                    android:textAppearance="?attr/textAppearanceBodyMedium"
                     android:paddingStart="24dp"
                     android:paddingEnd="24dp"
                     android:textAllCaps="false" />
 
                 <!-- 9. Buy 90-day VIP (disabled) -->
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnBuy90d"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
-                    android:drawableStart="@drawable/ic_card_giftcard"
+                    app:icon="@drawable/ic_card_giftcard"
+                    app:iconGravity="textStart"
+                    app:iconPadding="12dp"
+                    app:iconTint="?attr/colorOnSurfaceVariant"
+                    android:textColor="?attr/colorOnSurface"
                     android:enabled="false"
-                    android:background="@drawable/bg_vip_button_outline"
+                    app:cornerRadius="16dp"
+                    app:strokeColor="?attr/colorOutlineVariant"
+                    app:strokeWidth="1dp"
                     android:text="@string/vip_buy_90d_locked"
+                    android:textAppearance="?attr/textAppearanceBodyMedium"
                     android:layout_marginTop="8dp"
                     android:paddingStart="24dp"
                     android:paddingEnd="24dp"
                     android:textAllCaps="false" />
 
                 <!-- 10. Buy 1-year VIP (disabled) -->
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnBuy1y"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
-                    android:drawableStart="@drawable/ic_card_giftcard"
+                    app:icon="@drawable/ic_card_giftcard"
+                    app:iconGravity="textStart"
+                    app:iconPadding="12dp"
+                    app:iconTint="?attr/colorOnSurfaceVariant"
+                    android:textColor="?attr/colorOnSurface"
                     android:enabled="false"
-                    android:background="@drawable/bg_vip_button_outline"
+                    app:cornerRadius="16dp"
+                    app:strokeColor="?attr/colorOutlineVariant"
+                    app:strokeWidth="1dp"
                     android:text="@string/vip_buy_1y_locked"
+                    android:textAppearance="?attr/textAppearanceBodyMedium"
                     android:layout_marginTop="8dp"
                     android:paddingStart="24dp"
                     android:paddingEnd="24dp"
                     android:textAllCaps="false" />
 
                 <!-- 11. Buy lifetime VIP (disabled) -->
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnBuyLifetime"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
-                    android:drawableStart="@drawable/ic_card_giftcard"
+                    app:icon="@drawable/ic_card_giftcard"
+                    app:iconGravity="textStart"
+                    app:iconPadding="12dp"
+                    app:iconTint="?attr/colorOnSurfaceVariant"
+                    android:textColor="?attr/colorOnSurface"
                     android:enabled="false"
-                    android:background="@drawable/bg_vip_button_outline"
+                    app:cornerRadius="16dp"
+                    app:strokeColor="?attr/colorOutlineVariant"
+                    app:strokeWidth="1dp"
                     android:text="@string/vip_buy_lifetime_locked"
+                    android:textAppearance="?attr/textAppearanceBodyMedium"
                     android:layout_marginTop="8dp"
                     android:paddingStart="24dp"
                     android:paddingEnd="24dp"
                     android:textAllCaps="false" />
 
                 <!-- 13. Restore Purchase (disabled) -->
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnRestorePurchase"
-                    style="?android:attr/borderlessButtonStyle"
+                    style="@style/Widget.Material3.Button.TextButton"
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
-                    android:drawableStart="@drawable/ic_restore"
+                    app:icon="@drawable/ic_restore"
+                    app:iconGravity="textStart"
+                    app:iconPadding="12dp"
+                    app:iconTint="?attr/colorPrimary"
+                    android:textColor="?attr/colorPrimary"
                     android:enabled="false"
                     android:text="@string/vip_restore_locked"
+                    android:textAppearance="?attr/textAppearanceLabelLarge"
                     android:layout_marginTop="8dp"
                     android:paddingStart="24dp"
                     android:paddingEnd="24dp"

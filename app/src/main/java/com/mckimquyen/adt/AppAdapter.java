@@ -26,6 +26,7 @@ import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.color.MaterialColors;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 import com.mckimquyen.R;
 import com.mckimquyen.ext.Biometric;
@@ -103,6 +104,14 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
                 context,
                 androidx.appcompat.R.attr.colorPrimary,
                 ContextCompat.getColor(context, R.color.colorPrimary)
+        );
+    }
+
+    private static int resolveDynamicOnSurfaceVariantColor(Context context) {
+        return MaterialColors.getColor(
+                context,
+                com.google.android.material.R.attr.colorOnSurfaceVariant,
+                ContextCompat.getColor(context, R.color.colorAppTint)
         );
     }
 
@@ -289,7 +298,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
                 btAppLock.setVisibility(View.VISIBLE);
 
                 btAppLock.setImageResource(lockIconResFor(isAppOpened));
-                btAppLock.setColorFilter(isAppOpened ? Color.GRAY : resolveDynamicPrimaryColor(mContext));
+                btAppLock.setColorFilter(isAppOpened ? resolveDynamicOnSurfaceVariantColor(mContext) : resolveDynamicPrimaryColor(mContext));
                 btAppLock.setContentDescription(mContext.getString(lockContentDescriptionResFor(isAppOpened)));
             } else {
                 // Device không có biometric -> ẩn lock button
@@ -302,11 +311,11 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
             boolean isAppVisible = mApp.isVisible();
             if (isAppVisible) {
                 // App đang VISIBLE trong launcher
-                ivAppHide.setImageResource(R.drawable.ic_visibility_grey_24dp);
-                ivAppHide.setColorFilter(Color.GRAY);
+                ivAppHide.setImageResource(R.drawable.ic_visibility_24dp);
+                ivAppHide.setColorFilter(resolveDynamicOnSurfaceVariantColor(mContext));
             } else {
                 // App đang HIDDEN trong launcher
-                ivAppHide.setImageResource(R.drawable.ic_visibility_off_grey_24dp);
+                ivAppHide.setImageResource(R.drawable.ic_visibility_off_24dp);
                 ivAppHide.setColorFilter(resolveDynamicPrimaryColor(mContext));
             }
 
@@ -367,13 +376,19 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
             input.setSingleLine(true);
             input.setText(mApp.getFolderName());
             input.setSelectAllOnFocus(true);
-            new androidx.appcompat.app.AlertDialog.Builder(mActivityContext)
+            int paddingH = (int) (24 * mActivityContext.getResources().getDisplayMetrics().density);
+            int paddingV = (int) (8 * mActivityContext.getResources().getDisplayMetrics().density);
+            android.widget.FrameLayout container = new android.widget.FrameLayout(mActivityContext);
+            container.setPadding(paddingH, paddingV, paddingH, 0);
+            container.addView(input);
+
+            new MaterialAlertDialogBuilder(mActivityContext, R.style.MaterialYouDialogTheme)
                     .setTitle(R.string.organization_set_folder)
-                    .setView(input)
+                    .setView(container)
                     .setPositiveButton(android.R.string.ok, (dialog, which) ->
                             applyOrganization(
                                     mApp.isFavorite(),
-                                    input.getText().toString(),
+                                    input.getText() != null ? input.getText().toString() : "",
                                     mApp.getPinnedZone()))
                     .setNeutralButton(R.string.organization_clear_folder, (dialog, which) ->
                             applyOrganization(mApp.isFavorite(), null, mApp.getPinnedZone()))
@@ -424,13 +439,13 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
             if (isAppVisible) {
                 // Đang visible -> chuyển sang hidden
                 Snackbar.make(cvAppContainer, mApp.getLabel() + " is now hidden", Snackbar.LENGTH_LONG).show();
-                ivAppHide.setImageResource(R.drawable.ic_visibility_off_grey_24dp);
+                ivAppHide.setImageResource(R.drawable.ic_visibility_off_24dp);
                 ivAppHide.setColorFilter(resolveDynamicPrimaryColor(mContext));
             } else {
                 // Đang hidden -> chuyển sang visible
                 Snackbar.make(cvAppContainer, mApp.getLabel() + " is now visible", Snackbar.LENGTH_LONG).show();
-                ivAppHide.setImageResource(R.drawable.ic_visibility_grey_24dp);
-                ivAppHide.setColorFilter(Color.GRAY);
+                ivAppHide.setImageResource(R.drawable.ic_visibility_24dp);
+                ivAppHide.setColorFilter(resolveDynamicOnSurfaceVariantColor(mContext));
             }
 
             // Đồng bộ trạng thái vào Adapter list
@@ -481,7 +496,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
                                 Snackbar.make(cvAppContainer, label + " is now unlocked", Snackbar.LENGTH_LONG).show();
                             }
                             btAppLock.setImageResource(lockIconResFor(isNowOpened));
-                            btAppLock.setColorFilter(isNowOpened ? Color.GRAY : resolveDynamicPrimaryColor(mContext));
+                            btAppLock.setColorFilter(isNowOpened ? resolveDynamicOnSurfaceVariantColor(mContext) : resolveDynamicPrimaryColor(mContext));
                             btAppLock.setContentDescription(mContext.getString(lockContentDescriptionResFor(isNowOpened)));
 
                             // Đồng bộ trạng thái vào Adapter list

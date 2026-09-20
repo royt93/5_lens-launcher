@@ -23,8 +23,8 @@
         android:layout_gravity="center_horizontal"
         android:layout_marginBottom="4dp"
         android:text="@string/choose_language_title"
-        android:textSize="20sp"
-        android:textColor="?attr/colorPrimary"
+        android:textAppearance="?attr/textAppearanceTitleLarge"
+        android:textColor="?attr/colorOnSurface"
         android:textStyle="bold" />
 
     <!-- Subtitle -->
@@ -35,8 +35,8 @@
         android:layout_gravity="center_horizontal"
         android:layout_marginBottom="16dp"
         android:text="@string/choose_language_subtitle"
-        android:textSize="13sp"
-        android:textColor="@color/colorAppTint" />
+        android:textAppearance="?attr/textAppearanceBodySmall"
+        android:textColor="?attr/colorOnSurfaceVariant" />
 
     <!-- Custom Search Bar -->
     <LinearLayout
@@ -57,7 +57,7 @@
             android:layout_height="20dp"
             android:src="@drawable/ic_search_24dp"
             android:contentDescription="@null"
-            app:tint="@color/colorAppTint" />
+            app:tint="?attr/colorOnSurfaceVariant" />
 
         <EditText
             android:id="@+id/etSearch"
@@ -68,9 +68,9 @@
             android:hint="@string/search_language_hint"
             android:imeOptions="actionSearch"
             android:inputType="text"
-            android:textColor="@color/colorValue"
-            android:textColorHint="@color/colorAppTint"
-            android:textSize="15sp"
+            android:textAppearance="?attr/textAppearanceBodyLarge"
+            android:textColor="?attr/colorOnSurface"
+            android:textColorHint="?attr/colorOnSurfaceVariant"
             android:maxLines="1"
             android:importantForAutofill="no" />
 

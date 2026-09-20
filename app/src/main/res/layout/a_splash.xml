@@ -78,12 +78,11 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="48dp"
         android:alpha="0.6"
-        android:text="Loading..."
+        android:text="@string/loading"
         android:textAppearance="?attr/textAppearanceBodyMedium"
         android:textColor="?attr/colorOnSurfaceVariant"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        tools:ignore="HardcodedText" />
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

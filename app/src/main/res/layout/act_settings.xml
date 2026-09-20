@@ -38,7 +38,7 @@
                     android:layout_height="wrap_content"
                     android:theme="@style/AppTheme.AppBarOverlay">
 
-                    <androidx.appcompat.widget.Toolbar
+                    <com.google.android.material.appbar.MaterialToolbar
                         android:id="@+id/toolbar"
                         android:layout_width="match_parent"
                         android:layout_height="?attr/actionBarSize"
@@ -81,7 +81,7 @@
                                 android:textStyle="bold" />
                         </LinearLayout>
 
-                    </androidx.appcompat.widget.Toolbar>
+                    </com.google.android.material.appbar.MaterialToolbar>
 
                     <com.google.android.material.tabs.TabLayout
                         android:id="@+id/tabs"
@@ -106,26 +106,22 @@
                     android:layout_gravity="end|bottom"
                     android:layout_margin="@dimen/margin_fab"
                     android:contentDescription="@string/app_name"
-                    android:src="@drawable/ic_sort_white_24dp"
+                    android:src="@drawable/ic_sort_24dp"
                     app:fabSize="normal" />
             </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
-            <androidx.appcompat.widget.AppCompatButton
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btStart"
+                style="@style/Widget.Material3.Button.TonalButton"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="56dp"
                 android:layout_margin="16dp"
-                android:paddingHorizontal="18dp"
-                android:paddingVertical="10dp"
                 android:text="@string/menu_title_show_apps"
-                android:textColor="@android:color/white"
-                android:textStyle="bold"
-                android:textSize="13sp"
-                android:drawableStart="@drawable/ic_apps_white_24dp"
-                android:drawablePadding="12dp"
-                android:background="@drawable/bg_button_gradient_ripple"
-                android:elevation="6dp"
-                android:stateListAnimator="@null" />
+                android:textAppearance="?attr/textAppearanceTitleSmall"
+                app:icon="@drawable/ic_apps_24dp"
+                app:iconPadding="12dp"
+                app:iconGravity="textStart"
+                app:cornerRadius="28dp" />
 
             <include
                 android:id="@+id/layoutAdBanner"

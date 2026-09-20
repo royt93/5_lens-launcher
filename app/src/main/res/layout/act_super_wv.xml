@@ -6,10 +6,12 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <androidx.appcompat.widget.Toolbar
+    <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        app:navigationIconTint="?attr/colorOnSurface"
+        app:titleTextColor="?attr/colorOnSurface" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -29,7 +31,7 @@
             app:indicatorColor="?attr/colorPrimary"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:trackColor="@android:color/transparent"
+            app:trackColor="?attr/colorSurfaceVariant"
             app:trackThickness="4dp" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -37,7 +39,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:padding="24dp"
-            android:background="@color/background"
+            android:background="?android:attr/colorBackground"
             android:visibility="gone">
 
             <androidx.appcompat.widget.AppCompatImageView
@@ -60,48 +62,39 @@
                 android:orientation="horizontal"
                 app:layout_constraintGuide_percent="0.6" />
 
-            <androidx.appcompat.widget.AppCompatTextView
+            <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/errorTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/error_title"
-                android:textSize="24sp"
+                android:textAppearance="?attr/textAppearanceHeadlineSmall"
                 android:textStyle="bold"
-                android:textColor="?android:attr/textColorPrimary"
+                android:textColor="?attr/colorOnSurface"
                 android:layout_marginTop="16dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/guideline" />
 
-            <androidx.appcompat.widget.AppCompatTextView
+            <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/errorMessage"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:text="@string/error_message"
-                android:textSize="16sp"
-                android:textColor="?android:attr/textColorSecondary"
+                android:textAppearance="?attr/textAppearanceBodyLarge"
+                android:textColor="?attr/colorOnSurfaceVariant"
                 android:gravity="center"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/errorTitle" />
 
-            <androidx.appcompat.widget.AppCompatButton
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/retryButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
-                android:paddingStart="32dp"
-                android:paddingEnd="32dp"
-                android:paddingTop="14dp"
-                android:paddingBottom="14dp"
                 android:text="@string/button_retry"
-                android:textColor="@android:color/white"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:background="@drawable/bg_button_retry"
-                android:elevation="4dp"
-                android:stateListAnimator="@null"
+                app:cornerRadius="20dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/errorMessage" />

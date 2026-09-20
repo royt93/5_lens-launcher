@@ -34,7 +34,7 @@ class ActAboutWidgetTest {
     }
 
     @Test
-    fun testActAbout_cardsAreNowPlainLinearLayouts() {
+    fun testActAbout_cardsAreMaterial3Cards() {
         val scenario = ActivityScenario.launch(ActAbout::class.java)
         scenario.onActivity { activity ->
             val cardFeatures = activity.findViewById<View>(R.id.cardFeatures)
@@ -45,9 +45,9 @@ class ActAboutWidgetTest {
             assertNotNull("cardAbout must exist", cardAbout)
             assertNotNull("cardCredits must exist", cardCredits)
 
-            assertTrue("cardFeatures must be a LinearLayout after the UselessParent merge", cardFeatures is LinearLayout)
-            assertTrue("cardAbout must be a LinearLayout after the UselessParent merge", cardAbout is LinearLayout)
-            assertTrue("cardCredits must be a LinearLayout after the UselessParent merge", cardCredits is LinearLayout)
+            assertTrue("cardFeatures must be a MaterialCardView", cardFeatures is com.google.android.material.card.MaterialCardView)
+            assertTrue("cardAbout must be a MaterialCardView", cardAbout is com.google.android.material.card.MaterialCardView)
+            assertTrue("cardCredits must be a MaterialCardView", cardCredits is com.google.android.material.card.MaterialCardView)
         }
         scenario.close()
     }

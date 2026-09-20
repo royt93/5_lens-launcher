@@ -1,8 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorCircles">@color/colorWhite</color>
-    <color name="colorAppTint">@color/colorWhite</color>
-    <color name="background">#000000</color>
-    <color name="dialogBackground">#2C2C2C</color>
-    <color name="searchSurface">#F22C2C2C</color>
+    <!-- Material 3 Dark Color Roles (Pre-Android 12 Fallback; Android 12+ overridden dynamically) -->
+    <color name="colorPrimary">#FFB3B8</color>
+    <color name="colorOnPrimary">#680016</color>
+    <color name="colorPrimaryContainer">#900022</color>
+    <color name="colorOnPrimaryContainer">#FFDAD9</color>
+    <color name="colorPrimaryDark">#000000</color>
+    <color name="colorAccent">#FFB3B8</color>
+    <color name="colorPrimaryTrans">#33FFB3B8</color>
+
+    <color name="colorSecondary">#E6BDBC</color>
+    <color name="colorOnSecondary">#44292A</color>
+    <color name="colorSecondaryContainer">#5D3F40</color>
+    <color name="colorOnSecondaryContainer">#FFDAD9</color>
+
+    <color name="colorTertiary">#E1C28C</color>
+    <color name="colorOnTertiary">#3F2D04</color>
+    <color name="colorTertiaryContainer">#584319</color>
+    <color name="colorOnTertiaryContainer">#FEDEA6</color>
+
+    <color name="colorSurface">#1A1112</color>
+    <color name="colorOnSurface">#F0DFDE</color>
+    <color name="colorSurfaceVariant">#534343</color>
+    <color name="colorOnSurfaceVariant">#D7C1C1</color>
+
+    <!-- Material 3 Surface Containers (Dark mode tonal elevation) -->
+    <color name="colorSurfaceContainerLowest">#140C0C</color>
+    <color name="colorSurfaceContainerLow">#231919</color>
+    <color name="colorSurfaceContainer">#271D1D</color>
+    <color name="colorSurfaceContainerHigh">#322727</color>
+    <color name="colorSurfaceContainerHighest">#3D3232</color>
+
+    <color name="colorOutline">#A08C8C</color>
+    <color name="colorOutlineVariant">#534343</color>
+    <color name="colorDivider">#534343</color>
+
+    <!-- Legacy / Compatibility Aliases for Dark Mode -->
+    <color name="colorCircles">#FFFFFF</color>
+    <color name="colorAppTint">@color/colorOnSurfaceVariant</color>
+    <color name="colorValue">@color/colorOnSurface</color>
+    <color name="background">@color/colorSurface</color>
+    <color name="dialogBackground">@color/colorSurfaceContainer</color>
+    <color name="searchSurface">#F2271D1D</color>
 </resources>

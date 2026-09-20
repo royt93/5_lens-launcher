@@ -24,12 +24,15 @@
 
         <!-- General Settings Card -->
         <com.google.android.material.card.MaterialCardView
+            style="@style/Widget.Material3.CardView.Filled"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardCornerRadius="20dp"
-            app:cardElevation="6dp"
-            app:cardMaxElevation="8dp"
-            app:cardUseCompatPadding="true">
+            android:layout_marginHorizontal="12dp"
+            android:layout_marginVertical="6dp"
+            app:cardBackgroundColor="?attr/colorSurfaceContainerLow"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -83,11 +86,11 @@
 
                 </LinearLayout>
 
-                <View
+                <com.google.android.material.divider.MaterialDivider
                     android:layout_width="match_parent"
-                    android:layout_height="1dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginStart="52dp"
-                    android:background="@color/colorDivider" />
+                    app:dividerColor="?attr/colorOutlineVariant" />
 
                 <!-- Icon Pack -->
                 <LinearLayout
@@ -128,31 +131,25 @@
                             android:textColor="?attr/colorPrimary"
                             android:textSize="14sp" />
 
-                        <androidx.appcompat.widget.AppCompatButton
+                        <com.google.android.material.button.MaterialButton
                             android:id="@+id/btGetMoreIconPacks"
+                            style="@style/Widget.Material3.Button.TonalButton"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="8dp"
-                            android:background="@drawable/bg_button_icon_pack"
-                            android:paddingStart="16dp"
-                            android:paddingTop="0dp"
-                            android:paddingEnd="16dp"
-                            android:paddingBottom="0dp"
-                            android:stateListAnimator="@null"
                             android:text="@string/get_more_icon_packs"
-                            android:textAllCaps="false"
-                            android:textColor="@color/colorWhite"
-                            android:textSize="12sp" />
+                            android:textAppearance="?attr/textAppearanceLabelMedium"
+                            app:cornerRadius="16dp" />
 
                     </LinearLayout>
 
                 </LinearLayout>
 
-                <View
+                <com.google.android.material.divider.MaterialDivider
                     android:layout_width="match_parent"
-                    android:layout_height="1dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginStart="52dp"
-                    android:background="@color/colorDivider" />
+                    app:dividerColor="?attr/colorOutlineVariant" />
 
                 <!-- Night Mode -->
                 <LinearLayout
@@ -197,11 +194,11 @@
 
                 </LinearLayout>
 
-                <View
+                <com.google.android.material.divider.MaterialDivider
                     android:layout_width="match_parent"
-                    android:layout_height="1dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginStart="52dp"
-                    android:background="@color/colorDivider" />
+                    app:dividerColor="?attr/colorOutlineVariant" />
 
                 <!-- Language Selection -->
                 <LinearLayout
@@ -246,11 +243,11 @@
 
                 </LinearLayout>
 
-                <View
+                <com.google.android.material.divider.MaterialDivider
                     android:layout_width="match_parent"
-                    android:layout_height="1dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginStart="52dp"
-                    android:background="@color/colorDivider" />
+                    app:dividerColor="?attr/colorOutlineVariant" />
 
                 <!-- VIP Premium -->
                 <LinearLayout
@@ -301,12 +298,15 @@
 
         <!-- Appearance Card -->
         <com.google.android.material.card.MaterialCardView
+            style="@style/Widget.Material3.CardView.Filled"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardCornerRadius="20dp"
-            app:cardElevation="6dp"
-            app:cardMaxElevation="8dp"
-            app:cardUseCompatPadding="true">
+            android:layout_marginHorizontal="12dp"
+            android:layout_marginVertical="6dp"
+            app:cardBackgroundColor="?attr/colorSurfaceContainerLow"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -367,11 +367,11 @@
 
                 </LinearLayout>
 
-                <View
+                <com.google.android.material.divider.MaterialDivider
                     android:layout_width="match_parent"
-                    android:layout_height="1dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginStart="52dp"
-                    android:background="@color/colorDivider" />
+                    app:dividerColor="?attr/colorOutlineVariant" />
 
                 <!-- Highlight Color -->
                 <LinearLayout
@@ -429,12 +429,15 @@
 
         <!-- Behavior Card -->
         <com.google.android.material.card.MaterialCardView
+            style="@style/Widget.Material3.CardView.Filled"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardCornerRadius="20dp"
-            app:cardElevation="6dp"
-            app:cardMaxElevation="8dp"
-            app:cardUseCompatPadding="true">
+            android:layout_marginHorizontal="12dp"
+            android:layout_marginVertical="6dp"
+            app:cardBackgroundColor="?attr/colorSurfaceContainerLow"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -462,7 +465,7 @@
                         android:padding="8dp"
                         android:src="@drawable/ic_vibrate_24dp" />
 
-                    <com.google.android.material.switchmaterial.SwitchMaterial
+                    <com.google.android.material.materialswitch.MaterialSwitch
                         android:id="@+id/swVibrateAppHover"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -480,11 +483,11 @@
 
                 </RelativeLayout>
 
-                <View
+                <com.google.android.material.divider.MaterialDivider
                     android:layout_width="match_parent"
-                    android:layout_height="1dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginStart="52dp"
-                    android:background="@color/colorDivider" />
+                    app:dividerColor="?attr/colorOutlineVariant" />
 
                 <!-- Vibrate App Launch -->
                 <RelativeLayout
@@ -503,7 +506,7 @@
                         android:padding="8dp"
                         android:src="@drawable/ic_vibrate_24dp" />
 
-                    <com.google.android.material.switchmaterial.SwitchMaterial
+                    <com.google.android.material.materialswitch.MaterialSwitch
                         android:id="@+id/swVibrateAppLaunch"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -521,11 +524,11 @@
 
                 </RelativeLayout>
 
-                <View
+                <com.google.android.material.divider.MaterialDivider
                     android:layout_width="match_parent"
-                    android:layout_height="1dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginStart="52dp"
-                    android:background="@color/colorDivider" />
+                    app:dividerColor="?attr/colorOutlineVariant" />
 
                 <!-- Show Name App Hover -->
                 <RelativeLayout
@@ -544,7 +547,7 @@
                         android:padding="8dp"
                         android:src="@drawable/ic_label_24dp" />
 
-                    <com.google.android.material.switchmaterial.SwitchMaterial
+                    <com.google.android.material.materialswitch.MaterialSwitch
                         android:id="@+id/swShowNameAppHover"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -562,11 +565,11 @@
 
                 </RelativeLayout>
 
-                <View
+                <com.google.android.material.divider.MaterialDivider
                     android:layout_width="match_parent"
-                    android:layout_height="1dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginStart="52dp"
-                    android:background="@color/colorDivider" />
+                    app:dividerColor="?attr/colorOutlineVariant" />
 
                 <!-- Show New App Tag -->
                 <RelativeLayout
@@ -585,7 +588,7 @@
                         android:padding="8dp"
                         android:src="@drawable/ic_new_releases_24dp" />
 
-                    <com.google.android.material.switchmaterial.SwitchMaterial
+                    <com.google.android.material.materialswitch.MaterialSwitch
                         android:id="@+id/swShowNewAppTag"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -603,11 +606,11 @@
 
                 </RelativeLayout>
 
-                <View
+                <com.google.android.material.divider.MaterialDivider
                     android:layout_width="match_parent"
-                    android:layout_height="1dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginStart="52dp"
-                    android:background="@color/colorDivider" />
+                    app:dividerColor="?attr/colorOutlineVariant" />
 
                 <!-- Show Touch Selection -->
                 <RelativeLayout
@@ -626,7 +629,7 @@
                         android:padding="8dp"
                         android:src="@drawable/ic_touch_24dp" />
 
-                    <com.google.android.material.switchmaterial.SwitchMaterial
+                    <com.google.android.material.materialswitch.MaterialSwitch
                         android:id="@+id/swShowTouchSelection"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -644,11 +647,11 @@
 
                 </RelativeLayout>
 
-                <View
+                <com.google.android.material.divider.MaterialDivider
                     android:layout_width="match_parent"
-                    android:layout_height="1dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginStart="52dp"
-                    android:background="@color/colorDivider" />
+                    app:dividerColor="?attr/colorOutlineVariant" />
 
                 <!-- UI-001: Show Search Bar on Home -->
                 <RelativeLayout
@@ -667,7 +670,7 @@
                         android:padding="8dp"
                         android:src="@drawable/ic_search_24dp" />
 
-                    <com.google.android.material.switchmaterial.SwitchMaterial
+                    <com.google.android.material.materialswitch.MaterialSwitch
                         android:id="@+id/swShowSearchBar"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -691,12 +694,15 @@
 
         <!-- UI-012: search bar customization - hint text + per-quick-action toggles. -->
         <com.google.android.material.card.MaterialCardView
+            style="@style/Widget.Material3.CardView.Filled"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardCornerRadius="20dp"
-            app:cardElevation="6dp"
-            app:cardMaxElevation="8dp"
-            app:cardUseCompatPadding="true">
+            android:layout_marginHorizontal="12dp"
+            android:layout_marginVertical="6dp"
+            app:cardBackgroundColor="?attr/colorSurfaceContainerLow"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -749,11 +755,11 @@
 
                 </LinearLayout>
 
-                <View
+                <com.google.android.material.divider.MaterialDivider
                     android:layout_width="match_parent"
-                    android:layout_height="1dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginStart="52dp"
-                    android:background="@color/colorDivider" />
+                    app:dividerColor="?attr/colorOutlineVariant" />
 
                 <RelativeLayout
                     android:id="@+id/rlSwitchQuickActionCalculatorParent"
@@ -771,7 +777,7 @@
                         android:padding="8dp"
                         android:src="@drawable/ic_calculate_24dp" />
 
-                    <com.google.android.material.switchmaterial.SwitchMaterial
+                    <com.google.android.material.materialswitch.MaterialSwitch
                         android:id="@+id/swQuickActionCalculator"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -789,11 +795,11 @@
 
                 </RelativeLayout>
 
-                <View
+                <com.google.android.material.divider.MaterialDivider
                     android:layout_width="match_parent"
-                    android:layout_height="1dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginStart="52dp"
-                    android:background="@color/colorDivider" />
+                    app:dividerColor="?attr/colorOutlineVariant" />
 
                 <RelativeLayout
                     android:id="@+id/rlSwitchQuickActionUnitParent"
@@ -811,7 +817,7 @@
                         android:padding="8dp"
                         android:src="@drawable/ic_swap_horiz_24dp" />
 
-                    <com.google.android.material.switchmaterial.SwitchMaterial
+                    <com.google.android.material.materialswitch.MaterialSwitch
                         android:id="@+id/swQuickActionUnit"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -829,11 +835,11 @@
 
                 </RelativeLayout>
 
-                <View
+                <com.google.android.material.divider.MaterialDivider
                     android:layout_width="match_parent"
-                    android:layout_height="1dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginStart="52dp"
-                    android:background="@color/colorDivider" />
+                    app:dividerColor="?attr/colorOutlineVariant" />
 
                 <RelativeLayout
                     android:id="@+id/rlSwitchQuickActionTimerParent"
@@ -851,7 +857,7 @@
                         android:padding="8dp"
                         android:src="@drawable/ic_timer_24dp" />
 
-                    <com.google.android.material.switchmaterial.SwitchMaterial
+                    <com.google.android.material.materialswitch.MaterialSwitch
                         android:id="@+id/swQuickActionTimer"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -869,11 +875,11 @@
 
                 </RelativeLayout>
 
-                <View
+                <com.google.android.material.divider.MaterialDivider
                     android:layout_width="match_parent"
-                    android:layout_height="1dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginStart="52dp"
-                    android:background="@color/colorDivider" />
+                    app:dividerColor="?attr/colorOutlineVariant" />
 
                 <RelativeLayout
                     android:id="@+id/rlSwitchQuickActionBatteryParent"
@@ -891,7 +897,7 @@
                         android:padding="8dp"
                         android:src="@drawable/ic_battery_24dp" />
 
-                    <com.google.android.material.switchmaterial.SwitchMaterial
+                    <com.google.android.material.materialswitch.MaterialSwitch
                         android:id="@+id/swQuickActionBattery"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -909,11 +915,11 @@
 
                 </RelativeLayout>
 
-                <View
+                <com.google.android.material.divider.MaterialDivider
                     android:layout_width="match_parent"
-                    android:layout_height="1dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginStart="52dp"
-                    android:background="@color/colorDivider" />
+                    app:dividerColor="?attr/colorOutlineVariant" />
 
                 <RelativeLayout
                     android:id="@+id/rlSwitchQuickActionSettingsParent"
@@ -931,7 +937,7 @@
                         android:padding="8dp"
                         android:src="@drawable/ic_wifi_24dp" />
 
-                    <com.google.android.material.switchmaterial.SwitchMaterial
+                    <com.google.android.material.materialswitch.MaterialSwitch
                         android:id="@+id/swQuickActionSettings"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"

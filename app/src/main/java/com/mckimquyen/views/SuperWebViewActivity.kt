@@ -46,9 +46,9 @@ class SuperWebViewActivity : ActBase() {
         setContentView(R.layout.act_super_wv)
         UIUtils.setupEdgeToEdge2(findViewById(R.id.rootLayout))
 
-        // Set status bar icons to dark/black (minSdk is 25, so SDK_INT is always >= M here)
-        window.decorView.systemUiVisibility = window.decorView.systemUiVisibility or
-            View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+        // Set status bar icons dynamically based on night mode
+        val isNightMode = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+        androidx.core.view.WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = !isNightMode
 
         currentTitle = intent?.getStringExtra(KEY_TITLE) ?: ""
         currentWebsite = intent?.getStringExtra(KEY_URL) ?: ""

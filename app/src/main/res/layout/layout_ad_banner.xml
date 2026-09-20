@@ -12,16 +12,17 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="1dp"
-        android:layout_marginBottom="1dp"
+        android:layout_marginTop="2dp"
+        android:layout_marginBottom="2dp"
         android:background="@drawable/rounded_blue_bg"
-        android:gravity="start|center_vertical"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
+        android:gravity="center"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:paddingTop="2dp"
+        android:paddingBottom="2dp"
         android:text="@string/ad_label"
-        android:textColor="#ffffff"
-        android:textSize="12sp"
-        android:textStyle="bold" />
+        android:textAppearance="?attr/textAppearanceLabelSmall"
+        android:textColor="?attr/colorOnSurfaceVariant" />
 
     <FrameLayout
         android:id="@+id/bannerContainer"

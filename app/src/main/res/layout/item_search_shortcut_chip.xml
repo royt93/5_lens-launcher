@@ -4,19 +4,19 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_marginEnd="16dp"
-    android:background="?attr/selectableItemBackground"
+    android:layout_marginEnd="8dp"
+    android:background="@drawable/bg_search_shortcut_chip"
     android:clickable="true"
     android:focusable="true"
     android:gravity="center_vertical"
     android:orientation="horizontal"
-    android:paddingHorizontal="8dp"
+    android:paddingHorizontal="10dp"
     android:paddingVertical="6dp">
 
     <ImageView
         android:id="@+id/ivShortcutIcon"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
         android:contentDescription="@null" />
 
     <TextView
@@ -26,6 +26,7 @@
         android:layout_marginStart="6dp"
         android:ellipsize="end"
         android:maxLines="1"
-        android:textSize="12sp" />
+        android:textAppearance="?attr/textAppearanceLabelMedium"
+        android:textColor="?attr/colorOnSurfaceVariant" />
 
 </LinearLayout>

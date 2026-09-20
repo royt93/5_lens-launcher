@@ -338,7 +338,6 @@ class ActVipManagement : AppCompatActivity() {
     private fun animateEnableButton(button: android.widget.Button, enabled: Boolean) {
         button.animate().cancel()
         if (enabled) {
-            button.setTextColor(android.graphics.Color.BLACK)
             button.animate()
                 .scaleX(1.08f)
                 .scaleY(1.08f)
@@ -352,13 +351,6 @@ class ActVipManagement : AppCompatActivity() {
                 }
                 .start()
         } else {
-            button.setTextColor(
-                com.google.android.material.color.MaterialColors.getColor(
-                    button,
-                    com.google.android.material.R.attr.colorOnSurfaceVariant,
-                    "#9E9E9E".toColorInt()
-                )
-            )
             button.animate()
                 .scaleX(1.0f)
                 .scaleY(1.0f)
