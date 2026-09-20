@@ -208,9 +208,19 @@ public class RApplication extends android.app.Application {
             "e75FnQfS9XTTqM1Kne69U7PW_MBgAnGQTFvtwVVui6kRPKs5L7ws9twr5IQWwVfzPKZ5pF2IfDa7lguMgGlCyt"
         );
 
+        // FEAT: Ensure developer test devices always receive test ads across all builds (including release)
+        com.mckimquyen.util.TestDeviceHelper.configureTestDevices(this);
+
         com.roy.sdkadbmob.AdManager.INSTANCE.setConfig(adConfig);
         com.roy.sdkadbmob.AdManager.INSTANCE.initialize(this, (success, gaid) -> {
             Logger.d(TAG, "AdManager init success=" + success + ", gaid=" + gaid);
+            if (gaid != null && !gaid.isEmpty()) {
+                java.util.List<String> currentList = new java.util.ArrayList<>(com.roy.sdkadbmob.AdManager.INSTANCE.getTestDeviceIds());
+                if (!currentList.contains(gaid)) {
+                    currentList.add(gaid);
+                    com.roy.sdkadbmob.AdManager.INSTANCE.setTestDeviceIds(currentList.toArray(new String[0]));
+                }
+            }
             return kotlin.Unit.INSTANCE;
         });
     }
