@@ -168,6 +168,19 @@ class LensView : View {
         mAccessibilityHelper?.onFocusChanged(gainFocus, direction, previouslyFocusedRect)
     }
 
+    /**
+     * FEAT-004: Recalculate grid geometry and accessibility bounds on view resize
+     * (e.g. orientation rotation, multi-window split-screen, foldable folding/unfolding).
+     */
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+        if (w != oldw || h != oldh) {
+            mGridCache.clear()
+            mAccessibilityHelper?.invalidateRoot()
+            invalidate()
+        }
+    }
+
     private fun init() {
         mApps = ArrayList()
         mDrawType = DrawType.APPS
@@ -189,14 +202,22 @@ class LensView : View {
 
     /**
      * Fix: 1.4 - Migrate từ fitSystemWindows (deprecated) sang WindowInsetsCompat
-     * Xử lý system window insets (status bar, navigation bar) để view không bị che khuất
+     * FEAT-004: Include displayCutout for landscape orientation and punch-hole camera safe insets.
      */
     init {
-        // Sử dụng WindowInsetsCompat thay cho fitSystemWindows deprecated
-        ViewCompat.setOnApplyWindowInsetsListener(this) { view, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            // Lưu insets để sử dụng khi draw
-            mInsets = Rect(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+        ViewCompat.setOnApplyWindowInsetsListener(this) { _, insets ->
+            val systemBarsAndCutout = insets.getInsets(
+                WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout()
+            )
+            mInsets = Rect(
+                systemBarsAndCutout.left,
+                systemBarsAndCutout.top,
+                systemBarsAndCutout.right,
+                systemBarsAndCutout.bottom
+            )
+            mGridCache.clear()
+            mAccessibilityHelper?.invalidateRoot()
+            invalidate()
             insets
         }
     }

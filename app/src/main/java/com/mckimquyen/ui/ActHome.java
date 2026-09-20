@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.hardware.camera2.CameraAccessException;
@@ -29,6 +30,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
+import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
@@ -183,15 +185,24 @@ public class ActHome extends ActBase {
         ViewGroup.MarginLayoutParams searchParams =
                 (ViewGroup.MarginLayoutParams) searchBar.getLayoutParams();
         int searchBaseTopMargin = searchParams.topMargin;
+        int searchBaseHorizontalMargin = getResources().getDimensionPixelSize(R.dimen.home_search_margin_horizontal);
         int lensSearchGap = getResources().getDimensionPixelSize(R.dimen.home_search_to_grid_gap);
 
         ViewCompat.setOnApplyWindowInsetsListener(rootView, (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            Insets systemBars = insets.getInsets(
+                    WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.displayCutout()
+            );
             ViewGroup.MarginLayoutParams updatedSearchParams =
                     (ViewGroup.MarginLayoutParams) searchBar.getLayoutParams();
             int targetSearchTopMargin = searchBaseTopMargin + systemBars.top;
-            if (updatedSearchParams.topMargin != targetSearchTopMargin) {
+            int targetSearchLeftMargin = Math.max(searchBaseHorizontalMargin, systemBars.left);
+            int targetSearchRightMargin = Math.max(searchBaseHorizontalMargin, systemBars.right);
+            if (updatedSearchParams.topMargin != targetSearchTopMargin
+                    || updatedSearchParams.leftMargin != targetSearchLeftMargin
+                    || updatedSearchParams.rightMargin != targetSearchRightMargin) {
                 updatedSearchParams.topMargin = targetSearchTopMargin;
+                updatedSearchParams.leftMargin = targetSearchLeftMargin;
+                updatedSearchParams.rightMargin = targetSearchRightMargin;
                 searchBar.setLayoutParams(updatedSearchParams);
             }
 
@@ -203,9 +214,13 @@ public class ActHome extends ActBase {
                 ViewGroup.MarginLayoutParams updatedLensParams =
                         (ViewGroup.MarginLayoutParams) lensViews.getLayoutParams();
                 if (updatedLensParams.topMargin != targetLensTopMargin
-                        || updatedLensParams.bottomMargin != systemBars.bottom) {
+                        || updatedLensParams.bottomMargin != systemBars.bottom
+                        || updatedLensParams.leftMargin != systemBars.left
+                        || updatedLensParams.rightMargin != systemBars.right) {
                     updatedLensParams.topMargin = targetLensTopMargin;
                     updatedLensParams.bottomMargin = systemBars.bottom;
+                    updatedLensParams.leftMargin = systemBars.left;
+                    updatedLensParams.rightMargin = systemBars.right;
                     lensViews.setLayoutParams(updatedLensParams);
                 }
 
@@ -213,9 +228,13 @@ public class ActHome extends ActBase {
                     ViewGroup.MarginLayoutParams updatedListParams =
                             (ViewGroup.MarginLayoutParams) rvHomeAppList.getLayoutParams();
                     if (updatedListParams.topMargin != targetLensTopMargin
-                            || updatedListParams.bottomMargin != systemBars.bottom) {
+                            || updatedListParams.bottomMargin != systemBars.bottom
+                            || updatedListParams.leftMargin != systemBars.left
+                            || updatedListParams.rightMargin != systemBars.right) {
                         updatedListParams.topMargin = targetLensTopMargin;
                         updatedListParams.bottomMargin = systemBars.bottom;
+                        updatedListParams.leftMargin = systemBars.left;
+                        updatedListParams.rightMargin = systemBars.right;
                         rvHomeAppList.setLayoutParams(updatedListParams);
                     }
                 }
@@ -223,6 +242,21 @@ public class ActHome extends ActBase {
             return insets;
         });
         ViewCompat.requestApplyInsets(rootView);
+    }
+
+    @Override
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        View root = findViewById(R.id.rootLayout);
+        if (root != null) {
+            applyHomeColumnInsets(root);
+        }
+        if (lensViews != null) {
+            lensViews.post(() -> lensViews.invalidate());
+        }
+        if (homeAppAdapter != null) {
+            homeAppAdapter.notifyDataSetChanged();
+        }
     }
 
     private void setupViews() {

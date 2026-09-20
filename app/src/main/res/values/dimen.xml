@@ -11,6 +11,9 @@
     <dimen name="margin_new_app_tag">6dp</dimen>
     <dimen name="height_lens_preview">360dp</dimen>
     <dimen name="home_search_to_grid_gap">12dp</dimen>
+    <dimen name="home_search_margin_horizontal">32dp</dimen>
+    <dimen name="home_list_padding_horizontal">4dp</dimen>
+    <dimen name="home_content_max_width">720dp</dimen>
 
     <!-- Settings Dimensions -->
     <dimen name="diameter_highlight_color_switch">32dp</dimen>

@@ -3,5 +3,8 @@
 
     <!-- General -->
     <dimen name="activity_horizontal_margin">64dp</dimen>
+    <dimen name="home_search_margin_horizontal">96dp</dimen>
+    <dimen name="home_list_padding_horizontal">96dp</dimen>
+    <dimen name="home_content_max_width">720dp</dimen>
 
 </resources>

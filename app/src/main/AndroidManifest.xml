@@ -96,7 +96,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="false"
-        tools:ignore="DiscouragedApi,LockedOrientationActivity">
+        tools:ignore="DiscouragedApi">
 
         <!-- Room Database uses code-based configuration (AppDatabase) -->
 
@@ -122,8 +122,7 @@
         <activity
             android:name=".ui.SplashAct"
             android:exported="false"
-            android:noHistory="true"
-            android:screenOrientation="portrait">
+            android:noHistory="true">
             <!-- Intent filter đã comment - Splash không phải entry point -->
             <!-- Nếu muốn dùng Splash, uncomment intent-filter bên dưới -->
             <!--
@@ -139,14 +138,14 @@
              HOME ACTIVITY - Màn hình chính của launcher
              ==================================================================== -->
         <!-- Launcher configuration: singleTask, stateNotNeeded, empty taskAffinity -->
-        <!-- HOME category: Quan trọng để được chọn làm default launcher -->
+        <!-- FEAT-004: Supports landscape, tablets and foldables with adaptive configChanges -->
         <activity
             android:name=".ui.ActHome"
             android:clearTaskOnLaunch="false"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize"
             android:excludeFromRecents="false"
             android:exported="true"
             android:launchMode="singleTask"
-            android:screenOrientation="portrait"
             android:stateNotNeeded="true"
             android:taskAffinity=""
             android:theme="@style/HomeTheme">
@@ -164,9 +163,9 @@
         <!-- App Shortcuts: Long press icon để hiện shortcuts (xem res/xml/shortcuts.xml) -->
         <activity
             android:name=".ui.ActSettings"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize"
             android:exported="true"
             android:launchMode="singleTask"
-            android:screenOrientation="portrait"
             android:stateNotNeeded="true"
             android:taskAffinity=""
             android:theme="@style/AppTheme.NoActionBar">
@@ -185,10 +184,10 @@
         <!-- parentActivityName: Cho phép Up navigation về Settings -->
         <activity
             android:name=".ui.ActAbout"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize"
             android:exported="false"
             android:label="@string/activity_title_about"
             android:parentActivityName=".ui.ActSettings"
-            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
 
         <!-- ====================================================================
@@ -197,11 +196,11 @@
         <!-- hardwareAccelerated: Bắt buộc phải bật cho WebView để render tốt -->
         <activity
             android:name=".views.SuperWebViewActivity"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize"
             android:exported="false"
             android:hardwareAccelerated="true"
             android:label=""
             android:parentActivityName=".ui.ActSettings"
-            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
 
         <!-- ====================================================================
@@ -209,8 +208,8 @@
              ==================================================================== -->
         <activity
             android:name=".feature.vip.ActVipManagement"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize"
             android:exported="false"
-            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
 
         <!-- ====================================================================
@@ -224,8 +223,7 @@
             android:enabled="false"
             android:excludeFromRecents="true"
             android:exported="true"
-            android:noHistory="true"
-            android:screenOrientation="portrait">
+            android:noHistory="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.HOME" />

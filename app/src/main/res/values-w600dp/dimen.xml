@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- Lens Dimensions -->
-    <dimen name="height_lens_preview">240dp</dimen>
+    <!-- Tablet / Foldable Dimensions -->
+    <dimen name="activity_horizontal_margin">32dp</dimen>
     <dimen name="home_search_margin_horizontal">64dp</dimen>
-    <dimen name="home_list_padding_horizontal">48dp</dimen>
+    <dimen name="home_list_padding_horizontal">64dp</dimen>
     <dimen name="home_content_max_width">720dp</dimen>
 
 </resources>

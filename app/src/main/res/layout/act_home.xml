@@ -25,7 +25,7 @@
         android:layout_height="match_parent"
         android:layout_marginTop="72dp"
         android:clipToPadding="false"
-        android:paddingHorizontal="4dp"
+        android:paddingHorizontal="@dimen/home_list_padding_horizontal"
         android:paddingBottom="16dp"
         android:visibility="gone"
         tools:visibility="gone" />
@@ -47,7 +47,7 @@
         android:layout_width="match_parent"
         android:layout_height="48dp"
         android:layout_gravity="top"
-        android:layout_marginHorizontal="32dp"
+        android:layout_marginHorizontal="@dimen/home_search_margin_horizontal"
         android:layout_marginTop="10dp"
         android:hint="@string/search_apps_hint" />
 
