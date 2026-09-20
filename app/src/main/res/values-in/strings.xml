@@ -127,4 +127,5 @@
     <string name="about_made_with_love">Dibuat dengan ❤️</string>
     <string name="ads_action_disclosure">Harap diperhatikan: tindakan ini dapat menampilkan iklan</string>
     <string name="ad_label">Iklan</string>
+    <string name="loading">Memuat…</string>
 </resources>

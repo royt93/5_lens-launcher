@@ -127,4 +127,5 @@
     <string name="about_made_with_love">Fait avec ❤️</string>
     <string name="ads_action_disclosure">Remarque : cette action peut afficher des publicités</string>
     <string name="ad_label">Annonce</string>
+    <string name="loading">Chargement…</string>
 </resources>

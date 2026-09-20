@@ -127,4 +127,5 @@
     <string name="about_made_with_love">صُنع بـ ❤️</string>
     <string name="ads_action_disclosure">يرجى الملاحظة: قد يعرض هذا الإجراء إعلانات</string>
     <string name="ad_label">إعلان</string>
+    <string name="loading">جاري التحميل…</string>
 </resources>

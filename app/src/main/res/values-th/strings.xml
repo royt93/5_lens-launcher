@@ -127,4 +127,5 @@
     <string name="about_made_with_love">สร้างด้วย ❤️</string>
     <string name="ads_action_disclosure">โปรดทราบ: การกระทำนี้อาจแสดงโฆษณา</string>
     <string name="ad_label">โฆษณา</string>
+    <string name="loading">กำลังโหลด…</string>
 </resources>

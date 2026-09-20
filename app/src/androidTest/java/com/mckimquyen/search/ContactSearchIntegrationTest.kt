@@ -23,10 +23,13 @@ class ContactSearchIntegrationTest {
 
         assertTrue(permission.contains(Manifest.permission.READ_CONTACTS))
         UtilSettings(context).save(UtilSettings.KEY_CONTACTS_PERMISSION_REQUESTED, false)
-        revokeContactsPermission(context.packageName)
-
-        assertTrue(ContactSearchEngine.shouldShowPermissionRequest(context, "contact Jane"))
-        assertTrue(ContactSearchEngine.search(context, "contact Jane").isEmpty())
+        ContactSearchEngine.setPermissionGrantedForTesting(false)
+        try {
+            assertTrue(ContactSearchEngine.shouldShowPermissionRequest(context, "contact Jane"))
+            assertTrue(ContactSearchEngine.search(context, "contact Jane").isEmpty())
+        } finally {
+            ContactSearchEngine.setPermissionGrantedForTesting(null)
+        }
     }
 
     @Test
@@ -41,13 +44,5 @@ class ContactSearchIntegrationTest {
         assertEquals(android.content.Intent.ACTION_DIAL, result.dialIntent().action)
         assertEquals(android.content.Intent.ACTION_SENDTO, result.messageIntent().action)
         assertTrue(!permission.contains(Manifest.permission.CALL_PHONE))
-    }
-
-    private fun revokeContactsPermission(packageName: String) {
-        val instrumentation = InstrumentationRegistry.getInstrumentation()
-        instrumentation.uiAutomation.executeShellCommand(
-            "pm revoke $packageName ${Manifest.permission.READ_CONTACTS}"
-        ).close()
-        instrumentation.waitForIdleSync()
     }
 }

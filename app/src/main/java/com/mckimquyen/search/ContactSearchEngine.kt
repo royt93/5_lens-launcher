@@ -27,6 +27,7 @@ internal data class ContactRow(
 object ContactSearchEngine {
     private const val DEFAULT_LIMIT = 3
     private var testRows: List<ContactRow>? = null
+    private var permissionGrantedForTesting: Boolean? = null
 
     private val CONTACT_PREFIXES = listOf(
         "contact",
@@ -54,8 +55,8 @@ object ContactSearchEngine {
 
     @JvmStatic
     fun hasContactsPermission(context: Context): Boolean =
-        ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CONTACTS) ==
-            PackageManager.PERMISSION_GRANTED
+        permissionGrantedForTesting ?: (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CONTACTS) ==
+            PackageManager.PERMISSION_GRANTED)
 
     @JvmStatic
     fun shouldShowPermissionRequest(context: Context, query: CharSequence?): Boolean {
@@ -111,6 +112,10 @@ object ContactSearchEngine {
 
     internal fun setContactsForTesting(results: List<ContactSearchResult>?) {
         testRows = results?.map { ContactRow(it.displayName, it.phoneNumber) }
+    }
+
+    internal fun setPermissionGrantedForTesting(granted: Boolean?) {
+        permissionGrantedForTesting = granted
     }
 
     internal fun rankRows(
