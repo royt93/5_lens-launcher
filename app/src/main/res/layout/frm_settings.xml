@@ -151,6 +151,56 @@
                     android:layout_marginStart="52dp"
                     app:dividerColor="?attr/colorOutlineVariant" />
 
+                <!-- Launcher Mode (FEAT-003) -->
+                <LinearLayout
+                    android:id="@+id/llLauncherMode"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="12dp">
+
+                    <ImageView
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:contentDescription="@string/setting_launcher_mode"
+                        android:padding="8dp"
+                        android:src="@drawable/ic_apps_24dp"
+                        app:tint="?attr/colorControlNormal" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/setting_launcher_mode"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tvSelectedLauncherMode"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/launcher_mode_fisheye"
+                            android:textColor="?attr/colorPrimary"
+                            android:textSize="14sp" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <com.google.android.material.divider.MaterialDivider
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="52dp"
+                    app:dividerColor="?attr/colorOutlineVariant" />
+
                 <!-- Night Mode -->
                 <LinearLayout
                     android:id="@+id/llNightMode"

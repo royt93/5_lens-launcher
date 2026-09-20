@@ -148,4 +148,11 @@
     <plurals name="search_results_count">
         <item quantity="other">%1$d ứng dụng phù hợp</item>
     </plurals>
+
+    <!-- FEAT-003 Accessible List Mode Strings -->
+    <string name="setting_launcher_mode">Chế độ hiển thị</string>
+    <string name="launcher_mode_fisheye">Thấu kính Fisheye</string>
+    <string name="launcher_mode_list">Danh sách trợ năng</string>
+    <string name="a11y_suggest_list_mode_title">Đang bật TalkBack. Chuyển sang Danh sách trợ năng để điều hướng dễ dàng hơn?</string>
+    <string name="action_switch">Chuyển</string>
 </resources>

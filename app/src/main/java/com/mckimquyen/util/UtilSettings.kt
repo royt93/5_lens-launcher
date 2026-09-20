@@ -8,6 +8,7 @@ import androidx.core.content.edit
 import androidx.preference.PreferenceManager
 import com.mckimquyen.BuildConfig
 import com.mckimquyen.enums.BackgroundMode
+import com.mckimquyen.enums.LauncherMode
 import com.mckimquyen.enums.SortType
 import kotlin.math.roundToInt
 
@@ -115,6 +116,11 @@ class UtilSettings(context: Context) {
         // migrated on first read (see sortType/backgroundMode below) and never written again.
         const val KEY_SORT_TYPE_NAME = "sort_type_name"
         const val KEY_BACKGROUND_MODE = "background_mode"
+
+        // FEAT-003: Accessible list-mode launcher preferences
+        const val KEY_LAUNCHER_MODE = "launcher_mode"
+        const val KEY_A11Y_SUGGESTION_DISMISSED = "a11y_list_mode_suggestion_dismissed"
+        val DEFAULT_LAUNCHER_MODE = LauncherMode.FISHEYE
 
         const val KEY_READ_POLICY = "KEY_READ_POLICY${BuildConfig.VERSION_CODE}"
     }
@@ -248,6 +254,31 @@ class UtilSettings(context: Context) {
             save(migrated)
             return migrated
         }
+
+    fun getLauncherMode(): LauncherMode {
+        val storedName = prefs.getString(KEY_LAUNCHER_MODE, null)
+        return LauncherMode.fromPrefValue(storedName)
+    }
+
+    fun setLauncherMode(mode: LauncherMode) {
+        save(KEY_LAUNCHER_MODE, mode.prefValue)
+    }
+
+    fun isListMode(): Boolean = getLauncherMode() == LauncherMode.LIST
+
+    fun isA11ySuggestionDismissed(): Boolean = prefs.getBoolean(KEY_A11Y_SUGGESTION_DISMISSED, false)
+
+    fun dismissA11ySuggestion() {
+        save(KEY_A11Y_SUGGESTION_DISMISSED, true)
+    }
+
+    fun shouldSuggestAccessibleListMode(): Boolean {
+        if (isListMode() || isA11ySuggestionDismissed()) return false
+        val am = appContext.getSystemService(Context.ACCESSIBILITY_SERVICE) as? android.view.accessibility.AccessibilityManager ?: return false
+        if (!am.isEnabled) return false
+        val spokenServices = am.getEnabledAccessibilityServiceList(android.accessibilityservice.AccessibilityServiceInfo.FEEDBACK_SPOKEN)
+        return !spokenServices.isNullOrEmpty() || am.isTouchExplorationEnabled
+    }
 
     private fun getFloatWithValidation(name: String?, defaultValue: Float, minValue: Float, maxValue: Float): Float {
         val value = prefs.getFloat(name, defaultValue)

@@ -43,10 +43,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.color.MaterialColors;
 import com.google.android.material.search.SearchBar;
 import com.google.android.material.search.SearchView;
+import com.google.android.material.snackbar.Snackbar;
 import com.mckimquyen.BuildConfig;
 import com.mckimquyen.R;
+import com.mckimquyen.adt.AppAdapter;
 import com.mckimquyen.app.RAppsSingleton;
 import com.mckimquyen.enums.BackgroundMode;
+import com.mckimquyen.enums.LauncherMode;
 import com.mckimquyen.model.App;
 import com.mckimquyen.model.AppPersistent;
 import com.mckimquyen.search.AppSearchEngine;
@@ -76,6 +79,9 @@ public class ActHome extends ActBase {
     private static final int REQUEST_CODE_CONTACTS = 1003;
 
     LensView lensViews;
+    private RecyclerView rvHomeAppList;
+    private AppAdapter homeAppAdapter;
+    private UtilSettings utilSettings;
     CircularProgressIndicator progressBarHome;
     private ArrayList<App> listApp;
     private SearchBar searchBar;
@@ -190,16 +196,28 @@ public class ActHome extends ActBase {
             }
 
             searchBar.post(() -> {
-                ViewGroup.MarginLayoutParams updatedLensParams =
-                        (ViewGroup.MarginLayoutParams) lensViews.getLayoutParams();
                 int targetLensTopMargin = targetSearchTopMargin
                         + searchBar.getHeight()
                         + lensSearchGap;
+
+                ViewGroup.MarginLayoutParams updatedLensParams =
+                        (ViewGroup.MarginLayoutParams) lensViews.getLayoutParams();
                 if (updatedLensParams.topMargin != targetLensTopMargin
                         || updatedLensParams.bottomMargin != systemBars.bottom) {
                     updatedLensParams.topMargin = targetLensTopMargin;
                     updatedLensParams.bottomMargin = systemBars.bottom;
                     lensViews.setLayoutParams(updatedLensParams);
+                }
+
+                if (rvHomeAppList != null) {
+                    ViewGroup.MarginLayoutParams updatedListParams =
+                            (ViewGroup.MarginLayoutParams) rvHomeAppList.getLayoutParams();
+                    if (updatedListParams.topMargin != targetLensTopMargin
+                            || updatedListParams.bottomMargin != systemBars.bottom) {
+                        updatedListParams.topMargin = targetLensTopMargin;
+                        updatedListParams.bottomMargin = systemBars.bottom;
+                        rvHomeAppList.setLayoutParams(updatedListParams);
+                    }
                 }
             });
             return insets;
@@ -209,6 +227,11 @@ public class ActHome extends ActBase {
 
     private void setupViews() {
         lensViews = findViewById(R.id.lensViews);
+        rvHomeAppList = findViewById(R.id.rvHomeAppList);
+        utilSettings = new UtilSettings(this);
+        homeAppAdapter = new AppAdapter(this, new ArrayList<>());
+        rvHomeAppList.setLayoutManager(new LinearLayoutManager(this));
+        rvHomeAppList.setAdapter(homeAppAdapter);
         progressBarHome = findViewById(R.id.progressBarHome);
         searchBar = findViewById(R.id.searchBar);
         searchView = findViewById(R.id.searchView);
@@ -287,11 +310,14 @@ public class ActHome extends ActBase {
             // SearchView.isShowing() semantics, same reasoning as the old blur toggle it replaces.
             if (newState == SearchView.TransitionState.SHOWING) {
                 lensViews.setVisibility(View.INVISIBLE);
+                if (rvHomeAppList != null) {
+                    rvHomeAppList.setVisibility(View.GONE);
+                }
                 setSearchSystemBarsHarmonized(true);
             } else if (newState == SearchView.TransitionState.HIDING) {
                 setSearchSystemBarsHarmonized(false);
-            } else if (newState == SearchView.TransitionState.HIDDEN && listApp != null && !listApp.isEmpty()) {
-                lensViews.setVisibility(View.VISIBLE);
+            } else if (newState == SearchView.TransitionState.HIDDEN) {
+                updateModeVisibility();
             }
         });
         appSearch.setOnEditorActionListener((view, actionId, event) -> {
@@ -659,6 +685,8 @@ public class ActHome extends ActBase {
         updateColor();
         updateSearchBarVisibility();
         updateSearchCustomization();
+        updateModeVisibility();
+        checkA11ySuggestion();
         setupTransparentSystemBarsForLollipop();
         // UI-009 fix: setupTransparentSystemBarsForLollipop() unconditionally forces transparent
         // bars - if the task is paused/resumed (e.g. Home button, or launching an app from a
@@ -670,6 +698,46 @@ public class ActHome extends ActBase {
         }
         if (RAppsSingleton.getInstance().getApps() != null && !RAppsSingleton.getInstance().getApps().isEmpty()) {
             assignApps(Objects.requireNonNull(RAppsSingleton.getInstance().getApps()));
+        }
+    }
+
+    public void updateModeVisibility() {
+        if (searchView != null && searchView.isShowing()) {
+            if (lensViews != null) lensViews.setVisibility(View.INVISIBLE);
+            if (rvHomeAppList != null) rvHomeAppList.setVisibility(View.GONE);
+            return;
+        }
+        boolean isList = utilSettings != null && utilSettings.isListMode();
+        if (isList) {
+            if (lensViews != null) lensViews.setVisibility(View.GONE);
+            if (rvHomeAppList != null) {
+                rvHomeAppList.setVisibility(listApp != null && !listApp.isEmpty() ? View.VISIBLE : View.GONE);
+            }
+        } else {
+            if (rvHomeAppList != null) rvHomeAppList.setVisibility(View.GONE);
+            if (lensViews != null) {
+                lensViews.setVisibility(listApp != null && !listApp.isEmpty() ? View.VISIBLE : View.INVISIBLE);
+            }
+        }
+    }
+
+    private void checkA11ySuggestion() {
+        if (utilSettings != null && utilSettings.shouldSuggestAccessibleListMode()) {
+            Snackbar.make(findViewById(R.id.rootLayout), R.string.a11y_suggest_list_mode_title, Snackbar.LENGTH_INDEFINITE)
+                    .setAction(R.string.action_switch, v -> {
+                        utilSettings.setLauncherMode(LauncherMode.LIST);
+                        utilSettings.dismissA11ySuggestion();
+                        updateModeVisibility();
+                    })
+                    .addCallback(new Snackbar.Callback() {
+                        @Override
+                        public void onDismissed(Snackbar transientBottomBar, int event) {
+                            if (event != DISMISS_EVENT_ACTION) {
+                                utilSettings.dismissA11ySuggestion();
+                            }
+                        }
+                    })
+                    .show();
         }
     }
 
@@ -734,7 +802,7 @@ public class ActHome extends ActBase {
         if (lApp == null || lApp.isEmpty()) {
             listApp = new ArrayList<>();
             progressBarHome.setVisibility(View.INVISIBLE);
-            lensViews.setVisibility(View.INVISIBLE);
+            updateModeVisibility();
             if (searchView.isShowing() || appSearch.getText().length() > 0) {
                 updateSearchResults(appSearch.getText());
             }
@@ -752,7 +820,7 @@ public class ActHome extends ActBase {
         if (visibleApps.isEmpty()) {
             listApp = visibleApps;
             progressBarHome.setVisibility(View.INVISIBLE);
-            lensViews.setVisibility(View.INVISIBLE);
+            updateModeVisibility();
             if (searchView.isShowing() || appSearch.getText().length() > 0) {
                 updateSearchResults(appSearch.getText());
             }
@@ -760,16 +828,20 @@ public class ActHome extends ActBase {
         }
 
         // Check if the new visible list is identical to the currently displayed listApp
-        if (listApp != null && isSameAppList(listApp, visibleApps)) {
+        if (listApp != null && isSameAppList(listApp, visibleApps) && (homeAppAdapter == null || homeAppAdapter.getItemCount() > 0)) {
             Logger.d("ActHome: assignApps skipped - identical list of visible apps");
+            updateModeVisibility();
             return;
         }
 
         progressBarHome.setVisibility(View.INVISIBLE);
-        lensViews.setVisibility(searchView.isShowing() ? View.INVISIBLE : View.VISIBLE);
         listApp = visibleApps;
-        Logger.d("ActHome: Setting " + listApp.size() + " apps to lensViews");
+        Logger.d("ActHome: Setting " + listApp.size() + " apps to lensViews and homeAppAdapter");
         lensViews.setApps(listApp);
+        if (homeAppAdapter != null) {
+            homeAppAdapter.updateApps(listApp);
+        }
+        updateModeVisibility();
         if (searchView.isShowing() || appSearch.getText().length() > 0) {
             updateSearchResults(appSearch.getText());
         }

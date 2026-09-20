@@ -14,6 +14,7 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import com.mckimquyen.R
 import com.mckimquyen.enums.BackgroundMode
+import com.mckimquyen.enums.LauncherMode
 import com.mckimquyen.ext.searchIconPack
 import com.mckimquyen.itf.SettingsInterface
 import com.mckimquyen.util.UtilLauncher
@@ -47,6 +48,7 @@ class FrmSettings : Fragment(), SettingsInterface {
     private var utilSettings: UtilSettings? = null
     private var tvVipStatusSummary: TextView? = null
     private var tvSelectedLanguage: TextView? = null
+    private var tvSelectedLauncherMode: TextView? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -112,6 +114,10 @@ class FrmSettings : Fragment(), SettingsInterface {
         }
         view.findViewById<View>(R.id.btGetMoreIconPacks).setOnClickListener {
             activity?.searchIconPack()
+        }
+        tvSelectedLauncherMode = view.findViewById(R.id.tvSelectedLauncherMode)
+        view.findViewById<View>(R.id.llLauncherMode).setOnClickListener {
+            showLauncherModeDialog()
         }
         view.findViewById<View>(R.id.llNightMode).setOnClickListener {
             showNightModeChooser()
@@ -263,6 +269,10 @@ class FrmSettings : Fragment(), SettingsInterface {
                 customHint
             }
 
+            // Launcher Mode (FEAT-003)
+            val currentMode = us.getLauncherMode()
+            tvSelectedLauncherMode?.setText(currentMode.displayNameResId)
+
             // Language
             val currentLang = com.mckimquyen.util.LocaleHelper.getLanguage(requireContext())
             val matchingLang = com.mckimquyen.util.LocaleHelper.supportedLanguages.firstOrNull { it.code == currentLang }
@@ -272,6 +282,25 @@ class FrmSettings : Fragment(), SettingsInterface {
                 tvSelectedLanguage?.text = currentLang
             }
         }
+    }
+
+    private fun showLauncherModeDialog() {
+        val modes = LauncherMode.entries.toTypedArray()
+        val currentMode = utilSettings?.getLauncherMode() ?: LauncherMode.FISHEYE
+        val currentIndex = modes.indexOf(currentMode).coerceAtLeast(0)
+        val itemLabels = modes.map { getString(it.displayNameResId) }.toTypedArray()
+
+        com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext(), R.style.MaterialYouDialogTheme)
+            .setTitle(R.string.setting_launcher_mode)
+            .setSingleChoiceItems(itemLabels, currentIndex) { dialog, which ->
+                val selectedMode = modes[which]
+                utilSettings?.setLauncherMode(selectedMode)
+                tvSelectedLauncherMode?.setText(selectedMode.displayNameResId)
+                com.mckimquyen.services.AppEventManager.notifyAppsEdited()
+                dialog.dismiss()
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
     }
 
     private fun showIconPackDialog() {

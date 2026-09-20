@@ -18,6 +18,18 @@
         android:visibility="invisible"
         tools:visibility="visible" />
 
+    <!-- FEAT-003: Accessible List Mode RecyclerView -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvHomeAppList"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="72dp"
+        android:clipToPadding="false"
+        android:paddingHorizontal="4dp"
+        android:paddingBottom="16dp"
+        android:visibility="gone"
+        tools:visibility="gone" />
+
     <com.google.android.material.progressindicator.CircularProgressIndicator
         android:id="@+id/progressBarHome"
         android:layout_width="wrap_content"

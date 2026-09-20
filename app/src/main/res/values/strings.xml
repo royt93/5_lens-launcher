@@ -165,4 +165,11 @@
         <item quantity="one">%1$d matching app</item>
         <item quantity="other">%1$d matching apps</item>
     </plurals>
+
+    <!-- FEAT-003 Accessible List Mode Strings -->
+    <string name="setting_launcher_mode" tools:ignore="MissingTranslation">Launcher Mode</string>
+    <string name="launcher_mode_fisheye" tools:ignore="MissingTranslation">Fisheye Lens</string>
+    <string name="launcher_mode_list" tools:ignore="MissingTranslation">Accessible List</string>
+    <string name="a11y_suggest_list_mode_title" tools:ignore="MissingTranslation">TalkBack detected. Switch to Accessible List Mode for easier screen reader navigation?</string>
+    <string name="action_switch" tools:ignore="MissingTranslation">Switch</string>
 </resources>

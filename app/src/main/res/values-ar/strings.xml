@@ -156,4 +156,11 @@
         <item quantity="many">%1$d تطبيقًا مطابقًا</item>
         <item quantity="other">%1$d تطبيق مطابق</item>
     </plurals>
+
+    <!-- FEAT-003 Accessible List Mode Strings -->
+    <string name="setting_launcher_mode">وضع المشغل</string>
+    <string name="launcher_mode_fisheye">عدسة عين السمكة</string>
+    <string name="launcher_mode_list">قائمة سهلة الوصول</string>
+    <string name="a11y_suggest_list_mode_title">تم اكتشاف TalkBack. هل تريد التبديل إلى وضع القائمة لتسهيل التنقل؟</string>
+    <string name="action_switch">تبديل</string>
 </resources>
