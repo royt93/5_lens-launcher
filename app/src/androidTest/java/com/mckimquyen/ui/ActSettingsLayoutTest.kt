@@ -37,30 +37,26 @@ class ActSettingsLayoutTest {
     }
 
     @Test
-    fun btStartVerticalPaddingIsReducedWithoutShrinkingHorizontalPadding() {
+    fun btStartMaterialButtonMatchesMaterial3Specifications() {
         val root = inflateActSettingsAtDefaultFontScale()
-        val button = root.findViewById<Button>(R.id.btStart)
+        val button = root.findViewById<com.google.android.material.button.MaterialButton>(R.id.btStart)
+        org.junit.Assert.assertNotNull("btStart must exist as MaterialButton", button)
 
         val density = button.resources.displayMetrics.density
-        val expectedVerticalPx = Math.round(10 * density)
-        val expectedHorizontalPx = Math.round(18 * density)
+        val expectedCornerRadiusPx = Math.round(28 * density)
 
-        assertEquals("btStart top padding must match the reduced 10dp (was 18dp)", expectedVerticalPx, button.paddingTop)
-        assertEquals("btStart bottom padding must match the reduced 10dp (was 18dp)", expectedVerticalPx, button.paddingBottom)
-        assertEquals("btStart horizontal start padding must stay at 18dp for visual balance", expectedHorizontalPx, button.paddingStart)
-        assertEquals("btStart horizontal end padding must stay at 18dp for visual balance", expectedHorizontalPx, button.paddingEnd)
+        assertEquals("btStart cornerRadius must match 28dp Material3 pill shape", expectedCornerRadiusPx, button.cornerRadius)
+        org.junit.Assert.assertEquals(button.context.getString(R.string.menu_title_show_apps), button.text.toString())
     }
 
     @Test
-    fun btStartTextSizeIsReducedToHarmonizeWithTheShorterButton() {
+    fun btStartIconIsConfiguredWithProperPadding() {
         val root = inflateActSettingsAtDefaultFontScale()
-        val button = root.findViewById<Button>(R.id.btStart)
+        val button = root.findViewById<com.google.android.material.button.MaterialButton>(R.id.btStart)
 
-        val expectedTextSizePx = 13 * button.resources.displayMetrics.scaledDensity
+        val density = button.resources.displayMetrics.density
+        val expectedIconPaddingPx = Math.round(12 * density)
 
-        assertEquals(
-            "btStart text size must be reduced to 13sp (was 16sp)",
-            expectedTextSizePx, button.textSize, 0.01f
-        )
+        assertEquals("btStart iconPadding must match 12dp", expectedIconPaddingPx, button.iconPadding)
     }
 }

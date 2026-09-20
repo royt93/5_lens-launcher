@@ -39,6 +39,7 @@
 - ⚠️ Device policy update (2026-09-12, owner decision): the 2026-09-07 self-select authorization above is **revoked**. Owner reissued the hard ban — only the Samsung S24 Ultra (SM_S928B, serial `R5CX613VZBR`) may be used for build/run/install/smoke; no other physical device or emulator, even when S24 Ultra isn't connected. Triggered by an incident during LEAK-001 where `./gradlew connectedDevDebugAndroidTest` fanned out to a second attached device (Gradle's connected-test task cannot be scoped to one serial); corrected by re-running verification via direct `adb shell am instrument` against only S24 Ultra. Applies from LEAK-001 onward.
 - ⚠️ Device exception (2026-09-13, owner decision): S24 Ultra `R5CX613VZBR` is damaged and unavailable. For `SEARCH-005` only, owner authorizes Pixel 7 Pro (`cheetah`, serial `2B051FDH3006MU`) as the designated build/run/install/smoke device; TECNO remains fallback only if Pixel is unavailable. This exception is recorded per story and does not silently change the general S24 policy.
 - ❌ A11Y-001 declined by owner (2026-09-12): offered as the recommended next pick right after LEAK-001 shipped; owner declined ("A11Y-00 nên skip, tôi không thích") with no further rationale. `FEAT-003`, `FEAT-004`, and the `FISH-*` "Fisheye Smart" line all depend on A11Y-001 and stay blocked as a consequence — this is a standing decision, not a scheduling delay. `DISPLAY-001` picked instead for this round.
+- ❌ FISH-002 declined by owner (2026-09-20): offered as the recommended next pick after UI-002 and SEARCH-005; owner explicitly declined ("FISH-002 không cần làm đâu, skip đi và note lại lí do"). Edge alphabet scrubber is skipped and excluded from the implementation loop.
 
 ## ✅ Implemented
 
@@ -91,6 +92,7 @@
 
 - UI-002 — Material You full revamp (all screens): All screens (`ActSettings`, `ActAbout`, `ActVipManagement`, `SuperWebViewActivity`, `SplashAct`), bottom sheets (`LanguageBottomSheetFragment`), dialogs (Sort, Night mode, Highlight color, App folder) migrated to Material You M3 tokens, high-contrast dynamic colors, and edge-to-edge system bar controllers. Legacy `afollestad.material-dialogs` eliminated. 3-tier test suite established (Unit + Widget + Integration), 100% pass on TECNO KJ7. Self-audited **9.8/10** (2026-09-20, TECNO KJ7).
 - SEARCH-005 — Contacts search + quick call/message: Zero-persistence ephemeral contact queries (`contact`, `call`, `message`, `lien he`, `goi`), standard `ACTION_DIAL`/`ACTION_SENDTO` intents, single-prompt permission affordance with memory. Connected test runner crash fixed via test hook. Full regression: 327 unit tests, 22/22 widget tests, 2/2 integration tests, 0 lint errors, TECNO KJ7 smoke verified. Self-audited **9.6/10** (2026-09-20, TECNO KJ7).
+- ARCH-001 — Decompose complex UI controllers: `ActSettings.java` decomposed from 946 to 531 lines (-415 lines), moving menu routing, dialog coordination, ad state, VIP actions and intent construction into cohesive Kotlin collaborators (`SettingsMenuRouter`, `SettingsDialogCoordinator`, `SettingsAdVipDelegate`, `SettingsIntentHelper`). `onOptionsItemSelected` cyclomatic complexity dropped 20→2, cognitive complexity 128→2. 3-tier test suite added: 5 new unit test classes (367/367 unit tests green), 1 new widget test (3/3 green), 1 new integration test (3/3 green), full regression pass (12/12 connected tests green on TECNO BG6). Self-audited **9.80/10** (2026-09-20, TECNO BG6).
 
 ## 🟡 In progress
 
@@ -117,6 +119,7 @@
 ## ❌ Skipped
 
 - `store-assets` implementation work is excluded from the current product loop by owner decision. Reopen its security/store stories before deploying that tool.
+- `FISH-002` (Edge alphabet Fisheye scrubber) declined by owner (2026-09-20); remains in `todo` as historical backlog record.
 
 ## 💭 Ideas
 

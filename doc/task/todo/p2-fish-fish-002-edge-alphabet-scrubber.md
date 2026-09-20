@@ -11,6 +11,10 @@
 | Risk | Medium |
 | Dependencies | PERF-001, A11Y-001 |
 
+## Owner decision (2026-09-20)
+
+Declined and skipped by owner ("FISH-002 không cần làm đâu, skip đi và note lại lí do"). Edge alphabet scrubber is excluded from the current delivery loop; remains in `todo` as historical backlog record.
+
 ## User story and value
 
 As a user with hundreds of apps, I want to scrub an alphabet edge index and snap the lens focus to the matching group.

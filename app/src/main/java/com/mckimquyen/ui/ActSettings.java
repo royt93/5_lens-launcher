@@ -58,6 +58,15 @@ import com.mckimquyen.util.UtilLauncher;
 import com.mckimquyen.util.UtilNightModeUtil;
 import com.mckimquyen.util.UtilSettings;
 
+import com.mckimquyen.ui.settings.SettingsAdVipDelegate;
+import com.mckimquyen.ui.settings.SettingsDialogCoordinator;
+import com.mckimquyen.ui.settings.SettingsIntentHelper;
+import com.mckimquyen.ui.settings.SettingsMenuAction;
+import com.mckimquyen.ui.settings.SettingsMenuDispatcher;
+import com.mckimquyen.ui.settings.SettingsMenuHost;
+import com.mckimquyen.ui.settings.SettingsMenuResolver;
+import com.roy.sdkadbmob.AdManager;
+
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -68,8 +77,8 @@ import java.util.Objects;
 
 import kotlin.Unit;
 
-//2023.03.19 tried to convert kotlin but failed
-public class ActSettings extends ActBase {
+// ARCH-001: Decomposed complex controller with dedicated collaborators
+public class ActSettings extends ActBase implements SettingsMenuHost {
 
     private static final String TAG_COLOR_BACKGROUND = "BackgroundColor";
     private static final String TAG_COLOR_HIGHLIGHT = "HighlightColor";
@@ -78,10 +87,11 @@ public class ActSettings extends ActBase {
     ViewPager2 viewpager;
     FloatingActionButton fabSort;
     LinearLayout flAdOpenApp;
-    // private MaxAdView adView;
     private View adView = null;
-    private android.animation.ObjectAnimator vipBadgeAnimator;
-    private boolean consentResolved = false; // BUG-3: guard banner load before consent
+
+    private final SettingsDialogCoordinator dialogCoordinator = new SettingsDialogCoordinator();
+    private final SettingsAdVipDelegate adVipDelegate = new SettingsAdVipDelegate();
+    private SettingsMenuDispatcher menuDispatcher;
 
     private ArrayList<App> listApp;
     private AlertDialog dlgSortType;
@@ -117,7 +127,8 @@ public class ActSettings extends ActBase {
         UIUtils.INSTANCE.setupEdgeToEdge1(getWindow());
         setContentView(R.layout.act_settings);
         UIUtils.INSTANCE.setupEdgeToEdge2(findViewById(R.id.rootLayout), true, true);
-        com.roy.sdkadbmob.AdManager.INSTANCE.setCurrentActivity(this);
+        AdManager.INSTANCE.setCurrentActivity(this);
+        menuDispatcher = new SettingsMenuDispatcher(this);
         setupViews();
 
         // Observe app events using LiveData
@@ -185,63 +196,31 @@ public class ActSettings extends ActBase {
     @Override
     protected void onResume() {
         super.onResume();
-        if (com.roy.sdkadbmob.AdManager.INSTANCE.isVIPMember() || com.roy.sdkadbmob.AdManager.INSTANCE.isVipByKeyActive()) {
-            if (adView != null) {
-                com.roy.sdkadbmob.AdManager.INSTANCE.bannerDestroy(adView);
-                adView = null;
-            }
-            findViewById(R.id.bannerContainer).setVisibility(View.GONE);
-            findViewById(R.id.tvLabelAd).setVisibility(View.GONE);
-        } else if (consentResolved) {
-            // BUG-3: only load/resume banner after consent resolved
-            findViewById(R.id.bannerContainer).setVisibility(View.VISIBLE);
-            findViewById(R.id.tvLabelAd).setVisibility(View.VISIBLE);
-            if (adView == null) {
-                adView = com.roy.sdkadbmob.AdManager.INSTANCE.loadBanner(this,
-                        (android.view.ViewGroup) findViewById(R.id.bannerContainer),
-                        (android.widget.TextView) findViewById(R.id.tvLabelAd),
-                        com.roy.sdkadbmob.AdManager.INSTANCE.getAdaptiveBannerSize(this),
-                        true);
-            } else {
-                com.roy.sdkadbmob.AdManager.INSTANCE.bannerResume(adView);
-            }
-        }
+        boolean isVip = AdManager.INSTANCE.isVIPMember() || AdManager.INSTANCE.isVipByKeyActive();
+        adVipDelegate.onResume(this, findViewById(R.id.bannerContainer), findViewById(R.id.tvLabelAd), isVip);
+        adView = adVipDelegate.getBannerView();
         bindToolbarVipBadge();
 
         // 1. Show Terms and Privacy Policy dialog only once per session
         if (utilSettings != null && !hasShownTermsDialog) {
             boolean hasRead = utilSettings.getBoolean(UtilSettings.KEY_READ_POLICY);
             if (!hasRead) {
-                hasShownTermsDialog = true; // Mark as shown for this session
-
-                // Show non-cancelable dialog - user MUST choose an option
-                dlgTerms = showDialog2(
+                hasShownTermsDialog = true;
+                dialogCoordinator.showTermsDialog(
                         this,
-                        getString(R.string.terms_and_privacy_policy),
-                        getString(R.string.read_policy),
-                        getString(R.string.agree_and_continue),
-                        getString(R.string.cancel),
+                        utilSettings,
                         () -> {
-                            // Button 1: Agree and Continue
-                            utilSettings.save(UtilSettings.KEY_READ_POLICY, true);
-                            openUrlInBrowser(this, URL_POLICY_NOTION, getString(R.string.terms_and_privacy_policy),
-                                    false);
+                            openUrlInBrowser(this, URL_POLICY_NOTION, getString(R.string.terms_and_privacy_policy), false);
+                            return Unit.INSTANCE;
                         },
                         () -> {
-                            // Button 2: Cancel
-                            utilSettings.save(UtilSettings.KEY_READ_POLICY, true);
                             if (!isFinishing() && !isDestroyed()) {
                                 checkShowLanguagePicker();
                             }
-                        },
-                        false, // isCancelable = false (user MUST choose)
-                        () -> {
-                            // onDismiss: Fallback to save state even if somehow dismissed
-                            utilSettings.save(UtilSettings.KEY_READ_POLICY, true);
-                            if (!isFinishing() && !isDestroyed()) {
-                                checkShowLanguagePicker();
-                            }
-                        });
+                            return Unit.INSTANCE;
+                        }
+                );
+                dlgTerms = dialogCoordinator.getDlgTerms();
                 return;
             }
         }
@@ -266,234 +245,117 @@ public class ActSettings extends ActBase {
         }
     }
 
-    private void startVipBadgeAnimation(android.view.View view) {
-        if (vipBadgeAnimator != null) {
-            vipBadgeAnimator.cancel();
-            vipBadgeAnimator = null;
-        }
-        if (view == null) return;
-        vipBadgeAnimator = android.animation.ObjectAnimator.ofPropertyValuesHolder(
-            view,
-            android.animation.PropertyValuesHolder.ofFloat(android.view.View.SCALE_X, 0.9f, 1.0f),
-            android.animation.PropertyValuesHolder.ofFloat(android.view.View.SCALE_Y, 0.9f, 1.0f)
-        );
-        vipBadgeAnimator.setDuration(1200);
-        vipBadgeAnimator.setRepeatMode(android.animation.ValueAnimator.REVERSE);
-        vipBadgeAnimator.setRepeatCount(android.animation.ValueAnimator.INFINITE);
-        vipBadgeAnimator.start();
-    }
-
-    private void stopVipBadgeAnimation() {
-        if (vipBadgeAnimator != null) {
-            vipBadgeAnimator.cancel();
-            vipBadgeAnimator = null;
-        }
-    }
-
     public void navigateToVipTab() {
-        android.content.Intent intent = new android.content.Intent(this, com.mckimquyen.feature.vip.ActVipManagement.class);
-        startActivity(intent);
+        startActivity(SettingsIntentHelper.createVipIntent(this));
     }
 
     private void bindToolbarVipBadge() {
-        android.view.View chipVipBadge = findViewById(R.id.chipVipBadge);
+        View chipVipBadge = findViewById(R.id.chipVipBadge);
         if (chipVipBadge != null) {
-            boolean active = com.roy.sdkadbmob.AdManager.INSTANCE.isVIPMember();
-            if (chipVipBadge instanceof android.view.ViewGroup) {
-                android.widget.TextView tv = chipVipBadge.findViewById(R.id.tvVipBadgeStatus);
-                android.widget.ImageView iv = chipVipBadge.findViewById(R.id.ivVipBadgeIcon);
-                boolean isNight = (getResources().getConfiguration().uiMode & android.content.res.Configuration.UI_MODE_NIGHT_MASK) 
-                                  == android.content.res.Configuration.UI_MODE_NIGHT_YES;
-                if (active) {
-                    tv.setText(getString(R.string.vip_badge_active));
-                    tv.setTextColor(android.graphics.Color.parseColor("#1C1C1E"));
-                    chipVipBadge.setBackgroundTintList(android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#FFD60A"))); // Gold
-                    if (iv != null) {
-                        iv.setColorFilter(android.graphics.Color.parseColor("#1C1C1E"), android.graphics.PorterDuff.Mode.SRC_IN);
-                    }
-                } else {
-                    tv.setText(getString(R.string.vip_badge_get));
-                    int bgColor = isNight ? android.graphics.Color.parseColor("#2C2C2E") : android.graphics.Color.parseColor("#E5E5EA");
-                    int textColor = isNight ? android.graphics.Color.parseColor("#E5E5EA") : android.graphics.Color.parseColor("#3A3A3C");
-                    tv.setTextColor(textColor);
-                    chipVipBadge.setBackgroundTintList(android.content.res.ColorStateList.valueOf(bgColor));
-                    if (iv != null) {
-                        iv.setColorFilter(textColor, android.graphics.PorterDuff.Mode.SRC_IN);
-                    }
-                }
-            }
-            chipVipBadge.setVisibility(android.view.View.VISIBLE);
-            startVipBadgeAnimation(chipVipBadge);
+            boolean isNight = (getResources().getConfiguration().uiMode & android.content.res.Configuration.UI_MODE_NIGHT_MASK)
+                    == android.content.res.Configuration.UI_MODE_NIGHT_YES;
+            boolean isVip = AdManager.INSTANCE.isVIPMember();
+            adVipDelegate.bindVipBadge(chipVipBadge, isVip, isNight, () -> {
+                navigateToVipTab();
+                return Unit.INSTANCE;
+            });
         }
     }
 
     @Override
     protected void onPause() {
-        stopVipBadgeAnimation();
-        com.roy.sdkadbmob.AdManager.INSTANCE.bannerPause(adView);
-        // Dismiss dialogs in onPause to prevent WindowLeaked exception
+        adVipDelegate.onPause();
         dismissAllDialogs();
         super.onPause();
     }
 
-    private void launchApps() {
+    @Override
+    public void launchApps() {
         boolean isDefaultLauncher = UtilLauncher.isDefaultLauncher(getApplication());
         Logger.d("ActSettings", "launchApps - isDefaultLauncher: " + isDefaultLauncher);
 
         if (isDefaultLauncher) {
-            // Already default launcher -> go to launcher home screen
-            com.roy.sdkadbmob.AdManager.INSTANCE.showInterstitial(this, aBoolean -> {
-                Intent homeIntent = new Intent(Intent.ACTION_MAIN);
-                homeIntent.addCategory(Intent.CATEGORY_HOME);
-                homeIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            AdManager.INSTANCE.showInterstitial(this, aBoolean -> {
+                Intent homeIntent = SettingsIntentHelper.createHomeLauncherIntent();
                 startActivity(homeIntent);
-                finish(); // Close settings activity to go back to launcher
+                finish();
                 return Unit.INSTANCE;
             });
         } else {
-            // Not default launcher -> show chooser to set as default
             showHomeLauncherChooser();
         }
         overridePendingTransition(R.anim.a_fade_in, R.anim.a_fade_out);
     }
 
-    // private void createAdInter() {
-    // boolean enableAdInter = getString(R.string.EnableAdInter).equals("true");
-    // if (!enableAdInter) {
-    // return;
-    // }
-    // String id = getString(R.string.INTER);
-    // if (id.isEmpty()) {
-    // return;
-    // }
-    //
-
-    /// / interstitialAd = new MaxInterstitialAd(id, this);
-    /// / interstitialAd.setListener(new MaxAdListener() {
-    /// / @Override
-    /// / public void onAdLoaded(@NonNull MaxAd maxAd) {
-    /// /// retryAttempt = 0;
-    /// / }
-    /// /
-    /// / @Override
-    /// / public void onAdDisplayed(@NonNull MaxAd maxAd) {
-    /// /
-    /// / }
-    /// /
-    /// / @Override
-    /// / public void onAdHidden(@NonNull MaxAd maxAd) {
-    /// / // Interstitial ad is hidden. Pre-load the next ad
-    /// / interstitialAd.loadAd();
-    /// / }
-    /// /
-    /// / @Override
-    /// / public void onAdClicked(@NonNull MaxAd maxAd) {
-    /// /
-    /// / }
-    /// /
-    /// / @Override
-    /// / public void onAdLoadFailed(@NonNull String s, @NonNull MaxError maxError)
-    /// {
-    /// /// retryAttempt++;
-    /// /// long delayMillis = TimeUnit.SECONDS.toMillis((long) Math.pow(2,
-    /// Math.min(6, retryAttempt)));
-    /// ///
-    /// /// new Handler().postDelayed(() -> interstitialAd.loadAd(), delayMillis);
-    /// / }
-    /// /
-    /// / @Override
-    /// / public void onAdDisplayFailed(@NonNull MaxAd maxAd, @NonNull MaxError
-    /// maxError) {
-    /// / // Interstitial ad failed to display. AppLovin recommends that you load
-    /// the next ad.
-    /// / interstitialAd.loadAd();
-    /// / }
-    /// / });
-    /// / // Load the first ad
-    /// / interstitialAd.loadAd();
-    // }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == R.id.menuItemShowApps) {
-            launchApps();
-            return true;
-        } else if (id == R.id.menuItemAbout) {
-            com.roy.sdkadbmob.AdManager.INSTANCE.showInterstitial(this, aBoolean -> {
-                Intent aboutIntent = new Intent(ActSettings.this, ActAbout.class);
-                startActivity(aboutIntent);
-                overridePendingTransition(R.anim.a_slide_in_left, R.anim.a_slide_out_right);
-                return Unit.INSTANCE;
-            });
-            return true;
-        } else if (id == R.id.menuItemResetDefaultSettings) {
-            switch (viewpager.getCurrentItem()) {
-                case 0:
-                    if (lensInterface != null) {
-                        lensInterface.onDefaultsReset();
-                    }
-                    break;
-                case 1:
-                    if (appsInterface != null) {
-                        appsInterface.onDefaultsReset();
-                    }
-                    break;
-                case 2:
-                    if (settingsInterface != null) {
-                        settingsInterface.onDefaultsReset();
-                    }
-                    break;
-            }
-            Snackbar.make(toolbar, getString(R.string.snackbar_reset_successful), Snackbar.LENGTH_LONG).show();
-            return true;
-        } else if (id == R.id.menuRateApp) {
-            rateApp(this, this.getPackageName());
-            return true;
-        } else if (id == R.id.menuMoreApp) {
-            moreApp(this, "SAIGON PHANTOM LABS");
+        SettingsMenuAction action = SettingsMenuResolver.resolve(item.getItemId(), viewpager.getCurrentItem());
+        if (menuDispatcher.dispatch(action)) {
             return true;
         }
-        // else if (id == R.id.menuApplovinConfig) {
-        // if (BuildConfig.DEBUG) {
-        // showMediationDebuggerApplovin(this);
-        // } else {
-        // Toast.makeText(
-        // /* context = */ this,
-        // /* resId = */ "This feature is only available in Debug mode",
-        // /* duration = */ Toast.LENGTH_SHORT).show();
-        // }
-        // return true;
-        // }
-        else if (id == R.id.menuShareApp) {
-            shareApp(this);
-            return true;
-        } else if (id == R.id.menuFacebookFanPage) {
-            likeFacebookFanpage(this);
-            return true;
-        } else if (id == R.id.menuPolicy) {
-            openUrlInBrowser(this, URL_POLICY_NOTION, getString(R.string.terms_and_privacy_policy), false);
-            return true;
-        } else if (id == R.id.menuGithubOriginal) {
-            openUrlInBrowser(this, "https://github.com/ricknout/lens-launcher", getString(R.string.github_original),
-                    true);
-            return true;
-        } else if (id == R.id.menuGithubFork) {
-            openUrlInBrowser(this, "https://github.com/gj-loitp/lens-launcher", getString(R.string.github_fork), true);
-            return true;
-        } else if (id == R.id.menuLicense) {
-            openUrlInBrowser(this, "https://raw.githubusercontent.com/ricknout/lens-launcher/master/LICENSE.md",
-                    getString(R.string.license), true);
-            return true;
-        } else if (id == R.id.menuChangelog) {
-            openUrlInBrowser(this, "https://raw.githubusercontent.com/gj-loitp/lens-launcher/dev/CHANGE_LOG.md",
-                    getString(R.string.changelog), true);
-            return true;
-        } else if (id == R.id.menuFeedback) {
-            sendEmail();
-            return true;
-        } else {
-            return super.onOptionsItemSelected(item);
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void openAbout() {
+        AdManager.INSTANCE.showInterstitial(this, aBoolean -> {
+            Intent aboutIntent = SettingsIntentHelper.createAboutIntent(ActSettings.this);
+            startActivity(aboutIntent);
+            overridePendingTransition(R.anim.a_slide_in_left, R.anim.a_slide_out_right);
+            return Unit.INSTANCE;
+        });
+    }
+
+    @Override
+    public void resetTabDefaults(int currentTab) {
+        switch (currentTab) {
+            case 0:
+                if (lensInterface != null) {
+                    lensInterface.onDefaultsReset();
+                }
+                break;
+            case 1:
+                if (appsInterface != null) {
+                    appsInterface.onDefaultsReset();
+                }
+                break;
+            case 2:
+                if (settingsInterface != null) {
+                    settingsInterface.onDefaultsReset();
+                }
+                break;
         }
+        Snackbar.make(toolbar, getString(R.string.snackbar_reset_successful), Snackbar.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void rateApp() {
+        com.mckimquyen.ext.ActivityKt.rateApp(this, this.getPackageName());
+    }
+
+    @Override
+    public void openMoreApps() {
+        com.mckimquyen.ext.ActivityKt.moreApp(this, "SAIGON PHANTOM LABS");
+    }
+
+    @Override
+    public void shareApp() {
+        com.mckimquyen.ext.ActivityKt.shareApp(this);
+    }
+
+    @Override
+    public void openFacebookFanPage() {
+        com.mckimquyen.ext.ActivityKt.likeFacebookFanpage(this);
+    }
+
+    @Override
+    public void openWebUrl(@NonNull String url, int titleResId, boolean isExternal) {
+        openUrlInBrowser(this, url, getString(titleResId), isExternal);
+    }
+
+    @Override
+    public void sendFeedback() {
+        sendEmail();
     }
 
     private void sendUpdateAppsBroadcast() {
@@ -518,59 +380,24 @@ public class ActSettings extends ActBase {
     }
 
     private void showSortTypeDialog() {
-        final List<SortType> lSortType = new ArrayList<>(EnumSet.allOf(SortType.class));
-        final List<String> lSortTypeString = new ArrayList<>();
-        for (int i = 0; i < lSortType.size(); i++) {
-            lSortTypeString.add(getApplicationContext().getString(lSortType.get(i).getDisplayNameResId()));
-        }
-        assert utilSettings != null;
-        SortType selectedSortType = utilSettings.getSortType();
-        int selectedIndex = lSortType.indexOf(selectedSortType);
-        dlgSortType = new MaterialAlertDialogBuilder(this, R.style.MaterialYouDialogTheme)
-                .setTitle(R.string.setting_sort_apps)
-                .setSingleChoiceItems(lSortTypeString.toArray(new CharSequence[0]), selectedIndex, (dialog, which) -> {
-                    utilSettings.save(lSortType.get(which));
-                    sendEditAppsBroadcast();
-                    dialog.dismiss();
-                })
-                .setNegativeButton(android.R.string.cancel, null)
-                .show();
+        if (utilSettings == null) return;
+        dialogCoordinator.showSortTypeDialog(this, utilSettings, sortType -> {
+            sendEditAppsBroadcast();
+            return Unit.INSTANCE;
+        });
+        dlgSortType = dialogCoordinator.getDlgSortType();
     }
 
     public void showIconPackDialog() {
-        dismissIconPackDialog();
-        final ArrayList<UtilIconPackManager.IconPack> lAvailableIconPack = new UtilIconPackManager()
-                .getAvailableIconPacksWithIcons(true, getApplication());
-        // PREF-001: lIconPackDisplay is translated UI text; lIconPackValue is the stable,
-        // never-displayed domain value actually persisted (index-aligned with lIconPackDisplay),
-        // so switching device/app language can never desync the persisted selection.
-        final ArrayList<String> lIconPackDisplay = new ArrayList<>();
-        final ArrayList<String> lIconPackValue = new ArrayList<>();
-        lIconPackDisplay.add(getString(R.string.setting_default_icon_pack));
-        lIconPackValue.add(UtilSettings.DEFAULT_ICON_PACK_LABEL_NAME);
-        for (int i = 0; i < lAvailableIconPack.size(); i++) {
-            String name = lAvailableIconPack.get(i).mName;
-            if (!lIconPackValue.contains(name)) {
-                lIconPackDisplay.add(name);
-                lIconPackValue.add(name);
+        if (utilSettings == null) return;
+        dialogCoordinator.showIconPackDialog(this, utilSettings, packValue -> {
+            if (settingsInterface != null) {
+                settingsInterface.onValuesUpdated();
             }
-        }
-        assert utilSettings != null;
-        String selectedValue = utilSettings.getString(UtilSettings.KEY_ICON_PACK_LABEL_NAME);
-        int selectedIndex = lIconPackValue.indexOf(selectedValue);
-        CharSequence[] items = lIconPackDisplay.toArray(new CharSequence[0]);
-        dlgIconPack = new MaterialAlertDialogBuilder(this, R.style.MaterialYouDialogTheme)
-                .setTitle(R.string.setting_icon_pack)
-                .setSingleChoiceItems(items, selectedIndex, (dialog, which) -> {
-                    utilSettings.save(UtilSettings.KEY_ICON_PACK_LABEL_NAME, lIconPackValue.get(which));
-                    if (settingsInterface != null) {
-                        settingsInterface.onValuesUpdated();
-                    }
-                    sendUpdateAppsBroadcast();
-                    dialog.dismiss();
-                })
-                .setNegativeButton(android.R.string.cancel, null)
-                .show();
+            sendUpdateAppsBroadcast();
+            return Unit.INSTANCE;
+        });
+        dlgIconPack = dialogCoordinator.getDlgIconPack();
     }
 
     public void showHomeLauncherChooser() {
@@ -578,260 +405,81 @@ public class ActSettings extends ActBase {
     }
 
     public void showNightModeChooser() {
-        dismissNightModeDialog();
-        String[] arrAvailableNightMode = getResources().getStringArray(R.array.night_modes);
-        final ArrayList<String> nightModes = new ArrayList<>();
-        Collections.addAll(nightModes, arrAvailableNightMode);
-        assert utilSettings != null;
-        String selectedNightMode = UtilNightModeUtil.getNightModeDisplayName(utilSettings.getNightMode());
-        int selectedIndex = nightModes.indexOf(selectedNightMode);
-        dlgNightMode = new MaterialAlertDialogBuilder(this, R.style.MaterialYouDialogTheme)
-                .setTitle(R.string.setting_night_mode)
-                .setSingleChoiceItems(arrAvailableNightMode, selectedIndex, (dialog, which) -> {
-                    String selection = nightModes.get(which);
-                    utilSettings.save(UtilSettings.KEY_NIGHT_MODE,
-                            UtilNightModeUtil.getNightModeFromDisplayName(selection));
-                    sendNightModeBroadcast();
-                    if (settingsInterface != null) {
-                        settingsInterface.onValuesUpdated();
-                    }
-                    dialog.dismiss();
-
-                    // Recreate activity to apply new theme
-                    new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
-                        if (!isDestroyed() && !isFinishing()) recreate();
-                    }, 200);
-                })
-                .setNegativeButton(android.R.string.cancel, null)
-                .show();
+        if (utilSettings == null) return;
+        dialogCoordinator.showNightModeChooser(this, utilSettings, mode -> {
+            sendNightModeBroadcast();
+            if (settingsInterface != null) {
+                settingsInterface.onValuesUpdated();
+            }
+            return Unit.INSTANCE;
+        }, () -> {
+            recreate();
+            return Unit.INSTANCE;
+        });
+        dlgNightMode = dialogCoordinator.getDlgNightMode();
     }
 
     public void showBackgroundDialog() {
-        dismissBackgroundDialog();
-        // PREF-001: items(R.array.backgrounds) is UI-only display text; the persisted domain
-        // value is BackgroundMode, selected by list position (declaration order matches
-        // arrays.xml: WALLPAPER=0, COLOR=1), never by comparing against the displayed text.
-        BackgroundMode[] backgroundModes = BackgroundMode.values();
-        String[] bgNames = getResources().getStringArray(R.array.backgrounds);
-        assert utilSettings != null;
-        BackgroundMode selectedBackground = utilSettings.getBackgroundMode();
-        int selectedIndex = selectedBackground.ordinal();
-        dlgBackground = new MaterialAlertDialogBuilder(this, R.style.MaterialYouDialogTheme)
-                .setTitle(R.string.setting_background)
-                .setSingleChoiceItems(bgNames, selectedIndex, (dialog, which) -> {
-                    dialog.dismiss();
-                    BackgroundMode selection = backgroundModes[which];
-                    if (selection == BackgroundMode.WALLPAPER) {
-                        utilSettings.save(BackgroundMode.WALLPAPER);
-                        sendBackgroundChangedBroadcast();
-                        if (settingsInterface != null) {
-                            settingsInterface.onValuesUpdated();
-                        }
-                        showWallpaperPicker();
-                    } else if (selection == BackgroundMode.COLOR) {
-                        showBackgroundColorDialog();
-                    }
-                })
-                .setNegativeButton(android.R.string.cancel, null)
-                .show();
+        if (utilSettings == null) return;
+        dialogCoordinator.showBackgroundDialog(this, utilSettings, () -> {
+            sendBackgroundChangedBroadcast();
+            if (settingsInterface != null) {
+                settingsInterface.onValuesUpdated();
+            }
+            showWallpaperPicker();
+            return Unit.INSTANCE;
+        }, () -> {
+            showBackgroundColorDialog();
+            return Unit.INSTANCE;
+        });
+        dlgBackground = dialogCoordinator.getDlgBackground();
     }
 
     public void showWallpaperPicker() {
-        Intent intent = new Intent(Intent.ACTION_SET_WALLPAPER);
-        startActivity(Intent.createChooser(intent, "Select Wallpaper"));
+        startActivity(SettingsIntentHelper.createWallpaperPickerChooserIntent());
     }
-
-    private static final String[] COLOR_HEXES = {
-            "#FFF50057",
-            "#FFF44336",
-            "#FFFF5722",
-            "#FFFF9800",
-            "#FFFFC107",
-            "#FF4CAF50",
-            "#FF009688",
-            "#FF00BCD4",
-            "#FF2196F3",
-            "#FF3F51B5",
-            "#FF673AB7",
-            "#FF9C27B0",
-            "#FF607D8B",
-            "#FF212121",
-            "#FFFFFFFF"
-    };
-
-    private static final String[] COLOR_NAMES = {
-            "Rose",
-            "Red",
-            "Deep Orange",
-            "Orange",
-            "Amber",
-            "Green",
-            "Teal",
-            "Cyan",
-            "Blue",
-            "Indigo",
-            "Deep Purple",
-            "Purple",
-            "Blue Grey",
-            "Dark Neutral",
-            "Light Neutral"
-    };
 
     public void showBackgroundColorDialog() {
         if (utilSettings == null) return;
-        String currentHex = utilSettings.getString(UtilSettings.KEY_BACKGROUND_COLOR);
-        int selectedIndex = 0;
-        for (int i = 0; i < COLOR_HEXES.length; i++) {
-            if (COLOR_HEXES[i].equalsIgnoreCase(currentHex)) {
-                selectedIndex = i;
-                break;
+        dialogCoordinator.showBackgroundColorDialog(this, utilSettings, selectedHex -> {
+            sendBackgroundChangedBroadcast();
+            if (settingsInterface != null) {
+                settingsInterface.onValuesUpdated();
             }
-        }
-
-        android.widget.ArrayAdapter<String> adapter = new android.widget.ArrayAdapter<String>(
-                this,
-                android.R.layout.select_dialog_singlechoice,
-                android.R.id.text1,
-                COLOR_NAMES) {
-            @NonNull
-            @Override
-            public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-                View view = super.getView(position, convertView, parent);
-                TextView textView = view.findViewById(android.R.id.text1);
-                if (textView != null) {
-                    GradientDrawable dot = new GradientDrawable();
-                    dot.setShape(GradientDrawable.OVAL);
-                    dot.setColor(Color.parseColor(COLOR_HEXES[position]));
-                    int size = (int) (20 * getResources().getDisplayMetrics().density);
-                    dot.setSize(size, size);
-                    dot.setBounds(0, 0, size, size);
-                    textView.setCompoundDrawablesRelative(dot, null, null, null);
-                    textView.setCompoundDrawablePadding((int) (16 * getResources().getDisplayMetrics().density));
-                }
-                return view;
-            }
-        };
-
-        new MaterialAlertDialogBuilder(this, R.style.MaterialYouDialogTheme)
-                .setTitle(R.string.setting_background)
-                .setSingleChoiceItems(adapter, selectedIndex, (dialog, which) -> {
-                    String selectedHex = COLOR_HEXES[which];
-                    utilSettings.save(BackgroundMode.COLOR);
-                    utilSettings.save(UtilSettings.KEY_BACKGROUND_COLOR, selectedHex);
-                    sendBackgroundChangedBroadcast();
-                    if (settingsInterface != null) {
-                        settingsInterface.onValuesUpdated();
-                    }
-                    dialog.dismiss();
-                })
-                .setNegativeButton(android.R.string.cancel, null)
-                .show();
+            return Unit.INSTANCE;
+        });
     }
 
     public void showHighlightColorDialog() {
         if (utilSettings == null) return;
-        dismissHighlightColorDialog();
-        String currentHex = utilSettings.getString(UtilSettings.KEY_HIGHLIGHT_COLOR);
-        int selectedIndex = 0;
-        for (int i = 0; i < COLOR_HEXES.length; i++) {
-            if (COLOR_HEXES[i].equalsIgnoreCase(currentHex)) {
-                selectedIndex = i;
-                break;
+        dialogCoordinator.showHighlightColorDialog(this, utilSettings, selectedHex -> {
+            if (settingsInterface != null) {
+                settingsInterface.onValuesUpdated();
             }
-        }
-
-        android.widget.ArrayAdapter<String> adapter = new android.widget.ArrayAdapter<String>(
-                this,
-                android.R.layout.select_dialog_singlechoice,
-                android.R.id.text1,
-                COLOR_NAMES) {
-            @NonNull
-            @Override
-            public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-                View view = super.getView(position, convertView, parent);
-                TextView textView = view.findViewById(android.R.id.text1);
-                if (textView != null) {
-                    GradientDrawable dot = new GradientDrawable();
-                    dot.setShape(GradientDrawable.OVAL);
-                    dot.setColor(Color.parseColor(COLOR_HEXES[position]));
-                    int size = (int) (20 * getResources().getDisplayMetrics().density);
-                    dot.setSize(size, size);
-                    dot.setBounds(0, 0, size, size);
-                    textView.setCompoundDrawablesRelative(dot, null, null, null);
-                    textView.setCompoundDrawablePadding((int) (16 * getResources().getDisplayMetrics().density));
-                }
-                return view;
-            }
-        };
-
-        dlgHighlightColor = new MaterialAlertDialogBuilder(this, R.style.MaterialYouDialogTheme)
-                .setTitle(R.string.setting_highlight_color)
-                .setSingleChoiceItems(adapter, selectedIndex, (dialog, which) -> {
-                    String selectedHex = COLOR_HEXES[which];
-                    utilSettings.save(UtilSettings.KEY_HIGHLIGHT_COLOR, selectedHex);
-                    if (settingsInterface != null) {
-                        settingsInterface.onValuesUpdated();
-                    }
-                    dialog.dismiss();
-                })
-                .setNegativeButton(android.R.string.cancel, null)
-                .show();
-    }
-
-    private void dismissSortTypeDialog() {
-        if (dlgSortType != null && dlgSortType.isShowing()) {
-            dlgSortType.dismiss();
-        }
-    }
-
-    private void dismissIconPackDialog() {
-        if (dlgIconPack != null && dlgIconPack.isShowing()) {
-            dlgIconPack.dismiss();
-        }
-    }
-
-    private void dismissNightModeDialog() {
-        if (dlgNightMode != null && dlgNightMode.isShowing()) {
-            dlgNightMode.dismiss();
-        }
-    }
-
-    private void dismissBackgroundDialog() {
-        if (dlgBackground != null && dlgBackground.isShowing()) {
-            dlgBackground.dismiss();
-        }
-    }
-
-    private void dismissHighlightColorDialog() {
-        if (dlgHighlightColor != null && dlgHighlightColor.isShowing()) {
-            dlgHighlightColor.dismiss();
-        }
+            return Unit.INSTANCE;
+        });
+        dlgHighlightColor = dialogCoordinator.getDlgHighlightColor();
     }
 
     private void dismissAllDialogs() {
-        dismissSortTypeDialog();
-        dismissIconPackDialog();
-        dismissNightModeDialog();
-        dismissBackgroundDialog();
-        dismissHighlightColorDialog();
-        if (dlgTerms != null && dlgTerms.isShowing()) {
-            dlgTerms.dismiss();
-        }
+        dialogCoordinator.dismissAllDialogs();
+        dlgSortType = null;
+        dlgIconPack = null;
+        dlgNightMode = null;
+        dlgBackground = null;
+        dlgHighlightColor = null;
+        dlgTerms = null;
     }
 
     @Override
     protected void onDestroy() {
         try {
             dismissAllDialogs();
-            // LiveData observers are automatically removed when lifecycle owner is
-            // destroyed
-            // Clear fragment interface references to prevent memory leaks
             lensInterface = null;
             appsInterface = null;
             settingsInterface = null;
         } finally {
-            // Ensure AdView is always destroyed, even if exception occurs
-            com.roy.sdkadbmob.AdManager.INSTANCE.bannerDestroy(adView);
+            adVipDelegate.onDestroy();
             adView = null;
             super.onDestroy();
         }
@@ -867,24 +515,7 @@ public class ActSettings extends ActBase {
     }
 
     private void sendEmail() {
-        Intent intent = new Intent(Intent.ACTION_SENDTO);
-        intent.setData(Uri.parse("mailto:")); // Only email apps should handle this
-        intent.putExtra(Intent.EXTRA_EMAIL,
-                new String[]{"roy.mobile.dev@gmail.com", "20testersforclosedtesting@googlegroups.com"});
-        intent.putExtra(Intent.EXTRA_SUBJECT, "Feedback on Fisheye Launcher App");
-        intent.putExtra(Intent.EXTRA_TEXT,
-                """
-                        Hello,
-                        
-                        I hope this message finds you well. Below are my feedback and suggestions regarding the Fisheye Launcher app:
-                        
-                        [Insert your feedback here]
-                        
-                        Thank you for your attention and support.
-                        
-                        Best regards,
-                        [Your Name]""");
-
+        Intent intent = SettingsIntentHelper.createFeedbackEmailIntent();
         if (intent.resolveActivity(getPackageManager()) != null) {
             startActivity(intent);
         } else {
@@ -893,53 +524,7 @@ public class ActSettings extends ActBase {
     }
 
     private void checkShowAd() {
-        // BUG-2: timeout fallback — always hide overlay after 8s if SDK never fires callback
-        new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
-            if (!isFinishing() && !isDestroyed() && flAdOpenApp.getVisibility() == View.VISIBLE) {
-                flAdOpenApp.setVisibility(View.GONE);
-                consentResolved = true;
-            }
-        }, 8_000L);
-
-        // BUG-2: if offline → hide overlay immediately, skip SDK consent+appopen calls
-        if (!isNetworkAvailable()) {
-            flAdOpenApp.setVisibility(View.GONE);
-            consentResolved = true;
-            // BUG-1: still attempt interstitial preload (SDK queues for when network returns)
-            com.roy.sdkadbmob.AdManager.INSTANCE.loadInterstitial(this);
-            return;
-        }
-
-        com.roy.sdkadbmob.AdManager.INSTANCE.requestConsentInfoUpdate(this, false, canRequestAds -> {
-            com.roy.sdkadbmob.AdManager.INSTANCE.initSplashScreen(this, () -> {
-                flAdOpenApp.setVisibility(View.GONE);
-                consentResolved = true; // BUG-3: mark consent resolved before any banner load
-                // BUG-1: load interstitial here — after consent, not in setupViews()
-                com.roy.sdkadbmob.AdManager.INSTANCE.loadInterstitial(this);
-                if (!com.roy.sdkadbmob.AdManager.INSTANCE.isVIPMember() && !com.roy.sdkadbmob.AdManager.INSTANCE.isVipByKeyActive()) {
-                    if (adView == null) { // BUG-3: guard double-load — onResume may have already loaded
-                        adView = com.roy.sdkadbmob.AdManager.INSTANCE.loadBanner(this,
-                                (android.view.ViewGroup) findViewById(R.id.bannerContainer),
-                                (android.widget.TextView) findViewById(R.id.tvLabelAd),
-                                com.roy.sdkadbmob.AdManager.INSTANCE.getAdaptiveBannerSize(this),
-                                true);
-                    }
-                } else {
-                    findViewById(R.id.bannerContainer).setVisibility(View.GONE);
-                    findViewById(R.id.tvLabelAd).setVisibility(View.GONE);
-                }
-                return Unit.INSTANCE;
-            });
-            return Unit.INSTANCE;
-        });
+        boolean isNet = SettingsAdVipDelegate.isNetworkConnected(this);
+        adVipDelegate.checkShowAd(this, flAdOpenApp, findViewById(R.id.bannerContainer), findViewById(R.id.tvLabelAd), isNet);
     }
-
-    private boolean isNetworkAvailable() {
-        android.net.ConnectivityManager cm = (android.net.ConnectivityManager)
-                getSystemService(android.content.Context.CONNECTIVITY_SERVICE);
-        if (cm == null) return false;
-        android.net.NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-        return activeNetwork != null && activeNetwork.isConnected();
-    }
-
 }
