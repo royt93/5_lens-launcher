@@ -126,8 +126,13 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
     }
 
     @androidx.annotation.StringRes
-    static int lockContentDescriptionResFor(boolean isAppOpened) {
+    public static int lockContentDescriptionResFor(boolean isAppOpened) {
         return isAppOpened ? R.string.lock : R.string.unlock;
+    }
+
+    @androidx.annotation.StringRes
+    public static int hideContentDescriptionResFor(boolean isAppVisible) {
+        return isAppVisible ? R.string.desc_hide_app : R.string.desc_show_app;
     }
 
     /**
@@ -318,6 +323,10 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
                 ivAppHide.setImageResource(R.drawable.ic_visibility_off_24dp);
                 ivAppHide.setColorFilter(resolveDynamicPrimaryColor(mContext));
             }
+            ivAppHide.setContentDescription(mContext.getString(
+                    hideContentDescriptionResFor(isAppVisible), mApp.getLabel()));
+            ivAppMenu.setContentDescription(mContext.getString(R.string.desc_app_menu, mApp.getLabel()));
+            ivAppIcon.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
 
             // ================================================================
             // SPECIAL CASE: App launcher của mình (self-reference)
@@ -441,11 +450,13 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
                 Snackbar.make(cvAppContainer, mApp.getLabel() + " is now hidden", Snackbar.LENGTH_LONG).show();
                 ivAppHide.setImageResource(R.drawable.ic_visibility_off_24dp);
                 ivAppHide.setColorFilter(resolveDynamicPrimaryColor(mContext));
+                ivAppHide.setContentDescription(mContext.getString(R.string.desc_show_app, mApp.getLabel()));
             } else {
                 // Đang hidden -> chuyển sang visible
                 Snackbar.make(cvAppContainer, mApp.getLabel() + " is now visible", Snackbar.LENGTH_LONG).show();
                 ivAppHide.setImageResource(R.drawable.ic_visibility_24dp);
                 ivAppHide.setColorFilter(resolveDynamicOnSurfaceVariantColor(mContext));
+                ivAppHide.setContentDescription(mContext.getString(R.string.desc_hide_app, mApp.getLabel()));
             }
 
             // Đồng bộ trạng thái vào Adapter list

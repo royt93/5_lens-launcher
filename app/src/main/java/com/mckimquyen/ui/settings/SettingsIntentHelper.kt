@@ -3,6 +3,7 @@ package com.mckimquyen.ui.settings
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import androidx.core.net.toUri
 import com.mckimquyen.feature.vip.ActVipManagement
 import com.mckimquyen.ui.ActAbout
 
@@ -31,7 +32,7 @@ object SettingsIntentHelper {
     @JvmStatic
     fun createFeedbackEmailIntent(): Intent {
         return Intent(Intent.ACTION_SENDTO).apply {
-            data = Uri.parse("mailto:")
+            data = "mailto:".toUri()
             putExtra(Intent.EXTRA_EMAIL, arrayOf(FEEDBACK_EMAIL_1, FEEDBACK_EMAIL_2))
             putExtra(Intent.EXTRA_SUBJECT, FEEDBACK_SUBJECT)
             putExtra(Intent.EXTRA_TEXT, FEEDBACK_BODY)

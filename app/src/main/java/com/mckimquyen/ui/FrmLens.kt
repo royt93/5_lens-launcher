@@ -72,7 +72,7 @@ class FrmLens : Fragment(), LensInterface {
         lensViewsSettings?.setDrawType(DrawType.CIRCLES)
 
         sbMinIconSize?.addOnChangeListener { _, value, fromUser ->
-            tvValueMinIconSize?.text = "${value.toInt()}dp"
+            tvValueMinIconSize?.text = getString(R.string.unit_dp_format, value.toInt())
             if (fromUser) {
                 utilSettings?.save(UtilSettings.KEY_ICON_SIZE, value)
                 lensViewsSettings?.invalidate()
@@ -96,7 +96,7 @@ class FrmLens : Fragment(), LensInterface {
         }
 
         sbAnimationTime?.addOnChangeListener { _, value, fromUser ->
-            tvValueAnimationTime?.text = "${value.toLong()}ms"
+            tvValueAnimationTime?.text = getString(R.string.unit_ms_format, value.toLong())
             if (fromUser) {
                 utilSettings?.save(UtilSettings.KEY_ANIMATION_TIME, value.toLong())
             }
@@ -111,7 +111,7 @@ class FrmLens : Fragment(), LensInterface {
             val maxIcon = UtilSettings.MAX_ICON_SIZE.toFloat() + UtilSettings.MIN_ICON_SIZE
             val validIcon = iconSize.coerceIn(minIcon, maxIcon)
             sbMinIconSize?.value = validIcon
-            tvValueMinIconSize?.text = "${validIcon.toInt()}dp"
+            tvValueMinIconSize?.text = getString(R.string.unit_dp_format, validIcon.toInt())
 
             val distortion = us.getFloat(UtilSettings.KEY_DISTORTION_FACTOR)
             val validDistortion = distortion.coerceIn(0.5f, 5.0f)
@@ -126,7 +126,7 @@ class FrmLens : Fragment(), LensInterface {
             val animTime = us.getLong(UtilSettings.KEY_ANIMATION_TIME).toFloat()
             val validAnim = animTime.coerceIn(100.0f, 400.0f)
             sbAnimationTime?.value = validAnim
-            tvValueAnimationTime?.text = "${validAnim.toLong()}ms"
+            tvValueAnimationTime?.text = getString(R.string.unit_ms_format, validAnim.toLong())
         }
     }
 

@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.TextView
+import androidx.core.graphics.toColorInt
 import androidx.appcompat.app.AlertDialog
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.mckimquyen.R
@@ -97,7 +98,7 @@ class SettingsDialogCoordinator {
                     if (textView != null) {
                         val dot = GradientDrawable().apply {
                             shape = GradientDrawable.OVAL
-                            setColor(Color.parseColor(COLOR_HEXES[position]))
+                            setColor(COLOR_HEXES[position].toColorInt())
                             val size = (20 * context.resources.displayMetrics.density).toInt()
                             setSize(size, size)
                             setBounds(0, 0, size, size)

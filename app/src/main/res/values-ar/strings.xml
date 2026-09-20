@@ -128,4 +128,32 @@
     <string name="ads_action_disclosure">يرجى الملاحظة: قد يعرض هذا الإجراء إعلانات</string>
     <string name="ad_label">إعلان</string>
     <string name="loading">جاري التحميل…</string>
+
+    <!-- A11Y-001 Accessibility & Formatting Strings -->
+    <string name="about_version_format">الإصدار %1$s (%2$d)</string>
+    <string name="unit_dp_format">%1$d نقطة</string>
+    <string name="unit_ms_format">%1$d مللي ثانية</string>
+    <string name="language_display_format">%1$s %2$s</string>
+    <string name="desc_hide_app">إخفاء %1$s</string>
+    <string name="desc_show_app">إظهار %1$s</string>
+    <string name="desc_app_menu">خيارات لـ %1$s</string>
+    <string name="desc_app_icon">أيقونة %1$s</string>
+
+    <plurals name="apps_count">
+        <item quantity="zero">لا توجد تطبيقات</item>
+        <item quantity="one">تطبيق واحد</item>
+        <item quantity="two">تطبيقان</item>
+        <item quantity="few">%1$d تطبيقات</item>
+        <item quantity="many">%1$d تطبيقًا</item>
+        <item quantity="other">%1$d تطبيق</item>
+    </plurals>
+
+    <plurals name="search_results_count">
+        <item quantity="zero">لا توجد نتائج مطابقة</item>
+        <item quantity="one">تطبيق مطابق واحد</item>
+        <item quantity="two">تطبيقان متطابقان</item>
+        <item quantity="few">%1$d تطبيقات مطابقة</item>
+        <item quantity="many">%1$d تطبيقًا مطابقًا</item>
+        <item quantity="other">%1$d تطبيق مطابق</item>
+    </plurals>
 </resources>

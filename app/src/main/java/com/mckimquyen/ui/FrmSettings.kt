@@ -267,7 +267,7 @@ class FrmSettings : Fragment(), SettingsInterface {
             val currentLang = com.mckimquyen.util.LocaleHelper.getLanguage(requireContext())
             val matchingLang = com.mckimquyen.util.LocaleHelper.supportedLanguages.firstOrNull { it.code == currentLang }
             if (matchingLang != null) {
-                tvSelectedLanguage?.text = "${matchingLang.flag} ${matchingLang.nativeName}"
+                tvSelectedLanguage?.text = getString(R.string.language_display_format, matchingLang.flag, matchingLang.nativeName)
             } else {
                 tvSelectedLanguage?.text = currentLang
             }

@@ -16,6 +16,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.graphics.toColorInt
 import com.mckimquyen.R
 import com.roy.sdkadbmob.AdManager
 
@@ -59,13 +60,13 @@ class SettingsAdVipDelegate {
                 VipBadgeVisualState(
                     isVipActive = true,
                     textResId = R.string.vip_badge_active,
-                    textColorInt = Color.parseColor(VIP_DARK_TEXT_HEX),
-                    backgroundColorInt = Color.parseColor(VIP_GOLD_COLOR_HEX),
-                    iconColorInt = Color.parseColor(VIP_DARK_TEXT_HEX)
+                    textColorInt = VIP_DARK_TEXT_HEX.toColorInt(),
+                    backgroundColorInt = VIP_GOLD_COLOR_HEX.toColorInt(),
+                    iconColorInt = VIP_DARK_TEXT_HEX.toColorInt()
                 )
             } else {
-                val bg = if (isNightMode) Color.parseColor(VIP_INACTIVE_NIGHT_BG_HEX) else Color.parseColor(VIP_INACTIVE_DAY_BG_HEX)
-                val text = if (isNightMode) Color.parseColor(VIP_INACTIVE_NIGHT_TEXT_HEX) else Color.parseColor(VIP_INACTIVE_DAY_TEXT_HEX)
+                val bg = if (isNightMode) VIP_INACTIVE_NIGHT_BG_HEX.toColorInt() else VIP_INACTIVE_DAY_BG_HEX.toColorInt()
+                val text = if (isNightMode) VIP_INACTIVE_NIGHT_TEXT_HEX.toColorInt() else VIP_INACTIVE_DAY_TEXT_HEX.toColorInt()
                 VipBadgeVisualState(
                     isVipActive = false,
                     textResId = R.string.vip_badge_get,

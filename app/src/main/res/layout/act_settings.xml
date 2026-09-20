@@ -65,6 +65,7 @@
                                 android:id="@+id/ivVipBadgeIcon"
                                 android:layout_width="14dp"
                                 android:layout_height="14dp"
+                                android:importantForAccessibility="no"
                                 android:src="@drawable/ic_star_24dp"
                                 app:tint="@android:color/black" />
 

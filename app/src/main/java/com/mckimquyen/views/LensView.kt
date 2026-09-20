@@ -7,6 +7,7 @@ import android.graphics.*
 import android.graphics.drawable.NinePatchDrawable
 import android.util.AttributeSet
 import android.view.HapticFeedbackConstants
+import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
@@ -91,13 +92,80 @@ class LensView : View {
         init()
     }
 
+    // A11Y-001: Virtual view accessibility helper for TalkBack and D-pad/keyboard navigation
+    private var mAccessibilityHelper: LensAccessibilityHelper? = null
+
+    @androidx.annotation.VisibleForTesting
+    internal fun getAccessibilityHelper(): LensAccessibilityHelper? = mAccessibilityHelper
+
     fun setApps(apps: ArrayList<App>?) {
         mApps = apps
+        mAccessibilityHelper?.invalidateRoot()
         invalidate()
     }
 
     fun setPackageManager(packageManager: PackageManager?) {
         mPackageManager = packageManager
+    }
+
+    fun getAppBounds(index: Int, outRect: Rect): Boolean {
+        val baseRects = mGridCache.baseRects
+        if (index in baseRects.indices) {
+            val r = baseRects[index]
+            outRect.set(r.left.toInt(), r.top.toInt(), r.right.toInt(), r.bottom.toInt())
+            return true
+        }
+        return false
+    }
+
+    fun launchAppAtIndex(index: Int) {
+        val list = mApps ?: return
+        if (index in list.indices && mPackageManager != null) {
+            val app = list[index]
+            val bounds = Rect()
+            getAppBounds(index, bounds)
+            UtilApp.launchComponent(
+                context,
+                app.packageName.toString(),
+                app.label.toString(),
+                app.name.toString(),
+                this,
+                bounds
+            )
+        }
+    }
+
+    fun showAppOptionsAtIndex(index: Int): Boolean {
+        val list = mApps ?: return false
+        if (index in list.indices) {
+            val app = list[index]
+            return try {
+                context.startActivity(UtilApp.appInfoIntent(app.packageName.toString()))
+                true
+            } catch (_: Exception) {
+                false
+            }
+        }
+        return false
+    }
+
+    override fun dispatchHoverEvent(event: MotionEvent): Boolean {
+        if (mAccessibilityHelper?.dispatchHoverEvent(event) == true) {
+            return true
+        }
+        return super.dispatchHoverEvent(event)
+    }
+
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        if (mAccessibilityHelper?.dispatchKeyEvent(event) == true) {
+            return true
+        }
+        return super.dispatchKeyEvent(event)
+    }
+
+    override fun onFocusChanged(gainFocus: Boolean, direction: Int, previouslyFocusedRect: Rect?) {
+        super.onFocusChanged(gainFocus, direction, previouslyFocusedRect)
+        mAccessibilityHelper?.onFocusChanged(gainFocus, direction, previouslyFocusedRect)
     }
 
     private fun init() {
@@ -107,6 +175,16 @@ class LensView : View {
         mUtilSettings = UtilSettings(context)
         setupPaints()
         mTouchSlop = ViewConfiguration.get(context).scaledTouchSlop.toFloat()
+
+        mAccessibilityHelper = LensAccessibilityHelper(
+            host = this,
+            appProvider = { mApps },
+            rectProvider = { index, outRect -> getAppBounds(index, outRect) },
+            onAppClicked = { index -> launchAppAtIndex(index) },
+            onAppLongClicked = { index -> showAppOptionsAtIndex(index) }
+        )
+        ViewCompat.setAccessibilityDelegate(this, mAccessibilityHelper)
+        isFocusable = true
     }
 
     /**
@@ -590,6 +668,7 @@ class LensView : View {
         mUtilSettings = null
         mPackageManager = null
         mWorkspaceBackgroundDrawable = null
+        mAccessibilityHelper = null
         // PERF-001: drop the cached grid/base-rects too, they're only valid for this view instance.
         mGridCache.clear()
     }

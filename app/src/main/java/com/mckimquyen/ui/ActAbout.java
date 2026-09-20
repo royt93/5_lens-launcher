@@ -210,7 +210,7 @@ public class ActAbout extends ActBase {
 
         // Set version info
         if (tvVersion != null) {
-            tvVersion.setText("Version " + BuildConfig.VERSION_NAME + " (" + BuildConfig.VERSION_CODE + ")");
+            tvVersion.setText(getString(R.string.about_version_format, BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE));
         }
     }
 

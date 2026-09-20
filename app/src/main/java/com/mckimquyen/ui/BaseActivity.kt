@@ -11,6 +11,18 @@ import androidx.appcompat.app.AppCompatActivity
 open class BaseActivity : AppCompatActivity() {
 
     companion object {
+        const val MIN_SUPPORTED_FONT_SCALE = 0.85f
+        const val MAX_SUPPORTED_FONT_SCALE = 2.0f
+
+        /**
+         * A11Y-001: Pure function to clamp fontScale between 0.85x and 2.0x (200%),
+         * respecting accessibility settings without breaking canvas math.
+         */
+        @VisibleForTesting
+        internal fun clampFontScale(fontScale: Float): Float {
+            return fontScale.coerceIn(MIN_SUPPORTED_FONT_SCALE, MAX_SUPPORTED_FONT_SCALE)
+        }
+
         /**
          * DISPLAY-001 mode-selection policy: don't request a high refresh rate under battery
          * saver or moderate+ thermal throttling — forcing it there would fight the exact
@@ -35,8 +47,11 @@ open class BaseActivity : AppCompatActivity() {
 
     override fun attachBaseContext(context: Context) {
         val localeContext = com.mckimquyen.util.LocaleHelper.onAttach(context)
-        val override = Configuration(localeContext.resources.configuration)
-        override.fontScale = 1.0f
+        val systemFontScale = context.resources.configuration.fontScale
+        val clampedFontScale = clampFontScale(systemFontScale)
+        val override = Configuration(localeContext.resources.configuration).apply {
+            fontScale = clampedFontScale
+        }
         applyOverrideConfiguration(override)
         super.attachBaseContext(localeContext)
     }
