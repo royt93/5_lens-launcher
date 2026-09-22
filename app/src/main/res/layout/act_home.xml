@@ -48,7 +48,7 @@
         android:layout_height="48dp"
         android:layout_gravity="top"
         android:layout_marginHorizontal="@dimen/home_search_margin_horizontal"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="@dimen/home_search_top_margin"
         android:hint="@string/search_apps_hint" />
 
     <com.google.android.material.search.SearchView

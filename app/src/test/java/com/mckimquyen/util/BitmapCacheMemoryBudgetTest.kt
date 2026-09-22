@@ -34,7 +34,7 @@ class BitmapCacheMemoryBudgetTest {
         setMemoryClass(128)
         BitmapCache.init(context)
 
-        // heapBudget = 128MB*1024/8 = 16384KB; icon ceiling (300 * 144KB = 43200KB) is larger,
+        // heapBudget = 128MB*1024/8 = 16384KB; icon ceiling (1000 * 64KB = 64000KB) is larger,
         // so the heap-derived budget wins here.
         assertEquals(128 * 1024 / 8, BitmapCache.maxSizeKb())
     }
@@ -45,8 +45,8 @@ class BitmapCacheMemoryBudgetTest {
 
         BitmapCache.init(context)
 
-        val iconSizeKb = (192 * 192 * 4) / 1024
-        val expectedCeiling = iconSizeKb * 300
+        val iconSizeKb = (128 * 128 * 4) / 1024
+        val expectedCeiling = iconSizeKb * 1000
         assertEquals(expectedCeiling, BitmapCache.maxSizeKb())
         assertTrue(
             "budget must not scale with an inflated heap",
@@ -105,5 +105,29 @@ class BitmapCacheMemoryBudgetTest {
         BitmapCache.trimToFraction(0f)
 
         assertEquals(0, BitmapCache.sizeKb())
+    }
+
+    // UI-020 regression: this launcher renders every installed app on one unpaged grid (no
+    // paging/scrolling), so the cache must hold as many icons as a real device can have
+    // installed - the old fixed ceiling (300 icons at 192px = ~144KB each = ~42MB) was smaller
+    // than a real 346-app device's needs on a flagship-class phone, causing a permanent
+    // evict/reload/invalidate loop (visible as continuous flicker) for the overflow apps.
+    @Test
+    fun `a 346-app device on a flagship memory class caches every icon with none evicted`() {
+        setMemoryClass(256) // realistic flagship-class standard memory class
+        BitmapCache.init(context)
+        BitmapCache.clear()
+
+        val appCount = 346
+        repeat(appCount) { i ->
+            // 192x192 input (bigger than the new 128px target) exercises the real scale-down path.
+            BitmapCache.put("app$i", Bitmap.createBitmap(192, 192, Bitmap.Config.ARGB_8888))
+        }
+
+        val missing = (0 until appCount).filter { BitmapCache.get("app$it") == null }
+        assertTrue(
+            "expected every one of $appCount icons to still be cached, but evicted: $missing",
+            missing.isEmpty()
+        )
     }
 }

@@ -68,7 +68,6 @@
     <string name="about"><![CDATA[Fisheye Launcher ist eine einzigartige, effiziente Methode, um Ihre Apps zu durchsuchen und zu starten.<br><br>Statt durch lange Listen zu scrollen oder über mehrere Seiten zu wischen, bietet Fisheye Launcher zwei einzigartige Funktionen:<br><br><b>• Ein gleichabständiges Raster, das alle Ihre Apps unabhängig von Bildschirmgröße oder App-Anzahl anzeigt.<br><br>• Eine grafische Fisheye-Linse zum schnellen Zoomen, Schwenken und Starten von Apps mit Touch-Gesten.</b><br><br>Fisheye Launcher enthält auch ein umfassendes Einstellungsmenü, um alle Aspekte der Linse anzupassen: Verzerrung, Skalierung, Symbolgröße, haptisches Feedback usw.]]></string>
     <string name="done">Fertig</string>
     <string name="cancel">Abbrechen</string>
-    <string name="back">Zurück</string>
     <string name="rate_app">App bewerten</string>
     <string name="more_app">Weitere Apps</string>
     <string name="share_app">App teilen</string>

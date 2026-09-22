@@ -67,7 +67,6 @@
     <string name="about"><![CDATA[Fisheye Launcher là một cách độc đáo và hiệu quả để duyệt và mở các ứng dụng của bạn.<br><br>Thay vì cuộn qua danh sách dài hoặc vuốt qua nhiều trang, Fisheye Launcher triển khai hai tính năng độc đáo:<br><br><b>• Lưới khoảng cách đều hiển thị tất cả ứng dụng của bạn, bất kể kích thước màn hình hay số lượng ứng dụng.<br><br>• Thấu kính Fisheye đồ họa để nhanh chóng thu phóng, xoay và mở ứng dụng bằng cử chỉ chạm.</b><br><br>Fisheye Launcher cũng bao gồm một menu Cài đặt đầy đủ để tinh chỉnh tất cả các khía cạnh của Thấu kính; Biến dạng, Tỷ lệ, Kích thước biểu tượng, Phản hồi rung, v.v.]]></string>
     <string name="done">Xong</string>
     <string name="cancel">Hủy</string>
-    <string name="back">Quay lại</string>
     <string name="rate_app">Đánh giá ứng dụng</string>
     <string name="more_app">Ứng dụng khác</string>
     <string name="share_app">Chia sẻ ứng dụng</string>
@@ -139,7 +138,6 @@
     <string name="desc_hide_app">Ẩn %1$s</string>
     <string name="desc_show_app">Hiện %1$s</string>
     <string name="desc_app_menu">Tùy chọn cho %1$s</string>
-    <string name="desc_app_icon">Biểu tượng %1$s</string>
 
     <plurals name="apps_count">
         <item quantity="other">%1$d ứng dụng</item>

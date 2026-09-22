@@ -1,9 +1,0 @@
-<shape xmlns:android="http://schemas.android.com/apk/res/android"
-    android:shape="rectangle">
-
-    <!-- Màu nền của hình dạng -->
-    <solid android:color="#CCCCCC" /> <!-- Màu nền (thay thế bằng màu bạn cần) -->
-
-    <!-- Bo tròn các góc 45 độ -->
-    <corners android:radius="45dp" />
-</shape>

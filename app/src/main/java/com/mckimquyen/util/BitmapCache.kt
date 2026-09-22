@@ -21,14 +21,23 @@ object BitmapCache {
 
     private const val TAG = "BitmapCache"
 
-    // Target size for launcher icons (192x192 is ideal for xxxhdpi screens)
-    private const val TARGET_ICON_SIZE = 192
+    // UI-020: this grid shows every app on screen at once, unpaged (not a typical scrollable
+    // app drawer) - a device with more installed apps than the old 192px/300-icon budget
+    // (300 * 144KB = ~42MB) allowed meant the tail of the list could never all fit in cache at
+    // once. Every onDraw miss re-decoded + re-cached that icon, evicting a different one under
+    // the LRU cap, which needed reloading next frame too - an unbounded reload/evict/invalidate
+    // loop, seen live as continuous flicker on a 346-app device. 128px is still plenty sharp for
+    // a grid cell this small, and at 64KB/icon the same real memory budget now covers far more
+    // apps before the (still real, memory-class-derived) heapBudgetKb ceiling below ever binds.
+    private const val TARGET_ICON_SIZE = 128
     private const val BYTES_PER_ICON_PIXEL = 4 // ARGB_8888
     private val ICON_SIZE_KB = (TARGET_ICON_SIZE * TARGET_ICON_SIZE * BYTES_PER_ICON_PIXEL) / 1024
 
     // Ceiling: never budget more than this many icons' worth of memory, regardless of how
-    // large the device's memory class is - a launcher grid has no legitimate need for more.
-    private const val MAX_CACHED_ICONS = 300
+    // large the device's memory class is. Generous headroom (most devices have well under
+    // 1000 installed apps) - the real safety cap against low-memory devices is heapBudgetKb
+    // below, not this constant.
+    private const val MAX_CACHED_ICONS = 1000
     private const val MIN_CACHE_SIZE_KB = 4 * 1024 // floor for very low memory-class devices
     private const val FALLBACK_STANDARD_HEAP_MB = 64 // used only if init() is never called
 

@@ -68,7 +68,6 @@
     <string name="about"><![CDATA[Fisheye Launcher 是一种独特且高效的浏览和启动应用的方式。<br><br>Fisheye Launcher 没有采用滚动长列表或滑动多个页面的传统方式，而是实现了两个独特的功能：<br><br><b>• 等距网格：无论屏幕大小或应用数量多少，都能展示您所有的应用。<br><br>• 图形化鱼眼镜头：利用触摸手势快速缩放、平移并启动应用。</b><br><br>Fisheye Launcher 还包含一个完整的设置菜单，用以微调镜头的各个方面，如畸变、缩放、图标大小、触觉反馈等。]]></string>
     <string name="done">完成</string>
     <string name="cancel">取消</string>
-    <string name="back">返回</string>
     <string name="rate_app">评分</string>
     <string name="more_app">更多应用</string>
     <string name="share_app">分享应用</string>

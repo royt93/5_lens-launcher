@@ -6,7 +6,6 @@
     <color name="colorPrimaryContainer">#FFDAD9</color>
     <color name="colorOnPrimaryContainer">#40000A</color>
     <color name="colorPrimaryDark">#900022</color>
-    <color name="colorAccent">#B51939</color>
     <color name="colorPrimaryTrans">#33B51939</color>
 
     <color name="colorSecondary">#775656</color>
@@ -36,14 +35,11 @@
     <color name="colorDivider">#D7C1C1</color>
 
     <!-- Legacy / Compatibility Aliases mapped cleanly to M3 Roles -->
-    <color name="colorBlack">#000000</color>
     <color name="colorWhite">#FFFFFF</color>
     <color name="colorTransparent">#00FFFFFF</color>
-    <color name="colorValue">@color/colorOnSurface</color>
     <color name="colorShadow">#40000000</color>
     <color name="colorCircles">#A6A4A6</color>
     <color name="colorAppTint">@color/colorOnSurfaceVariant</color>
     <color name="background">@color/colorSurface</color>
-    <color name="dialogBackground">@color/colorSurfaceContainer</color>
     <color name="searchSurface">#F2FFF8F6</color>
 </resources>

@@ -14,6 +14,18 @@ import com.mckimquyen.model.Grid;
 public class UtilCalculator {
 
     /**
+     * UI-020: extra symmetric side margin (in the same unit as the inputs, typically px) so the
+     * home column doesn't stretch edge-to-edge on tablets/large landscape screens. Zero unless
+     * the screen is actually wider than maxContentWidth (a normal phone never engages this).
+     */
+    public static int calculateContentMaxWidthMargin(int screenWidth, int maxContentWidth) {
+        if (screenWidth <= maxContentWidth) {
+            return 0;
+        }
+        return (screenWidth - maxContentWidth) / 2;
+    }
+
+    /**
      * Calculate equispaced grid based on screen dimensions, item count, and icon size in DP
      */
     public static Grid calculateGrid(Context context, int screenWidth, int screenHeight, int itemCount, float iconSizeDp) {

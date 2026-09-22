@@ -68,7 +68,6 @@
     <string name="about"><![CDATA[Fisheye Launcherは、ユニークで効率的なアプリ閲覧・起動ツールです。<br><br>長いリストのスクロールや複数ページの切り替えの代わりに、Fisheye Launcherは2つの独自機能を実装しています：<br><br><b>• 等間隔グリッド：画面サイズやアプリ数に関わらず、すべてのアプリを1画面に表示します。<br><br>• 魚眼レンズ：タッチジェスチャーを使用して、素早くズーム、パン、起動を行うことができます。</b><br><br>また、歪み、スケーリング、アイコンサイズ、触覚フィードバックなど、レンズのあらゆる側面を調整できる充実した設定メニューも含まれています。]]></string>
     <string name="done">完了</string>
     <string name="cancel">キャンセル</string>
-    <string name="back">戻る</string>
     <string name="rate_app">アプリを評価</string>
     <string name="more_app">他のアプリ</string>
     <string name="share_app">アプリを共有</string>

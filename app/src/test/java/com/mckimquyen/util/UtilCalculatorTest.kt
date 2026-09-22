@@ -146,4 +146,29 @@ class UtilCalculatorTest {
         // Then: should return original position
         assertEquals(itemPosition, shifted, 0.01f)
     }
+
+    // UI-020: home_content_max_width clamp - a phone screen never engages it (0 extra margin),
+    // a tablet/landscape screen wider than the cap gets exactly half the excess on each side.
+    @Test
+    fun `calculateContentMaxWidthMargin returns zero when screen is narrower than the cap`() {
+        assertEquals(0, UtilCalculator.calculateContentMaxWidthMargin(1080, 2160))
+    }
+
+    @Test
+    fun `calculateContentMaxWidthMargin returns zero when screen exactly equals the cap`() {
+        assertEquals(0, UtilCalculator.calculateContentMaxWidthMargin(2160, 2160))
+    }
+
+    @Test
+    fun `calculateContentMaxWidthMargin splits the excess evenly on a wider screen`() {
+        // 2160px cap, 3200px screen -> 1040px excess -> 520px margin each side
+        assertEquals(520, UtilCalculator.calculateContentMaxWidthMargin(3200, 2160))
+    }
+
+    @Test
+    fun `calculateContentMaxWidthMargin matches the observed S24 Ultra landscape width (no clamp)`() {
+        // Regression fixture from live S24 Ultra measurement: landscape width ~668dp at 3x
+        // density = 2004px, under the 720dp (2160px at 3x) cap - must not clamp a normal phone.
+        assertEquals(0, UtilCalculator.calculateContentMaxWidthMargin(2004, 2160))
+    }
 }

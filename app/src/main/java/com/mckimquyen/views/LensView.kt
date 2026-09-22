@@ -17,7 +17,6 @@ import android.view.animation.Transformation
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.toColorInt
 import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import com.mckimquyen.R
 import com.mckimquyen.enums.BackgroundMode
 import com.mckimquyen.enums.DrawType
@@ -59,7 +58,11 @@ class LensView : View {
     private var mMoving = false
     private var mUtilSettings: UtilSettings? = null
     private var mWorkspaceBackgroundDrawable: NinePatchDrawable? = null
-    private var mInsets = Rect(0, 0, 0, 0)
+    // UI-019: system-bar avoidance is now owned by ActHome.applyHomeColumnInsets (margins on this
+    // view's own layout params), not here - this used to also carve out systemBars/displayCutout
+    // internally via its own OnApplyWindowInsetsListener, double-reserving the same space and
+    // firing invalidate() on every insets dispatch (visible top/bottom gaps and flicker).
+    private val mInsets = Rect(0, 0, 0, 0)
 
     // PERF-002: de-dupes concurrent reload requests for the same evicted icon - onDraw runs
     // every frame, so without this the same cache miss would spawn a new coroutine per frame.
@@ -198,28 +201,6 @@ class LensView : View {
         )
         ViewCompat.setAccessibilityDelegate(this, mAccessibilityHelper)
         isFocusable = true
-    }
-
-    /**
-     * Fix: 1.4 - Migrate từ fitSystemWindows (deprecated) sang WindowInsetsCompat
-     * FEAT-004: Include displayCutout for landscape orientation and punch-hole camera safe insets.
-     */
-    init {
-        ViewCompat.setOnApplyWindowInsetsListener(this) { _, insets ->
-            val systemBarsAndCutout = insets.getInsets(
-                WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout()
-            )
-            mInsets = Rect(
-                systemBarsAndCutout.left,
-                systemBarsAndCutout.top,
-                systemBarsAndCutout.right,
-                systemBarsAndCutout.bottom
-            )
-            mGridCache.clear()
-            mAccessibilityHelper?.invalidateRoot()
-            invalidate()
-            insets
-        }
     }
 
     private fun setupPaints() {

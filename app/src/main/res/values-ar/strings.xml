@@ -68,7 +68,6 @@
     <string name="about"><![CDATA[يعتبر Fisheye Launcher طريقة فريدة وفعالة لتصفح وتشغيل تطبيقاتك.<br><br>بدلاً من التمرير عبر قوائم طويلة أو التمرير عبر صفحات متعددة، يطبق Fisheye Launcher ميزتين فريدتين:<br><br><b>• شبكة متساوية الأبعاد تعرض جميع تطبيقاتك، بغض النظر عن حجم الشاشة أو عدد التطبيقات.<br><br>• عدسة عين السمكة (Fisheye) رسومية للتكبير والتنقل وتشغيل التطبيقات بسرعة باستخدام إيماءات اللمس.</b><br><br>يتضمن Fisheye Launcher أيضًا قائمة إعدادات كاملة لضبط جميع جوانب العدسة؛ التشوه، القياس، حجم الأيقونة، الاستجابة اللمسية، إلخ.]]></string>
     <string name="done">تم</string>
     <string name="cancel">إلغاء</string>
-    <string name="back">رجوع</string>
     <string name="rate_app">تقييم التطبيق</string>
     <string name="more_app">المزيد من التطبيقات</string>
     <string name="share_app">مشاركة التطبيق</string>
@@ -137,7 +136,6 @@
     <string name="desc_hide_app">إخفاء %1$s</string>
     <string name="desc_show_app">إظهار %1$s</string>
     <string name="desc_app_menu">خيارات لـ %1$s</string>
-    <string name="desc_app_icon">أيقونة %1$s</string>
 
     <plurals name="apps_count">
         <item quantity="zero">لا توجد تطبيقات</item>

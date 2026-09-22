@@ -63,6 +63,7 @@ import com.mckimquyen.search.SearchHistoryStore;
 import com.mckimquyen.search.SearchResultAdapter;
 import com.mckimquyen.util.Logger;
 import com.mckimquyen.util.UIUtils;
+import com.mckimquyen.util.UtilCalculator;
 import com.mckimquyen.services.AppEventManager;
 import com.mckimquyen.util.UtilSettings;
 import com.mckimquyen.views.LensView;
@@ -90,8 +91,8 @@ public class ActHome extends ActBase {
     private SearchView searchView;
     private EditText appSearch;
     private View recentHeader;
-    private View allAppsHeader;
-    private View resultsSectionHeader;
+    private TextView allAppsHeader;
+    private TextView resultsSectionHeader;
     private View llEmptyQuickActions;
     private TextView noSearchResults;
     private TextView webSearchFallback;
@@ -182,11 +183,19 @@ public class ActHome extends ActBase {
      * bounds and keep icons clear of both the search bar and system navigation.
      */
     private void applyHomeColumnInsets(View rootView) {
-        ViewGroup.MarginLayoutParams searchParams =
-                (ViewGroup.MarginLayoutParams) searchBar.getLayoutParams();
-        int searchBaseTopMargin = searchParams.topMargin;
+        // UI-019 fix: must read a fixed dimen, not searchBar's live layoutParams.topMargin - this
+        // method re-runs on every onConfigurationChanged (rotation, etc.), and that margin is
+        // itself overwritten below with (base + inset). Reading it back as the next "base" made
+        // the top gap compound larger on every single config change.
+        int searchBaseTopMargin = getResources().getDimensionPixelSize(R.dimen.home_search_top_margin);
         int searchBaseHorizontalMargin = getResources().getDimensionPixelSize(R.dimen.home_search_margin_horizontal);
         int lensSearchGap = getResources().getDimensionPixelSize(R.dimen.home_search_to_grid_gap);
+        // FEAT-004: cap the lens/list column width on tablets and landscape large screens so it
+        // doesn't stretch edge-to-edge (matches home_content_max_width, previously defined but
+        // never applied). Extra margin only kicks in once the screen is actually wider than the cap.
+        int maxContentWidth = getResources().getDimensionPixelSize(R.dimen.home_content_max_width);
+        int screenWidth = getResources().getDisplayMetrics().widthPixels;
+        int contentMaxWidthMargin = UtilCalculator.calculateContentMaxWidthMargin(screenWidth, maxContentWidth);
 
         ViewCompat.setOnApplyWindowInsetsListener(rootView, (v, insets) -> {
             Insets systemBars = insets.getInsets(
@@ -211,16 +220,19 @@ public class ActHome extends ActBase {
                         + searchBar.getHeight()
                         + lensSearchGap;
 
+                int targetLensSideMargin = Math.max(systemBars.left, contentMaxWidthMargin);
+                int targetLensRightMargin = Math.max(systemBars.right, contentMaxWidthMargin);
+
                 ViewGroup.MarginLayoutParams updatedLensParams =
                         (ViewGroup.MarginLayoutParams) lensViews.getLayoutParams();
                 if (updatedLensParams.topMargin != targetLensTopMargin
                         || updatedLensParams.bottomMargin != systemBars.bottom
-                        || updatedLensParams.leftMargin != systemBars.left
-                        || updatedLensParams.rightMargin != systemBars.right) {
+                        || updatedLensParams.leftMargin != targetLensSideMargin
+                        || updatedLensParams.rightMargin != targetLensRightMargin) {
                     updatedLensParams.topMargin = targetLensTopMargin;
                     updatedLensParams.bottomMargin = systemBars.bottom;
-                    updatedLensParams.leftMargin = systemBars.left;
-                    updatedLensParams.rightMargin = systemBars.right;
+                    updatedLensParams.leftMargin = targetLensSideMargin;
+                    updatedLensParams.rightMargin = targetLensRightMargin;
                     lensViews.setLayoutParams(updatedLensParams);
                 }
 
@@ -229,12 +241,12 @@ public class ActHome extends ActBase {
                             (ViewGroup.MarginLayoutParams) rvHomeAppList.getLayoutParams();
                     if (updatedListParams.topMargin != targetLensTopMargin
                             || updatedListParams.bottomMargin != systemBars.bottom
-                            || updatedListParams.leftMargin != systemBars.left
-                            || updatedListParams.rightMargin != systemBars.right) {
+                            || updatedListParams.leftMargin != targetLensSideMargin
+                            || updatedListParams.rightMargin != targetLensRightMargin) {
                         updatedListParams.topMargin = targetLensTopMargin;
                         updatedListParams.bottomMargin = systemBars.bottom;
-                        updatedListParams.leftMargin = systemBars.left;
-                        updatedListParams.rightMargin = systemBars.right;
+                        updatedListParams.leftMargin = targetLensSideMargin;
+                        updatedListParams.rightMargin = targetLensRightMargin;
                         rvHomeAppList.setLayoutParams(updatedListParams);
                     }
                 }
@@ -457,9 +469,18 @@ public class ActHome extends ActBase {
         // GhostView fade-out overlays rendering on top of the new content, i.e. the exact
         // "overlapping UI" bug this whole revamp exists to remove. Plain visibility swaps instead.
         searchResultAdapter.submitList(results);
+        int resultCount = results.size();
         recentHeader.setVisibility(isEmptyQuery && hasResults && !showAllAppsFallback ? View.VISIBLE : View.GONE);
         allAppsHeader.setVisibility(showAllAppsFallback ? View.VISIBLE : View.GONE);
+        if (showAllAppsFallback) {
+            allAppsHeader.setText(getResources().getQuantityString(
+                    R.plurals.apps_count, resultCount, resultCount));
+        }
         resultsSectionHeader.setVisibility(!isEmptyQuery && hasResults ? View.VISIBLE : View.GONE);
+        if (!isEmptyQuery && hasResults) {
+            resultsSectionHeader.setText(getResources().getQuantityString(
+                    R.plurals.search_results_count, resultCount, resultCount));
+        }
         llEmptyQuickActions.setVisibility(isEmptyQuery ? View.VISIBLE : View.GONE);
         searchResults.setVisibility(hasResults ? View.VISIBLE : View.GONE);
         noSearchResults.setText(isEmptyQuery ? R.string.search_empty_state : R.string.no_apps_found);

@@ -6,7 +6,6 @@
     <color name="colorPrimaryContainer">#900022</color>
     <color name="colorOnPrimaryContainer">#FFDAD9</color>
     <color name="colorPrimaryDark">#000000</color>
-    <color name="colorAccent">#FFB3B8</color>
     <color name="colorPrimaryTrans">#33FFB3B8</color>
 
     <color name="colorSecondary">#E6BDBC</color>
@@ -38,8 +37,6 @@
     <!-- Legacy / Compatibility Aliases for Dark Mode -->
     <color name="colorCircles">#FFFFFF</color>
     <color name="colorAppTint">@color/colorOnSurfaceVariant</color>
-    <color name="colorValue">@color/colorOnSurface</color>
     <color name="background">@color/colorSurface</color>
-    <color name="dialogBackground">@color/colorSurfaceContainer</color>
     <color name="searchSurface">#F2271D1D</color>
 </resources>
