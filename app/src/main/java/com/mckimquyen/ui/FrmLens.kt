@@ -8,10 +8,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.slider.Slider
 import com.mckimquyen.R
 import com.mckimquyen.enums.DrawType
 import com.mckimquyen.itf.LensInterface
+import com.mckimquyen.util.LensPhysicsPreset
 import com.mckimquyen.util.UtilSettings
 import com.mckimquyen.views.LensView
 import java.util.Locale
@@ -30,6 +32,9 @@ class FrmLens : Fragment(), LensInterface {
     private var tvValueScaleFactor: TextView? = null
     private var sbAnimationTime: Slider? = null
     private var tvValueAnimationTime: TextView? = null
+    private var btnPresetGentle: MaterialButton? = null
+    private var btnPresetStandard: MaterialButton? = null
+    private var btnPresetSnappy: MaterialButton? = null
     private var utilSettings: UtilSettings? = null
 
     override fun onCreateView(
@@ -62,6 +67,9 @@ class FrmLens : Fragment(), LensInterface {
         tvValueScaleFactor = view.findViewById(R.id.tvValueScaleFactor)
         sbAnimationTime = view.findViewById(R.id.sbAnimationTime)
         tvValueAnimationTime = view.findViewById(R.id.tvValueAnimationTime)
+        btnPresetGentle = view.findViewById(R.id.btnPresetGentle)
+        btnPresetStandard = view.findViewById(R.id.btnPresetStandard)
+        btnPresetSnappy = view.findViewById(R.id.btnPresetSnappy)
 
         // Empty click listeners to prevent parent click events
         view.findViewById<View>(R.id.sbMinIconSizeParent).setOnClickListener(null)
@@ -101,6 +109,25 @@ class FrmLens : Fragment(), LensInterface {
                 utilSettings?.save(UtilSettings.KEY_ANIMATION_TIME, value.toLong())
             }
         }
+
+        btnPresetGentle?.setOnClickListener { applyPreset(LensPhysicsPreset.GENTLE) }
+        btnPresetStandard?.setOnClickListener { applyPreset(LensPhysicsPreset.STANDARD) }
+        btnPresetSnappy?.setOnClickListener { applyPreset(LensPhysicsPreset.SNAPPY) }
+    }
+
+    /**
+     * FISH-004: applies a named preset to the 3 sliders above in one tap - safe/instant, and
+     * fully reversible (the sliders remain fine-tunable afterward, same as after Reset to
+     * Default, which is itself just the STANDARD preset applied from a different entry point).
+     */
+    private fun applyPreset(preset: LensPhysicsPreset) {
+        utilSettings?.let { us ->
+            us.save(UtilSettings.KEY_DISTORTION_FACTOR, preset.distortionFactor)
+            us.save(UtilSettings.KEY_SCALE_FACTOR, preset.scaleFactor)
+            us.save(UtilSettings.KEY_ANIMATION_TIME, preset.animationTimeMs)
+        }
+        assignValues()
+        lensViewsSettings?.invalidate()
     }
 
     @SuppressLint("SetTextI18n")
@@ -158,6 +185,9 @@ class FrmLens : Fragment(), LensInterface {
         tvValueScaleFactor = null
         sbAnimationTime = null
         tvValueAnimationTime = null
+        btnPresetGentle = null
+        btnPresetStandard = null
+        btnPresetSnappy = null
         utilSettings = null
         super.onDestroyView()
     }

@@ -22,6 +22,7 @@ import com.mckimquyen.enums.BackgroundMode
 import com.mckimquyen.enums.DrawType
 import com.mckimquyen.model.App
 import com.mckimquyen.model.AppPersistent
+import com.mckimquyen.util.LensPhysicsPolicy
 import com.mckimquyen.util.UtilApp
 import com.mckimquyen.util.UtilCalculator
 import com.mckimquyen.util.UtilSettings
@@ -564,6 +565,7 @@ class LensView : View {
                 mUtilSettings?.let { us ->
                     if (us.getBoolean(UtilSettings.KEY_VIBRATE_APP_HOVER)
                         && !mAnimationHiding
+                        && !LensPhysicsPolicy.shouldReduceLensMotion(context)
                     ) {
                         performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
                     }
@@ -577,7 +579,9 @@ class LensView : View {
 
     private fun performLaunchVibration() {
         if (mInsideRect) {
-            if (mUtilSettings?.getBoolean(UtilSettings.KEY_VIBRATE_APP_LAUNCH) == true) {
+            if (mUtilSettings?.getBoolean(UtilSettings.KEY_VIBRATE_APP_LAUNCH) == true
+                && !LensPhysicsPolicy.shouldReduceLensMotion(context)
+            ) {
                 performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
             }
         }
@@ -605,7 +609,11 @@ class LensView : View {
         init {
             interpolator = AccelerateDecelerateInterpolator()
             mUtilSettings?.let {
-                duration = it.getLong(UtilSettings.KEY_ANIMATION_TIME)
+                duration = if (LensPhysicsPolicy.shouldReduceLensMotion(context)) {
+                    0L
+                } else {
+                    it.getLong(UtilSettings.KEY_ANIMATION_TIME)
+                }
             }
             setAnimationListener(object : AnimationListener {
                 override fun onAnimationStart(animation: Animation) {
