@@ -11,6 +11,12 @@
 | Risk | High |
 | Dependencies | VIP-001, ADS-001, REL-002 |
 
+## Owner decision (2026-09-22)
+
+Declined as a consequence of ADS-001/VIP-001/REL-002 all being declined the same day for the
+same root cause (ADS-001 stays with the external Ad SDK team indefinitely). Remains in `todo`
+as historical backlog record; revisit once that chain unblocks or the owner explicitly reopens it.
+
 ## User story and value
 
 As a user, I want a transparent ad-free purchase with reliable restore instead of reusable keys or manipulative ad flows.

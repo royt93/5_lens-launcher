@@ -11,6 +11,12 @@
 | Risk | Medium |
 | Dependencies | FISH-001, PERF-001, CORE-002 |
 
+## Owner decision (2026-09-22)
+
+Declined as a consequence of FISH-001 being declined the same day (chain traces back to
+ADS-001 staying with the external Ad SDK team). Remains in `todo` as historical backlog record;
+revisit once FISH-001 unblocks or the owner explicitly reopens it.
+
 ## User story and value
 
 As a user, I want subtle halos to reveal useful local groups without adding permanent visual clutter.

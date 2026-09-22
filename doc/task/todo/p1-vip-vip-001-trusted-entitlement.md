@@ -12,6 +12,13 @@
 | Dependencies | ADS-001 |
 | External prerequisites | Play Billing or signed-token backend |
 
+## Owner decision (2026-09-22)
+
+Declined as a consequence of ADS-001 staying with the external Ad SDK team indefinitely
+("không đụng ADS-001, chính thức declined cả chuỗi phụ thuộc" - explicit standing decision, not
+a scheduling delay). Remains in `todo` as historical backlog record; revisit only once ADS-001
+actually ships or the owner explicitly reopens this story.
+
 ## Context and evidence
 
 `VipKeys.kt` and `AdKeys.kt` embed reusable secrets in the APK; Base64 is reversible. `ActVipManagement.setupListeners()` validates locally and temporarily replaces the SDK secret, so a modified APK can grant entitlement.

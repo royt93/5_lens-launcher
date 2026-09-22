@@ -11,6 +11,12 @@
 | Risk | High |
 | Dependencies | CORE-001, DB-001, PERF-001, INSIGHT-001 |
 
+## Owner decision (2026-09-22)
+
+Declined as a consequence of INSIGHT-001 being declined the same day (chain traces back to
+ADS-001 staying with the external Ad SDK team). Remains in `todo` as historical backlog record;
+revisit once INSIGHT-001 unblocks or the owner explicitly reopens it.
+
 ## User story and value
 
 As a returning user, I want likely apps subtly easier to reach at the current time while keeping spatial control and privacy.

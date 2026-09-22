@@ -14,7 +14,7 @@ STATUS_DIRECTORIES = {
     "inprogress": ROOT / "inprogress",
     "done": ROOT / "done",
 }
-EXPECTED_STORY_COUNT = 72
+EXPECTED_STORY_COUNT = 74
 ALLOWED = {
     "Type": {"fix", "enhance", "new", "idea", "exclusive", "feature"},
     "Status": set(STATUS_DIRECTORIES),

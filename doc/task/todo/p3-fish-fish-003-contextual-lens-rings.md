@@ -11,6 +11,12 @@
 | Risk | High |
 | Dependencies | FISH-001, FEAT-002 |
 
+## Owner decision (2026-09-22)
+
+Declined as a consequence of FISH-001 being declined the same day (chain traces back to
+ADS-001 staying with the external Ad SDK team). Remains in `todo` as historical backlog record;
+revisit once FISH-001 unblocks or the owner explicitly reopens it.
+
 ## User story and value
 
 As a user, I want optional rings for work, travel and leisure that surface relevant apps around the lens without replacing my main layout.

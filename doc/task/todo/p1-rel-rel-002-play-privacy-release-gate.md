@@ -11,6 +11,12 @@
 | Risk | High |
 | Dependencies | ADS-001, VIP-001, SEC-003 |
 
+## Owner decision (2026-09-22)
+
+Declined as a consequence of ADS-001 (external Ad SDK team) and VIP-001 (declined the same day
+for the same reason) - standing decision, not a scheduling delay. Remains in `todo` as
+historical backlog record; revisit once ADS-001/VIP-001 land or the owner explicitly reopens it.
+
 ## Context and evidence
 
 The app includes advertising identifiers and a third-party ad wrapper, requests permissions that lack a demonstrated runtime need, enables backup without extraction rules, and lacks a reproducible privacy/release checklist.
