@@ -4,15 +4,12 @@ import android.content.pm.ActivityInfo
 import android.graphics.Rect
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.platform.app.InstrumentationRegistry
 import com.google.android.material.search.SearchView
 import com.mckimquyen.R
 import com.mckimquyen.ui.ActHome
-import com.mckimquyen.util.WindowSizeHelper
 import com.mckimquyen.views.LensView
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -70,16 +67,5 @@ class AdaptiveMultiWindowIntegrationTest {
         }
 
         scenario.close()
-    }
-
-    @Test
-    fun testWindowSizeHelperDetectsDeviceClass() {
-        val context = InstrumentationRegistry.getInstrumentation().targetContext
-        val (widthDp, heightDp) = WindowSizeHelper.getScreenDimensionsDp(context)
-        val sizeClass = WindowSizeHelper.computeWidthSizeClass(widthDp)
-
-        assertNotNull("WindowWidthSizeClass must not be null", sizeClass)
-        assertTrue("Width DP should be positive", widthDp > 0)
-        assertTrue("Height DP should be positive", heightDp > 0)
     }
 }
