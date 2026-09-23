@@ -1,5 +1,9 @@
 # 🧪 Unit Tests - Lens Launcher
 
+> ⚠️ **SUPERSEDED — historical snapshot.** "Total Tests: 55+" below is stale
+> (434 unit tests pass as of this writing; run `./gradlew testDevDebugUnitTest`
+> for the live count). Current status: `doc/task/README.md`.
+
 ## Tổng Quan
 
 Comprehensive unit tests để verify tất cả các fixes đã implement.

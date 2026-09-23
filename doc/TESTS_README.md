@@ -1,5 +1,9 @@
 # ✅ UNIT TESTS - PROOF OF IMPLEMENTATION
 
+> ⚠️ **SUPERSEDED — historical snapshot.** The "55+" count below is stale (434
+> unit tests pass as of this writing; run `./gradlew testDevDebugUnitTest` for
+> the live count). Current status: `doc/task/README.md`.
+
 ## 🎯 Mục Đích
 
 Document này chứng minh rằng **TẤT CẢ CÁC FIXES ĐÃ ĐƯỢC TRIỂN KHAI ĐÚNG** thông qua **55+ comprehensive unit tests**.

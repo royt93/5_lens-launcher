@@ -1,5 +1,9 @@
 # 🧠 Memory Leaks & Bug Audit — Lens Launcher
 
+> ⚠️ **SUPERSEDED — historical snapshot as of 2026-04-05.** Many lifecycle/cache
+> fixes have landed since (see `doc/task/done/` and `doc/task/README.md`, the
+> live status source). The "0 issue còn lại" claim below is not current.
+
 > Audit toàn bộ mã nguồn, fix và verify qua nhiều vòng review.  
 > Cập nhật lần cuối: **2026-04-05** | Trạng thái: ✅ **HOÀN THÀNH — 0 issue còn lại**
 

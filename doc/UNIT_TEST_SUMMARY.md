@@ -1,5 +1,9 @@
 # ✅ UNIT TEST SUMMARY - Chứng Minh Implementation Đúng
 
+> ⚠️ **SUPERSEDED — historical snapshot.** The "55+" count below is stale (434
+> unit tests pass as of this writing; run `./gradlew testDevDebugUnitTest` for
+> the live count). Current status: `doc/task/README.md`.
+
 ## 🎯 Executive Summary
 
 **55+ unit tests** đã được tạo để **CHỨNG MINH** rằng tất cả các fixes đã được triển khai **ĐÚNG** và **HOẠT ĐỘNG**.

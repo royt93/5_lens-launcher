@@ -1,5 +1,8 @@
 # 📊 TÓM TẮT CÁC VẤN ĐỀ ĐÃ FIX
 
+> ⚠️ **SUPERSEDED — historical snapshot.** The "11/27 issues" count below predates
+> the current backlog workflow. Live status: `doc/task/README.md` (done/inprogress/todo).
+
 ## ✅ Đã Fix Hoàn Tất (11/27 issues)
 
 ### 1. **Deprecation & Warnings** (5/5) ✅

@@ -1,4 +1,8 @@
 # Ad SDK Integration — Test Plan & Results
+> ⚠️ **SUPERSEDED — historical snapshot from 2026-06-20.** Consent-gating
+> behavior has since been found to conflict with this flow (see
+> `doc/task/inprogress/p1-ads-ads-001-consent-state-machine.md`); re-run this
+> plan once that story lands.
 > Device: Pixel 7 Pro · Build: devDebug 2026.06.20 · Date: 2026-06-20
 
 ---

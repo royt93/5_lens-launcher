@@ -1,5 +1,11 @@
 # Fisheye Lens Launcher — Product & Engineering Backlog
 
+> **This file is the live status source of truth** for backlog state and test/build
+> evidence (each story below carries its own point-in-time counts as it lands).
+> Other docs under `doc/` predate this workflow and are marked superseded — treat
+> their numbers as historical, not current. For a fresh test count, run
+> `./gradlew testDevDebugUnitTest`.
+
 > Audit baseline: 2026-09-05 · Branch: `dev` · Scope: Android app + tests/resources/config/docs + `store-assets`
 
 ## Working agreement
@@ -98,6 +104,7 @@
 - UI-002 — Material You full revamp (all screens): All screens (`ActSettings`, `ActAbout`, `ActVipManagement`, `SuperWebViewActivity`, `SplashAct`), bottom sheets (`LanguageBottomSheetFragment`), dialogs (Sort, Night mode, Highlight color, App folder) migrated to Material You M3 tokens, high-contrast dynamic colors, and edge-to-edge system bar controllers. Legacy `afollestad.material-dialogs` eliminated. 3-tier test suite established (Unit + Widget + Integration), 100% pass on TECNO KJ7. Self-audited **9.8/10** (2026-09-20, TECNO KJ7).
 - SEARCH-005 — Contacts search + quick call/message: Zero-persistence ephemeral contact queries (`contact`, `call`, `message`, `lien he`, `goi`), standard `ACTION_DIAL`/`ACTION_SENDTO` intents, single-prompt permission affordance with memory. Connected test runner crash fixed via test hook. Full regression: 327 unit tests, 22/22 widget tests, 2/2 integration tests, 0 lint errors, TECNO KJ7 smoke verified. Self-audited **9.6/10** (2026-09-20, TECNO KJ7).
 - ARCH-001 — Decompose complex UI controllers: `ActSettings.java` decomposed from 946 to 531 lines (-415 lines), moving menu routing, dialog coordination, ad state, VIP actions and intent construction into cohesive Kotlin collaborators (`SettingsMenuRouter`, `SettingsDialogCoordinator`, `SettingsAdVipDelegate`, `SettingsIntentHelper`). `onOptionsItemSelected` cyclomatic complexity dropped 20→2, cognitive complexity 128→2. 3-tier test suite added: 5 new unit test classes (367/367 unit tests green), 1 new widget test (3/3 green), 1 new integration test (3/3 green), full regression pass (12/12 connected tests green on TECNO BG6). Self-audited **9.80/10** (2026-09-20, TECNO BG6).
+- DOC-001 — Consolidated stale documentation (2026-09-23, owner-picked filler once the real backlog ran dry — everything else chains to declined `ADS-001` or its blocked dependents, or is CI-gate/`store-assets` scope already declined). Made this file the explicit live status source; added a `⚠️ SUPERSEDED` banner (pointing back here) to every dated historical doc still claiming stale "55+ tests"/"0 issues" numbers (`memory_leak.md`, `FIX_SUMMARY.md`, `CODE_REVIEW_RISKS.md`, `UNIT_TEST_SUMMARY.md`, `TESTS_README.md`, `app/src/test/README.md`, `MIGRATION_GUIDE.md`, `AD_SDK_TEST_PLAN.md`); root `README.md` gained a "Docs" section linking to `CLAUDE.md`/this file/ad docs/`store-assets` instead of duplicating content. Live count verified: 434 unit tests, 0 failures (`./gradlew testDevDebugUnitTest`). One item deliberately left open rather than guessed at: `doc/init.md`'s content (currency-input notes) doesn't match this app — flagged for owner review, not deleted. Doc-only change; no code/test-layer touched. Self-audited **9.2/10**.
 
 ## 🟡 In progress
 

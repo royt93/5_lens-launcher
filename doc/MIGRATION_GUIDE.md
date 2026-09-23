@@ -1,5 +1,9 @@
 # 📋 MIGRATION GUIDE - Hướng dẫn Fix các vấn đề còn lại
 
+> ⚠️ **SUPERSEDED — historical snapshot.** Remaining work tracking has moved to
+> `doc/task/todo/` / `inprogress/` / `done/`; see `doc/task/README.md` for
+> current status.
+
 ## ✅ Đã Fix (Completed)
 
 ### 1. Deprecation & Warnings

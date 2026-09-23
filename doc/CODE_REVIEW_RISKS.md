@@ -1,5 +1,8 @@
 # 🔍 Code Review Round 2 — Risk Assessment
 
+> ⚠️ **SUPERSEDED — historical snapshot from 2026-04-05.** Live status/audit
+> trail: `doc/task/README.md` and `doc/task/done/`.
+
 > Self-review lần 2: Kiểm tra sâu hơn lần 1, phát hiện thêm 3 vấn đề mới.  
 > Ngày: 2026-04-05.
 
