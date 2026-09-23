@@ -125,6 +125,9 @@
 | 8 | UI-021 Adopt the predictive back gesture | P2 | 3 |
 | 9 | PERF-004 Add a Baseline Profile for cold-start | P2 | 5 |
 | 10 | FEAT-005 Add a "Keep screen on" toggle | P2 | 2 |
+| 11 | FISH-006 Smart Focus, lite (no new data collection) | P2 | 8 |
+| 12 | FEAT-006 Export/import launcher layout | P2 | 5 |
+| 13 | UI-022 Gesture shortcuts on the lens grid | P2 | 5 |
 
 ## ⏸️ Deferred
 
@@ -141,6 +144,7 @@
 - Accessible list mode, large-screen support, store asset automation, local insights, privacy-first monetization, and five Fisheye Smart concepts remain captured as individual `idea` stories in `todo`.
 - `UI-021`/`PERF-004`/`FEAT-005` (2026-09-23, owner-picked from a ponytail-audit-triggered perf/Material You gap check): predictive back gesture, Baseline Profile cold-start, and a "keep screen on" toggle — scoped as full stories, see `todo/`.
 - Not yet scoped into a story (flagged, not picked): themed/monochrome adaptive app icon (Android 13+, `<monochrome>` missing from `mipmap-anydpi-v26/ic_launcher.xml` — ties into the existing dynamic-color work from `UI-005`); `StrictMode` in debug builds to catch main-thread I/O/leaked closeables during development (dev-time only, zero user-facing risk).
+- `FISH-006`/`FEAT-006`/`UI-022` (2026-09-23, owner-picked exclusive-feature brainstorm, deliberately scoped to avoid the declined `ADS-001`/`INSIGHT-001`/`VIP-001`/`REL-002` chain): a lite re-scope of `FISH-001`'s Smart Focus using only the `open count` Room already persists (no new tracking), export/import of the existing layout data model, and lens-grid gesture shortcuts reusing `SEARCH-003`'s already-extracted intent helpers. `FISH-006` is explicitly a re-scope proposal for owner sign-off, not an automatic go — see the story file.
 - ✅ Material You full revamp (owner decision, 2026-09-12): scoped and split into `UI-002`/`UI-003`/`UI-004`/`UI-006`, all shipped this session (see Implemented). `UI-005` (dynamic color audit, found along the way) also shipped.
 - Search expansion (owner decision, 2026-09-12): scoped and split into `SEARCH-001`/`SEARCH-002`/`SEARCH-003`/`SEARCH-004`/`SEARCH-006` (**all shipped**, see Implemented). `SEARCH-005` (contacts — `READ_CONTACTS`) is now `inprogress` after owner dev-loop sign-off on 2026-09-13; Pixel 7 Pro verification is recorded under the owner-approved S24 replacement exception, while Play Console/privacy-policy contacts declarations remain required before production release. `SEARCH-004`'s own CAMERA/location Play Console Data Safety form update is likewise still owner-pending before a production release (code shipped to dev regardless).
 - ✅ Icon size default now auto-scales to device (`smallestScreenWidthDp`) instead of a fixed 18dp — `UtilSettings.calculateAutoDefaultIconSize`, live-verified on TECNO KJ7 (showed 18dp, matching this device's ~360dp baseline).
