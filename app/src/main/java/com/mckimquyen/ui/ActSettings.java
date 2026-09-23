@@ -156,7 +156,7 @@ public class ActSettings extends ActBase implements SettingsMenuHost {
 
         fabSort.hide();
         setSupportActionBar(toolbar);
-        FragmentPagerAdapter mPagerAdapter = new FragmentPagerAdapter(ActSettings.this, ActSettings.this);
+        FragmentPagerAdapter mPagerAdapter = new FragmentPagerAdapter(ActSettings.this);
         viewpager.setOffscreenPageLimit(2);
         viewpager.setAdapter(mPagerAdapter);
 

@@ -65,7 +65,7 @@ import com.mckimquyen.model.App
  *
  *     // Notify UI
  *     withContext(Dispatchers.Main) {
- *         LoadedObservable.instance.updateValue(null)
+ *         AppEventManager.notifyAppsLoaded()
  *     }
  * }
  * ```
