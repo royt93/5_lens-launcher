@@ -665,4 +665,42 @@ class AppSearchWidgetTest {
             }
         }
     }
+
+    // ==================================================================== SEARCH-007
+
+    /**
+     * SEARCH-007: DND special access has no GrantPermissionRule equivalent (it's not a runtime
+     * permission), so this widget test only exercises the not-granted/request-row rendering path -
+     * the real granted/toggle path is proven on-device in DndQuickActionIntegrationTest instead.
+     */
+    @Test
+    fun dndQuickActionOffersAccessRequestWhenNotGranted() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        UtilSettings(context).save(UtilSettings.KEY_DND_PERMISSION_REQUESTED, false)
+        ActivityScenario.launch(ActHome::class.java).use { scenario ->
+            var searchView: SearchView? = null
+            scenario.onActivity { activity ->
+                searchView = activity.findViewById(R.id.searchView)
+                searchView!!.show()
+            }
+            waitUntilShowing(searchView!!, true)
+            scenario.onActivity { searchView!!.editText.setText("dnd") }
+            scenario.onActivity { activity ->
+                val notificationManager = activity.getSystemService(android.app.NotificationManager::class.java)
+                org.junit.Assume.assumeTrue(
+                    "this test only proves the not-granted path; skip if this device/build already has access",
+                    !notificationManager.isNotificationPolicyAccessGranted
+                )
+                assertEquals(View.VISIBLE, activity.findViewById<View>(R.id.quickActionRow).visibility)
+                assertEquals(
+                    activity.getString(R.string.quick_action_tap_to_allow),
+                    activity.findViewById<TextView>(R.id.tvQuickActionValue).text.toString()
+                )
+                assertTrue(
+                    "row must be clickable so tapping can open the DND access Settings screen",
+                    activity.findViewById<View>(R.id.quickActionRow).hasOnClickListeners()
+                )
+            }
+        }
+    }
 }

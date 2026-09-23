@@ -64,6 +64,7 @@
     <string name="quick_action_flashlight_on">เปิด</string>
     <string name="quick_action_flashlight_off">ปิด</string>
     <string name="quick_action_tap_to_allow">แตะเพื่ออนุญาต</string>
+    <string name="quick_action_dnd_denied">การเข้าถึงถูกปฏิเสธ — แตะเพื่ออนุญาต</string>
     <string name="error_no_flashlight">อุปกรณ์นี้ไม่มีไฟฉาย</string>
     <string name="error_too_many_apps">โหลดแอปไม่สำเร็จ</string>
     <string name="snackbar_reset_successful">รีเซ็ตค่าเป็นเริ่มต้นเรียบร้อยแล้ว</string>

@@ -64,6 +64,7 @@
     <string name="quick_action_flashlight_on">开</string>
     <string name="quick_action_flashlight_off">关</string>
     <string name="quick_action_tap_to_allow">点击以允许</string>
+    <string name="quick_action_dnd_denied">访问被拒绝 — 点击以允许</string>
     <string name="error_no_flashlight">此设备没有手电筒</string>
     <string name="error_too_many_apps">加载应用失败</string>
     <string name="snackbar_reset_successful">设置已重置为默认值</string>

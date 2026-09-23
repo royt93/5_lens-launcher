@@ -66,6 +66,8 @@
     <string name="quick_action_flashlight_on">On</string>
     <string name="quick_action_flashlight_off">Off</string>
     <string name="quick_action_tap_to_allow">Tap to allow</string>
+    <!-- SEARCH-007 -->
+    <string name="quick_action_dnd_denied">Access denied — tap to allow</string>
     <string name="error_no_flashlight">No flashlight on this device</string>
     <string name="error_too_many_apps">Failed to Load Apps</string>
     <string name="snackbar_reset_successful">Values Reset To Default</string>

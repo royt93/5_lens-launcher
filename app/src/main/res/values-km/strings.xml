@@ -64,6 +64,7 @@
     <string name="quick_action_flashlight_on">បើក</string>
     <string name="quick_action_flashlight_off">បិទ</string>
     <string name="quick_action_tap_to_allow">ចុចដើម្បីអនុញ្ញាត</string>
+    <string name="quick_action_dnd_denied">ការចូលប្រើត្រូវបានបដិសេធ — ចុចដើម្បីអនុញ្ញាត</string>
     <string name="error_no_flashlight">ឧបករណ៍នេះគ្មានពិល</string>
     <string name="error_too_many_apps">មិនអាចផ្ទុកកម្មវិធីបានទេ</string>
     <string name="snackbar_reset_successful">ការកំណត់ត្រូវបានកំណត់ទៅលំនាំដើមវិញហើយ</string>

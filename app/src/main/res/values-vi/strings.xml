@@ -63,6 +63,7 @@
     <string name="quick_action_flashlight_on">Bật</string>
     <string name="quick_action_flashlight_off">Tắt</string>
     <string name="quick_action_tap_to_allow">Chạm để cho phép</string>
+    <string name="quick_action_dnd_denied">Quyền truy cập bị từ chối — chạm để cho phép</string>
     <string name="error_no_flashlight">Thiết bị này không có đèn pin</string>
     <string name="error_too_many_apps">Lỗi tải ứng dụng</string>
     <string name="snackbar_reset_successful">Giá trị đã được thiết lập lại mặc định</string>

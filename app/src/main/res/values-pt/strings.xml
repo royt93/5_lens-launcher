@@ -64,6 +64,7 @@
     <string name="quick_action_flashlight_on">Ativado</string>
     <string name="quick_action_flashlight_off">Desativado</string>
     <string name="quick_action_tap_to_allow">Toque para permitir</string>
+    <string name="quick_action_dnd_denied">Acesso negado — toque para permitir</string>
     <string name="error_no_flashlight">Sem lanterna neste dispositivo</string>
     <string name="error_too_many_apps">Erro ao carregar aplicativos</string>
     <string name="snackbar_reset_successful">Configurações restauradas para o padrão</string>

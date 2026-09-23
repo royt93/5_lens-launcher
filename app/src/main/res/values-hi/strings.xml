@@ -64,6 +64,7 @@
     <string name="quick_action_flashlight_on">चालू</string>
     <string name="quick_action_flashlight_off">बंद</string>
     <string name="quick_action_tap_to_allow">अनुमति देने के लिए टैप करें</string>
+    <string name="quick_action_dnd_denied">पहुँच अस्वीकृत — अनुमति देने के लिए टैप करें</string>
     <string name="error_no_flashlight">इस डिवाइस में फ्लैशलाइट नहीं है</string>
     <string name="error_too_many_apps">ऐप्स लोड करने में विफल</string>
     <string name="snackbar_reset_successful">सेटिंग्स डिफ़ॉल्ट पर रीसेट कर दी गईं</string>

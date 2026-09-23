@@ -104,6 +104,12 @@ class UtilSettings(context: Context) {
         // resolveWifiSsid for why "already asked" matters).
         const val KEY_QUICK_ACTION_FLASHLIGHT = "quick_action_flashlight_enabled"
         const val KEY_QUICK_ACTION_WIFI_SSID = "quick_action_wifi_ssid_enabled"
+        // SEARCH-007: DND special access (ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS) has no
+        // system permission dialog to "remember a decline" for - it's always a manual Settings
+        // hop the user explicitly taps into, so unlike KEY_FLASHLIGHT_PERMISSION_REQUESTED below,
+        // this key only changes the row's copy (first ask vs. "still denied"), never hides it.
+        const val KEY_QUICK_ACTION_DND = "quick_action_dnd_enabled"
+        const val KEY_DND_PERMISSION_REQUESTED = "dnd_permission_requested"
         const val KEY_FLASHLIGHT_PERMISSION_REQUESTED = "flashlight_permission_requested"
         const val KEY_WIFI_SSID_PERMISSION_REQUESTED = "wifi_ssid_permission_requested"
         const val KEY_CONTACTS_PERMISSION_REQUESTED = "contacts_permission_requested"
@@ -219,7 +225,7 @@ class UtilSettings(context: Context) {
         KEY_KEEP_SCREEN_ON -> prefs.getBoolean(name, DEFAULT_KEEP_SCREEN_ON)
         KEY_QUICK_ACTION_CALCULATOR, KEY_QUICK_ACTION_UNIT, KEY_QUICK_ACTION_TIMER,
         KEY_QUICK_ACTION_BATTERY, KEY_QUICK_ACTION_SETTINGS,
-        KEY_QUICK_ACTION_FLASHLIGHT, KEY_QUICK_ACTION_WIFI_SSID ->
+        KEY_QUICK_ACTION_FLASHLIGHT, KEY_QUICK_ACTION_WIFI_SSID, KEY_QUICK_ACTION_DND ->
             prefs.getBoolean(name, DEFAULT_QUICK_ACTION_ENABLED)
         // KEY_FLASHLIGHT_PERMISSION_REQUESTED / KEY_WIFI_SSID_PERMISSION_REQUESTED fall through
         // to the else branch below - default false is exactly DEFAULT_BOOLEAN already.

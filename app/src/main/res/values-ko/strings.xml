@@ -64,6 +64,7 @@
     <string name="quick_action_flashlight_on">켜짐</string>
     <string name="quick_action_flashlight_off">꺼짐</string>
     <string name="quick_action_tap_to_allow">허용하려면 탭하세요</string>
+    <string name="quick_action_dnd_denied">액세스가 거부됨 — 허용하려면 탭하세요</string>
     <string name="error_no_flashlight">이 기기에는 손전등이 없습니다</string>
     <string name="error_too_many_apps">앱 로드 실패</string>
     <string name="snackbar_reset_successful">설정이 기본값으로 재설정되었습니다</string>

@@ -64,6 +64,7 @@
     <string name="quick_action_flashlight_on">Attiva</string>
     <string name="quick_action_flashlight_off">Disattiva</string>
     <string name="quick_action_tap_to_allow">Tocca per consentire</string>
+    <string name="quick_action_dnd_denied">Accesso negato: tocca per consentire</string>
     <string name="error_no_flashlight">Nessuna torcia su questo dispositivo</string>
     <string name="error_too_many_apps">Impossibile caricare le app</string>
     <string name="snackbar_reset_successful">Impostazioni ripristinate ai valori predefiniti</string>

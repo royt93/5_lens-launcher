@@ -2,6 +2,7 @@ package com.mckimquyen.search
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -35,6 +36,17 @@ sealed class QuickAction {
      *  (ActHome owns the request flow); once granted, resolve() returns [Info] with the real
      *  SSID instead. */
     data class WifiSsidPermissionRequest(val label: String) : QuickAction()
+
+    /** SEARCH-007: Do Not Disturb special access (NotificationManager.isNotificationPolicyAccessGranted())
+     *  not yet granted - tapping opens Settings' access screen (ActHome owns the request flow).
+     *  [previouslyRequested] only changes the row's copy ("tap to allow" vs "still denied, tap to
+     *  allow") - it never hides the row, unlike [WifiSsidPermissionRequest]'s runtime-permission
+     *  decline memory, since there is no OS popup here to avoid re-nagging with. */
+    data class DndAccessRequest(val label: String, val previouslyRequested: Boolean) : QuickAction()
+
+    /** SEARCH-007: access already granted - tapping toggles Do Not Disturb on/off. [isOn] reflects
+     *  the real current NotificationManager.getCurrentInterruptionFilter() state, not a cached guess. */
+    data class DndToggle(val label: String, val isOn: Boolean) : QuickAction()
 }
 
 object QuickActionEngine {
@@ -52,6 +64,7 @@ object QuickActionEngine {
             ?: (if (enabled(UtilSettings.KEY_QUICK_ACTION_BATTERY)) resolveBattery(context, raw) else null)
             ?: (if (enabled(UtilSettings.KEY_QUICK_ACTION_FLASHLIGHT)) resolveFlashlightToggle(context, raw) else null)
             ?: (if (enabled(UtilSettings.KEY_QUICK_ACTION_WIFI_SSID)) resolveWifiSsid(context, raw) else null)
+            ?: (if (enabled(UtilSettings.KEY_QUICK_ACTION_DND)) resolveDnd(context, raw) else null)
             ?: (if (enabled(UtilSettings.KEY_QUICK_ACTION_SETTINGS)) resolveSettingsShortcut(raw) else null)
     }
 
@@ -371,5 +384,30 @@ object QuickActionEngine {
         val ssid = wifiManager.connectionInfo?.ssid?.trim('"')
         if (ssid.isNullOrEmpty() || ssid == "<unknown ssid>") return null
         return QuickAction.Info(raw.trim(), ssid)
+    }
+
+    // ==================================================================== Focus / Do Not Disturb
+
+    private val DND_KEYWORDS = setOf(
+        "dnd", "focus", "do not disturb", "khong lam phien", "tap trung", "che do tap trung"
+    )
+
+    /**
+     * SEARCH-007: DND special access has no runtime-permission dialog - it's always a manual
+     * Settings screen hop (ActHome.openDndAccessSettings()), so unlike [resolveFlashlightToggle]/
+     * [resolveWifiSsid] there is no "already asked, stop nagging" hide - the row always tells the
+     * user how to grant it, just with different copy depending on whether they've been sent there
+     * before (see [QuickAction.DndAccessRequest]).
+     */
+    internal fun resolveDnd(context: Context, raw: String): QuickAction? {
+        if (AppSearchEngine.normalize(raw) !in DND_KEYWORDS) return null
+        val notificationManager = context.applicationContext
+            .getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager ?: return null
+        if (!notificationManager.isNotificationPolicyAccessGranted) {
+            val previouslyRequested = UtilSettings(context).getBoolean(UtilSettings.KEY_DND_PERMISSION_REQUESTED)
+            return QuickAction.DndAccessRequest(raw.trim(), previouslyRequested)
+        }
+        val isOn = notificationManager.currentInterruptionFilter != NotificationManager.INTERRUPTION_FILTER_ALL
+        return QuickAction.DndToggle(raw.trim(), isOn)
     }
 }

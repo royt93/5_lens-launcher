@@ -64,6 +64,7 @@
     <string name="quick_action_flashlight_on">Включено</string>
     <string name="quick_action_flashlight_off">Выключено</string>
     <string name="quick_action_tap_to_allow">Нажмите, чтобы разрешить</string>
+    <string name="quick_action_dnd_denied">Доступ запрещён — нажмите, чтобы разрешить</string>
     <string name="error_no_flashlight">На этом устройстве нет фонарика</string>
     <string name="error_too_many_apps">Не удалось загрузить приложения</string>
     <string name="snackbar_reset_successful">Настройки сброшены по умолчанию</string>

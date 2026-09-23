@@ -64,6 +64,7 @@
     <string name="quick_action_flashlight_on">قيد التشغيل</string>
     <string name="quick_action_flashlight_off">إيقاف</string>
     <string name="quick_action_tap_to_allow">انقر للسماح</string>
+    <string name="quick_action_dnd_denied">تم رفض الوصول — انقر للسماح</string>
     <string name="error_no_flashlight">لا يوجد مصباح يدوي على هذا الجهاز</string>
     <string name="error_too_many_apps">فشل في تحميل التطبيقات</string>
     <string name="snackbar_reset_successful">تم إعادة تعيين القيم إلى الافتراضية</string>

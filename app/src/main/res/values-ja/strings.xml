@@ -64,6 +64,7 @@
     <string name="quick_action_flashlight_on">オン</string>
     <string name="quick_action_flashlight_off">オフ</string>
     <string name="quick_action_tap_to_allow">タップして許可</string>
+    <string name="quick_action_dnd_denied">アクセスが拒否されました。タップして許可</string>
     <string name="error_no_flashlight">この端末にはフラッシュライトがありません</string>
     <string name="error_too_many_apps">アプリの読み込みに失敗しました</string>
     <string name="snackbar_reset_successful">設定をデフォルトにリセットしました</string>

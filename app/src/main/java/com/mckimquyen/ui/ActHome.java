@@ -581,6 +581,16 @@ public class ActHome extends ActBase {
             tvQuickActionLabel.setText(permissionRequest.getLabel());
             tvQuickActionValue.setText(R.string.quick_action_tap_to_allow);
             quickActionRow.setOnClickListener(v -> requestWifiSsidPermission());
+        } else if (action instanceof QuickAction.DndAccessRequest dndRequest) {
+            tvQuickActionLabel.setText(dndRequest.getLabel());
+            tvQuickActionValue.setText(dndRequest.getPreviouslyRequested()
+                    ? R.string.quick_action_dnd_denied
+                    : R.string.quick_action_tap_to_allow);
+            quickActionRow.setOnClickListener(v -> openDndAccessSettings());
+        } else if (action instanceof QuickAction.DndToggle dndToggle) {
+            tvQuickActionLabel.setText(dndToggle.getLabel());
+            tvQuickActionValue.setText(dndToggle.isOn() ? R.string.quick_action_flashlight_on : R.string.quick_action_flashlight_off);
+            quickActionRow.setOnClickListener(v -> performDndToggle(dndToggle.isOn()));
         }
     }
 
@@ -636,6 +646,35 @@ public class ActHome extends ActBase {
                 new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
                 REQUEST_CODE_WIFI_SSID
         );
+    }
+
+    /**
+     * SEARCH-007: DND special access has no requestPermissions() callback - the only way to grant
+     * it is this Settings screen, and the only way to detect the result is re-checking
+     * isNotificationPolicyAccessGranted() next time the row renders, which onResume() does below.
+     */
+    private void openDndAccessSettings() {
+        new UtilSettings(this).save(UtilSettings.KEY_DND_PERMISSION_REQUESTED, true);
+        try {
+            startActivity(new Intent(android.provider.Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS));
+        } catch (ActivityNotFoundException e) {
+            Toast.makeText(this, R.string.error_app_not_found, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void performDndToggle(boolean currentlyOn) {
+        android.app.NotificationManager notificationManager =
+                (android.app.NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        if (!notificationManager.isNotificationPolicyAccessGranted()) {
+            // Access was revoked externally between resolve() and this tap - fall back to the
+            // request flow instead of crashing on setInterruptionFilter's SecurityException.
+            openDndAccessSettings();
+            return;
+        }
+        notificationManager.setInterruptionFilter(currentlyOn
+                ? android.app.NotificationManager.INTERRUPTION_FILTER_ALL
+                : android.app.NotificationManager.INTERRUPTION_FILTER_NONE);
+        updateQuickAction(appSearch.getText());
     }
 
     private void updateContactAction(CharSequence query) {
@@ -751,6 +790,10 @@ public class ActHome extends ActBase {
         // behind the search panel instead of the matching tonal color.
         if (searchView.isShowing()) {
             setSearchSystemBarsHarmonized(true);
+            // SEARCH-007: DND access has no onRequestPermissionsResult callback - re-resolve the
+            // quick-action row on every resume so returning from openDndAccessSettings() reflects
+            // the real granted/denied state instead of the stale pre-Settings copy.
+            updateQuickAction(appSearch.getText());
         }
         if (RAppsSingleton.getInstance().getApps() != null && !RAppsSingleton.getInstance().getApps().isEmpty()) {
             assignApps(Objects.requireNonNull(RAppsSingleton.getInstance().getApps()));
