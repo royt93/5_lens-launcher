@@ -12,6 +12,9 @@
 | Dependencies | None |
 | External prerequisites | Play Console owner access, CI secret store |
 
+> Step-by-step owner-action checklist (Play Console rotation, CI secrets, history
+> purge, secret scanning): `doc/task/SEC-001_OWNER_CHECKLIST.md`.
+
 ## Context and evidence
 
 `app/keystore.jks` is tracked by Git. `gradle.properties` contains `KS_ALIAS` and `KS_PW` in plain text, and `app/build.gradle` uses them for release signing. The credential also exists in repository history.
