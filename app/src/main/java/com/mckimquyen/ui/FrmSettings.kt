@@ -39,6 +39,7 @@ class FrmSettings : Fragment(), SettingsInterface {
     private var swShowNewAppTag: SwitchCompat? = null
     private var swShowTouchSelection: SwitchCompat? = null
     private var swShowSearchBar: SwitchCompat? = null
+    private var swKeepScreenOn: SwitchCompat? = null
     private var tvSelectedSearchHint: TextView? = null
     private var swQuickActionCalculator: SwitchCompat? = null
     private var swQuickActionUnit: SwitchCompat? = null
@@ -89,6 +90,7 @@ class FrmSettings : Fragment(), SettingsInterface {
         swShowNewAppTag = view.findViewById(R.id.swShowNewAppTag)
         swShowTouchSelection = view.findViewById(R.id.swShowTouchSelection)
         swShowSearchBar = view.findViewById(R.id.swShowSearchBar)
+        swKeepScreenOn = view.findViewById(R.id.swKeepScreenOn)
         tvSelectedSearchHint = view.findViewById(R.id.tvSelectedSearchHint)
         swQuickActionCalculator = view.findViewById(R.id.swQuickActionCalculator)
         swQuickActionUnit = view.findViewById(R.id.swQuickActionUnit)
@@ -135,6 +137,7 @@ class FrmSettings : Fragment(), SettingsInterface {
         view.findViewById<View>(R.id.swShowNewAppTagParent).setOnClickListener(null)
         view.findViewById<View>(R.id.rlSwitchShowTouchSelectionParent).setOnClickListener(null)
         view.findViewById<View>(R.id.rlSwitchShowSearchBarParent).setOnClickListener(null)
+        view.findViewById<View>(R.id.rlSwitchKeepScreenOnParent).setOnClickListener(null)
         view.findViewById<View>(R.id.rlSwitchQuickActionCalculatorParent).setOnClickListener(null)
         view.findViewById<View>(R.id.rlSwitchQuickActionUnitParent).setOnClickListener(null)
         view.findViewById<View>(R.id.rlSwitchQuickActionTimerParent).setOnClickListener(null)
@@ -162,6 +165,9 @@ class FrmSettings : Fragment(), SettingsInterface {
         }
         swShowSearchBar?.setOnCheckedChangeListener { _, isChecked ->
             utilSettings?.save(UtilSettings.KEY_SHOW_SEARCH_BAR, isChecked)
+        }
+        swKeepScreenOn?.setOnCheckedChangeListener { _, isChecked ->
+            utilSettings?.save(UtilSettings.KEY_KEEP_SCREEN_ON, isChecked)
         }
         swQuickActionCalculator?.setOnCheckedChangeListener { _, isChecked ->
             utilSettings?.save(UtilSettings.KEY_QUICK_ACTION_CALCULATOR, isChecked)
@@ -257,6 +263,7 @@ class FrmSettings : Fragment(), SettingsInterface {
             swShowNewAppTag?.isChecked = us.getBoolean(UtilSettings.KEY_SHOW_NEW_APP_TAG)
             swShowTouchSelection?.isChecked = us.getBoolean(UtilSettings.KEY_SHOW_TOUCH_SELECTION)
             swShowSearchBar?.isChecked = us.getBoolean(UtilSettings.KEY_SHOW_SEARCH_BAR)
+            swKeepScreenOn?.isChecked = us.getBoolean(UtilSettings.KEY_KEEP_SCREEN_ON)
             swQuickActionCalculator?.isChecked = us.getBoolean(UtilSettings.KEY_QUICK_ACTION_CALCULATOR)
             swQuickActionUnit?.isChecked = us.getBoolean(UtilSettings.KEY_QUICK_ACTION_UNIT)
             swQuickActionTimer?.isChecked = us.getBoolean(UtilSettings.KEY_QUICK_ACTION_TIMER)
@@ -339,6 +346,7 @@ class FrmSettings : Fragment(), SettingsInterface {
             us.save(UtilSettings.KEY_SHOW_NAME_APP_HOVER, true)
             us.save(UtilSettings.KEY_SHOW_TOUCH_SELECTION, false)
             us.save(UtilSettings.KEY_SHOW_SEARCH_BAR, UtilSettings.DEFAULT_SHOW_SEARCH_BAR)
+            us.save(UtilSettings.KEY_KEEP_SCREEN_ON, UtilSettings.DEFAULT_KEEP_SCREEN_ON)
             us.save(UtilSettings.KEY_QUICK_ACTION_CALCULATOR, UtilSettings.DEFAULT_QUICK_ACTION_ENABLED)
             us.save(UtilSettings.KEY_QUICK_ACTION_UNIT, UtilSettings.DEFAULT_QUICK_ACTION_ENABLED)
             us.save(UtilSettings.KEY_QUICK_ACTION_TIMER, UtilSettings.DEFAULT_QUICK_ACTION_ENABLED)

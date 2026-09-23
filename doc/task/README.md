@@ -105,6 +105,7 @@
 - SEARCH-005 — Contacts search + quick call/message: Zero-persistence ephemeral contact queries (`contact`, `call`, `message`, `lien he`, `goi`), standard `ACTION_DIAL`/`ACTION_SENDTO` intents, single-prompt permission affordance with memory. Connected test runner crash fixed via test hook. Full regression: 327 unit tests, 22/22 widget tests, 2/2 integration tests, 0 lint errors, TECNO KJ7 smoke verified. Self-audited **9.6/10** (2026-09-20, TECNO KJ7).
 - ARCH-001 — Decompose complex UI controllers: `ActSettings.java` decomposed from 946 to 531 lines (-415 lines), moving menu routing, dialog coordination, ad state, VIP actions and intent construction into cohesive Kotlin collaborators (`SettingsMenuRouter`, `SettingsDialogCoordinator`, `SettingsAdVipDelegate`, `SettingsIntentHelper`). `onOptionsItemSelected` cyclomatic complexity dropped 20→2, cognitive complexity 128→2. 3-tier test suite added: 5 new unit test classes (367/367 unit tests green), 1 new widget test (3/3 green), 1 new integration test (3/3 green), full regression pass (12/12 connected tests green on TECNO BG6). Self-audited **9.80/10** (2026-09-20, TECNO BG6).
 - DOC-001 — Consolidated stale documentation (2026-09-23, owner-picked filler once the real backlog ran dry — everything else chains to declined `ADS-001` or its blocked dependents, or is CI-gate/`store-assets` scope already declined). Made this file the explicit live status source; added a `⚠️ SUPERSEDED` banner (pointing back here) to every dated historical doc still claiming stale "55+ tests"/"0 issues" numbers (`memory_leak.md`, `FIX_SUMMARY.md`, `CODE_REVIEW_RISKS.md`, `UNIT_TEST_SUMMARY.md`, `TESTS_README.md`, `app/src/test/README.md`, `MIGRATION_GUIDE.md`, `AD_SDK_TEST_PLAN.md`); root `README.md` gained a "Docs" section linking to `CLAUDE.md`/this file/ad docs/`store-assets` instead of duplicating content. Live count verified: 434 unit tests, 0 failures (`./gradlew testDevDebugUnitTest`). One item deliberately left open rather than guessed at: `doc/init.md`'s content (currency-input notes) doesn't match this app — flagged for owner review, not deleted. Doc-only change; no code/test-layer touched. Self-audited **9.2/10**.
+- FEAT-005 — "Keep screen on" toggle (2026-09-23, owner-picked first `/loop` pick off the fresh backlog): new `UtilSettings.KEY_KEEP_SCREEN_ON` (default off) + `FrmSettings` switch row, following `UI-001`'s `KEY_SHOW_SEARCH_BAR` pattern exactly; `ActHome.updateKeepScreenOnFlag()` re-reads on every `onResume()` (mirrors `updateSearchBarVisibility()`) to set/clear real `FLAG_KEEP_SCREEN_ON` — no explicit `onPause` handling needed since a `Window` flag only governs screen-on state while its window is foregrounded (platform semantics, not assumed). Hint text discloses the battery-saver-can-still-override caveat, translated into all 16 non-English locales. 4 new unit + 4 new widget + 3 new integration tests (real `Window.attributes.flags` bit assertions), all pass; full 425/425 unit regression; lint 0 errors/9 warnings unchanged. Live-verified both directions on Samsung SM-S928B (S24 Ultra): `dumpsys window` `fl=` bit `0x80` toggled on/off correctly via real UI taps, screenshotted. Self-audited **9.6/10**.
 
 ## 🟡 In progress
 
@@ -124,16 +125,15 @@
 | 7 | AUDIT-001 Score every change round and gate push | P1 | 3 |
 | 8 | UI-021 Adopt the predictive back gesture | P2 | 3 |
 | 9 | PERF-004 Add a Baseline Profile for cold-start | P2 | 5 |
-| 10 | FEAT-005 Add a "Keep screen on" toggle | P2 | 2 |
-| 11 | FISH-006 Smart Focus, lite (no new data collection) | P2 | 8 |
-| 12 | FEAT-006 Export/import launcher layout | P2 | 5 |
-| 13 | UI-022 Gesture shortcuts on the lens grid | P2 | 5 |
-| 14 | SEARCH-007 Focus/DND quick toggle | P2 | 2 |
-| 15 | SEARCH-008 QR/barcode scan quick action | P2 | 3 |
-| 16 | FEAT-007 Multi-select bulk actions in the Apps tab | P2 | 5 |
-| 17 | FISH-007 Depth-of-field blur by focus distance | P2 | 5 |
-| 18 | FISH-009 Live pinch-to-adjust lens curvature | P2 | 5 |
-| 19 | FISH-008 Multi-lens workspaces | P2 | 13 → split required |
+| 10 | FISH-006 Smart Focus, lite (no new data collection) | P2 | 8 |
+| 11 | FEAT-006 Export/import launcher layout | P2 | 5 |
+| 12 | UI-022 Gesture shortcuts on the lens grid | P2 | 5 |
+| 13 | SEARCH-007 Focus/DND quick toggle | P2 | 2 |
+| 14 | SEARCH-008 QR/barcode scan quick action | P2 | 3 |
+| 15 | FEAT-007 Multi-select bulk actions in the Apps tab | P2 | 5 |
+| 16 | FISH-007 Depth-of-field blur by focus distance | P2 | 5 |
+| 17 | FISH-009 Live pinch-to-adjust lens curvature | P2 | 5 |
+| 18 | FISH-008 Multi-lens workspaces | P2 | 13 → split required |
 
 ## ⏸️ Deferred
 
@@ -148,7 +148,7 @@
 ## 💭 Ideas
 
 - Accessible list mode, large-screen support, store asset automation, local insights, privacy-first monetization, and five Fisheye Smart concepts remain captured as individual `idea` stories in `todo`.
-- `UI-021`/`PERF-004`/`FEAT-005` (2026-09-23, owner-picked from a ponytail-audit-triggered perf/Material You gap check): predictive back gesture, Baseline Profile cold-start, and a "keep screen on" toggle — scoped as full stories, see `todo/`.
+- `UI-021`/`PERF-004`/`FEAT-005` (2026-09-23, owner-picked from a ponytail-audit-triggered perf/Material You gap check): predictive back gesture, Baseline Profile cold-start, and a "keep screen on" toggle — scoped as full stories, see `todo/`. `FEAT-005` shipped the same day (see Implemented); `UI-021`/`PERF-004` remain in `todo/`.
 - Not yet scoped into a story (flagged, not picked): themed/monochrome adaptive app icon (Android 13+, `<monochrome>` missing from `mipmap-anydpi-v26/ic_launcher.xml` — ties into the existing dynamic-color work from `UI-005`); `StrictMode` in debug builds to catch main-thread I/O/leaked closeables during development (dev-time only, zero user-facing risk).
 - `FISH-006`/`FEAT-006`/`UI-022` (2026-09-23, owner-picked exclusive-feature brainstorm, deliberately scoped to avoid the declined `ADS-001`/`INSIGHT-001`/`VIP-001`/`REL-002` chain): a lite re-scope of `FISH-001`'s Smart Focus using only the `open count` Room already persists (no new tracking), export/import of the existing layout data model, and lens-grid gesture shortcuts reusing `SEARCH-003`'s already-extracted intent helpers. `FISH-006` is explicitly a re-scope proposal for owner sign-off, not an automatic go — see the story file.
 - `SEARCH-007`/`SEARCH-008`/`FEAT-007` (2026-09-23, same brainstorm, round 2): DND/Focus quick toggle and QR-scan delegation follow the exact `QuickActionEngine`/`SEARCH-006` delegate-to-installed-app pattern (zero new dependency); multi-select bulk actions in the Apps tab uses native `ActionMode`, addressing the large-app-count pain point `UI-020` already documented live (346 apps on one owner device).

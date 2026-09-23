@@ -15,6 +15,8 @@
     <string name="setting_show_name_app_hover">Mostrar nombre al pasar sobre la app</string>
     <string name="setting_show_touch_selection">Mostrar selección táctil</string>
     <string name="setting_show_search_bar">Mostrar barra de búsqueda</string>
+    <string name="setting_keep_screen_on">Mantener pantalla encendida</string>
+    <string name="setting_keep_screen_on_hint">La pantalla permanece encendida mientras la pantalla de inicio del launcher está abierta. El ahorro de batería puede apagarla de todos modos.</string>
     <string name="setting_search_hint_title">Texto de sugerencia de búsqueda</string>
     <string name="setting_search_hint_default">Predeterminado</string>
     <string name="setting_quick_action_calculator">Mostrar calculadora</string>
