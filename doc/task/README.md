@@ -122,6 +122,9 @@
 | 5 | TEST-001 Establish trustworthy CI test gates | P1 | 8 |
 | 6 | TEST-002 Build complete test coverage and Tecno smoke matrix | P1 | 8 |
 | 7 | AUDIT-001 Score every change round and gate push | P1 | 3 |
+| 8 | UI-021 Adopt the predictive back gesture | P2 | 3 |
+| 9 | PERF-004 Add a Baseline Profile for cold-start | P2 | 5 |
+| 10 | FEAT-005 Add a "Keep screen on" toggle | P2 | 2 |
 
 ## ⏸️ Deferred
 
@@ -136,6 +139,8 @@
 ## 💭 Ideas
 
 - Accessible list mode, large-screen support, store asset automation, local insights, privacy-first monetization, and five Fisheye Smart concepts remain captured as individual `idea` stories in `todo`.
+- `UI-021`/`PERF-004`/`FEAT-005` (2026-09-23, owner-picked from a ponytail-audit-triggered perf/Material You gap check): predictive back gesture, Baseline Profile cold-start, and a "keep screen on" toggle — scoped as full stories, see `todo/`.
+- Not yet scoped into a story (flagged, not picked): themed/monochrome adaptive app icon (Android 13+, `<monochrome>` missing from `mipmap-anydpi-v26/ic_launcher.xml` — ties into the existing dynamic-color work from `UI-005`); `StrictMode` in debug builds to catch main-thread I/O/leaked closeables during development (dev-time only, zero user-facing risk).
 - ✅ Material You full revamp (owner decision, 2026-09-12): scoped and split into `UI-002`/`UI-003`/`UI-004`/`UI-006`, all shipped this session (see Implemented). `UI-005` (dynamic color audit, found along the way) also shipped.
 - Search expansion (owner decision, 2026-09-12): scoped and split into `SEARCH-001`/`SEARCH-002`/`SEARCH-003`/`SEARCH-004`/`SEARCH-006` (**all shipped**, see Implemented). `SEARCH-005` (contacts — `READ_CONTACTS`) is now `inprogress` after owner dev-loop sign-off on 2026-09-13; Pixel 7 Pro verification is recorded under the owner-approved S24 replacement exception, while Play Console/privacy-policy contacts declarations remain required before production release. `SEARCH-004`'s own CAMERA/location Play Console Data Safety form update is likewise still owner-pending before a production release (code shipped to dev regardless).
 - ✅ Icon size default now auto-scales to device (`smallestScreenWidthDp`) instead of a fixed 18dp — `UtilSettings.calculateAutoDefaultIconSize`, live-verified on TECNO KJ7 (showed 18dp, matching this device's ~360dp baseline).
