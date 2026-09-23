@@ -7,10 +7,12 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.net.wifi.WifiManager
 import android.provider.AlarmClock
 import android.provider.Settings
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import com.mckimquyen.util.UtilSettings
 import java.util.Locale
 
@@ -65,6 +67,7 @@ object QuickActionEngine {
             ?: (if (enabled(UtilSettings.KEY_QUICK_ACTION_FLASHLIGHT)) resolveFlashlightToggle(context, raw) else null)
             ?: (if (enabled(UtilSettings.KEY_QUICK_ACTION_WIFI_SSID)) resolveWifiSsid(context, raw) else null)
             ?: (if (enabled(UtilSettings.KEY_QUICK_ACTION_DND)) resolveDnd(context, raw) else null)
+            ?: (if (enabled(UtilSettings.KEY_QUICK_ACTION_SCAN)) resolveScan(context, raw) else null)
             ?: (if (enabled(UtilSettings.KEY_QUICK_ACTION_SETTINGS)) resolveSettingsShortcut(raw) else null)
     }
 
@@ -409,5 +412,33 @@ object QuickActionEngine {
         }
         val isOn = notificationManager.currentInterruptionFilter != NotificationManager.INTERRUPTION_FILTER_ALL
         return QuickAction.DndToggle(raw.trim(), isOn)
+    }
+
+    // ==================================================================== QR/barcode scan
+
+    private val SCAN_KEYWORDS = setOf(
+        "scan", "qr", "barcode", "quet qr", "ma qr", "quet ma qr", "quet ma vach", "ma vach",
+        "quet ma"
+    )
+
+    /**
+     * SEARCH-008: same delegate-to-installed-app principle as SEARCH-006's web search fallback -
+     * no ML Kit/ZXing dependency bundled here. `com.google.zxing.client.android.SCAN` is the
+     * de-facto standard implicit action most third-party scanner apps register (ZXing's own
+     * Barcode Scanner and its many compatible forks/clones); if nothing resolves it, falls back
+     * to a Play Store search instead of silently no-op'ing. Reuses the plain [QuickAction.Action]
+     * type - no new QuickAction subtype or ActHome UI wiring needed, this is exactly the same
+     * shape as [resolveSettingsShortcut].
+     */
+    internal fun resolveScan(context: Context, raw: String): QuickAction.Action? {
+        if (AppSearchEngine.normalize(raw) !in SCAN_KEYWORDS) return null
+        val scanIntent = Intent("com.google.zxing.client.android.SCAN")
+        val resolves = scanIntent.resolveActivity(context.packageManager) != null
+        val intent = if (resolves) {
+            scanIntent
+        } else {
+            Intent(Intent.ACTION_VIEW, "market://search?q=${Uri.encode("QR scanner")}&c=apps".toUri())
+        }
+        return QuickAction.Action(raw.trim(), intent)
     }
 }

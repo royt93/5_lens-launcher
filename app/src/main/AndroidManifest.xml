@@ -81,6 +81,11 @@
             <action android:name="android.intent.action.MAIN" />
             <category android:name="android.intent.category.HOME" />
         </intent>
+        <intent>
+            <!-- SEARCH-008: package-visibility (API 30+) so resolveActivity() can actually see an
+                 installed barcode scanner app instead of always falling back to Play Store. -->
+            <action android:name="com.google.zxing.client.android.SCAN" />
+        </intent>
     </queries>
 
     <!-- ========================================================================

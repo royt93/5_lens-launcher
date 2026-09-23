@@ -703,4 +703,34 @@ class AppSearchWidgetTest {
             }
         }
     }
+
+    // ==================================================================== SEARCH-008
+
+    /**
+     * SEARCH-008: proves the row renders and is clickable for either branch (direct-scan intent
+     * or Play Store fallback) - which branch this specific device takes depends on whether a
+     * scanner app happens to be installed, so this only asserts what's true regardless of that,
+     * matching the story's own disclosed test-layer split.
+     */
+    @Test
+    fun scanQuickActionRendersAndIsClickable() {
+        ActivityScenario.launch(ActHome::class.java).use { scenario ->
+            var searchView: SearchView? = null
+            scenario.onActivity { activity ->
+                searchView = activity.findViewById(R.id.searchView)
+                searchView!!.show()
+            }
+            waitUntilShowing(searchView!!, true)
+            scenario.onActivity { searchView!!.editText.setText("qr") }
+            scenario.onActivity { activity ->
+                assertEquals(View.VISIBLE, activity.findViewById<View>(R.id.quickActionRow).visibility)
+                assertEquals("qr", activity.findViewById<TextView>(R.id.tvQuickActionLabel).text.toString())
+                assertEquals("›", activity.findViewById<TextView>(R.id.tvQuickActionValue).text.toString())
+                assertTrue(
+                    "row must be clickable so tapping fires the scan/fallback intent",
+                    activity.findViewById<View>(R.id.quickActionRow).hasOnClickListeners()
+                )
+            }
+        }
+    }
 }

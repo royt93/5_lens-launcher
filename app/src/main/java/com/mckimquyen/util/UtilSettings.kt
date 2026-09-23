@@ -109,6 +109,7 @@ class UtilSettings(context: Context) {
         // hop the user explicitly taps into, so unlike KEY_FLASHLIGHT_PERMISSION_REQUESTED below,
         // this key only changes the row's copy (first ask vs. "still denied"), never hides it.
         const val KEY_QUICK_ACTION_DND = "quick_action_dnd_enabled"
+        const val KEY_QUICK_ACTION_SCAN = "quick_action_scan_enabled"
         const val KEY_DND_PERMISSION_REQUESTED = "dnd_permission_requested"
         const val KEY_FLASHLIGHT_PERMISSION_REQUESTED = "flashlight_permission_requested"
         const val KEY_WIFI_SSID_PERMISSION_REQUESTED = "wifi_ssid_permission_requested"
@@ -225,7 +226,8 @@ class UtilSettings(context: Context) {
         KEY_KEEP_SCREEN_ON -> prefs.getBoolean(name, DEFAULT_KEEP_SCREEN_ON)
         KEY_QUICK_ACTION_CALCULATOR, KEY_QUICK_ACTION_UNIT, KEY_QUICK_ACTION_TIMER,
         KEY_QUICK_ACTION_BATTERY, KEY_QUICK_ACTION_SETTINGS,
-        KEY_QUICK_ACTION_FLASHLIGHT, KEY_QUICK_ACTION_WIFI_SSID, KEY_QUICK_ACTION_DND ->
+        KEY_QUICK_ACTION_FLASHLIGHT, KEY_QUICK_ACTION_WIFI_SSID, KEY_QUICK_ACTION_DND,
+        KEY_QUICK_ACTION_SCAN ->
             prefs.getBoolean(name, DEFAULT_QUICK_ACTION_ENABLED)
         // KEY_FLASHLIGHT_PERMISSION_REQUESTED / KEY_WIFI_SSID_PERMISSION_REQUESTED fall through
         // to the else branch below - default false is exactly DEFAULT_BOOLEAN already.
