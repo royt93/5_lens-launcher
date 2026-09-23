@@ -29,6 +29,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.BackEventCompat;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
@@ -80,6 +81,66 @@ public class ActHome extends ActBase {
     private static final int REQUEST_CODE_CAMERA = 1001;
     private static final int REQUEST_CODE_WIFI_SSID = 1002;
     private static final int REQUEST_CODE_CONTACTS = 1003;
+
+    // UI-021: predictive-back shrink/fade preview bounds for the search overlay, matching
+    // Android's own predictive-back design guidance (subtle scale-down + slight fade, not a
+    // dramatic transform).
+    private static final float PREDICTIVE_BACK_MAX_SCALE = 1.0f;
+    private static final float PREDICTIVE_BACK_MIN_SCALE = 0.95f;
+    private static final float PREDICTIVE_BACK_MAX_ALPHA = 1.0f;
+    private static final float PREDICTIVE_BACK_MIN_ALPHA = 0.7f;
+
+    // UI-010 fix: this used to be an unconditional no-op, relying on SearchView's own internal
+    // MaterialBackOrchestrator to intercept back first and collapse the panel. Confirmed live on
+    // TECNO KJ7 that back does NOT close the search overlay - explicitly checking isShowing()
+    // here instead makes it work regardless of whatever SearchView is or isn't doing internally.
+    // Falls through to no-op (blocking launcher exit) otherwise, since this is the HOME activity
+    // and back should never finish it.
+    //
+    // UI-021: kept unconditionally enabled (never toggled by isShowing()) rather than disabling
+    // when search is closed - this is the HOME activity's task root, so letting back fall through
+    // to the default dispatcher when disabled risks finish()'ing it, which UI-010's fix
+    // deliberately prevents. The predictive-back preview (handleOnBackStarted/Progressed/
+    // Cancelled) is driven by this same reliable callback rather than SearchView's own internal
+    // predictive-back handling, since that's the exact path UI-010 already found unreliable on
+    // real hardware - safer to reuse the proven interception point than gamble the underlying
+    // Material bug is now fixed. Kept as a named field (not an inline anonymous registration) so
+    // widget tests can reach these methods directly via reflection, the same pattern
+    // BaseActivityRefreshRateWidgetTest already uses for a protected method.
+    private final OnBackPressedCallback searchBackCallback = new OnBackPressedCallback(true) {
+        @Override
+        public void handleOnBackStarted(@NonNull BackEventCompat backEvent) {
+            if (searchView.isShowing()) {
+                searchView.setPivotY(0f);
+            }
+        }
+
+        @Override
+        public void handleOnBackProgressed(@NonNull BackEventCompat backEvent) {
+            if (!searchView.isShowing()) return;
+            float progress = backEvent.getProgress();
+            float scale = PREDICTIVE_BACK_MAX_SCALE
+                    - (PREDICTIVE_BACK_MAX_SCALE - PREDICTIVE_BACK_MIN_SCALE) * progress;
+            searchView.setScaleX(scale);
+            searchView.setScaleY(scale);
+            searchView.setAlpha(
+                    PREDICTIVE_BACK_MAX_ALPHA
+                            - (PREDICTIVE_BACK_MAX_ALPHA - PREDICTIVE_BACK_MIN_ALPHA) * progress);
+        }
+
+        @Override
+        public void handleOnBackCancelled() {
+            resetPredictiveBackPreview();
+        }
+
+        @Override
+        public void handleOnBackPressed() {
+            resetPredictiveBackPreview();
+            if (searchView.isShowing()) {
+                hideSearch();
+            }
+        }
+    };
 
     LensView lensViews;
     private RecyclerView rvHomeAppList;
@@ -159,20 +220,10 @@ public class ActHome extends ActBase {
 
         AppEventManager.INSTANCE.getNightModeChanged().observe(this, data -> updateNightMode());
 
-        // UI-010 fix: this used to be an unconditional no-op, relying on SearchView's own
-        // internal MaterialBackOrchestrator to intercept back first and collapse the panel.
-        // Confirmed live on TECNO KJ7 that back does NOT close the search overlay - explicitly
-        // checking isShowing() here instead makes it work regardless of whatever SearchView is or
-        // isn't doing internally. Falls through to no-op (blocking launcher exit) otherwise, since
-        // this is the HOME activity and back should never finish it.
-        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
-            @Override
-            public void handleOnBackPressed() {
-                if (searchView.isShowing()) {
-                    hideSearch();
-                }
-            }
-        });
+        // See searchBackCallback's own doc comment for why this stays unconditionally enabled
+        // (UI-010) and drives its own predictive-back preview instead of relying on SearchView's
+        // internal handling (UI-021).
+        getOnBackPressedDispatcher().addCallback(this, searchBackCallback);
 
         rateAppInApp(this, BuildConfig.DEBUG);
     }
@@ -770,6 +821,18 @@ public class ActHome extends ActBase {
         // SearchView.hide() runs the reverse morph animation and handles keyboard/focus itself.
         searchView.clearText();
         searchView.hide();
+    }
+
+    /**
+     * UI-021: restores the search overlay to its identity transform after a predictive-back
+     * preview ends, whether the gesture completed (about to run hide()'s own animation from a
+     * clean baseline) or was cancelled (snap back to fully visible, matching the system's own
+     * predictive-back cancel convention).
+     */
+    private void resetPredictiveBackPreview() {
+        searchView.setScaleX(PREDICTIVE_BACK_MAX_SCALE);
+        searchView.setScaleY(PREDICTIVE_BACK_MAX_SCALE);
+        searchView.setAlpha(PREDICTIVE_BACK_MAX_ALPHA);
     }
 
     @Override
