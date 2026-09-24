@@ -31,6 +31,16 @@
     <string name="setting_night_mode">Tema do modo escuro</string>
     <string name="setting_background">Fundo</string>
     <string name="setting_default_icon_pack">Pacote de ícones padrão</string>
+    <string name="setting_export_layout">Exportar layout</string>
+    <string name="setting_import_layout">Importar layout</string>
+    <string name="layout_export_success">Layout exportado</string>
+    <string name="layout_export_failed">Falha na exportação</string>
+    <string name="layout_import_preview_title">Importar layout?</string>
+    <string name="layout_import_preview_message">Apps atualizados: %1$d. Apps ignorados (não instalados): %2$d.</string>
+    <string name="layout_import_success">Layout importado</string>
+    <string name="layout_import_failed_malformed">Este arquivo não é um backup de layout válido</string>
+    <string name="layout_import_failed_unsupported_version">Este backup foi criado por uma versão mais recente do app e não pode ser importado aqui</string>
+    <string name="layout_import_nothing_to_import">Nenhum app instalado correspondente encontrado neste backup</string>
     <string name="setting_sort_type_label_ascending">Nome do app (Crescente)</string>
     <string name="setting_sort_type_label_descending">Nome do app (Decrescente)</string>
     <string name="setting_sort_type_install_date_ascending">Mais novos primeiro</string>

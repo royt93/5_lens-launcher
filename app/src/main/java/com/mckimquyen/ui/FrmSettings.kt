@@ -130,6 +130,12 @@ class FrmSettings : Fragment(), SettingsInterface {
         view.findViewById<View>(R.id.llHighlightColor).setOnClickListener {
             showHighlightColorDialog()
         }
+        view.findViewById<View>(R.id.llExportLayout).setOnClickListener {
+            (activity as? ActSettings)?.exportLayout()
+        }
+        view.findViewById<View>(R.id.llImportLayout).setOnClickListener {
+            (activity as? ActSettings)?.importLayout()
+        }
         // Empty click listeners to prevent parent click events
         view.findViewById<View>(R.id.rlSwitchVibrateAppHoverParent).setOnClickListener(null)
         view.findViewById<View>(R.id.rlSwitchVibrateAppLaunchParent).setOnClickListener(null)

@@ -31,6 +31,16 @@
     <string name="setting_night_mode">Темная тема</string>
     <string name="setting_background">Фон</string>
     <string name="setting_default_icon_pack">Пакет значков по умолчанию</string>
+    <string name="setting_export_layout">Экспорт макета</string>
+    <string name="setting_import_layout">Импорт макета</string>
+    <string name="layout_export_success">Макет экспортирован</string>
+    <string name="layout_export_failed">Ошибка экспорта</string>
+    <string name="layout_import_preview_title">Импортировать макет?</string>
+    <string name="layout_import_preview_message">Будет обновлено приложений: %1$d. Пропущено: %2$d (не установлены).</string>
+    <string name="layout_import_success">Макет импортирован</string>
+    <string name="layout_import_failed_malformed">Этот файл не является допустимой резервной копией макета</string>
+    <string name="layout_import_failed_unsupported_version">Эта резервная копия создана более новой версией приложения и не может быть импортирована здесь</string>
+    <string name="layout_import_nothing_to_import">В этой резервной копии не найдено подходящих установленных приложений</string>
     <string name="setting_sort_type_label_ascending">Имя приложения (А-Я)</string>
     <string name="setting_sort_type_label_descending">Имя приложения (Я-А)</string>
     <string name="setting_sort_type_install_date_ascending">Сначала новые</string>

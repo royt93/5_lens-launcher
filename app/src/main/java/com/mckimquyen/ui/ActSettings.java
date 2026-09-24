@@ -21,8 +21,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.graphics.drawable.GradientDrawable;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -50,6 +53,9 @@ import com.mckimquyen.itf.AppsInterface;
 import com.mckimquyen.itf.LensInterface;
 import com.mckimquyen.itf.SettingsInterface;
 import com.mckimquyen.model.App;
+import com.mckimquyen.model.LayoutBackupParseResult;
+import com.mckimquyen.util.LayoutBackupIo;
+import com.mckimquyen.util.LayoutImportApplier;
 import com.mckimquyen.util.UIUtils;
 import com.mckimquyen.services.AppEventManager;
 import com.mckimquyen.services.BroadcastReceivers;
@@ -92,6 +98,21 @@ public class ActSettings extends ActBase implements SettingsMenuHost {
     private final SettingsDialogCoordinator dialogCoordinator = new SettingsDialogCoordinator();
     private final SettingsAdVipDelegate adVipDelegate = new SettingsAdVipDelegate();
     private SettingsMenuDispatcher menuDispatcher;
+
+    // FEAT-006: field initializers run during construction, well before onStart - the required
+    // timing for registerForActivityResult().
+    private static final String LAYOUT_EXPORT_FILE_NAME = "lens_launcher_layout.json";
+    private static final String LAYOUT_MIME_TYPE = "application/json";
+
+    private final ActivityResultLauncher<String> exportLayoutLauncher =
+            registerForActivityResult(new ActivityResultContracts.CreateDocument(LAYOUT_MIME_TYPE), uri -> {
+                if (uri != null) onLayoutExportUriPicked(uri);
+            });
+
+    private final ActivityResultLauncher<String[]> importLayoutLauncher =
+            registerForActivityResult(new ActivityResultContracts.OpenDocument(), uri -> {
+                if (uri != null) onLayoutImportUriPicked(uri);
+            });
 
     private ArrayList<App> listApp;
     private AlertDialog dlgSortType;
@@ -402,6 +423,65 @@ public class ActSettings extends ActBase implements SettingsMenuHost {
 
     public void showHomeLauncherChooser() {
         UtilLauncher.resetPreferredLauncherAndOpenChooser(getApplicationContext());
+    }
+
+    /** FEAT-006: SAF-only, no raw filesystem path, works under scoped storage on every API level. */
+    public void exportLayout() {
+        exportLayoutLauncher.launch(LAYOUT_EXPORT_FILE_NAME);
+    }
+
+    public void importLayout() {
+        importLayoutLauncher.launch(new String[]{LAYOUT_MIME_TYPE});
+    }
+
+    private void onLayoutExportUriPicked(Uri uri) {
+        LayoutBackupIo.exportAsync(this, uri, success -> {
+            Toast.makeText(
+                    this,
+                    success ? R.string.layout_export_success : R.string.layout_export_failed,
+                    Toast.LENGTH_SHORT
+            ).show();
+            return Unit.INSTANCE;
+        });
+    }
+
+    private void onLayoutImportUriPicked(Uri uri) {
+        LayoutBackupIo.importAsync(this, uri, result -> {
+            if (result instanceof LayoutBackupParseResult.Malformed) {
+                Toast.makeText(this, R.string.layout_import_failed_malformed, Toast.LENGTH_SHORT).show();
+            } else if (result instanceof LayoutBackupParseResult.UnsupportedSchemaVersion) {
+                Toast.makeText(this, R.string.layout_import_failed_unsupported_version, Toast.LENGTH_SHORT).show();
+            } else if (result instanceof LayoutBackupParseResult.Success successResult) {
+                showLayoutImportPreview(successResult.getBackup());
+            }
+            return Unit.INSTANCE;
+        });
+    }
+
+    private void showLayoutImportPreview(com.mckimquyen.model.LayoutBackup backup) {
+        List<App> installedApps = RAppsSingleton.getInstance().getApps();
+        LayoutImportApplier.Plan plan = LayoutImportApplier.INSTANCE.plan(
+                backup,
+                installedApps != null ? installedApps : Collections.emptyList()
+        );
+        if (plan.getMatched().isEmpty()) {
+            Toast.makeText(this, R.string.layout_import_nothing_to_import, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        String message = getString(
+                R.string.layout_import_preview_message,
+                plan.getMatched().size(),
+                plan.getSkippedCount()
+        );
+        new MaterialAlertDialogBuilder(this, R.style.MaterialYouDialogTheme)
+                .setTitle(R.string.layout_import_preview_title)
+                .setMessage(message)
+                .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                    LayoutImportApplier.INSTANCE.apply(plan);
+                    Toast.makeText(this, R.string.layout_import_success, Toast.LENGTH_SHORT).show();
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
     }
 
     public void showNightModeChooser() {

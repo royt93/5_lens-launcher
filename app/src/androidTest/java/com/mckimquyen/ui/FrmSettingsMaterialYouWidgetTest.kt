@@ -68,4 +68,14 @@ class FrmSettingsMaterialYouWidgetTest {
         assertNotNull("Row language must exist", rowLanguage)
         assertNotNull("Row vip must exist", rowVip)
     }
+
+    /** FEAT-006: entry points exist in the raw layout (click wiring verified separately below,
+     *  where the Fragment's real onViewCreated has actually run). */
+    @Test
+    fun testFrmSettingsLayoutBackupRowsExist() {
+        val view = LayoutInflater.from(themedContext).inflate(R.layout.frm_settings, null, false)
+
+        assertNotNull("Row export layout must exist", view.findViewById<android.view.View>(R.id.llExportLayout))
+        assertNotNull("Row import layout must exist", view.findViewById<android.view.View>(R.id.llImportLayout))
+    }
 }

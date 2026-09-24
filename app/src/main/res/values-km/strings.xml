@@ -31,6 +31,16 @@
     <string name="setting_night_mode">ស្បែកមុខងារពេលយប់</string>
     <string name="setting_background">ផ្ទៃខាងក្រោយ</string>
     <string name="setting_default_icon_pack">កញ្ចប់រូបតំណាងលំនាំដើម</string>
+    <string name="setting_export_layout">នាំចេញប្លង់</string>
+    <string name="setting_import_layout">នាំចូលប្លង់</string>
+    <string name="layout_export_success">បាននាំចេញប្លង់</string>
+    <string name="layout_export_failed">ការនាំចេញបានបរាជ័យ</string>
+    <string name="layout_import_preview_title">នាំចូលប្លង់?</string>
+    <string name="layout_import_preview_message">កម្មវិធីបានធ្វើបច្ចុប្បន្នភាព៖ %1$d។ កម្មវិធីបានរំលង (មិនបានដំឡើង)៖ %2$d។</string>
+    <string name="layout_import_success">បាននាំចូលប្លង់</string>
+    <string name="layout_import_failed_malformed">ឯកសារនេះមិនមែនជាការបម្រុងទុកប្លង់ត្រឹមត្រូវទេ</string>
+    <string name="layout_import_failed_unsupported_version">ការបម្រុងទុកនេះត្រូវបានបង្កើតដោយកំណែកម្មវិធីថ្មីជាង ហើយមិនអាចនាំចូលនៅទីនេះបានទេ</string>
+    <string name="layout_import_nothing_to_import">រកមិនឃើញកម្មវិធីដែលបានដំឡើងដែលត្រូវគ្នាក្នុងការបម្រុងទុកនេះទេ</string>
     <string name="setting_sort_type_label_ascending">ឈ្មោះកម្មវិធី (ឡើង)</string>
     <string name="setting_sort_type_label_descending">ឈ្មោះកម្មវិធី (ចុះ)</string>
     <string name="setting_sort_type_install_date_ascending">ថ្មីបំផុតមុន</string>

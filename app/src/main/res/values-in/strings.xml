@@ -31,6 +31,16 @@
     <string name="setting_night_mode">Tema Mode Gelap</string>
     <string name="setting_background">Latar Belakang</string>
     <string name="setting_default_icon_pack">Paket Ikon Default</string>
+    <string name="setting_export_layout">Ekspor tata letak</string>
+    <string name="setting_import_layout">Impor tata letak</string>
+    <string name="layout_export_success">Tata letak diekspor</string>
+    <string name="layout_export_failed">Ekspor gagal</string>
+    <string name="layout_import_preview_title">Impor tata letak?</string>
+    <string name="layout_import_preview_message">Aplikasi diperbarui: %1$d. Aplikasi dilewati (tidak terpasang): %2$d.</string>
+    <string name="layout_import_success">Tata letak diimpor</string>
+    <string name="layout_import_failed_malformed">File ini bukan cadangan tata letak yang valid</string>
+    <string name="layout_import_failed_unsupported_version">Cadangan ini dibuat oleh versi aplikasi yang lebih baru dan tidak dapat diimpor di sini</string>
+    <string name="layout_import_nothing_to_import">Tidak ditemukan aplikasi terpasang yang cocok dalam cadangan ini</string>
     <string name="setting_sort_type_label_ascending">Nama Aplikasi (Meningkat)</string>
     <string name="setting_sort_type_label_descending">Nama Aplikasi (Menurun)</string>
     <string name="setting_sort_type_install_date_ascending">Terbaru Dahulu</string>

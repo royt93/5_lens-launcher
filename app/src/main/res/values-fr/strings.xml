@@ -31,6 +31,16 @@
     <string name="setting_night_mode">Thème du mode nuit</string>
     <string name="setting_background">Fond</string>
     <string name="setting_default_icon_pack">Pack d\'icônes par défaut</string>
+    <string name="setting_export_layout">Exporter la disposition</string>
+    <string name="setting_import_layout">Importer la disposition</string>
+    <string name="layout_export_success">Disposition exportée</string>
+    <string name="layout_export_failed">Échec de l\'exportation</string>
+    <string name="layout_import_preview_title">Importer la disposition ?</string>
+    <string name="layout_import_preview_message">Applications mises à jour : %1$d. Applications ignorées (non installées) : %2$d.</string>
+    <string name="layout_import_success">Disposition importée</string>
+    <string name="layout_import_failed_malformed">Ce fichier n\'est pas une sauvegarde de disposition valide</string>
+    <string name="layout_import_failed_unsupported_version">Cette sauvegarde a été créée avec une version plus récente de l\'application et ne peut pas être importée ici</string>
+    <string name="layout_import_nothing_to_import">Aucune application installée correspondante trouvée dans cette sauvegarde</string>
     <string name="setting_sort_type_label_ascending">Nom de l\'appli (Ascendant)</string>
     <string name="setting_sort_type_label_descending">Nom de l\'appli (Descendant)</string>
     <string name="setting_sort_type_install_date_ascending">Plus récentes en premier</string>

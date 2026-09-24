@@ -31,6 +31,16 @@
     <string name="setting_night_mode">ธีมโหมดกลางคืน</string>
     <string name="setting_background">พื้นหลัง</string>
     <string name="setting_default_icon_pack">ชุดไอคอนเริ่มต้น</string>
+    <string name="setting_export_layout">ส่งออกเลย์เอาต์</string>
+    <string name="setting_import_layout">นำเข้าเลย์เอาต์</string>
+    <string name="layout_export_success">ส่งออกเลย์เอาต์แล้ว</string>
+    <string name="layout_export_failed">ส่งออกล้มเหลว</string>
+    <string name="layout_import_preview_title">นำเข้าเลย์เอาต์หรือไม่?</string>
+    <string name="layout_import_preview_message">แอปที่อัปเดต: %1$d แอปที่ข้าม (ยังไม่ได้ติดตั้ง): %2$d</string>
+    <string name="layout_import_success">นำเข้าเลย์เอาต์แล้ว</string>
+    <string name="layout_import_failed_malformed">ไฟล์นี้ไม่ใช่ไฟล์สำรองเลย์เอาต์ที่ถูกต้อง</string>
+    <string name="layout_import_failed_unsupported_version">ไฟล์สำรองนี้สร้างโดยแอปเวอร์ชันที่ใหม่กว่าและไม่สามารถนำเข้าที่นี่ได้</string>
+    <string name="layout_import_nothing_to_import">ไม่พบแอปที่ติดตั้งที่ตรงกันในไฟล์สำรองนี้</string>
     <string name="setting_sort_type_label_ascending">ชื่อแอป (จากน้อยไปมาก)</string>
     <string name="setting_sort_type_label_descending">ชื่อแอป (จากมากไปน้อย)</string>
     <string name="setting_sort_type_install_date_ascending">ใหม่ล่าสุดก่อน</string>

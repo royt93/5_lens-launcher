@@ -31,6 +31,16 @@
     <string name="setting_night_mode">डार्क मोड थीम</string>
     <string name="setting_background">पृष्ठभूमि</string>
     <string name="setting_default_icon_pack">डिफ़ॉल्ट आइकन पैक</string>
+    <string name="setting_export_layout">लेआउट निर्यात करें</string>
+    <string name="setting_import_layout">लेआउट आयात करें</string>
+    <string name="layout_export_success">लेआउट निर्यात हुआ</string>
+    <string name="layout_export_failed">निर्यात विफल</string>
+    <string name="layout_import_preview_title">लेआउट आयात करें?</string>
+    <string name="layout_import_preview_message">अपडेट किए गए ऐप्स: %1$d। छोड़े गए ऐप्स (इंस्टॉल नहीं हैं): %2$d।</string>
+    <string name="layout_import_success">लेआउट आयात हुआ</string>
+    <string name="layout_import_failed_malformed">यह फ़ाइल मान्य लेआउट बैकअप नहीं है</string>
+    <string name="layout_import_failed_unsupported_version">यह बैकअप ऐप के नए संस्करण द्वारा बनाया गया था और यहां आयात नहीं किया जा सकता</string>
+    <string name="layout_import_nothing_to_import">इस बैकअप में कोई मेल खाता इंस्टॉल किया गया ऐप नहीं मिला</string>
     <string name="setting_sort_type_label_ascending">ऐप का नाम (बढ़ते क्रम में)</string>
     <string name="setting_sort_type_label_descending">ऐप का नाम (घटते क्रम में)</string>
     <string name="setting_sort_type_install_date_ascending">नवीनतम पहले</string>

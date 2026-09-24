@@ -30,6 +30,16 @@
     <string name="setting_night_mode">Giao diện chế độ tối</string>
     <string name="setting_background">Hình nền</string>
     <string name="setting_default_icon_pack">Gói biểu tượng mặc định</string>
+    <string name="setting_export_layout">Xuất bố cục</string>
+    <string name="setting_import_layout">Nhập bố cục</string>
+    <string name="layout_export_success">Đã xuất bố cục</string>
+    <string name="layout_export_failed">Xuất thất bại</string>
+    <string name="layout_import_preview_title">Nhập bố cục?</string>
+    <string name="layout_import_preview_message">Ứng dụng được cập nhật: %1$d. Ứng dụng bị bỏ qua (chưa cài đặt): %2$d.</string>
+    <string name="layout_import_success">Đã nhập bố cục</string>
+    <string name="layout_import_failed_malformed">Tệp này không phải là bản sao lưu bố cục hợp lệ</string>
+    <string name="layout_import_failed_unsupported_version">Bản sao lưu này được tạo bởi phiên bản ứng dụng mới hơn và không thể nhập ở đây</string>
+    <string name="layout_import_nothing_to_import">Không tìm thấy ứng dụng đã cài đặt khớp trong bản sao lưu này</string>
     <string name="setting_sort_type_label_ascending">Tên ứng dụng (Tăng dần)</string>
     <string name="setting_sort_type_label_descending">Tên ứng dụng (Giảm dần)</string>
     <string name="setting_sort_type_install_date_ascending">Mới nhất trước</string>

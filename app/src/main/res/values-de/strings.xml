@@ -31,6 +31,16 @@
     <string name="setting_night_mode">Dunkelmodus-Design</string>
     <string name="setting_background">Hintergrund</string>
     <string name="setting_default_icon_pack">Standard-Symbolpaket</string>
+    <string name="setting_export_layout">Layout exportieren</string>
+    <string name="setting_import_layout">Layout importieren</string>
+    <string name="layout_export_success">Layout exportiert</string>
+    <string name="layout_export_failed">Export fehlgeschlagen</string>
+    <string name="layout_import_preview_title">Layout importieren?</string>
+    <string name="layout_import_preview_message">Aktualisierte Apps: %1$d. Übersprungene Apps (nicht installiert): %2$d.</string>
+    <string name="layout_import_success">Layout importiert</string>
+    <string name="layout_import_failed_malformed">Diese Datei ist keine gültige Layout-Sicherung</string>
+    <string name="layout_import_failed_unsupported_version">Diese Sicherung wurde mit einer neueren App-Version erstellt und kann hier nicht importiert werden</string>
+    <string name="layout_import_nothing_to_import">Keine passenden installierten Apps in dieser Sicherung gefunden</string>
     <string name="setting_sort_type_label_ascending">App-Name (Aufsteigend)</string>
     <string name="setting_sort_type_label_descending">App-Name (Absteigend)</string>
     <string name="setting_sort_type_install_date_ascending">Neueste zuerst</string>

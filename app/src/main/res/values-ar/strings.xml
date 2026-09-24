@@ -31,6 +31,16 @@
     <string name="setting_night_mode">سمة الوضع الداكن</string>
     <string name="setting_background">الخلفية</string>
     <string name="setting_default_icon_pack">حزمة الأيقونات الافتراضية</string>
+    <string name="setting_export_layout">تصدير التخطيط</string>
+    <string name="setting_import_layout">استيراد التخطيط</string>
+    <string name="layout_export_success">تم تصدير التخطيط</string>
+    <string name="layout_export_failed">فشل التصدير</string>
+    <string name="layout_import_preview_title">استيراد التخطيط؟</string>
+    <string name="layout_import_preview_message">التطبيقات المحدثة: %1$d. التطبيقات المتخطاة (غير مثبتة): %2$d.</string>
+    <string name="layout_import_success">تم استيراد التخطيط</string>
+    <string name="layout_import_failed_malformed">هذا الملف ليس نسخة احتياطية صالحة للتخطيط</string>
+    <string name="layout_import_failed_unsupported_version">تم إنشاء هذه النسخة الاحتياطية بواسطة إصدار أحدث من التطبيق ولا يمكن استيرادها هنا</string>
+    <string name="layout_import_nothing_to_import">لم يتم العثور على تطبيقات مثبتة مطابقة في هذه النسخة الاحتياطية</string>
     <string name="setting_sort_type_label_ascending">اسم التطبيق (تصاعدي)</string>
     <string name="setting_sort_type_label_descending">اسم التطبيق (تنازلي)</string>
     <string name="setting_sort_type_install_date_ascending">الأحدث أولاً</string>

@@ -31,6 +31,16 @@
     <string name="setting_night_mode">ທີມໂໝດກາງຄືນ</string>
     <string name="setting_background">ພື້ນຫຼັງ</string>
     <string name="setting_default_icon_pack">ຊຸດໄອຄອນເລີ່ມຕົ້ນ</string>
+    <string name="setting_export_layout">ສົ່ງອອກໂຄງຮ່າງ</string>
+    <string name="setting_import_layout">ນຳເຂົ້າໂຄງຮ່າງ</string>
+    <string name="layout_export_success">ສົ່ງອອກໂຄງຮ່າງແລ້ວ</string>
+    <string name="layout_export_failed">ການສົ່ງອອກລົ້ມເຫຼວ</string>
+    <string name="layout_import_preview_title">ນຳເຂົ້າໂຄງຮ່າງບໍ?</string>
+    <string name="layout_import_preview_message">ແອັບທີ່ອັບເດດ: %1$d. ແອັບທີ່ຂ້າມ (ບໍ່ໄດ້ຕິດຕັ້ງ): %2$d.</string>
+    <string name="layout_import_success">ນຳເຂົ້າໂຄງຮ່າງແລ້ວ</string>
+    <string name="layout_import_failed_malformed">ໄຟລ໌ນີ້ບໍ່ແມ່ນໄຟລ໌ສຳຮອງໂຄງຮ່າງທີ່ຖືກຕ້ອງ</string>
+    <string name="layout_import_failed_unsupported_version">ໄຟລ໌ສຳຮອງນີ້ຖືກສ້າງໂດຍແອັບເວີຊັນໃໝ່ກວ່າ ແລະ ບໍ່ສາມາດນຳເຂົ້າຢູ່ບ່ອນນີ້ໄດ້</string>
+    <string name="layout_import_nothing_to_import">ບໍ່ພົບແອັບທີ່ຕິດຕັ້ງທີ່ກົງກັນໃນໄຟລ໌ສຳຮອງນີ້</string>
     <string name="setting_sort_type_label_ascending">ຊື່ແອັບ (ຈາກໜ້ອຍຫາຫຼາຍ)</string>
     <string name="setting_sort_type_label_descending">ຊື່ແອັບ (ຈາກຫຼາຍຫາໜ້ອຍ)</string>
     <string name="setting_sort_type_install_date_ascending">ໃໝ່ສຸດກ່ອນ</string>

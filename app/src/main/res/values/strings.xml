@@ -32,6 +32,17 @@
     <string name="setting_night_mode">Night Mode Theme</string>
     <string name="setting_background">Background</string>
     <string name="setting_default_icon_pack">Default Icon Pack</string>
+    <!-- FEAT-006 -->
+    <string name="setting_export_layout">Export layout</string>
+    <string name="setting_import_layout">Import layout</string>
+    <string name="layout_export_success">Layout exported</string>
+    <string name="layout_export_failed">Export failed</string>
+    <string name="layout_import_preview_title">Import layout?</string>
+    <string name="layout_import_preview_message">Apps updated: %1$d. Apps skipped (not installed): %2$d.</string>
+    <string name="layout_import_success">Layout imported</string>
+    <string name="layout_import_failed_malformed">This file is not a valid layout backup</string>
+    <string name="layout_import_failed_unsupported_version">This backup was made by a newer app version and cannot be imported here</string>
+    <string name="layout_import_nothing_to_import">No matching installed apps found in this backup</string>
     <string name="setting_sort_type_label_ascending">App Name (Ascending)</string>
     <string name="setting_sort_type_label_descending">App Name (Descending)</string>
     <string name="setting_sort_type_install_date_ascending">Newest First</string>

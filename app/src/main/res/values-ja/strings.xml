@@ -31,6 +31,16 @@
     <string name="setting_night_mode">ダークモードテーマ</string>
     <string name="setting_background">背景</string>
     <string name="setting_default_icon_pack">デフォルトアイコンパック</string>
+    <string name="setting_export_layout">レイアウトをエクスポート</string>
+    <string name="setting_import_layout">レイアウトをインポート</string>
+    <string name="layout_export_success">レイアウトをエクスポートしました</string>
+    <string name="layout_export_failed">エクスポートに失敗しました</string>
+    <string name="layout_import_preview_title">レイアウトをインポートしますか?</string>
+    <string name="layout_import_preview_message">更新するアプリ: %1$d件。スキップするアプリ(未インストール): %2$d件。</string>
+    <string name="layout_import_success">レイアウトをインポートしました</string>
+    <string name="layout_import_failed_malformed">このファイルは有効なレイアウトのバックアップではありません</string>
+    <string name="layout_import_failed_unsupported_version">このバックアップは新しいバージョンのアプリで作成されたため、ここではインポートできません</string>
+    <string name="layout_import_nothing_to_import">このバックアップに一致するインストール済みアプリが見つかりません</string>
     <string name="setting_sort_type_label_ascending">アプリ名 (昇順)</string>
     <string name="setting_sort_type_label_descending">アプリ名 (降降)</string>
     <string name="setting_sort_type_install_date_ascending">新しい順</string>

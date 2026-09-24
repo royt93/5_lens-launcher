@@ -31,6 +31,16 @@
     <string name="setting_night_mode">夜间模式主题</string>
     <string name="setting_background">背景</string>
     <string name="setting_default_icon_pack">默认图标包</string>
+    <string name="setting_export_layout">导出布局</string>
+    <string name="setting_import_layout">导入布局</string>
+    <string name="layout_export_success">布局已导出</string>
+    <string name="layout_export_failed">导出失败</string>
+    <string name="layout_import_preview_title">导入布局?</string>
+    <string name="layout_import_preview_message">将更新 %1$d 个应用。跳过 %2$d 个(未安装)。</string>
+    <string name="layout_import_success">布局已导入</string>
+    <string name="layout_import_failed_malformed">此文件不是有效的布局备份</string>
+    <string name="layout_import_failed_unsupported_version">此备份由更新的应用版本创建,无法在此导入</string>
+    <string name="layout_import_nothing_to_import">在此备份中未找到匹配的已安装应用</string>
     <string name="setting_sort_type_label_ascending">应用名称（升序）</string>
     <string name="setting_sort_type_label_descending">应用名称（降序）</string>
     <string name="setting_sort_type_install_date_ascending">最新安装优先</string>

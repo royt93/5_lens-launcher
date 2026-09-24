@@ -31,6 +31,16 @@
     <string name="setting_night_mode">Tema de modo oscuro</string>
     <string name="setting_background">Fondo</string>
     <string name="setting_default_icon_pack">Paquete de iconos predeterminado</string>
+    <string name="setting_export_layout">Exportar diseño</string>
+    <string name="setting_import_layout">Importar diseño</string>
+    <string name="layout_export_success">Diseño exportado</string>
+    <string name="layout_export_failed">Error al exportar</string>
+    <string name="layout_import_preview_title">¿Importar diseño?</string>
+    <string name="layout_import_preview_message">Apps actualizadas: %1$d. Apps omitidas (no instaladas): %2$d.</string>
+    <string name="layout_import_success">Diseño importado</string>
+    <string name="layout_import_failed_malformed">Este archivo no es una copia de seguridad de diseño válida</string>
+    <string name="layout_import_failed_unsupported_version">Esta copia de seguridad se creó con una versión más reciente de la app y no se puede importar aquí</string>
+    <string name="layout_import_nothing_to_import">No se encontraron aplicaciones instaladas coincidentes en esta copia de seguridad</string>
     <string name="setting_sort_type_label_ascending">Nombre de app (Ascendente)</string>
     <string name="setting_sort_type_label_descending">Nombre de app (Descendente)</string>
     <string name="setting_sort_type_install_date_ascending">Más nuevas primero</string>
