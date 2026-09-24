@@ -13,6 +13,7 @@ import com.mckimquyen.ui.ActSettings
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -175,6 +176,211 @@ class AppAdapterWidgetTest {
                 if (hasBiometric) View.VISIBLE else View.GONE,
                 lockView.visibility
             )
+        }
+
+        scenario.close()
+    }
+
+    /**
+     * FEAT-007: toggling a selection must rebind only via [AppAdapter.PAYLOAD_SELECTION] —
+     * proven here by calling the payload-aware `onBindViewHolder` overload directly with a
+     * payload that is NOT the selection marker: the label must stay whatever `tvAppLabel`
+     * already showed (a real content rebind would instead replace it), while the selection
+     * payload path does apply the checked state and hides the per-row action icons.
+     */
+    @Test
+    fun testSelectionPayload_onlyUpdatesCheckedStateAndIconVisibility_notUnrelatedFields() {
+        val scenario = ActivityScenario.launch(ActSettings::class.java)
+
+        scenario.onActivity { activity ->
+            val recyclerView = RecyclerView(activity)
+            recyclerView.layoutManager = LinearLayoutManager(activity)
+            val adapter = AppAdapter(activity, mutableListOf(app("a", label = "A Label")))
+            recyclerView.adapter = adapter
+            recyclerView.measure(0, 0)
+            recyclerView.layout(0, 0, 1080, 2000)
+
+            val holder = adapter.createViewHolder(recyclerView, adapter.getItemViewType(0))
+            adapter.bindViewHolder(holder, 0)
+            val labelBefore = holder.itemView.findViewById<android.widget.TextView>(R.id.tvAppLabel).text
+            val card = holder.itemView.findViewById<com.google.android.material.card.MaterialCardView>(R.id.cvAppContainer)
+            assertFalse("row must start unchecked", card.isChecked)
+            assertEquals(View.VISIBLE, holder.itemView.findViewById<ImageView>(R.id.ivAppMenu).visibility)
+
+            // An unrelated payload must fall through to the normal DiffUtil-driven full bind.
+            adapter.onBindViewHolder(holder, 0, mutableListOf<Any>("something-else"))
+            assertEquals(labelBefore, holder.itemView.findViewById<android.widget.TextView>(R.id.tvAppLabel).text)
+
+            adapter.toggleSelection(adapter.getItemForPosition(0))
+            adapter.onBindViewHolder(holder, 0, mutableListOf<Any>(AppAdapter.PAYLOAD_SELECTION))
+
+            assertTrue("selection payload must check the card", card.isChecked)
+            assertEquals(
+                "selection mode must hide the per-row menu button",
+                View.GONE,
+                holder.itemView.findViewById<ImageView>(R.id.ivAppMenu).visibility
+            )
+            assertEquals(labelBefore, holder.itemView.findViewById<android.widget.TextView>(R.id.tvAppLabel).text)
+        }
+
+        scenario.close()
+    }
+
+    @Test
+    fun testToggleSelection_addsAndRemovesFromSelectedApps() {
+        val scenario = ActivityScenario.launch(ActSettings::class.java)
+
+        scenario.onActivity { activity ->
+            val adapter = AppAdapter(activity, mutableListOf(app("a"), app("b")))
+            assertFalse(adapter.isSelectionMode)
+            assertEquals(0, adapter.selectionCount)
+
+            adapter.toggleSelection(adapter.getItemForPosition(0))
+            assertTrue(adapter.isSelectionMode)
+            assertEquals(listOf("a"), adapter.selectedApps.map { it.packageName.toString() })
+
+            adapter.toggleSelection(adapter.getItemForPosition(1))
+            assertEquals(2, adapter.selectionCount)
+
+            adapter.toggleSelection(adapter.getItemForPosition(0))
+            assertEquals(listOf("b"), adapter.selectedApps.map { it.packageName.toString() })
+
+            adapter.clearSelection()
+            assertFalse(adapter.isSelectionMode)
+            assertEquals(0, adapter.selectionCount)
+        }
+
+        scenario.close()
+    }
+
+    /**
+     * FEAT-007 audit finding: [AppAdapter.AppViewHolder.setSelectionState] only ever set the
+     * per-row action icons to GONE when entering selection mode — it never restored them on
+     * exit, because the payload-only rebind path never calls back into `setAppElement`'s
+     * visibility rules. Deselecting the last selected item (the single most common way a user
+     * exits multi-select) must bring the row's hide/lock/menu icons back.
+     */
+    @Test
+    fun testDeselectingLastItem_restoresPerRowIconVisibility() {
+        val scenario = ActivityScenario.launch(ActSettings::class.java)
+
+        scenario.onActivity { activity ->
+            val recyclerView = RecyclerView(activity)
+            recyclerView.layoutManager = LinearLayoutManager(activity)
+            val adapter = AppAdapter(activity, mutableListOf(app("a")))
+            recyclerView.adapter = adapter
+            recyclerView.measure(0, 0)
+            recyclerView.layout(0, 0, 1080, 2000)
+
+            val holder = adapter.createViewHolder(recyclerView, adapter.getItemViewType(0))
+            adapter.bindViewHolder(holder, 0)
+            val menuView = holder.itemView.findViewById<ImageView>(R.id.ivAppMenu)
+            val hideView = holder.itemView.findViewById<ImageView>(R.id.ivAppHide)
+            assertEquals(View.VISIBLE, menuView.visibility)
+            assertEquals(View.VISIBLE, hideView.visibility)
+
+            val target = adapter.getItemForPosition(0)
+            adapter.toggleSelection(target)
+            adapter.onBindViewHolder(holder, 0, mutableListOf<Any>(AppAdapter.PAYLOAD_SELECTION))
+            assertEquals("selecting must hide the row menu icon", View.GONE, menuView.visibility)
+            assertEquals("selecting must hide the row hide icon", View.GONE, hideView.visibility)
+
+            adapter.toggleSelection(target)
+            adapter.onBindViewHolder(holder, 0, mutableListOf<Any>(AppAdapter.PAYLOAD_SELECTION))
+            assertEquals(
+                "deselecting the last item must restore the row menu icon, not leave it GONE forever",
+                View.VISIBLE,
+                menuView.visibility
+            )
+            assertEquals(
+                "deselecting the last item must restore the row hide icon, not leave it GONE forever",
+                View.VISIBLE,
+                hideView.visibility
+            )
+        }
+
+        scenario.close()
+    }
+
+    /**
+     * FEAT-007 audit finding: a background app-list refresh (`updateApps`) while a selection
+     * is active must not leave the `ActionMode`/selection count silently referencing apps that
+     * no longer exist in the list.
+     */
+    @Test
+    fun testUpdateApps_prunesSelectionToAppsStillPresent() {
+        val scenario = ActivityScenario.launch(ActSettings::class.java)
+
+        scenario.onActivity { activity ->
+            val adapter = AppAdapter(activity, mutableListOf(app("a"), app("b"), app("c")))
+            adapter.toggleSelection(adapter.getItemForPosition(0))
+            adapter.toggleSelection(adapter.getItemForPosition(1))
+            assertEquals(2, adapter.selectionCount)
+
+            var lastReportedCount = -1
+            adapter.setSelectionListener(AppAdapter.SelectionListener { count -> lastReportedCount = count })
+
+            // "a" is removed from the refreshed list; "b" and "d" remain/arrive.
+            adapter.updateApps(listOf(app("b"), app("d")))
+
+            assertEquals(
+                "selection must drop identifiers for apps no longer in the list",
+                1,
+                adapter.selectionCount
+            )
+            assertEquals(listOf("b"), adapter.selectedApps.map { it.packageName.toString() })
+            assertEquals(
+                "the selection listener must be told the count changed, so ActionMode updates",
+                1,
+                lastReportedCount
+            )
+        }
+
+        scenario.close()
+    }
+
+    /**
+     * FEAT-007: the launcher's own row must never enter selection — it can't be
+     * hidden/pinned/uninstalled anyway (see the `PKG_NAME` special case in
+     * `setAppElement`). Drives a real `performLongClick()`, not a direct
+     * `toggleSelection()` call, so it actually exercises the guard in
+     * `setOnClickListeners()`.
+     */
+    @Test
+    fun testLongPress_onLauncherOwnRow_neverEntersSelection() {
+        val scenario = ActivityScenario.launch(ActSettings::class.java)
+
+        scenario.onActivity { activity ->
+            val recyclerView = RecyclerView(activity)
+            recyclerView.layoutManager = LinearLayoutManager(activity)
+            val ownApp = App(packageName = com.mckimquyen.util.PKG_NAME, name = "MainActivity", label = "Fisheye Launcher")
+            val adapter = AppAdapter(activity, mutableListOf(ownApp, app("other")))
+            recyclerView.adapter = adapter
+            recyclerView.measure(0, 0)
+            recyclerView.layout(0, 0, 1080, 2000)
+
+            val holder = adapter.createViewHolder(recyclerView, adapter.getItemViewType(0))
+            adapter.bindViewHolder(holder, 0)
+
+            val consumed = holder.itemView.performLongClick()
+
+            assertTrue("the long-click listener must still consume the event (no popup fallback)", consumed)
+            assertFalse("long-pressing the launcher's own row must never enter selection", adapter.isSelectionMode)
+            assertEquals(0, adapter.selectionCount)
+        }
+
+        scenario.close()
+    }
+
+    @Test
+    fun testSelectAll_selectsEveryCurrentApp() {
+        val scenario = ActivityScenario.launch(ActSettings::class.java)
+
+        scenario.onActivity { activity ->
+            val adapter = AppAdapter(activity, mutableListOf(app("a"), app("b"), app("c")))
+            adapter.selectAll()
+            assertEquals(3, adapter.selectionCount)
+            assertEquals(listOf("a", "b", "c"), adapter.selectedApps.map { it.packageName.toString() })
         }
 
         scenario.close()

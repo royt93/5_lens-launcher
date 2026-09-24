@@ -20,7 +20,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.PopupMenu;
-import androidx.cardview.widget.CardView;
+import com.google.android.material.card.MaterialCardView;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
@@ -40,7 +40,9 @@ import com.mckimquyen.util.UtilApp;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.Objects;
+import java.util.Set;
 import java.util.Collections;
 
 import kotlin.Unit;
@@ -72,6 +74,18 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
     // ========================================================================
     private final Context mContext;
     private final List<App> mApps;
+
+    // ========================================================================
+    // FEAT-007: MULTI-SELECT STATE
+    // ========================================================================
+    /** Payload marker for a selection-only rebind — see {@link #onBindViewHolder(AppViewHolder, int, List)}. */
+    public static final Object PAYLOAD_SELECTION = new Object();
+    private final Set<String> mSelectedIdentifiers = new LinkedHashSet<>();
+    private SelectionListener mSelectionListener;
+
+    public interface SelectionListener {
+        void onSelectionChanged(int selectedCount);
+    }
 
     // ========================================================================
     // CONSTRUCTOR
@@ -147,6 +161,24 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
         mApps.addAll(newApps);
         DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new AppDiffCallback(oldApps, mApps));
         diffResult.dispatchUpdatesTo(this);
+        pruneSelectionToCurrentApps();
+    }
+
+    /**
+     * FEAT-007 audit finding: a background app-list refresh (uninstall, icon-pack switch,
+     * sort change) must not leave the selection/`ActionMode` silently referencing an app
+     * that no longer exists in the list — drop it, and tell the listener so the host
+     * `ActionMode` title/menu updates (or closes, if that empties the selection).
+     */
+    private void pruneSelectionToCurrentApps() {
+        if (mSelectedIdentifiers.isEmpty()) return;
+        Set<String> currentIdentifiers = new LinkedHashSet<>();
+        for (App app : mApps) {
+            currentIdentifiers.add(identifierFor(app));
+        }
+        if (mSelectedIdentifiers.retainAll(currentIdentifiers)) {
+            notifySelectionListener();
+        }
     }
 
     public boolean moveItem(int fromPosition, int toPosition) {
@@ -172,6 +204,149 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
         }
         AppPersistent.setAppOrderBatch(mApps);
         mContext.sendBroadcast(new Intent(mContext, BroadcastReceivers.AppsEditedReceiver.class));
+    }
+
+    // ========================================================================
+    // FEAT-007: MULTI-SELECT — pure, Context-free helpers (unit-testable)
+    // ========================================================================
+
+    static String identifierFor(App app) {
+        return AppPersistent.generateIdentifier(
+                app.getPackageName() != null ? app.getPackageName().toString() : null,
+                app.getName() != null ? app.getName().toString() : null);
+    }
+
+    static Set<String> toggleIdentifier(Set<String> current, String identifier) {
+        Set<String> next = new LinkedHashSet<>(current);
+        if (!next.remove(identifier)) {
+            next.add(identifier);
+        }
+        return next;
+    }
+
+    static Set<String> selectAllIdentifiers(List<App> apps) {
+        Set<String> ids = new LinkedHashSet<>();
+        for (App app : apps) {
+            ids.add(identifierFor(app));
+        }
+        return ids;
+    }
+
+    // ========================================================================
+    // FEAT-007: MULTI-SELECT — adapter state
+    // ========================================================================
+
+    public void setSelectionListener(SelectionListener listener) {
+        mSelectionListener = listener;
+    }
+
+    public boolean isSelectionMode() {
+        return !mSelectedIdentifiers.isEmpty();
+    }
+
+    public boolean isSelected(App app) {
+        return mSelectedIdentifiers.contains(identifierFor(app));
+    }
+
+    public int getSelectionCount() {
+        return mSelectedIdentifiers.size();
+    }
+
+    public List<App> getSelectedApps() {
+        List<App> selected = new ArrayList<>();
+        for (App app : mApps) {
+            if (mSelectedIdentifiers.contains(identifierFor(app))) {
+                selected.add(app);
+            }
+        }
+        return selected;
+    }
+
+    /** Long-press entry point: toggles one app in/out of the selection. */
+    public void toggleSelection(App app) {
+        boolean wasSelectionMode = isSelectionMode();
+        String identifier = identifierFor(app);
+        Set<String> next = toggleIdentifier(mSelectedIdentifiers, identifier);
+        mSelectedIdentifiers.clear();
+        mSelectedIdentifiers.addAll(next);
+
+        // Entering/leaving selection mode changes every row's icon visibility, not just this
+        // one — a single-item payload update would leave the other visible rows stale.
+        if (wasSelectionMode != isSelectionMode()) {
+            notifyItemRangeChanged(0, mApps.size(), PAYLOAD_SELECTION);
+        } else {
+            notifyIdentifierChanged(identifier);
+        }
+        notifySelectionListener();
+    }
+
+    public void selectAll() {
+        mSelectedIdentifiers.clear();
+        mSelectedIdentifiers.addAll(selectAllIdentifiers(mApps));
+        notifyItemRangeChanged(0, mApps.size(), PAYLOAD_SELECTION);
+        notifySelectionListener();
+    }
+
+    /** Cleared on tab switch (fresh adapter) and on {@code ActionMode} exit — never left stale. */
+    public void clearSelection() {
+        if (mSelectedIdentifiers.isEmpty()) return;
+        mSelectedIdentifiers.clear();
+        notifyItemRangeChanged(0, mApps.size(), PAYLOAD_SELECTION);
+        notifySelectionListener();
+    }
+
+    private void notifyIdentifierChanged(String identifier) {
+        for (int i = 0; i < mApps.size(); i++) {
+            if (identifierFor(mApps.get(i)).equals(identifier)) {
+                notifyItemChanged(i, PAYLOAD_SELECTION);
+                return;
+            }
+        }
+    }
+
+    private void notifySelectionListener() {
+        if (mSelectionListener != null) {
+            mSelectionListener.onSelectionChanged(mSelectedIdentifiers.size());
+        }
+    }
+
+    // ========================================================================
+    // FEAT-007: MULTI-SELECT — bulk actions (each reuses the existing single-app
+    // AppPersistent codepath in a loop; no new bulk-specific business logic)
+    // ========================================================================
+
+    public void bulkSetVisibility(boolean visible) {
+        boolean changed = false;
+        for (int i = 0; i < mApps.size(); i++) {
+            App app = mApps.get(i);
+            if (!mSelectedIdentifiers.contains(identifierFor(app)) || app.isVisible() == visible) continue;
+            String pkg = Objects.requireNonNull(app.getPackageName()).toString();
+            String name = Objects.requireNonNull(app.getName()).toString();
+            AppPersistent.setAppVisibility(pkg, name, visible);
+            mApps.set(i, app.copyWithLockAndVisibility(app.isOpened(), visible, app.getOpenCount()));
+            notifyItemChanged(i);
+            changed = true;
+        }
+        if (changed) {
+            mContext.sendBroadcast(new Intent(mContext, BroadcastReceivers.AppsVisibilityChangedReceiver.class));
+        }
+    }
+
+    public void bulkPin(PinnedZone zone) {
+        boolean changed = false;
+        for (int i = 0; i < mApps.size(); i++) {
+            App app = mApps.get(i);
+            if (!mSelectedIdentifiers.contains(identifierFor(app))) continue;
+            String pkg = Objects.requireNonNull(app.getPackageName()).toString();
+            String name = Objects.requireNonNull(app.getName()).toString();
+            AppPersistent.setOrganization(pkg, name, app.isFavorite(), app.getFolderName(), zone);
+            mApps.set(i, app.copyWithOrganization(app.isFavorite(), app.getFolderName(), zone));
+            notifyItemChanged(i);
+            changed = true;
+        }
+        if (changed) {
+            mContext.sendBroadcast(new Intent(mContext, BroadcastReceivers.AppsEditedReceiver.class));
+        }
     }
 
     // ========================================================================
@@ -213,6 +388,24 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
             return;
         }
         holder.setAppElement(app);
+        holder.setSelectionState(isSelected(app), isSelectionMode());
+    }
+
+    /**
+     * FEAT-007: a selection-only change (toggle/select-all/clear) never carries a full
+     * rebind — only the checked state and icon visibility are touched, not the label,
+     * icon bitmap, lock state, etc.
+     */
+    @Override
+    public void onBindViewHolder(@NonNull AppViewHolder holder, int position, @NonNull List<Object> payloads) {
+        if (payloads.contains(PAYLOAD_SELECTION)) {
+            App app = getItemForPosition(position);
+            if (app != null) {
+                holder.setSelectionState(isSelected(app), isSelectionMode());
+            }
+            return;
+        }
+        super.onBindViewHolder(holder, position, payloads);
     }
 
     /**
@@ -230,7 +423,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
         // ====================================================================
         // UI COMPONENTS
         // ====================================================================
-        CardView cvAppContainer;    // Container của item
+        MaterialCardView cvAppContainer;    // Container của item
         TextView tvAppLabel;        // Tên app
         TextView tvAppOrganization;
         ImageView ivAppIcon;        // Icon app
@@ -343,6 +536,34 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
                 } else {
                     btAppLock.setVisibility(View.GONE);
                 }
+            }
+        }
+
+        /**
+         * FEAT-007: reflects the adapter's selection state on this row. The checked state
+         * itself is native {@link CardView} (accessibility reports checked/unchecked for
+         * free); while selection mode is active, the per-row hide/lock/menu controls are
+         * hidden so a tap always means "toggle selection", never a stray single-app action.
+         * On exit, {@link #setAppElement(App)} is re-run to restore them — reusing its
+         * existing self-app/biometric visibility rules instead of duplicating them here,
+         * since a bare "set VISIBLE" would be wrong for the launcher's own row or a
+         * no-biometric device (bug found by {@code AppAdapterWidgetTest
+         * #testDeselectingLastItem_restoresPerRowIconVisibility}: this previously only ever
+         * hid the icons and never brought them back on exit).
+         */
+        public void setSelectionState(boolean selected, boolean selectionModeActive) {
+            cvAppContainer.setChecked(selected);
+            if (selectionModeActive) {
+                ivAppHide.setVisibility(View.GONE);
+                btAppLock.setVisibility(View.GONE);
+                ivAppMenu.setVisibility(View.GONE);
+            } else if (mApp != null) {
+                // ivAppMenu's visibility isn't part of setAppElement's own rules (it's
+                // always shown outside of selection mode, in the original layout's default
+                // state) — restore it explicitly; ivAppHide/btAppLock's rules (self-app,
+                // biometric) ARE setAppElement's, so that call covers those two.
+                ivAppMenu.setVisibility(View.VISIBLE);
+                setAppElement(mApp);
             }
         }
 
@@ -571,23 +792,32 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
             // ================================================================
             // CLICK ITEM: Launch app
             // ================================================================
-            itemView.setOnClickListener(view ->
-                    UtilApp.launchComponent(
-                            mContext,
-                            Objects.requireNonNull(mApp.getPackageName()).toString(),
-                            Objects.requireNonNull(mApp.getLabel()).toString(),
-                            Objects.requireNonNull(mApp.getName()).toString(),
-                            itemView,
-                            new Rect(
-                                    0,
-                                    0,
-                                    itemView.getMeasuredWidth(),
-                                    itemView.getMeasuredHeight()
-                            )
-                    )
-            );
+            itemView.setOnClickListener(view -> {
+                if (mAdapter.isSelectionMode()) {
+                    mAdapter.toggleSelection(mApp);
+                    return;
+                }
+                UtilApp.launchComponent(
+                        mContext,
+                        Objects.requireNonNull(mApp.getPackageName()).toString(),
+                        Objects.requireNonNull(mApp.getLabel()).toString(),
+                        Objects.requireNonNull(mApp.getName()).toString(),
+                        itemView,
+                        new Rect(
+                                0,
+                                0,
+                                itemView.getMeasuredWidth(),
+                                itemView.getMeasuredHeight()
+                        )
+                );
+            });
+            // FEAT-007: long-press enters/extends multi-select (native ActionMode pattern).
+            // The launcher's own row never enters selection — it can't be hidden/pinned/
+            // uninstalled anyway (see the PKG_NAME special case in setAppElement).
             itemView.setOnLongClickListener(view -> {
-                showAppMenu(view);
+                if (mApp != null && !Objects.requireNonNull(mApp.getPackageName()).toString().equals(PKG_NAME)) {
+                    mAdapter.toggleSelection(mApp);
+                }
                 return true;
             });
 

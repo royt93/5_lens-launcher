@@ -179,6 +179,22 @@
         <item quantity="other">%1$d matching apps</item>
     </plurals>
 
+    <!-- FEAT-007 Apps tab multi-select -->
+    <plurals name="apps_selected_count" tools:ignore="MissingTranslation">
+        <item quantity="one">%1$d selected</item>
+        <item quantity="other">%1$d selected</item>
+    </plurals>
+    <string name="menu_bulk_select_all" tools:ignore="MissingTranslation">Select all</string>
+    <string name="menu_bulk_hide" tools:ignore="MissingTranslation">Hide</string>
+    <string name="menu_bulk_unhide" tools:ignore="MissingTranslation">Unhide</string>
+    <string name="menu_bulk_pin" tools:ignore="MissingTranslation">Pin</string>
+    <string name="menu_bulk_uninstall" tools:ignore="MissingTranslation">Uninstall</string>
+    <string name="bulk_uninstall_confirm_title" tools:ignore="MissingTranslation">Uninstall apps</string>
+    <plurals name="bulk_uninstall_confirm_message" tools:ignore="MissingTranslation">
+        <item quantity="one">You will be asked to confirm uninstalling %1$d app.</item>
+        <item quantity="other">You will be asked to confirm uninstalling %1$d apps, one at a time.</item>
+    </plurals>
+
     <!-- FEAT-003 Accessible List Mode Strings -->
     <string name="setting_launcher_mode" tools:ignore="MissingTranslation">Launcher Mode</string>
     <string name="launcher_mode_fisheye" tools:ignore="MissingTranslation">Fisheye Lens</string>

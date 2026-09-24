@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/menuItemBulkSelectAll"
+        android:title="@string/menu_bulk_select_all"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/menuItemBulkHide"
+        android:icon="@drawable/ic_visibility_off_24dp"
+        android:title="@string/menu_bulk_hide"
+        app:iconTint="?attr/colorOnPrimary"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/menuItemBulkUnhide"
+        android:icon="@drawable/ic_visibility_24dp"
+        android:title="@string/menu_bulk_unhide"
+        app:iconTint="?attr/colorOnPrimary"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/menuItemBulkPin"
+        android:icon="@drawable/ic_star_24dp"
+        android:title="@string/menu_bulk_pin"
+        app:iconTint="?attr/colorOnPrimary"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/menuItemBulkUninstall"
+        android:icon="@drawable/ic_delete_outline_24dp"
+        android:title="@string/menu_bulk_uninstall"
+        app:iconTint="?attr/colorOnPrimary"
+        app:showAsAction="ifRoom" />
+
+</menu>

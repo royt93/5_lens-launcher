@@ -42,6 +42,14 @@
 
         <!-- Material 3 Component default styles -->
         <item name="materialCardViewStyle">@style/Widget.Material3.CardView.Filled</item>
+
+        <!-- FEAT-007: theme the multi-select contextual action bar to match this app's own
+             toolbar (?attr/colorPrimary/colorOnPrimary, same Material You dynamic-color
+             tokens the toolbar already uses) instead of AppCompat's default light bar —
+             fixes a real color mismatch found live: an untouched CAB rendered as a stark
+             light bar directly above this app's own dark, dynamically-tinted toolbar. -->
+        <item name="actionModeStyle">@style/AppTheme.ActionMode</item>
+        <item name="actionModeCloseButtonStyle">@style/AppTheme.ActionMode.CloseButton</item>
     </style>
 
     <!-- Home (Launcher) Theme -->
@@ -74,6 +82,22 @@
 
     <!-- App Bar Themes -->
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.Material3.Dark.ActionBar" />
+
+    <!-- FEAT-007: multi-select contextual action bar, matching AppTheme.AppBarOverlay's
+         same dark-toolbar treatment so it reads as one continuous surface, not a foreign
+         light bar. -->
+    <style name="AppTheme.ActionMode" parent="Widget.AppCompat.ActionMode">
+        <item name="background">?attr/colorPrimary</item>
+        <item name="titleTextStyle">@style/AppTheme.ActionMode.Title</item>
+    </style>
+
+    <style name="AppTheme.ActionMode.Title" parent="TextAppearance.AppCompat.Widget.ActionMode.Title">
+        <item name="android:textColor">?attr/colorOnPrimary</item>
+    </style>
+
+    <style name="AppTheme.ActionMode.CloseButton" parent="Widget.AppCompat.ActionButton.CloseMode">
+        <item name="tint">?attr/colorOnPrimary</item>
+    </style>
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.Material3">
         <item name="android:textColor">?attr/colorOnSurface</item>
