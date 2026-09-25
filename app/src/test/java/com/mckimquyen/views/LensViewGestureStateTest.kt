@@ -86,4 +86,99 @@ class LensViewGestureStateTest {
             trueCount
         )
     }
+
+    // ==================================================================== FISH-009: Pinch Gesture State Machine
+
+    @Test
+    fun `resolvePointerDown from IDLE with 1 pointer stays IDLE`() {
+        assertEquals(LensGestureState.IDLE, LensView.resolvePointerDown(LensGestureState.IDLE, 1))
+    }
+
+    @Test
+    fun `resolvePointerDown from IDLE with 2 pointers transitions to PINCHING`() {
+        assertEquals(LensGestureState.PINCHING, LensView.resolvePointerDown(LensGestureState.IDLE, 2))
+    }
+
+    @Test
+    fun `resolvePointerDown from PANNING with 2 pointers stays PANNING (pan precedence)`() {
+        assertEquals(LensGestureState.PANNING, LensView.resolvePointerDown(LensGestureState.PANNING, 2))
+    }
+
+    @Test
+    fun `resolvePointerDown from PINCHING with 2 or more pointers stays PINCHING`() {
+        assertEquals(LensGestureState.PINCHING, LensView.resolvePointerDown(LensGestureState.PINCHING, 2))
+        assertEquals(LensGestureState.PINCHING, LensView.resolvePointerDown(LensGestureState.PINCHING, 3))
+    }
+
+    @Test
+    fun `resolvePointerDown from PINCH_RELEASE with 2 pointers re-enters PINCHING`() {
+        assertEquals(LensGestureState.PINCHING, LensView.resolvePointerDown(LensGestureState.PINCH_RELEASE, 2))
+    }
+
+    @Test
+    fun `resolvePointerUp from PINCHING with 1 remaining pointer enters PINCH_RELEASE`() {
+        assertEquals(LensGestureState.PINCH_RELEASE, LensView.resolvePointerUp(LensGestureState.PINCHING, 1))
+    }
+
+    @Test
+    fun `resolvePointerUp from PINCHING with 0 remaining pointers returns to IDLE`() {
+        assertEquals(LensGestureState.IDLE, LensView.resolvePointerUp(LensGestureState.PINCHING, 0))
+    }
+
+    @Test
+    fun `resolvePointerUp from PINCH_RELEASE with 1 remaining pointer stays PINCH_RELEASE`() {
+        assertEquals(LensGestureState.PINCH_RELEASE, LensView.resolvePointerUp(LensGestureState.PINCH_RELEASE, 1))
+    }
+
+    @Test
+    fun `resolvePointerUp from PINCH_RELEASE with 0 remaining pointers returns to IDLE`() {
+        assertEquals(LensGestureState.IDLE, LensView.resolvePointerUp(LensGestureState.PINCH_RELEASE, 0))
+    }
+
+    @Test
+    fun `resolvePointerUp from PANNING with 1 remaining pointer stays PANNING`() {
+        assertEquals(LensGestureState.PANNING, LensView.resolvePointerUp(LensGestureState.PANNING, 1))
+    }
+
+    @Test
+    fun `resolvePointerUp from PANNING with 0 remaining pointers returns to IDLE`() {
+        assertEquals(LensGestureState.IDLE, LensView.resolvePointerUp(LensGestureState.PANNING, 0))
+    }
+
+    // ==================================================================== FISH-009: Curvature Clamping & Math
+
+    @Test
+    fun `calculatePinchDistortion scales curvature proportionally`() {
+        val result = LensView.calculatePinchDistortion(current = 2.5f, scaleFactor = 1.2f)
+        assertEquals(3.0f, result, 0.001f)
+    }
+
+    @Test
+    fun `calculatePinchDistortion clamps to minimum bound 0_5f`() {
+        val result = LensView.calculatePinchDistortion(current = 0.6f, scaleFactor = 0.5f)
+        assertEquals(0.5f, result, 0.001f)
+    }
+
+    @Test
+    fun `calculatePinchDistortion clamps to maximum bound 5_0f`() {
+        val result = LensView.calculatePinchDistortion(current = 4.5f, scaleFactor = 1.5f)
+        assertEquals(5.0f, result, 0.001f)
+    }
+
+    @Test
+    fun `calculatePinchDistortion ignores invalid scale factors`() {
+        assertEquals(2.5f, LensView.calculatePinchDistortion(current = 2.5f, scaleFactor = Float.NaN), 0.001f)
+        assertEquals(2.5f, LensView.calculatePinchDistortion(current = 2.5f, scaleFactor = -1.0f), 0.001f)
+        assertEquals(2.5f, LensView.calculatePinchDistortion(current = 2.5f, scaleFactor = 0.0f), 0.001f)
+    }
+
+    // ==================================================================== FISH-009: App Launch Guard
+
+    @Test
+    fun `shouldAllowAppLaunch permits IDLE and PANNING, blocks PINCHING and PINCH_RELEASE`() {
+        assertTrue(LensView.shouldAllowAppLaunch(LensGestureState.IDLE))
+        assertTrue(LensView.shouldAllowAppLaunch(LensGestureState.PANNING))
+        assertFalse(LensView.shouldAllowAppLaunch(LensGestureState.PINCHING))
+        assertFalse(LensView.shouldAllowAppLaunch(LensGestureState.PINCH_RELEASE))
+    }
 }

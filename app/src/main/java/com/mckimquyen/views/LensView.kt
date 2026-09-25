@@ -14,6 +14,7 @@ import android.view.Gravity
 import android.view.HapticFeedbackConstants
 import android.view.KeyEvent
 import android.view.MotionEvent
+import android.view.ScaleGestureDetector
 import android.view.View
 import android.view.ViewConfiguration
 import android.view.animation.AccelerateDecelerateInterpolator
@@ -36,8 +37,30 @@ import com.mckimquyen.util.UtilApp
 import com.mckimquyen.util.UtilCalculator
 import com.mckimquyen.util.UtilSettings
 import kotlinx.coroutines.launch
+import java.util.Locale
 import kotlin.math.pow
 import kotlin.math.sqrt
+
+/**
+ * FISH-009: Listener notified when the user performs a live pinch gesture to adjust curvature.
+ * [finished] is false during active pinch drag and true once fingers lift / gesture completes.
+ */
+fun interface OnCurvatureAdjustedListener {
+    fun onCurvatureAdjusted(curvature: Float, finished: Boolean)
+}
+
+/**
+ * FISH-009: Deterministic multi-touch gesture state machine for LensView.
+ * Precedence: In-progress single-pointer pan is protected from stray second pointers.
+ * Initial multi-touch transitions into PINCHING. When one finger lifts, enters PINCH_RELEASE
+ * to suppress accidental app launch until all fingers leave the screen.
+ */
+enum class LensGestureState {
+    IDLE,
+    PANNING,
+    PINCHING,
+    PINCH_RELEASE
+}
 
 class LensView : View {
 
@@ -67,6 +90,63 @@ class LensView : View {
         @androidx.annotation.VisibleForTesting
         internal fun shouldTriggerLongPress(armed: Boolean, moving: Boolean, selectIndex: Int): Boolean =
             armed && !moving && selectIndex >= 0
+
+        // FISH-009: Pure state-machine transition and calculation functions
+
+        /**
+         * Determines next gesture state when a pointer goes down.
+         * Precedence: If already PANNING, stay PANNING (stray second pointer does not fight pan).
+         * If IDLE or PINCH_RELEASE and pointerCount >= 2, enter PINCHING.
+         */
+        @androidx.annotation.VisibleForTesting
+        internal fun resolvePointerDown(currentState: LensGestureState, pointerCount: Int): LensGestureState {
+            if (currentState == LensGestureState.PANNING) {
+                return LensGestureState.PANNING
+            }
+            if (pointerCount >= 2) {
+                return LensGestureState.PINCHING
+            }
+            return currentState
+        }
+
+        /**
+         * Determines next gesture state when a pointer lifts.
+         * If PINCHING and fingers remain, enter PINCH_RELEASE to prevent accidental pan or launch.
+         * When all fingers lift, return to IDLE.
+         */
+        @androidx.annotation.VisibleForTesting
+        internal fun resolvePointerUp(currentState: LensGestureState, remainingPointerCount: Int): LensGestureState {
+            if (remainingPointerCount <= 0) {
+                return LensGestureState.IDLE
+            }
+            if (currentState == LensGestureState.PINCHING) {
+                return LensGestureState.PINCH_RELEASE
+            }
+            return currentState
+        }
+
+        /**
+         * Pure function to scale and clamp live curvature during a pinch gesture.
+         * Clamped to [min, max] (defaults to [0.5f, 5.0f]).
+         */
+        @androidx.annotation.VisibleForTesting
+        internal fun calculatePinchDistortion(
+            current: Float,
+            scaleFactor: Float,
+            min: Float = UtilSettings.MIN_DISTORTION_FACTOR,
+            max: Float = 5.0f
+        ): Float {
+            if (scaleFactor.isNaN() || scaleFactor <= 0f) return current
+            return (current * scaleFactor).coerceIn(min, max)
+        }
+
+        /**
+         * Guard to ensure app launch only occurs on valid single-pointer tap or pan-release,
+         * never from pinch or pinch-release.
+         */
+        @androidx.annotation.VisibleForTesting
+        internal fun shouldAllowAppLaunch(currentState: LensGestureState): Boolean =
+            currentState != LensGestureState.PINCHING && currentState != LensGestureState.PINCH_RELEASE
     }
     private var mPaintIcons: Paint? = null
     private var mPaintCircles: Paint? = null
@@ -85,6 +165,32 @@ class LensView : View {
     private var mAnimationHiding = false
     private var mTouchSlop = 0f
     private var mMoving = false
+
+    // FISH-009: Live pinch-to-adjust curvature state and detector
+    var gestureState: LensGestureState = LensGestureState.IDLE
+        internal set
+    var liveDistortionFactor: Float? = null
+        internal set
+    var onCurvatureAdjustedListener: OnCurvatureAdjustedListener? = null
+    private var mScaleGestureDetector: ScaleGestureDetector? = null
+    private var mPinchReported = false
+    private var mPaintHud: Paint? = null
+    private var mPaintHudBackground: Paint? = null
+    private val mHudRect = RectF()
+
+    fun commitLiveDistortionFactor() {
+        val factor = liveDistortionFactor ?: return
+        mUtilSettings?.save(UtilSettings.KEY_DISTORTION_FACTOR, factor)
+        liveDistortionFactor = null
+        invalidate()
+    }
+
+    fun resetLiveDistortionFactor() {
+        if (liveDistortionFactor != null) {
+            liveDistortionFactor = null
+            invalidate()
+        }
+    }
 
     // UI-022: long-press-and-hold quick actions (info/pin/uninstall). Explicit state guards
     // (mLongPressArmed/mMoving/mSelectIndex), not a bare timer alone: the posted Runnable only
@@ -357,6 +463,32 @@ class LensView : View {
         )
         ViewCompat.setAccessibilityDelegate(this, mAccessibilityHelper)
         isFocusable = true
+
+        // FISH-009: Live pinch gesture detector for real-time curvature adjustment
+        mScaleGestureDetector = ScaleGestureDetector(context, object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
+            override fun onScale(detector: ScaleGestureDetector): Boolean {
+                if (gestureState != LensGestureState.PINCHING) return false
+                val factor = detector.scaleFactor
+                if (factor.isNaN() || factor <= 0f) return false
+                val current = liveDistortionFactor
+                    ?: mUtilSettings?.getFloat(UtilSettings.KEY_DISTORTION_FACTOR)
+                    ?: UtilSettings.DEFAULT_DISTORTION_FACTOR
+                val newDistortion = calculatePinchDistortion(current, factor)
+                liveDistortionFactor = newDistortion
+                onCurvatureAdjustedListener?.onCurvatureAdjusted(newDistortion, false)
+                invalidate()
+                return true
+            }
+
+            override fun onScaleEnd(detector: ScaleGestureDetector) {
+                liveDistortionFactor?.let { finalDistortion ->
+                    if (!mPinchReported) {
+                        mPinchReported = true
+                        onCurvatureAdjustedListener?.onCurvatureAdjusted(finalDistortion, true)
+                    }
+                }
+            }
+        })
     }
 
     private fun setupPaints() {
@@ -409,6 +541,21 @@ class LensView : View {
                 ContextCompat.getColor(context, R.color.colorShadow)
             )
         }
+
+        mPaintHudBackground = Paint().apply {
+            isAntiAlias = true
+            style = Paint.Style.FILL
+            color = Color.argb(200, 30, 30, 30)
+        }
+
+        mPaintHud = Paint().apply {
+            isAntiAlias = true
+            style = Paint.Style.FILL
+            color = Color.WHITE
+            textSize = resources.displayMetrics.scaledDensity * 16f
+            textAlign = Paint.Align.CENTER
+            typeface = Typeface.DEFAULT_BOLD
+        }
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -427,6 +574,9 @@ class LensView : View {
                 if (us.getBoolean(UtilSettings.KEY_SHOW_TOUCH_SELECTION)) {
                     drawTouchSelection(canvas)
                 }
+                if (gestureState == LensGestureState.PINCHING || gestureState == LensGestureState.PINCH_RELEASE) {
+                    drawPinchHud(canvas)
+                }
             }
         } else if (mDrawType == DrawType.CIRCLES) {
             val mNumberOfCircles = 100
@@ -436,83 +586,151 @@ class LensView : View {
         }
     }
 
+    private fun drawPinchHud(canvas: Canvas) {
+        val distortion = liveDistortionFactor ?: return
+        val text = String.format(Locale.US, "%.1fx", distortion)
+        val textWidth = mPaintHud?.measureText(text) ?: return
+        val pillWidth = textWidth + 48f
+        val pillHeight = 72f
+        val cx = width / 2f
+        val top = (mInsets.top + 32f).coerceAtLeast(32f)
+        mHudRect.set(cx - pillWidth / 2f, top, cx + pillWidth / 2f, top + pillHeight)
+        mPaintHudBackground?.let { canvas.drawRoundRect(mHudRect, 36f, 36f, it) }
+        mPaintHud?.let {
+            val fontMetrics = it.fontMetrics
+            val baseline = mHudRect.centerY() - (fontMetrics.ascent + fontMetrics.descent) / 2f
+            canvas.drawText(text, cx, baseline, it)
+        }
+    }
+
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        return if (mDrawType == DrawType.APPS) {
-            when (event.actionMasked) {
-                MotionEvent.ACTION_DOWN -> {
-                    mTouchX = event.x.coerceAtLeast(0.0f)
-                    mTouchY = event.y.coerceAtLeast(0.0f)
-                    mSelectIndex = -1
-                    mMoving = false
-                    mLongPressTriggered = false
-                    mLongPressArmed = true
-                    mLongPressHandler.removeCallbacks(mLongPressRunnable)
-                    mLongPressHandler.postDelayed(
-                        mLongPressRunnable,
-                        ViewConfiguration.getLongPressTimeout().toLong()
-                    )
-                    invalidate()
-                    true
-                }
+        if (mDrawType != DrawType.APPS) return super.onTouchEvent(event)
 
-                MotionEvent.ACTION_MOVE -> {
-                    if (mLongPressTriggered) return true
-                    if (!mMoving && exceedsTouchSlop(event.x - mTouchX, event.y - mTouchY, mTouchSlop)) {
-                        mMoving = true
+        val reduceMotion = LensPhysicsPolicy.shouldReduceLensMotion(context)
+        if (!reduceMotion && mScaleGestureDetector != null) {
+            mScaleGestureDetector?.onTouchEvent(event)
+        }
+
+        return when (event.actionMasked) {
+            MotionEvent.ACTION_DOWN -> {
+                mPinchReported = false
+                gestureState = LensGestureState.IDLE
+                mTouchX = event.x.coerceAtLeast(0.0f)
+                mTouchY = event.y.coerceAtLeast(0.0f)
+                mSelectIndex = -1
+                mMoving = false
+                mLongPressTriggered = false
+                mLongPressArmed = true
+                mLongPressHandler.removeCallbacks(mLongPressRunnable)
+                mLongPressHandler.postDelayed(
+                    mLongPressRunnable,
+                    ViewConfiguration.getLongPressTimeout().toLong()
+                )
+                invalidate()
+                true
+            }
+
+            MotionEvent.ACTION_POINTER_DOWN -> {
+                if (!reduceMotion) {
+                    val nextState = resolvePointerDown(gestureState, event.pointerCount)
+                    if (nextState == LensGestureState.PINCHING) {
+                        gestureState = LensGestureState.PINCHING
                         mLongPressArmed = false
                         mLongPressHandler.removeCallbacks(mLongPressRunnable)
-                        val lensShowAnimation = LensAnimation(true)
-                        startAnimation(lensShowAnimation)
-                    }
-                    if (!mMoving) {
+                        mSelectIndex = -1
+                        mRectToSelect = null
+                        invalidate()
                         return true
                     }
-                    mTouchX = event.x.coerceAtLeast(0.0f)
-                    mTouchY = event.y.coerceAtLeast(0.0f)
-                    invalidate()
-                    true
                 }
+                true
+            }
 
-                MotionEvent.ACTION_UP -> {
+            MotionEvent.ACTION_MOVE -> {
+                if (gestureState == LensGestureState.PINCHING || gestureState == LensGestureState.PINCH_RELEASE) {
+                    return true
+                }
+                if (mLongPressTriggered) return true
+                if (!mMoving && exceedsTouchSlop(event.x - mTouchX, event.y - mTouchY, mTouchSlop)) {
+                    mMoving = true
+                    gestureState = LensGestureState.PANNING
                     mLongPressArmed = false
                     mLongPressHandler.removeCallbacks(mLongPressRunnable)
-                    if (mLongPressTriggered) {
-                        mLongPressTriggered = false
-                        return true
+                    val lensShowAnimation = LensAnimation(true)
+                    startAnimation(lensShowAnimation)
+                }
+                if (!mMoving) {
+                    return true
+                }
+                mTouchX = event.x.coerceAtLeast(0.0f)
+                mTouchY = event.y.coerceAtLeast(0.0f)
+                invalidate()
+                true
+            }
+
+            MotionEvent.ACTION_POINTER_UP -> {
+                if (!reduceMotion) {
+                    val remaining = event.pointerCount - 1
+                    gestureState = resolvePointerUp(gestureState, remaining)
+                }
+                true
+            }
+
+            MotionEvent.ACTION_UP -> {
+                mLongPressArmed = false
+                mLongPressHandler.removeCallbacks(mLongPressRunnable)
+                if (gestureState == LensGestureState.PINCHING || gestureState == LensGestureState.PINCH_RELEASE) {
+                    gestureState = LensGestureState.IDLE
+                    mSelectIndex = -1
+                    mTouchX = -Float.MAX_VALUE
+                    mTouchY = -Float.MAX_VALUE
+                    liveDistortionFactor?.let { finalDistortion ->
+                        if (!mPinchReported) {
+                            mPinchReported = true
+                            onCurvatureAdjustedListener?.onCurvatureAdjusted(finalDistortion, true)
+                        }
                     }
-                    performLaunchVibration()
-                    if (mMoving) {
-                        val lensHideAnimation = LensAnimation(false)
-                        startAnimation(lensHideAnimation)
-                        mMoving = false
-                    } else {
+                    invalidate()
+                    return true
+                }
+                gestureState = LensGestureState.IDLE
+                if (mLongPressTriggered) {
+                    mLongPressTriggered = false
+                    return true
+                }
+                performLaunchVibration()
+                if (mMoving) {
+                    val lensHideAnimation = LensAnimation(false)
+                    startAnimation(lensHideAnimation)
+                    mMoving = false
+                } else {
+                    if (shouldAllowAppLaunch(gestureState)) {
                         launchApp()
                     }
-                    true
                 }
-
-                MotionEvent.ACTION_CANCEL -> {
-                    mLongPressArmed = false
-                    mLongPressTriggered = false
-                    mLongPressHandler.removeCallbacks(mLongPressRunnable)
-                    if (mMoving) {
-                        val lensHideAnimation = LensAnimation(false)
-                        startAnimation(lensHideAnimation)
-                        mMoving = false
-                    } else {
-                        mTouchX = -Float.MAX_VALUE
-                        mTouchY = -Float.MAX_VALUE
-                        invalidate()
-                    }
-                    true
-                }
-
-                else -> {
-                    super.onTouchEvent(event)
-                }
+                true
             }
-        } else super.onTouchEvent(event)
+
+            MotionEvent.ACTION_CANCEL -> {
+                mLongPressArmed = false
+                mLongPressTriggered = false
+                mLongPressHandler.removeCallbacks(mLongPressRunnable)
+                gestureState = LensGestureState.IDLE
+                if (mMoving) {
+                    val lensHideAnimation = LensAnimation(false)
+                    startAnimation(lensHideAnimation)
+                    mMoving = false
+                } else {
+                    mTouchX = -Float.MAX_VALUE
+                    mTouchY = -Float.MAX_VALUE
+                    invalidate()
+                }
+                true
+            }
+
+            else -> super.onTouchEvent(event)
+        }
     }
 
     private fun drawWorkspaceBackground(canvas: Canvas) {
@@ -537,7 +755,7 @@ class LensView : View {
     private fun drawGrid(canvas: Canvas, itemCount: Int) {
         val us = mUtilSettings ?: return
         val iconSizeDp = us.getFloat(UtilSettings.KEY_ICON_SIZE)
-        val distortionFactor = us.getFloat(UtilSettings.KEY_DISTORTION_FACTOR)
+        val distortionFactor = liveDistortionFactor ?: us.getFloat(UtilSettings.KEY_DISTORTION_FACTOR)
         val scaleFactor = us.getFloat(UtilSettings.KEY_SCALE_FACTOR)
 
         val grid = mGridCache.getOrCompute(

@@ -80,6 +80,9 @@
     <string name="error_no_flashlight">इस डिवाइस में फ्लैशलाइट नहीं है</string>
     <string name="error_too_many_apps">ऐप्स लोड करने में विफल</string>
     <string name="snackbar_reset_successful">सेटिंग्स डिफ़ॉल्ट पर रीसेट कर दी गईं</string>
+    <!-- FISH-009: Live pinch-to-adjust lens curvature -->
+    <string name="pinch_curvature_preview">%1$s: %2$.1fx</string>
+    <string name="pinch_save_default">डिफ़ॉल्ट के रूप में सहेजें</string>
     <string name="about"><![CDATA[Fisheye Launcher आपके ऐप्स को खोजने और लॉन्च करने का एक अनोखा और कुशल तरीका है।<br><br>लंबी सूचियों को स्क्रॉल करने या कई पेजों को स्वाइप करने के बजाय, Fisheye Launcher दो अनोखे फीचर प्रदान करता है:<br><br><b>• एक समान दूरी वाला ग्रिड जो स्क्रीन के आकार या ऐप्स की संख्या की परवाह किए बिना आपके सभी ऐप्स प्रदर्शित करता है।<br><br>• टच जेस्चर का उपयोग करके ऐप्स को तेज़ी से ज़ूम, पैन और लॉन्च करने के लिए एक ग्राफिकल फ़िशआई लेंस।</b><br><br>Fisheye Launcher में लेंस के सभी पहलुओं को बदलने के लिए एक पूर्ण सेटिंग्स मेनू भी शामिल है; जैसे विकृति, स्केलिंग, आइकन का आकार, हैप्टिक फीडबैक आदि।]]></string>
     <string name="done">हो गया</string>
     <string name="cancel">रद्द करें</string>

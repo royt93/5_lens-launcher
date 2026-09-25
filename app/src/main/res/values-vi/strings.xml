@@ -79,6 +79,9 @@
     <string name="error_no_flashlight">Thiết bị này không có đèn pin</string>
     <string name="error_too_many_apps">Lỗi tải ứng dụng</string>
     <string name="snackbar_reset_successful">Giá trị đã được thiết lập lại mặc định</string>
+    <!-- FISH-009: Live pinch-to-adjust lens curvature -->
+    <string name="pinch_curvature_preview">%1$s: %2$.1fx</string>
+    <string name="pinch_save_default">Lưu mặc định</string>
     <string name="about"><![CDATA[Fisheye Launcher là một cách độc đáo và hiệu quả để duyệt và mở các ứng dụng của bạn.<br><br>Thay vì cuộn qua danh sách dài hoặc vuốt qua nhiều trang, Fisheye Launcher triển khai hai tính năng độc đáo:<br><br><b>• Lưới khoảng cách đều hiển thị tất cả ứng dụng của bạn, bất kể kích thước màn hình hay số lượng ứng dụng.<br><br>• Thấu kính Fisheye đồ họa để nhanh chóng thu phóng, xoay và mở ứng dụng bằng cử chỉ chạm.</b><br><br>Fisheye Launcher cũng bao gồm một menu Cài đặt đầy đủ để tinh chỉnh tất cả các khía cạnh của Thấu kính; Biến dạng, Tỷ lệ, Kích thước biểu tượng, Phản hồi rung, v.v.]]></string>
     <string name="done">Xong</string>
     <string name="cancel">Hủy</string>

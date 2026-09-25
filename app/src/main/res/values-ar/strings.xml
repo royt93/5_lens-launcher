@@ -80,6 +80,9 @@
     <string name="error_no_flashlight">لا يوجد مصباح يدوي على هذا الجهاز</string>
     <string name="error_too_many_apps">فشل في تحميل التطبيقات</string>
     <string name="snackbar_reset_successful">تم إعادة تعيين القيم إلى الافتراضية</string>
+    <!-- FISH-009: Live pinch-to-adjust lens curvature -->
+    <string name="pinch_curvature_preview">%1$s: %2$.1fx</string>
+    <string name="pinch_save_default">حفظ كافتراضي</string>
     <string name="about"><![CDATA[يعتبر Fisheye Launcher طريقة فريدة وفعالة لتصفح وتشغيل تطبيقاتك.<br><br>بدلاً من التمرير عبر قوائم طويلة أو التمرير عبر صفحات متعددة، يطبق Fisheye Launcher ميزتين فريدتين:<br><br><b>• شبكة متساوية الأبعاد تعرض جميع تطبيقاتك، بغض النظر عن حجم الشاشة أو عدد التطبيقات.<br><br>• عدسة عين السمكة (Fisheye) رسومية للتكبير والتنقل وتشغيل التطبيقات بسرعة باستخدام إيماءات اللمس.</b><br><br>يتضمن Fisheye Launcher أيضًا قائمة إعدادات كاملة لضبط جميع جوانب العدسة؛ التشوه، القياس، حجم الأيقونة، الاستجابة اللمسية، إلخ.]]></string>
     <string name="done">تم</string>
     <string name="cancel">إلغاء</string>

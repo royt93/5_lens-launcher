@@ -80,6 +80,9 @@
     <string name="error_no_flashlight">이 기기에는 손전등이 없습니다</string>
     <string name="error_too_many_apps">앱 로드 실패</string>
     <string name="snackbar_reset_successful">설정이 기본값으로 재설정되었습니다</string>
+    <!-- FISH-009: Live pinch-to-adjust lens curvature -->
+    <string name="pinch_curvature_preview">%1$s: %2$.1fx</string>
+    <string name="pinch_save_default">기본값으로 저장</string>
     <string name="about"><![CDATA[Fisheye Launcher는 앱을 탐색하고 실행하는 독특하고 효율적인 방법을 제공합니다.<br><br>긴 목록을 스크롤하거나 여러 페이지를 넘길 필요 없이, Fisheye Launcher는 두 가지 핵심 기능을 제공합니다:<br><br><b>• 화면 크기나 앱 개수에 관계없이 모든 앱을 표시하는 등간격 그리드.<br><br>• 터치 제스처를 사용하여 앱을 빠르게 확대, 이동 및 실행하는 그래픽 어안 렌즈.</b><br><br>Fisheye Launcher에는 왜곡, 크기 조정, 아이콘 크기, 햅틱 피드백 등 렌즈의 모든 요소를 세부 설정할 수 있는 전체 설정 메뉴가 포함되어 있습니다.]]></string>
     <string name="done">완료</string>
     <string name="cancel">취소</string>

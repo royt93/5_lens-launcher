@@ -84,6 +84,9 @@
     <string name="error_no_flashlight">No flashlight on this device</string>
     <string name="error_too_many_apps">Failed to Load Apps</string>
     <string name="snackbar_reset_successful">Values Reset To Default</string>
+    <!-- FISH-009: Live pinch-to-adjust lens curvature -->
+    <string name="pinch_curvature_preview">%1$s: %2$.1fx</string>
+    <string name="pinch_save_default">Save as default</string>
     <string name="about"><![CDATA[Fisheye Launcher is a unique, efficient way to browse and launch your apps.<br><br>Instead of scrolling long lists or swiping through multiple pages, Fisheye Launcher implements two unique features:<br><br><b>• An Equispaced Grid that displays all of your apps, regardless of screen size or app count.<br><br>• A Graphical Fisheye Lens to quickly zoom, pan and launch apps using touch gestures.</b><br><br>Fisheye Launcher also includes a full Settings menu to tweak all aspects of the Lens; Distortion, Scaling, Icon Size, Haptic Feedback, etc.</a>]]></string>
     <string name="about_features_header">✨ Key Features</string>
     <string name="about_feature_equispaced_grid">• Equispaced Grid - displays all apps regardless of screen size</string>

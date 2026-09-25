@@ -80,6 +80,9 @@
     <string name="error_no_flashlight">Sem lanterna neste dispositivo</string>
     <string name="error_too_many_apps">Erro ao carregar aplicativos</string>
     <string name="snackbar_reset_successful">Configurações restauradas para o padrão</string>
+    <!-- FISH-009: Live pinch-to-adjust lens curvature -->
+    <string name="pinch_curvature_preview">%1$s: %2$.1fx</string>
+    <string name="pinch_save_default">Salvar como padrão</string>
     <string name="about"><![CDATA[Fisheye Launcher é uma maneira única e eficiente de navegar e iniciar seus aplicativos.<br><br>Em vez de rolar longas listas ou deslizar por várias páginas, o Fisheye Launcher implementa dois recursos exclusivos:<br><br><b>• Uma grade com espaçamento uniforme que exibe todos os seus aplicativos, independentemente do tamanho da tela ou do número de aplicativos.<br><br>• Uma lente olho de peixe (Fisheye) gráfica para aplicar zoom, arrastar e iniciar aplicativos rapidamente usando gestos de toque.</b><br><br>O Fisheye Launcher também inclui um menu de Configurações completo para ajustar todos os aspectos da lente: distorção, escala, tamanho do ícone, feedback tátil, etc.]]></string>
     <string name="done">Concluído</string>
     <string name="cancel">Cancelar</string>

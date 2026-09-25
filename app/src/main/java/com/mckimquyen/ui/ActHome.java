@@ -201,6 +201,11 @@ public class ActHome extends ActBase {
         lensViews.setPackageManager(mPackageManager);
         lensViews.setSystemUiVisibility(
                 View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
+        lensViews.setOnCurvatureAdjustedListener((curvature, finished) -> {
+            if (finished) {
+                showPinchCurvatureSnackbar(curvature);
+            }
+        });
         assignApps(Objects.requireNonNull(Objects.requireNonNull(RAppsSingleton.getInstance()).getApps()));
 
         // Observe app events using LiveData
@@ -905,6 +910,41 @@ public class ActHome extends ActBase {
                     })
                     .show();
         }
+    }
+
+    // FISH-009: Material3 confirmation snackbar for live pinch-to-adjust curvature
+    @androidx.annotation.VisibleForTesting
+    Snackbar pinchCurvatureSnackbar;
+
+    @androidx.annotation.VisibleForTesting
+    void showPinchCurvatureSnackbar(float curvature) {
+        if (pinchCurvatureSnackbar != null && pinchCurvatureSnackbar.isShown()) {
+            pinchCurvatureSnackbar.dismiss();
+        }
+        String label = getString(R.string.setting_distortion_factor);
+        String message = getString(R.string.pinch_curvature_preview, label, curvature);
+        View root = findViewById(R.id.rootLayout);
+        if (root == null) return;
+        pinchCurvatureSnackbar = Snackbar.make(root, message, Snackbar.LENGTH_LONG)
+                .setAction(R.string.pinch_save_default, v -> {
+                    if (utilSettings != null) {
+                        utilSettings.save(UtilSettings.KEY_DISTORTION_FACTOR, curvature);
+                    }
+                    if (lensViews != null) {
+                        lensViews.commitLiveDistortionFactor();
+                    }
+                })
+                .addCallback(new Snackbar.Callback() {
+                    @Override
+                    public void onDismissed(Snackbar transientBottomBar, int event) {
+                        if (event != DISMISS_EVENT_ACTION) {
+                            if (lensViews != null) {
+                                lensViews.resetLiveDistortionFactor();
+                            }
+                        }
+                    }
+                });
+        pinchCurvatureSnackbar.show();
     }
 
     // DISPLAY-001: this is the live, continuously-dragged fisheye grid — the one screen
