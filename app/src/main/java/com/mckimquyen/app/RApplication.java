@@ -106,6 +106,9 @@ public class RApplication extends android.app.Application {
     public void onCreate() {
         super.onCreate();
 
+        // Debug builds only: log main-thread I/O and leaked closeables before any startup work.
+        com.mckimquyen.util.DebugStrictMode.installIfDebug(com.mckimquyen.BuildConfig.DEBUG);
+
         // Material You: harmonize every Activity's theme with the device's wallpaper-derived
         // dynamic color on Android 12+. No-op on older versions or if the theme isn't Material3.
         com.google.android.material.color.DynamicColors.applyToActivitiesIfAvailable(this);
