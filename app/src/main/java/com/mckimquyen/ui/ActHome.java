@@ -148,6 +148,9 @@ public class ActHome extends ActBase {
     private UtilSettings utilSettings;
     CircularProgressIndicator progressBarHome;
     private ArrayList<App> listApp;
+    private boolean hasReportedFullyDrawn = false;
+    @androidx.annotation.VisibleForTesting
+    int reportFullyDrawnCallCount = 0;
     private SearchBar searchBar;
     private SearchView searchView;
     private EditText appSearch;
@@ -1006,6 +1009,14 @@ public class ActHome extends ActBase {
             homeAppAdapter.updateApps(listApp);
         }
         updateModeVisibility();
+        // PERF-004: the first moment icons are actually on screen - on a true cold start this is
+        // the appsLoaded observer's call, not onCreate's (the snapshot is still empty then).
+        // StartupTimingMetric's timeToFullDisplay only exists because of this call.
+        if (UtilCalculator.shouldReportFullyDrawn(hasReportedFullyDrawn, !listApp.isEmpty())) {
+            hasReportedFullyDrawn = true;
+            reportFullyDrawnCallCount++;
+            reportFullyDrawn();
+        }
         if (searchView.isShowing() || appSearch.getText().length() > 0) {
             updateSearchResults(appSearch.getText());
         }

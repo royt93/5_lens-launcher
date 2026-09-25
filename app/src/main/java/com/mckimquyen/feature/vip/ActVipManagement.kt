@@ -12,20 +12,22 @@ import android.view.HapticFeedbackConstants
 import android.view.View
 import android.view.animation.DecelerateInterpolator
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.graphics.toColorInt
 import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.mckimquyen.R
 import com.mckimquyen.databinding.ActVipManagementBinding
+import com.mckimquyen.ui.BaseActivity
 import com.roy.sdkadbmob.AdManager
 import com.roy.sdkadbmob.AppPreferences
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class ActVipManagement : AppCompatActivity() {
+// Extends BaseActivity (not AppCompatActivity) so it gets the app-wide Keep Screen On flag,
+// locale override and font-scale clamp like every other screen.
+class ActVipManagement : BaseActivity() {
 
     private lateinit var binding: ActVipManagementBinding
 

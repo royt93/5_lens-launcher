@@ -48,6 +48,57 @@ class ReleaseSigningContractTest(unittest.TestCase):
         self.assertNotIn("KS_PW", build_script)
         self.assertNotIn("KS_ALIAS", build_script)
 
+    def test_signing_guard_still_matches_real_release_tasks_but_not_benchmark_ones(self) -> None:
+        """PERF-004: the guard was narrowed to let the baseline-profile plugin's synthetic
+        benchmarkRelease/nonMinifiedRelease build types run without a production keystore
+        (they're on-device-only, unsigned-by-design artifacts). This proves the narrowing is
+        exact — a real release task still trips the guard, only the two carve-outs don't."""
+        build_script = (ROOT / "app" / "build.gradle").read_text(encoding="utf-8")
+
+        guard_match = re.search(
+            r"def createsReleaseArtifact = taskGraph\.allTasks\.any \{ task ->(.*?)\n {4}\}",
+            build_script,
+            re.DOTALL,
+        )
+        self.assertIsNotNone(guard_match, "createsReleaseArtifact predicate not found")
+        guard_body = guard_match.group(1)
+        self.assertIn("benchmark", guard_body)
+        self.assertIn("nonminified", guard_body)
+
+        task_name_pattern = re.search(
+            r"task\.name\.toLowerCase\(Locale\.ROOT\)\.matches\((/.*?/)\)",
+            guard_body,
+        )
+        self.assertIsNotNone(task_name_pattern, "release task-name regex not found")
+        release_regex = re.compile(task_name_pattern.group(1)[1:-1])
+
+        def guard_would_fire(task_name: str) -> bool:
+            lowered = task_name.lower()
+            if not release_regex.match(lowered):
+                return False
+            if "benchmark" in lowered or "nonminified" in lowered:
+                return False
+            return True
+
+        for real_release_task in (
+            "assembleProductionRelease",
+            "bundleProductionRelease",
+            "assembleDevRelease",
+        ):
+            self.assertTrue(
+                guard_would_fire(real_release_task),
+                f"guard must still require signing for {real_release_task}",
+            )
+
+        for benchmark_carveout_task in (
+            "assembleProductionBenchmarkRelease",
+            "assembleDevNonMinifiedRelease",
+        ):
+            self.assertFalse(
+                guard_would_fire(benchmark_carveout_task),
+                f"guard must not require production signing for {benchmark_carveout_task}",
+            )
+
     def test_local_signing_files_are_ignored(self) -> None:
         for path in (
             "keystore.properties",

@@ -1,0 +1,44 @@
+// PERF-004: generates app/src/main/generated/baselineProfiles/baseline-prof.txt and measures
+// cold start (StartupTimingMetric) against the real :app build.
+apply plugin: 'com.android.test'
+apply plugin: 'kotlin-android'
+apply plugin: 'androidx.baselineprofile'
+
+android {
+    namespace 'com.mckimquyen.baselineprofile'
+    compileSdkVersion 37
+
+    defaultConfig {
+        minSdkVersion 28 // Macrobenchmark floor; unrelated to :app's minSdk 25
+        targetSdkVersion 37
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+        // :app has a 'type' flavor dimension (dev/production); this module isn't flavored
+        // itself - always target the shipping 'production' flavor, the only one that matters
+        // for a cold-start profile that ships to real users.
+        missingDimensionStrategy 'type', 'production'
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = '17'
+    }
+
+    targetProjectPath = ':app'
+}
+
+// ponytail: connected device only, no Gradle Managed Device - this repo pins one approved
+// physical device per session and GMD would add another device surface to fan out to.
+baselineProfile {
+    useConnectedDevices = true
+}
+
+dependencies {
+    implementation 'androidx.test.ext:junit:1.2.1'
+    implementation 'androidx.test:runner:1.6.1'
+    implementation 'androidx.test.uiautomator:uiautomator:2.3.0'
+    implementation 'androidx.benchmark:benchmark-macro-junit4:1.5.0'
+}

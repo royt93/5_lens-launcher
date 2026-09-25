@@ -65,7 +65,12 @@ class MaterialYouSettingsIntegrationTest {
             slider.value = newValue
 
             assertEquals("Slider value must be updated", newValue, slider.value, 0.01f)
-            assertEquals("Label must update with slider value", "${newValue.toInt()}dp", tvValue.text.toString())
+            // Label comes from the localized unit_dp_format resource (A11Y-001), not a literal.
+            assertEquals(
+                "Label must update with slider value",
+                activity.getString(R.string.unit_dp_format, newValue.toInt()),
+                tvValue.text.toString()
+            )
         }
 
         scenario.close()

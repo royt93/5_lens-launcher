@@ -14,6 +14,15 @@ import com.mckimquyen.model.Grid;
 public class UtilCalculator {
 
     /**
+     * PERF-004: gate for Activity.reportFullyDrawn() — report exactly once, only once real
+     * (non-empty) app content has actually been handed to the grid/list, not on the empty
+     * first-frame cold-start branch.
+     */
+    public static boolean shouldReportFullyDrawn(boolean alreadyReported, boolean hasVisibleApps) {
+        return !alreadyReported && hasVisibleApps;
+    }
+
+    /**
      * UI-020: extra symmetric side margin (in the same unit as the inputs, typically px) so the
      * home column doesn't stretch edge-to-edge on tablets/large landscape screens. Zero unless
      * the screen is actually wider than maxContentWidth (a normal phone never engages this).

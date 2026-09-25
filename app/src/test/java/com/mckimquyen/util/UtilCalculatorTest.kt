@@ -79,6 +79,26 @@ class UtilCalculatorTest {
     }
 
     @Test
+    fun shouldReportFullyDrawn_firstNonEmptyContent_reports() {
+        assertTrue(UtilCalculator.shouldReportFullyDrawn(false, true))
+    }
+
+    @Test
+    fun shouldReportFullyDrawn_alreadyReported_doesNotReportAgain() {
+        assertFalse(UtilCalculator.shouldReportFullyDrawn(true, true))
+    }
+
+    @Test
+    fun shouldReportFullyDrawn_emptyColdStartFrame_doesNotReport() {
+        assertFalse(UtilCalculator.shouldReportFullyDrawn(false, false))
+    }
+
+    @Test
+    fun shouldReportFullyDrawn_alreadyReportedAndEmpty_doesNotReport() {
+        assertFalse(UtilCalculator.shouldReportFullyDrawn(true, false))
+    }
+
+    @Test
     fun testScalePointInsideFisheyeLens() {
         // Given
         val lensPosition = 500f

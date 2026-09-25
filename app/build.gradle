@@ -4,6 +4,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
+apply plugin: 'androidx.baselineprofile' // PERF-004: consumes :baselineprofile's generated profile
 
 kapt {
     arguments {
@@ -321,10 +322,35 @@ android {
     }
 }
 
+// PERF-004: the baseline-profile plugin's synthetic benchmarkRelease/nonMinifiedRelease build
+// types inherit release's real ad config. Profile generation/benchmarking must never make a real
+// ad request (inflated timing, real impressions), so reuse the existing IS_ENABLE_ADMOB kill
+// switch RApplication.setupAdmob() already honors - no new flag.
+androidComponents {
+    onVariants(selector().all()) { variant ->
+        def buildType = variant.buildType ?: ''
+        if (buildType.startsWith('benchmark') || buildType.startsWith('nonMinified')) {
+            variant.buildConfigFields.put(
+                    'IS_ENABLE_ADMOB',
+                    new com.android.build.api.variant.BuildConfigField('Boolean', 'false', 'PERF-004: no ads while profiling')
+            )
+        }
+    }
+}
+
+// PERF-004: merge the per-variant generated profile into one committed file under
+// src/main/generated/baselineProfiles, shipped in every release variant.
+baselineProfile {
+    mergeIntoMain = true
+    saveInSrc = true
+}
+
 gradle.taskGraph.whenReady { taskGraph ->
     def createsReleaseArtifact = taskGraph.allTasks.any { task ->
         task.project == project &&
-                task.name.toLowerCase(Locale.ROOT).matches(/(assemble|bundle|package).*release.*/)
+                task.name.toLowerCase(Locale.ROOT).matches(/(assemble|bundle|package).*release.*/) &&
+                !task.name.toLowerCase(Locale.ROOT).contains('benchmark') &&
+                !task.name.toLowerCase(Locale.ROOT).contains('nonminified')
     }
     if (createsReleaseArtifact && !hasReleaseSigning) {
         throw new GradleException(
@@ -341,6 +367,11 @@ gradle.taskGraph.whenReady { taskGraph ->
 dependencies {
     // Local JARs
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    // PERF-004: installs the shipped baseline profile on sideload/non-Play installs too
+    // (was already pulled in transitively at 1.4.0 - pinned explicitly so the intent is visible).
+    implementation 'androidx.profileinstaller:profileinstaller:1.4.1'
+    baselineProfile project(':baselineprofile')
 
     // ========================================================================
     // TESTING DEPENDENCIES

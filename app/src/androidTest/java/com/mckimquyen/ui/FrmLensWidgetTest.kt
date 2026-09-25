@@ -109,7 +109,8 @@ class FrmLensWidgetTest {
             val slider = requireNotNull(view.findViewById<com.google.android.material.slider.Slider>(R.id.sbMinIconSize))
             val value = requireNotNull(view.findViewById<android.widget.TextView>(R.id.tvValueMinIconSize))
 
-            assertEquals("${expected.toInt()}dp", value.text.toString())
+            // Label comes from the localized unit_dp_format resource (A11Y-001), not a literal.
+            assertEquals(fragment.getString(R.string.unit_dp_format, expected.toInt()), value.text.toString())
             assertEquals(expected, slider.value, 0.01f)
             assertEquals(expected, prefs.getFloat(UtilSettings.KEY_ICON_SIZE, Float.NaN))
         }

@@ -5,6 +5,7 @@ import androidx.preference.PreferenceManager
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.mckimquyen.feature.vip.ActVipManagement
 import com.mckimquyen.util.UtilSettings
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -72,6 +73,50 @@ class BaseActivityKeepScreenOnIntegrationTest {
             assertEquals(
                 "a third, unrelated Activity must also get the flag - proving this isn't a two-Activity coincidence",
                 true,
+                hasKeepScreenOnFlag(activity)
+            )
+        }
+        scenario.close()
+    }
+
+    @Test
+    fun flagIsSet_onActVipManagement_whenSettingIsOn() {
+        UtilSettings(context).save(UtilSettings.KEY_KEEP_SCREEN_ON, true)
+
+        val scenario = ActivityScenario.launch(ActVipManagement::class.java)
+        scenario.onActivity { activity ->
+            assertEquals(
+                "ActVipManagement used to extend AppCompatActivity directly and missed the flag",
+                true,
+                hasKeepScreenOnFlag(activity)
+            )
+        }
+        scenario.close()
+    }
+
+    @Test
+    fun flagIsClear_onActVipManagement_whenSettingIsOff() {
+        val scenario = ActivityScenario.launch(ActVipManagement::class.java)
+        scenario.onActivity { activity ->
+            assertEquals(false, hasKeepScreenOnFlag(activity))
+        }
+        scenario.close()
+    }
+
+    @Test
+    fun flagIsCleared_onResume_afterSettingTurnedOff() {
+        UtilSettings(context).save(UtilSettings.KEY_KEEP_SCREEN_ON, true)
+
+        val scenario = ActivityScenario.launch(ActVipManagement::class.java)
+        scenario.onActivity { assertEquals(true, hasKeepScreenOnFlag(it)) }
+
+        UtilSettings(context).save(UtilSettings.KEY_KEEP_SCREEN_ON, false)
+        scenario.moveToState(androidx.lifecycle.Lifecycle.State.STARTED)
+        scenario.moveToState(androidx.lifecycle.Lifecycle.State.RESUMED)
+        scenario.onActivity { activity ->
+            assertEquals(
+                "toggling the setting off must clear the flag on the next resume",
+                false,
                 hasKeepScreenOnFlag(activity)
             )
         }
