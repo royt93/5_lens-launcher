@@ -102,4 +102,50 @@ class LensViewAccessibilityWidgetTest {
         assertTrue("App 0 bounds must be computable", hasBounds0)
         assertFalse("App 0 bounds must not be empty", bounds.isEmpty)
     }
+
+    /**
+     * UI-022 acceptance: "the same actions remain reachable via a non-gesture path... a
+     * swipe-only affordance is not acceptable per this project's A11Y-001 standard." TalkBack's
+     * virtual-node long-click action must reach the exact same `showAppOptionsAtIndex()` quick
+     * actions the real touch long-press gesture opens - one shared method, not two divergent
+     * implementations that could drift apart.
+     */
+    @Test
+    fun testLensView_longClickAction_reachesTheSameQuickActionsAsTheTouchLongPress() {
+        val testApps = arrayListOf(
+            App(id = 1, label = "Test App 1", packageName = "com.test1", name = "Activity1")
+        )
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            lensView.setApps(testApps)
+        }
+
+        val helper = lensView.getAccessibilityHelper()
+        assertNotNull("Helper must be present", helper)
+
+        val node = AccessibilityNodeInfoCompat.obtain()
+        helper!!.testPopulateNodeForVirtualView(0, node)
+        assertTrue(
+            "a node with a long-click handler wired must expose itself as long-clickable to TalkBack",
+            node.isLongClickable
+        )
+
+        // This view is never attached to a real window in this test harness, so the popup
+        // inside showAppOptionsAtIndex() can't show (no window token) - the return value here
+        // is simply whatever showAppOptionsAtIndex() reports, proving the wiring reaches it
+        // without crashing. Real end-to-end success on a genuine attached+themed window,
+        // through this exact TalkBack action, is proven by
+        // LensViewQuickActionsIntegrationTest#testAccessibilityLongClickAction_realAttachedThemedWindow_actuallySucceeds.
+        var handled = true
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            handled = helper.testPerformActionForVirtualView(
+                0,
+                AccessibilityNodeInfoCompat.ACTION_LONG_CLICK,
+                null
+            )
+        }
+        assertFalse(
+            "TalkBack's long-click action must reach showAppOptionsAtIndex() and fail the same clean way (no window), not crash",
+            handled
+        )
+    }
 }

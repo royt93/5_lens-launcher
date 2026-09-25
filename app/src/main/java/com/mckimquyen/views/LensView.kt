@@ -2,10 +2,15 @@ package com.mckimquyen.views
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.*
 import android.graphics.drawable.NinePatchDrawable
+import android.os.Handler
+import android.os.Looper
 import android.util.AttributeSet
+import android.view.ContextThemeWrapper
+import android.view.Gravity
 import android.view.HapticFeedbackConstants
 import android.view.KeyEvent
 import android.view.MotionEvent
@@ -14,6 +19,8 @@ import android.view.ViewConfiguration
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.animation.Animation
 import android.view.animation.Transformation
+import android.widget.Toast
+import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.toColorInt
 import androidx.core.view.ViewCompat
@@ -22,6 +29,8 @@ import com.mckimquyen.enums.BackgroundMode
 import com.mckimquyen.enums.DrawType
 import com.mckimquyen.model.App
 import com.mckimquyen.model.AppPersistent
+import com.mckimquyen.model.PinnedZone
+import com.mckimquyen.services.BroadcastReceivers
 import com.mckimquyen.util.LensPhysicsPolicy
 import com.mckimquyen.util.UtilApp
 import com.mckimquyen.util.UtilCalculator
@@ -39,6 +48,25 @@ class LensView : View {
         const val FRAME_BUDGET_90HZ_MS = 11.1f
         const val FRAME_BUDGET_120HZ_MS = 8.3f
         const val LARGE_APP_LIST_BENCHMARK_SIZE = 300
+
+        // UI-022: pure gesture-disambiguation predicates, extracted so the exact logic
+        // `onTouchEvent` runs is also directly unit-testable without a Context/Robolectric
+        // (same pattern as AppAdapter's `lockIconResFor`/`AppAdapterSelectionStateTest`).
+
+        /** Has the touch moved far enough from its down-point to count as a real pan? */
+        @androidx.annotation.VisibleForTesting
+        internal fun exceedsTouchSlop(dx: Float, dy: Float, touchSlop: Float): Boolean =
+            sqrt(dx.toDouble().pow(2.0) + dy.toDouble().pow(2.0)) > touchSlop
+
+        /**
+         * Should the pending long-press Runnable actually act when it fires? False whenever
+         * the touch already turned into a pan (`moving`), was released/cancelled before the
+         * timeout (`armed` false), or never landed on an icon (`selectIndex < 0`) - a real
+         * state check, not just "the timer elapsed".
+         */
+        @androidx.annotation.VisibleForTesting
+        internal fun shouldTriggerLongPress(armed: Boolean, moving: Boolean, selectIndex: Int): Boolean =
+            armed && !moving && selectIndex >= 0
     }
     private var mPaintIcons: Paint? = null
     private var mPaintCircles: Paint? = null
@@ -57,6 +85,25 @@ class LensView : View {
     private var mAnimationHiding = false
     private var mTouchSlop = 0f
     private var mMoving = false
+
+    // UI-022: long-press-and-hold quick actions (info/pin/uninstall). Explicit state guards
+    // (mLongPressArmed/mMoving/mSelectIndex), not a bare timer alone: the posted Runnable only
+    // acts if the touch never crossed the pan threshold and still sits over an icon by the time
+    // it fires, and is cancelled outright the instant a real pan starts (ACTION_MOVE past
+    // mTouchSlop) or the touch ends/cancels - so an in-progress pan can never be mistaken for a
+    // long-press and a long-press can never fight the existing pan/launch gesture.
+    private var mLongPressArmed = false
+    private var mLongPressTriggered = false
+    private val mLongPressHandler = Handler(Looper.getMainLooper())
+    private val mLongPressRunnable = Runnable {
+        if (shouldTriggerLongPress(mLongPressArmed, mMoving, mSelectIndex)) {
+            mLongPressTriggered = true
+            if (!LensPhysicsPolicy.shouldReduceLensMotion(context)) {
+                performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+            }
+            showAppOptionsAtIndex(mSelectIndex)
+        }
+    }
     private var mUtilSettings: UtilSettings? = null
     private var mWorkspaceBackgroundDrawable: NinePatchDrawable? = null
     // UI-019: system-bar avoidance is now owned by ActHome.applyHomeColumnInsets (margins on this
@@ -139,18 +186,92 @@ class LensView : View {
         }
     }
 
+    /**
+     * UI-022: shared quick-actions entry point for BOTH the touch long-press gesture and the
+     * accessibility (TalkBack) long-click path (`LensAccessibilityHelper.onAppLongClicked`) -
+     * one path, so a non-gesture accessible route always reaches the exact same actions a
+     * touch long-press does (this project's A11Y-001 standard).
+     */
     fun showAppOptionsAtIndex(index: Int): Boolean {
         val list = mApps ?: return false
-        if (index in list.indices) {
-            val app = list[index]
-            return try {
-                context.startActivity(UtilApp.appInfoIntent(app.packageName.toString()))
-                true
-            } catch (_: Exception) {
-                false
+        if (index !in list.indices) return false
+        return showQuickActionsMenu(list[index])
+    }
+
+    /**
+     * UI-022: reuses the exact same menu resource, intents and organization persistence
+     * `SearchResultAdapter`'s row long-press already established (SEARCH-003) - no new intent
+     * construction or pin logic duplicated a third time. The whole construct-inflate-show
+     * sequence is one try/catch, not just `.show()`: a stray long-press firing while this
+     * view's context can't resolve the popup's theme (e.g. mid-detach, or - found live while
+     * testing this very story - a non-Activity context with no Material3 theme applied) must
+     * degrade to "no menu appears" rather than crash the app.
+     *
+     * ponytail: anchored to `this` (the whole `LensView`), not the pressed icon's own rect -
+     * live-verified the menu always opens near the same corner regardless of which icon was
+     * pressed, rather than tracking the icon. `LensView` draws every icon on one `Canvas` (no
+     * per-icon child View to anchor to), so precise per-icon positioning needs a transient
+     * anchor View added to LensView's own parent ViewGroup at the icon's translated rect - real
+     * but non-trivial extra plumbing for a purely cosmetic improvement (the menu is reachable
+     * and correct either way). Upgrade if real usage shows the fixed position is confusing.
+     */
+    private fun showQuickActionsMenu(app: App): Boolean {
+        return try {
+            val wrapper = ContextThemeWrapper(context, R.style.PopupMenuTheme)
+            val popupMenu = PopupMenu(wrapper, this, Gravity.CENTER)
+            popupMenu.inflate(R.menu.menu_search_result)
+            popupMenu.menu.findItem(R.id.menuItemUnpin).isVisible = app.pinnedZone != PinnedZone.NONE
+            popupMenu.setForceShowIcon(true)
+            popupMenu.setOnMenuItemClickListener { item ->
+                when (item.itemId) {
+                    R.id.menuItemElementAppInfo -> {
+                        startQuickActionIntent(UtilApp.appInfoIntent(app.packageName.toString()))
+                        true
+                    }
+                    R.id.menuItemElementUninstall -> {
+                        startQuickActionIntent(UtilApp.uninstallIntent(app.packageName.toString()))
+                        true
+                    }
+                    R.id.menuItemPinStart -> {
+                        pinQuickAction(app, PinnedZone.START)
+                        true
+                    }
+                    R.id.menuItemPinEnd -> {
+                        pinQuickAction(app, PinnedZone.END)
+                        true
+                    }
+                    R.id.menuItemUnpin -> {
+                        pinQuickAction(app, PinnedZone.NONE)
+                        true
+                    }
+                    else -> false
+                }
             }
+            popupMenu.show()
+            true
+        } catch (_: Exception) {
+            false
         }
-        return false
+    }
+
+    private fun startQuickActionIntent(intent: Intent) {
+        try {
+            context.startActivity(intent)
+        } catch (_: Exception) {
+            Toast.makeText(context, R.string.error_app_not_found, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun pinQuickAction(app: App, zone: PinnedZone) {
+        AppPersistent.setOrganization(
+            app.packageName.toString(),
+            app.name.toString(),
+            app.isFavorite,
+            app.folderName,
+            zone
+        )
+        context.sendBroadcast(Intent(context, BroadcastReceivers.AppsEditedReceiver::class.java))
+        Toast.makeText(context, R.string.organization_saved, Toast.LENGTH_SHORT).show()
     }
 
     override fun dispatchHoverEvent(event: MotionEvent): Boolean {
@@ -290,17 +411,23 @@ class LensView : View {
                     mTouchY = event.y.coerceAtLeast(0.0f)
                     mSelectIndex = -1
                     mMoving = false
+                    mLongPressTriggered = false
+                    mLongPressArmed = true
+                    mLongPressHandler.removeCallbacks(mLongPressRunnable)
+                    mLongPressHandler.postDelayed(
+                        mLongPressRunnable,
+                        ViewConfiguration.getLongPressTimeout().toLong()
+                    )
                     invalidate()
                     true
                 }
 
                 MotionEvent.ACTION_MOVE -> {
-                    if (!mMoving && sqrt(
-                            (event.x - mTouchX).toDouble().pow(2.0) + (event.y - mTouchY).toDouble()
-                                .pow(2.0)
-                        ) > mTouchSlop
-                    ) {
+                    if (mLongPressTriggered) return true
+                    if (!mMoving && exceedsTouchSlop(event.x - mTouchX, event.y - mTouchY, mTouchSlop)) {
                         mMoving = true
+                        mLongPressArmed = false
+                        mLongPressHandler.removeCallbacks(mLongPressRunnable)
                         val lensShowAnimation = LensAnimation(true)
                         startAnimation(lensShowAnimation)
                     }
@@ -314,6 +441,12 @@ class LensView : View {
                 }
 
                 MotionEvent.ACTION_UP -> {
+                    mLongPressArmed = false
+                    mLongPressHandler.removeCallbacks(mLongPressRunnable)
+                    if (mLongPressTriggered) {
+                        mLongPressTriggered = false
+                        return true
+                    }
                     performLaunchVibration()
                     if (mMoving) {
                         val lensHideAnimation = LensAnimation(false)
@@ -323,6 +456,14 @@ class LensView : View {
                         launchApp()
                     }
                     true
+                }
+
+                MotionEvent.ACTION_CANCEL -> {
+                    mLongPressArmed = false
+                    mLongPressTriggered = false
+                    mLongPressHandler.removeCallbacks(mLongPressRunnable)
+                    mMoving = false
+                    super.onTouchEvent(event)
                 }
 
                 else -> {
@@ -670,6 +811,9 @@ class LensView : View {
 
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
+        // UI-022: a pending long-press Runnable must never fire (and show a PopupMenu) after
+        // this view is detached/destroyed.
+        mLongPressHandler.removeCallbacks(mLongPressRunnable)
         // Fix BUG-05: Cancel animation đang chạy để tránh AnimationListener callback
         // vào LensView (inner class giữ outer reference) sau khi view bị detach/destroy
         clearAnimation()
