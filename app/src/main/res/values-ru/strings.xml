@@ -16,7 +16,7 @@
     <string name="setting_show_touch_selection">Показывать выбор касанием</string>
     <string name="setting_show_search_bar">Показать строку поиска</string>
     <string name="setting_keep_screen_on">Не выключать экран</string>
-    <string name="setting_keep_screen_on_hint">Экран остаётся включённым, пока открыт главный экран лаунчера. Режим энергосбережения всё же может выключить его.</string>
+    <string name="setting_keep_screen_on_hint">Экран остаётся включённым, пока открыт любой экран этого приложения. Режим энергосбережения всё же может выключить его.</string>
     <string name="setting_search_hint_title">Текст подсказки поиска</string>
     <string name="setting_search_hint_default">По умолчанию</string>
     <string name="setting_quick_action_calculator">Показать калькулятор</string>

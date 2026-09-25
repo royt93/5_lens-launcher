@@ -16,7 +16,7 @@
     <string name="setting_show_touch_selection">Tampilkan Pilihan Sentuh</string>
     <string name="setting_show_search_bar">Tampilkan bilah pencarian</string>
     <string name="setting_keep_screen_on">Jaga layar tetap menyala</string>
-    <string name="setting_keep_screen_on_hint">Layar tetap menyala selama layar utama launcher terbuka. Penghemat baterai tetap dapat mematikannya.</string>
+    <string name="setting_keep_screen_on_hint">Layar tetap menyala selama layar mana pun dari aplikasi ini terbuka. Penghemat baterai tetap dapat mematikannya.</string>
     <string name="setting_search_hint_title">Teks petunjuk pencarian</string>
     <string name="setting_search_hint_default">Default</string>
     <string name="setting_quick_action_calculator">Tampilkan kalkulator</string>

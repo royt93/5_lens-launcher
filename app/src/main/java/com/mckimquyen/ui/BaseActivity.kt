@@ -4,9 +4,11 @@ import android.content.Context
 import android.content.res.Configuration
 import android.os.Build
 import android.os.PowerManager
+import android.view.WindowManager
 import androidx.annotation.RequiresApi
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
+import com.mckimquyen.util.UtilSettings
 
 open class BaseActivity : AppCompatActivity() {
 
@@ -61,6 +63,7 @@ open class BaseActivity : AppCompatActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && wantsHighRefreshRate()) {
             requestHighRefreshRate()
         }
+        updateKeepScreenOnFlag()
     }
 
     override fun onPause() {
@@ -68,6 +71,26 @@ open class BaseActivity : AppCompatActivity() {
             releasePreferredDisplayMode()
         }
         super.onPause()
+    }
+
+    /**
+     * Owner request (2026-09-25): the "Keep Screen On" setting (previously ActHome-only,
+     * FEAT-005) now applies to every screen in the app, centralized here so a new Activity
+     * gets it for free just by extending BaseActivity/ActBase - no per-Activity wiring.
+     * Re-read on every resume (matches [wantsHighRefreshRate]'s established pattern) so
+     * toggling the setting in ActSettings takes effect immediately on return. Plain
+     * `FLAG_KEEP_SCREEN_ON`, not a `PowerManager.WakeLock`: it only affects screen-on state
+     * while this window is the one displayed (no `WAKE_LOCK` permission, no manual
+     * acquire/release lifecycle to leak) - the native, platform-idiomatic mechanism for
+     * exactly this "keep the screen on while my app is in front" use case.
+     */
+    private fun updateKeepScreenOnFlag() {
+        val keepScreenOn = UtilSettings(this).getBoolean(UtilSettings.KEY_KEEP_SCREEN_ON)
+        if (keepScreenOn) {
+            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        } else {
+            window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        }
     }
 
     @RequiresApi(Build.VERSION_CODES.R)

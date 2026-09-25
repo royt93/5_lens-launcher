@@ -16,7 +16,7 @@
     <string name="setting_show_touch_selection">स्पर्श चयन दिखाएं</string>
     <string name="setting_show_search_bar">खोज बार दिखाएं</string>
     <string name="setting_keep_screen_on">स्क्रीन चालू रखें</string>
-    <string name="setting_keep_screen_on_hint">जब तक लॉन्चर की होम स्क्रीन खुली है, स्क्रीन चालू रहेगी। बैटरी सेवर फिर भी इसे बंद कर सकता है।</string>
+    <string name="setting_keep_screen_on_hint">जब तक इस ऐप की कोई भी स्क्रीन खुली है, स्क्रीन चालू रहेगी। बैटरी सेवर फिर भी इसे बंद कर सकता है।</string>
     <string name="setting_search_hint_title">खोज संकेत टेक्स्ट</string>
     <string name="setting_search_hint_default">डिफ़ॉल्ट</string>
     <string name="setting_quick_action_calculator">कैलकुलेटर दिखाएं</string>

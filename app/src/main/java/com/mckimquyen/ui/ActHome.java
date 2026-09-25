@@ -841,7 +841,8 @@ public class ActHome extends ActBase {
         Log.d("roy93~", "onResume");
         updateColor();
         updateSearchBarVisibility();
-        updateKeepScreenOnFlag();
+        // Keep-screen-on flag is now applied to every screen by BaseActivity.onResume()
+        // (called via super.onResume() above), not just here - see UtilSettings.KEY_KEEP_SCREEN_ON.
         updateSearchCustomization();
         updateModeVisibility();
         checkA11ySuggestion();
@@ -921,19 +922,6 @@ public class ActHome extends ActBase {
         }
     }
 
-    // FEAT-005: re-read on every resume (matches updateSearchBarVisibility's established
-    // pattern) so toggling the setting in ActSettings takes effect immediately when the user
-    // returns Home. FLAG_KEEP_SCREEN_ON only affects screen-on state while this window is the
-    // one being displayed, so it never leaks into other activities and needs no explicit
-    // onPause clearing - once another Activity's window is on top, this flag is inert.
-    private void updateKeepScreenOnFlag() {
-        boolean keepScreenOn = new UtilSettings(this).getBoolean(UtilSettings.KEY_KEEP_SCREEN_ON);
-        if (keepScreenOn) {
-            getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        } else {
-            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        }
-    }
 
     private void setupTransparentSystemBarsForLollipop() {
         Window window = getWindow();

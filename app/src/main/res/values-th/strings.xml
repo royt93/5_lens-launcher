@@ -16,7 +16,7 @@
     <string name="setting_show_touch_selection">แสดงการเลือกสัมผัส</string>
     <string name="setting_show_search_bar">แสดงแถบค้นหา</string>
     <string name="setting_keep_screen_on">เปิดหน้าจอค้างไว้</string>
-    <string name="setting_keep_screen_on_hint">หน้าจอจะเปิดค้างไว้ขณะที่หน้าจอหลักของลันเชอร์เปิดอยู่ โหมดประหยัดแบตเตอรี่อาจยังปิดหน้าจอได้</string>
+    <string name="setting_keep_screen_on_hint">หน้าจอจะเปิดค้างไว้ขณะที่หน้าจอใดหน้าจอหนึ่งของแอปนี้เปิดอยู่ โหมดประหยัดแบตเตอรี่อาจยังปิดหน้าจอได้</string>
     <string name="setting_search_hint_title">ข้อความคำแนะนำการค้นหา</string>
     <string name="setting_search_hint_default">ค่าเริ่มต้น</string>
     <string name="setting_quick_action_calculator">แสดงเครื่องคิดเลข</string>
