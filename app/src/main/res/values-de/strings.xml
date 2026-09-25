@@ -17,6 +17,8 @@
     <string name="setting_show_search_bar">Suchleiste anzeigen</string>
     <string name="setting_keep_screen_on">Bildschirm eingeschaltet lassen</string>
     <string name="setting_keep_screen_on_hint">Der Bildschirm bleibt eingeschaltet, während ein beliebiger Bildschirm dieser App geöffnet ist. Der Energiesparmodus kann ihn trotzdem ausschalten.</string>
+    <string name="setting_depth_of_field">Tiefenschärfe-Unschärfe</string>
+    <string name="setting_depth_of_field_hint">Zeichnet Symbole abseits deines Fingers beim Ziehen der Linse weich, wie bei einer echten Kamera. Standardmäßig aus.</string>
     <string name="setting_search_hint_title">Suchhinweistext</string>
     <string name="setting_search_hint_default">Standard</string>
     <string name="setting_quick_action_calculator">Rechner anzeigen</string>

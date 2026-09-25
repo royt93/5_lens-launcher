@@ -52,6 +52,8 @@ class UtilSettings(context: Context) {
         const val DEFAULT_SHOW_SEARCH_BAR = true
         // FEAT-005: off by default, no behavior change for existing users.
         const val DEFAULT_KEEP_SCREEN_ON = false
+        // FISH-007: depth-of-field blur is opt-in (owner decision), off by default.
+        const val DEFAULT_DEPTH_OF_FIELD = false
         // UI-012: each SEARCH-002 quick-action type can be individually toggled off; all on by
         // default so this is purely additive for existing users.
         const val DEFAULT_QUICK_ACTION_ENABLED = true
@@ -92,6 +94,7 @@ class UtilSettings(context: Context) {
         const val KEY_SHOW_NEW_APP_TAG = "show_new_tag_app"
         const val KEY_SHOW_SEARCH_BAR = "show_search_bar"
         const val KEY_KEEP_SCREEN_ON = "keep_screen_on"
+        const val KEY_DEPTH_OF_FIELD = "depth_of_field_blur"
         // UI-012: per-quick-action toggles + custom search hint text.
         const val KEY_QUICK_ACTION_CALCULATOR = "quick_action_calculator_enabled"
         const val KEY_QUICK_ACTION_UNIT = "quick_action_unit_enabled"
@@ -224,6 +227,7 @@ class UtilSettings(context: Context) {
         KEY_SHOW_NEW_APP_TAG -> prefs.getBoolean(name, DEFAULT_SHOW_NEW_APP_TAG)
         KEY_SHOW_SEARCH_BAR -> prefs.getBoolean(name, DEFAULT_SHOW_SEARCH_BAR)
         KEY_KEEP_SCREEN_ON -> prefs.getBoolean(name, DEFAULT_KEEP_SCREEN_ON)
+        KEY_DEPTH_OF_FIELD -> prefs.getBoolean(name, DEFAULT_DEPTH_OF_FIELD)
         KEY_QUICK_ACTION_CALCULATOR, KEY_QUICK_ACTION_UNIT, KEY_QUICK_ACTION_TIMER,
         KEY_QUICK_ACTION_BATTERY, KEY_QUICK_ACTION_SETTINGS,
         KEY_QUICK_ACTION_FLASHLIGHT, KEY_QUICK_ACTION_WIFI_SSID, KEY_QUICK_ACTION_DND,

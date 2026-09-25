@@ -16,6 +16,8 @@
     <string name="setting_show_search_bar">Hiện thanh tìm kiếm</string>
     <string name="setting_keep_screen_on">Giữ màn hình sáng</string>
     <string name="setting_keep_screen_on_hint">Màn hình sẽ giữ sáng khi bất kỳ màn hình nào của ứng dụng đang mở. Chế độ tiết kiệm pin vẫn có thể tắt màn hình.</string>
+    <string name="setting_depth_of_field">Làm mờ theo tiêu cự</string>
+    <string name="setting_depth_of_field_hint">Làm mờ nhẹ các biểu tượng xa ngón tay khi kéo lens, như ống kính máy ảnh thật. Mặc định tắt.</string>
     <string name="setting_search_hint_title">Chữ gợi ý tìm kiếm</string>
     <string name="setting_search_hint_default">Mặc định</string>
     <string name="setting_quick_action_calculator">Hiện máy tính</string>

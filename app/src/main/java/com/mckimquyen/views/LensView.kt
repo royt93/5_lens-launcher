@@ -123,6 +123,40 @@ class LensView : View {
     private val mGridCache = LensGridCache()
     private val mScratchRect = RectF()
 
+    // FISH-007: depth-of-field. The user toggle (UtilSettings.KEY_DEPTH_OF_FIELD, off by default)
+    // and reduced-motion are sampled once per lens show/hide (LensAnimation), never per frame.
+    // The @VisibleForTesting fields expose the last frame's decision to tests.
+    private var mReduceMotion = false
+    private val mDofLayers: DepthOfFieldLayers? =
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            DepthOfFieldLayers(resources.displayMetrics.density)
+        } else {
+            null
+        }
+    @androidx.annotation.VisibleForTesting
+    internal var depthOfFieldEnabled = UtilSettings.DEFAULT_DEPTH_OF_FIELD
+    @androidx.annotation.VisibleForTesting
+    internal var dofLastMode = DepthOfField.Mode.OFF
+    @androidx.annotation.VisibleForTesting
+    internal var dofLastTransition = 0f
+    @androidx.annotation.VisibleForTesting
+    internal val dofBandCounts = IntArray(DepthOfField.BLUR_BAND_COUNT + 1)
+
+    /** Puts the lens in a given drag state without driving the (unattached-view-unfriendly) Animation. */
+    @androidx.annotation.VisibleForTesting
+    internal fun setLensStateForTest(touchX: Float, touchY: Float, animationMultiplier: Float, reduceMotion: Boolean) {
+        mTouchX = touchX
+        mTouchY = touchY
+        mAnimationMultiplier = animationMultiplier
+        mReduceMotion = reduceMotion
+    }
+
+    @androidx.annotation.VisibleForTesting
+    internal val selectedIndexForTest: Int get() = mSelectIndex
+
+    @androidx.annotation.VisibleForTesting
+    internal fun selectedRectForTest(): RectF? = mRectToSelect?.let { RectF(it) }
+
     private var mDrawType: DrawType? = null
     fun setDrawType(drawType: DrawType?) {
         mDrawType = drawType
@@ -462,8 +496,16 @@ class LensView : View {
                     mLongPressArmed = false
                     mLongPressTriggered = false
                     mLongPressHandler.removeCallbacks(mLongPressRunnable)
-                    mMoving = false
-                    super.onTouchEvent(event)
+                    if (mMoving) {
+                        val lensHideAnimation = LensAnimation(false)
+                        startAnimation(lensHideAnimation)
+                        mMoving = false
+                    } else {
+                        mTouchX = -Float.MAX_VALUE
+                        mTouchY = -Float.MAX_VALUE
+                        invalidate()
+                    }
+                    true
                 }
 
                 else -> {
@@ -514,6 +556,21 @@ class LensView : View {
             mAnimationMultiplier
         } else {
             1.0f
+        }
+        // FISH-007: one mode/transition decision per frame; per-cell work below is arithmetic only.
+        val dofTransition = DepthOfField.transition(animationMultiplier, mReduceMotion)
+        val dofMode = DepthOfField.renderMode(
+            depthOfFieldEnabled,
+            mDrawType == DrawType.APPS && mTouchX >= 0 && mTouchY >= 0 && dofTransition > 0f,
+            android.os.Build.VERSION.SDK_INT,
+            canvas.isHardwareAccelerated
+        )
+        dofLastMode = dofMode
+        dofLastTransition = dofTransition
+        dofBandCounts.fill(0)
+        val dofLayers = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S && dofMode == DepthOfField.Mode.BLUR) mDofLayers else null
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            dofLayers?.begin(width, height)
         }
         for (currentIndex in baseRects.indices) {
             if (currentIndex >= grid.itemCount && mDrawType != DrawType.CIRCLES) continue
@@ -572,11 +629,33 @@ class LensView : View {
                 }
             }
             if (mDrawType == DrawType.APPS) {
-                drawAppIcon(canvas, rect, currentIndex)
+                // FISH-007: blur only picks the target canvas/alpha - rect and hit-test above are untouched.
+                val dofIntensity = if (dofMode == DepthOfField.Mode.OFF) 0f else DepthOfField.intensity(
+                    DepthOfField.focusDistance(
+                        mTouchX, mTouchY, baseRect.centerX(), baseRect.centerY(),
+                        width.toFloat(), height.toFloat()
+                    ),
+                    dofTransition
+                )
+                val dofBand = DepthOfField.band(dofIntensity)
+                dofBandCounts[dofBand]++
+                if (dofMode == DepthOfField.Mode.ALPHA) {
+                    mPaintIcons?.alpha = DepthOfField.fallbackAlpha(dofIntensity)
+                }
+                val iconCanvas = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+                    dofLayers?.canvas(dofBand) ?: canvas
+                } else {
+                    canvas
+                }
+                drawAppIcon(iconCanvas, rect, currentIndex)
             } else if (mDrawType == DrawType.CIRCLES) {
                 drawCircle(canvas, rect)
             }
         }
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            dofLayers?.endAndDraw(canvas)
+        }
+        mPaintIcons?.alpha = DepthOfField.OPAQUE_ALPHA
         mMustVibrate = if (selectIndex >= 0) {
             selectIndex != mSelectIndex
         } else {
@@ -749,8 +828,11 @@ class LensView : View {
     private inner class LensAnimation(private val mShow: Boolean) : Animation() {
         init {
             interpolator = AccelerateDecelerateInterpolator()
+            mReduceMotion = LensPhysicsPolicy.shouldReduceLensMotion(context)
+            depthOfFieldEnabled = mUtilSettings?.getBoolean(UtilSettings.KEY_DEPTH_OF_FIELD)
+                ?: UtilSettings.DEFAULT_DEPTH_OF_FIELD
             mUtilSettings?.let {
-                duration = if (LensPhysicsPolicy.shouldReduceLensMotion(context)) {
+                duration = if (mReduceMotion) {
                     0L
                 } else {
                     it.getLong(UtilSettings.KEY_ANIMATION_TIME)
@@ -825,5 +907,9 @@ class LensView : View {
         mAccessibilityHelper = null
         // PERF-001: drop the cached grid/base-rects too, they're only valid for this view instance.
         mGridCache.clear()
+        // FISH-007: free the blur layers' GPU display lists.
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            mDofLayers?.discard()
+        }
     }
 }

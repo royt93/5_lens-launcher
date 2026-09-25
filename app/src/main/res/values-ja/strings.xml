@@ -17,6 +17,8 @@
     <string name="setting_show_search_bar">検索バーを表示</string>
     <string name="setting_keep_screen_on">画面を常にオンにする</string>
     <string name="setting_keep_screen_on_hint">このアプリのいずれかの画面が開いている間、画面はオンのままになります。バッテリーセーバーによってオフになる場合があります。</string>
+    <string name="setting_depth_of_field">被写界深度ぼかし</string>
+    <string name="setting_depth_of_field_hint">レンズをドラッグ中、指から離れたアイコンを本物のカメラのようにやさしくぼかします。既定ではオフです。</string>
     <string name="setting_search_hint_title">検索ヒントテキスト</string>
     <string name="setting_search_hint_default">デフォルト</string>
     <string name="setting_quick_action_calculator">電卓を表示</string>

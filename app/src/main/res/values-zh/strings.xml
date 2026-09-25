@@ -17,6 +17,8 @@
     <string name="setting_show_search_bar">显示搜索栏</string>
     <string name="setting_keep_screen_on">保持屏幕常亮</string>
     <string name="setting_keep_screen_on_hint">此应用的任意屏幕打开时屏幕将保持常亮。省电模式仍可能将其关闭。</string>
+    <string name="setting_depth_of_field">景深模糊</string>
+    <string name="setting_depth_of_field_hint">拖动镜头时，像真实相机一样柔和地模糊远离手指的图标。默认关闭。</string>
     <string name="setting_search_hint_title">搜索提示文字</string>
     <string name="setting_search_hint_default">默认</string>
     <string name="setting_quick_action_calculator">显示计算器</string>

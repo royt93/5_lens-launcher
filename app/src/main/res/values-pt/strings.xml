@@ -17,6 +17,8 @@
     <string name="setting_show_search_bar">Mostrar barra de pesquisa</string>
     <string name="setting_keep_screen_on">Manter tela ligada</string>
     <string name="setting_keep_screen_on_hint">A tela permanece ligada enquanto qualquer tela deste app estiver aberta. A economia de bateria ainda pode desligá-la.</string>
+    <string name="setting_depth_of_field">Desfoque de profundidade de campo</string>
+    <string name="setting_depth_of_field_hint">Desfoca suavemente os ícones longe do seu dedo ao arrastar a lente, como uma câmera real. Desativado por padrão.</string>
     <string name="setting_search_hint_title">Texto de dica da pesquisa</string>
     <string name="setting_search_hint_default">Padrão</string>
     <string name="setting_quick_action_calculator">Mostrar calculadora</string>

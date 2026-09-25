@@ -17,6 +17,8 @@
     <string name="setting_show_search_bar">검색창 표시</string>
     <string name="setting_keep_screen_on">화면 계속 켜두기</string>
     <string name="setting_keep_screen_on_hint">이 앱의 어떤 화면이든 열려 있는 동안 화면이 계속 켜져 있습니다. 배터리 절약 모드에서는 꺼질 수 있습니다.</string>
+    <string name="setting_depth_of_field">피사계 심도 흐림</string>
+    <string name="setting_depth_of_field_hint">렌즈를 드래그할 때 손가락에서 먼 아이콘을 실제 카메라처럼 부드럽게 흐리게 합니다. 기본값은 꺼짐입니다.</string>
     <string name="setting_search_hint_title">검색 힌트 텍스트</string>
     <string name="setting_search_hint_default">기본값</string>
     <string name="setting_quick_action_calculator">계산기 표시</string>

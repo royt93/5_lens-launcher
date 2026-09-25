@@ -18,6 +18,8 @@
     <!-- FEAT-005 -->
     <string name="setting_keep_screen_on">Keep Screen On</string>
     <string name="setting_keep_screen_on_hint">Screen stays on while any screen of this app is open. Battery saver may still turn it off.</string>
+    <string name="setting_depth_of_field">Depth-of-field blur</string>
+    <string name="setting_depth_of_field_hint">Softly blurs icons away from your finger while dragging the lens, like a real camera. Off by default.</string>
     <string name="setting_search_hint_title">Search hint text</string>
     <string name="setting_search_hint_default">Default</string>
     <string name="setting_quick_action_calculator">Show Calculator</string>

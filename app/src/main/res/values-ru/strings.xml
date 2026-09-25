@@ -17,6 +17,8 @@
     <string name="setting_show_search_bar">Показать строку поиска</string>
     <string name="setting_keep_screen_on">Не выключать экран</string>
     <string name="setting_keep_screen_on_hint">Экран остаётся включённым, пока открыт любой экран этого приложения. Режим энергосбережения всё же может выключить его.</string>
+    <string name="setting_depth_of_field">Размытие глубины резкости</string>
+    <string name="setting_depth_of_field_hint">Мягко размывает значки вдали от пальца при перетаскивании линзы, как настоящая камера. По умолчанию выключено.</string>
     <string name="setting_search_hint_title">Текст подсказки поиска</string>
     <string name="setting_search_hint_default">По умолчанию</string>
     <string name="setting_quick_action_calculator">Показать калькулятор</string>

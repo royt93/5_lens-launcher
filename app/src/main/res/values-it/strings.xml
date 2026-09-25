@@ -17,6 +17,8 @@
     <string name="setting_show_search_bar">Mostra barra di ricerca</string>
     <string name="setting_keep_screen_on">Mantieni schermo acceso</string>
     <string name="setting_keep_screen_on_hint">Lo schermo resta acceso finché una qualsiasi schermata di questa app è aperta. Il risparmio energetico può comunque spegnerlo.</string>
+    <string name="setting_depth_of_field">Sfocatura profondità di campo</string>
+    <string name="setting_depth_of_field_hint">Sfoca leggermente le icone lontane dal dito mentre trascini la lente, come una vera fotocamera. Disattivata per impostazione predefinita.</string>
     <string name="setting_search_hint_title">Testo suggerimento ricerca</string>
     <string name="setting_search_hint_default">Predefinito</string>
     <string name="setting_quick_action_calculator">Mostra calcolatrice</string>

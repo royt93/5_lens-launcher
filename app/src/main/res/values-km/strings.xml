@@ -17,6 +17,8 @@
     <string name="setting_show_search_bar">បង្ហាញរបារស្វែងរក</string>
     <string name="setting_keep_screen_on">រក្សាអេក្រង់ឱ្យបើក</string>
     <string name="setting_keep_screen_on_hint">អេក្រង់នឹងបន្តបើកនៅពេលដែលអេក្រង់ណាមួយនៃកម្មវិធីនេះកំពុងបើក។ កម្មវិធីសន្សំសំចៃថ្មអាចនៅតែបិទវាបាន។</string>
+    <string name="setting_depth_of_field">ធ្វើឱ្យព្រិលតាមជម្រៅ</string>
+    <string name="setting_depth_of_field_hint">ធ្វើឱ្យរូបតំណាងឆ្ងាយពីម្រាមដៃព្រិលបន្តិច ពេលអូសកញ្ចក់ ដូចកាមេរ៉ាពិត។ បិទតាមលំនាំដើម។</string>
     <string name="setting_search_hint_title">អត្ថបទណែនាំស្វែងរក</string>
     <string name="setting_search_hint_default">លំនាំដើម</string>
     <string name="setting_quick_action_calculator">បង្ហាញម៉ាស៊ីនគិតលេខ</string>
