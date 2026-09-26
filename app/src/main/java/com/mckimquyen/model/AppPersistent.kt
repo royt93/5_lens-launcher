@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicLong
 
 @Entity(
     tableName = "APP_PERSISTENT",
-    indices = [Index(value = ["IDENTIFIER"], unique = true)]
+    indices = [Index(value = ["LENS_ID", "IDENTIFIER"], unique = true)]
 )
 data class AppPersistent(
     @PrimaryKey(autoGenerate = true)
@@ -44,13 +44,16 @@ data class AppPersistent(
     @ColumnInfo(name = "FOLDER_NAME")
     var folderName: String? = null,
     @ColumnInfo(name = "PINNED_ZONE", defaultValue = "'NONE'")
-    var pinnedZone: String = PinnedZone.NONE.name
+    var pinnedZone: String = PinnedZone.NONE.name,
+    @ColumnInfo(name = "LENS_ID", defaultValue = "'default'")
+    var lensId: String = LensWorkspace.DEFAULT_LENS_ID
 ) {
     companion object {
+        const val DEFAULT_LENS_ID = LensWorkspace.DEFAULT_LENS_ID
         private const val DEFAULT_ORDER_NUMBER = -1
         private const val DEFAULT_OPEN_COUNT = 0L
-        private val orderWriteMutex = Mutex()
-        private val orderWriteRevision = AtomicLong(0L)
+        private val orderWriteMutexes = ConcurrentHashMap<String, Mutex>()
+        private val orderWriteRevisions = ConcurrentHashMap<String, AtomicLong>()
         private val latestWriteMutexes = ConcurrentHashMap<String, Mutex>()
         private val latestWriteRevisions = ConcurrentHashMap<String, AtomicLong>()
 
@@ -60,14 +63,16 @@ data class AppPersistent(
 
         private fun dao(): AppPersistentDao = AppDatabase.getInstance().appPersistentDao()
 
-        private fun defaults(packageName: String, name: String) = AppPersistent(
+        @JvmStatic
+        fun defaults(packageName: String, name: String, lensId: String = DEFAULT_LENS_ID) = AppPersistent(
             packageName = packageName,
             name = name,
             identifier = generateIdentifier(packageName, name),
             openCount = DEFAULT_OPEN_COUNT,
             orderNumber = DEFAULT_ORDER_NUMBER,
             appVisible = true,
-            appOpened = true
+            appOpened = true,
+            lensId = lensId
         )
 
         private fun persist(operation: suspend AppPersistentDao.() -> Unit): Job =
@@ -82,9 +87,10 @@ data class AppPersistent(
         private fun persistLatest(
             channel: String,
             identifier: String,
+            lensId: String = DEFAULT_LENS_ID,
             operation: suspend AppPersistentDao.() -> Unit
         ): Job {
-            val key = "$channel:$identifier"
+            val key = "$channel:$lensId:$identifier"
             val revisionCounter = latestWriteRevisions.computeIfAbsent(key) { AtomicLong(0L) }
             val revision = revisionCounter.incrementAndGet()
             val mutex = latestWriteMutexes.computeIfAbsent(key) { Mutex() }
@@ -107,10 +113,13 @@ data class AppPersistent(
             }
         }
 
+        @JvmOverloads
         @JvmStatic
-        fun setAppOrderBatch(apps: List<App>) {
+        fun setAppOrderBatch(apps: List<App>, lensId: String = DEFAULT_LENS_ID) {
             if (apps.isEmpty()) return
-            val revision = orderWriteRevision.incrementAndGet()
+            val revisionCounter = orderWriteRevisions.computeIfAbsent(lensId) { AtomicLong(0L) }
+            val revision = revisionCounter.incrementAndGet()
+            val mutex = orderWriteMutexes.computeIfAbsent(lensId) { Mutex() }
             val rows = apps.mapIndexedNotNull { index, app ->
                 val packageName = app.packageName?.toString()
                 val name = app.name?.toString()
@@ -118,12 +127,12 @@ data class AppPersistent(
                     null
                 } else {
                     RAppsSingleton.instance.updateAppOrder(packageName, name, index)
-                    defaults(packageName, name).copy(orderNumber = index)
+                    defaults(packageName, name, lensId).copy(orderNumber = index)
                 }
             }
             persist {
-                orderWriteMutex.withLock {
-                    if (revision == orderWriteRevision.get()) setOrders(rows)
+                mutex.withLock {
+                    if (revision == revisionCounter.get()) setOrders(rows)
                 }
             }
         }
@@ -134,12 +143,18 @@ data class AppPersistent(
             return RAppsSingleton.instance.findApp(packageName, name)?.isOpened ?: true
         }
 
+        @JvmOverloads
         @JvmStatic
-        fun setAppOpened(packageName: String?, name: String?, appOpened: Boolean) {
+        fun setAppOpened(
+            packageName: String?,
+            name: String?,
+            appOpened: Boolean,
+            lensId: String = DEFAULT_LENS_ID
+        ) {
             if (packageName.isNullOrBlank() || name.isNullOrBlank()) return
             RAppsSingleton.instance.updateAppState(packageName, name, isOpened = appOpened)
-            val defaults = defaults(packageName, name)
-            persistLatest("opened", defaults.identifier) { setOpened(defaults, appOpened) }
+            val defaults = defaults(packageName, name, lensId)
+            persistLatest("opened", defaults.identifier, lensId) { setOpened(defaults, appOpened) }
         }
 
         @JvmStatic
@@ -148,12 +163,13 @@ data class AppPersistent(
             return RAppsSingleton.instance.findApp(packageName, name)?.isVisible ?: true
         }
 
+        @JvmOverloads
         @JvmStatic
-        fun setAppVisibility(packageName: String?, name: String?, visible: Boolean) {
+        fun setAppVisibility(packageName: String?, name: String?, visible: Boolean, lensId: String = DEFAULT_LENS_ID) {
             if (packageName.isNullOrBlank() || name.isNullOrBlank()) return
             RAppsSingleton.instance.updateAppState(packageName, name, isVisible = visible)
-            val defaults = defaults(packageName, name)
-            persistLatest("visibility", defaults.identifier) { setVisibility(defaults, visible) }
+            val defaults = defaults(packageName, name, lensId)
+            persistLatest("visibility", defaults.identifier, lensId) { setVisibility(defaults, visible) }
         }
 
         @JvmStatic
@@ -180,13 +196,15 @@ data class AppPersistent(
             dao().setPaletteColor(defaults(packageName, name), color)
         }
 
+        @JvmOverloads
         @JvmStatic
         fun setOrganization(
             packageName: String?,
             name: String?,
             favorite: Boolean,
             folderName: String?,
-            pinnedZone: PinnedZone
+            pinnedZone: PinnedZone,
+            lensId: String = DEFAULT_LENS_ID
         ) {
             if (packageName.isNullOrBlank() || name.isNullOrBlank()) return
             val normalizedFolder = AppOrganizationRules.normalizeFolder(folderName)
@@ -197,8 +215,8 @@ data class AppPersistent(
                 normalizedFolder,
                 pinnedZone
             )
-            val defaults = defaults(packageName, name)
-            persistLatest("organization", defaults.identifier) {
+            val defaults = defaults(packageName, name, lensId)
+            persistLatest("organization", defaults.identifier, lensId) {
                 setOrganization(
                     defaults,
                     favorite,

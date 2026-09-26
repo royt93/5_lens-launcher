@@ -7,9 +7,10 @@ import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
-@Database(entities = [AppPersistent::class], version = 10, exportSchema = true)
+@Database(entities = [AppPersistent::class, LensWorkspace::class], version = 11, exportSchema = true)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun appPersistentDao(): AppPersistentDao
+    abstract fun lensWorkspaceDao(): LensWorkspaceDao
 
     companion object {
         @Volatile
@@ -24,7 +25,7 @@ abstract class AppDatabase : RoomDatabase() {
                             AppDatabase::class.java,
                             "app_persistent.db"
                         )
-                        .addMigrations(MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10)
+                        .addMigrations(MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11)
                         .build()
                     }
                 }
@@ -82,6 +83,34 @@ abstract class AppDatabase : RoomDatabase() {
                 db.execSQL(
                     "ALTER TABLE APP_PERSISTENT ADD COLUMN PINNED_ZONE " +
                         "TEXT NOT NULL DEFAULT 'NONE'"
+                )
+            }
+        }
+
+        @androidx.annotation.VisibleForTesting
+        internal val MIGRATION_10_11 = object : Migration(10, 11) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS LENS_WORKSPACE (
+                        ID TEXT PRIMARY KEY NOT NULL,
+                        NAME TEXT NOT NULL,
+                        ORDER_INDEX INTEGER NOT NULL DEFAULT 0,
+                        CREATED_AT INTEGER NOT NULL DEFAULT 0
+                    )
+                    """.trimIndent()
+                )
+                db.execSQL(
+                    "INSERT OR IGNORE INTO LENS_WORKSPACE (ID, NAME, ORDER_INDEX, CREATED_AT) " +
+                        "VALUES ('default', 'Lens 1', 0, 0)"
+                )
+                db.execSQL(
+                    "ALTER TABLE APP_PERSISTENT ADD COLUMN LENS_ID TEXT NOT NULL DEFAULT 'default'"
+                )
+                db.execSQL("DROP INDEX IF EXISTS index_APP_PERSISTENT_IDENTIFIER")
+                db.execSQL(
+                    "CREATE UNIQUE INDEX IF NOT EXISTS index_APP_PERSISTENT_LENS_ID_IDENTIFIER " +
+                        "ON APP_PERSISTENT (LENS_ID, IDENTIFIER)"
                 )
             }
         }

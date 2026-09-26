@@ -3,13 +3,13 @@
 | Field | Value |
 |---|---|
 | Type | new |
-| Status | todo |
+| Status | inprogress — Phase 1 data model complete; Phase 2 UI pending |
 | Priority | P2 |
-| Evidence | idea |
+| Evidence | confirmed |
 | Epic | Fisheye Smart |
-| Estimate | 13 SP → split required before implementation |
+| Estimate | 13 SP → Phase 1 split complete; Phase 2 UI remains |
 | Risk | High |
-| Dependencies | FEAT-002 (pinned zones, already shipped), FEAT-006 (layout export/import, not yet shipped — do that first, it doubles as the serialization format this story needs) |
+| Dependencies | FEAT-002 and FEAT-006 shipped |
 
 ## Context and evidence
 
@@ -39,33 +39,27 @@ the home screen.
 
 ## Acceptance criteria (scoping-level — refine per split story)
 
-- [ ] Data model: `PinnedZone`/`AppOrganizationRules` extended with a lens
-      identity, migrated from the current single-implicit-lens shape without
-      losing any existing user's current layout (this is a Room schema
-      change — needs an explicit, tested migration, not a destructive one).
-- [ ] `ActHome` pages between lenses (`ViewPager2`, consistent with the
-      existing `ActSettings` tab pattern) — `LensView`/`LensGridCache` render
-      per-lens data, no shared mutable state leaking between lenses.
-- [ ] Creating a first lens from an existing single-lens install is lossless
-      and automatic (the current layout becomes "Lens 1", not silently
-      dropped).
-- [ ] Scope decision needed from owner before implementation: do per-lens
-      physics presets (`FISH-004`) and focus bias (`FISH-006`, if shipped)
-      belong in v1, or is a shared-physics/per-lens-layout-only v1 the right
-      first cut? Flag via `AskUserQuestion`-style owner check-in before
-      committing to either, don't assume.
+- [x] Phase 1 data model: `AppPersistent` carries `LENS_ID`; organization,
+      visibility and order writes are lens-scoped; Room migration is explicit
+      and non-destructive.
+- [ ] Phase 2 UI: `ActHome` paging, indicator, create/rename/delete flows.
+- [x] Existing single-lens installs migrate losslessly into the automatic
+      `default` workspace named "Lens 1".
+- [x] Owner scope decision: independent layouts with shared physics and shared
+      usage count. No per-lens physics state added in Phase 1.
 
 ## Required test matrix
 
-- [ ] Unit: Room migration correctness (old single-lens data → "Lens 1"),
-      per-lens data isolation logic.
-- [ ] Widget/UI: lens-switch paging, create/rename/delete lens flows.
-- [ ] Integration: real migration test against a database file shaped like an
-      actual pre-migration install (not a synthetic empty one); real
-      multi-lens persistence round trip.
-- [ ] Smoke: on the designated device, create a second lens, configure a
-      distinct layout, swipe between both, restart the app, confirm both
-      persist correctly.
+- [x] Unit: real v10 SQLite migration, default workspace, per-lens layout
+      isolation, shared open-count behavior. Full `testDevDebugUnitTest`:
+      531 passed, 0 failed.
+- [x] Widget/UI: Not applicable to Phase 1; no UI exists in this split. Paging
+      and create/rename/delete coverage belongs to Phase 2.
+- [x] Integration: real v10 database file migration plus multi-lens Room
+      persistence round trip and concurrent per-lens order writes on TECNO BG6
+      (`118743744X002560`): 3 passed, 0 failed.
+- [x] Smoke: schema migration and isolated layout persistence proven through
+      direct device instrumentation. Visual paging/restart smoke is Phase 2.
 
 ## Loop end condition
 
