@@ -268,8 +268,6 @@ android {
         // Loại bỏ debug info trong native libs
         jniLibs {
             useLegacyPackaging = false
-            // Chỉ pick file .so đầu tiên nếu bị duplicate
-            pickFirsts += ['**/*.so']
         }
 
         // Giảm kích thước dex files

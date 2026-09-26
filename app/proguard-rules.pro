@@ -15,9 +15,8 @@
 -verbose
 
 # ============================================================================
-# SUGAR ORM - Database ORM Library
+# ROOM & DATA MODELS
 # ============================================================================
--keep class com.orm.** { *; }
 -keep class com.mckimquyen.model.** { *; }
 -keepattributes *Annotation*
 
@@ -40,8 +39,6 @@
 # KOTLIN & COROUTINES
 # ============================================================================
 -keepattributes *Annotation*
--keep class kotlin.** { *; }
--keep class kotlinx.coroutines.** { *; }
 -dontwarn kotlinx.coroutines.**
 
 # ============================================================================
@@ -79,10 +76,8 @@
 }
 
 # ============================================================================
-# ANDROIDX & LIFECYCLE
+# ANDROIDX & LIFECYCLE (consumer AAR rules apply automatically)
 # ============================================================================
--keep class androidx.lifecycle.** { *; }
--keep class androidx.biometric.** { *; }
 
 # ============================================================================
 # REMOVE UNUSED CODE
