@@ -440,6 +440,23 @@ public class ActHome extends ActBase {
             currentLenses = lenses;
             lensPagerAdapter.submitLenses(lenses);
             lensPageIndicator.setVisibility(lenses.size() > 1 ? View.VISIBLE : View.GONE);
+            // FISH-008 Phase 2 r2: restore active page after rotation/recreate so the user stays on
+            // the lens they were viewing instead of bouncing back to page 0.
+            if (utilSettings != null && !lenses.isEmpty()) {
+                String savedActive = utilSettings.getString(UtilSettings.KEY_ACTIVE_LENS_ID);
+                for (int i = 0; i < lenses.size(); i++) {
+                    if (lenses.get(i).getId().equals(savedActive)) {
+                        final int targetIndex = i;
+                        // ViewPager2 needs a layout tick after adapter update to accept target position
+                        lensPager.post(() -> {
+                            if (lensPager != null && lensPager.getCurrentItem() != targetIndex) {
+                                lensPager.setCurrentItem(targetIndex, false);
+                            }
+                        });
+                        break;
+                    }
+                }
+            }
             return Unit.INSTANCE;
         });
     }
@@ -568,6 +585,21 @@ public class ActHome extends ActBase {
                             currentLenses = lenses;
                             lensPagerAdapter.submitLenses(lenses);
                             lensPageIndicator.setVisibility(lenses.size() > 1 ? View.VISIBLE : View.GONE);
+                            // FISH-008 Phase 2 r2: if we just deleted the active lens, clamp the
+                            // pager and switch RAppsSingleton to the newly active lens so the
+                            // deleted lens's layout is not retained in memory.
+                            if (!lenses.isEmpty()) {
+                                int targetPos = Math.min(lensPager.getCurrentItem(), lenses.size() - 1);
+                                lensPager.setCurrentItem(targetPos, false);
+                                LensWorkspace targetLens = lenses.get(targetPos);
+                                if (utilSettings != null) {
+                                    utilSettings.save(UtilSettings.KEY_ACTIVE_LENS_ID, targetLens.getId());
+                                }
+                                Object app = getApplication();
+                                if (app instanceof RApplication) {
+                                    ((RApplication) app).getAppRefreshPipeline().switchLens(targetLens.getId());
+                                }
+                            }
                             return Unit.INSTANCE;
                         }))
                 .setNegativeButton(android.R.string.cancel, null)
@@ -1275,6 +1307,9 @@ public class ActHome extends ActBase {
 
     @Override
     protected void onDestroy() {
+        if (lensPager != null && lensPageChangeCallback != null) {
+            lensPager.unregisterOnPageChangeCallback(lensPageChangeCallback);
+        }
         super.onDestroy();
     }
 }

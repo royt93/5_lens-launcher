@@ -82,4 +82,23 @@ class ActHomeMultiLensWidgetTest {
             }
         }
     }
+
+    @Test
+    fun savedActiveLens_isRestoredOnLaunch() {
+        runBlocking {
+            val dao = AppDatabase.getInstance().lensWorkspaceDao()
+            dao.insertOrUpdate(LensWorkspace(id = "work", name = "Work", orderIndex = 1))
+        }
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val settings = com.mckimquyen.util.UtilSettings(context)
+        settings.save(com.mckimquyen.util.UtilSettings.KEY_ACTIVE_LENS_ID, "work")
+
+        ActivityScenario.launch(ActHome::class.java).use { scenario ->
+            InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+            scenario.onActivity { activity ->
+                val pager = activity.findViewById<androidx.viewpager2.widget.ViewPager2>(R.id.lensPager)
+                assertEquals("Pager must restore to the saved active lens page", 1, pager.currentItem)
+            }
+        }
+    }
 }

@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | new |
-| Status | inprogress — Phase 1 data model complete; Phase 2 UI pending |
+| Status | complete — Phase 1 data model + Phase 2 UI shipped locally (2026-09-26) |
 | Priority | P2 |
 | Evidence | confirmed |
 | Epic | Fisheye Smart |
@@ -42,7 +42,7 @@ the home screen.
 - [x] Phase 1 data model: `AppPersistent` carries `LENS_ID`; organization,
       visibility and order writes are lens-scoped; Room migration is explicit
       and non-destructive.
-- [ ] Phase 2 UI: `ActHome` paging, indicator, create/rename/delete flows.
+- [x] Phase 2 UI: `ActHome` paging, indicator, create/rename/delete flows.
 - [x] Existing single-lens installs migrate losslessly into the automatic
       `default` workspace named "Lens 1".
 - [x] Owner scope decision: independent layouts with shared physics and shared
