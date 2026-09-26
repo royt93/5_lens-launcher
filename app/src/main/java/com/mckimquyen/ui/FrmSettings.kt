@@ -41,6 +41,7 @@ class FrmSettings : Fragment(), SettingsInterface {
     private var swShowSearchBar: SwitchCompat? = null
     private var swKeepScreenOn: SwitchCompat? = null
     private var swDepthOfField: SwitchCompat? = null
+    private var swSmartFocus: SwitchCompat? = null
     private var tvSelectedSearchHint: TextView? = null
     private var swQuickActionCalculator: SwitchCompat? = null
     private var swQuickActionUnit: SwitchCompat? = null
@@ -93,6 +94,7 @@ class FrmSettings : Fragment(), SettingsInterface {
         swShowSearchBar = view.findViewById(R.id.swShowSearchBar)
         swKeepScreenOn = view.findViewById(R.id.swKeepScreenOn)
         swDepthOfField = view.findViewById(R.id.swDepthOfField)
+        swSmartFocus = view.findViewById(R.id.swSmartFocus)
         tvSelectedSearchHint = view.findViewById(R.id.tvSelectedSearchHint)
         swQuickActionCalculator = view.findViewById(R.id.swQuickActionCalculator)
         swQuickActionUnit = view.findViewById(R.id.swQuickActionUnit)
@@ -147,6 +149,7 @@ class FrmSettings : Fragment(), SettingsInterface {
         view.findViewById<View>(R.id.rlSwitchShowSearchBarParent).setOnClickListener(null)
         view.findViewById<View>(R.id.rlSwitchKeepScreenOnParent).setOnClickListener(null)
         view.findViewById<View>(R.id.rlSwitchDepthOfFieldParent).setOnClickListener(null)
+        view.findViewById<View>(R.id.rlSwitchSmartFocusParent).setOnClickListener(null)
         view.findViewById<View>(R.id.rlSwitchQuickActionCalculatorParent).setOnClickListener(null)
         view.findViewById<View>(R.id.rlSwitchQuickActionUnitParent).setOnClickListener(null)
         view.findViewById<View>(R.id.rlSwitchQuickActionTimerParent).setOnClickListener(null)
@@ -180,6 +183,10 @@ class FrmSettings : Fragment(), SettingsInterface {
         }
         swDepthOfField?.setOnCheckedChangeListener { _, isChecked ->
             utilSettings?.save(UtilSettings.KEY_DEPTH_OF_FIELD, isChecked)
+        }
+        swSmartFocus?.setOnCheckedChangeListener { _, isChecked ->
+            utilSettings?.save(UtilSettings.KEY_SMART_FOCUS_BIAS, isChecked)
+            com.mckimquyen.services.AppEventManager.notifyAppsEdited()
         }
         swQuickActionCalculator?.setOnCheckedChangeListener { _, isChecked ->
             utilSettings?.save(UtilSettings.KEY_QUICK_ACTION_CALCULATOR, isChecked)
@@ -277,6 +284,7 @@ class FrmSettings : Fragment(), SettingsInterface {
             swShowSearchBar?.isChecked = us.getBoolean(UtilSettings.KEY_SHOW_SEARCH_BAR)
             swKeepScreenOn?.isChecked = us.getBoolean(UtilSettings.KEY_KEEP_SCREEN_ON)
             swDepthOfField?.isChecked = us.getBoolean(UtilSettings.KEY_DEPTH_OF_FIELD)
+            swSmartFocus?.isChecked = us.getBoolean(UtilSettings.KEY_SMART_FOCUS_BIAS)
             swQuickActionCalculator?.isChecked = us.getBoolean(UtilSettings.KEY_QUICK_ACTION_CALCULATOR)
             swQuickActionUnit?.isChecked = us.getBoolean(UtilSettings.KEY_QUICK_ACTION_UNIT)
             swQuickActionTimer?.isChecked = us.getBoolean(UtilSettings.KEY_QUICK_ACTION_TIMER)
@@ -361,6 +369,7 @@ class FrmSettings : Fragment(), SettingsInterface {
             us.save(UtilSettings.KEY_SHOW_SEARCH_BAR, UtilSettings.DEFAULT_SHOW_SEARCH_BAR)
             us.save(UtilSettings.KEY_KEEP_SCREEN_ON, UtilSettings.DEFAULT_KEEP_SCREEN_ON)
             us.save(UtilSettings.KEY_DEPTH_OF_FIELD, UtilSettings.DEFAULT_DEPTH_OF_FIELD)
+            us.save(UtilSettings.KEY_SMART_FOCUS_BIAS, UtilSettings.DEFAULT_SMART_FOCUS_BIAS)
             us.save(UtilSettings.KEY_QUICK_ACTION_CALCULATOR, UtilSettings.DEFAULT_QUICK_ACTION_ENABLED)
             us.save(UtilSettings.KEY_QUICK_ACTION_UNIT, UtilSettings.DEFAULT_QUICK_ACTION_ENABLED)
             us.save(UtilSettings.KEY_QUICK_ACTION_TIMER, UtilSettings.DEFAULT_QUICK_ACTION_ENABLED)
@@ -385,5 +394,35 @@ class FrmSettings : Fragment(), SettingsInterface {
             }
         })
         dialog.show(parentFragmentManager, "LanguageBottomSheet")
+    }
+
+    override fun onDestroyView() {
+        tvSelectedHomeLauncher = null
+        tvSelectedIconPack = null
+        tvSelectedNightMode = null
+        tvSelectedBackground = null
+        ivSelectedBackgroundColor = null
+        tvSelectedHighlightColor = null
+        ivSelectedHighlightColor = null
+        swVibrateAppHover = null
+        swVibrateAppLaunch = null
+        swShowNameAppHover = null
+        swShowNewAppTag = null
+        swShowTouchSelection = null
+        swShowSearchBar = null
+        swKeepScreenOn = null
+        swDepthOfField = null
+        swSmartFocus = null
+        tvSelectedSearchHint = null
+        swQuickActionCalculator = null
+        swQuickActionUnit = null
+        swQuickActionTimer = null
+        swQuickActionBattery = null
+        swQuickActionSettings = null
+        tvVipStatusSummary = null
+        tvSelectedLanguage = null
+        tvSelectedLauncherMode = null
+        utilSettings = null
+        super.onDestroyView()
     }
 }

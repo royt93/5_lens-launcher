@@ -19,6 +19,9 @@
     <string name="setting_keep_screen_on_hint">ໜ້າຈໍຈະເປີດຄ້າງໄວ້ໃນຂະນະທີ່ໜ້າຈໍໃດໜຶ່ງຂອງແອັບນີ້ກຳລັງເປີດຢູ່. ຕົວປະຫຍັດແບັດເຕີຣີອາດຈະປິດມັນໄດ້ຢູ່ດີ.</string>
     <string name="setting_depth_of_field">ເຮັດໃຫ້ມົວຕາມຄວາມເລິກ</string>
     <string name="setting_depth_of_field_hint">ເຮັດໃຫ້ໄອຄອນທີ່ຢູ່ໄກຈາກນິ້ວມົວເລັກນ້ອຍ ຂະນະລາກເລນ ຄືກັບກ້ອງແທ້. ປິດໄວ້ເປັນຄ່າເລີ່ມຕົ້ນ.</string>
+    <!-- FISH-006: Smart Focus Lite -->
+    <string name="setting_smart_focus">ໂຟກັສອັດສະລິຍະ</string>
+    <string name="setting_smart_focus_hint">ວາງແອັບທີ່ໃຊ້ເລື້ອຍໆໄວ້ໃກ້ກາງເລນ</string>
     <string name="setting_search_hint_title">ຂໍ້ຄວາມແນະນຳຄົ້ນຫາ</string>
     <string name="setting_search_hint_default">ຄ່າເລີ່ມຕົ້ນ</string>
     <string name="setting_quick_action_calculator">ສະແດງເຄື່ອງຄິດເລກ</string>

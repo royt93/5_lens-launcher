@@ -45,7 +45,8 @@
     <com.google.android.material.search.SearchBar
         android:id="@+id/searchBar"
         android:layout_width="match_parent"
-        android:layout_height="48dp"
+        android:layout_height="@dimen/home_search_height"
+        android:minHeight="0dp"
         android:layout_gravity="top"
         android:layout_marginHorizontal="@dimen/home_search_margin_horizontal"
         android:layout_marginTop="@dimen/home_search_top_margin"

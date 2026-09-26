@@ -19,6 +19,9 @@
     <string name="setting_keep_screen_on_hint">La pantalla permanece encendida mientras cualquier pantalla de esta app esté abierta. El ahorro de batería puede apagarla de todos modos.</string>
     <string name="setting_depth_of_field">Desenfoque de profundidad de campo</string>
     <string name="setting_depth_of_field_hint">Desenfoca suavemente los iconos alejados de tu dedo al arrastrar la lente, como una cámara real. Desactivado por defecto.</string>
+    <!-- FISH-006: Smart Focus Lite -->
+    <string name="setting_smart_focus">Enfoque inteligente</string>
+    <string name="setting_smart_focus_hint">Coloca las apps frecuentes cerca del centro de la lente</string>
     <string name="setting_search_hint_title">Texto de sugerencia de búsqueda</string>
     <string name="setting_search_hint_default">Predeterminado</string>
     <string name="setting_quick_action_calculator">Mostrar calculadora</string>

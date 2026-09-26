@@ -19,6 +19,9 @@
     <string name="setting_keep_screen_on_hint">หน้าจอจะเปิดค้างไว้ขณะที่หน้าจอใดหน้าจอหนึ่งของแอปนี้เปิดอยู่ โหมดประหยัดแบตเตอรี่อาจยังปิดหน้าจอได้</string>
     <string name="setting_depth_of_field">เบลอตามระยะชัด</string>
     <string name="setting_depth_of_field_hint">เบลอไอคอนที่อยู่ห่างจากนิ้วเล็กน้อยขณะลากเลนส์ เหมือนกล้องจริง ปิดไว้เป็นค่าเริ่มต้น</string>
+    <!-- FISH-006: Smart Focus Lite -->
+    <string name="setting_smart_focus">สมาร์ทโฟกัส</string>
+    <string name="setting_smart_focus_hint">วางแอปที่ใช้บ่อยให้อยู่ใกล้จุดศูนย์กลางของเลนส์</string>
     <string name="setting_search_hint_title">ข้อความคำแนะนำการค้นหา</string>
     <string name="setting_search_hint_default">ค่าเริ่มต้น</string>
     <string name="setting_quick_action_calculator">แสดงเครื่องคิดเลข</string>

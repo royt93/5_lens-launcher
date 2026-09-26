@@ -33,6 +33,7 @@ import com.mckimquyen.model.AppPersistent
 import com.mckimquyen.model.PinnedZone
 import com.mckimquyen.services.BroadcastReceivers
 import com.mckimquyen.util.LensPhysicsPolicy
+import com.mckimquyen.util.SmartFocusArranger
 import com.mckimquyen.util.UtilApp
 import com.mckimquyen.util.UtilCalculator
 import com.mckimquyen.util.UtilSettings
@@ -159,7 +160,10 @@ class LensView : View {
     private var mRectToSelect: RectF? = RectF(0f, 0f, 0f, 0f)
     private var mMustVibrate = true
     private var mSelectIndex = 0
+    private var mSourceApps: ArrayList<App>? = null
     private var mApps: ArrayList<App>? = null
+    private var mSmartFocusCols = -1
+    private var mSmartFocusRows = -1
     private var mPackageManager: PackageManager? = null
     private var mAnimationMultiplier = 0.0f
     private var mAnimationHiding = false
@@ -290,7 +294,30 @@ class LensView : View {
     internal fun getAccessibilityHelper(): LensAccessibilityHelper? = mAccessibilityHelper
 
     fun setApps(apps: ArrayList<App>?) {
-        mApps = apps
+        mSourceApps = apps?.let(::ArrayList)
+        applySmartFocusArrangement(force = true)
+    }
+
+    fun refreshSmartFocus() {
+        applySmartFocusArrangement(force = true)
+    }
+
+    private fun applySmartFocusArrangement(force: Boolean = false) {
+        val source = mSourceApps ?: arrayListOf()
+        val grid = mGridCache.grid
+        val cols = grid?.itemCountHorizontal ?: -1
+        val rows = grid?.itemCountVertical ?: -1
+        if (!force && cols == mSmartFocusCols && rows == mSmartFocusRows) return
+
+        mSmartFocusCols = cols
+        mSmartFocusRows = rows
+        val enabled = mUtilSettings?.getBoolean(UtilSettings.KEY_SMART_FOCUS_BIAS)
+            ?: UtilSettings.DEFAULT_SMART_FOCUS_BIAS
+        mApps = if (enabled && cols > 0 && rows > 0) {
+            SmartFocusArranger.arrange(source, cols, rows, smartFocusEnabled = true)
+        } else {
+            ArrayList(source)
+        }
         mAccessibilityHelper?.invalidateRoot()
         invalidate()
     }
@@ -766,6 +793,9 @@ class LensView : View {
             iconSizeDp,
             mInsets
         )
+        if (grid.itemCountHorizontal != mSmartFocusCols || grid.itemCountVertical != mSmartFocusRows) {
+            applySmartFocusArrangement()
+        }
         val baseRects = mGridCache.baseRects
         mInsideRect = false
         var selectIndex = -1

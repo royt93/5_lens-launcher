@@ -20,6 +20,9 @@
     <string name="setting_keep_screen_on_hint">Screen stays on while any screen of this app is open. Battery saver may still turn it off.</string>
     <string name="setting_depth_of_field">Depth-of-field blur</string>
     <string name="setting_depth_of_field_hint">Softly blurs icons away from your finger while dragging the lens, like a real camera. Off by default.</string>
+    <!-- FISH-006: Smart Focus Lite -->
+    <string name="setting_smart_focus">Smart Focus (Frequently Used in Center)</string>
+    <string name="setting_smart_focus_hint">Place frequently used apps closer to the center of the lens</string>
     <string name="setting_search_hint_title">Search hint text</string>
     <string name="setting_search_hint_default">Default</string>
     <string name="setting_quick_action_calculator">Show Calculator</string>

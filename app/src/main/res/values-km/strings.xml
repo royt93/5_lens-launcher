@@ -19,6 +19,9 @@
     <string name="setting_keep_screen_on_hint">អេក្រង់នឹងបន្តបើកនៅពេលដែលអេក្រង់ណាមួយនៃកម្មវិធីនេះកំពុងបើក។ កម្មវិធីសន្សំសំចៃថ្មអាចនៅតែបិទវាបាន។</string>
     <string name="setting_depth_of_field">ធ្វើឱ្យព្រិលតាមជម្រៅ</string>
     <string name="setting_depth_of_field_hint">ធ្វើឱ្យរូបតំណាងឆ្ងាយពីម្រាមដៃព្រិលបន្តិច ពេលអូសកញ្ចក់ ដូចកាមេរ៉ាពិត។ បិទតាមលំនាំដើម។</string>
+    <!-- FISH-006: Smart Focus Lite -->
+    <string name="setting_smart_focus">ការផ្ដោតឆ្លាតវៃ</string>
+    <string name="setting_smart_focus_hint">ដាក់កម្មវិធីដែលប្រើញឹកញាប់នៅជិតចំណុចកណ្ដាលនៃឡេន</string>
     <string name="setting_search_hint_title">អត្ថបទណែនាំស្វែងរក</string>
     <string name="setting_search_hint_default">លំនាំដើម</string>
     <string name="setting_quick_action_calculator">បង្ហាញម៉ាស៊ីនគិតលេខ</string>

@@ -19,6 +19,9 @@
     <string name="setting_keep_screen_on_hint">تبقى الشاشة مضاءة أثناء فتح أي شاشة من شاشات هذا التطبيق. قد يعمل موفر البطارية على إيقاف تشغيلها رغم ذلك.</string>
     <string name="setting_depth_of_field">تمويه عمق المجال</string>
     <string name="setting_depth_of_field_hint">يموّه الأيقونات البعيدة عن إصبعك برفق أثناء سحب العدسة، مثل كاميرا حقيقية. متوقف افتراضيًا.</string>
+    <!-- FISH-006: Smart Focus Lite -->
+    <string name="setting_smart_focus">التركيز الذكي</string>
+    <string name="setting_smart_focus_hint">ضع التطبيقات المستخدمة بكثرة بالقرب من مركز العدسة</string>
     <string name="setting_search_hint_title">نص تلميح البحث</string>
     <string name="setting_search_hint_default">افتراضي</string>
     <string name="setting_quick_action_calculator">إظهار الآلة الحاسبة</string>

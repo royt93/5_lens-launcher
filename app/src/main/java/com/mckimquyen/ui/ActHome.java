@@ -849,6 +849,7 @@ public class ActHome extends ActBase {
         Log.d("roy93~", "onResume");
         updateColor();
         updateSearchBarVisibility();
+        lensViews.refreshSmartFocus();
         // Keep-screen-on flag is now applied to every screen by BaseActivity.onResume()
         // (called via super.onResume() above), not just here - see UtilSettings.KEY_KEEP_SCREEN_ON.
         updateSearchCustomization();
