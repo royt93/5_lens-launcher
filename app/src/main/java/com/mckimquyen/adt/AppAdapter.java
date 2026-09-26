@@ -202,7 +202,10 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
             App app = mApps.get(index).copyWithOrder(index);
             mApps.set(index, app);
         }
-        AppPersistent.setAppOrderBatch(mApps);
+        // FISH-008 Phase 2: this adapter only ever shows one lens's apps at a time, so the
+        // first app's lensId (if any) is the whole batch's lens.
+        String lensId = mApps.isEmpty() ? AppPersistent.DEFAULT_LENS_ID : mApps.get(0).getLensId();
+        AppPersistent.setAppOrderBatch(mApps, lensId);
         mContext.sendBroadcast(new Intent(mContext, BroadcastReceivers.AppsEditedReceiver.class));
     }
 
@@ -322,7 +325,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
             if (!mSelectedIdentifiers.contains(identifierFor(app)) || app.isVisible() == visible) continue;
             String pkg = Objects.requireNonNull(app.getPackageName()).toString();
             String name = Objects.requireNonNull(app.getName()).toString();
-            AppPersistent.setAppVisibility(pkg, name, visible);
+            AppPersistent.setAppVisibility(pkg, name, visible, app.getLensId());
             mApps.set(i, app.copyWithLockAndVisibility(app.isOpened(), visible, app.getOpenCount()));
             notifyItemChanged(i);
             changed = true;
@@ -339,7 +342,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
             if (!mSelectedIdentifiers.contains(identifierFor(app))) continue;
             String pkg = Objects.requireNonNull(app.getPackageName()).toString();
             String name = Objects.requireNonNull(app.getName()).toString();
-            AppPersistent.setOrganization(pkg, name, app.isFavorite(), app.getFolderName(), zone);
+            AppPersistent.setOrganization(pkg, name, app.isFavorite(), app.getFolderName(), zone, app.getLensId());
             mApps.set(i, app.copyWithOrganization(app.isFavorite(), app.getFolderName(), zone));
             notifyItemChanged(i);
             changed = true;
@@ -588,7 +591,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
             String packageName = Objects.requireNonNull(mApp.getPackageName()).toString();
             String componentName = Objects.requireNonNull(mApp.getName()).toString();
             String normalizedFolder = AppOrganizationRules.normalizeFolder(folder);
-            AppPersistent.setOrganization(packageName, componentName, favorite, normalizedFolder, zone);
+            AppPersistent.setOrganization(packageName, componentName, favorite, normalizedFolder, zone, mApp.getLensId());
             mApp = mApp.copyWithOrganization(favorite, normalizedFolder, zone);
             int position = getBindingAdapterPosition();
             if (position != RecyclerView.NO_POSITION) {
@@ -663,7 +666,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
             boolean isAppVisible = mApp.isVisible();
 
             // Toggle trạng thái
-            AppPersistent.setAppVisibility(pkgName, name, !isAppVisible);
+            AppPersistent.setAppVisibility(pkgName, name, !isAppVisible, mApp.getLensId());
 
             // Update UI
             if (isAppVisible) {
@@ -716,7 +719,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
                         isAppOpened,
                         (s, aBoolean) -> {
                             // Callback sau khi authentication thành công
-                            AppPersistent.setAppOpened(pkgName, name, !isAppOpened);
+                            AppPersistent.setAppOpened(pkgName, name, !isAppOpened, mApp.getLensId());
 
                             // Update UI
                             boolean isNowOpened = !isAppOpened;

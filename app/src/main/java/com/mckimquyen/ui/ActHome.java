@@ -32,6 +32,7 @@ import android.widget.Toast;
 import androidx.activity.BackEventCompat;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
@@ -42,19 +43,26 @@ import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.android.material.color.MaterialColors;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.search.SearchBar;
 import com.google.android.material.search.SearchView;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
 import com.mckimquyen.BuildConfig;
 import com.mckimquyen.R;
 import com.mckimquyen.adt.AppAdapter;
+import com.mckimquyen.adt.LensPagerAdapter;
+import com.mckimquyen.app.RApplication;
 import com.mckimquyen.app.RAppsSingleton;
 import com.mckimquyen.enums.BackgroundMode;
 import com.mckimquyen.enums.LauncherMode;
 import com.mckimquyen.model.App;
 import com.mckimquyen.model.AppPersistent;
+import com.mckimquyen.model.LensWorkspace;
 import com.mckimquyen.search.AppSearchEngine;
 import com.mckimquyen.search.ContactSearchEngine;
 import com.mckimquyen.search.ContactSearchResult;
@@ -70,9 +78,12 @@ import com.mckimquyen.util.UtilSettings;
 import com.mckimquyen.views.LensView;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import com.google.android.material.progressindicator.CircularProgressIndicator;
+
+import kotlin.Unit;
 
 //2023.03.19 tried to convert kotlin but failed
 public class ActHome extends ActBase {
@@ -142,7 +153,42 @@ public class ActHome extends ActBase {
         }
     };
 
+    // FISH-008 Phase 2: the currently VISIBLE page's LensView. Kept current by
+    // lensPageChangeCallback (or bootstrapped once at cold start by bindLensView) - never
+    // written to from a page bind that isn't the tracked current one, so a not-yet-selected
+    // prefetched page can't clobber it with the wrong lens's view.
     LensView lensViews;
+    private ViewPager2 lensPager;
+    private TabLayout lensPageIndicator;
+    private LensPagerAdapter lensPagerAdapter;
+    private List<LensWorkspace> currentLenses = new ArrayList<>();
+    private final ViewPager2.OnPageChangeCallback lensPageChangeCallback = new ViewPager2.OnPageChangeCallback() {
+        @Override
+        public void onPageSelected(int position) {
+            LensView view = lensViewAt(position);
+            if (view != null) {
+                lensViews = view;
+                if (listApp != null) {
+                    view.setApps(listApp);
+                }
+            }
+            if (position >= 0 && position < currentLenses.size()) {
+                LensWorkspace lens = currentLenses.get(position);
+                String currentActive = utilSettings != null
+                        ? utilSettings.getString(UtilSettings.KEY_ACTIVE_LENS_ID)
+                        : null;
+                if (lens.getId() != null && !lens.getId().equals(currentActive)) {
+                    if (utilSettings != null) {
+                        utilSettings.save(UtilSettings.KEY_ACTIVE_LENS_ID, lens.getId());
+                    }
+                    Object application = getApplication();
+                    if (application instanceof RApplication) {
+                        ((RApplication) application).getAppRefreshPipeline().switchLens(lens.getId());
+                    }
+                }
+            }
+        }
+    };
     private RecyclerView rvHomeAppList;
     private AppAdapter homeAppAdapter;
     private UtilSettings utilSettings;
@@ -197,15 +243,7 @@ public class ActHome extends ActBase {
         applyHomeColumnInsets(findViewById(R.id.rootLayout));
         setupSearch();
         // updateColor();
-        PackageManager mPackageManager = getPackageManager();
-        lensViews.setPackageManager(mPackageManager);
-        lensViews.setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
-        lensViews.setOnCurvatureAdjustedListener((curvature, finished) -> {
-            if (finished) {
-                showPinchCurvatureSnackbar(curvature);
-            }
-        });
+        refreshLensList();
         assignApps(Objects.requireNonNull(Objects.requireNonNull(RAppsSingleton.getInstance()).getApps()));
 
         // Observe app events using LiveData
@@ -283,7 +321,7 @@ public class ActHome extends ActBase {
                 int targetLensRightMargin = Math.max(systemBars.right, contentMaxWidthMargin);
 
                 ViewGroup.MarginLayoutParams updatedLensParams =
-                        (ViewGroup.MarginLayoutParams) lensViews.getLayoutParams();
+                        (ViewGroup.MarginLayoutParams) lensPager.getLayoutParams();
                 if (updatedLensParams.topMargin != targetLensTopMargin
                         || updatedLensParams.bottomMargin != systemBars.bottom
                         || updatedLensParams.leftMargin != targetLensSideMargin
@@ -292,7 +330,7 @@ public class ActHome extends ActBase {
                     updatedLensParams.bottomMargin = systemBars.bottom;
                     updatedLensParams.leftMargin = targetLensSideMargin;
                     updatedLensParams.rightMargin = targetLensRightMargin;
-                    lensViews.setLayoutParams(updatedLensParams);
+                    lensPager.setLayoutParams(updatedLensParams);
                 }
 
                 if (rvHomeAppList != null) {
@@ -331,7 +369,20 @@ public class ActHome extends ActBase {
     }
 
     private void setupViews() {
-        lensViews = findViewById(R.id.lensViews);
+        lensPager = findViewById(R.id.lensPager);
+        lensPageIndicator = findViewById(R.id.lensPageIndicator);
+        lensPagerAdapter = new LensPagerAdapter((view, lens) -> {
+            bindLensView(view);
+            return Unit.INSTANCE;
+        });
+        lensPager.setAdapter(lensPagerAdapter);
+        new TabLayoutMediator(lensPageIndicator, lensPager,
+                (tab, position) -> tab.setIcon(R.drawable.lens_page_indicator_dot)).attach();
+        lensPager.registerOnPageChangeCallback(lensPageChangeCallback);
+        lensPageIndicator.setOnLongClickListener(v -> {
+            showLensManagementMenu(v);
+            return true;
+        });
         rvHomeAppList = findViewById(R.id.rvHomeAppList);
         utilSettings = new UtilSettings(this);
         homeAppAdapter = new AppAdapter(this, new ArrayList<>());
@@ -377,6 +428,152 @@ public class ActHome extends ActBase {
         }
     }
 
+    // ========================================================================
+    // FISH-008 Phase 2: multi-lens workspace paging + create/rename/delete
+    // ========================================================================
+
+    /** (Re)loads the lens list from Room and hands it to the pager adapter; hides the dots
+     *  indicator entirely when only one lens exists so single-lens devices look and behave
+     *  exactly like before this feature. */
+    private void refreshLensList() {
+        LensWorkspace.loadAll(lenses -> {
+            currentLenses = lenses;
+            lensPagerAdapter.submitLenses(lenses);
+            lensPageIndicator.setVisibility(lenses.size() > 1 ? View.VISIBLE : View.GONE);
+            return Unit.INSTANCE;
+        });
+    }
+
+    /** Runs on every page bind (initial + recycled). Only the page currently tracked as
+     *  {@link #lensViews} (or the very first bind, before any page has been selected yet) is
+     *  fed today's already-loaded apps here - a different, not-yet-selected page gets its own
+     *  lens's apps once the user actually swipes to it (see lensPageChangeCallback), so a
+     *  prefetched adjacent page never briefly shows the wrong lens's layout. */
+    private void bindLensView(LensView view) {
+        view.setPackageManager(getPackageManager());
+        view.setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
+        view.setOnCurvatureAdjustedListener((curvature, finished) -> {
+            if (finished) {
+                showPinchCurvatureSnackbar(curvature);
+            }
+        });
+        if (lensViews == null || lensViews == view) {
+            lensViews = view;
+            if (listApp != null) {
+                view.setApps(listApp);
+            }
+        }
+    }
+
+    /** ViewPager2 wraps exactly one child, its own internal RecyclerView - a well-known (if
+     *  unofficial) way to reach a specific page's already-bound ViewHolder, used here only to
+     *  resolve which LensView a just-selected page actually is. */
+    private LensView lensViewAt(int position) {
+        if (lensPager == null || lensPager.getChildCount() == 0) return null;
+        View child = lensPager.getChildAt(0);
+        if (!(child instanceof RecyclerView)) return null;
+        RecyclerView.ViewHolder holder = ((RecyclerView) child).findViewHolderForAdapterPosition(position);
+        if (holder instanceof LensPagerAdapter.PageHolder) {
+            return ((LensPagerAdapter.PageHolder) holder).getLensView();
+        }
+        return null;
+    }
+
+    private void showLensManagementMenu(View anchor) {
+        PopupMenu menu = new PopupMenu(this, anchor);
+        menu.getMenu().add(0, 1, 0, R.string.lens_add);
+        menu.getMenu().add(0, 2, 0, R.string.lens_rename);
+        android.view.MenuItem delete = menu.getMenu().add(0, 3, 0, R.string.lens_delete);
+        delete.setEnabled(currentLenses.size() > 1);
+        int position = lensPager.getCurrentItem();
+        menu.setOnMenuItemClickListener(item -> {
+            if (position < 0 || position >= currentLenses.size()) return false;
+            LensWorkspace current = currentLenses.get(position);
+            int id = item.getItemId();
+            if (id == 1) {
+                createLensDialog(current.getId());
+                return true;
+            } else if (id == 2) {
+                renameLensDialog(current);
+                return true;
+            } else if (id == 3) {
+                confirmDeleteLensDialog(current);
+                return true;
+            }
+            return false;
+        });
+        menu.show();
+    }
+
+    private void createLensDialog(String copyFromLensId) {
+        String defaultName = getString(R.string.lens_new_name_template, currentLenses.size() + 1);
+        showLensNameDialog(R.string.lens_add, defaultName, name ->
+                LensWorkspace.createLens(name, copyFromLensId, lenses -> {
+                    currentLenses = lenses;
+                    lensPagerAdapter.submitLenses(lenses);
+                    lensPageIndicator.setVisibility(lenses.size() > 1 ? View.VISIBLE : View.GONE);
+                    return Unit.INSTANCE;
+                }));
+    }
+
+    private void renameLensDialog(LensWorkspace lens) {
+        showLensNameDialog(R.string.lens_rename_title, lens.getName(), name ->
+                LensWorkspace.renameLens(lens, name, lenses -> {
+                    currentLenses = lenses;
+                    lensPagerAdapter.submitLenses(lenses);
+                    return Unit.INSTANCE;
+                }));
+    }
+
+    private interface LensNameCallback {
+        void onNameEntered(String name);
+    }
+
+    private void showLensNameDialog(int titleRes, String initialText, LensNameCallback onDone) {
+        EditText input = new EditText(this);
+        // A programmatic View with no id is skipped by onSaveInstanceState, so the typed name would
+        // be lost on rotation. android.R.id.edit is the platform's own id for this exact role.
+        input.setId(android.R.id.edit);
+        input.setText(initialText);
+        input.setHint(R.string.lens_name_hint);
+        input.setSingleLine(true);
+        input.setSelectAllOnFocus(true);
+        int paddingH = (int) (24 * getResources().getDisplayMetrics().density);
+        int paddingV = (int) (8 * getResources().getDisplayMetrics().density);
+        android.widget.FrameLayout container = new android.widget.FrameLayout(this);
+        container.setPadding(paddingH, paddingV, paddingH, 0);
+        container.addView(input);
+
+        new MaterialAlertDialogBuilder(this, R.style.MaterialYouDialogTheme)
+                .setTitle(titleRes)
+                .setView(container)
+                .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                    String name = input.getText() != null ? input.getText().toString().trim() : "";
+                    if (!name.isEmpty()) {
+                        onDone.onNameEntered(name);
+                    }
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    private void confirmDeleteLensDialog(LensWorkspace lens) {
+        String message = getString(R.string.lens_delete_confirm_message, lens.getName());
+        new MaterialAlertDialogBuilder(this, R.style.MaterialYouDialogTheme)
+                .setTitle(R.string.lens_delete)
+                .setMessage(message)
+                .setPositiveButton(R.string.lens_delete, (dialog, which) ->
+                        LensWorkspace.deleteLens(lens.getId(), lenses -> {
+                            currentLenses = lenses;
+                            lensPagerAdapter.submitLenses(lenses);
+                            lensPageIndicator.setVisibility(lenses.size() > 1 ? View.VISIBLE : View.GONE);
+                            return Unit.INSTANCE;
+                        }))
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
     private void setupSearch() {
         searchHistoryStore = new SearchHistoryStore(this);
         searchResultAdapter = new SearchResultAdapter(this::launchSearchResult);
@@ -414,7 +611,8 @@ public class ActHome extends ActBase {
             // surface while search is open. Toggled on SHOWING/HIDING (not SHOWN/HIDDEN) to match
             // SearchView.isShowing() semantics, same reasoning as the old blur toggle it replaces.
             if (newState == SearchView.TransitionState.SHOWING) {
-                lensViews.setVisibility(View.INVISIBLE);
+                lensPager.setVisibility(View.INVISIBLE);
+                lensPageIndicator.setVisibility(View.GONE);
                 if (rvHomeAppList != null) {
                     rvHomeAppList.setVisibility(View.GONE);
                 }
@@ -849,7 +1047,9 @@ public class ActHome extends ActBase {
         Log.d("roy93~", "onResume");
         updateColor();
         updateSearchBarVisibility();
-        lensViews.refreshSmartFocus();
+        if (lensViews != null) {
+            lensViews.refreshSmartFocus();
+        }
         // Keep-screen-on flag is now applied to every screen by BaseActivity.onResume()
         // (called via super.onResume() above), not just here - see UtilSettings.KEY_KEEP_SCREEN_ON.
         updateSearchCustomization();
@@ -875,20 +1075,26 @@ public class ActHome extends ActBase {
 
     public void updateModeVisibility() {
         if (searchView != null && searchView.isShowing()) {
-            if (lensViews != null) lensViews.setVisibility(View.INVISIBLE);
+            if (lensPager != null) lensPager.setVisibility(View.INVISIBLE);
+            if (lensPageIndicator != null) lensPageIndicator.setVisibility(View.GONE);
             if (rvHomeAppList != null) rvHomeAppList.setVisibility(View.GONE);
             return;
         }
         boolean isList = utilSettings != null && utilSettings.isListMode();
         if (isList) {
-            if (lensViews != null) lensViews.setVisibility(View.GONE);
+            if (lensPager != null) lensPager.setVisibility(View.GONE);
+            if (lensPageIndicator != null) lensPageIndicator.setVisibility(View.GONE);
             if (rvHomeAppList != null) {
                 rvHomeAppList.setVisibility(listApp != null && !listApp.isEmpty() ? View.VISIBLE : View.GONE);
             }
         } else {
             if (rvHomeAppList != null) rvHomeAppList.setVisibility(View.GONE);
-            if (lensViews != null) {
-                lensViews.setVisibility(listApp != null && !listApp.isEmpty() ? View.VISIBLE : View.INVISIBLE);
+            boolean hasApps = listApp != null && !listApp.isEmpty();
+            if (lensPager != null) {
+                lensPager.setVisibility(hasApps ? View.VISIBLE : View.INVISIBLE);
+            }
+            if (lensPageIndicator != null) {
+                lensPageIndicator.setVisibility(hasApps && currentLenses.size() > 1 ? View.VISIBLE : View.GONE);
             }
         }
     }
@@ -979,7 +1185,9 @@ public class ActHome extends ActBase {
     }
 
     private void setBackground() {
-        lensViews.invalidate();
+        if (lensViews != null) {
+            lensViews.invalidate();
+        }
     }
 
     private boolean isSameAppList(java.util.List<App> list1, java.util.List<App> list2) {
@@ -1045,7 +1253,9 @@ public class ActHome extends ActBase {
         progressBarHome.setVisibility(View.INVISIBLE);
         listApp = visibleApps;
         Logger.d("ActHome: Setting " + listApp.size() + " apps to lensViews and homeAppAdapter");
-        lensViews.setApps(listApp);
+        if (lensViews != null) {
+            lensViews.setApps(listApp);
+        }
         if (homeAppAdapter != null) {
             homeAppAdapter.updateApps(listApp);
         }

@@ -66,6 +66,12 @@ public class RApplication extends android.app.Application {
     private BroadcastReceiver packageReceiver;
     private TaskUpdateApps appRefreshPipeline;
     private TaskSortApps appSortPipeline;
+
+    /** FISH-008 Phase 2: lets ActHome call switchLens() directly on a lens-page change, instead
+     *  of broadcasting a full refresh (which would re-scan PackageManager on every swipe). */
+    public TaskUpdateApps getAppRefreshPipeline() {
+        return appRefreshPipeline;
+    }
     private final ComponentCallbacks2 iconCacheMemoryCallbacks = new ComponentCallbacks2() {
         // CORE-002/PERF-002: evict cached icon bitmaps under real memory pressure instead of
         // relying only on LruCache's own bounded eviction. Tiered by severity so a mild signal
@@ -119,6 +125,9 @@ public class RApplication extends android.app.Application {
 
         // Khởi tạo database Room
         AppDatabase.Companion.init(this);
+        // FISH-008 Phase 2: seed the default lens for fresh installs (existing installs get it
+        // via MIGRATION_10_11 already).
+        com.mckimquyen.model.LensWorkspace.Companion.seedDefaultIfAbsent();
 
         // One application-owned pipeline serializes startup and package-event refreshes.
         appRefreshPipeline = new TaskUpdateApps(

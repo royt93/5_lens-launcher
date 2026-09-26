@@ -9,13 +9,31 @@
     android:layout_height="match_parent"
     tools:ignore="MergeRootFrame">
 
-    <com.mckimquyen.views.LensView
-        android:id="@+id/lensViews"
+    <!-- FISH-008 Phase 2: hosts one LensView per lens workspace, swipeable. Margin that used to
+         sit directly on the single LensView now belongs to the pager container; each page's
+         LensView fills its page (see item_lens_page.xml). -->
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/lensPager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:hapticFeedbackEnabled="true"
         android:layout_marginTop="72dp"
         android:visibility="invisible"
+        tools:visibility="visible" />
+
+    <!-- FISH-008 Phase 2: dots indicator, GONE while only one lens exists (today's default) so
+         single-lens devices look and behave identically to before this feature. Long-press opens
+         the add/rename/delete menu. -->
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/lensPageIndicator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="24dp"
+        android:background="@android:color/transparent"
+        app:tabGravity="center"
+        app:tabIndicatorHeight="0dp"
+        app:tabMode="fixed"
+        android:visibility="gone"
         tools:visibility="visible" />
 
     <!-- FEAT-003: Accessible List Mode RecyclerView -->

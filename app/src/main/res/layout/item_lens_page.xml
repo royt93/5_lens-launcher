@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- FISH-008 Phase 2: one ViewPager2 page's content - a single LensView, no margin (the margin
+     that used to sit on the single lensViews instance now belongs to lensPager in act_home.xml).
+     FrameLayout root (NOT LensView) keeps layout lookups on it stable even if the child view
+     class ever changes; the unique id only matters inside this page's own inflated copy. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.mckimquyen.views.LensView
+        android:id="@+id/lensViews"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:hapticFeedbackEnabled="true" />
+</FrameLayout>

@@ -41,7 +41,14 @@ data class App(
      * (see [com.mckimquyen.util.BitmapCache.buildKey]) so a stale bitmap can never be
      * returned for a different component, package version or icon pack.
      */
-    val iconCacheKey: String = ""
+    val iconCacheKey: String = "",
+    /**
+     * FISH-008 Phase 2: which [com.mckimquyen.model.LensWorkspace] this app's layout fields
+     * (isVisible/openCount... below/order/isFavorite/folderName/pinnedZone) came from. Every
+     * write site should pass this back to `AppPersistent.setXxx(..., lensId)` instead of
+     * silently targeting the default lens.
+     */
+    val lensId: String = LensWorkspace.DEFAULT_LENS_ID
 ) {
     /**
      * Creates a copy of this App with the specified properties changed.

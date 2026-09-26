@@ -60,13 +60,15 @@ class AccessibleListModeWidgetTest {
 
         ActivityScenario.launch(ActHome::class.java).use { scenario ->
             scenario.onActivity { activity ->
-                val lensViews = activity.findViewById<View>(R.id.lensViews)
+                // FISH-008 Phase 2: the lens grid is now the ViewPager2 container (lensPager);
+                // lensViews is one page inside it and is not what list mode hides.
+                val lensPager = activity.findViewById<View>(R.id.lensPager)
                 val rvHomeAppList = activity.findViewById<RecyclerView>(R.id.rvHomeAppList)
 
-                assertNotNull("lensViews must be present", lensViews)
+                assertNotNull("lensPager must be present", lensPager)
                 assertNotNull("rvHomeAppList must be present", rvHomeAppList)
 
-                assertEquals("lensViews must be GONE in List mode", View.GONE, lensViews.visibility)
+                assertEquals("lensPager must be GONE in List mode", View.GONE, lensPager.visibility)
                 assertNotNull("rvHomeAppList adapter must be initialized", rvHomeAppList.adapter)
             }
         }
@@ -76,7 +78,7 @@ class AccessibleListModeWidgetTest {
     fun testDynamicModeSwitch_switchesViewsWithoutRestart() {
         ActivityScenario.launch(ActHome::class.java).use { scenario ->
             scenario.onActivity { activity ->
-                val lensViews = activity.findViewById<View>(R.id.lensViews)
+                val lensPager = activity.findViewById<View>(R.id.lensPager)
                 val rvHomeAppList = activity.findViewById<RecyclerView>(R.id.rvHomeAppList)
 
                 // Start in Fisheye
@@ -87,7 +89,7 @@ class AccessibleListModeWidgetTest {
                 // Switch to List Mode dynamically
                 utilSettings.setLauncherMode(LauncherMode.LIST)
                 activity.updateModeVisibility()
-                assertEquals(View.GONE, lensViews.visibility)
+                assertEquals(View.GONE, lensPager.visibility)
 
                 // Switch back to Fisheye
                 utilSettings.setLauncherMode(LauncherMode.FISHEYE)

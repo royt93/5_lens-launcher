@@ -181,4 +181,40 @@ class LensViewGestureStateTest {
         assertFalse(LensView.shouldAllowAppLaunch(LensGestureState.PINCHING))
         assertFalse(LensView.shouldAllowAppLaunch(LensGestureState.PINCH_RELEASE))
     }
+
+    // ============================================= FISH-008 Phase 2: pager vs. pan disambiguation
+
+    @Test
+    fun `a flat horizontal drag is a page swipe`() {
+        assertTrue(LensView.isHorizontalSwipeIntent(dx = 60f, dy = 5f, touchSlop = 10f))
+        assertTrue(LensView.isHorizontalSwipeIntent(dx = -60f, dy = 5f, touchSlop = 10f))
+    }
+
+    @Test
+    fun `horizontal travel under touch slop is not yet a page swipe`() {
+        assertFalse(LensView.isHorizontalSwipeIntent(dx = 9f, dy = 0f, touchSlop = 10f))
+    }
+
+    @Test
+    fun `a diagonal drag stays with the lens pan`() {
+        // 2:1 is the boundary, so exactly 2:1 must NOT hand the gesture to the pager.
+        assertFalse(LensView.isHorizontalSwipeIntent(dx = 40f, dy = 20f, touchSlop = 10f))
+        assertFalse(LensView.isHorizontalSwipeIntent(dx = 40f, dy = 30f, touchSlop = 10f))
+    }
+
+    @Test
+    fun `a vertical drag is never a page swipe`() {
+        assertFalse(LensView.isHorizontalSwipeIntent(dx = 2f, dy = 80f, touchSlop = 10f))
+        assertFalse(LensView.isHorizontalSwipeIntent(dx = 0f, dy = -80f, touchSlop = 10f))
+    }
+
+    @Test
+    fun `a pan that already exceeds slop diagonally is not stolen by the pager`() {
+        // Same event that exceedsTouchSlop() accepts as a pan must be rejected as a page swipe,
+        // otherwise both predicates would fire for one move and the precedence would be ambiguous.
+        val dx = 30f
+        val dy = 25f
+        assertTrue(LensView.exceedsTouchSlop(dx, dy, touchSlop = 10f))
+        assertFalse(LensView.isHorizontalSwipeIntent(dx, dy, touchSlop = 10f))
+    }
 }

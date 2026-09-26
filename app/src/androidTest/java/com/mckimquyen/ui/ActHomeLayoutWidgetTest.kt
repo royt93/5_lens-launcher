@@ -33,11 +33,15 @@ class ActHomeLayoutWidgetTest {
         ActivityScenario.launch(ActHome::class.java).use { scenario ->
             scenario.onActivity { activity ->
                 val searchBar = activity.findViewById<SearchBar>(R.id.searchBar)
-                val lensView = activity.findViewById<View>(R.id.lensViews)
+                // FISH-008 Phase 2: the margin that used to sit directly on lensViews now sits on
+                // its ViewPager2 container - lensViews itself is nested inside a page and its
+                // .top is relative to that page, not comparable to searchBar's root-relative
+                // .bottom anymore.
+                val lensPager = activity.findViewById<View>(R.id.lensPager)
 
                 assertTrue(
-                    "LensView must start below the collapsed SearchBar so icons remain visible",
-                    lensView.top >= searchBar.bottom
+                    "LensView pager must start below the collapsed SearchBar so icons remain visible",
+                    lensPager.top >= searchBar.bottom
                 )
                 assertTrue(
                     "SearchBar should be a compact launcher affordance",
@@ -59,9 +63,9 @@ class ActHomeLayoutWidgetTest {
 
             scenario.onActivity { activity ->
                 assertEquals(
-                    "Lens grid must not draw behind the search screen",
+                    "Lens pager must not draw behind the search screen",
                     View.INVISIBLE,
-                    activity.findViewById<View>(R.id.lensViews).visibility
+                    activity.findViewById<View>(R.id.lensPager).visibility
                 )
                 searchView!!.hide()
             }
@@ -69,8 +73,8 @@ class ActHomeLayoutWidgetTest {
             scenario.onActivity { activity ->
                 assertEquals(false, searchView!!.isShowing)
                 assertTrue(
-                    "Lens grid may remain hidden when the test app list has not loaded yet",
-                    activity.findViewById<View>(R.id.lensViews).visibility in listOf(View.VISIBLE, View.INVISIBLE)
+                    "Lens pager may remain hidden when the test app list has not loaded yet",
+                    activity.findViewById<View>(R.id.lensPager).visibility in listOf(View.VISIBLE, View.INVISIBLE)
                 )
             }
         }

@@ -23,6 +23,8 @@ import com.mckimquyen.ext.Biometric
 import com.mckimquyen.model.App
 import com.mckimquyen.model.AppPersistent
 import com.mckimquyen.model.AppDatabase
+import com.mckimquyen.model.LensWorkspace
+import com.mckimquyen.model.PinnedZone
 import com.mckimquyen.services.BroadcastReceivers.AppsEditedReceiver
 import java.util.*
 import kotlinx.coroutines.Dispatchers
@@ -31,17 +33,41 @@ import kotlinx.coroutines.withContext
 object UtilApp {
 
     /**
-     * Get all available apps for launcher
+     * Get all available apps for launcher, merged with one lens's layout state.
+     * FISH-008 Phase 2: thin back-compat facade over [getAppShells] + [mergeLensPersistence] -
+     * every existing caller/test keeps compiling unchanged (lensId defaults to the pre-Phase-2
+     * behavior). Prefer calling the two split functions directly when switching lenses, so the
+     * expensive PackageManager scan in [getAppShells] isn't repeated on every switch.
      */
+    @JvmOverloads
     @JvmStatic
     suspend fun getApps(
         packageManager: PackageManager,
         context: Context?,
         application: Application?,
         iconPackLabelName: String,
-        sortType: SortType?
+        sortType: SortType?,
+        lensId: String = LensWorkspace.DEFAULT_LENS_ID
+    ): ArrayList<App> = mergeLensPersistence(
+        getAppShells(packageManager, context, application, iconPackLabelName),
+        lensId,
+        sortType
+    )
+
+    /**
+     * The expensive half of app loading: PackageManager scan, icon-pack resolution, icon
+     * decode, and the (lens-independent) palette-color lookup/seed. Callers switching between
+     * lenses should call this once and re-run [mergeLensPersistence] per lens instead of
+     * re-scanning PackageManager on every switch.
+     */
+    @JvmStatic
+    suspend fun getAppShells(
+        packageManager: PackageManager,
+        context: Context?,
+        application: Application?,
+        iconPackLabelName: String
     ): ArrayList<App> {
-        val apps = ArrayList<App>()
+        val shells = ArrayList<App>()
         val intent = Intent(Intent.ACTION_MAIN, null).apply {
             addCategory(Intent.CATEGORY_LAUNCHER)
         }
@@ -54,10 +80,6 @@ object UtilApp {
             }
             throw e
         }
-
-        // Query all DB records once to avoid N database queries in loop
-        val allPersistents = AppDatabase.getInstance().appPersistentDao().getAll()
-        val persistentMap = allPersistents.associateBy { it.identifier }
 
         // Find selected icon pack
         val iconPacks = UtilIconPackManager().getAvailableIconPacksWithIcons(true, application)
@@ -87,9 +109,6 @@ object UtilApp {
             val defaultBitmap = UtilBitmap.packageNameToBitmap(packageManager, packageName, iconResId)
             val icon = selectedIconPack?.getIconForPackage(packageName, defaultBitmap) ?: defaultBitmap
 
-            val identifier = AppPersistent.generateIdentifier(packageName, name)
-            val persistent = persistentMap[identifier]
-
             val iconCacheKey = BitmapCache.buildKey(
                 packageName = packageName,
                 componentName = name,
@@ -97,12 +116,11 @@ object UtilApp {
                 iconPackToken = iconPackToken
             )
 
-            val isOpened = persistent?.appOpened ?: true
-            val isVisible = persistent?.appVisible ?: true
-            val openCount = persistent?.openCount ?: 0L
-
-            // Cache palette color (Issue 3)
-            var paletteColor = persistent?.paletteColor ?: 0
+            // Palette color is global by design (not lens-scoped, see AppPersistentDao's
+            // updatePaletteColor) - look it up regardless of which lens's row holds it.
+            val identifier = AppPersistent.generateIdentifier(packageName, name)
+            val existingPersistent = AppDatabase.getInstance().appPersistentDao().findAnyByIdentifier(identifier)
+            var paletteColor = existingPersistent?.paletteColor ?: 0
             if (paletteColor == 0 && icon != null) {
                 paletteColor = UtilColor.getPaletteColorFromBitmap(icon)
                 if (paletteColor != 0) {
@@ -110,28 +128,55 @@ object UtilApp {
                 }
             }
 
-            // Create App instance
-            val app = App(
-                id = index,
-                label = label,
-                packageName = packageName,
-                name = name,
-                iconResId = iconResId,
-                icon = icon,
-                installDate = installDate,
-                paletteColor = paletteColor,
-                isOpened = isOpened,
-                isVisible = isVisible,
-                openCount = openCount,
-                orderNumber = persistent?.orderNumber ?: -1,
-                isFavorite = persistent?.isFavorite ?: false,
-                folderName = persistent?.folderName,
-                pinnedZone = com.mckimquyen.model.PinnedZone.fromStored(persistent?.pinnedZone),
-                iconCacheKey = iconCacheKey
+            shells.add(
+                App(
+                    id = index,
+                    label = label,
+                    packageName = packageName,
+                    name = name,
+                    iconResId = iconResId,
+                    icon = icon,
+                    installDate = installDate,
+                    paletteColor = paletteColor,
+                    iconCacheKey = iconCacheKey
+                )
             )
-            apps.add(app)
         }
+        return shells
+    }
 
+    /**
+     * The cheap half of app loading: overlays one lens's [AppPersistent] rows onto
+     * already-resolved [shells] and sorts. Safe to call repeatedly (e.g. once per lens switch)
+     * without re-scanning PackageManager.
+     */
+    @JvmStatic
+    suspend fun mergeLensPersistence(
+        shells: List<App>,
+        lensId: String,
+        sortType: SortType?
+    ): ArrayList<App> {
+        val persistentMap = AppDatabase.getInstance().appPersistentDao()
+            .getAllForLens(lensId)
+            .associateBy { it.identifier }
+
+        val apps = ArrayList<App>(shells.size)
+        shells.forEach { shell ->
+            val identifier = AppPersistent.generateIdentifier(shell.packageName.toString(), shell.name.toString())
+            val persistent = persistentMap[identifier]
+            apps.add(
+                shell.copy(
+                    isOpened = persistent?.appOpened ?: true,
+                    isVisible = persistent?.appVisible ?: true,
+                    openCount = persistent?.openCount ?: 0L,
+                    orderNumber = persistent?.orderNumber ?: -1,
+                    isFavorite = persistent?.isFavorite ?: false,
+                    folderName = persistent?.folderName,
+                    pinnedZone = PinnedZone.fromStored(persistent?.pinnedZone),
+                    lensId = lensId
+                )
+            )
+        }
         UtilAppSorter.sort(apps, sortType)
         return apps
     }

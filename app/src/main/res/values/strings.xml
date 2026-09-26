@@ -215,4 +215,14 @@
     <string name="lens_physics_preset_gentle" translatable="false">Gentle</string>
     <string name="lens_physics_preset_standard" translatable="false">Standard</string>
     <string name="lens_physics_preset_snappy" translatable="false">Snappy</string>
+
+    <!-- FISH-008 Phase 2: multi-lens workspace paging + management. English-only for now
+         (tools:ignore="MissingTranslation") - full 17-locale translation is a follow-up. -->
+    <string name="lens_add" tools:ignore="MissingTranslation">Add lens</string>
+    <string name="lens_rename" tools:ignore="MissingTranslation">Rename lens</string>
+    <string name="lens_delete" tools:ignore="MissingTranslation">Delete lens</string>
+    <string name="lens_rename_title" tools:ignore="MissingTranslation">Rename lens</string>
+    <string name="lens_name_hint" tools:ignore="MissingTranslation">Lens name</string>
+    <string name="lens_delete_confirm_message" tools:ignore="MissingTranslation">Delete \"%1$s\"? Its apps and layout stay installed but this lens\'s custom order, favorites and folders are removed.</string>
+    <string name="lens_new_name_template" tools:ignore="MissingTranslation">Lens %1$d</string>
 </resources>

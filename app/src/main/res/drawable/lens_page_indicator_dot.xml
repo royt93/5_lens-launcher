@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- FISH-008 Phase 2: TabLayout.Tab icon for the lens-page dots indicator - filled when
+     selected, outline-toned otherwise. Reused as-is via TabLayoutMediator, no custom View. -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_selected="true">
+        <shape android:shape="oval">
+            <size android:width="8dp" android:height="8dp" />
+            <solid android:color="?attr/colorPrimary" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="oval">
+            <size android:width="6dp" android:height="6dp" />
+            <solid android:color="?attr/colorOutlineVariant" />
+        </shape>
+    </item>
+</selector>

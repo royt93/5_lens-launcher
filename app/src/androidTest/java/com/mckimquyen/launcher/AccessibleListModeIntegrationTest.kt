@@ -83,8 +83,8 @@ class AccessibleListModeIntegrationTest {
             // Switch to Fisheye
             utilSettings.setLauncherMode(LauncherMode.FISHEYE)
             activity.updateModeVisibility()
-            val lensView = activity.findViewById<View>(R.id.lensViews)
-            assertNotEquals(View.GONE, lensView.visibility)
+            val lensPager = activity.findViewById<View>(R.id.lensPager)
+            assertNotEquals(View.GONE, lensPager.visibility)
 
             // Switch back to List
             utilSettings.setLauncherMode(LauncherMode.LIST)

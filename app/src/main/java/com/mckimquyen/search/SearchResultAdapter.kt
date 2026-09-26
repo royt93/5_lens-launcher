@@ -237,7 +237,8 @@ class SearchResultAdapter(
                 app.name.toString(),
                 app.isFavorite,
                 app.folderName,
-                zone
+                zone,
+                app.lensId
             )
             anchor.context.sendBroadcast(Intent(anchor.context, AppsEditedReceiver::class.java))
             Toast.makeText(anchor.context, R.string.organization_saved, Toast.LENGTH_SHORT).show()

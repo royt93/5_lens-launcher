@@ -16,6 +16,13 @@ interface AppPersistentDao {
     @Query("SELECT * FROM APP_PERSISTENT WHERE LENS_ID = 'default' AND IDENTIFIER = :identifier LIMIT 1")
     suspend fun findByIdentifier(identifier: String): AppPersistent?
 
+    // FISH-008 Phase 2: paletteColor is global by design (see updatePaletteColor below), but a
+    // row for a given identifier may only exist under a non-default lens (e.g. an app first
+    // seen while a "Work" lens was active). This looks it up regardless of which lens wrote it,
+    // for the palette-color-only read in UtilApp.getAppShells.
+    @Query("SELECT * FROM APP_PERSISTENT WHERE IDENTIFIER = :identifier LIMIT 1")
+    suspend fun findAnyByIdentifier(identifier: String): AppPersistent?
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(app: AppPersistent): Long
 

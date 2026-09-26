@@ -41,19 +41,22 @@ object LayoutImportApplier {
     fun apply(plan: Plan) {
         val orderedApps = plan.matched.sortedBy { it.entry.orderNumber }.map { it.app }
         if (orderedApps.isNotEmpty()) {
-            AppPersistent.setAppOrderBatch(orderedApps)
+            // FISH-008 Phase 2: installedApps passed into plan() already came from one active
+            // lens's merged list, so every matched app shares the same lensId.
+            AppPersistent.setAppOrderBatch(orderedApps, orderedApps.first().lensId)
         }
         plan.matched.forEach { (entry, app) ->
             val packageName = app.packageName.toString()
             val name = app.name.toString()
-            AppPersistent.setAppVisibility(packageName, name, entry.appVisible)
-            AppPersistent.setAppOpened(packageName, name, entry.appOpened)
+            AppPersistent.setAppVisibility(packageName, name, entry.appVisible, app.lensId)
+            AppPersistent.setAppOpened(packageName, name, entry.appOpened, app.lensId)
             AppPersistent.setOrganization(
                 packageName,
                 name,
                 entry.isFavorite,
                 entry.folderName,
-                PinnedZone.fromStored(entry.pinnedZone)
+                PinnedZone.fromStored(entry.pinnedZone),
+                app.lensId
             )
         }
     }

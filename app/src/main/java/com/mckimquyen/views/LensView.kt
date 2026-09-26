@@ -39,6 +39,7 @@ import com.mckimquyen.util.UtilCalculator
 import com.mckimquyen.util.UtilSettings
 import kotlinx.coroutines.launch
 import java.util.Locale
+import kotlin.math.abs
 import kotlin.math.pow
 import kotlin.math.sqrt
 
@@ -81,6 +82,26 @@ class LensView : View {
         @androidx.annotation.VisibleForTesting
         internal fun exceedsTouchSlop(dx: Float, dy: Float, touchSlop: Float): Boolean =
             sqrt(dx.toDouble().pow(2.0) + dy.toDouble().pow(2.0)) > touchSlop
+
+        /**
+         * FISH-008 Phase 2: is this move clearly a horizontal page-swipe rather than a lens pan?
+         *
+         * ViewPager2 and LensView both want every ACTION_MOVE, so one of them has to yield before
+         * the other confirms. A lens pan is a free 2D drag, so anything with real vertical travel
+         * belongs to the lens; only a near-horizontal drag is handed to the pager. The 2:1 ratio is
+         * a deliberate bias toward the lens (the primary, always-present interaction) - the pager
+         * only wins when the intent is unambiguous.
+         *
+         * ponytail: fixed 2:1 ratio, tuned on real hardware (TECNO KJ7). Revisit only if a device
+         * with a very different touch-slop profile reports mis-detection; do not "improve" it with
+         * velocity tracking without that evidence.
+         */
+        @androidx.annotation.VisibleForTesting
+        internal fun isHorizontalSwipeIntent(dx: Float, dy: Float, touchSlop: Float): Boolean =
+            abs(dx) > touchSlop && abs(dx) > abs(dy) * HORIZONTAL_SWIPE_DOMINANCE_RATIO
+
+        /** How much more horizontal than vertical a move must be to count as a page swipe. */
+        private const val HORIZONTAL_SWIPE_DOMINANCE_RATIO = 2.0f
 
         /**
          * Should the pending long-press Runnable actually act when it fires? False whenever
@@ -435,7 +456,8 @@ class LensView : View {
             app.name.toString(),
             app.isFavorite,
             app.folderName,
-            zone
+            zone,
+            app.lensId
         )
         context.sendBroadcast(Intent(context, BroadcastReceivers.AppsEditedReceiver::class.java))
         Toast.makeText(context, R.string.organization_saved, Toast.LENGTH_SHORT).show()
@@ -642,6 +664,10 @@ class LensView : View {
         return when (event.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
                 mPinchReported = false
+                // FISH-008 Phase 2: claim the gesture up front so a ViewPager2 ancestor cannot page
+                // away on its own slop before this view has seen enough movement to classify it;
+                // ACTION_MOVE releases the claim as soon as the drag reads as a horizontal swipe.
+                parent?.requestDisallowInterceptTouchEvent(true)
                 gestureState = LensGestureState.IDLE
                 mTouchX = event.x.coerceAtLeast(0.0f)
                 mTouchY = event.y.coerceAtLeast(0.0f)
@@ -663,6 +689,9 @@ class LensView : View {
                     val nextState = resolvePointerDown(gestureState, event.pointerCount)
                     if (nextState == LensGestureState.PINCHING) {
                         gestureState = LensGestureState.PINCHING
+                        // FISH-008 Phase 2: a confirmed pinch must never be interrupted by a
+                        // ViewPager2 ancestor paging to the next lens.
+                        parent?.requestDisallowInterceptTouchEvent(true)
                         mLongPressArmed = false
                         mLongPressHandler.removeCallbacks(mLongPressRunnable)
                         mSelectIndex = -1
@@ -679,9 +708,24 @@ class LensView : View {
                     return true
                 }
                 if (mLongPressTriggered) return true
-                if (!mMoving && exceedsTouchSlop(event.x - mTouchX, event.y - mTouchY, mTouchSlop)) {
+                val dx = event.x - mTouchX
+                val dy = event.y - mTouchY
+                // FISH-008 Phase 2: before a pan is confirmed, an unambiguously horizontal drag is
+                // a lens page-swipe - release the gesture so the ViewPager2 ancestor can take it.
+                if (!mMoving && isHorizontalSwipeIntent(dx, dy, mTouchSlop)) {
+                    mLongPressArmed = false
+                    mLongPressHandler.removeCallbacks(mLongPressRunnable)
+                    parent?.requestDisallowInterceptTouchEvent(false)
+                    return false
+                }
+                if (!mMoving && exceedsTouchSlop(dx, dy, mTouchSlop)) {
                     mMoving = true
                     gestureState = LensGestureState.PANNING
+                    // FISH-008 Phase 2: only claim the gesture once a pan is actually confirmed -
+                    // until then a ViewPager2 ancestor is free to decide (via its own slop/
+                    // direction check) that this is a page-swipe instead, exactly as it would for
+                    // any other horizontally-scrolling child.
+                    parent?.requestDisallowInterceptTouchEvent(true)
                     mLongPressArmed = false
                     mLongPressHandler.removeCallbacks(mLongPressRunnable)
                     val lensShowAnimation = LensAnimation(true)
@@ -740,6 +784,7 @@ class LensView : View {
             }
 
             MotionEvent.ACTION_CANCEL -> {
+                parent?.requestDisallowInterceptTouchEvent(false)
                 mLongPressArmed = false
                 mLongPressTriggered = false
                 mLongPressHandler.removeCallbacks(mLongPressRunnable)

@@ -10,6 +10,7 @@ import com.mckimquyen.BuildConfig
 import com.mckimquyen.enums.BackgroundMode
 import com.mckimquyen.enums.LauncherMode
 import com.mckimquyen.enums.SortType
+import com.mckimquyen.model.LensWorkspace
 import kotlin.math.roundToInt
 
 /**
@@ -140,6 +141,9 @@ class UtilSettings(context: Context) {
         val DEFAULT_LAUNCHER_MODE = LauncherMode.FISHEYE
 
         const val KEY_READ_POLICY = "KEY_READ_POLICY${BuildConfig.VERSION_CODE}"
+
+        // FISH-008 Phase 2: which LensWorkspace.id the home screen is currently showing.
+        const val KEY_ACTIVE_LENS_ID = "active_lens_id"
     }
 
     fun save(name: String?, value: Int) {
@@ -220,6 +224,7 @@ class UtilSettings(context: Context) {
         KEY_BACKGROUND_COLOR -> prefs.getString(name, DEFAULT_BACKGROUND_COLOR)
         KEY_HIGHLIGHT_COLOR -> prefs.getString(name, DEFAULT_HIGHLIGHT_COLOR)
         KEY_ICON_PACK_LABEL_NAME -> prefs.getString(name, DEFAULT_ICON_PACK_LABEL_NAME)
+        KEY_ACTIVE_LENS_ID -> prefs.getString(name, LensWorkspace.DEFAULT_LENS_ID)
         else -> prefs.getString(name, DEFAULT_STRING)
     }
 
