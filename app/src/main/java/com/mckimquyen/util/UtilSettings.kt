@@ -306,6 +306,71 @@ class UtilSettings(context: Context) {
         return !spokenServices.isNullOrEmpty() || am.isTouchExplorationEnabled
     }
 
+    // ========================================================================
+    // FISH-008 Phase 3: Per-lens physics & Smart Focus configuration
+    //
+    // A lens stores its overrides under "<key>_<lensId>". The default lens has
+    // no suffix at all, so it reads and writes the very keys every pre-Phase-3
+    // install already has - a single-lens setup is byte-for-byte unchanged. A
+    // lens that has never been given its own value inherits the shared one, so
+    // adding a lens never silently resets its physics to the hardcoded default.
+    // ========================================================================
+
+    private fun lensKey(baseKey: String, lensId: String?): String =
+        if (lensId.isNullOrEmpty() || lensId == LensWorkspace.DEFAULT_LENS_ID) {
+            baseKey
+        } else {
+            "${baseKey}_$lensId"
+        }
+
+    fun getDistortionFactor(lensId: String?): Float {
+        val key = lensKey(KEY_DISTORTION_FACTOR, lensId)
+        return if (prefs.contains(key)) {
+            getFloatWithValidation(
+                key,
+                DEFAULT_DISTORTION_FACTOR,
+                MIN_DISTORTION_FACTOR,
+                MAX_DISTORTION_FACTOR / 2f + MIN_DISTORTION_FACTOR
+            )
+        } else {
+            getFloat(KEY_DISTORTION_FACTOR)
+        }
+    }
+
+    fun saveDistortionFactor(lensId: String?, value: Float) {
+        save(lensKey(KEY_DISTORTION_FACTOR, lensId), value)
+    }
+
+    fun isSmartFocusBias(lensId: String?): Boolean {
+        val key = lensKey(KEY_SMART_FOCUS_BIAS, lensId)
+        return if (prefs.contains(key)) {
+            prefs.getBoolean(key, DEFAULT_SMART_FOCUS_BIAS)
+        } else {
+            getBoolean(KEY_SMART_FOCUS_BIAS)
+        }
+    }
+
+    fun saveSmartFocusBias(lensId: String?, value: Boolean) {
+        save(lensKey(KEY_SMART_FOCUS_BIAS, lensId), value)
+    }
+
+    /** Materializes [fromLensId]'s effective values onto [toLensId], inherited ones included. */
+    fun duplicateLensSettings(fromLensId: String, toLensId: String) {
+        val distortion = getDistortionFactor(fromLensId)
+        val smartFocus = isSmartFocusBias(fromLensId)
+        saveDistortionFactor(toLensId, distortion)
+        saveSmartFocusBias(toLensId, smartFocus)
+    }
+
+    fun deleteLensSettings(lensId: String) {
+        if (lensId.isNotEmpty() && lensId != LensWorkspace.DEFAULT_LENS_ID) {
+            prefs.edit {
+                remove("${KEY_DISTORTION_FACTOR}_$lensId")
+                remove("${KEY_SMART_FOCUS_BIAS}_$lensId")
+            }
+        }
+    }
+
     private fun getFloatWithValidation(name: String?, defaultValue: Float, minValue: Float, maxValue: Float): Float {
         val value = prefs.getFloat(name, defaultValue)
         return when {

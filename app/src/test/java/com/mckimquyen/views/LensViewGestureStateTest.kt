@@ -72,12 +72,7 @@ class LensViewGestureStateTest {
 
     @Test
     fun `every combination is enumerated and exactly one is true`() {
-        val combinations = listOf(true, false).flatMap { armed ->
-            listOf(true, false).flatMap { moving ->
-                listOf(0, -1).map { selectIndex -> Triple(armed, moving, selectIndex) }
-            }
-        }
-        val trueCount = combinations.count { (armed, moving, selectIndex) ->
+        val trueCount = allCombinations().count { (armed, moving, selectIndex) ->
             LensView.shouldTriggerLongPress(armed, moving, selectIndex)
         }
         assertEquals(
@@ -86,6 +81,62 @@ class LensViewGestureStateTest {
             trueCount
         )
     }
+
+    // ========================================================= shouldTriggerEmptySpaceLongPress
+    // FISH-008 Phase 3: long-press on empty grid space opens the lens management menu - the only
+    // way to reach it on a single-lens install, where the page-dots indicator is hidden.
+
+    @Test
+    fun `armed, stationary, no icon under the touch - triggers the empty-space press`() {
+        assertTrue(LensView.shouldTriggerEmptySpaceLongPress(armed = true, moving = false, selectIndex = -1))
+    }
+
+    @Test
+    fun `over an icon - the empty-space press must not trigger (the icon menu owns that)`() {
+        assertFalse(LensView.shouldTriggerEmptySpaceLongPress(armed = true, moving = false, selectIndex = 0))
+    }
+
+    @Test
+    fun `a pan over empty space must not open the lens menu`() {
+        assertFalse(LensView.shouldTriggerEmptySpaceLongPress(armed = true, moving = true, selectIndex = -1))
+    }
+
+    @Test
+    fun `an unarmed press over empty space must not open the lens menu`() {
+        assertFalse(LensView.shouldTriggerEmptySpaceLongPress(armed = false, moving = false, selectIndex = -1))
+    }
+
+    @Test
+    fun `the two long-press predicates are mutually exclusive for every input`() {
+        // One touch must never open both the app quick-actions menu and the lens menu.
+        allCombinations().forEach { (armed, moving, selectIndex) ->
+            val icon = LensView.shouldTriggerLongPress(armed, moving, selectIndex)
+            val empty = LensView.shouldTriggerEmptySpaceLongPress(armed, moving, selectIndex)
+            assertFalse(
+                "armed=$armed moving=$moving selectIndex=$selectIndex fired both menus",
+                icon && empty
+            )
+        }
+    }
+
+    @Test
+    fun `exactly one empty-space combination triggers`() {
+        val trueCount = allCombinations().count { (armed, moving, selectIndex) ->
+            LensView.shouldTriggerEmptySpaceLongPress(armed, moving, selectIndex)
+        }
+        assertEquals(
+            "exactly the (armed=true, moving=false, selectIndex<0) combination must trigger",
+            1,
+            trueCount
+        )
+    }
+
+    private fun allCombinations(): List<Triple<Boolean, Boolean, Int>> =
+        listOf(true, false).flatMap { armed ->
+            listOf(true, false).flatMap { moving ->
+                listOf(0, -1).map { selectIndex -> Triple(armed, moving, selectIndex) }
+            }
+        }
 
     // ==================================================================== FISH-009: Pinch Gesture State Machine
 

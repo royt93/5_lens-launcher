@@ -60,6 +60,48 @@ class FrmSettingsSmartFocusWidgetTest {
         assertTrue(UtilSettings(context).getBoolean(UtilSettings.KEY_SMART_FOCUS_BIAS))
     }
 
+    // ---- FISH-008 Phase 3: the switch targets whichever lens Home is currently on ----
+
+    @Test
+    fun switchReflectsTheActiveLens_notTheGlobalValue() {
+        val settings = UtilSettings(context)
+        settings.save(UtilSettings.KEY_ACTIVE_LENS_ID, "work")
+        settings.saveSmartFocusBias("work", true)
+        // The shared/default value stays off - only the active lens is on.
+        assertFalse(settings.isSmartFocusBias(com.mckimquyen.model.LensWorkspace.DEFAULT_LENS_ID))
+
+        launchFragmentInContainer<FrmSettings>(themeResId = R.style.AppTheme_NoActionBar).use { scenario ->
+            scenario.onFragment { fragment ->
+                assertTrue(
+                    "The switch must show the active lens's own state",
+                    fragment.requireView().findViewById<SwitchCompat>(R.id.swSmartFocus).isChecked
+                )
+            }
+        }
+    }
+
+    @Test
+    fun togglingSwitch_writesToTheActiveLensOnly() {
+        val settings = UtilSettings(context)
+        settings.save(UtilSettings.KEY_ACTIVE_LENS_ID, "work")
+
+        launchFragmentInContainer<FrmSettings>(themeResId = R.style.AppTheme_NoActionBar).use { scenario ->
+            scenario.onFragment { fragment ->
+                fragment.requireView().findViewById<SwitchCompat>(R.id.swSmartFocus).isChecked = true
+            }
+        }
+
+        assertTrue(settings.isSmartFocusBias("work"))
+        assertFalse(
+            "Another lens must not be dragged along",
+            settings.isSmartFocusBias("personal")
+        )
+        assertFalse(
+            "The shared default must not be overwritten by a per-lens toggle",
+            settings.isSmartFocusBias(com.mckimquyen.model.LensWorkspace.DEFAULT_LENS_ID)
+        )
+    }
+
     @Test
     fun resetToDefaults_turnsSmartFocusOff() {
         UtilSettings(context).save(UtilSettings.KEY_SMART_FOCUS_BIAS, true)

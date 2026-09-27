@@ -372,7 +372,11 @@ public class ActHome extends ActBase {
         lensPager = findViewById(R.id.lensPager);
         lensPageIndicator = findViewById(R.id.lensPageIndicator);
         lensPagerAdapter = new LensPagerAdapter((view, lens) -> {
-            bindLensView(view);
+            // FISH-008 Phase 3: every page carries its own lens identity, set on every bind and
+            // rebind (not on page selection) so a prefetched neighbour page never draws with the
+            // currently-visible lens's curvature/Smart Focus for a frame before being swiped to.
+            view.setLensId(lens.getId());
+            bindLensView(view, lens);
             return Unit.INSTANCE;
         });
         lensPager.setAdapter(lensPagerAdapter);
@@ -467,6 +471,15 @@ public class ActHome extends ActBase {
      *  lens's apps once the user actually swipes to it (see lensPageChangeCallback), so a
      *  prefetched adjacent page never briefly shows the wrong lens's layout. */
     private void bindLensView(LensView view) {
+        bindLensView(view, null);
+    }
+
+    /**
+     * @param lens the workspace this page is being bound to, when the caller knows it. During a
+     *             rebind the holder is not yet discoverable through the pager, so the lens id is
+     *             the only reliable way to tell "this is the page the user is looking at".
+     */
+    private void bindLensView(LensView view, LensWorkspace lens) {
         view.setPackageManager(getPackageManager());
         view.setSystemUiVisibility(
                 View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
@@ -475,7 +488,20 @@ public class ActHome extends ActBase {
                 showPinchCurvatureSnackbar(curvature);
             }
         });
-        if (lensViews == null || lensViews == view) {
+        // FISH-008 Phase 3: the dots indicator - the menu's only other entry point - is hidden
+        // while a single lens exists, so long-pressing empty grid space has to reach it too.
+        // Otherwise no single-lens install (i.e. everyone, right after the v11 migration) can
+        // ever create a second lens. Anchored on the page itself, same as UI-022's icon menu.
+        view.setOnEmptySpaceLongPressListener(() -> showLensManagementMenu(lensMenuAnchor()));
+        // FISH-008 Phase 3 fix: after a configuration change every page rebinds while `listApp`
+        // is already populated, but `lensViews` still points at the destroyed Activity's
+        // LensView - so no page matched here and the restored page was left with an empty grid
+        // until the next app-list broadcast. The pager cannot resolve its holder mid-rebind, so
+        // match on the lens id instead: the page whose lens is the active one is the visible one.
+        // Found by rotating a real TECNO KJ7 with two lenses on the second page.
+        boolean isActiveLensPage = lens != null && utilSettings != null
+                && lens.getId().equals(utilSettings.getString(UtilSettings.KEY_ACTIVE_LENS_ID));
+        if (lensViews == null || lensViews == view || isActiveLensPage) {
             lensViews = view;
             if (listApp != null) {
                 view.setApps(listApp);
@@ -497,41 +523,113 @@ public class ActHome extends ActBase {
         return null;
     }
 
+    /** The lens menu currently built, exposed so tests can inspect what it actually offered. */
+    @androidx.annotation.VisibleForTesting
+    PopupMenu lensManagementMenu;
+
+    /**
+     * A PopupMenu sizes and places itself against its anchor, so anchoring to the full-screen
+     * LensView pushed the menu off the top edge and clipped it to a single visible row - found on
+     * a real TECNO KJ7, where only "Add lens" of the four items was reachable. The page-dots
+     * indicator is a small view near the top with room below it, exactly what a popup wants; it is
+     * the menu's other entry point anyway, so both routes now open the identical menu. It is GONE
+     * on a single-lens install, but a hidden view is still a valid anchor (it has real bounds),
+     * which is precisely the case this entry point exists for.
+     */
+    @androidx.annotation.VisibleForTesting
+    View lensMenuAnchor() {
+        // setupViews() assigns lensPageIndicator before the adapter that can trigger this, so it
+        // is non-null by the time any menu can open; rootLayout is a defensive fallback only.
+        return lensPageIndicator != null ? lensPageIndicator : findViewById(R.id.rootLayout);
+    }
+
     private void showLensManagementMenu(View anchor) {
         PopupMenu menu = new PopupMenu(this, anchor);
+        lensManagementMenu = menu;
         menu.getMenu().add(0, 1, 0, R.string.lens_add);
         menu.getMenu().add(0, 2, 0, R.string.lens_rename);
         android.view.MenuItem delete = menu.getMenu().add(0, 3, 0, R.string.lens_delete);
         delete.setEnabled(currentLenses.size() > 1);
         int position = lensPager.getCurrentItem();
-        menu.setOnMenuItemClickListener(item -> {
-            if (position < 0 || position >= currentLenses.size()) return false;
-            LensWorkspace current = currentLenses.get(position);
-            int id = item.getItemId();
-            if (id == 1) {
-                createLensDialog(current.getId());
-                return true;
-            } else if (id == 2) {
-                renameLensDialog(current);
-                return true;
-            } else if (id == 3) {
-                confirmDeleteLensDialog(current);
-                return true;
-            }
-            return false;
-        });
+        // FISH-008 Phase 3: Smart Focus is per-lens, so it gets a quick toggle right here on the
+        // lens it applies to (FrmSettings' own switch covers the same lens from Settings). The
+        // label states the action rather than using a checkable item - PopupMenu check marks and
+        // icons proved unreliable on real hardware in UI-022.
+        menu.getMenu().add(0, 4, 0, lensSmartFocusMenuLabelRes(position));
+        menu.setOnMenuItemClickListener(item -> onLensMenuItemSelected(item.getItemId(), position));
         menu.show();
+    }
+
+    /**
+     * The menu's real behavior, split out from the {@link PopupMenu} that hosts it. Espresso
+     * cannot inject the touches that drive a popup on this project's newer test devices
+     * (InputManager.getInstance is gone on API 37), so tests exercise this exact method instead
+     * of a reimplementation of it.
+     */
+    @androidx.annotation.VisibleForTesting
+    boolean onLensMenuItemSelected(int itemId, int position) {
+        if (position < 0 || position >= currentLenses.size()) return false;
+        LensWorkspace current = currentLenses.get(position);
+        if (itemId == 1) {
+            createLensDialog(current.getId());
+            return true;
+        } else if (itemId == 2) {
+            renameLensDialog(current);
+            return true;
+        } else if (itemId == 3) {
+            confirmDeleteLensDialog(current);
+            return true;
+        } else if (itemId == 4) {
+            toggleSmartFocusForLens(current);
+            return true;
+        }
+        return false;
+    }
+
+    /** The menu entry names the action it performs, so it has to read the lens's current state. */
+    @androidx.annotation.VisibleForTesting
+    int lensSmartFocusMenuLabelRes(int position) {
+        boolean on = position >= 0 && position < currentLenses.size()
+                && utilSettings != null
+                && utilSettings.isSmartFocusBias(currentLenses.get(position).getId());
+        return on ? R.string.lens_smart_focus_disable : R.string.lens_smart_focus_enable;
+    }
+
+    private void toggleSmartFocusForLens(LensWorkspace lens) {
+        if (utilSettings == null) return;
+        boolean enabled = !utilSettings.isSmartFocusBias(lens.getId());
+        utilSettings.saveSmartFocusBias(lens.getId(), enabled);
+        if (lensViews != null) {
+            lensViews.refreshSmartFocus();
+        }
     }
 
     private void createLensDialog(String copyFromLensId) {
         String defaultName = getString(R.string.lens_new_name_template, currentLenses.size() + 1);
         showLensNameDialog(R.string.lens_add, defaultName, name ->
                 LensWorkspace.createLens(name, copyFromLensId, lenses -> {
+                    // FISH-008 Phase 3: the new lens copies its source's curvature/Smart Focus
+                    // too, not just its layout. createLens() doesn't return the new id, so find
+                    // the one lens that wasn't there before.
+                    if (utilSettings != null) {
+                        for (LensWorkspace lens : lenses) {
+                            if (!containsLens(currentLenses, lens.getId())) {
+                                utilSettings.duplicateLensSettings(copyFromLensId, lens.getId());
+                            }
+                        }
+                    }
                     currentLenses = lenses;
                     lensPagerAdapter.submitLenses(lenses);
                     lensPageIndicator.setVisibility(lenses.size() > 1 ? View.VISIBLE : View.GONE);
                     return Unit.INSTANCE;
                 }));
+    }
+
+    private static boolean containsLens(List<LensWorkspace> lenses, String lensId) {
+        for (LensWorkspace lens : lenses) {
+            if (lens.getId().equals(lensId)) return true;
+        }
+        return false;
     }
 
     private void renameLensDialog(LensWorkspace lens) {
@@ -546,6 +644,14 @@ public class ActHome extends ActBase {
     private interface LensNameCallback {
         void onNameEntered(String name);
     }
+
+    /**
+     * The lens dialog currently on screen, exposed so tests can drive its real buttons. Espresso
+     * cannot be used for this on API 37 (its event injector needs the removed
+     * InputManager.getInstance), and even a non-clicking onView() call builds that injector.
+     */
+    @androidx.annotation.VisibleForTesting
+    androidx.appcompat.app.AlertDialog lensDialog;
 
     private void showLensNameDialog(int titleRes, String initialText, LensNameCallback onDone) {
         EditText input = new EditText(this);
@@ -562,7 +668,7 @@ public class ActHome extends ActBase {
         container.setPadding(paddingH, paddingV, paddingH, 0);
         container.addView(input);
 
-        new MaterialAlertDialogBuilder(this, R.style.MaterialYouDialogTheme)
+        lensDialog = new MaterialAlertDialogBuilder(this, R.style.MaterialYouDialogTheme)
                 .setTitle(titleRes)
                 .setView(container)
                 .setPositiveButton(android.R.string.ok, (dialog, which) -> {
@@ -577,11 +683,16 @@ public class ActHome extends ActBase {
 
     private void confirmDeleteLensDialog(LensWorkspace lens) {
         String message = getString(R.string.lens_delete_confirm_message, lens.getName());
-        new MaterialAlertDialogBuilder(this, R.style.MaterialYouDialogTheme)
+        lensDialog = new MaterialAlertDialogBuilder(this, R.style.MaterialYouDialogTheme)
                 .setTitle(R.string.lens_delete)
                 .setMessage(message)
                 .setPositiveButton(R.string.lens_delete, (dialog, which) ->
                         LensWorkspace.deleteLens(lens.getId(), lenses -> {
+                            // FISH-008 Phase 3: no cascade exists for prefs either - drop the
+                            // deleted lens's own curvature/Smart Focus keys explicitly.
+                            if (utilSettings != null) {
+                                utilSettings.deleteLensSettings(lens.getId());
+                            }
                             currentLenses = lenses;
                             lensPagerAdapter.submitLenses(lenses);
                             lensPageIndicator.setVisibility(lenses.size() > 1 ? View.VISIBLE : View.GONE);
@@ -1166,9 +1277,10 @@ public class ActHome extends ActBase {
         if (root == null) return;
         pinchCurvatureSnackbar = Snackbar.make(root, message, Snackbar.LENGTH_LONG)
                 .setAction(R.string.pinch_save_default, v -> {
-                    if (utilSettings != null) {
-                        utilSettings.save(UtilSettings.KEY_DISTORTION_FACTOR, curvature);
-                    }
+                    // FISH-008 Phase 3: commitLiveDistortionFactor() already persists to the
+                    // currently-viewed page's own lens (LensView.lensId) - a second explicit
+                    // write to the global key here was redundant and, once lensId is real, wrong
+                    // (it would leak this lens's curvature into the shared default).
                     if (lensViews != null) {
                         lensViews.commitLiveDistortionFactor();
                     }
@@ -1309,6 +1421,19 @@ public class ActHome extends ActBase {
     protected void onDestroy() {
         if (lensPager != null && lensPageChangeCallback != null) {
             lensPager.unregisterOnPageChangeCallback(lensPageChangeCallback);
+        }
+        // FISH-008 Phase 3: both hold a View (a dialog's decor, a popup's anchor) belonging to
+        // this Activity. Dismiss a dialog still showing during a rotation - it would leak its
+        // window - and drop both references so the destroyed Activity is not retained.
+        if (lensDialog != null) {
+            if (lensDialog.isShowing()) {
+                lensDialog.dismiss();
+            }
+            lensDialog = null;
+        }
+        if (lensManagementMenu != null) {
+            lensManagementMenu.dismiss();
+            lensManagementMenu = null;
         }
         super.onDestroy();
     }

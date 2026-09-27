@@ -83,6 +83,55 @@ class ActHomeMultiLensWidgetTest {
         }
     }
 
+    /**
+     * FISH-008 Phase 3 regression: after a configuration change every page rebinds while the app
+     * snapshot is already loaded, but `lensViews` still pointed at the destroyed Activity's view,
+     * so no page matched and the restored page kept an empty grid. Caught by rotating a real
+     * TECNO KJ7 - the lens drew nothing but the wallpaper until the next app-list broadcast.
+     */
+    @Test
+    fun recreate_keepsTheRestoredLensPagePopulated() {
+        runBlocking {
+            AppDatabase.getInstance().lensWorkspaceDao()
+                .insertOrUpdate(LensWorkspace(id = "work", name = "Work", orderIndex = 1))
+        }
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        // Page 1, not page 0: the bug only shows on a page the pager has to restore onto, which
+        // binds while `lensViews` still points at the destroyed Activity's view.
+        com.mckimquyen.util.UtilSettings(context)
+            .save(com.mckimquyen.util.UtilSettings.KEY_ACTIVE_LENS_ID, "work")
+        com.mckimquyen.app.RAppsSingleton.instance.apps = arrayListOf(
+            com.mckimquyen.model.App(id = 1, label = "App 1", packageName = "com.t1", name = "A1"),
+            com.mckimquyen.model.App(id = 2, label = "App 2", packageName = "com.t2", name = "A2")
+        )
+
+        ActivityScenario.launch(ActHome::class.java).use { scenario ->
+            InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+            android.os.SystemClock.sleep(500)
+
+            scenario.recreate()
+            InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+            android.os.SystemClock.sleep(800)
+
+            scenario.onActivity { activity ->
+                val pager = activity.findViewById<androidx.viewpager2.widget.ViewPager2>(R.id.lensPager)
+                val recycler = pager.getChildAt(0) as androidx.recyclerview.widget.RecyclerView
+                val holder = recycler.findViewHolderForAdapterPosition(pager.currentItem)
+                val lensView = (holder as com.mckimquyen.adt.LensPagerAdapter.PageHolder).lensView
+                val apps = com.mckimquyen.views.LensView::class.java
+                    .getDeclaredField("mApps")
+                    .apply { isAccessible = true }
+                    .get(lensView) as? ArrayList<*>
+                // The real app-refresh pipeline rescans PackageManager here, so the exact count
+                // belongs to the device - the invariant the bug broke is simply "not empty".
+                org.junit.Assert.assertTrue(
+                    "The restored lens page must still hold its apps after recreate, not an empty grid",
+                    (apps?.size ?: 0) > 0
+                )
+            }
+        }
+    }
+
     @Test
     fun savedActiveLens_isRestoredOnLaunch() {
         runBlocking {

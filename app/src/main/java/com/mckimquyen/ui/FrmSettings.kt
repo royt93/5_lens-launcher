@@ -17,6 +17,7 @@ import com.mckimquyen.enums.BackgroundMode
 import com.mckimquyen.enums.LauncherMode
 import com.mckimquyen.ext.searchIconPack
 import com.mckimquyen.itf.SettingsInterface
+import com.mckimquyen.model.LensWorkspace
 import com.mckimquyen.util.UtilLauncher
 import com.mckimquyen.util.UtilNightModeUtil
 import com.mckimquyen.util.UtilSettings
@@ -49,6 +50,9 @@ class FrmSettings : Fragment(), SettingsInterface {
     private var swQuickActionBattery: SwitchCompat? = null
     private var swQuickActionSettings: SwitchCompat? = null
     private var utilSettings: UtilSettings? = null
+    // FISH-008 Phase 3: Smart Focus is per-lens; this switch always targets the lens the home
+    // screen is currently on (re-read in assignValues, which onResume already calls).
+    private var activeLensId: String = LensWorkspace.DEFAULT_LENS_ID
     private var tvVipStatusSummary: TextView? = null
     private var tvSelectedLanguage: TextView? = null
     private var tvSelectedLauncherMode: TextView? = null
@@ -185,7 +189,7 @@ class FrmSettings : Fragment(), SettingsInterface {
             utilSettings?.save(UtilSettings.KEY_DEPTH_OF_FIELD, isChecked)
         }
         swSmartFocus?.setOnCheckedChangeListener { _, isChecked ->
-            utilSettings?.save(UtilSettings.KEY_SMART_FOCUS_BIAS, isChecked)
+            utilSettings?.saveSmartFocusBias(activeLensId, isChecked)
             com.mckimquyen.services.AppEventManager.notifyAppsEdited()
         }
         swQuickActionCalculator?.setOnCheckedChangeListener { _, isChecked ->
@@ -284,7 +288,8 @@ class FrmSettings : Fragment(), SettingsInterface {
             swShowSearchBar?.isChecked = us.getBoolean(UtilSettings.KEY_SHOW_SEARCH_BAR)
             swKeepScreenOn?.isChecked = us.getBoolean(UtilSettings.KEY_KEEP_SCREEN_ON)
             swDepthOfField?.isChecked = us.getBoolean(UtilSettings.KEY_DEPTH_OF_FIELD)
-            swSmartFocus?.isChecked = us.getBoolean(UtilSettings.KEY_SMART_FOCUS_BIAS)
+            activeLensId = us.getString(UtilSettings.KEY_ACTIVE_LENS_ID) ?: LensWorkspace.DEFAULT_LENS_ID
+            swSmartFocus?.isChecked = us.isSmartFocusBias(activeLensId)
             swQuickActionCalculator?.isChecked = us.getBoolean(UtilSettings.KEY_QUICK_ACTION_CALCULATOR)
             swQuickActionUnit?.isChecked = us.getBoolean(UtilSettings.KEY_QUICK_ACTION_UNIT)
             swQuickActionTimer?.isChecked = us.getBoolean(UtilSettings.KEY_QUICK_ACTION_TIMER)
@@ -369,7 +374,7 @@ class FrmSettings : Fragment(), SettingsInterface {
             us.save(UtilSettings.KEY_SHOW_SEARCH_BAR, UtilSettings.DEFAULT_SHOW_SEARCH_BAR)
             us.save(UtilSettings.KEY_KEEP_SCREEN_ON, UtilSettings.DEFAULT_KEEP_SCREEN_ON)
             us.save(UtilSettings.KEY_DEPTH_OF_FIELD, UtilSettings.DEFAULT_DEPTH_OF_FIELD)
-            us.save(UtilSettings.KEY_SMART_FOCUS_BIAS, UtilSettings.DEFAULT_SMART_FOCUS_BIAS)
+            us.saveSmartFocusBias(activeLensId, UtilSettings.DEFAULT_SMART_FOCUS_BIAS)
             us.save(UtilSettings.KEY_QUICK_ACTION_CALCULATOR, UtilSettings.DEFAULT_QUICK_ACTION_ENABLED)
             us.save(UtilSettings.KEY_QUICK_ACTION_UNIT, UtilSettings.DEFAULT_QUICK_ACTION_ENABLED)
             us.save(UtilSettings.KEY_QUICK_ACTION_TIMER, UtilSettings.DEFAULT_QUICK_ACTION_ENABLED)

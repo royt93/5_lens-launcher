@@ -54,6 +54,13 @@ class LensViewPinchIntegrationTest {
         }
     }
 
+    @org.junit.After
+    fun tearDown() {
+        // FISH-008 Phase 3: the per-lens test below writes a suffixed key for a lens that only
+        // exists inside this test - drop it so a run leaves no orphan in the app's preferences.
+        utilSettings.deleteLensSettings("other-lens")
+    }
+
     private fun obtainMultiTouchEvent(
         action: Int,
         downTime: Long,
@@ -183,6 +190,74 @@ class LensViewPinchIntegrationTest {
             assertNull(lensView.liveDistortionFactor)
             assertEquals(3.8f, utilSettings.getFloat(UtilSettings.KEY_DISTORTION_FACTOR), 0.001f)
         }
+    }
+
+    @Test
+    fun commitLiveDistortion_savesOnlyTheBoundLens() {
+        val otherLensId = "other-lens"
+        utilSettings.save(UtilSettings.KEY_DISTORTION_FACTOR, 2.5f)
+        utilSettings.saveDistortionFactor(otherLensId, 1.5f)
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            lensView.lensId = otherLensId
+            lensView.liveDistortionFactor = 3.8f
+            lensView.commitLiveDistortionFactor()
+        }
+
+        assertEquals(3.8f, utilSettings.getDistortionFactor(otherLensId), 0.001f)
+        assertEquals(
+            "Committing a non-default lens must not leak into the old shared value",
+            2.5f,
+            utilSettings.getFloat(UtilSettings.KEY_DISTORTION_FACTOR),
+            0.001f
+        )
+    }
+
+    /**
+     * `commitLiveDistortionFactor` writes per-lens; `drawGrid` has to read the same key back or
+     * the saved curvature never actually appears on screen. Reading it through a pinch that
+     * starts from no live value proves the read side agrees with the write side.
+     */
+    @Test
+    fun curvatureReadBack_followsTheBoundLens_notTheSharedValue() {
+        utilSettings.save(UtilSettings.KEY_DISTORTION_FACTOR, 2.0f)
+        utilSettings.saveDistortionFactor("other-lens", 4.5f)
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            lensView.lensId = "other-lens"
+            lensView.resetLiveDistortionFactor()
+            // A pinch with no live value in flight starts from whatever the bound lens has saved.
+            lensView.liveDistortionFactor =
+                LensView.calculatePinchDistortion(utilSettings.getDistortionFactor(lensView.lensId), 1.0f)
+        }
+
+        assertEquals(
+            "The view must start a pinch from its own lens's curvature, not the shared one",
+            4.5f,
+            lensView.liveDistortionFactor!!,
+            0.001f
+        )
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            lensView.resetLiveDistortionFactor()
+            // Drawing must not throw or write anything while reading a per-lens value.
+            lensView.draw(Canvas())
+        }
+        assertEquals(4.5f, utilSettings.getDistortionFactor("other-lens"), 0.001f)
+        assertEquals(2.0f, utilSettings.getFloat(UtilSettings.KEY_DISTORTION_FACTOR), 0.001f)
+    }
+
+    /** A lens that never set a curvature of its own must draw with the shared one. */
+    @Test
+    fun aLensWithNoCurvatureOverride_readsTheSharedValue() {
+        utilSettings.save(UtilSettings.KEY_DISTORTION_FACTOR, 3.2f)
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            lensView.lensId = "other-lens"
+            lensView.draw(Canvas())
+        }
+
+        assertEquals(3.2f, utilSettings.getDistortionFactor("other-lens"), 0.001f)
     }
 
     @Test

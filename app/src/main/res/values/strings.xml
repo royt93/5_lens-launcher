@@ -225,4 +225,8 @@
     <string name="lens_name_hint" tools:ignore="MissingTranslation">Lens name</string>
     <string name="lens_delete_confirm_message" tools:ignore="MissingTranslation">Delete \"%1$s\"? Its apps and layout stay installed but this lens\'s custom order, favorites and folders are removed.</string>
     <string name="lens_new_name_template" tools:ignore="MissingTranslation">Lens %1$d</string>
+
+    <!-- FISH-008 Phase 3: per-lens Smart Focus quick toggle in the lens management menu. -->
+    <string name="lens_smart_focus_enable" tools:ignore="MissingTranslation">Turn on Smart Focus</string>
+    <string name="lens_smart_focus_disable" tools:ignore="MissingTranslation">Turn off Smart Focus</string>
 </resources>

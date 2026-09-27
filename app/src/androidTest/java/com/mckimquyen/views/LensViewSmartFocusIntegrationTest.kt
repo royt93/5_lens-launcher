@@ -41,6 +41,12 @@ class LensViewSmartFocusIntegrationTest {
     @After
     fun tearDown() {
         settings.save(UtilSettings.KEY_SMART_FOCUS_BIAS, false)
+        // FISH-008 Phase 3: the per-lens tests below write suffixed keys for lenses that exist
+        // only inside this test - drop them so a run does not leave orphans in the real app's
+        // preferences (found during device smoke).
+        settings.deleteLensSettings("other-lens")
+        settings.deleteLensSettings("untouched-lens")
+        settings.deleteLensSettings("focus-lens")
     }
 
     private fun apps(): ArrayList<App> = ArrayList((0 until 25).map { index ->
@@ -142,5 +148,93 @@ class LensViewSmartFocusIntegrationTest {
         lensView.setApps(source)
         lensView.draw(Canvas())
         assertEquals(source.map { it.id }, displayedApps().map { it.id })
+    }
+
+    // ---- FISH-008 Phase 3: Smart Focus is per-lens ----
+
+    @Test
+    fun perLensOverride_arrangesIndependentlyOfTheGlobalFlag() = onMain {
+        // Global default is ON (set in @Before); this lens explicitly opts out.
+        settings.saveSmartFocusBias("other-lens", false)
+        lensView.lensId = "other-lens"
+
+        val source = apps()
+        lensView.setApps(source)
+        lensView.draw(Canvas())
+
+        assertEquals(
+            "A lens with its own Smart Focus override must ignore the global flag",
+            source.map { it.id },
+            displayedApps().map { it.id }
+        )
+    }
+
+    /**
+     * A recycled page is handed a different lens while it already holds an arrangement. The
+     * setter has to rebuild it, or the page keeps drawing the previous lens's ordering until
+     * something else happens to invalidate - the exact visual bug per-lens Smart Focus would
+     * otherwise introduce for every swipe.
+     */
+    @Test
+    fun rebindingAPageToAnotherLens_rearrangesImmediately() = onMain {
+        settings.saveSmartFocusBias("other-lens", false)
+        settings.saveSmartFocusBias("focus-lens", true)
+
+        val source = apps()
+        lensView.lensId = "other-lens"
+        lensView.setApps(source)
+        lensView.draw(Canvas())
+        assertEquals(
+            "Sanity: the opted-out lens keeps the source order",
+            source.map { it.id },
+            displayedApps().map { it.id }
+        )
+
+        lensView.lensId = "focus-lens"
+        lensView.draw(Canvas())
+
+        assertTrue(
+            "Switching to a Smart-Focus lens must re-arrange the very same view",
+            source.map { it.id } != displayedApps().map { it.id }
+        )
+        assertEquals(
+            "Re-arranging must not drop or duplicate apps",
+            source.map { it.id }.sorted(),
+            displayedApps().map { it.id }.sorted()
+        )
+    }
+
+    /** Assigning the identical id must not force needless re-arrangement work. */
+    @Test
+    fun rebindingAPageToTheSameLens_isANoOp() = onMain {
+        settings.saveSmartFocusBias("other-lens", true)
+        lensView.lensId = "other-lens"
+        lensView.setApps(apps())
+        lensView.draw(Canvas())
+
+        val before = displayedApps().map { it.id }
+        val recomputeBefore = gridCache().recomputeCount
+
+        lensView.lensId = "other-lens"
+        lensView.draw(Canvas())
+
+        assertEquals(before, displayedApps().map { it.id })
+        assertEquals(recomputeBefore, gridCache().recomputeCount)
+    }
+
+    @Test
+    fun lensWithNoOverride_inheritsTheGlobalFlag() = onMain {
+        settings.save(UtilSettings.KEY_SMART_FOCUS_BIAS, false)
+        lensView.lensId = "untouched-lens"
+
+        val source = apps()
+        lensView.setApps(source)
+        lensView.draw(Canvas())
+
+        assertEquals(
+            "A lens that never set its own Smart Focus must follow the shared value",
+            source.map { it.id },
+            displayedApps().map { it.id }
+        )
     }
 }

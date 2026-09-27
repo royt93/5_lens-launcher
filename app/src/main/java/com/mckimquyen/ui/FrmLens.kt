@@ -13,6 +13,7 @@ import com.google.android.material.slider.Slider
 import com.mckimquyen.R
 import com.mckimquyen.enums.DrawType
 import com.mckimquyen.itf.LensInterface
+import com.mckimquyen.model.LensWorkspace
 import com.mckimquyen.util.LensPhysicsPreset
 import com.mckimquyen.util.UtilSettings
 import com.mckimquyen.views.LensView
@@ -36,6 +37,7 @@ class FrmLens : Fragment(), LensInterface {
     private var btnPresetStandard: MaterialButton? = null
     private var btnPresetSnappy: MaterialButton? = null
     private var utilSettings: UtilSettings? = null
+    private var activeLensId: String = LensWorkspace.DEFAULT_LENS_ID
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -49,7 +51,22 @@ class FrmLens : Fragment(), LensInterface {
         super.onViewCreated(view, savedInstanceState)
         utilSettings = UtilSettings(requireContext())
         setupViews(view)
+        refreshActiveLens()
         assignValues()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // FISH-008 Phase 3: the active lens can change while this Fragment stays alive in
+        // ActSettings' pager. Re-read on every resume, matching FrmSettings.assignValues().
+        refreshActiveLens()
+        assignValues()
+    }
+
+    private fun refreshActiveLens() {
+        activeLensId = utilSettings?.getString(UtilSettings.KEY_ACTIVE_LENS_ID)
+            ?: LensWorkspace.DEFAULT_LENS_ID
+        lensViewsSettings?.lensId = activeLensId
     }
 
     override fun onAttach(context: Context) {
@@ -90,7 +107,7 @@ class FrmLens : Fragment(), LensInterface {
         sbDistortionFactor?.addOnChangeListener { _, value, fromUser ->
             tvValueDistortionFactor?.text = String.format(Locale.US, "%.1f", value)
             if (fromUser) {
-                utilSettings?.save(UtilSettings.KEY_DISTORTION_FACTOR, value)
+                utilSettings?.saveDistortionFactor(activeLensId, value)
                 lensViewsSettings?.invalidate()
             }
         }
@@ -122,7 +139,7 @@ class FrmLens : Fragment(), LensInterface {
      */
     private fun applyPreset(preset: LensPhysicsPreset) {
         utilSettings?.let { us ->
-            us.save(UtilSettings.KEY_DISTORTION_FACTOR, preset.distortionFactor)
+            us.saveDistortionFactor(activeLensId, preset.distortionFactor)
             us.save(UtilSettings.KEY_SCALE_FACTOR, preset.scaleFactor)
             us.save(UtilSettings.KEY_ANIMATION_TIME, preset.animationTimeMs)
         }
@@ -140,7 +157,7 @@ class FrmLens : Fragment(), LensInterface {
             sbMinIconSize?.value = validIcon
             tvValueMinIconSize?.text = getString(R.string.unit_dp_format, validIcon.toInt())
 
-            val distortion = us.getFloat(UtilSettings.KEY_DISTORTION_FACTOR)
+            val distortion = us.getDistortionFactor(activeLensId)
             val validDistortion = distortion.coerceIn(0.5f, 5.0f)
             sbDistortionFactor?.value = validDistortion
             tvValueDistortionFactor?.text = String.format(Locale.US, "%.1f", validDistortion)
@@ -165,7 +182,7 @@ class FrmLens : Fragment(), LensInterface {
     private fun resetToDefault() {
         utilSettings?.let { us ->
             us.save(UtilSettings.KEY_ICON_SIZE, us.autoDefaultIconSize)
-            us.save(UtilSettings.KEY_DISTORTION_FACTOR, UtilSettings.DEFAULT_DISTORTION_FACTOR)
+            us.saveDistortionFactor(activeLensId, UtilSettings.DEFAULT_DISTORTION_FACTOR)
             us.save(UtilSettings.KEY_SCALE_FACTOR, UtilSettings.DEFAULT_SCALE_FACTOR)
             us.save(UtilSettings.KEY_ANIMATION_TIME, UtilSettings.DEFAULT_ANIMATION_TIME)
         }

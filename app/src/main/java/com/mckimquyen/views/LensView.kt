@@ -30,6 +30,7 @@ import com.mckimquyen.enums.BackgroundMode
 import com.mckimquyen.enums.DrawType
 import com.mckimquyen.model.App
 import com.mckimquyen.model.AppPersistent
+import com.mckimquyen.model.LensWorkspace
 import com.mckimquyen.model.PinnedZone
 import com.mckimquyen.services.BroadcastReceivers
 import com.mckimquyen.util.LensPhysicsPolicy
@@ -49,6 +50,17 @@ import kotlin.math.sqrt
  */
 fun interface OnCurvatureAdjustedListener {
     fun onCurvatureAdjusted(curvature: Float, finished: Boolean)
+}
+
+/**
+ * FISH-008 Phase 3: long-press on empty grid space - the standard launcher gesture for "configure
+ * this home screen". Before this, that branch of the long-press did nothing at all, which made the
+ * lens management menu unreachable on any single-lens install: its only other entry point is a
+ * long-press on the page-dots indicator, and Phase 2 deliberately hides that indicator while one
+ * lens exists (zero clutter), so no user could ever create their second lens.
+ */
+fun interface OnEmptySpaceLongPressListener {
+    fun onEmptySpaceLongPress()
 }
 
 /**
@@ -112,6 +124,15 @@ class LensView : View {
         @androidx.annotation.VisibleForTesting
         internal fun shouldTriggerLongPress(armed: Boolean, moving: Boolean, selectIndex: Int): Boolean =
             armed && !moving && selectIndex >= 0
+
+        /**
+         * FISH-008 Phase 3: the same press, but landing on empty space instead of an icon. Shares
+         * every guard with [shouldTriggerLongPress] (still a real press, still not a pan) and is
+         * exactly its complement on `selectIndex`, so the two can never both fire for one touch.
+         */
+        @androidx.annotation.VisibleForTesting
+        internal fun shouldTriggerEmptySpaceLongPress(armed: Boolean, moving: Boolean, selectIndex: Int): Boolean =
+            armed && !moving && selectIndex < 0
 
         // FISH-009: Pure state-machine transition and calculation functions
 
@@ -191,6 +212,18 @@ class LensView : View {
     private var mTouchSlop = 0f
     private var mMoving = false
 
+    // FISH-008 Phase 3: Lens-scoped configuration
+    var lensId: String = LensWorkspace.DEFAULT_LENS_ID
+        set(value) {
+            if (field != value) {
+                field = value
+                mSmartFocusCols = -1
+                mSmartFocusRows = -1
+                applySmartFocusArrangement(force = true)
+                invalidate()
+            }
+        }
+
     // FISH-009: Live pinch-to-adjust curvature state and detector
     var gestureState: LensGestureState = LensGestureState.IDLE
         internal set
@@ -205,7 +238,7 @@ class LensView : View {
 
     fun commitLiveDistortionFactor() {
         val factor = liveDistortionFactor ?: return
-        mUtilSettings?.save(UtilSettings.KEY_DISTORTION_FACTOR, factor)
+        mUtilSettings?.saveDistortionFactor(lensId, factor)
         liveDistortionFactor = null
         invalidate()
     }
@@ -233,8 +266,19 @@ class LensView : View {
                 performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
             }
             showAppOptionsAtIndex(mSelectIndex)
+        } else if (onEmptySpaceLongPressListener != null
+            && shouldTriggerEmptySpaceLongPress(mLongPressArmed, mMoving, mSelectIndex)
+        ) {
+            mLongPressTriggered = true
+            if (!LensPhysicsPolicy.shouldReduceLensMotion(context)) {
+                performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+            }
+            onEmptySpaceLongPressListener?.onEmptySpaceLongPress()
         }
     }
+
+    /** See [OnEmptySpaceLongPressListener]. Null (the default) keeps the pre-Phase-3 no-op. */
+    var onEmptySpaceLongPressListener: OnEmptySpaceLongPressListener? = null
     private var mUtilSettings: UtilSettings? = null
     private var mWorkspaceBackgroundDrawable: NinePatchDrawable? = null
     // UI-019: system-bar avoidance is now owned by ActHome.applyHomeColumnInsets (margins on this
@@ -332,7 +376,7 @@ class LensView : View {
 
         mSmartFocusCols = cols
         mSmartFocusRows = rows
-        val enabled = mUtilSettings?.getBoolean(UtilSettings.KEY_SMART_FOCUS_BIAS)
+        val enabled = mUtilSettings?.isSmartFocusBias(lensId)
             ?: UtilSettings.DEFAULT_SMART_FOCUS_BIAS
         mApps = if (enabled && cols > 0 && rows > 0) {
             SmartFocusArranger.arrange(source, cols, rows, smartFocusEnabled = true)
@@ -520,7 +564,7 @@ class LensView : View {
                 val factor = detector.scaleFactor
                 if (factor.isNaN() || factor <= 0f) return false
                 val current = liveDistortionFactor
-                    ?: mUtilSettings?.getFloat(UtilSettings.KEY_DISTORTION_FACTOR)
+                    ?: mUtilSettings?.getDistortionFactor(lensId)
                     ?: UtilSettings.DEFAULT_DISTORTION_FACTOR
                 val newDistortion = calculatePinchDistortion(current, factor)
                 liveDistortionFactor = newDistortion
@@ -827,7 +871,7 @@ class LensView : View {
     private fun drawGrid(canvas: Canvas, itemCount: Int) {
         val us = mUtilSettings ?: return
         val iconSizeDp = us.getFloat(UtilSettings.KEY_ICON_SIZE)
-        val distortionFactor = liveDistortionFactor ?: us.getFloat(UtilSettings.KEY_DISTORTION_FACTOR)
+        val distortionFactor = liveDistortionFactor ?: us.getDistortionFactor(lensId)
         val scaleFactor = us.getFloat(UtilSettings.KEY_SCALE_FACTOR)
 
         val grid = mGridCache.getOrCompute(
