@@ -36,3 +36,5 @@ Source of truth for implementation choices in this session. Detailed acceptance 
 ## 💭 Ideas
 
 - See `doc/task/todo/` for the remaining product backlog.
+- **FISH-010 — Aperture-reveal cho dialog tổ chức** (picked 27/09/2026, chưa làm): circular reveal (native `ViewAnimationUtils.createCircularReveal`, không thêm dependency) cho 3 dialog thật dùng `AlertDialog` — Set folder, đổi tên lens, xóa lens — khuếch tán từ tâm view neo sẵn có. Không đụng menu quick-actions (PopupMenu hệ thống, không hook animation được). Tôn trọng `LensPhysicsPolicy.shouldReduceLensMotion`. Chi tiết: `doc/task/todo/p2-fish-fish-010-aperture-reveal-dialogs.md`.
+- Hai idea còn lại được chọn cùng lượt nhưng chưa viết spec: xuất ảnh "Polaroid" layout lens (chia sẻ), chế độ "lau lens" tối giản (vuốt 2 ngón). Sẽ viết thành story khi được yêu cầu tiếp.
