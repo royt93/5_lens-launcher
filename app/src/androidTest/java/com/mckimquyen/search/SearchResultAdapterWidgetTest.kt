@@ -173,4 +173,54 @@ class SearchResultAdapterWidgetTest {
             }
         }
     }
+
+    /**
+     * Repo audit: the adapter cancels its own CoroutineScope in onDetachedFromRecyclerView. A
+     * cancelled scope is permanently dead - every later `launch` is silently dropped - so if the
+     * adapter is ever re-attached (a second setAdapter, a RecyclerView moved between windows, a
+     * config change that re-uses the instance) its icon loads would stop happening with no crash
+     * and no log. ActHome attaches it exactly once today, which is the only reason this is not a
+     * live bug; this pins the behaviour so a future re-attach does not regress silently.
+     */
+    @Test
+    fun adapterStillLoadsIconsAfterBeingDetachedAndReattached() {
+        ActivityScenario.launch(ActHome::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                BitmapCache.clear()
+                val app = App(
+                    label = "Reattached",
+                    packageName = "pkg.reattached",
+                    name = "ReattachedActivity",
+                    iconCacheKey = "reattached-cache-key"
+                )
+                val adapter = SearchResultAdapter { _, _ -> }
+                adapter.submitList(listOf(app))
+
+                val recyclerView = androidx.recyclerview.widget.RecyclerView(activity).apply {
+                    layoutManager = androidx.recyclerview.widget.LinearLayoutManager(activity)
+                }
+
+                recyclerView.adapter = adapter
+                recyclerView.adapter = null      // detaches -> cancels the scope
+                recyclerView.adapter = adapter   // re-attaches the same instance
+
+                // Binding must still work, and the coroutine-backed icon path must still run.
+                val holder = adapter.onCreateViewHolder(FrameLayout(activity), 0)
+                adapter.onBindViewHolder(holder, 0)
+
+                assertEquals(
+                    "Reattached",
+                    holder.itemView.findViewById<TextView>(R.id.tvSearchResultLabel).text.toString()
+                )
+                assertTrue(
+                    "A re-attached adapter must still render icons - a dead scope drops them silently",
+                    holder.itemView.findViewById<ImageView>(R.id.ivSearchResultIcon).drawable != null
+                )
+                assertTrue(
+                    "The adapter's scope must be alive again after re-attach",
+                    adapter.isScopeActiveForTest()
+                )
+            }
+        }
+    }
 }

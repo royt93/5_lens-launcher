@@ -26,6 +26,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -37,7 +38,18 @@ class SearchResultAdapter(
     private val onAppClick: SearchResultClickListener
 ) : RecyclerView.Adapter<SearchResultAdapter.ResultViewHolder>() {
     private val apps = mutableListOf<App>()
-    private val adapterScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+
+    // Repo audit: this scope is cancelled on detach, and a cancelled CoroutineScope is dead for
+    // good - every later launch is dropped silently, so a re-attached adapter would stop loading
+    // icons with no crash and nothing in the log. Recreate it on attach instead of holding one
+    // instance for the adapter's whole lifetime.
+    private var adapterScope = newAdapterScope()
+
+    private fun newAdapterScope() = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+
+    /** Whether the scope can still run work; see [onAttachedToRecyclerView]. */
+    @androidx.annotation.VisibleForTesting
+    fun isScopeActiveForTest(): Boolean = adapterScope.isActive
     private val shortcutsByPackage = mutableMapOf<String, List<QuickShortcut>>()
     private val loadingIconKeys = mutableSetOf<String>()
     private val loadingShortcutPackages = mutableSetOf<String>()
@@ -68,8 +80,19 @@ class SearchResultAdapter(
         super.onViewRecycled(holder)
     }
 
+    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+        super.onAttachedToRecyclerView(recyclerView)
+        if (!adapterScope.isActive) {
+            adapterScope = newAdapterScope()
+        }
+    }
+
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+        // Cancel in-flight icon/shortcut loads for a list nobody is showing; onAttached revives
+        // the scope, so this stays a pause rather than a one-way shutdown.
         adapterScope.cancel()
+        loadingIconKeys.clear()
+        loadingShortcutPackages.clear()
         super.onDetachedFromRecyclerView(recyclerView)
     }
 
