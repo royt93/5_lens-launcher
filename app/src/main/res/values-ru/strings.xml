@@ -148,4 +148,16 @@
     <string name="ads_action_disclosure">Обратите внимание: это действие может показать рекламу</string>
     <string name="ad_label">Реклама</string>
     <string name="loading">Загрузка…</string>
+
+    <!-- FISH-008: multi-lens workspaces (Phase 2 paging/management,
+         Phase 3 per-lens Smart Focus toggle). -->
+    <string name="lens_add">Добавить объектив</string>
+    <string name="lens_rename">Переименовать объектив</string>
+    <string name="lens_delete">Удалить объектив</string>
+    <string name="lens_rename_title">Переименовать объектив</string>
+    <string name="lens_name_hint">Название объектива</string>
+    <string name="lens_delete_confirm_message">Удалить \"%1$s\"? Приложения и расположение останутся, но собственный порядок, избранное и папки этого объектива будут удалены.</string>
+    <string name="lens_new_name_template">Объектив %1$d</string>
+    <string name="lens_smart_focus_enable">Включить умный фокус</string>
+    <string name="lens_smart_focus_disable">Выключить умный фокус</string>
 </resources>

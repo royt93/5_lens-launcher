@@ -182,4 +182,16 @@
     <string name="launcher_mode_list">قائمة سهلة الوصول</string>
     <string name="a11y_suggest_list_mode_title">تم اكتشاف TalkBack. هل تريد التبديل إلى وضع القائمة لتسهيل التنقل؟</string>
     <string name="action_switch">تبديل</string>
+
+    <!-- FISH-008: multi-lens workspaces (Phase 2 paging/management,
+         Phase 3 per-lens Smart Focus toggle). -->
+    <string name="lens_add">إضافة عدسة</string>
+    <string name="lens_rename">إعادة تسمية العدسة</string>
+    <string name="lens_delete">حذف العدسة</string>
+    <string name="lens_rename_title">إعادة تسمية العدسة</string>
+    <string name="lens_name_hint">اسم العدسة</string>
+    <string name="lens_delete_confirm_message">حذف \"%1$s\"؟ تبقى التطبيقات والتخطيط مثبتة، لكن يتم حذف الترتيب المخصص والمفضلة والمجلدات الخاصة بهذه العدسة.</string>
+    <string name="lens_new_name_template">العدسة %1$d</string>
+    <string name="lens_smart_focus_enable">تشغيل التركيز الذكي</string>
+    <string name="lens_smart_focus_disable">إيقاف التركيز الذكي</string>
 </resources>

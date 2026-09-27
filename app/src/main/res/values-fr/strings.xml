@@ -148,4 +148,16 @@
     <string name="ads_action_disclosure">Remarque : cette action peut afficher des publicités</string>
     <string name="ad_label">Annonce</string>
     <string name="loading">Chargement…</string>
+
+    <!-- FISH-008: multi-lens workspaces (Phase 2 paging/management,
+         Phase 3 per-lens Smart Focus toggle). -->
+    <string name="lens_add">Ajouter une lentille</string>
+    <string name="lens_rename">Renommer la lentille</string>
+    <string name="lens_delete">Supprimer la lentille</string>
+    <string name="lens_rename_title">Renommer la lentille</string>
+    <string name="lens_name_hint">Nom de la lentille</string>
+    <string name="lens_delete_confirm_message">Supprimer \"%1$s\" ? Les applications et la disposition restent installées, mais l\'ordre personnalisé, les favoris et les dossiers de cette lentille sont supprimés.</string>
+    <string name="lens_new_name_template">Lentille %1$d</string>
+    <string name="lens_smart_focus_enable">Activer le focus intelligent</string>
+    <string name="lens_smart_focus_disable">Désactiver le focus intelligent</string>
 </resources>

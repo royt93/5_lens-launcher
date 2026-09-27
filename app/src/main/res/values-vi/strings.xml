@@ -174,4 +174,16 @@
     <string name="launcher_mode_list">Danh sách trợ năng</string>
     <string name="a11y_suggest_list_mode_title">Đang bật TalkBack. Chuyển sang Danh sách trợ năng để điều hướng dễ dàng hơn?</string>
     <string name="action_switch">Chuyển</string>
+
+    <!-- FISH-008: multi-lens workspaces (Phase 2 paging/management,
+         Phase 3 per-lens Smart Focus toggle). -->
+    <string name="lens_add">Thêm thấu kính</string>
+    <string name="lens_rename">Đổi tên thấu kính</string>
+    <string name="lens_delete">Xoá thấu kính</string>
+    <string name="lens_rename_title">Đổi tên thấu kính</string>
+    <string name="lens_name_hint">Tên thấu kính</string>
+    <string name="lens_delete_confirm_message">Xoá \"%1$s\"? Ứng dụng và bố cục vẫn được giữ, nhưng thứ tự tuỳ chỉnh, mục yêu thích và thư mục của thấu kính này sẽ bị xoá.</string>
+    <string name="lens_new_name_template">Thấu kính %1$d</string>
+    <string name="lens_smart_focus_enable">Bật Tiêu điểm thông minh</string>
+    <string name="lens_smart_focus_disable">Tắt Tiêu điểm thông minh</string>
 </resources>

@@ -148,4 +148,16 @@
     <string name="ads_action_disclosure">សូមចំណាំ៖ សកម្មភាពនេះអាចបង្ហាញការផ្សាយពាណិជ្ជកម្ម</string>
     <string name="ad_label">ការផ្សាយពាណិជ្ជកម្ម</string>
     <string name="loading">កំពុងផ្ទុក…</string>
+
+    <!-- FISH-008: multi-lens workspaces (Phase 2 paging/management,
+         Phase 3 per-lens Smart Focus toggle). -->
+    <string name="lens_add">បន្ថែមកែវពង្រីក</string>
+    <string name="lens_rename">ប្ដូរឈ្មោះកែវពង្រីក</string>
+    <string name="lens_delete">លុបកែវពង្រីក</string>
+    <string name="lens_rename_title">ប្ដូរឈ្មោះកែវពង្រីក</string>
+    <string name="lens_name_hint">ឈ្មោះកែវពង្រីក</string>
+    <string name="lens_delete_confirm_message">លុប \"%1$s\"? កម្មវិធី និងប្លង់នៅដដែល ប៉ុន្តែលំដាប់ផ្ទាល់ខ្លួន សំណព្វ និងថតរបស់កែវពង្រីកនេះនឹងត្រូវលុប។</string>
+    <string name="lens_new_name_template">កែវពង្រីក %1$d</string>
+    <string name="lens_smart_focus_enable">បើកការផ្ដោតឆ្លាតវៃ</string>
+    <string name="lens_smart_focus_disable">បិទការផ្ដោតឆ្លាតវៃ</string>
 </resources>

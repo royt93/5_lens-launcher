@@ -148,4 +148,16 @@
     <string name="ads_action_disclosure">โปรดทราบ: การกระทำนี้อาจแสดงโฆษณา</string>
     <string name="ad_label">โฆษณา</string>
     <string name="loading">กำลังโหลด…</string>
+
+    <!-- FISH-008: multi-lens workspaces (Phase 2 paging/management,
+         Phase 3 per-lens Smart Focus toggle). -->
+    <string name="lens_add">เพิ่มเลนส์</string>
+    <string name="lens_rename">เปลี่ยนชื่อเลนส์</string>
+    <string name="lens_delete">ลบเลนส์</string>
+    <string name="lens_rename_title">เปลี่ยนชื่อเลนส์</string>
+    <string name="lens_name_hint">ชื่อเลนส์</string>
+    <string name="lens_delete_confirm_message">ลบ \"%1$s\" ไหม แอปและเลย์เอาต์ยังคงอยู่ แต่ลำดับที่กำหนดเอง รายการโปรด และโฟลเดอร์ของเลนส์นี้จะถูกลบ</string>
+    <string name="lens_new_name_template">เลนส์ %1$d</string>
+    <string name="lens_smart_focus_enable">เปิดสมาร์ทโฟกัส</string>
+    <string name="lens_smart_focus_disable">ปิดสมาร์ทโฟกัส</string>
 </resources>

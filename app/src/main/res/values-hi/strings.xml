@@ -148,4 +148,16 @@
     <string name="ads_action_disclosure">कृपया ध्यान दें: इस क्रिया से विज्ञापन दिख सकते हैं</string>
     <string name="ad_label">विज्ञापन</string>
     <string name="loading">लोड हो रहा है…</string>
+
+    <!-- FISH-008: multi-lens workspaces (Phase 2 paging/management,
+         Phase 3 per-lens Smart Focus toggle). -->
+    <string name="lens_add">लेंस जोड़ें</string>
+    <string name="lens_rename">लेंस का नाम बदलें</string>
+    <string name="lens_delete">लेंस हटाएँ</string>
+    <string name="lens_rename_title">लेंस का नाम बदलें</string>
+    <string name="lens_name_hint">लेंस का नाम</string>
+    <string name="lens_delete_confirm_message">\"%1$s\" हटाएँ? ऐप्स और लेआउट इंस्टॉल रहेंगे, लेकिन इस लेंस का कस्टम क्रम, पसंदीदा और फ़ोल्डर हटा दिए जाएँगे।</string>
+    <string name="lens_new_name_template">लेंस %1$d</string>
+    <string name="lens_smart_focus_enable">स्मार्ट फ़ोकस चालू करें</string>
+    <string name="lens_smart_focus_disable">स्मार्ट फ़ोकस बंद करें</string>
 </resources>

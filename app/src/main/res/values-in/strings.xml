@@ -148,4 +148,16 @@
     <string name="ads_action_disclosure">Harap diperhatikan: tindakan ini dapat menampilkan iklan</string>
     <string name="ad_label">Iklan</string>
     <string name="loading">Memuat…</string>
+
+    <!-- FISH-008: multi-lens workspaces (Phase 2 paging/management,
+         Phase 3 per-lens Smart Focus toggle). -->
+    <string name="lens_add">Tambah lensa</string>
+    <string name="lens_rename">Ganti nama lensa</string>
+    <string name="lens_delete">Hapus lensa</string>
+    <string name="lens_rename_title">Ganti nama lensa</string>
+    <string name="lens_name_hint">Nama lensa</string>
+    <string name="lens_delete_confirm_message">Hapus \"%1$s\"? Aplikasi dan tata letaknya tetap terpasang, tetapi urutan khusus, favorit, dan folder lensa ini akan dihapus.</string>
+    <string name="lens_new_name_template">Lensa %1$d</string>
+    <string name="lens_smart_focus_enable">Aktifkan Fokus Pintar</string>
+    <string name="lens_smart_focus_disable">Nonaktifkan Fokus Pintar</string>
 </resources>

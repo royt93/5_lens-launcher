@@ -148,4 +148,16 @@
     <string name="ads_action_disclosure">Ten en cuenta: esta acción puede mostrar anuncios</string>
     <string name="ad_label">Anuncio</string>
     <string name="loading">Cargando…</string>
+
+    <!-- FISH-008: multi-lens workspaces (Phase 2 paging/management,
+         Phase 3 per-lens Smart Focus toggle). -->
+    <string name="lens_add">Añadir lente</string>
+    <string name="lens_rename">Cambiar nombre de la lente</string>
+    <string name="lens_delete">Eliminar lente</string>
+    <string name="lens_rename_title">Cambiar nombre de la lente</string>
+    <string name="lens_name_hint">Nombre de la lente</string>
+    <string name="lens_delete_confirm_message">¿Eliminar \"%1$s\"? Las aplicaciones y el diseño siguen instalados, pero se quitarán el orden personalizado, los favoritos y las carpetas de esta lente.</string>
+    <string name="lens_new_name_template">Lente %1$d</string>
+    <string name="lens_smart_focus_enable">Activar el enfoque inteligente</string>
+    <string name="lens_smart_focus_disable">Desactivar el enfoque inteligente</string>
 </resources>

@@ -148,4 +148,16 @@
     <string name="ads_action_disclosure">请注意：此操作可能会显示广告</string>
     <string name="ad_label">广告</string>
     <string name="loading">正在加载…</string>
+
+    <!-- FISH-008: multi-lens workspaces (Phase 2 paging/management,
+         Phase 3 per-lens Smart Focus toggle). -->
+    <string name="lens_add">添加镜头</string>
+    <string name="lens_rename">重命名镜头</string>
+    <string name="lens_delete">删除镜头</string>
+    <string name="lens_rename_title">重命名镜头</string>
+    <string name="lens_name_hint">镜头名称</string>
+    <string name="lens_delete_confirm_message">删除“%1$s”？应用和布局仍会保留，但此镜头的自定义排序、收藏和文件夹将被移除。</string>
+    <string name="lens_new_name_template">镜头 %1$d</string>
+    <string name="lens_smart_focus_enable">开启智能焦点</string>
+    <string name="lens_smart_focus_disable">关闭智能焦点</string>
 </resources>
