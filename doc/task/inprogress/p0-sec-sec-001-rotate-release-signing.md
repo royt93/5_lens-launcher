@@ -29,7 +29,7 @@ As a publisher, I need only authorized builds to be accepted as updates so users
 - [ ] Rotate or revoke the compromised credential; validate an upload on a non-production track.
 - [ ] Remove keystore/passwords from HEAD and purge sensitive history using a coordinated repository rewrite.
 - [x] Load signing material from local untracked properties or CI secrets; fresh clones contain no secret.
-- [ ] Add secret scanning and document recovery/key ownership.
+- [x] Add secret scanning and document recovery/key ownership (added Gitleaks workflow, .gitleaks.toml, scripts/check-secrets.sh, SigningCredentialSecurityTest, and SEC-001_OWNER_CHECKLIST.md).
 
 ## Implementation notes
 

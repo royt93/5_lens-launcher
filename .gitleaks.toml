@@ -1,0 +1,13 @@
+# Gitleaks configuration for Fisheye Launcher
+# Baseline allowances for known historical commits pending owner purge rewrite.
+
+[allowlist]
+description = "Known historical commits containing deleted credentials (SEC-001)"
+commits = [
+    "a8701ba90b9b3e1f37e41575cae72846d0e82c16",
+    "ac7e944b584d4127c515a452fc3855a1aa38914b",
+    "67e7f81b1db2f8c5b058a2d1d07c0b0a66d03cf1",
+]
+paths = [
+    '''keystore\.properties\.example''',
+]
