@@ -385,18 +385,27 @@ dependencies {
     testImplementation 'org.robolectric:robolectric:4.11.1'    // Android unit tests
 
     // Android Instrumentation Testing (Device/Emulator-based tests)
-    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
-    androidTestImplementation 'androidx.test:runner:1.6.1'
-    androidTestImplementation 'androidx.test:rules:1.6.1'
-    androidTestImplementation 'androidx.test:core-ktx:1.6.1'               // ActivityScenario KTX
+    // Dependency audit (2026-09-27): bumped the whole androidx.test.* family to its 2025-07-30
+    // coordinated release together (junit/espresso/runner/rules/core all released same cycle) -
+    // per its official release notes, espresso-core 3.7.0 replaces the reflective
+    // InputManager.getInstance() call with getSystemService(), which is exactly what threw
+    // NoSuchMethodException on TECNO KJ7 (API 37) and forced the @VisibleForTesting seam
+    // workarounds in ActHome/LensView's FISH-008 tests. Confirmed real Espresso
+    // onView()/perform(click()) still works (regression check, not a KJ7 re-test - see
+    // EspressoSanityCheckTest) on TECNO BG6 (API 33, never affected by the removed API). Re-run
+    // that test on KJ7 once reconnected to confirm the original crash is actually gone there.
+    androidTestImplementation 'androidx.test.ext:junit:1.3.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.7.0'
+    androidTestImplementation 'androidx.test:runner:1.7.0'
+    androidTestImplementation 'androidx.test:rules:1.7.0'
+    androidTestImplementation 'androidx.test:core-ktx:1.7.0'               // ActivityScenario KTX
     androidTestImplementation 'androidx.fragment:fragment-testing:1.8.6'    // launchFragmentInContainer (FrmLensWidgetTest)
     debugImplementation 'androidx.fragment:fragment-testing:1.8.6'          // Required for launchFragmentInContainer
-    // fragment-testing drags androidx.test:core:1.5.0 (monitor 1.6.0) onto the *app* runtime
-    // classpath; AGP's consistent resolution then pins androidTest to 1.6.0 too, and espresso-core
-    // 3.6.1 explodes with NoClassDefFoundError androidx.test.platform.concurrent.DirectExecutor
-    // (added in monitor 1.7.1). Pin the app side up so both classpaths agree.
-    debugImplementation 'androidx.test:core:1.6.1'
+    // fragment-testing drags androidx.test:core onto the *app* runtime classpath; AGP's
+    // consistent resolution then pins androidTest's core to whatever this is, so it must match
+    // the monitor/core version the espresso-core/runner above were released with (1.7.0), or a
+    // NoClassDefFoundError reappears in the other direction (androidTest ahead, app behind).
+    debugImplementation 'androidx.test:core:1.7.0'
     androidTestImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0'
 
     // ========================================================================

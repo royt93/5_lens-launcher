@@ -12,8 +12,9 @@ import com.mckimquyen.util.Logger
  * Trước đây: BroadcastReceiver → XxxObservable.instance.update() → AppEventManager
  * Bây giờ:   BroadcastReceiver → AppEventManager (direct, clean, no deprecated wrapper)
  *
- * XxxObservable classes vẫn giữ lại (không xóa) để tránh compile error nếu còn
- * bất kỳ chỗ nào reference, nhưng không được gọi từ đây nữa.
+ * The XxxObservable wrapper classes this comment used to reference have since been deleted
+ * outright (an audit confirmed every call site had migrated to AppEventManager) — there is
+ * no compat layer left to bypass, only this direct path.
  */
 class BroadcastReceivers {
 
