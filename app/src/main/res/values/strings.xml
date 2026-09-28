@@ -228,4 +228,8 @@
     <string name="lens_new_name_template">Lens %1$d</string>
     <string name="lens_smart_focus_enable">Turn on Smart Focus</string>
     <string name="lens_smart_focus_disable">Turn off Smart Focus</string>
+
+    <!-- FISH-EXPORT (polaroid lens export, 2026-09-28 brainstorm): translated into all 16
+         locales in the same pass as lens_share_image / error_lens_share_failed below. -->
+    <string name="lens_share_caption_via">via %1$s</string>
 </resources>

@@ -37,7 +37,7 @@
   - `PolaroidExportHelper.calculatePolaroidLayout(contentWidthPx: Int, contentHeightPx: Int): PolaroidExportHelper.PolaroidLayout` — `PolaroidLayout(val outerWidth: Int, val outerHeight: Int, val contentLeft: Int, val contentTop: Int, val captionLine1BaselineY: Int, val captionLine2BaselineY: Int)`.
   - `PolaroidExportHelper.buildShareIntent(context: Context, imageUri: Uri): Intent`.
 
-- [ ] **Step 1: Add the new string resource**
+- [x] **Step 1: Add the new string resource**
 
 In `app/src/main/res/values/strings.xml`, find this exact block (end of the `FISH-008` lens strings comment group, right before `</resources>`):
 
@@ -59,7 +59,7 @@ Replace it with:
 </resources>
 ```
 
-- [ ] **Step 2: Write the failing unit test**
+- [x] **Step 2: Write the failing unit test**
 
 Create `app/src/test/java/com/mckimquyen/util/PolaroidExportHelperTest.kt`:
 
@@ -163,12 +163,12 @@ class PolaroidExportHelperTest {
 }
 ```
 
-- [ ] **Step 3: Run the test to verify it fails**
+- [x] **Step 3: Run the test to verify it fails**
 
 Run: `./gradlew testDevDebugUnitTest --tests PolaroidExportHelperTest -q`
 Expected: FAIL to compile — `PolaroidExportHelper` does not exist yet.
 
-- [ ] **Step 4: Implement the pure functions**
+- [x] **Step 4: Implement the pure functions**
 
 Create `app/src/main/java/com/mckimquyen/util/PolaroidExportHelper.kt`:
 
@@ -268,21 +268,29 @@ object PolaroidExportHelper {
 }
 ```
 
-- [ ] **Step 5: Run the test to verify it passes**
+- [x] **Step 5: Run the test to verify it passes**
 
 Run: `./gradlew testDevDebugUnitTest --tests PolaroidExportHelperTest -q`
 Expected: PASS (11 tests, 0 failures).
 
-- [ ] **Step 6: Run the full unit suite and lint**
+- [x] **Step 6: Run the full unit suite and lint**
 
 Run: `./gradlew testDevDebugUnitTest -q && ./gradlew lintDevDebug -q`
 Expected: full suite passes (591 tests: 580 pre-existing + 11 new), 0 lint errors.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add app/src/main/java/com/mckimquyen/util/PolaroidExportHelper.kt app/src/test/java/com/mckimquyen/util/PolaroidExportHelperTest.kt app/src/main/res/values/strings.xml
 git commit -m "feat(lens-export): add PolaroidExportHelper pure functions (caption, filename, layout, share intent)"
+```
+
+**Deviation found and fixed during execution (not in the original plan):** the unit test's `context.getString(R.string.xxx)` calls threw `Resources$NotFoundException` for every resource, including pre-existing static ones - no prior Robolectric test in this repo had ever called `getString`. Root cause: `app/build.gradle` never set `testOptions.unitTests.includeAndroidResources = true`, so AGP never packages real resources for the unit-test task. Fixing that then hit a second gap: Robolectric 4.11.1 only supports up to API 34, but this app's targetSdk is 37 - added `app/src/test/resources/robolectric.properties` (`sdk=34`) as the module-wide default. Turning resource loading on for real then exposed a **pre-existing test-isolation bug**: `DebugStrictModeAndThemedIconTest` only reset `StrictMode` in `@After`, so it silently depended on no earlier test in the same JVM fork leaving a policy installed - true by luck until real resource loading let some other test's `RApplication.onCreate()` actually run. Added a matching `@Before` reset. All three fixes were necessary for `591/591` (591 = 580 pre-existing + 11 new; **589 pass, 2 expected-pending** until Task 5 translates `lens_share_caption_via` - `AllStringsTranslationTest`/`LensStringTranslationTest` correctly fail on the untranslated string, and `lintDevDebug` correctly shows 1 `MissingTranslation` error for the same reason, both resolved by Task 5) to be true, not a workaround unique to this feature. Committed together with the planned files:
+
+```bash
+git add app/build.gradle app/src/test/resources/robolectric.properties \
+  app/src/test/java/com/mckimquyen/util/DebugStrictModeAndThemedIconTest.kt
+git commit -m "fix(test-infra): enable includeAndroidResources, pin Robolectric sdk=34, fix StrictMode test isolation"
 ```
 
 ---
