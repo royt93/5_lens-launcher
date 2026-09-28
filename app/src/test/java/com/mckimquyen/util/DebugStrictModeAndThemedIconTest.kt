@@ -47,6 +47,15 @@ class DebugStrictModeAndThemedIconTest {
     }
 
     @Test
+    fun `wasInstalledThisProcess starts false and only flips true after a debug install`() {
+        assertFalse(DebugStrictMode.wasInstalledThisProcess)
+        assertFalse(DebugStrictMode.installIfDebug(false))
+        assertFalse("A release-build call must not flip the flag", DebugStrictMode.wasInstalledThisProcess)
+        assertTrue(DebugStrictMode.installIfDebug(true))
+        assertTrue(DebugStrictMode.wasInstalledThisProcess)
+    }
+
+    @Test
     fun `both adaptive launcher icons declare the monochrome layer`() {
         ADAPTIVE_ICONS.forEach { path ->
             val doc = DocumentBuilderFactory.newInstance().apply { isNamespaceAware = true }
