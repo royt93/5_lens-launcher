@@ -160,6 +160,9 @@
     <string name="lens_new_name_template">Lensa %1$d</string>
     <string name="lens_smart_focus_enable">Aktifkan Fokus Pintar</string>
     <string name="lens_smart_focus_disable">Nonaktifkan Fokus Pintar</string>
+    <string name="lens_share_caption_via">melalui %1$s</string>
+    <string name="lens_share_image">Bagikan gambar lensa</string>
+    <string name="error_lens_share_failed">Gagal membagikan gambar lensa</string>
     <string name="a11y_suggest_list_mode_title">TalkBack terdeteksi. Beralih ke Mode Daftar Aksesibel agar navigasi pembaca layar lebih mudah?</string>
     <string name="about_version_format">Versi %1$s (%2$d)</string>
     <string name="action_switch">Alihkan</string>

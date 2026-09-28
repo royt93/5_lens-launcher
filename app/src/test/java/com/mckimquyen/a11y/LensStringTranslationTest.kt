@@ -83,9 +83,10 @@ class LensStringTranslationTest {
     @Test
     fun `translations are not left as the untranslated English text`() {
         val base = baseStrings
-        // "Lens %1$d" is a proper noun plus an index; some locales legitimately keep the word,
-        // so it is the one string allowed to match English.
-        val allowedToMatch = setOf("lens_new_name_template")
+        // "Lens %1$d" is a proper noun plus an index; some locales legitimately keep the word.
+        // "via %1$s" (lens_share_caption_via) is a real, correct word in French and Portuguese
+        // too, not a copy-paste - both intentionally match the English source.
+        val allowedToMatch = setOf("lens_new_name_template", "lens_share_caption_via")
 
         val untranslated = localeDirectories().flatMap { directory ->
             lensStrings(File(directory, "strings.xml"))

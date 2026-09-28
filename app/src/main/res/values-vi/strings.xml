@@ -186,6 +186,9 @@
     <string name="lens_new_name_template">Thấu kính %1$d</string>
     <string name="lens_smart_focus_enable">Bật Tiêu điểm thông minh</string>
     <string name="lens_smart_focus_disable">Tắt Tiêu điểm thông minh</string>
+    <string name="lens_share_caption_via">qua %1$s</string>
+    <string name="lens_share_image">Chia sẻ ảnh lens</string>
+    <string name="error_lens_share_failed">Không thể chia sẻ ảnh lens</string>
     <string name="bulk_uninstall_confirm_title">Gỡ cài đặt ứng dụng</string>
     <string name="menu_bulk_hide">Ẩn</string>
     <string name="menu_bulk_pin">Ghim</string>

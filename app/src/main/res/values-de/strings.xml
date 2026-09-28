@@ -160,6 +160,9 @@
     <string name="lens_new_name_template">Linse %1$d</string>
     <string name="lens_smart_focus_enable">Smart Focus einschalten</string>
     <string name="lens_smart_focus_disable">Smart Focus ausschalten</string>
+    <string name="lens_share_caption_via">über %1$s</string>
+    <string name="lens_share_image">Linsenbild teilen</string>
+    <string name="error_lens_share_failed">Linsenbild konnte nicht geteilt werden</string>
     <string name="a11y_suggest_list_mode_title">TalkBack erkannt. Zum barrierefreien Listenmodus wechseln, um die Bildschirmleser-Navigation zu erleichtern?</string>
     <string name="about_version_format">Version %1$s (%2$d)</string>
     <string name="action_switch">Wechseln</string>

@@ -160,6 +160,9 @@
     <string name="lens_new_name_template">レンズ %1$d</string>
     <string name="lens_smart_focus_enable">スマートフォーカスをオンにする</string>
     <string name="lens_smart_focus_disable">スマートフォーカスをオフにする</string>
+    <string name="lens_share_caption_via">%1$s より</string>
+    <string name="lens_share_image">レンズ画像を共有</string>
+    <string name="error_lens_share_failed">レンズ画像を共有できませんでした</string>
     <string name="a11y_suggest_list_mode_title">TalkBackを検出しました。スクリーンリーダーでの操作をしやすくするため、アクセシブルリストモードに切り替えますか？</string>
     <string name="about_version_format">バージョン %1$s (%2$d)</string>
     <string name="action_switch">切り替え</string>

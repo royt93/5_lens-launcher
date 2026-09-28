@@ -194,6 +194,9 @@
     <string name="lens_new_name_template">العدسة %1$d</string>
     <string name="lens_smart_focus_enable">تشغيل التركيز الذكي</string>
     <string name="lens_smart_focus_disable">إيقاف التركيز الذكي</string>
+    <string name="lens_share_caption_via">عبر %1$s</string>
+    <string name="lens_share_image">مشاركة صورة العدسة</string>
+    <string name="error_lens_share_failed">تعذرت مشاركة صورة العدسة</string>
     <string name="bulk_uninstall_confirm_title">إلغاء تثبيت التطبيقات</string>
     <string name="menu_bulk_hide">إخفاء</string>
     <string name="menu_bulk_pin">تثبيت</string>

@@ -1437,7 +1437,7 @@ git commit -m "feat(lens-export): add FrmLens share button, relaying through Act
 
 **Interfaces:** None (resource-only; no code depends on translated text, only on the resource keys already added in Tasks 1 and 3).
 
-- [ ] **Step 1: Insert the 3 translated strings into each locale file**
+- [x] **Step 1: Insert the 3 translated strings into each locale file**
 
 For every locale file below, find:
 
@@ -1559,17 +1559,17 @@ For every locale file below, find:
     <string name="error_lens_share_failed">ບໍ່ສາມາດແບ່ງປັນຮູບພາບເລນໄດ້</string>
 ```
 
-- [ ] **Step 2: Verify no missing translation and no lint regression**
+- [x] **Step 2: Verify no missing translation and no lint regression**
 
 Run: `./gradlew lintDevDebug -q`
 Expected: 0 errors, and no new `MissingTranslation` warning for `lens_share_caption_via`, `lens_share_image` or `error_lens_share_failed` (this repo's lint config fails/warns on that - see the "Translated into all 16 locales" comment convention in `strings.xml`).
 
-- [ ] **Step 3: Run the full unit suite**
+- [x] **Step 3: Run the full unit suite**
 
 Run: `./gradlew testDevDebugUnitTest -q`
 Expected: full suite passes (591 tests, unchanged - resource-only change).
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add app/src/main/res/values-ar/strings.xml app/src/main/res/values-de/strings.xml \
