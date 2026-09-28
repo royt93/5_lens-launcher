@@ -160,4 +160,35 @@
     <string name="lens_new_name_template">เลนส์ %1$d</string>
     <string name="lens_smart_focus_enable">เปิดสมาร์ทโฟกัส</string>
     <string name="lens_smart_focus_disable">ปิดสมาร์ทโฟกัส</string>
+    <string name="a11y_suggest_list_mode_title">ตรวจพบ TalkBack ต้องการสลับไปใช้โหมดรายการที่เข้าถึงได้เพื่อให้นำทางด้วยโปรแกรมอ่านหน้าจอง่ายขึ้นไหม</string>
+    <string name="about_version_format">เวอร์ชัน %1$s (%2$d)</string>
+    <string name="action_switch">สลับ</string>
+    <string name="bulk_uninstall_confirm_title">ถอนการติดตั้งแอป</string>
+    <string name="desc_app_menu">ตัวเลือกสำหรับ %1$s</string>
+    <string name="desc_hide_app">ซ่อน %1$s</string>
+    <string name="desc_show_app">แสดง %1$s</string>
+    <string name="language_display_format">%1$s %2$s</string>
+    <string name="launcher_mode_fisheye">เลนส์ฟิชอาย</string>
+    <string name="launcher_mode_list">รายการที่เข้าถึงได้</string>
+    <string name="menu_bulk_hide">ซ่อน</string>
+    <string name="menu_bulk_pin">ปักหมุด</string>
+    <string name="menu_bulk_select_all">เลือกทั้งหมด</string>
+    <string name="menu_bulk_unhide">แสดง</string>
+    <string name="menu_bulk_uninstall">ถอนการติดตั้ง</string>
+    <string name="setting_launcher_mode">โหมดลอนเชอร์</string>
+    <string name="setting_lens_physics_presets">ความรู้สึกการเคลื่อนไหว</string>
+    <string name="unit_dp_format">%1$d dp</string>
+    <string name="unit_ms_format">%1$d ms</string>
+    <plurals name="apps_count">
+        <item quantity="other">%1$d แอป</item>
+    </plurals>
+    <plurals name="search_results_count">
+        <item quantity="other">%1$d แอปที่ตรงกัน</item>
+    </plurals>
+    <plurals name="apps_selected_count">
+        <item quantity="other">เลือกแล้ว %1$d</item>
+    </plurals>
+    <plurals name="bulk_uninstall_confirm_message">
+        <item quantity="other">คุณจะถูกขอให้ยืนยันการถอนการติดตั้งแอป %1$d รายการทีละรายการ</item>
+    </plurals>
 </resources>

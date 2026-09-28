@@ -160,4 +160,39 @@
     <string name="lens_new_name_template">Linse %1$d</string>
     <string name="lens_smart_focus_enable">Smart Focus einschalten</string>
     <string name="lens_smart_focus_disable">Smart Focus ausschalten</string>
+    <string name="a11y_suggest_list_mode_title">TalkBack erkannt. Zum barrierefreien Listenmodus wechseln, um die Bildschirmleser-Navigation zu erleichtern?</string>
+    <string name="about_version_format">Version %1$s (%2$d)</string>
+    <string name="action_switch">Wechseln</string>
+    <string name="bulk_uninstall_confirm_title">Apps deinstallieren</string>
+    <string name="desc_app_menu">Optionen für %1$s</string>
+    <string name="desc_hide_app">%1$s ausblenden</string>
+    <string name="desc_show_app">%1$s anzeigen</string>
+    <string name="language_display_format">%1$s %2$s</string>
+    <string name="launcher_mode_fisheye">Fisheye-Linse</string>
+    <string name="launcher_mode_list">Barrierefreie Liste</string>
+    <string name="menu_bulk_hide">Ausblenden</string>
+    <string name="menu_bulk_pin">Anheften</string>
+    <string name="menu_bulk_select_all">Alle auswählen</string>
+    <string name="menu_bulk_unhide">Einblenden</string>
+    <string name="menu_bulk_uninstall">Deinstallieren</string>
+    <string name="setting_launcher_mode">Launcher-Modus</string>
+    <string name="setting_lens_physics_presets">Bewegungsgefühl</string>
+    <string name="unit_dp_format">%1$d dp</string>
+    <string name="unit_ms_format">%1$d ms</string>
+    <plurals name="apps_count">
+        <item quantity="one">%1$d App</item>
+        <item quantity="other">%1$d Apps</item>
+    </plurals>
+    <plurals name="search_results_count">
+        <item quantity="one">%1$d passende App</item>
+        <item quantity="other">%1$d passende Apps</item>
+    </plurals>
+    <plurals name="apps_selected_count">
+        <item quantity="one">%1$d ausgewählt</item>
+        <item quantity="other">%1$d ausgewählt</item>
+    </plurals>
+    <plurals name="bulk_uninstall_confirm_message">
+        <item quantity="one">Du wirst gebeten, die Deinstallation von %1$d App zu bestätigen.</item>
+        <item quantity="other">Du wirst gebeten, die Deinstallation von %1$d Apps einzeln zu bestätigen.</item>
+    </plurals>
 </resources>

@@ -160,4 +160,35 @@
     <string name="lens_new_name_template">镜头 %1$d</string>
     <string name="lens_smart_focus_enable">开启智能焦点</string>
     <string name="lens_smart_focus_disable">关闭智能焦点</string>
+    <string name="a11y_suggest_list_mode_title">检测到 TalkBack。是否切换到无障碍列表模式以便更轻松地使用屏幕阅读器导航？</string>
+    <string name="about_version_format">版本 %1$s (%2$d)</string>
+    <string name="action_switch">切换</string>
+    <string name="bulk_uninstall_confirm_title">卸载应用</string>
+    <string name="desc_app_menu">%1$s 的选项</string>
+    <string name="desc_hide_app">隐藏 %1$s</string>
+    <string name="desc_show_app">显示 %1$s</string>
+    <string name="language_display_format">%1$s %2$s</string>
+    <string name="launcher_mode_fisheye">鱼眼镜头</string>
+    <string name="launcher_mode_list">无障碍列表</string>
+    <string name="menu_bulk_hide">隐藏</string>
+    <string name="menu_bulk_pin">置顶</string>
+    <string name="menu_bulk_select_all">全选</string>
+    <string name="menu_bulk_unhide">显示</string>
+    <string name="menu_bulk_uninstall">卸载</string>
+    <string name="setting_launcher_mode">启动器模式</string>
+    <string name="setting_lens_physics_presets">移动手感</string>
+    <string name="unit_dp_format">%1$d dp</string>
+    <string name="unit_ms_format">%1$d ms</string>
+    <plurals name="apps_count">
+        <item quantity="other">%1$d 个应用</item>
+    </plurals>
+    <plurals name="search_results_count">
+        <item quantity="other">%1$d 个匹配的应用</item>
+    </plurals>
+    <plurals name="apps_selected_count">
+        <item quantity="other">已选择 %1$d 个</item>
+    </plurals>
+    <plurals name="bulk_uninstall_confirm_message">
+        <item quantity="other">系统将要求你逐个确认卸载 %1$d 个应用。</item>
+    </plurals>
 </resources>

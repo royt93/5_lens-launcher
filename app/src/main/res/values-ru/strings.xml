@@ -160,4 +160,47 @@
     <string name="lens_new_name_template">Объектив %1$d</string>
     <string name="lens_smart_focus_enable">Включить умный фокус</string>
     <string name="lens_smart_focus_disable">Выключить умный фокус</string>
+    <string name="a11y_suggest_list_mode_title">Обнаружен TalkBack. Переключиться в режим доступного списка для упрощения навигации с экранным диктором?</string>
+    <string name="about_version_format">Версия %1$s (%2$d)</string>
+    <string name="action_switch">Переключить</string>
+    <string name="bulk_uninstall_confirm_title">Удалить приложения</string>
+    <string name="desc_app_menu">Параметры для %1$s</string>
+    <string name="desc_hide_app">Скрыть %1$s</string>
+    <string name="desc_show_app">Показать %1$s</string>
+    <string name="language_display_format">%1$s %2$s</string>
+    <string name="launcher_mode_fisheye">Объектив «рыбий глаз»</string>
+    <string name="launcher_mode_list">Доступный список</string>
+    <string name="menu_bulk_hide">Скрыть</string>
+    <string name="menu_bulk_pin">Закрепить</string>
+    <string name="menu_bulk_select_all">Выбрать все</string>
+    <string name="menu_bulk_unhide">Показать</string>
+    <string name="menu_bulk_uninstall">Удалить</string>
+    <string name="setting_launcher_mode">Режим лаунчера</string>
+    <string name="setting_lens_physics_presets">Ощущение движения</string>
+    <string name="unit_dp_format">%1$d dp</string>
+    <string name="unit_ms_format">%1$d ms</string>
+    <plurals name="apps_count">
+        <item quantity="one">%1$d приложение</item>
+        <item quantity="few">%1$d приложения</item>
+        <item quantity="many">%1$d приложений</item>
+        <item quantity="other">%1$d приложения</item>
+    </plurals>
+    <plurals name="search_results_count">
+        <item quantity="one">%1$d подходящее приложение</item>
+        <item quantity="few">%1$d подходящих приложения</item>
+        <item quantity="many">%1$d подходящих приложений</item>
+        <item quantity="other">%1$d подходящего приложения</item>
+    </plurals>
+    <plurals name="apps_selected_count">
+        <item quantity="one">%1$d выбрано</item>
+        <item quantity="few">%1$d выбрано</item>
+        <item quantity="many">%1$d выбрано</item>
+        <item quantity="other">%1$d выбрано</item>
+    </plurals>
+    <plurals name="bulk_uninstall_confirm_message">
+        <item quantity="one">Вам будет предложено подтвердить удаление %1$d приложения.</item>
+        <item quantity="few">Вам будет предложено подтвердить удаление %1$d приложений по одному.</item>
+        <item quantity="many">Вам будет предложено подтвердить удаление %1$d приложений по одному.</item>
+        <item quantity="other">Вам будет предложено подтвердить удаление %1$d приложения по одному.</item>
+    </plurals>
 </resources>

@@ -160,4 +160,35 @@
     <string name="lens_new_name_template">កែវពង្រីក %1$d</string>
     <string name="lens_smart_focus_enable">បើកការផ្ដោតឆ្លាតវៃ</string>
     <string name="lens_smart_focus_disable">បិទការផ្ដោតឆ្លាតវៃ</string>
+    <string name="a11y_suggest_list_mode_title">បានរកឃើញ TalkBack។ ប្តូរទៅរបៀបបញ្ជីងាយស្រួលប្រើ ដើម្បីងាយស្រួលរុករកជាមួយកម្មវិធីអានអេក្រង់?</string>
+    <string name="about_version_format">កំណែ %1$s (%2$d)</string>
+    <string name="action_switch">ប្តូរ</string>
+    <string name="bulk_uninstall_confirm_title">លុបកម្មវិធី</string>
+    <string name="desc_app_menu">ជម្រើសសម្រាប់ %1$s</string>
+    <string name="desc_hide_app">លាក់ %1$s</string>
+    <string name="desc_show_app">បង្ហាញ %1$s</string>
+    <string name="language_display_format">%1$s %2$s</string>
+    <string name="launcher_mode_fisheye">កែវពង្រីកហ្វីសអាយ</string>
+    <string name="launcher_mode_list">បញ្ជីងាយស្រួលប្រើ</string>
+    <string name="menu_bulk_hide">លាក់</string>
+    <string name="menu_bulk_pin">ខ្ទាស់</string>
+    <string name="menu_bulk_select_all">ជ្រើសរើសទាំងអស់</string>
+    <string name="menu_bulk_unhide">បង្ហាញ</string>
+    <string name="menu_bulk_uninstall">លុបកម្មវិធី</string>
+    <string name="setting_launcher_mode">របៀបឡាន់ឆឺរ</string>
+    <string name="setting_lens_physics_presets">អារម្មណ៍នៃចលនា</string>
+    <string name="unit_dp_format">%1$d dp</string>
+    <string name="unit_ms_format">%1$d ms</string>
+    <plurals name="apps_count">
+        <item quantity="other">%1$d កម្មវិធី</item>
+    </plurals>
+    <plurals name="search_results_count">
+        <item quantity="other">%1$d កម្មវិធីដែលត្រូវគ្នា</item>
+    </plurals>
+    <plurals name="apps_selected_count">
+        <item quantity="other">បានជ្រើសរើស %1$d</item>
+    </plurals>
+    <plurals name="bulk_uninstall_confirm_message">
+        <item quantity="other">អ្នកនឹងត្រូវបានស្នើសុំឱ្យបញ្ជាក់ការលុបកម្មវិធីចំនួន %1$d ម្តងមួយៗ។</item>
+    </plurals>
 </resources>

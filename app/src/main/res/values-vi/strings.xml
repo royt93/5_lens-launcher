@@ -186,4 +186,17 @@
     <string name="lens_new_name_template">Thấu kính %1$d</string>
     <string name="lens_smart_focus_enable">Bật Tiêu điểm thông minh</string>
     <string name="lens_smart_focus_disable">Tắt Tiêu điểm thông minh</string>
+    <string name="bulk_uninstall_confirm_title">Gỡ cài đặt ứng dụng</string>
+    <string name="menu_bulk_hide">Ẩn</string>
+    <string name="menu_bulk_pin">Ghim</string>
+    <string name="menu_bulk_select_all">Chọn tất cả</string>
+    <string name="menu_bulk_unhide">Hiện</string>
+    <string name="menu_bulk_uninstall">Gỡ cài đặt</string>
+    <string name="setting_lens_physics_presets">Cảm giác chuyển động</string>
+    <plurals name="apps_selected_count">
+        <item quantity="other">Đã chọn %1$d</item>
+    </plurals>
+    <plurals name="bulk_uninstall_confirm_message">
+        <item quantity="other">Bạn sẽ được yêu cầu xác nhận gỡ cài đặt từng ứng dụng trong số %1$d ứng dụng.</item>
+    </plurals>
 </resources>

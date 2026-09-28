@@ -194,4 +194,27 @@
     <string name="lens_new_name_template">العدسة %1$d</string>
     <string name="lens_smart_focus_enable">تشغيل التركيز الذكي</string>
     <string name="lens_smart_focus_disable">إيقاف التركيز الذكي</string>
+    <string name="bulk_uninstall_confirm_title">إلغاء تثبيت التطبيقات</string>
+    <string name="menu_bulk_hide">إخفاء</string>
+    <string name="menu_bulk_pin">تثبيت</string>
+    <string name="menu_bulk_select_all">تحديد الكل</string>
+    <string name="menu_bulk_unhide">إظهار</string>
+    <string name="menu_bulk_uninstall">إلغاء التثبيت</string>
+    <string name="setting_lens_physics_presets">إحساس الحركة</string>
+    <plurals name="apps_selected_count">
+        <item quantity="zero">لم يتم تحديد أي شيء</item>
+        <item quantity="one">تم تحديد واحد</item>
+        <item quantity="two">تم تحديد اثنين</item>
+        <item quantity="few">تم تحديد %1$d</item>
+        <item quantity="many">تم تحديد %1$d</item>
+        <item quantity="other">تم تحديد %1$d</item>
+    </plurals>
+    <plurals name="bulk_uninstall_confirm_message">
+        <item quantity="zero">لن يُطلب منك تأكيد إلغاء تثبيت أي تطبيق.</item>
+        <item quantity="one">سيُطلب منك تأكيد إلغاء تثبيت تطبيق واحد.</item>
+        <item quantity="two">سيُطلب منك تأكيد إلغاء تثبيت تطبيقين.</item>
+        <item quantity="few">سيُطلب منك تأكيد إلغاء تثبيت %1$d تطبيقات، واحدًا تلو الآخر.</item>
+        <item quantity="many">سيُطلب منك تأكيد إلغاء تثبيت %1$d تطبيقًا، واحدًا تلو الآخر.</item>
+        <item quantity="other">سيُطلب منك تأكيد إلغاء تثبيت %1$d تطبيق، واحدًا تلو الآخر.</item>
+    </plurals>
 </resources>

@@ -160,4 +160,35 @@
     <string name="lens_new_name_template">렌즈 %1$d</string>
     <string name="lens_smart_focus_enable">스마트 포커스 켜기</string>
     <string name="lens_smart_focus_disable">스마트 포커스 끄기</string>
+    <string name="a11y_suggest_list_mode_title">TalkBack가 감지되었습니다. 스크린 리더 탐색을 더 쉽게 하기 위해 접근성 목록 모드로 전환하시겠습니까?</string>
+    <string name="about_version_format">버전 %1$s (%2$d)</string>
+    <string name="action_switch">전환</string>
+    <string name="bulk_uninstall_confirm_title">앱 제거</string>
+    <string name="desc_app_menu">%1$s 옵션</string>
+    <string name="desc_hide_app">%1$s 숨기기</string>
+    <string name="desc_show_app">%1$s 표시</string>
+    <string name="language_display_format">%1$s %2$s</string>
+    <string name="launcher_mode_fisheye">피시아이 렌즈</string>
+    <string name="launcher_mode_list">접근성 목록</string>
+    <string name="menu_bulk_hide">숨기기</string>
+    <string name="menu_bulk_pin">고정</string>
+    <string name="menu_bulk_select_all">모두 선택</string>
+    <string name="menu_bulk_unhide">표시</string>
+    <string name="menu_bulk_uninstall">제거</string>
+    <string name="setting_launcher_mode">런처 모드</string>
+    <string name="setting_lens_physics_presets">움직임 느낌</string>
+    <string name="unit_dp_format">%1$d dp</string>
+    <string name="unit_ms_format">%1$d ms</string>
+    <plurals name="apps_count">
+        <item quantity="other">앱 %1$d개</item>
+    </plurals>
+    <plurals name="search_results_count">
+        <item quantity="other">일치하는 앱 %1$d개</item>
+    </plurals>
+    <plurals name="apps_selected_count">
+        <item quantity="other">%1$d개 선택됨</item>
+    </plurals>
+    <plurals name="bulk_uninstall_confirm_message">
+        <item quantity="other">앱 %1$d개를 하나씩 제거하도록 확인 요청됩니다.</item>
+    </plurals>
 </resources>

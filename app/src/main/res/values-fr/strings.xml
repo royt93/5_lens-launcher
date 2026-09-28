@@ -160,4 +160,43 @@
     <string name="lens_new_name_template">Lentille %1$d</string>
     <string name="lens_smart_focus_enable">Activer le focus intelligent</string>
     <string name="lens_smart_focus_disable">Désactiver le focus intelligent</string>
+    <string name="a11y_suggest_list_mode_title">TalkBack détecté. Passer en mode liste accessible pour faciliter la navigation avec un lecteur d\'écran ?</string>
+    <string name="about_version_format">Version %1$s (%2$d)</string>
+    <string name="action_switch">Changer</string>
+    <string name="bulk_uninstall_confirm_title">Désinstaller les applications</string>
+    <string name="desc_app_menu">Options pour %1$s</string>
+    <string name="desc_hide_app">Masquer %1$s</string>
+    <string name="desc_show_app">Afficher %1$s</string>
+    <string name="language_display_format">%1$s %2$s</string>
+    <string name="launcher_mode_fisheye">Lentille Fisheye</string>
+    <string name="launcher_mode_list">Liste accessible</string>
+    <string name="menu_bulk_hide">Masquer</string>
+    <string name="menu_bulk_pin">Épingler</string>
+    <string name="menu_bulk_select_all">Tout sélectionner</string>
+    <string name="menu_bulk_unhide">Afficher</string>
+    <string name="menu_bulk_uninstall">Désinstaller</string>
+    <string name="setting_launcher_mode">Mode du launcher</string>
+    <string name="setting_lens_physics_presets">Ressenti du mouvement</string>
+    <string name="unit_dp_format">%1$d dp</string>
+    <string name="unit_ms_format">%1$d ms</string>
+    <plurals name="apps_count">
+        <item quantity="one">%1$d application</item>
+        <item quantity="other">%1$d applications</item>
+        <item quantity="many">%1$d applications</item>
+    </plurals>
+    <plurals name="search_results_count">
+        <item quantity="one">%1$d application correspondante</item>
+        <item quantity="other">%1$d applications correspondantes</item>
+        <item quantity="many">%1$d applications correspondantes</item>
+    </plurals>
+    <plurals name="apps_selected_count">
+        <item quantity="one">%1$d sélectionnée</item>
+        <item quantity="other">%1$d sélectionnées</item>
+        <item quantity="many">%1$d sélectionnées</item>
+    </plurals>
+    <plurals name="bulk_uninstall_confirm_message">
+        <item quantity="one">Il vous sera demandé de confirmer la désinstallation de %1$d application.</item>
+        <item quantity="other">Il vous sera demandé de confirmer la désinstallation de %1$d applications, une à la fois.</item>
+        <item quantity="many">Il vous sera demandé de confirmer la désinstallation de %1$d applications, une à la fois.</item>
+    </plurals>
 </resources>

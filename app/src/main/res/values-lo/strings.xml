@@ -160,4 +160,35 @@
     <string name="lens_new_name_template">ເລນ %1$d</string>
     <string name="lens_smart_focus_enable">ເປີດໂຟກັສອັດສະລິຍະ</string>
     <string name="lens_smart_focus_disable">ປິດໂຟກັສອັດສະລິຍະ</string>
+    <string name="a11y_suggest_list_mode_title">ກວດພົບ TalkBack. ສະລັບໄປໃຊ້ໂໝດລາຍການທີ່ເຂົ້າເຖິງໄດ້ ເພື່ອໃຫ້ການນຳທາງດ້ວຍໂປຣແກຣມອ່ານໜ້າຈໍງ່າຍຂຶ້ນບໍ?</string>
+    <string name="about_version_format">ເວີຊັນ %1$s (%2$d)</string>
+    <string name="action_switch">ສະລັບ</string>
+    <string name="bulk_uninstall_confirm_title">ຖອນການຕິດຕັ້ງແອັບ</string>
+    <string name="desc_app_menu">ຕົວເລືອກສຳລັບ %1$s</string>
+    <string name="desc_hide_app">ເຊື່ອງ %1$s</string>
+    <string name="desc_show_app">ສະແດງ %1$s</string>
+    <string name="language_display_format">%1$s %2$s</string>
+    <string name="launcher_mode_fisheye">ເລນຟິດອາຍ</string>
+    <string name="launcher_mode_list">ລາຍການທີ່ເຂົ້າເຖິງໄດ້</string>
+    <string name="menu_bulk_hide">ເຊື່ອງ</string>
+    <string name="menu_bulk_pin">ປັກໝຸດ</string>
+    <string name="menu_bulk_select_all">ເລືອກທັງໝົດ</string>
+    <string name="menu_bulk_unhide">ສະແດງ</string>
+    <string name="menu_bulk_uninstall">ຖອນການຕິດຕັ້ງ</string>
+    <string name="setting_launcher_mode">ໂໝດລອນເຊີ</string>
+    <string name="setting_lens_physics_presets">ຄວາມຮູ້ສຶກການເຄື່ອນໄຫວ</string>
+    <string name="unit_dp_format">%1$d dp</string>
+    <string name="unit_ms_format">%1$d ms</string>
+    <plurals name="apps_count">
+        <item quantity="other">%1$d ແອັບ</item>
+    </plurals>
+    <plurals name="search_results_count">
+        <item quantity="other">%1$d ແອັບທີ່ກົງກັນ</item>
+    </plurals>
+    <plurals name="apps_selected_count">
+        <item quantity="other">ເລືອກແລ້ວ %1$d</item>
+    </plurals>
+    <plurals name="bulk_uninstall_confirm_message">
+        <item quantity="other">ທ່ານຈະຖືກຂໍໃຫ້ຢືນຢັນການຖອນການຕິດຕັ້ງແອັບ %1$d ອັນ ເທື່ອລະອັນ.</item>
+    </plurals>
 </resources>

@@ -169,49 +169,49 @@
     <string name="loading">Loading…</string>
 
     <!-- A11Y-001 Accessibility & Formatting Strings -->
-    <string name="about_version_format" tools:ignore="MissingTranslation">Version %1$s (%2$d)</string>
-    <string name="unit_dp_format" tools:ignore="MissingTranslation">%1$d dp</string>
-    <string name="unit_ms_format" tools:ignore="MissingTranslation">%1$d ms</string>
-    <string name="language_display_format" tools:ignore="MissingTranslation">%1$s %2$s</string>
-    <string name="desc_hide_app" tools:ignore="MissingTranslation">Hide %1$s</string>
-    <string name="desc_show_app" tools:ignore="MissingTranslation">Show %1$s</string>
-    <string name="desc_app_menu" tools:ignore="MissingTranslation">Options for %1$s</string>
+    <string name="about_version_format">Version %1$s (%2$d)</string>
+    <string name="unit_dp_format">%1$d dp</string>
+    <string name="unit_ms_format">%1$d ms</string>
+    <string name="language_display_format">%1$s %2$s</string>
+    <string name="desc_hide_app">Hide %1$s</string>
+    <string name="desc_show_app">Show %1$s</string>
+    <string name="desc_app_menu">Options for %1$s</string>
 
-    <plurals name="apps_count" tools:ignore="MissingTranslation">
+    <plurals name="apps_count">
         <item quantity="one">%1$d app</item>
         <item quantity="other">%1$d apps</item>
     </plurals>
 
-    <plurals name="search_results_count" tools:ignore="MissingTranslation">
+    <plurals name="search_results_count">
         <item quantity="one">%1$d matching app</item>
         <item quantity="other">%1$d matching apps</item>
     </plurals>
 
     <!-- FEAT-007 Apps tab multi-select -->
-    <plurals name="apps_selected_count" tools:ignore="MissingTranslation">
+    <plurals name="apps_selected_count">
         <item quantity="one">%1$d selected</item>
         <item quantity="other">%1$d selected</item>
     </plurals>
-    <string name="menu_bulk_select_all" tools:ignore="MissingTranslation">Select all</string>
-    <string name="menu_bulk_hide" tools:ignore="MissingTranslation">Hide</string>
-    <string name="menu_bulk_unhide" tools:ignore="MissingTranslation">Unhide</string>
-    <string name="menu_bulk_pin" tools:ignore="MissingTranslation">Pin</string>
-    <string name="menu_bulk_uninstall" tools:ignore="MissingTranslation">Uninstall</string>
-    <string name="bulk_uninstall_confirm_title" tools:ignore="MissingTranslation">Uninstall apps</string>
-    <plurals name="bulk_uninstall_confirm_message" tools:ignore="MissingTranslation">
+    <string name="menu_bulk_select_all">Select all</string>
+    <string name="menu_bulk_hide">Hide</string>
+    <string name="menu_bulk_unhide">Unhide</string>
+    <string name="menu_bulk_pin">Pin</string>
+    <string name="menu_bulk_uninstall">Uninstall</string>
+    <string name="bulk_uninstall_confirm_title">Uninstall apps</string>
+    <plurals name="bulk_uninstall_confirm_message">
         <item quantity="one">You will be asked to confirm uninstalling %1$d app.</item>
         <item quantity="other">You will be asked to confirm uninstalling %1$d apps, one at a time.</item>
     </plurals>
 
     <!-- FEAT-003 Accessible List Mode Strings -->
-    <string name="setting_launcher_mode" tools:ignore="MissingTranslation">Launcher Mode</string>
-    <string name="launcher_mode_fisheye" tools:ignore="MissingTranslation">Fisheye Lens</string>
-    <string name="launcher_mode_list" tools:ignore="MissingTranslation">Accessible List</string>
-    <string name="a11y_suggest_list_mode_title" tools:ignore="MissingTranslation">TalkBack detected. Switch to Accessible List Mode for easier screen reader navigation?</string>
-    <string name="action_switch" tools:ignore="MissingTranslation">Switch</string>
+    <string name="setting_launcher_mode">Launcher Mode</string>
+    <string name="launcher_mode_fisheye">Fisheye Lens</string>
+    <string name="launcher_mode_list">Accessible List</string>
+    <string name="a11y_suggest_list_mode_title">TalkBack detected. Switch to Accessible List Mode for easier screen reader navigation?</string>
+    <string name="action_switch">Switch</string>
 
     <!-- FISH-004 Adaptive Lens Physics -->
-    <string name="setting_lens_physics_presets" tools:ignore="MissingTranslation">Movement feel</string>
+    <string name="setting_lens_physics_presets">Movement feel</string>
     <string name="lens_physics_preset_gentle" translatable="false">Gentle</string>
     <string name="lens_physics_preset_standard" translatable="false">Standard</string>
     <string name="lens_physics_preset_snappy" translatable="false">Snappy</string>
