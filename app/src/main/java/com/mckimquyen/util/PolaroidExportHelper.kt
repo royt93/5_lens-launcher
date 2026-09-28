@@ -9,6 +9,7 @@ import android.graphics.Paint
 import android.graphics.Typeface
 import android.net.Uri
 import androidx.core.content.FileProvider
+import androidx.core.graphics.createBitmap
 import com.mckimquyen.R
 import com.mckimquyen.app.ApplicationScope
 import com.mckimquyen.views.LensView
@@ -23,11 +24,14 @@ import java.io.FileOutputStream
  * docs/superpowers/specs/2026-09-28-polaroid-lens-export-design.md). Snapshots a lens's
  * currently-rendered LensView into a polaroid-framed PNG for sharing.
  *
- * Pure geometry/text/intent-building functions live here and are unit-tested directly
- * (PolaroidExportHelperTest). The Android-side-effecting `exportAsync` (bitmap capture, frame
- * compositing, file write, FileProvider) is added in a later task and covered by androidTest,
- * since it needs a real Bitmap/Canvas/File - same split this codebase already uses for
- * ApertureRevealHelper (pure) vs LayoutBackupIo (side-effecting).
+ * Pure geometry/text/intent-building functions live here and are unit-tested directly with plain
+ * JUnit (PolaroidExportHelperTest) - none of them touch a Context or a string resource, on
+ * purpose: R.string.app_name/R.string.lens_share_caption_via are resolved only inside
+ * [exportAsync] itself, which always runs on a real Android Context (androidTest), never from a
+ * JVM unit test. The Android-side-effecting `exportAsync` (bitmap capture, frame compositing,
+ * file write, FileProvider) is covered by androidTest instead, since it needs a real
+ * Bitmap/Canvas/File - same split this codebase already uses for ApertureRevealHelper (pure) vs
+ * LayoutBackupIo (side-effecting).
  */
 object PolaroidExportHelper {
 
@@ -50,19 +54,14 @@ object PolaroidExportHelper {
         val captionLine2BaselineY: Int
     )
 
-    /** line1 = the lens name (truncated if very long, falls back to the app name if blank);
-     *  line2 = a fixed "via <app name>" branding line. */
+    /** Pure: the lens name, truncated if very long, falling back to [fallbackName] (the caller's
+     *  already-resolved app name) if blank. No Context/resource dependency - the caller (exportAsync)
+     *  resolves R.string.app_name/R.string.lens_share_caption_via itself, since those are only ever
+     *  needed on a real Android Context, never from a unit test. */
     @JvmStatic
-    fun formatCaption(context: Context, lensName: String): CaptionLines {
-        val trimmed = lensName.trim()
-        val base = trimmed.ifEmpty { context.getString(R.string.app_name) }
-        val line1 = if (base.length > MAX_LENS_NAME_LENGTH) {
-            base.take(MAX_LENS_NAME_LENGTH - 1) + "…"
-        } else {
-            base
-        }
-        val line2 = context.getString(R.string.lens_share_caption_via, context.getString(R.string.app_name))
-        return CaptionLines(line1, line2)
+    fun buildCaptionLine1(lensName: String, fallbackName: String): String {
+        val base = lensName.trim().ifEmpty { fallbackName }
+        return if (base.length > MAX_LENS_NAME_LENGTH) base.take(MAX_LENS_NAME_LENGTH - 1) + "…" else base
     }
 
     /** Strips characters unsafe for a filesystem path component; never returns an empty string. */
@@ -96,7 +95,7 @@ object PolaroidExportHelper {
     /** ACTION_SEND for [imageUri], matching ext/Activity.kt's shareApp() pattern (the caller
      *  wraps this in Intent.createChooser(...) with R.string.share_via). */
     @JvmStatic
-    fun buildShareIntent(context: Context, imageUri: Uri): Intent {
+    fun buildShareIntent(imageUri: Uri): Intent {
         return Intent(Intent.ACTION_SEND).apply {
             type = "image/png"
             putExtra(Intent.EXTRA_STREAM, imageUri)
@@ -105,7 +104,7 @@ object PolaroidExportHelper {
     }
 
     private fun renderFrame(content: Bitmap, layout: PolaroidLayout, caption: CaptionLines): Bitmap {
-        val framed = Bitmap.createBitmap(layout.outerWidth, layout.outerHeight, Bitmap.Config.ARGB_8888)
+        val framed = createBitmap(layout.outerWidth, layout.outerHeight, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(framed)
         canvas.drawColor(Color.WHITE)
         canvas.drawBitmap(content, layout.contentLeft.toFloat(), layout.contentTop.toFloat(), null)
@@ -154,7 +153,7 @@ object PolaroidExportHelper {
         }
         lensView.resetToIdleForExport()
         val contentBitmap = try {
-            Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888).also { bmp ->
+            createBitmap(width, height, Bitmap.Config.ARGB_8888).also { bmp ->
                 lensView.draw(Canvas(bmp))
             }
         } catch (error: OutOfMemoryError) {
@@ -164,7 +163,11 @@ object PolaroidExportHelper {
         }
 
         val appContext = context.applicationContext
-        val caption = formatCaption(appContext, lensName)
+        val appName = appContext.getString(R.string.app_name)
+        val caption = CaptionLines(
+            line1 = buildCaptionLine1(lensName, appName),
+            line2 = appContext.getString(R.string.lens_share_caption_via, appName)
+        )
         val fileName = sanitizeFileName(lensName)
         ApplicationScope.scope.launch(Dispatchers.IO) {
             val uri = try {

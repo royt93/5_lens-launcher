@@ -46,6 +46,7 @@ class ActHomeLensManagementWidgetTest {
     private val itemRename = 2
     private val itemDelete = 3
     private val itemSmartFocus = 4
+    private val itemShare = 5
 
     @Before
     fun setup() {
@@ -307,8 +308,8 @@ class ActHomeLensManagementWidgetTest {
                     .onEmptySpaceLongPressListener!!.onEmptySpaceLongPress()
 
                 assertEquals(
-                    "The menu must offer all four actions",
-                    4,
+                    "The menu must offer all five actions (add/rename/delete/Smart Focus/share)",
+                    5,
                     activity.lensManagementMenu!!.menu.size()
                 )
 
@@ -565,5 +566,35 @@ class ActHomeLensManagementWidgetTest {
                 lenses.find { it.id == LensWorkspace.DEFAULT_LENS_ID }
             )
         }
+    }
+
+    @Suppress("DEPRECATION")
+    @Test
+    fun shareMenuItem_exportsAndLaunchesAChooserForTheActiveLens() {
+        val scenario = ActivityScenario.launch(ActHome::class.java)
+        var captured: android.content.Intent? = null
+        val latch = java.util.concurrent.CountDownLatch(1)
+
+        scenario.onActivity { activity ->
+            activity.lensShareLauncher = ActHome.LensShareLauncher { intent ->
+                captured = intent
+                latch.countDown()
+            }
+            activity.onLensMenuItemSelected(itemShare, 0)
+        }
+
+        assertTrue("share export must complete", latch.await(5, java.util.concurrent.TimeUnit.SECONDS))
+        assertNotNull("selecting Share must build a chooser Intent", captured)
+
+        val inner = captured!!.getParcelableExtra<android.content.Intent>(android.content.Intent.EXTRA_INTENT)
+        assertNotNull("the chooser must wrap a real ACTION_SEND intent", inner)
+        assertEquals(android.content.Intent.ACTION_SEND, inner!!.action)
+        assertEquals("image/png", inner.type)
+        assertNotNull(
+            "the send intent must carry the exported image's uri",
+            inner.getParcelableExtra<android.net.Uri>(android.content.Intent.EXTRA_STREAM)
+        )
+
+        scenario.close()
     }
 }

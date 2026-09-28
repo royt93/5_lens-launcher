@@ -1,49 +1,49 @@
 package com.mckimquyen.util
 
-import android.content.Context
 import android.content.Intent
 import androidx.core.net.toUri
-import androidx.test.core.app.ApplicationProvider
-import com.mckimquyen.R
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
+// Config.NONE (same as DebugStrictModeAndThemedIconTest): buildShareIntent touches the real
+// android.content.Intent framework class, which needs Robolectric's shadow to work at all in a
+// JVM unit test - but nothing here needs the real app manifest/resources/Application, so skip
+// all three entirely rather than pulling in RApplication.onCreate()'s side effects.
 @RunWith(RobolectricTestRunner::class)
+@Config(manifest = Config.NONE)
 class PolaroidExportHelperTest {
 
-    private val context: Context = ApplicationProvider.getApplicationContext()
+    @Test
+    fun `buildCaptionLine1 uses the lens name when present`() {
+        assertEquals("Work", PolaroidExportHelper.buildCaptionLine1("Work", fallbackName = "Fisheye Launcher"))
+    }
 
     @Test
-    fun `formatCaption uses the lens name and an app-name branding line`() {
-        val lines = PolaroidExportHelper.formatCaption(context, "Work")
-        assertEquals("Work", lines.line1)
+    fun `buildCaptionLine1 falls back to the given name for a blank lens name`() {
         assertEquals(
-            context.getString(R.string.lens_share_caption_via, context.getString(R.string.app_name)),
-            lines.line2
+            "Fisheye Launcher",
+            PolaroidExportHelper.buildCaptionLine1("   ", fallbackName = "Fisheye Launcher")
         )
     }
 
     @Test
-    fun `formatCaption falls back to the app name for a blank lens name`() {
-        val lines = PolaroidExportHelper.formatCaption(context, "   ")
-        assertEquals(context.getString(R.string.app_name), lines.line1)
-    }
-
-    @Test
-    fun `formatCaption truncates a very long lens name with an ellipsis`() {
+    fun `buildCaptionLine1 truncates a very long lens name with an ellipsis`() {
         val longName = "A".repeat(40)
-        val lines = PolaroidExportHelper.formatCaption(context, longName)
-        assertEquals(24, lines.line1.length)
-        assertTrue(lines.line1.endsWith("…"))
+        val line1 = PolaroidExportHelper.buildCaptionLine1(longName, fallbackName = "Fisheye Launcher")
+        assertEquals(24, line1.length)
+        assertTrue(line1.endsWith("…"))
     }
 
     @Test
-    fun `formatCaption keeps Vietnamese diacritics intact`() {
-        val lines = PolaroidExportHelper.formatCaption(context, "Công việc")
-        assertEquals("Công việc", lines.line1)
+    fun `buildCaptionLine1 keeps Vietnamese diacritics intact`() {
+        assertEquals(
+            "Công việc",
+            PolaroidExportHelper.buildCaptionLine1("Công việc", fallbackName = "Fisheye Launcher")
+        )
     }
 
     @Test
@@ -88,7 +88,7 @@ class PolaroidExportHelperTest {
     @Test
     fun `buildShareIntent targets an image share with the given uri and read permission`() {
         val uri = "content://com.mckimquyen.lenslauncher.fileprovider/polaroid/Work.png".toUri()
-        val intent = PolaroidExportHelper.buildShareIntent(context, uri)
+        val intent = PolaroidExportHelper.buildShareIntent(uri)
         assertEquals(Intent.ACTION_SEND, intent.action)
         assertEquals("image/png", intent.type)
         assertEquals(uri, intent.getParcelableExtra(Intent.EXTRA_STREAM))

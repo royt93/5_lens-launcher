@@ -15,6 +15,7 @@ import android.graphics.Color;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -73,6 +74,7 @@ import com.mckimquyen.search.SearchHistoryStore;
 import com.mckimquyen.search.SearchResultAdapter;
 import com.mckimquyen.util.ApertureRevealHelper;
 import com.mckimquyen.util.Logger;
+import com.mckimquyen.util.PolaroidExportHelper;
 import com.mckimquyen.util.UIUtils;
 import com.mckimquyen.util.UtilCalculator;
 import com.mckimquyen.services.AppEventManager;
@@ -164,6 +166,24 @@ public class ActHome extends ActBase {
     private TabLayout lensPageIndicator;
     private LensPagerAdapter lensPagerAdapter;
     private List<LensWorkspace> currentLenses = new ArrayList<>();
+
+    /** FISH-EXPORT: set by FrmLens's share button on the Intent that (re)launches this singleTask
+     *  activity, so onLensMenuItemSelected's item 5 path runs automatically once currentLenses is
+     *  loaded, instead of FrmLens needing its own copy of the export logic. */
+    public static final String EXTRA_AUTO_EXPORT_LENS =
+            "com.mckimquyen.lenslauncher.EXTRA_AUTO_EXPORT_LENS";
+    private boolean pendingAutoExportLens = false;
+
+    /** Test seam so PolaroidExportHelperWidgetTest-style tests can capture the built chooser
+     *  Intent instead of actually popping a real system share sheet - same pattern as
+     *  lensManagementMenu/lensDialog below. */
+    @androidx.annotation.VisibleForTesting
+    interface LensShareLauncher {
+        void launch(Intent chooserIntent);
+    }
+
+    @androidx.annotation.VisibleForTesting
+    LensShareLauncher lensShareLauncher = this::startActivity;
     private final ViewPager2.OnPageChangeCallback lensPageChangeCallback = new ViewPager2.OnPageChangeCallback() {
         @Override
         public void onPageSelected(int position) {
@@ -245,6 +265,7 @@ public class ActHome extends ActBase {
         applyHomeColumnInsets(findViewById(R.id.rootLayout));
         setupSearch();
         // updateColor();
+        consumeAutoExportExtra(getIntent());
         refreshLensList();
         assignApps(Objects.requireNonNull(Objects.requireNonNull(RAppsSingleton.getInstance()).getApps()));
 
@@ -274,6 +295,24 @@ public class ActHome extends ActBase {
         getOnBackPressedDispatcher().addCallback(this, searchBackCallback);
 
         rateAppInApp(this, BuildConfig.DEBUG);
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        consumeAutoExportExtra(intent);
+        refreshLensList();
+    }
+
+    /** Consumes (clears) the one-shot auto-export flag so a later rotation/recreate never
+     *  re-triggers it - the same one-shot-extra pattern this codebase already needs because
+     *  ActHome is launchMode="singleTask" (relaunching it calls onNewIntent, not onCreate). */
+    private void consumeAutoExportExtra(Intent intent) {
+        if (intent != null && intent.getBooleanExtra(EXTRA_AUTO_EXPORT_LENS, false)) {
+            intent.removeExtra(EXTRA_AUTO_EXPORT_LENS);
+            pendingAutoExportLens = true;
+        }
     }
 
     /**
@@ -469,6 +508,10 @@ public class ActHome extends ActBase {
                     }
                 }
             }
+            if (pendingAutoExportLens) {
+                pendingAutoExportLens = false;
+                lensPager.post(this::exportActiveLensImage);
+            }
             return Unit.INSTANCE;
         });
     }
@@ -564,6 +607,7 @@ public class ActHome extends ActBase {
         // label states the action rather than using a checkable item - PopupMenu check marks and
         // icons proved unreliable on real hardware in UI-022.
         menu.getMenu().add(0, 4, 0, lensSmartFocusMenuLabelRes(position));
+        menu.getMenu().add(0, 5, 0, R.string.lens_share_image);
         menu.setOnMenuItemClickListener(item -> onLensMenuItemSelected(item.getItemId(), position));
         menu.show();
     }
@@ -590,6 +634,9 @@ public class ActHome extends ActBase {
         } else if (itemId == 4) {
             toggleSmartFocusForLens(current);
             return true;
+        } else if (itemId == 5) {
+            exportActiveLensImage();
+            return true;
         }
         return false;
     }
@@ -610,6 +657,39 @@ public class ActHome extends ActBase {
         if (lensViews != null) {
             lensViews.refreshSmartFocus();
         }
+    }
+
+    /** FISH-EXPORT: snapshots the currently visible lens - via {@link #lensViews}, this file's
+     *  existing "which LensView is actually on screen" pointer (see its own field comment), kept
+     *  correct across page-selection and rebind-after-rotation - into a polaroid-framed PNG and
+     *  hands it to the share sheet via {@link #lensShareLauncher}. */
+    private void exportActiveLensImage() {
+        LensView view = lensViews;
+        if (view == null) return;
+        String activeLensId = view.getLensId();
+        LensWorkspace matched = null;
+        for (LensWorkspace lens : currentLenses) {
+            if (lens.getId().equals(activeLensId)) {
+                matched = lens;
+                break;
+            }
+        }
+        if (matched == null) return;
+        String lensName = matched.getName();
+        PolaroidExportHelper.exportAsync(view, lensName, this, uri -> {
+            if (uri != null) {
+                try {
+                    lensShareLauncher.launch(Intent.createChooser(
+                            PolaroidExportHelper.buildShareIntent(uri),
+                            getString(R.string.share_via)));
+                } catch (Exception e) {
+                    Toast.makeText(this, R.string.error_lens_share_failed, Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                Toast.makeText(this, R.string.error_lens_share_failed, Toast.LENGTH_SHORT).show();
+            }
+            return Unit.INSTANCE;
+        });
     }
 
     private void createLensDialog(String copyFromLensId) {

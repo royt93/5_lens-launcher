@@ -232,4 +232,6 @@
     <!-- FISH-EXPORT (polaroid lens export, 2026-09-28 brainstorm): translated into all 16
          locales in the same pass as lens_share_image / error_lens_share_failed below. -->
     <string name="lens_share_caption_via">via %1$s</string>
+    <string name="lens_share_image">Share lens image</string>
+    <string name="error_lens_share_failed">Couldn\'t share lens image</string>
 </resources>

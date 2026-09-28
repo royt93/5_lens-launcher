@@ -285,13 +285,13 @@ git add app/src/main/java/com/mckimquyen/util/PolaroidExportHelper.kt app/src/te
 git commit -m "feat(lens-export): add PolaroidExportHelper pure functions (caption, filename, layout, share intent)"
 ```
 
-**Deviation found and fixed during execution (not in the original plan):** the unit test's `context.getString(R.string.xxx)` calls threw `Resources$NotFoundException` for every resource, including pre-existing static ones - no prior Robolectric test in this repo had ever called `getString`. Root cause: `app/build.gradle` never set `testOptions.unitTests.includeAndroidResources = true`, so AGP never packages real resources for the unit-test task. Fixing that then hit a second gap: Robolectric 4.11.1 only supports up to API 34, but this app's targetSdk is 37 - added `app/src/test/resources/robolectric.properties` (`sdk=34`) as the module-wide default. Turning resource loading on for real then exposed a **pre-existing test-isolation bug**: `DebugStrictModeAndThemedIconTest` only reset `StrictMode` in `@After`, so it silently depended on no earlier test in the same JVM fork leaving a policy installed - true by luck until real resource loading let some other test's `RApplication.onCreate()` actually run. Added a matching `@Before` reset. All three fixes were necessary for `591/591` (591 = 580 pre-existing + 11 new; **589 pass, 2 expected-pending** until Task 5 translates `lens_share_caption_via` - `AllStringsTranslationTest`/`LensStringTranslationTest` correctly fail on the untranslated string, and `lintDevDebug` correctly shows 1 `MissingTranslation` error for the same reason, both resolved by Task 5) to be true, not a workaround unique to this feature. Committed together with the planned files:
+**Deviation found, tried, and reverted during execution (not in the original plan) - recorded so the same dead end isn't retried:** the unit test's `context.getString(R.string.xxx)` calls in the original `formatCaption(context, lensName)` design threw `Resources$NotFoundException` - no prior Robolectric test in this repo had ever called `getString`. First fix attempt: set `testOptions.unitTests.includeAndroidResources = true` in `app/build.gradle` (the standard AGP fix) plus `app/src/test/resources/robolectric.properties` (`sdk=34`, working around Robolectric 4.11.1's API-34 ceiling against this app's targetSdk 37). This *worked* for this test but had a much bigger side effect than expected: it made Robolectric actually instantiate the real `RApplication` (per the manifest) for every other unit test that didn't opt out with `@Config(manifest = Config.NONE)`, running its real `onCreate()` - which seeds a default `LensWorkspace` row and installs `StrictMode` policies as side effects. That broke `LensWorkspaceDaoTest` (an unrelated test asserting an exact, now-polluted row list) and `DebugStrictModeAndThemedIconTest` (StrictMode leaking across tests in the same JVM fork). Patching `DebugStrictModeAndThemedIconTest` with a defensive `@Before` reset fixed that one, but discovering a second, unrelated collateral regression from the same one-line Gradle flag was the signal to stop patching symptoms and fix the actual design instead.
 
-```bash
-git add app/build.gradle app/src/test/resources/robolectric.properties \
-  app/src/test/java/com/mckimquyen/util/DebugStrictModeAndThemedIconTest.kt
-git commit -m "fix(test-infra): enable includeAndroidResources, pin Robolectric sdk=34, fix StrictMode test isolation"
-```
+**Actual fix, kept:** `PolaroidExportHelper` never needed a `Context` in its pure functions at all - `formatCaption(context, lensName): CaptionLines` was replaced with `buildCaptionLine1(lensName, fallbackName): String`, a fully pure function with no resource dependency. The two real string-resource lookups (`R.string.app_name`, `R.string.lens_share_caption_via`) moved into `exportAsync` itself, which only ever runs against a real Android `Context` (production, or androidTest - never a JVM unit test). `PolaroidExportHelperTest` still needs `@RunWith(RobolectricTestRunner::class)` (its `buildShareIntent` test touches the real `Intent` framework class, which needs Robolectric's shadow to work in a JVM test at all) but now also declares `@Config(manifest = Config.NONE)` - the same annotation `DebugStrictModeAndThemedIconTest` already used for exactly this reason - so it never touches the real manifest, `RApplication`, or resources, and carries zero risk to any other test. `app/build.gradle`'s `testOptions` block and `robolectric.properties` were both removed again; `DebugStrictModeAndThemedIconTest` was reverted to its original form since the condition that motivated the defensive `@Before` no longer exists. `buildShareIntent(context, imageUri)` also lost its always-unused `context` parameter in the same pass (`ActHome`'s call site updated to match).
+
+Verified clean after the redesign: `591` unit tests (589 pass, the same 2 expected-pending until Task 5's i18n - nothing else), `20/20` androidTest across `PolaroidExportHelperWidgetTest`/`PolaroidExportHelperIntegrationTest`/`ActHomeLensManagementWidgetTest`/`ActHomeLensShareIntegrationTest`, lint back to exactly the expected 3 `MissingTranslation` errors (0 new warnings - a stray `UseKtx` on the two `Bitmap.createBitmap(...)` calls introduced by this task was also fixed to match this codebase's already-established `androidx.core.graphics.createBitmap(...)` KTX convention).
+
+No separate "test-infra" commit exists in the final history - the redesign is folded into Task 1 and Task 3's own commits instead.
 
 ---
 
@@ -767,7 +767,7 @@ git commit -m "feat(lens-export): add FileProvider + LensView.resetToIdleForExpo
   - `public static final String ActHome.EXTRA_AUTO_EXPORT_LENS` (Intent extra key).
   - `ActHome.LensShareLauncher` (`@VisibleForTesting` functional interface: `void launch(Intent chooserIntent)`) and the field `ActHome.lensShareLauncher` (`@VisibleForTesting`, default `this::startActivity`) - the same test seam pattern this file already uses for `lensManagementMenu`/`lensDialog`.
 
-- [ ] **Step 1: Add the two new strings**
+- [x] **Step 1: Add the two new strings**
 
 In `app/src/main/res/values/strings.xml`, find:
 
@@ -785,7 +785,7 @@ Replace with:
 </resources>
 ```
 
-- [ ] **Step 2: Write the failing widget test (menu item 5 end-to-end) first**
+- [x] **Step 2: Write the failing widget test (menu item 5 end-to-end) first**
 
 In `app/src/androidTest/java/com/mckimquyen/ui/ActHomeLensManagementWidgetTest.kt`, find:
 
@@ -843,12 +843,12 @@ Then add, right before the final closing `}` of the `ActHomeLensManagementWidget
     }
 ```
 
-- [ ] **Step 3: Run it to verify it fails**
+- [x] **Step 3: Run it to verify it fails**
 
 Run: `ANDROID_SERIAL=115333744A005844 ./gradlew installDevDebug installDevDebugAndroidTest -q`
 Expected: build FAILS to compile - `itemShare`/`ActHome.LensShareLauncher`/`activity.lensShareLauncher`/`onLensMenuItemSelected(itemShare, 0)` reference API that does not exist yet (item 5 isn't handled, `lensShareLauncher` isn't a field).
 
-- [ ] **Step 4: Add imports**
+- [x] **Step 4: Add imports**
 
 In `app/src/main/java/com/mckimquyen/ui/ActHome.java`, find:
 
@@ -882,7 +882,7 @@ import com.mckimquyen.util.PolaroidExportHelper;
 import com.mckimquyen.util.UIUtils;
 ```
 
-- [ ] **Step 5: Add the new fields (constant, pending-export flag, test seam)**
+- [x] **Step 5: Add the new fields (constant, pending-export flag, test seam)**
 
 Find:
 
@@ -914,7 +914,7 @@ Replace with:
     LensShareLauncher lensShareLauncher = this::startActivity;
 ```
 
-- [ ] **Step 6: Consume the auto-export extra in `onCreate`, add `onNewIntent`**
+- [x] **Step 6: Consume the auto-export extra in `onCreate`, add `onNewIntent`**
 
 Find:
 
@@ -965,7 +965,7 @@ Replace with:
     }
 ```
 
-- [ ] **Step 7: Trigger the pending auto-export once lenses are loaded**
+- [x] **Step 7: Trigger the pending auto-export once lenses are loaded**
 
 Find:
 
@@ -995,7 +995,7 @@ Replace with:
     }
 ```
 
-- [ ] **Step 8: Add the menu item, its handler, and `exportActiveLensImage()`**
+- [x] **Step 8: Add the menu item, its handler, and `exportActiveLensImage()`**
 
 Find:
 
@@ -1098,13 +1098,13 @@ Replace with:
     }
 ```
 
-- [ ] **Step 9: Run the test to verify it passes**
+- [x] **Step 9: Run the test to verify it passes**
 
 Run: `ANDROID_SERIAL=115333744A005844 ./gradlew installDevDebug installDevDebugAndroidTest -q`
 Then: `adb -s 115333744A005844 shell am instrument -w -e class com.mckimquyen.ui.ActHomeLensManagementWidgetTest com.mckimquyen.lenslauncher.test/androidx.test.runner.AndroidJUnitRunner`
 Expected: `OK (16 tests)` (15 pre-existing + 1 new).
 
-- [ ] **Step 10: Mutation-check**
+- [x] **Step 10: Mutation-check**
 
 Temporarily delete the `} else if (itemId == 5) { exportActiveLensImage(); return true; }` branch from `onLensMenuItemSelected`. Reinstall and rerun just the new test:
 Run: `adb -s 115333744A005844 shell am instrument -w -e class com.mckimquyen.ui.ActHomeLensManagementWidgetTest#shareMenuItem_exportsAndLaunchesAChooserForTheActiveLens com.mckimquyen.lenslauncher.test/androidx.test.runner.AndroidJUnitRunner`
@@ -1113,7 +1113,7 @@ Expected: FAILS (latch times out - `onLensMenuItemSelected` returns `false` and 
 Restore the branch, reinstall, rerun the same command.
 Expected: `OK (1 test)`.
 
-- [ ] **Step 11: Write and run the cross-lens integration test**
+- [x] **Step 11: Write and run the cross-lens integration test**
 
 Create `app/src/androidTest/java/com/mckimquyen/ui/ActHomeLensShareIntegrationTest.kt`:
 
@@ -1204,12 +1204,12 @@ Run: `ANDROID_SERIAL=115333744A005844 ./gradlew installDevDebug installDevDebugA
 Then: `adb -s 115333744A005844 shell am instrument -w -e class com.mckimquyen.ui.ActHomeLensShareIntegrationTest com.mckimquyen.lenslauncher.test/androidx.test.runner.AndroidJUnitRunner`
 Expected: `OK (1 test)`.
 
-- [ ] **Step 12: Run the full unit suite and lint**
+- [x] **Step 12: Run the full unit suite and lint**
 
 Run: `./gradlew testDevDebugUnitTest -q && ./gradlew lintDevDebug -q`
 Expected: full suite passes (591 tests, unchanged - all new tests this task are androidTest), 0 lint errors.
 
-- [ ] **Step 13: Commit**
+- [x] **Step 13: Commit**
 
 ```bash
 git add app/src/main/java/com/mckimquyen/ui/ActHome.java app/src/main/res/values/strings.xml \
