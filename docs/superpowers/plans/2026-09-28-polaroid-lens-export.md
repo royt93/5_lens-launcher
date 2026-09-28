@@ -1589,7 +1589,7 @@ git commit -m "i18n(lens-export): translate the 3 new polaroid-export strings to
 
 **Files:** None (verification only).
 
-- [ ] **Step 1: Full unit + full instrumented regression**
+- [x] **Step 1: Full unit + full instrumented regression**
 
 Run: `./gradlew testDevDebugUnitTest -q`
 Expected: full suite passes, report the exact count (should be 591: 580 pre-`LINT-009` baseline + 11 new unit tests from Task 1).
@@ -1601,7 +1601,7 @@ Expected: 0 failures beyond any already-known pre-existing flake - cross-check a
 Run: `./gradlew lintDevDebug -q`
 Expected: 0 errors.
 
-- [ ] **Step 2: Manual smoke - `ActHome` long-press menu entry point**
+- [x] **Step 2: Manual smoke - `ActHome` long-press menu entry point**
 
 On TECNO KJ7 (`115333744A005844`):
 1. `adb -s 115333744A005844 shell am start -n com.mckimquyen.lenslauncher/com.mckimquyen.ui.ActHome`
@@ -1611,18 +1611,18 @@ On TECNO KJ7 (`115333744A005844`):
 5. **Stop and check for an ad per this repo's standing screenshot-test rule (R4)**: if any ad overlay is visible at any point in this flow, stop, note the ad type/position, and do not continue until it's dismissed.
 6. Take a screenshot of the share sheet for the story file's evidence.
 
-- [ ] **Step 3: Manual smoke - `FrmLens` button entry point + mid-pinch behavior**
+- [x] **Step 3: Manual smoke - `FrmLens` button entry point + mid-pinch behavior**
 
 1. Open Settings (`ActSettings`) → Lens tab.
 2. Tap **"Share lens image"**. Confirm it navigates to `ActHome` and the share sheet opens automatically for the currently-active lens (no extra tap needed).
 3. Back in `ActHome`, start a two-finger pinch on the lens grid and, **while still mid-pinch**, trigger the share menu another way is not possible mid-gesture by design - instead: pinch, release, then immediately long-press and share; confirm the exported image shows the idle (non-distorted, no HUD pill) layout, not a mid-gesture artifact.
 4. Confirm the caption reads `<lens name>` / `via <app name>`.
 
-- [ ] **Step 4: Write the story file**
+- [x] **Step 4: Write the story file**
 
 Create `doc/task/done/p2-fish-fish-011-polaroid-lens-export.md` following the exact structure of `doc/task/done/p2-lint-lint-009-notifydatasetchanged.md` (fields table, Context, Investigation and changes, Required test matrix, Test evidence with real counts/output, Device policy note, Audit score table scored honestly against the README rubric). Update `doc/feature.md`'s Implemented section and `doc/task/README.md`'s Implemented list with a matching entry, and remove the now-shipped idea from `doc/feature.md`'s Ideas section (matching how FISH-010's entry was moved in the `p2-lint-lint-009` docs-sync fix earlier this session).
 
-- [ ] **Step 5: Self-audit and push gate**
+- [x] **Step 5: Self-audit and push gate**
 
 Score the round against `doc/task/README.md`'s rubric (Correctness 2.0 / Unit 1.5 / Widget 1.0 / Integration 1.5 / Smoke 1.0 / Security 1.0 / Performance-lifecycle 1.0 / Maintainability 1.0). Push only if the total is strictly greater than 9.0, matching this session's established push gate (see `feedback_step_done_gate` memory).
 
