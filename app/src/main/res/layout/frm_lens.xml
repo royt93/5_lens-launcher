@@ -32,6 +32,17 @@
 
         </com.google.android.material.card.MaterialCardView>
 
+        <!-- FISH-EXPORT: relays to ActHome, which alone holds a real content-rendering LensView -
+             this preview card above draws DrawType.CIRCLES placeholders, not real app icons. -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnShareLens"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:icon="@drawable/ic_share_24dp"
+            android:text="@string/lens_share_image" />
+
         <!-- Min Icon Size Card -->
         <com.google.android.material.card.MaterialCardView
             style="@style/Widget.Material3.CardView.Filled"

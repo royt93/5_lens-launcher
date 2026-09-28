@@ -1231,7 +1231,7 @@ git commit -m "feat(lens-export): wire Share lens image into ActHome's long-pres
 - Consumes: `ActHome.EXTRA_AUTO_EXPORT_LENS` (Task 3).
 - Produces: `FrmLens.lensExportLauncher: (Intent) -> Unit` (`@VisibleForTesting internal`, default `{ intent -> startActivity(intent) }`) - same test-seam shape as `ActHome.lensShareLauncher`.
 
-- [ ] **Step 1: Write the failing widget test first**
+- [x] **Step 1: Write the failing widget test first**
 
 In `app/src/androidTest/java/com/mckimquyen/ui/FrmLensPerLensWidgetTest.kt`, add these imports:
 
@@ -1265,12 +1265,12 @@ import com.google.android.material.button.MaterialButton
     }
 ```
 
-- [ ] **Step 2: Run it to verify it fails**
+- [x] **Step 2: Run it to verify it fails**
 
 Run: `ANDROID_SERIAL=115333744A005844 ./gradlew installDevDebug installDevDebugAndroidTest -q`
 Expected: build FAILS to compile - `R.id.btnShareLens` and `fragment.lensExportLauncher` don't exist yet.
 
-- [ ] **Step 3: Add the button to the layout**
+- [x] **Step 3: Add the button to the layout**
 
 In `app/src/main/res/layout/frm_lens.xml`, find:
 
@@ -1311,7 +1311,7 @@ Replace with:
         <!-- Min Icon Size Card -->
 ```
 
-- [ ] **Step 4: Wire the button in `FrmLens.kt`**
+- [x] **Step 4: Wire the button in `FrmLens.kt`**
 
 Find:
 
@@ -1400,13 +1400,13 @@ Replace with:
         sbMinIconSize = null
 ```
 
-- [ ] **Step 5: Run the test to verify it passes**
+- [x] **Step 5: Run the test to verify it passes**
 
 Run: `ANDROID_SERIAL=115333744A005844 ./gradlew installDevDebug installDevDebugAndroidTest -q`
 Then: `adb -s 115333744A005844 shell am instrument -w -e class com.mckimquyen.ui.FrmLensPerLensWidgetTest com.mckimquyen.lenslauncher.test/androidx.test.runner.AndroidJUnitRunner`
 Expected: `OK (7 tests)` (6 pre-existing + 1 new).
 
-- [ ] **Step 6: Mutation-check**
+- [x] **Step 6: Mutation-check**
 
 Temporarily change `btnShareLens?.setOnClickListener { shareLensImage() }` to `btnShareLens?.setOnClickListener { }`. Reinstall and rerun just the new test:
 Run: `adb -s 115333744A005844 shell am instrument -w -e class com.mckimquyen.ui.FrmLensPerLensWidgetTest#shareButton_startsActHomeWithTheAutoExportExtra com.mckimquyen.lenslauncher.test/androidx.test.runner.AndroidJUnitRunner`
@@ -1415,12 +1415,12 @@ Expected: FAILS (`captured` stays null).
 Restore the real click listener, reinstall, rerun the same command.
 Expected: `OK (1 test)`.
 
-- [ ] **Step 7: Run the full unit suite and lint**
+- [x] **Step 7: Run the full unit suite and lint**
 
 Run: `./gradlew testDevDebugUnitTest -q && ./gradlew lintDevDebug -q`
 Expected: full suite passes (591 tests, unchanged), 0 lint errors.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add app/src/main/res/layout/frm_lens.xml app/src/main/java/com/mckimquyen/ui/FrmLens.kt \

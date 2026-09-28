@@ -2,6 +2,7 @@ package com.mckimquyen.ui
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -36,8 +37,14 @@ class FrmLens : Fragment(), LensInterface {
     private var btnPresetGentle: MaterialButton? = null
     private var btnPresetStandard: MaterialButton? = null
     private var btnPresetSnappy: MaterialButton? = null
+    private var btnShareLens: MaterialButton? = null
     private var utilSettings: UtilSettings? = null
     private var activeLensId: String = LensWorkspace.DEFAULT_LENS_ID
+
+    /** Test seam: swap this to capture the launched Intent instead of actually starting ActHome -
+     *  same pattern as ActHome.lensShareLauncher, which this button ultimately triggers. */
+    @androidx.annotation.VisibleForTesting
+    internal var lensExportLauncher: (Intent) -> Unit = { intent -> startActivity(intent) }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -130,6 +137,15 @@ class FrmLens : Fragment(), LensInterface {
         btnPresetGentle?.setOnClickListener { applyPreset(LensPhysicsPreset.GENTLE) }
         btnPresetStandard?.setOnClickListener { applyPreset(LensPhysicsPreset.STANDARD) }
         btnPresetSnappy?.setOnClickListener { applyPreset(LensPhysicsPreset.SNAPPY) }
+        btnShareLens = view.findViewById(R.id.btnShareLens)
+        btnShareLens?.setOnClickListener { shareLensImage() }
+    }
+
+    private fun shareLensImage() {
+        val intent = Intent(requireContext(), ActHome::class.java).apply {
+            putExtra(ActHome.EXTRA_AUTO_EXPORT_LENS, true)
+        }
+        lensExportLauncher(intent)
     }
 
     /**
@@ -194,6 +210,7 @@ class FrmLens : Fragment(), LensInterface {
      */
     override fun onDestroyView() {
         lensViewsSettings = null
+        btnShareLens = null
         sbMinIconSize = null
         tvValueMinIconSize = null
         sbDistortionFactor = null

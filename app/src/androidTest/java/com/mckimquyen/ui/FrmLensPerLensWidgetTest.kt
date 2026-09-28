@@ -14,6 +14,7 @@ import com.mckimquyen.util.LensPhysicsPreset
 import com.mckimquyen.util.UtilSettings
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -219,6 +220,25 @@ class FrmLensPerLensWidgetTest {
             LensPhysicsPreset.GENTLE.distortionFactor,
             settings.getFloat(UtilSettings.KEY_DISTORTION_FACTOR),
             0.001f
+        )
+        scenario.close()
+    }
+
+    @Test
+    fun shareButton_startsActHomeWithTheAutoExportExtra() {
+        val scenario = launchFragmentInContainer<FrmLens>(themeResId = R.style.AppTheme)
+        var captured: android.content.Intent? = null
+
+        scenario.onFragment { fragment ->
+            fragment.lensExportLauncher = { intent -> captured = intent }
+            fragment.requireView().findViewById<MaterialButton>(R.id.btnShareLens).performClick()
+        }
+
+        assertNotNull("the share button must launch an intent", captured)
+        assertEquals(ActHome::class.java.name, captured!!.component?.className)
+        org.junit.Assert.assertTrue(
+            "the intent must carry the one-shot auto-export flag",
+            captured!!.getBooleanExtra(ActHome.EXTRA_AUTO_EXPORT_LENS, false)
         )
         scenario.close()
     }
