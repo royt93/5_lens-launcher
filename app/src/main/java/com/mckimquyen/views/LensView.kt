@@ -326,6 +326,17 @@ class LensView : View {
         mReduceMotion = reduceMotion
     }
 
+    /** FISH-EXPORT: called by PolaroidExportHelper.exportAsync right before it draws this view
+     *  into an offscreen bitmap, so a live touch/pinch never bakes distortion or the pinch HUD
+     *  (drawPinchHud, gated on gestureState) into the exported snapshot. Deliberately narrower
+     *  than setLensStateForTest above (that one also drives animation/reduceMotion state for a
+     *  different testing purpose this export path has no reason to touch). */
+    internal fun resetToIdleForExport() {
+        mTouchX = -Float.MAX_VALUE
+        mTouchY = -Float.MAX_VALUE
+        gestureState = LensGestureState.IDLE
+    }
+
     @androidx.annotation.VisibleForTesting
     internal val selectedIndexForTest: Int get() = mSelectIndex
 

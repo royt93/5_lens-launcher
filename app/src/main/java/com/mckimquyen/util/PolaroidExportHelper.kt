@@ -2,8 +2,21 @@ package com.mckimquyen.util
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.Typeface
 import android.net.Uri
+import androidx.core.content.FileProvider
 import com.mckimquyen.R
+import com.mckimquyen.app.ApplicationScope
+import com.mckimquyen.views.LensView
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
+import java.io.FileOutputStream
 
 /**
  * Polaroid lens export (brainstormed 2026-09-27, spec:
@@ -88,6 +101,85 @@ object PolaroidExportHelper {
             type = "image/png"
             putExtra(Intent.EXTRA_STREAM, imageUri)
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+    }
+
+    private fun renderFrame(content: Bitmap, layout: PolaroidLayout, caption: CaptionLines): Bitmap {
+        val framed = Bitmap.createBitmap(layout.outerWidth, layout.outerHeight, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(framed)
+        canvas.drawColor(Color.WHITE)
+        canvas.drawBitmap(content, layout.contentLeft.toFloat(), layout.contentTop.toFloat(), null)
+
+        val line1Paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Color.DKGRAY
+            textSize = CAPTION_LINE1_TEXT_SIZE_PX
+            textAlign = Paint.Align.CENTER
+            typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.ITALIC)
+        }
+        val line2Paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Color.GRAY
+            textSize = CAPTION_LINE2_TEXT_SIZE_PX
+            textAlign = Paint.Align.CENTER
+            typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.ITALIC)
+        }
+        val centerX = layout.outerWidth / 2f
+        canvas.drawText(caption.line1, centerX, layout.captionLine1BaselineY.toFloat(), line1Paint)
+        canvas.drawText(caption.line2, centerX, layout.captionLine2BaselineY.toFloat(), line2Paint)
+        return framed
+    }
+
+    private fun writeToCache(context: Context, bitmap: Bitmap, fileName: String): File {
+        val dir = File(context.cacheDir, "polaroid").apply { mkdirs() }
+        val file = File(dir, "$fileName.png")
+        FileOutputStream(file).use { stream ->
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
+        }
+        return file
+    }
+
+    /**
+     * Must be called from the main thread - [lensView].draw() requires it. Captures the bitmap
+     * synchronously on the calling thread, then moves to [Dispatchers.IO] only for
+     * compositing/compress/file-write, then delivers [onDone] on [Dispatchers.Main]. Delivers
+     * `null` on any failure: an unlaid-out view (width/height <= 0), an OutOfMemoryError, or an
+     * I/O/FileProvider failure.
+     */
+    @JvmStatic
+    fun exportAsync(lensView: LensView, lensName: String, context: Context, onDone: (Uri?) -> Unit) {
+        val width = lensView.width
+        val height = lensView.height
+        if (width <= 0 || height <= 0) {
+            onDone(null)
+            return
+        }
+        lensView.resetToIdleForExport()
+        val contentBitmap = try {
+            Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888).also { bmp ->
+                lensView.draw(Canvas(bmp))
+            }
+        } catch (error: OutOfMemoryError) {
+            Logger.e("PolaroidExportHelper: bitmap alloc failed", error)
+            onDone(null)
+            return
+        }
+
+        val appContext = context.applicationContext
+        val caption = formatCaption(appContext, lensName)
+        val fileName = sanitizeFileName(lensName)
+        ApplicationScope.scope.launch(Dispatchers.IO) {
+            val uri = try {
+                val layout = calculatePolaroidLayout(contentBitmap.width, contentBitmap.height)
+                val framed = renderFrame(contentBitmap, layout, caption)
+                val file = writeToCache(appContext, framed, fileName)
+                framed.recycle()
+                FileProvider.getUriForFile(appContext, "${appContext.packageName}.fileprovider", file)
+            } catch (error: Exception) {
+                Logger.e("PolaroidExportHelper: export failed", error)
+                null
+            } finally {
+                contentBitmap.recycle()
+            }
+            withContext(Dispatchers.Main) { onDone(uri) }
         }
     }
 }

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Scoped narrowly to the one subdirectory PolaroidExportHelper writes to - not the whole
+         cache dir - so the FileProvider can never expose anything else this app ever caches. -->
+    <cache-path name="polaroid" path="polaroid/" />
+</paths>

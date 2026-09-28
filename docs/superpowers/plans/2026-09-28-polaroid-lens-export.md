@@ -311,7 +311,7 @@ git commit -m "fix(test-infra): enable includeAndroidResources, pin Robolectric 
   - `LensView.resetToIdleForExport()` (internal, no args, `Unit`).
   - `PolaroidExportHelper.exportAsync(lensView: LensView, lensName: String, context: Context, onDone: (Uri?) -> Unit)` — must be called from the main thread; delivers `onDone` on the main thread.
 
-- [ ] **Step 1: Add the FileProvider to the manifest**
+- [x] **Step 1: Add the FileProvider to the manifest**
 
 In `app/src/main/AndroidManifest.xml`, find this exact block:
 
@@ -342,7 +342,7 @@ Insert immediately before it:
              ==================================================================== -->
 ```
 
-- [ ] **Step 2: Add the file-paths declaration**
+- [x] **Step 2: Add the file-paths declaration**
 
 Create `app/src/main/res/xml/file_paths.xml`:
 
@@ -355,13 +355,13 @@ Create `app/src/main/res/xml/file_paths.xml`:
 </paths>
 ```
 
-- [ ] **Step 3: Verify the manifest merges cleanly**
+- [x] **Step 3: Verify the manifest merges cleanly**
 
 Run: `./gradlew :app:processDevDebugManifest -q`
 Expected: task succeeds. Then: `grep -A2 'androidx.core.content.FileProvider' app/build/intermediates/merged_manifest/devDebug/processDevDebugManifest/AndroidManifest.xml`
 Expected: the `<provider>` block appears with `android:authorities="com.mckimquyen.lenslauncher.dev.fileprovider"` (or the equivalent resolved `applicationId` for whichever flavor merged).
 
-- [ ] **Step 4: Add `resetToIdleForExport()` to `LensView`**
+- [x] **Step 4: Add `resetToIdleForExport()` to `LensView`**
 
 In `app/src/main/java/com/mckimquyen/views/LensView.kt`, find this exact block:
 
@@ -400,7 +400,7 @@ Replace it with:
     }
 ```
 
-- [ ] **Step 5: Write the failing widget test (capture + reset-before-draw)**
+- [x] **Step 5: Write the failing widget test (capture + reset-before-draw)**
 
 Create `app/src/androidTest/java/com/mckimquyen/util/PolaroidExportHelperWidgetTest.kt`:
 
@@ -509,13 +509,13 @@ class PolaroidExportHelperWidgetTest {
 }
 ```
 
-- [ ] **Step 6: Run it to verify it fails**
+- [x] **Step 6: Run it to verify it fails**
 
 Run: `ANDROID_SERIAL=115333744A005844 ./gradlew installDevDebug installDevDebugAndroidTest -q`
 Then: `adb -s 115333744A005844 shell am instrument -w -e class com.mckimquyen.util.PolaroidExportHelperWidgetTest com.mckimquyen.lenslauncher.test/androidx.test.runner.AndroidJUnitRunner`
 Expected: FAIL to compile/run — `exportAsync` does not exist yet.
 
-- [ ] **Step 7: Implement `exportAsync` in `PolaroidExportHelper.kt`**
+- [x] **Step 7: Implement `exportAsync` in `PolaroidExportHelper.kt`**
 
 In `app/src/main/java/com/mckimquyen/util/PolaroidExportHelper.kt`, replace the import block:
 
@@ -636,13 +636,13 @@ Then, right before the final closing `}` of the `object PolaroidExportHelper` bo
     }
 ```
 
-- [ ] **Step 8: Run the widget test to verify it passes**
+- [x] **Step 8: Run the widget test to verify it passes**
 
 Run: `ANDROID_SERIAL=115333744A005844 ./gradlew installDevDebug installDevDebugAndroidTest -q`
 Then: `adb -s 115333744A005844 shell am instrument -w -e class com.mckimquyen.util.PolaroidExportHelperWidgetTest com.mckimquyen.lenslauncher.test/androidx.test.runner.AndroidJUnitRunner`
 Expected: `OK (2 tests)`.
 
-- [ ] **Step 9: Mutation check the reset-before-draw behavior**
+- [x] **Step 9: Mutation check the reset-before-draw behavior**
 
 Temporarily comment out the `lensView.resetToIdleForExport()` line inside `exportAsync`. Reinstall (`ANDROID_SERIAL=115333744A005844 ./gradlew installDevDebug installDevDebugAndroidTest -q`) and rerun just `exportAsync_resetsLiveTouchAndGestureStateBeforeCapture`:
 
@@ -652,7 +652,7 @@ Expected: FAILS with the assertion message about `resetToIdleForExport()`.
 Restore the `lensView.resetToIdleForExport()` line, reinstall, rerun the same command.
 Expected: `OK (1 test)`.
 
-- [ ] **Step 10: Write and run the integration test (real FileProvider + contentResolver boundary)**
+- [x] **Step 10: Write and run the integration test (real FileProvider + contentResolver boundary)**
 
 Create `app/src/androidTest/java/com/mckimquyen/util/PolaroidExportHelperIntegrationTest.kt`:
 
@@ -735,12 +735,12 @@ Run: `ANDROID_SERIAL=115333744A005844 ./gradlew installDevDebug installDevDebugA
 Then: `adb -s 115333744A005844 shell am instrument -w -e class com.mckimquyen.util.PolaroidExportHelperIntegrationTest com.mckimquyen.lenslauncher.test/androidx.test.runner.AndroidJUnitRunner`
 Expected: `OK (1 test)`.
 
-- [ ] **Step 11: Run the full unit suite and lint**
+- [x] **Step 11: Run the full unit suite and lint**
 
 Run: `./gradlew testDevDebugUnitTest -q && ./gradlew lintDevDebug -q`
 Expected: full suite passes (591 tests, unchanged from Task 1 - no new unit tests this task), 0 lint errors.
 
-- [ ] **Step 12: Commit**
+- [x] **Step 12: Commit**
 
 ```bash
 git add app/src/main/AndroidManifest.xml app/src/main/res/xml/file_paths.xml \
