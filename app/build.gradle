@@ -224,6 +224,21 @@ android {
     }
 
     // ========================================================================
+    // TEST OPTIONS
+    // ========================================================================
+    // FISH-EXPORT: required for Robolectric to resolve real Android resources
+    // (Context.getString(R.string.x), including build-time resValue entries like app_name) in
+    // JVM unit tests - without this, AGP never packages resources for the unit-test task at all,
+    // so any Resources.getString/getText call throws Resources$NotFoundException regardless of
+    // whether the resource actually exists. No prior test in this repo called getString(R....),
+    // so this gap was never hit before PolaroidExportHelperTest.
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+        }
+    }
+
+    // ========================================================================
     // COMPILE OPTIONS
     // ========================================================================
     compileOptions {

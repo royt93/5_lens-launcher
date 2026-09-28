@@ -8,6 +8,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -24,6 +25,20 @@ class DebugStrictModeAndThemedIconTest {
             "src/main/res/mipmap-anydpi-v26/ic_launcher.xml",
             "src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml",
         )
+    }
+
+    // FISH-EXPORT finding: StrictMode is real static JVM-wide state that Robolectric does not
+    // reset between test classes on its own. This class only reset it in @After, so "release
+    // build leaves StrictMode untouched" silently depended on no earlier test in the same JVM
+    // fork having left a policy installed - true by luck until app/build.gradle's
+    // testOptions.unitTests.includeAndroidResources=true (added for PolaroidExportHelperTest,
+    // which needs real Context.getString) started actually running RApplication.onCreate() for
+    // some other test's Application context, which installs a real policy that then leaked here.
+    // Reset before every test too, not just after, so this class no longer depends on run order.
+    @Before
+    fun resetPoliciesBeforeEachTest() {
+        StrictMode.setThreadPolicy(StrictMode.ThreadPolicy.LAX)
+        StrictMode.setVmPolicy(StrictMode.VmPolicy.LAX)
     }
 
     @After
