@@ -126,4 +126,40 @@ class AccessibleListModeIntegrationTest {
 
         scenario.close()
     }
+
+    /**
+     * LINT-009: force-rebinding via `notifyDataSetChanged()` on config change must not lose or
+     * corrupt the real [RAppsSingleton] snapshot the adapter is bound to — the risk a naive
+     * `DiffUtil`-based "fix" would carry if it mishandled the identical-data case.
+     */
+    @Test
+    fun onConfigurationChanged_preservesAdapterContentFromRAppsSingleton() {
+        val scenario = ActivityScenario.launch(ActHome::class.java)
+
+        scenario.onActivity { activity ->
+            val rvHomeAppList = activity.findViewById<RecyclerView>(R.id.rvHomeAppList)
+            val adapter = rvHomeAppList.adapter as? AppAdapter
+            assertNotNull("Adapter must exist", adapter)
+
+            val singletonVisibleCount = RAppsSingleton.instance.apps.orEmpty().count { it.isVisible }
+            val beforeCount = adapter!!.itemCount
+
+            activity.onConfigurationChanged(activity.resources.configuration)
+
+            assertEquals(
+                "Item count must be unchanged by a force-rebind",
+                beforeCount,
+                adapter.itemCount
+            )
+            if (singletonVisibleCount > 0) {
+                assertEquals(
+                    "Adapter must still reflect RAppsSingleton's visible-app count after rebind",
+                    singletonVisibleCount,
+                    adapter.itemCount
+                )
+            }
+        }
+
+        scenario.close()
+    }
 }

@@ -3,6 +3,7 @@ package com.mckimquyen.ui;
 import static com.mckimquyen.ext.ActivityKt.rateAppInApp;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.ClipData;
@@ -354,6 +355,12 @@ public class ActHome extends ActBase {
         ViewCompat.requestApplyInsets(rootView);
     }
 
+    // LINT-009: `android:configChanges` keeps ActHome alive across rotation/fold, so rows must be
+    // force-rebound here to re-measure for the new width/column count. `updateApps()`'s DiffUtil
+    // path (used elsewhere for real data changes) would see identical content and skip every
+    // rebind, leaving stale layout — notifyDataSetChanged is the correct call for this case, not
+    // the lint-preferred "last resort".
+    @SuppressLint("NotifyDataSetChanged")
     @Override
     public void onConfigurationChanged(@NonNull Configuration newConfig) {
         super.onConfigurationChanged(newConfig);

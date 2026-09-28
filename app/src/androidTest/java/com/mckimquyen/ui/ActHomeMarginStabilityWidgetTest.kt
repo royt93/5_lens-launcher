@@ -2,11 +2,14 @@ package com.mckimquyen.ui
 
 import android.view.ViewGroup
 import androidx.core.view.ViewCompat
+import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.android.material.search.SearchBar
 import com.mckimquyen.R
+import java.util.concurrent.atomic.AtomicBoolean
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -70,6 +73,36 @@ class ActHomeMarginStabilityWidgetTest {
                 "top margin must not grow after 2 config changes",
                 baseline,
                 afterSecond
+            )
+        }
+    }
+
+    /**
+     * LINT-009: `homeAppAdapter.notifyDataSetChanged()` in onConfigurationChanged is a deliberate
+     * force-rebind (activity survives rotation/fold via `configChanges`, so rows must re-measure
+     * for the new width) — not the equivalent-but-safer `DiffUtil` path used elsewhere, which
+     * would compute zero changes against identical data (see AppDiffCallbackTest's "identical
+     * lists produce no changes") and silently skip every rebind. This proves the observer that
+     * `notifyDataSetChanged()` fires actually reaches the adapter attached to rvHomeAppList.
+     */
+    @Test
+    fun onConfigurationChangedForceRebindsHomeAppAdapter() {
+        ActivityScenario.launch(ActHome::class.java).use { scenario ->
+            val rebindFired = AtomicBoolean(false)
+            scenario.onActivity { activity ->
+                val rvHomeAppList = activity.findViewById<RecyclerView>(R.id.rvHomeAppList)
+                rvHomeAppList.adapter!!.registerAdapterDataObserver(
+                    object : RecyclerView.AdapterDataObserver() {
+                        override fun onChanged() {
+                            rebindFired.set(true)
+                        }
+                    }
+                )
+                activity.onConfigurationChanged(activity.resources.configuration)
+            }
+            assertTrue(
+                "notifyDataSetChanged() must fire AdapterDataObserver.onChanged() on config change",
+                rebindFired.get()
             )
         }
     }
