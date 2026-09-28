@@ -72,7 +72,12 @@ class AppSearchIntegrationTest {
                 waitForMainThread()
                 scenario.onActivity { activity ->
                     assertSearch(activity, 0)
-                    assertEquals(View.INVISIBLE, activity.findViewById<View>(R.id.lensViews).visibility)
+                    // FISH-008 left this checking the per-page LensView's own `lensViews` id,
+                    // whose visibility is never explicitly toggled - visibility now lives on the
+                    // ViewPager2 (`lensPager`) that wraps it (see item_lens_page.xml's own comment
+                    // on this exact migration). Confirmed via direct log: lensPager was already
+                    // correctly INVISIBLE here while `lensViews` stayed VISIBLE by coincidence.
+                    assertEquals(View.INVISIBLE, activity.findViewById<View>(R.id.lensPager).visibility)
                 }
 
                 singleton.apps = arrayListOf()
@@ -151,6 +156,21 @@ class AppSearchIntegrationTest {
                     searchView!!.show()
                 }
                 waitUntilShowing(searchView!!, true)
+
+                // Closes a real race against RApplication's background PackageManager scan
+                // (kicked off once at process start, outside this test's control - see
+                // RApplication.onCreate()'s unconditional updateApps() call). waitUntilShowing
+                // above polls for up to 5s, plenty of time on a slow device for that scan to
+                // complete and overwrite this fake single-app list with real device apps before
+                // the assertions below run - confirmed via direct logging (adapterCount=0 at the
+                // point of failure). Re-asserting immediately before use, the same pattern this
+                // file's other test method already uses before each of its own checks, closes
+                // the window to zero (everything from here to the end of the onActivity block
+                // below runs synchronously on the main thread with no yield back to the message
+                // queue, so nothing else can interleave and clobber it mid-block).
+                singleton.apps = arrayListOf(launchable)
+                AppEventManager.notifyAppsUpdated()
+                waitForMainThread()
 
                 scenario.onActivity {
                     val search: EditText = searchView!!.editText

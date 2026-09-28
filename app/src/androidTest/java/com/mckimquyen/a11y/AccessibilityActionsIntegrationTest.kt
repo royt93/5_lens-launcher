@@ -26,30 +26,36 @@ class AccessibilityActionsIntegrationTest {
 
     @Test
     fun testLensAccessibilityAction_click_triggersLaunchCallback() {
-        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+        val context = instrumentation.targetContext
         var launchedIndex = -1
+        var success = false
 
-        val lensView = LensView(context)
-        val sampleApps = listOf(
-            App(id = 1, label = "Test App", packageName = "com.test.app", name = "MainAct")
-        )
+        // LensView's constructor needs a Looper (FISH-009's ScaleGestureDetector) - must run on
+        // the main thread, matching every other test in this codebase that constructs a LensView.
+        instrumentation.runOnMainSync {
+            val lensView = LensView(context)
+            val sampleApps = listOf(
+                App(id = 1, label = "Test App", packageName = "com.test.app", name = "MainAct")
+            )
 
-        val helper = LensAccessibilityHelper(
-            host = lensView,
-            appProvider = { sampleApps },
-            rectProvider = { _, outRect ->
-                outRect.set(10, 10, 100, 100)
-                true
-            },
-            onAppClicked = { index -> launchedIndex = index },
-            onAppLongClicked = { true }
-        )
+            val helper = LensAccessibilityHelper(
+                host = lensView,
+                appProvider = { sampleApps },
+                rectProvider = { _, outRect ->
+                    outRect.set(10, 10, 100, 100)
+                    true
+                },
+                onAppClicked = { index -> launchedIndex = index },
+                onAppLongClicked = { true }
+            )
 
-        val success = helper.testPerformActionForVirtualView(
-            id = 0,
-            action = AccessibilityNodeInfoCompat.ACTION_CLICK,
-            args = null
-        )
+            success = helper.testPerformActionForVirtualView(
+                id = 0,
+                action = AccessibilityNodeInfoCompat.ACTION_CLICK,
+                args = null
+            )
+        }
 
         assertTrue("Action click must succeed", success)
         assertEquals("Launched index must be 0", 0, launchedIndex)

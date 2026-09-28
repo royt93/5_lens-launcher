@@ -103,9 +103,17 @@ class MaterialYouWidgetTest {
 
     @Test
     fun testMaterialYouCardTokens() {
-        val root = LayoutInflater.from(themedContext).inflate(R.layout.frm_lens, null, false) as android.view.ViewGroup
-        val container = root.getChildAt(0) as android.view.ViewGroup
-        val cardView = container.getChildAt(1) as com.google.android.material.card.MaterialCardView
+        // frm_lens.xml contains a LensView (lensViewsSettings), whose constructor needs a Looper
+        // (FISH-009's ScaleGestureDetector) - inflating it must run on the main thread, matching
+        // every other test in this codebase that constructs/inflates a LensView.
+        lateinit var cardView: com.google.android.material.card.MaterialCardView
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            val root = LayoutInflater.from(themedContext).inflate(R.layout.frm_lens, null, false) as android.view.ViewGroup
+            val container = root.getChildAt(0) as android.view.ViewGroup
+            // FISH-011: child 1 is now the "Share lens image" button, not a card - the Min Icon
+            // Size card (still the one this test targets) moved from index 1 to index 2.
+            cardView = container.getChildAt(2) as com.google.android.material.card.MaterialCardView
+        }
         val density = themedContext.resources.displayMetrics.density
 
         val expectedRadius = 16 * density
