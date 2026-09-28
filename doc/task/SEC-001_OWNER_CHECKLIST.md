@@ -42,13 +42,17 @@
 
 ## Bước 5 — Purge lịch sử Git (phối hợp, rủi ro cao)
 
-- [ ] Backup toàn bộ repo trước khi làm (mọi branch, mọi remote).
+> **Lưu ý (2026-09-28):** lệnh `git filter-repo --path app/keystore.jks --invert-paths`
+> đơn thuần chỉ xoá blob `keystore.jks`. Nó KHÔNG xoá được `KS_ALIAS`/`KS_PW` plaintext
+> vẫn còn nằm trong các version cũ của `gradle.properties` (file này hiện vẫn tracked
+> với nội dung sạch, nên filter-repo không đụng vào lịch sử của nó) — xác nhận bằng
+> `git log --all -p -- gradle.properties | grep -i KS_`. Dùng script dưới đây, nó xử lý
+> cả hai.
+
+- [ ] Backup toàn bộ repo trước khi làm (mọi branch, mọi remote) — script tự tạo `git bundle` backup, nhưng nên tự lưu thêm 1 bản riêng.
 - [ ] Thông báo TRƯỚC cho bất kỳ ai khác có clone repo — sau khi rewrite history, họ phải re-clone hoặc `git fetch` + reset cứng, không được merge/rebase bình thường.
-- [ ] Dùng `git filter-repo` (khuyến nghị, thay cho `filter-branch` đã deprecated) để xoá `app/keystore.jks` khỏi mọi commit:
-  ```
-  git filter-repo --path app/keystore.jks --invert-paths
-  ```
-- [ ] Force-push toàn bộ branch bị ảnh hưởng lên remote — **đây là thao tác phá hoại không đảo ngược được, Claude sẽ không tự chạy lệnh này**, Roy tự chạy khi đã sẵn sàng.
+- [ ] Chạy `scripts/purge-keystore-history.sh --yes-i-have-backed-up-and-notified-everyone` (xoá `app/keystore.jks` khỏi mọi commit + redact `KS_ALIAS`/`KS_PW` plaintext theo `scripts/keystore-history-redact-expressions.txt`). Cần cài `git-filter-repo` trước: `brew install git-filter-repo`.
+- [ ] Force-push toàn bộ branch bị ảnh hưởng lên remote — **đây là thao tác phá hoại không đảo ngược được, Claude sẽ không tự chạy lệnh này**, Roy tự chạy khi đã sẵn sàng. Script không tự force-push.
 - [ ] Sau force-push: báo mọi người re-clone; xoá reflog + chạy GC trên server (GitHub tự làm với repo cũ sau 1 khoảng thời gian, hoặc liên hệ GitHub Support để xoá cache sớm hơn nếu cần).
 
 ## Bước 6 — Secret scanning + tài liệu ownership

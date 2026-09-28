@@ -29,6 +29,8 @@ import java.util.Locale
 // locale override and font-scale clamp like every other screen.
 class ActVipManagement : BaseActivity() {
 
+    // lateinit is safe here: both are assigned first thing in onCreate, before any other
+    // lifecycle callback or listener that could read them can run.
     private lateinit var binding: ActVipManagementBinding
 
     private var countDownTimer: CountDownTimer? = null
@@ -395,8 +397,11 @@ class ActVipManagement : BaseActivity() {
 
                 val currentMinute = minutes.toInt()
                 if (lastMinute != currentMinute) {
-                    if (lastMinute != null) {
-                        playCountUpAnimation(lastMinute!!, currentMinute)
+                    // local val: lastMinute is a mutable class property, so Kotlin won't smart-cast
+                    // it across the null check above — capture it instead of force-unwrapping.
+                    val previousMinute = lastMinute
+                    if (previousMinute != null) {
+                        playCountUpAnimation(previousMinute, currentMinute)
                     }
                     lastMinute = currentMinute
                 }
