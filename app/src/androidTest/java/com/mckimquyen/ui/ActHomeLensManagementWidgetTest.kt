@@ -112,7 +112,12 @@ class ActHomeLensManagementWidgetTest {
             dialog!!.findViewById<EditText>(android.R.id.edit)!!.setText(name)
             dialog.getButton(DialogInterface.BUTTON_POSITIVE).performClick()
         }
+        // FISH-010: confirming now plays a circular-unreveal (ApertureRevealHelper.
+        // DEFAULT_DURATION_MS) before the dialog actually dismisses and its business logic runs -
+        // idle()'s own 250ms margin is the same order of magnitude as that animation on a real
+        // device with animations enabled, so wait past it explicitly rather than race it.
         idle()
+        SystemClock.sleep(300)
     }
 
     /** Presses the live confirm dialog's real positive button. */
@@ -122,7 +127,9 @@ class ActHomeLensManagementWidgetTest {
             assertNotNull("The confirm dialog must be showing", dialog)
             dialog!!.getButton(DialogInterface.BUTTON_POSITIVE).performClick()
         }
+        // FISH-010: same reveal-then-dismiss timing note as confirmNameDialog above.
         idle()
+        SystemClock.sleep(300)
     }
 
     /** Pages to the second lens so the menu acts on a non-default lens (its own suffixed keys). */
@@ -483,6 +490,80 @@ class ActHomeLensManagementWidgetTest {
                 lenses.find { it.id == LensWorkspace.DEFAULT_LENS_ID }
             )
             assertNotNull("The non-active lens must survive", lenses.find { it.id == "second" })
+        }
+    }
+
+    // ---- FISH-010: reduced motion must skip the reveal but still apply the business logic ----
+
+    private fun runShell(command: String): String {
+        val pfd = InstrumentationRegistry.getInstrumentation().uiAutomation.executeShellCommand(command)
+        return java.io.BufferedReader(
+            java.io.InputStreamReader(android.os.ParcelFileDescriptor.AutoCloseInputStream(pfd))
+        ).use { it.readText() }
+    }
+
+    /** Forces `LensPhysicsPolicy.shouldReduceLensMotion` true for the duration of [block]. */
+    private fun withReducedMotionForced(block: () -> Unit) {
+        val original = runShell("settings get global animator_duration_scale").trim()
+        runShell("settings put global animator_duration_scale 0")
+        try {
+            block()
+        } finally {
+            runShell("settings put global animator_duration_scale ${if (original.isBlank() || original == "null") "1" else original}")
+        }
+    }
+
+    @Test
+    fun renameLens_underReducedMotion_stillAppliesInstantly() = withReducedMotionForced {
+        seedSecondLens()
+
+        ActivityScenario.launch(ActHome::class.java).use { scenario ->
+            idle()
+
+            openMenuAndSelect(scenario, itemRename, position = 0)
+            scenario.onActivity { activity ->
+                val dialog = activity.lensDialog
+                assertNotNull("The name dialog must be showing", dialog)
+                dialog!!.findViewById<EditText>(android.R.id.edit)!!.setText("Instant Rename")
+                dialog.getButton(DialogInterface.BUTTON_POSITIVE).performClick()
+                // No reveal plays under reduced motion, so the dialog itself must already be
+                // gone by the time performClick() returns - only the underlying DB write
+                // (LensWorkspace.renameLens's own IO-dispatcher coroutine) is still async.
+                assertFalse(dialog.isShowing)
+            }
+            idle()
+
+            val lenses = runBlocking { dao.getAll() }
+            assertNotNull(
+                "The rename must be applied even with no reveal animation",
+                lenses.find { it.name == "Instant Rename" }
+            )
+        }
+    }
+
+    @Test
+    fun deleteLens_underReducedMotion_stillAppliesInstantly() = withReducedMotionForced {
+        seedSecondLens()
+
+        ActivityScenario.launch(ActHome::class.java).use { scenario ->
+            idle()
+
+            openMenuAndSelect(scenario, itemDelete, position = 0)
+            scenario.onActivity { activity ->
+                val dialog = activity.lensDialog
+                assertNotNull("The confirm dialog must be showing", dialog)
+                dialog!!.getButton(DialogInterface.BUTTON_POSITIVE).performClick()
+                // Same reduced-motion synchronous-dismiss note as the rename test above.
+                assertFalse(dialog.isShowing)
+            }
+            idle()
+
+            val lenses = runBlocking { dao.getAll() }
+            assertEquals("The delete must be applied even with no reveal animation", 1, lenses.size)
+            assertNull(
+                "The active (default) lens must be gone",
+                lenses.find { it.id == LensWorkspace.DEFAULT_LENS_ID }
+            )
         }
     }
 }

@@ -70,6 +70,7 @@ import com.mckimquyen.search.QuickAction;
 import com.mckimquyen.search.QuickActionEngine;
 import com.mckimquyen.search.SearchHistoryStore;
 import com.mckimquyen.search.SearchResultAdapter;
+import com.mckimquyen.util.ApertureRevealHelper;
 import com.mckimquyen.util.Logger;
 import com.mckimquyen.util.UIUtils;
 import com.mckimquyen.util.UtilCalculator;
@@ -671,14 +672,27 @@ public class ActHome extends ActBase {
         lensDialog = new MaterialAlertDialogBuilder(this, R.style.MaterialYouDialogTheme)
                 .setTitle(titleRes)
                 .setView(container)
-                .setPositiveButton(android.R.string.ok, (dialog, which) -> {
-                    String name = input.getText() != null ? input.getText().toString().trim() : "";
-                    if (!name.isEmpty()) {
-                        onDone.onNameEntered(name);
-                    }
-                })
+                .setPositiveButton(android.R.string.ok, null)
                 .setNegativeButton(android.R.string.cancel, null)
-                .show();
+                .create();
+
+        // FISH-010: circular reveal expanding from/collapsing to the lens menu's own anchor -
+        // the same anchor already resolved for the menu itself (lensMenuAnchor()).
+        ApertureRevealHelper.prepareDialog(lensDialog);
+        lensDialog.show();
+        ApertureRevealHelper.revealShownDialog(lensDialog, lensMenuAnchor());
+
+        lensDialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE).setOnClickListener(v -> {
+            String name = input.getText() != null ? input.getText().toString().trim() : "";
+            ApertureRevealHelper.dismissWithReveal(lensDialog, lensMenuAnchor(), () -> {
+                if (!name.isEmpty()) {
+                    onDone.onNameEntered(name);
+                }
+            });
+        });
+        lensDialog.getButton(android.content.DialogInterface.BUTTON_NEGATIVE).setOnClickListener(v ->
+                ApertureRevealHelper.dismissWithReveal(lensDialog, lensMenuAnchor(), null)
+        );
     }
 
     private void confirmDeleteLensDialog(LensWorkspace lens) {
@@ -686,7 +700,16 @@ public class ActHome extends ActBase {
         lensDialog = new MaterialAlertDialogBuilder(this, R.style.MaterialYouDialogTheme)
                 .setTitle(R.string.lens_delete)
                 .setMessage(message)
-                .setPositiveButton(R.string.lens_delete, (dialog, which) ->
+                .setPositiveButton(R.string.lens_delete, null)
+                .setNegativeButton(android.R.string.cancel, null)
+                .create();
+
+        ApertureRevealHelper.prepareDialog(lensDialog);
+        lensDialog.show();
+        ApertureRevealHelper.revealShownDialog(lensDialog, lensMenuAnchor());
+
+        lensDialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE).setOnClickListener(v ->
+                ApertureRevealHelper.dismissWithReveal(lensDialog, lensMenuAnchor(), () ->
                         LensWorkspace.deleteLens(lens.getId(), lenses -> {
                             // FISH-008 Phase 3: no cascade exists for prefs either - drop the
                             // deleted lens's own curvature/Smart Focus keys explicitly.
@@ -712,9 +735,10 @@ public class ActHome extends ActBase {
                                 }
                             }
                             return Unit.INSTANCE;
-                        }))
-                .setNegativeButton(android.R.string.cancel, null)
-                .show();
+                        })));
+        lensDialog.getButton(android.content.DialogInterface.BUTTON_NEGATIVE).setOnClickListener(v ->
+                ApertureRevealHelper.dismissWithReveal(lensDialog, lensMenuAnchor(), null)
+        );
     }
 
     private void setupSearch() {

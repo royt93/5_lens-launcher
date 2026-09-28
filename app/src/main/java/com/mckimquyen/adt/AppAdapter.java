@@ -36,6 +36,7 @@ import com.mckimquyen.model.AppPersistent;
 import com.mckimquyen.model.PinnedZone;
 import com.mckimquyen.services.BroadcastReceivers;
 import com.mckimquyen.ui.ActSettings;
+import com.mckimquyen.util.ApertureRevealHelper;
 import com.mckimquyen.util.UtilApp;
 
 import java.util.List;
@@ -443,6 +444,12 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
         private final boolean mIsHaveBiometric; // Device có hỗ trợ biometric không
         private final AppAdapter mAdapter;   // Reference to adapter for state sync
 
+        /** The Set-folder dialog currently on screen, exposed so tests can drive its real buttons
+         *  (same pattern as {@code ActHome.lensDialog} - Espresso cannot inject touches for this
+         *  on this project's test devices, see FISH-008's own note on that). */
+        @androidx.annotation.VisibleForTesting
+        androidx.appcompat.app.AlertDialog folderDialog;
+
         // ====================================================================
         // CONSTRUCTOR
         // ====================================================================
@@ -615,18 +622,32 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
             container.setPadding(paddingH, paddingV, paddingH, 0);
             container.addView(input);
 
-            new MaterialAlertDialogBuilder(mActivityContext, R.style.MaterialYouDialogTheme)
+            folderDialog = new MaterialAlertDialogBuilder(mActivityContext, R.style.MaterialYouDialogTheme)
                     .setTitle(R.string.organization_set_folder)
                     .setView(container)
-                    .setPositiveButton(android.R.string.ok, (dialog, which) ->
-                            applyOrganization(
-                                    mApp.isFavorite(),
-                                    input.getText() != null ? input.getText().toString() : "",
-                                    mApp.getPinnedZone()))
-                    .setNeutralButton(R.string.organization_clear_folder, (dialog, which) ->
-                            applyOrganization(mApp.isFavorite(), null, mApp.getPinnedZone()))
+                    .setPositiveButton(android.R.string.ok, null)
+                    .setNeutralButton(R.string.organization_clear_folder, null)
                     .setNegativeButton(android.R.string.cancel, null)
-                    .show();
+                    .create();
+
+            ApertureRevealHelper.prepareDialog(folderDialog);
+            folderDialog.show();
+            ApertureRevealHelper.revealShownDialog(folderDialog, itemView);
+
+            folderDialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE).setOnClickListener(v -> {
+                String folder = input.getText() != null ? input.getText().toString() : "";
+                ApertureRevealHelper.dismissWithReveal(folderDialog, itemView, () ->
+                        applyOrganization(mApp.isFavorite(), folder, mApp.getPinnedZone()));
+            });
+
+            folderDialog.getButton(android.content.DialogInterface.BUTTON_NEUTRAL).setOnClickListener(v ->
+                ApertureRevealHelper.dismissWithReveal(folderDialog, itemView, () ->
+                        applyOrganization(mApp.isFavorite(), null, mApp.getPinnedZone()))
+            );
+
+            folderDialog.getButton(android.content.DialogInterface.BUTTON_NEGATIVE).setOnClickListener(v ->
+                ApertureRevealHelper.dismissWithReveal(folderDialog, itemView, null)
+            );
         }
 
         private void showAppMenu(View anchor) {
