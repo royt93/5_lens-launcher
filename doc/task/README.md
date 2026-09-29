@@ -144,6 +144,8 @@
 - UI-023 — Dialog `EditText` loses typed text on config change (2026-09-29, picked as the immediate follow-up from `FISH-012`'s own audit): `AppAdapter.showFolderDialog` and `FrmSettings.showSearchHintDialog` both built their `EditText` with no `id`, so `View.dispatchSaveInstanceState`/`dispatchRestoreInstanceState` skip it entirely (documented AOSP contract) — same root cause and fix already applied to the lens-rename dialog, just never carried over here. Fix: `setId(android.R.id.edit)` on both, one line each. A real dead end disclosed rather than hidden: the original plan to smoke-verify via an actual device rotation was abandoned once it became clear `ActSettings`/`ActHome` both declare `configChanges="orientation|..."` and never recreate on rotation at all, making that the wrong tool for this specific claim; manual on-device exploration to confirm this also hit a real `adb shell uiautomator dump` failure (`could not get idle state`), traced to this same codebase's own already-documented indeterminate-progress-bar cause. Correct fix instead: two widget tests exercise the real documented `saveHierarchyState`/`restoreHierarchyState` mechanism directly against each dialog's real, production-constructed `EditText` — both written and confirmed failing before the fix, passing after, and independently mutation-checked. 601/601 unit tests (unchanged, no new unit tests — genuinely not applicable), lint 0 errors/8 warnings, 9 instrumented classes (both touched + 7 neighboring `FrmSettings*`/`AppAdapter*`/`FrmApps*`) all green on TECNO KJ7. Self-audited **9.7/10**.
 - FISH-013 — Auto-export-lens intent extra silently lost on process kill (2026-09-29, picked as the next unblocked backlog item — full `brainstorming`→`writing-plans`→`executing-plans` pipeline, `docs/superpowers/specs/2026-09-29-fish-013-auto-export-lens-race-design.md` / `docs/superpowers/plans/2026-09-29-fish-013-auto-export-lens-race.md`): `FrmLens`'s Share-lens button raced a process kill between "intent extra consumed" and "export actually completes", silently losing the request with the in-memory-only `pendingAutoExportLens` boolean. Fix: a durable `UtilSettings` pending flag (`KEY_PENDING_AUTO_EXPORT_LENS`), the exact same pending-key shape as `FISH-012`'s pinch-adjust persistence — set at request time by both `FrmLens.shareLensImage()` and `ActHome.consumeAutoExportExtra()`, resurrected on every `onCreate`/`onNewIntent`, and cleared only at `exportActiveLensImage()`'s genuine terminal outcomes (success, export-failure Toast, or either unrecoverable early-return), never at request time — so a process kill mid-export now resurrects and completes the share on next launch instead of vanishing. Code review (`superpowers:requesting-code-review`) found 0 Critical, 2 Important (both doc/traceability nits — `apply()`'s async-flush ceiling vs. a raw SIGKILL, and a test that landed in a different file than the design spec named), 1 Minor, all fixed same-day; reviewer traced all five clear/trigger call sites by hand and confirmed no double-clear or missed-clear path. 604/604 unit tests (3 new), 2 new integration tests plus the pre-existing `ActHomeAutoExportWidgetTest`/`ActHomeLensShareIntegrationTest` regression pair all green, lint 0 errors. **Device policy deviation, disclosed**: TECNO KJ7 and its BG6 fallback were both absent from `adb devices` this session; owner granted a one-off `AskUserQuestion`-approved exception for Pixel 7 Pro (`2B051FDH3006MU`). On-device verification reproduced the actual original bug scenario live (`am force-stop` ~150ms after tapping Share, mid-export) and confirmed the pending flag persisted through the kill, then auto-fired the real share sheet with zero user interaction on relaunch, then cleared — no `FATAL` in `logcat`. Self-audited **9.6/10**.
 
+- FISH-014 — Active lens name label on home screen (2026-09-29, picked after FISH-013 — full `brainstorming`→`writing-plans`→`subagent-driven-development` pipeline, `docs/superpowers/specs/2026-09-29-fish-014-lens-name-label-design.md` / `docs/superpowers/plans/2026-09-29-fish-014-lens-name-label.md`): In multi-lens workspaces, users couldn't tell which lens was active without guessing dot positions or opening the menu. Fix: compact centered `TextView` (`tvLensName`) added directly above the dot indicator in `act_home.xml`, visible only when ≥2 lenses exist and Fisheye mode is active — `View.GONE` on single-lens installs, preserving the clean pre-FISH-008 look. Pure resolver `LensLabelResolver.resolveActiveLensName` handles name lookup and fallback logic (unit tested, fully independent of Android framework). Centralized `updateLensNavigationChrome()` in `ActHome.java` keeps dots and label in lockstep across all lifecycle events: swipe, rename, create, delete, list mode toggle, search open/close, and Activity recreation. Long-press label opens existing management menu (no new logic). Final whole-branch review found 0 Critical, 0 Important, 0 Minor. 608/608 unit tests (4 new), 3 widget + 2 integration tests all green on Pixel 7 Pro; `ActHomeMultiLensWidgetTest` (4) and `ActHomeLensManagementWidgetTest` (16) confirmed no regression. **Device policy deviation, disclosed**: TECNO KJ7/BG6 offline; owner-approved one-off Pixel 7 Pro exception (same session as FISH-013). Audit **9.7/10**.
+
 ## 🟡 In progress
 
 - SEC-001 — Local signing remediation is complete. Play Console rotation/revocation, CI secret replacement, non-production upload validation and coordinated Git-history cleanup require publisher-owner access.
@@ -153,19 +155,18 @@
 
 | Order | Story | Priority | SP |
 |---:|---|:---:|---:|
-| 1 | FISH-014 Active lens name label on home screen | P2 | 3 |
-| 2 | FISH-015 Save custom lens physics presets | P2 | 3 |
-| 3 | FEAT-009 Recently used apps quick panel | P2 | 5 |
-| 4 | UI-024 Notification count badges on app icons | P2 | 5 |
-| 5 | VIP-001 Replace reusable VIP secrets | P1 | 13 → split required, blocked on ADS-001 |
-| 6 | STORE-001 Harden store-assets write/upload APIs | P1 | 8 |
-| 7 | STORE-002 Add revision-safe project persistence | P1 | 5 |
-| 8 | REL-002 Add Play/privacy release gate | P1 | 8 |
-| 9 | TEST-001 Establish trustworthy CI test gates | P1 | 8 |
-| 10 | TEST-002 Build complete test coverage and Tecno smoke matrix | P1 | 8 |
-| 11 | AUDIT-001 Score every change round and gate push | P1 | 3 |
+| 1 | FISH-015 Save custom lens physics presets | P2 | 3 |
+| 2 | FEAT-009 Recently used apps quick panel | P2 | 5 |
+| 3 | UI-024 Notification count badges on app icons | P2 | 5 |
+| 4 | VIP-001 Replace reusable VIP secrets | P1 | 13 → split required, blocked on ADS-001 |
+| 5 | STORE-001 Harden store-assets write/upload APIs | P1 | 8 |
+| 6 | STORE-002 Add revision-safe project persistence | P1 | 5 |
+| 7 | REL-002 Add Play/privacy release gate | P1 | 8 |
+| 8 | TEST-001 Establish trustworthy CI test gates | P1 | 8 |
+| 9 | TEST-002 Build complete test coverage and Tecno smoke matrix | P1 | 8 |
+| 10 | AUDIT-001 Score every change round and gate push | P1 | 3 |
 
-Owner-approved 4-story delivery loop (2026-09-29): FISH-014 → FISH-015 → FEAT-009 → UI-024, each with full unit, widget, and integration test coverage. Rows 5-11 remain blocked on external dependencies or owner-declined categories.
+Owner-approved 4-story delivery loop (2026-09-29): FISH-014 (done) → FISH-015 → FEAT-009 → UI-024, each with full unit, widget, and integration test coverage. Rows 4-10 remain blocked on external dependencies or owner-declined categories.
 
 ## ⏸️ Deferred
 
