@@ -88,6 +88,10 @@ class UtilSettings(context: Context) {
         const val DEFAULT_STRING = ""
         const val KEY_ICON_SIZE = "min_icon_size"
         const val KEY_DISTORTION_FACTOR = "distortion_factor"
+        // FISH-012: a pinch adjustment survives here from the instant the gesture ends until the
+        // user answers the confirmation Snackbar (Save or dismiss) - both of which clear it. A
+        // leftover value found on the next bind means the process died before the user answered.
+        const val KEY_PENDING_DISTORTION_FACTOR = "pending_distortion_factor"
         const val KEY_SCALE_FACTOR = "scale_factor"
         const val KEY_ANIMATION_TIME = "animation_time"
         const val KEY_VIBRATE_APP_HOVER = "vibrate_app_hover"
@@ -341,6 +345,20 @@ class UtilSettings(context: Context) {
         save(lensKey(KEY_DISTORTION_FACTOR, lensId), value)
     }
 
+    /** FISH-012: null means no pinch was left unresolved for this lens. */
+    fun getPendingDistortionFactor(lensId: String?): Float? {
+        val key = lensKey(KEY_PENDING_DISTORTION_FACTOR, lensId)
+        return if (prefs.contains(key)) prefs.getFloat(key, 0f) else null
+    }
+
+    fun savePendingDistortionFactor(lensId: String?, value: Float) {
+        save(lensKey(KEY_PENDING_DISTORTION_FACTOR, lensId), value)
+    }
+
+    fun clearPendingDistortionFactor(lensId: String?) {
+        prefs.edit { remove(lensKey(KEY_PENDING_DISTORTION_FACTOR, lensId)) }
+    }
+
     fun isSmartFocusBias(lensId: String?): Boolean {
         val key = lensKey(KEY_SMART_FOCUS_BIAS, lensId)
         return if (prefs.contains(key)) {
@@ -367,6 +385,7 @@ class UtilSettings(context: Context) {
             prefs.edit {
                 remove("${KEY_DISTORTION_FACTOR}_$lensId")
                 remove("${KEY_SMART_FOCUS_BIAS}_$lensId")
+                remove("${KEY_PENDING_DISTORTION_FACTOR}_$lensId")
             }
         }
     }
