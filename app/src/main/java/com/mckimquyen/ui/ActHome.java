@@ -539,7 +539,8 @@ public class ActHome extends ActBase {
     /** (Re)loads the lens list from Room and hands it to the pager adapter; hides the dots
      *  indicator entirely when only one lens exists so single-lens devices look and behave
      *  exactly like before this feature. */
-    private void refreshLensList() {
+    @androidx.annotation.VisibleForTesting
+    void refreshLensList() {
         LensWorkspace.loadAll(lenses -> {
             currentLenses = lenses;
             lensPagerAdapter.submitLenses(lenses);
