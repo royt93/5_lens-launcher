@@ -57,6 +57,11 @@ class FrmSettings : Fragment(), SettingsInterface {
     private var tvSelectedLanguage: TextView? = null
     private var tvSelectedLauncherMode: TextView? = null
 
+    /** Test seam so a widget test can reach the shown dialog - same pattern as
+     *  AppAdapter.folderDialog / ActHome.lensDialog. */
+    @androidx.annotation.VisibleForTesting
+    internal var searchHintDialog: androidx.appcompat.app.AlertDialog? = null
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -213,6 +218,10 @@ class FrmSettings : Fragment(), SettingsInterface {
         val context = requireContext()
         val current = utilSettings?.getString(UtilSettings.KEY_SEARCH_HINT_TEXT).orEmpty()
         val input = android.widget.EditText(context).apply {
+            // UI-023: a programmatic View with no id is skipped by onSaveInstanceState, so the
+            // typed hint would be lost on a config change - same fix already applied to the
+            // lens-rename and Set-folder dialogs.
+            id = android.R.id.edit
             setText(current)
             hint = getString(R.string.search_apps_hint)
             setSelection(text.length)
@@ -222,7 +231,7 @@ class FrmSettings : Fragment(), SettingsInterface {
             setPadding(paddingPx, paddingPx / 2, paddingPx, 0)
             addView(input)
         }
-        com.google.android.material.dialog.MaterialAlertDialogBuilder(context)
+        searchHintDialog = com.google.android.material.dialog.MaterialAlertDialogBuilder(context)
             .setTitle(R.string.setting_search_hint_title)
             .setView(container)
             .setPositiveButton(R.string.done) { _, _ ->

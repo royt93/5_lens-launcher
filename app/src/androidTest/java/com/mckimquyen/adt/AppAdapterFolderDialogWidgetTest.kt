@@ -184,4 +184,36 @@ class AppAdapterFolderDialogWidgetTest {
             scenario.close()
         }
     }
+
+    /**
+     * UI-023: a `View` with no id is skipped entirely by `View.dispatchSaveInstanceState` /
+     * `dispatchRestoreInstanceState` (documented AOSP contract) - a config change (rotation,
+     * fold, locale switch) that drives a real hierarchy-state save/restore cycle would silently
+     * discard whatever was typed. Exercising the real `saveHierarchyState`/`restoreHierarchyState`
+     * pair directly on the dialog's own decor view proves the exact mechanism, independent of
+     * which OS event actually triggers it on a given device/config.
+     */
+    @Test
+    fun folderDialogInput_survivesAHierarchyStateRoundTrip() {
+        val scenario = ActivityScenario.launch(ActSettings::class.java)
+        scenario.onActivity { activity ->
+            val (_, holder) = openFolderDialog(activity)
+            val dialog = holder.folderDialog!!
+            val input = findEditText(dialog)
+            input.setText("SurviveMe")
+
+            val states = android.util.SparseArray<android.os.Parcelable>()
+            val root = dialog.window!!.decorView
+            root.saveHierarchyState(states)
+            input.setText("")
+            root.restoreHierarchyState(states)
+
+            assertEquals(
+                "typed folder name must survive a hierarchy-state save/restore round trip - the exact mechanism a config change drives",
+                "SurviveMe",
+                input.text.toString()
+            )
+        }
+        scenario.close()
+    }
 }

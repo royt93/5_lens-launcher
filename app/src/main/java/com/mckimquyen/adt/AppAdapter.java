@@ -612,6 +612,10 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
 
         private void showFolderDialog() {
             EditText input = new EditText(mActivityContext);
+            // UI-023: a programmatic View with no id is skipped by onSaveInstanceState, so the
+            // typed folder name would be lost on a config change - same fix already applied to
+            // the lens-rename dialog (ActHome.showLensNameDialog).
+            input.setId(android.R.id.edit);
             input.setHint(R.string.organization_folder_hint);
             input.setSingleLine(true);
             input.setText(mApp.getFolderName());
