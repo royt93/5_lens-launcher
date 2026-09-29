@@ -153,15 +153,19 @@
 
 | Order | Story | Priority | SP |
 |---:|---|:---:|---:|
-| 1 | VIP-001 Replace reusable VIP secrets | P1 | 13 → split required, blocked on ADS-001 |
-| 2 | STORE-001 Harden store-assets write/upload APIs | P1 | 8 |
-| 3 | STORE-002 Add revision-safe project persistence | P1 | 5 |
-| 4 | REL-002 Add Play/privacy release gate | P1 | 8 |
-| 5 | TEST-001 Establish trustworthy CI test gates | P1 | 8 |
-| 6 | TEST-002 Build complete test coverage and Tecno smoke matrix | P1 | 8 |
-| 7 | AUDIT-001 Score every change round and gate push | P1 | 3 |
+| 1 | FISH-014 Active lens name label on home screen | P2 | 3 |
+| 2 | FISH-015 Save custom lens physics presets | P2 | 3 |
+| 3 | FEAT-009 Recently used apps quick panel | P2 | 5 |
+| 4 | UI-024 Notification count badges on app icons | P2 | 5 |
+| 5 | VIP-001 Replace reusable VIP secrets | P1 | 13 → split required, blocked on ADS-001 |
+| 6 | STORE-001 Harden store-assets write/upload APIs | P1 | 8 |
+| 7 | STORE-002 Add revision-safe project persistence | P1 | 5 |
+| 8 | REL-002 Add Play/privacy release gate | P1 | 8 |
+| 9 | TEST-001 Establish trustworthy CI test gates | P1 | 8 |
+| 10 | TEST-002 Build complete test coverage and Tecno smoke matrix | P1 | 8 |
+| 11 | AUDIT-001 Score every change round and gate push | P1 | 3 |
 
-Rows 9/10/11/13 (`FISH-006`, `UI-022`, `FEAT-007`, `FISH-009`) removed 2026-09-29 — stale: all four are already done and self-audited under ✅ Implemented above, this table just never got cleaned up after. No remaining unblocked, non-declined backlog item exists as of this date (everything else here is P1 and either blocked on `ADS-001`/external Play Console access, or a declined CI-gate/`store-assets` category per owner decision — see `feedback_backlog_scope` policy). Next pick needs either a newly-scoped idea (see 💭 Ideas) or an explicit owner re-open of a blocked/declined row.
+Owner-approved 4-story delivery loop (2026-09-29): FISH-014 → FISH-015 → FEAT-009 → UI-024, each with full unit, widget, and integration test coverage. Rows 5-11 remain blocked on external dependencies or owner-declined categories.
 
 ## ⏸️ Deferred
 
