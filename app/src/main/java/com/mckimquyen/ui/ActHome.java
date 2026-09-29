@@ -510,10 +510,9 @@ public class ActHome extends ActBase {
      */
     void updateLensNavigationChrome() {
         if (lensPageIndicator == null) return;
-        boolean hasApps = listApp != null && !listApp.isEmpty();
         boolean isList = utilSettings != null && utilSettings.isListMode();
         boolean isSearchShowing = searchView != null && searchView.isShowing();
-        boolean visible = !isList && !isSearchShowing && hasApps && currentLenses != null && currentLenses.size() > 1;
+        boolean visible = !isList && !isSearchShowing && currentLenses != null && currentLenses.size() > 1;
 
         lensPageIndicator.setVisibility(visible ? View.VISIBLE : View.GONE);
         if (tvLensName != null) {

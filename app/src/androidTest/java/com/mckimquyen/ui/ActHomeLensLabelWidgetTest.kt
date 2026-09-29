@@ -32,29 +32,38 @@ class ActHomeLensLabelWidgetTest {
 
     private fun cleanDb() = runBlocking {
         AppDatabase.init(context)
-        dao.getAll().filter { it.id != LensWorkspace.DEFAULT_LENS_ID }.forEach { dao.delete(it) }
+        val all = dao.getAll()
+        all.filter { it.id != LensWorkspace.DEFAULT_LENS_ID }.forEach { dao.delete(it) }
         dao.insertIfAbsent(LensWorkspace.createDefault())
         Unit
     }
 
-    private fun idle() {
-        InstrumentationRegistry.getInstrumentation().waitForIdleSync()
-        android.os.SystemClock.sleep(300)
+    private fun waitForLabel(scenario: ActivityScenario<ActHome>, expectedVisibility: Int, timeoutMs: Long = 5000): String {
+        val deadline = System.currentTimeMillis() + timeoutMs
+        var lastText = ""
+        var lastVis = -1
+        while (System.currentTimeMillis() < deadline) {
+            InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+            scenario.onActivity { activity ->
+                val tvName = activity.findViewById<TextView>(R.id.tvLensName)
+                if (tvName != null) {
+                    lastVis = tvName.visibility
+                    lastText = tvName.text.toString()
+                }
+            }
+            if (lastVis == expectedVisibility) {
+                return lastText
+            }
+            android.os.SystemClock.sleep(100)
+        }
+        assertEquals("Label visibility must match within timeout", expectedVisibility, lastVis)
+        return lastText
     }
 
     @Test
     fun singleLens_hidesLensNameLabel() {
         ActivityScenario.launch(ActHome::class.java).use { scenario ->
-            idle()
-            scenario.onActivity { activity ->
-                val tvName = activity.findViewById<TextView>(R.id.tvLensName)
-                assertNotNull("tvLensName must exist in layout", tvName)
-                assertEquals(
-                    "Lens name label must be GONE when only one lens exists",
-                    View.GONE,
-                    tvName.visibility
-                )
-            }
+            waitForLabel(scenario, View.GONE)
         }
     }
 
@@ -65,35 +74,16 @@ class ActHomeLensLabelWidgetTest {
         }
 
         ActivityScenario.launch(ActHome::class.java).use { scenario ->
-            idle()
-            scenario.onActivity { activity ->
-                val tvName = activity.findViewById<TextView>(R.id.tvLensName)
-                assertEquals(
-                    "Lens name label must be VISIBLE when multiple lenses exist",
-                    View.VISIBLE,
-                    tvName.visibility
-                )
-                assertEquals(
-                    "Default lens name should be displayed initially",
-                    "Lens 1",
-                    tvName.text.toString()
-                )
-            }
+            val initialText = waitForLabel(scenario, View.VISIBLE)
+            assertEquals("Lens 1", initialText)
 
             // Swipe to second page
             scenario.onActivity { activity ->
                 activity.findViewById<ViewPager2>(R.id.lensPager).setCurrentItem(1, false)
             }
-            idle()
 
-            scenario.onActivity { activity ->
-                val tvName = activity.findViewById<TextView>(R.id.tvLensName)
-                assertEquals(
-                    "Lens name label must update to 'Work' on page swipe",
-                    "Work",
-                    tvName.text.toString()
-                )
-            }
+            val swipedText = waitForLabel(scenario, View.VISIBLE)
+            assertEquals("Work", swipedText)
         }
     }
 
@@ -104,11 +94,10 @@ class ActHomeLensLabelWidgetTest {
         }
 
         ActivityScenario.launch(ActHome::class.java).use { scenario ->
-            idle()
+            waitForLabel(scenario, View.VISIBLE)
             var menuOpened = false
             scenario.onActivity { activity ->
                 val tvName = activity.findViewById<TextView>(R.id.tvLensName)
-                // performLongClick returns true if the OnLongClickListener handled it
                 menuOpened = tvName.performLongClick()
             }
             assertTrue("Long-pressing tvLensName must invoke the management menu handler", menuOpened)
