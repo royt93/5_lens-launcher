@@ -20,6 +20,24 @@
         android:visibility="invisible"
         tools:visibility="visible" />
 
+    <!-- FISH-014: displays active lens name when multiple lenses exist. Centered above dots.
+         Long-press opens the lens management menu. GONE when single lens. -->
+    <TextView
+        android:id="@+id/tvLensName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="56dp"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="4dp"
+        android:textAppearance="?attr/textAppearanceLabelMedium"
+        android:textColor="?attr/colorOnSurfaceVariant"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:visibility="gone"
+        tools:visibility="visible"
+        tools:text="Lens 1" />
+
     <!-- FISH-008 Phase 2: dots indicator, GONE while only one lens exists (today's default) so
          single-lens devices look and behave identically to before this feature. Long-press opens
          the add/rename/delete menu. -->

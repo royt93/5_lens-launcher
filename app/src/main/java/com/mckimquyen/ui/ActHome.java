@@ -73,6 +73,7 @@ import com.mckimquyen.search.QuickActionEngine;
 import com.mckimquyen.search.SearchHistoryStore;
 import com.mckimquyen.search.SearchResultAdapter;
 import com.mckimquyen.util.ApertureRevealHelper;
+import com.mckimquyen.util.LensLabelResolver;
 import com.mckimquyen.util.Logger;
 import com.mckimquyen.util.PolaroidExportHelper;
 import com.mckimquyen.util.UIUtils;
@@ -164,6 +165,7 @@ public class ActHome extends ActBase {
     LensView lensViews;
     private ViewPager2 lensPager;
     private TabLayout lensPageIndicator;
+    private TextView tvLensName;
     private LensPagerAdapter lensPagerAdapter;
     private List<LensWorkspace> currentLenses = new ArrayList<>();
 
@@ -213,6 +215,7 @@ public class ActHome extends ActBase {
                 // - bindLensView will not run again just because it's now selected, so the
                 // confirmation Snackbar has to be (re-)offered from here too.
                 maybeShowResurrectSnackbar(lens);
+                updateLensNavigationChrome();
             }
         }
     };
@@ -435,6 +438,7 @@ public class ActHome extends ActBase {
     private void setupViews() {
         lensPager = findViewById(R.id.lensPager);
         lensPageIndicator = findViewById(R.id.lensPageIndicator);
+        tvLensName = findViewById(R.id.tvLensName);
         lensPagerAdapter = new LensPagerAdapter((view, lens) -> {
             // FISH-008 Phase 3: every page carries its own lens identity, set on every bind and
             // rebind (not on page selection) so a prefetched neighbour page never draws with the
@@ -448,6 +452,10 @@ public class ActHome extends ActBase {
                 (tab, position) -> tab.setIcon(R.drawable.lens_page_indicator_dot)).attach();
         lensPager.registerOnPageChangeCallback(lensPageChangeCallback);
         lensPageIndicator.setOnLongClickListener(v -> {
+            showLensManagementMenu(v);
+            return true;
+        });
+        tvLensName.setOnLongClickListener(v -> {
             showLensManagementMenu(v);
             return true;
         });
@@ -496,6 +504,34 @@ public class ActHome extends ActBase {
         }
     }
 
+    /**
+     * FISH-014: synchronizes visibility and text for the lens navigation chrome (both dots indicator
+     * and the active lens name label) in lockstep across all lifecycle, swipe, search, and mode states.
+     */
+    void updateLensNavigationChrome() {
+        if (lensPageIndicator == null) return;
+        boolean hasApps = listApp != null && !listApp.isEmpty();
+        boolean isList = utilSettings != null && utilSettings.isListMode();
+        boolean isSearchShowing = searchView != null && searchView.isShowing();
+        boolean visible = !isList && !isSearchShowing && hasApps && currentLenses != null && currentLenses.size() > 1;
+
+        lensPageIndicator.setVisibility(visible ? View.VISIBLE : View.GONE);
+        if (tvLensName != null) {
+            tvLensName.setVisibility(visible ? View.VISIBLE : View.GONE);
+            if (visible && currentLenses != null) {
+                int position = lensPager != null ? lensPager.getCurrentItem() : 0;
+                if (position >= 0 && position < currentLenses.size()) {
+                    tvLensName.setText(currentLenses.get(position).getName());
+                } else {
+                    String activeId = utilSettings != null
+                            ? utilSettings.getString(UtilSettings.KEY_ACTIVE_LENS_ID)
+                            : null;
+                    tvLensName.setText(LensLabelResolver.resolveActiveLensName(currentLenses, activeId));
+                }
+            }
+        }
+    }
+
     // ========================================================================
     // FISH-008 Phase 2: multi-lens workspace paging + create/rename/delete
     // ========================================================================
@@ -507,7 +543,7 @@ public class ActHome extends ActBase {
         LensWorkspace.loadAll(lenses -> {
             currentLenses = lenses;
             lensPagerAdapter.submitLenses(lenses);
-            lensPageIndicator.setVisibility(lenses.size() > 1 ? View.VISIBLE : View.GONE);
+            updateLensNavigationChrome();
             // FISH-008 Phase 2 r2: restore active page after rotation/recreate so the user stays on
             // the lens they were viewing instead of bouncing back to page 0.
             if (utilSettings != null && !lenses.isEmpty()) {
@@ -824,7 +860,7 @@ public class ActHome extends ActBase {
                     }
                     currentLenses = lenses;
                     lensPagerAdapter.submitLenses(lenses);
-                    lensPageIndicator.setVisibility(lenses.size() > 1 ? View.VISIBLE : View.GONE);
+                    updateLensNavigationChrome();
                     return Unit.INSTANCE;
                 }));
     }
@@ -841,6 +877,7 @@ public class ActHome extends ActBase {
                 LensWorkspace.renameLens(lens, name, lenses -> {
                     currentLenses = lenses;
                     lensPagerAdapter.submitLenses(lenses);
+                    updateLensNavigationChrome();
                     return Unit.INSTANCE;
                 }));
     }
@@ -921,7 +958,7 @@ public class ActHome extends ActBase {
                             }
                             currentLenses = lenses;
                             lensPagerAdapter.submitLenses(lenses);
-                            lensPageIndicator.setVisibility(lenses.size() > 1 ? View.VISIBLE : View.GONE);
+                            updateLensNavigationChrome();
                             // FISH-008 Phase 2 r2: if we just deleted the active lens, clamp the
                             // pager and switch RAppsSingleton to the newly active lens so the
                             // deleted lens's layout is not retained in memory.
@@ -983,6 +1020,7 @@ public class ActHome extends ActBase {
             if (newState == SearchView.TransitionState.SHOWING) {
                 lensPager.setVisibility(View.INVISIBLE);
                 lensPageIndicator.setVisibility(View.GONE);
+                if (tvLensName != null) tvLensName.setVisibility(View.GONE);
                 if (rvHomeAppList != null) {
                     rvHomeAppList.setVisibility(View.GONE);
                 }
@@ -1446,14 +1484,14 @@ public class ActHome extends ActBase {
     public void updateModeVisibility() {
         if (searchView != null && searchView.isShowing()) {
             if (lensPager != null) lensPager.setVisibility(View.INVISIBLE);
-            if (lensPageIndicator != null) lensPageIndicator.setVisibility(View.GONE);
+            updateLensNavigationChrome();
             if (rvHomeAppList != null) rvHomeAppList.setVisibility(View.GONE);
             return;
         }
         boolean isList = utilSettings != null && utilSettings.isListMode();
         if (isList) {
             if (lensPager != null) lensPager.setVisibility(View.GONE);
-            if (lensPageIndicator != null) lensPageIndicator.setVisibility(View.GONE);
+            updateLensNavigationChrome();
             if (rvHomeAppList != null) {
                 rvHomeAppList.setVisibility(listApp != null && !listApp.isEmpty() ? View.VISIBLE : View.GONE);
             }
@@ -1463,9 +1501,7 @@ public class ActHome extends ActBase {
             if (lensPager != null) {
                 lensPager.setVisibility(hasApps ? View.VISIBLE : View.INVISIBLE);
             }
-            if (lensPageIndicator != null) {
-                lensPageIndicator.setVisibility(hasApps && currentLenses.size() > 1 ? View.VISIBLE : View.GONE);
-            }
+            updateLensNavigationChrome();
         }
     }
 
@@ -1590,6 +1626,7 @@ public class ActHome extends ActBase {
             listApp = new ArrayList<>();
             progressBarHome.setVisibility(View.INVISIBLE);
             updateModeVisibility();
+            updateLensNavigationChrome();
             if (searchView.isShowing() || appSearch.getText().length() > 0) {
                 updateSearchResults(appSearch.getText());
             }
@@ -1608,6 +1645,7 @@ public class ActHome extends ActBase {
             listApp = visibleApps;
             progressBarHome.setVisibility(View.INVISIBLE);
             updateModeVisibility();
+            updateLensNavigationChrome();
             if (searchView.isShowing() || appSearch.getText().length() > 0) {
                 updateSearchResults(appSearch.getText());
             }
@@ -1618,6 +1656,7 @@ public class ActHome extends ActBase {
         if (listApp != null && isSameAppList(listApp, visibleApps) && (homeAppAdapter == null || homeAppAdapter.getItemCount() > 0)) {
             Logger.d("ActHome: assignApps skipped - identical list of visible apps");
             updateModeVisibility();
+            updateLensNavigationChrome();
             return;
         }
 
@@ -1631,6 +1670,7 @@ public class ActHome extends ActBase {
             homeAppAdapter.updateApps(listApp);
         }
         updateModeVisibility();
+        updateLensNavigationChrome();
         // PERF-004: the first moment icons are actually on screen - on a true cold start this is
         // the appsLoaded observer's call, not onCreate's (the snapshot is still empty then).
         // StartupTimingMetric's timeToFullDisplay only exists because of this call.
