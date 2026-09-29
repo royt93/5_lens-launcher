@@ -746,7 +746,12 @@ public class ActHome extends ActBase {
      *  hands it to the share sheet via {@link #lensShareLauncher}. */
     private void exportActiveLensImage() {
         LensView view = lensViews;
-        if (view == null) return;
+        if (view == null) {
+            // FISH-013: an auto-export request that can never be resolved (no bound page) must
+            // not stay pending on disk forever, and must not fail silently.
+            clearPendingAutoExportLensAndNotifyFailure();
+            return;
+        }
         String activeLensId = view.getLensId();
         LensWorkspace matched = null;
         for (LensWorkspace lens : currentLenses) {
@@ -755,9 +760,20 @@ public class ActHome extends ActBase {
                 break;
             }
         }
-        if (matched == null) return;
+        if (matched == null) {
+            // FISH-013: the requesting lens no longer exists (e.g. deleted while the request was
+            // in flight) - same unrecoverable case as above.
+            clearPendingAutoExportLensAndNotifyFailure();
+            return;
+        }
         String lensName = matched.getName();
         PolaroidExportHelper.exportAsync(view, lensName, this, uri -> {
+            // FISH-013: only clear the durable pending flag once export has actually reached a
+            // terminal outcome (success or failure) - never at request time - so a process kill
+            // mid-export still resurrects the request on next launch instead of losing it.
+            if (utilSettings != null) {
+                utilSettings.clearPendingAutoExportLens();
+            }
             if (uri != null) {
                 try {
                     lensShareLauncher.launch(Intent.createChooser(
@@ -771,6 +787,17 @@ public class ActHome extends ActBase {
             }
             return Unit.INSTANCE;
         });
+    }
+
+    /** FISH-013: shared terminal-failure path for exportActiveLensImage's two unrecoverable
+     *  early-return cases (no bound view, or the active lens was deleted) - clears the durable
+     *  pending flag so the request stops resurrecting forever, and tells the user explicitly
+     *  instead of the previous silent no-op. */
+    private void clearPendingAutoExportLensAndNotifyFailure() {
+        if (utilSettings != null) {
+            utilSettings.clearPendingAutoExportLens();
+        }
+        Toast.makeText(this, R.string.error_lens_share_failed, Toast.LENGTH_SHORT).show();
     }
 
     private void createLensDialog(String copyFromLensId) {
