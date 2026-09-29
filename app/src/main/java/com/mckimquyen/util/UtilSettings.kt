@@ -361,7 +361,10 @@ class UtilSettings(context: Context) {
         prefs.edit { remove(lensKey(KEY_PENDING_DISTORTION_FACTOR, lensId)) }
     }
 
-    /** FISH-013: survives a process kill between the Share-lens tap and export finishing. */
+    /** FISH-013: survives a process kill between the Share-lens tap and export finishing.
+     *  Writes go through `prefs.edit { }` (apply(), async) - same as FISH-012's pending-distortion
+     *  key - which Android flushes on a normal app-stop/process-death sequence, but not against a
+     *  raw SIGKILL landing in the narrow pre-flush window. Accepted precedent, not a regression. */
     fun hasPendingAutoExportLens(): Boolean {
         return prefs.getBoolean(KEY_PENDING_AUTO_EXPORT_LENS, false)
     }

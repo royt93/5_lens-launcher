@@ -23,7 +23,7 @@ In `ActHome`:
 ## 2. Goals & Non-Goals
 
 ### Goals
-- **Survive process death:** The one-shot request persists across process recreation via `SharedPreferences` (matching the proven `FISH-012` pending-key pattern).
+- **Survive normal app-stop/process death:** The one-shot request persists across process recreation via `SharedPreferences` (matching the proven `FISH-012` pending-key pattern). The shared `prefs.edit { }` helper uses asynchronous `apply()`: Android flushes it on a normal app-stop/process-death sequence, but a raw SIGKILL arriving in the narrow pre-flush window remains outside this guarantee (same accepted ceiling as FISH-012).
 - **Clear on resolve only:** The persistent flag is only cleared when export finishes successfully, fails visibly, or hits an unrecoverable state.
 - **Explicit failure UX:** If the active lens cannot be resolved or export fails, show an explicit error Toast (`R.string.error_lens_share_failed`) rather than failing silently.
 - **Prevent duplicate exports:** In-memory guards prevent multiple simultaneous exports in the same Activity session.
@@ -104,13 +104,20 @@ Clear `utilSettings.clearPendingAutoExportLens()` only at actual terminal outcom
    - `pendingAutoExportLens_roundTripAndClear()`
 2. **Widget Test (`ActHomeAutoExportWidgetTest.kt`)**:
    - Preserve existing `autoExportExtra_firesExactlyOnce_andNeverAgainAfterRecreate()`.
-   - Add `unrecoverableState_clearsPendingFlagAndShowsToast()`.
 3. **Integration Test (`ActHomeAutoExportPersistenceIntegrationTest.kt`)**:
    - Write `utilSettings.setPendingAutoExportLens(true)` directly to simulate surviving a process kill.
    - Launch `ActHome` without any intent extra.
    - Assert `lensShareLauncher` receives chooser intent.
    - Assert `utilSettings.hasPendingAutoExportLens()` is now `false`.
    - Recreate Activity and verify no second export occurs.
+   - **Implementation note (post-review):** the unrecoverable-state case originally slated
+     for `ActHomeAutoExportWidgetTest.kt` as `unrecoverableState_clearsPendingFlagAndShowsToast()`
+     landed instead in this same file as
+     `exportWithNoBoundLensView_clearsPendingFlagInsteadOfResurrectingForever()` - it needed
+     `exportActiveLensImage()` made package-visible (`@VisibleForTesting`) to call it directly
+     with `lensViews == null` deterministically, rather than racing real `ViewPager2` bind timing
+     the way the widget test's other cases do. Functionally equivalent coverage, different file;
+     confirmed via code review (2026-09-29).
 4. **Physical Device Smoke (Tecno KJ7 `115333744A005844`)**:
    - Launch app -> Settings -> Tab Lens -> Share lens image -> Verify share sheet appears.
    - Record SHA, device metadata, timestamp.

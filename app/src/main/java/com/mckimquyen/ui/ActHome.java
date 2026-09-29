@@ -716,6 +716,11 @@ public class ActHome extends ActBase {
             toggleSmartFocusForLens(current);
             return true;
         } else if (itemId == 5) {
+            // FISH-013: this menu's "Share" entry calls exportActiveLensImage() directly, with no
+            // pending-flag write first - intentional, not a missed call site. It's a synchronous
+            // foreground action (the menu is already on screen), not the cross-activity/
+            // process-death gap between FrmLens's tap and export completing that FISH-013 exists
+            // to cover; exportActiveLensImage() clearing an already-absent key is a harmless no-op.
             exportActiveLensImage();
             return true;
         }
