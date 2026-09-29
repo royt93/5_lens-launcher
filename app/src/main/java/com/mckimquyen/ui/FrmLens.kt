@@ -142,6 +142,9 @@ class FrmLens : Fragment(), LensInterface {
     }
 
     private fun shareLensImage() {
+        // FISH-013: persist pending flag before dispatching Intent so the request survives a
+        // process kill between this tap and exportAsync completing in ActHome.
+        utilSettings?.setPendingAutoExportLens(true)
         val intent = Intent(requireContext(), ActHome::class.java).apply {
             putExtra(ActHome.EXTRA_AUTO_EXPORT_LENS, true)
         }

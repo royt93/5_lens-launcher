@@ -310,12 +310,24 @@ public class ActHome extends ActBase {
         refreshLensList();
     }
 
-    /** Consumes (clears) the one-shot auto-export flag so a later rotation/recreate never
-     *  re-triggers it - the same one-shot-extra pattern this codebase already needs because
-     *  ActHome is launchMode="singleTask" (relaunching it calls onNewIntent, not onCreate). */
+    /** Consumes (clears) the one-shot auto-export intent extra so a later rotation/recreate never
+     *  re-triggers it from the Intent - the same one-shot-extra pattern this codebase already
+     *  needs because ActHome is launchMode="singleTask" (relaunching it calls onNewIntent, not
+     *  onCreate). FISH-013: the Intent extra alone is not durable across a process kill (nothing
+     *  guarantees the OS replays the pre-mutation Intent), so the real durable signal is
+     *  {@link UtilSettings#hasPendingAutoExportLens()} - set here (and by FrmLens.shareLensImage
+     *  at the moment of the tap) and read back on every entry point, cleared only once
+     *  exportActiveLensImage() actually reaches a terminal outcome. */
     private void consumeAutoExportExtra(Intent intent) {
-        if (intent != null && intent.getBooleanExtra(EXTRA_AUTO_EXPORT_LENS, false)) {
+        boolean fromIntent = intent != null && intent.getBooleanExtra(EXTRA_AUTO_EXPORT_LENS, false);
+        if (fromIntent) {
             intent.removeExtra(EXTRA_AUTO_EXPORT_LENS);
+            if (utilSettings != null) {
+                utilSettings.setPendingAutoExportLens(true);
+            }
+        }
+        boolean fromDisk = utilSettings != null && utilSettings.hasPendingAutoExportLens();
+        if (fromIntent || fromDisk) {
             pendingAutoExportLens = true;
         }
     }
