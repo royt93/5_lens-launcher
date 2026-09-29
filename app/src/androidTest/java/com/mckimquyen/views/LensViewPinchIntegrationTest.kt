@@ -287,4 +287,55 @@ class LensViewPinchIntegrationTest {
             )
         }
     }
+
+    @Test
+    fun pinchFinishing_persistsAPendingValueBeforeEitherResolutionBranch() {
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            lensView.liveDistortionFactor = 4.4f
+            lensView.reportPinchFinished(4.4f)
+        }
+
+        assertEquals(
+            "gesture-end must persist a pending value before the user answers Save/dismiss",
+            4.4f,
+            utilSettings.getPendingDistortionFactor(lensView.lensId)!!,
+            0.001f
+        )
+    }
+
+    @Test
+    fun committing_clearsThePendingValue() {
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            lensView.liveDistortionFactor = 4.4f
+            lensView.reportPinchFinished(4.4f)
+            lensView.commitLiveDistortionFactor()
+        }
+
+        assertNull(
+            "Save as default must clear the pending key, not just commit the real one",
+            utilSettings.getPendingDistortionFactor(lensView.lensId)
+        )
+    }
+
+    @Test
+    fun resetting_clearsThePendingValue() {
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            lensView.liveDistortionFactor = 4.4f
+            lensView.reportPinchFinished(4.4f)
+            lensView.resetLiveDistortionFactor()
+        }
+
+        assertNull(
+            "dismiss/timeout must clear the pending key too, not just revert in-memory",
+            utilSettings.getPendingDistortionFactor(lensView.lensId)
+        )
+    }
+
+    @Test
+    fun restoreLiveDistortionFactor_setsTheLiveValueAndInvalidates() {
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            lensView.restoreLiveDistortionFactor(5.1f)
+            assertEquals(5.1f, lensView.liveDistortionFactor!!, 0.001f)
+        }
+    }
 }

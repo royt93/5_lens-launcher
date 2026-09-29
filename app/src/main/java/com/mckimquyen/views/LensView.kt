@@ -239,6 +239,7 @@ class LensView : View {
     fun commitLiveDistortionFactor() {
         val factor = liveDistortionFactor ?: return
         mUtilSettings?.saveDistortionFactor(lensId, factor)
+        mUtilSettings?.clearPendingDistortionFactor(lensId)
         liveDistortionFactor = null
         invalidate()
     }
@@ -248,6 +249,33 @@ class LensView : View {
             liveDistortionFactor = null
             invalidate()
         }
+        mUtilSettings?.clearPendingDistortionFactor(lensId)
+    }
+
+    /** FISH-012: restores a pinch adjustment that was persisted to the pending key but never
+     *  resolved (Save/dismiss) before the process died - called by ActHome.bindLensView on every
+     *  page bind when UtilSettings.getPendingDistortionFactor(lensId) is non-null. Does not touch
+     *  the pending key itself; commitLiveDistortionFactor()/resetLiveDistortionFactor() clear it
+     *  the normal way once the user answers again. */
+    fun restoreLiveDistortionFactor(value: Float) {
+        liveDistortionFactor = value
+        invalidate()
+    }
+
+    /** FISH-012: persists the just-finished pinch value to the pending key *before* notifying the
+     *  listener (which triggers ActHome's confirmation Snackbar) - so a process kill between
+     *  gesture-end and the user answering that Snackbar doesn't lose the adjustment silently.
+     *  Both call sites below (onScaleEnd, ACTION_UP) previously duplicated this same
+     *  mPinchReported-guarded block; centralizing it here also closes that duplication.
+     *  Visible for testing: driving a real ScaleGestureDetector span change via synthetic
+     *  MotionEvents is impractical/flaky, so LensViewPinchIntegrationTest calls this directly -
+     *  same seam shape as setLensStateForTest below. */
+    @androidx.annotation.VisibleForTesting
+    internal fun reportPinchFinished(finalDistortion: Float) {
+        if (mPinchReported) return
+        mPinchReported = true
+        mUtilSettings?.savePendingDistortionFactor(lensId, finalDistortion)
+        onCurvatureAdjustedListener?.onCurvatureAdjusted(finalDistortion, true)
     }
 
     // UI-022: long-press-and-hold quick actions (info/pin/uninstall). Explicit state guards
@@ -585,12 +613,7 @@ class LensView : View {
             }
 
             override fun onScaleEnd(detector: ScaleGestureDetector) {
-                liveDistortionFactor?.let { finalDistortion ->
-                    if (!mPinchReported) {
-                        mPinchReported = true
-                        onCurvatureAdjustedListener?.onCurvatureAdjusted(finalDistortion, true)
-                    }
-                }
+                liveDistortionFactor?.let(::reportPinchFinished)
             }
         })
     }
@@ -811,12 +834,7 @@ class LensView : View {
                     mSelectIndex = -1
                     mTouchX = -Float.MAX_VALUE
                     mTouchY = -Float.MAX_VALUE
-                    liveDistortionFactor?.let { finalDistortion ->
-                        if (!mPinchReported) {
-                            mPinchReported = true
-                            onCurvatureAdjustedListener?.onCurvatureAdjusted(finalDistortion, true)
-                        }
-                    }
+                    liveDistortionFactor?.let(::reportPinchFinished)
                     invalidate()
                     return true
                 }
