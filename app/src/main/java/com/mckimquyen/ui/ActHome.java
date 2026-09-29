@@ -743,8 +743,11 @@ public class ActHome extends ActBase {
     /** FISH-EXPORT: snapshots the currently visible lens - via {@link #lensViews}, this file's
      *  existing "which LensView is actually on screen" pointer (see its own field comment), kept
      *  correct across page-selection and rebind-after-rotation - into a polaroid-framed PNG and
-     *  hands it to the share sheet via {@link #lensShareLauncher}. */
-    private void exportActiveLensImage() {
+     *  hands it to the share sheet via {@link #lensShareLauncher}. Package-visible (not private)
+     *  so FISH-013's unrecoverable-state test can call it directly with lensViews == null instead
+     *  of racing ViewPager2's real bind timing to reach that branch. */
+    @androidx.annotation.VisibleForTesting
+    void exportActiveLensImage() {
         LensView view = lensViews;
         if (view == null) {
             // FISH-013: an auto-export request that can never be resolved (no bound page) must
