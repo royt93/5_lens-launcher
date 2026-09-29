@@ -82,6 +82,55 @@ class PolaroidExportHelperWidgetTest {
         assertTrue("framed image must be taller than raw content (border + caption)", decoded.height > SIZE_PX)
     }
 
+    // ==================================================================== B4 (test-audit)
+
+    @Test
+    fun exportAsync_onAnUnlaidOutView_deliversNullSynchronouslyAndWritesNoFile() {
+        lateinit var unlaidView: LensView
+        instrumentation.runOnMainSync {
+            unlaidView = LensView(context) // never layout()'d - width/height stay 0
+        }
+
+        var called = false
+        var result: android.net.Uri? = null
+        instrumentation.runOnMainSync {
+            PolaroidExportHelper.exportAsync(unlaidView, "NeverLaidOut", context) { uri ->
+                called = true
+                result = uri
+            }
+            // Must already be true here, inside the same runOnMainSync block that made the call -
+            // proving the width<=0 branch returns before ever touching Dispatchers.IO, not via a
+            // posted/async callback.
+            assertTrue("the unlaid-out branch must call onDone synchronously on the calling thread", called)
+        }
+        assertEquals(null, result)
+        assertTrue(
+            "no file must be written for a view that was never laid out",
+            !File(File(context.cacheDir, "polaroid"), "NeverLaidOut.png").exists()
+        )
+    }
+
+    // ==================================================================== B6 (test-audit)
+
+    @Test
+    fun exportAsync_rendersAWhiteBorderAndVisibleCaptionText() {
+        val uri = exportAndAwait("PixelCheck")
+        assertNotNull(uri)
+        val file = File(File(context.cacheDir, "polaroid"), "PixelCheck.png")
+        val decoded = BitmapFactory.decodeFile(file.absolutePath)
+        assertNotNull(decoded)
+
+        // Reuse the real (public, pure) layout math instead of hardcoding the border/caption
+        // pixel offsets here - BORDER_PX/CAPTION_* stay private implementation details.
+        val layout = PolaroidExportHelper.calculatePolaroidLayout(SIZE_PX, SIZE_PX)
+        val borderPixel = decoded!!.getPixel(layout.contentLeft / 2, layout.contentTop / 2)
+        assertEquals("the polaroid frame border must be plain white", Color.WHITE, borderPixel)
+
+        val captionRowY = layout.captionLine1BaselineY - 10
+        val captionRowHasInk = (0 until decoded.width).any { x -> decoded.getPixel(x, captionRowY) != Color.WHITE }
+        assertTrue("the caption row must contain non-white pixels (rendered text)", captionRowHasInk)
+    }
+
     @Test
     fun exportAsync_resetsLiveTouchAndGestureStateBeforeCapture() {
         instrumentation.runOnMainSync {

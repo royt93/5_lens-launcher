@@ -31,7 +31,10 @@ SUSPICIOUS_PATTERNS=(
 )
 
 for pattern in "${SUSPICIOUS_PATTERNS[@]}"; do
-    MATCHES=$(git diff --cached -S"$pattern" --name-only || true)
+    # -G (regex pickaxe), not -S (literal-string pickaxe, found by B8 test-audit fixture test to
+    # silently never match any pattern here containing a regex metacharacter - i.e. every pattern
+    # except the two "BEGIN ... PRIVATE KEY" ones, which have none).
+    MATCHES=$(git diff --cached -G"$pattern" --name-only || true)
     if [ -n "$MATCHES" ]; then
         for f in $MATCHES; do
             # Allow examples/docs

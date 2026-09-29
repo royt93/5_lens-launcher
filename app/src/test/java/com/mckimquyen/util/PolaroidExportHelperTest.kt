@@ -66,6 +66,17 @@ class PolaroidExportHelperTest {
         assertEquals("lens", PolaroidExportHelper.sanitizeFileName("😀😀"))
     }
 
+    // B7 (test-audit): locks in TODAY's known behavior - two differently-named lenses that
+    // sanitize to the same filename DO collide (writeToCache overwrites, no dedupe). This is not
+    // asserting the collision is fine, only pinning it so a future change is a deliberate,
+    // reviewed decision - see the `ponytail:` comment on PolaroidExportHelper.sanitizeFileName.
+    @Test
+    fun `sanitizeFileName collides for differently-punctuated lens names with the same letters`() {
+        val a = PolaroidExportHelper.sanitizeFileName("Work/Personal")
+        val b = PolaroidExportHelper.sanitizeFileName("Work Personal")
+        assertEquals("today's regex-replace sanitizer does not disambiguate these", a, b)
+    }
+
     @Test
     fun `calculatePolaroidLayout adds a border and a caption band around the content`() {
         val layout = PolaroidExportHelper.calculatePolaroidLayout(800, 800)

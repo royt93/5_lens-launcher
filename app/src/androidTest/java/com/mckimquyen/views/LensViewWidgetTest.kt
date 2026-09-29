@@ -99,6 +99,10 @@ class LensViewWidgetTest {
 
     @Test
     fun testSetApps() {
+        // Independent of Smart Focus global default/leftover state from other test classes
+        // (LensViewSmartFocusIntegrationTest's own @Before/@After already follow this same
+        // defensive pattern for the same reason).
+        com.mckimquyen.util.UtilSettings(context).save(com.mckimquyen.util.UtilSettings.KEY_SMART_FOCUS_BIAS, false)
         val testApps = arrayListOf(
             App(id = 1, label = "Test App 1", packageName = "com.test1", name = "Activity1"),
             App(id = 2, label = "Test App 2", packageName = "com.test2", name = "Activity2")
@@ -108,7 +112,53 @@ class LensViewWidgetTest {
             lensView.setApps(testApps)
         }
 
-        assertTrue(true)
+        val displayed: ArrayList<App> = privateField("mApps")
+        assertEquals("setApps must populate the displayed list with exactly the apps given", 2, displayed.size)
+        assertEquals(listOf(1, 2), displayed.map { it.id })
+    }
+
+    // ==================================================================== B2 (test-audit)
+
+    @Test
+    fun launchAppAtIndex_withoutPackageManagerSet_isANoOp() {
+        val testApps = arrayListOf(
+            App(id = 1, label = "Test App 1", packageName = "com.test1", name = "Activity1")
+        )
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            lensView.setApps(testApps)
+            // mPackageManager was never set (setPackageManager() not called) - the guard at
+            // LensView.kt:417 must block the launch attempt entirely, not just fail inside it.
+            lensView.launchAppAtIndex(0)
+        }
+        // No crash is the only observable contract here: the whole point of the guard is that
+        // nothing downstream (UtilApp.launchComponent) ever runs without a PackageManager.
+    }
+
+    @Test
+    fun launchAppAtIndex_invalidIndex_isANoOpAndDoesNotThrow() {
+        val testApps = arrayListOf(
+            App(id = 1, label = "Test App 1", packageName = "com.test1", name = "Activity1")
+        )
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            lensView.setApps(testApps)
+            lensView.setPackageManager(context.packageManager)
+            lensView.launchAppAtIndex(99)
+        }
+    }
+
+    @Test
+    fun launchAppAtIndex_validIndexWithPackageManagerSet_doesNotThrow() {
+        val testApps = arrayListOf(
+            App(id = 1, label = "Test App 1", packageName = "com.test1", name = "Activity1")
+        )
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            lensView.setApps(testApps)
+            lensView.setPackageManager(context.packageManager)
+            // com.test1/Activity1 does not resolve to a real component - UtilApp.launchComponent
+            // catches ActivityNotFoundException internally (shows a toast), so this must reach
+            // that real call path and return normally, never throw or crash the test.
+            lensView.launchAppAtIndex(0)
+        }
     }
 
     @Test

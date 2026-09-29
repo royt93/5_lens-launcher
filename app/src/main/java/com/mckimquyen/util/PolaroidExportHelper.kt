@@ -64,7 +64,9 @@ object PolaroidExportHelper {
         return if (base.length > MAX_LENS_NAME_LENGTH) base.take(MAX_LENS_NAME_LENGTH - 1) + "…" else base
     }
 
-    /** Strips characters unsafe for a filesystem path component; never returns an empty string. */
+    /** Strips characters unsafe for a filesystem path component; never returns an empty string.
+     *  ponytail: Different names with identical sanitized text share one cache file; add a stable
+     *  lensId suffix if a real concurrent/collision report makes per-lens uniqueness necessary. */
     @JvmStatic
     fun sanitizeFileName(lensName: String): String {
         val cleaned = UNSAFE_FILENAME_CHARS.replace(lensName.trim(), "_").trim('_')

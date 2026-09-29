@@ -169,8 +169,11 @@ open app/build/reports/coverage/index.html
 
 ### Fix 4.1: Context Leak Prevention
 ```bash
-./gradlew test --tests "TaskUpdateAppsTest.test WeakReference*"
-# Expected: PASSED
+# TaskUpdateAppsTest no longer has a test named "WeakReference*" - it was rewritten around the
+# generation-guarded coroutine refresh pipeline (see CLAUDE.md's Refresh pipeline section) rather
+# than the original AsyncTask+WeakReference design this snapshot documented. Run the whole class:
+./gradlew test --tests TaskUpdateAppsTest
+# Expected: 6/6 PASSED
 ```
 
 ### Fix 5.1: Bitmap LruCache

@@ -198,8 +198,16 @@ class RAppsSingletonIconCacheTest {
         threads.forEach { it.start() }
         threads.forEach { it.join() }
 
-        // Không crash là đủ để chứng minh thread safety
-        assertTrue("Concurrent setAppIcon must not crash", true)
+        // A-tautology (test-audit): "no crash" alone doesn't prove thread safety - a race that
+        // silently drops a write (last-writer-wins on a non-atomic structure, a lost put under
+        // concurrent resize, etc.) would still pass the old assertTrue(true). Each of the 20
+        // distinct keys must actually be retrievable after all 20 threads joined.
+        (1..20).forEach { i ->
+            assertNotNull(
+                "icon for com.app.$i must survive 20 concurrent setAppIcon calls, not be lost to a race",
+                RAppsSingleton.instance.getAppIcon("com.app.$i")
+            )
+        }
     }
 
     // ========================================================================

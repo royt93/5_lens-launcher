@@ -222,6 +222,40 @@ class LensViewSmartFocusIntegrationTest {
         assertEquals(recomputeBefore, gridCache().recomputeCount)
     }
 
+    /**
+     * B1 (test-audit): production only ever calls this from ActHome's Smart Focus menu toggle
+     * and onResume (ActHome.java) - never through setApps()/lensId, the only two paths every
+     * other test above exercises. refreshSmartFocus() must re-arrange immediately off of a grid
+     * that's already been computed, with no new setApps() call and no extra draw() pass.
+     */
+    @Test
+    fun refreshSmartFocus_rearrangesImmediately_withoutASecondSetAppsOrDrawCall() = onMain {
+        settings.save(UtilSettings.KEY_SMART_FOCUS_BIAS, false)
+        val source = apps()
+        lensView.setApps(source)
+        lensView.draw(Canvas()) // computes the grid once; mApps still equals source order (off)
+        assertEquals(
+            "sanity: Smart Focus starts off",
+            source.map { it.id },
+            displayedApps().map { it.id }
+        )
+
+        // Toggle the setting directly (not through the view) then call the production entry
+        // point - no setApps(), no draw().
+        settings.save(UtilSettings.KEY_SMART_FOCUS_BIAS, true)
+        lensView.refreshSmartFocus()
+
+        assertTrue(
+            "refreshSmartFocus() alone must re-arrange mApps without a new setApps()/draw() call",
+            source.map { it.id } != displayedApps().map { it.id }
+        )
+        assertEquals(
+            "re-arranging must not drop or duplicate apps",
+            source.map { it.id }.sorted(),
+            displayedApps().map { it.id }.sorted()
+        )
+    }
+
     @Test
     fun lensWithNoOverride_inheritsTheGlobalFlag() = onMain {
         settings.save(UtilSettings.KEY_SMART_FOCUS_BIAS, false)

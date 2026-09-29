@@ -23,6 +23,7 @@ local.properties
 # Android Studio
 #.idea/
 .gradle
+.kotlin/
 build/
 /*/local.properties
 local.properties

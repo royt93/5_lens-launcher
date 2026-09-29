@@ -508,7 +508,17 @@ public class ActHome extends ActBase {
                     }
                 }
             }
-            if (pendingAutoExportLens) {
+            // B3 (test-audit): consumed here ONLY when a page is already bound (lensViews !=
+            // null) - the real-world case that matters most, since ActHome is launchMode=
+            // "singleTask" and FrmLens's share button re-launches an already-running, already-
+            // fully-bound instance via onNewIntent. submitLenses() with an unchanged lens list
+            // triggers no rebind at all in that case, so bindLensView's own check below would
+            // never run - this is the only place that ever fires for that path. On a genuine
+            // cold launch, lensViews can still be null here (the DB load can finish before
+            // ViewPager2 has bound its first page) - leave the flag set so bindLensView catches
+            // it the moment that first bind actually happens, instead of firing against a null
+            // view or, worse, silently losing the one-shot request forever.
+            if (pendingAutoExportLens && lensViews != null) {
                 pendingAutoExportLens = false;
                 lensPager.post(this::exportActiveLensImage);
             }
@@ -556,6 +566,15 @@ public class ActHome extends ActBase {
             lensViews = view;
             if (listApp != null) {
                 view.setApps(listApp);
+            }
+            // B3 (test-audit): must fire from here, the exact point lensViews first becomes
+            // non-null, not from refreshLensList()'s DB-load callback via a separate
+            // lensPager.post() - that raced two independent queuing mechanisms (a plain
+            // Handler.post against the RecyclerView's own Choreographer-scheduled bind pass) and
+            // could silently lose the one-shot auto-export forever if this bind lost the race.
+            if (pendingAutoExportLens) {
+                pendingAutoExportLens = false;
+                view.post(this::exportActiveLensImage);
             }
         }
     }
