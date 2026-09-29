@@ -208,6 +208,11 @@ public class ActHome extends ActBase {
                         ((RApplication) application).getAppRefreshPipeline().switchLens(lens.getId());
                     }
                 }
+                // FISH-012: this page may already have been bound (and its pending value already
+                // silently restored) as a prefetched neighbour before the user ever swiped to it
+                // - bindLensView will not run again just because it's now selected, so the
+                // confirmation Snackbar has to be (re-)offered from here too.
+                maybeShowResurrectSnackbar(lens);
             }
         }
     };
@@ -554,6 +559,12 @@ public class ActHome extends ActBase {
         // Otherwise no single-lens install (i.e. everyone, right after the v11 migration) can
         // ever create a second lens. Anchored on the page itself, same as UI-022's icon menu.
         view.setOnEmptySpaceLongPressListener(() -> showLensManagementMenu(lensMenuAnchor()));
+        // FISH-012: a pinch adjustment that was never resolved (Save/dismiss) before the process
+        // died is restored here silently, on every bind - not just the active page - so it's
+        // ready the instant the user swipes to whichever lens it belonged to. The confirmation
+        // Snackbar itself is only re-shown for the page currently on screen (below) - see
+        // maybeShowResurrectSnackbar's own doc comment for why onPageSelected also needs it.
+        restorePendingPinchIfAny(view, lens);
         // FISH-008 Phase 3 fix: after a configuration change every page rebinds while `listApp`
         // is already populated, but `lensViews` still points at the destroyed Activity's
         // LensView - so no page matched here and the restored page was left with an empty grid
@@ -567,6 +578,7 @@ public class ActHome extends ActBase {
             if (listApp != null) {
                 view.setApps(listApp);
             }
+            maybeShowResurrectSnackbar(lens);
             // B3 (test-audit): must fire from here, the exact point lensViews first becomes
             // non-null, not from refreshLensList()'s DB-load callback via a separate
             // lensPager.post() - that raced two independent queuing mechanisms (a plain
@@ -576,6 +588,44 @@ public class ActHome extends ActBase {
                 pendingAutoExportLens = false;
                 view.post(this::exportActiveLensImage);
             }
+        }
+    }
+
+    /** FISH-012: silently restores {@code lens}'s pending pinch value (if any) into {@code view}'s
+     *  live/preview state. Safe to call on every bind, active page or not, so a not-yet-visible
+     *  page already shows the right curvature the instant the user swipes to it. */
+    private void restorePendingPinchIfAny(LensView view, LensWorkspace lens) {
+        if (view == null || lens == null || utilSettings == null) return;
+        Float pending = utilSettings.getPendingDistortionFactor(lens.getId());
+        if (pending != null) {
+            view.restoreLiveDistortionFactor(pending);
+        }
+    }
+
+    /** FISH-012: lens ids this Activity instance has already offered the resurrect Snackbar for -
+     *  guards against showing it twice for the same cold-launch page (bindLensView AND
+     *  onPageSelected both fire for page 0 at launch). A second show would call
+     *  showPinchCurvatureSnackbar again, which dismisses the still-showing first Snackbar as a
+     *  side effect - and that dismissal now calls resetLiveDistortionFactor(), which clears the
+     *  pending key too, silently un-resurrecting what was just resurrected. Reset per Activity
+     *  instance only (a fresh instance after recreate/relaunch should still get one real prompt
+     *  if the value is still genuinely unresolved). */
+    private final java.util.Set<String> resurrectPromptedLensIds = new java.util.HashSet<>();
+
+    /** FISH-012: re-shows the confirmation Snackbar for {@code lens}'s pending pinch value, if
+     *  any - call this ONLY for the page the user is actually looking at right now. Called from
+     *  both bindLensView (covers the active page being freshly bound or rebound) and
+     *  lensPageChangeCallback.onPageSelected (covers swiping onto a page that was already bound
+     *  as a prefetched neighbour and therefore never goes through bindLensView again -
+     *  ViewPager2's underlying RecyclerView keeps adjacent pages bound without rebinding them on
+     *  selection). resurrectPromptedLensIds above ensures only the first of those two calls for a
+     *  given lens actually shows anything. */
+    private void maybeShowResurrectSnackbar(LensWorkspace lens) {
+        if (lens == null || utilSettings == null) return;
+        if (!resurrectPromptedLensIds.add(lens.getId())) return;
+        Float pending = utilSettings.getPendingDistortionFactor(lens.getId());
+        if (pending != null) {
+            showPinchCurvatureSnackbar(pending);
         }
     }
 

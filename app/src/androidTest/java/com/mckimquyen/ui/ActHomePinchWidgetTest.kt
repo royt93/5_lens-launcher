@@ -7,6 +7,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.mckimquyen.R
 import com.mckimquyen.app.RAppsSingleton
 import com.mckimquyen.model.App
+import com.mckimquyen.model.LensWorkspace
 import com.mckimquyen.util.UtilSettings
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -42,6 +43,7 @@ class ActHomePinchWidgetTest {
     @After
     fun tearDown() {
         utilSettings.save(UtilSettings.KEY_DISTORTION_FACTOR, 2.5f)
+        utilSettings.clearPendingDistortionFactor(LensWorkspace.DEFAULT_LENS_ID)
     }
 
     @Test
@@ -108,6 +110,66 @@ class ActHomePinchWidgetTest {
         scenario.onActivity { activity ->
             assertNull("Live distortion must revert to null on dismiss", activity.lensViews.liveDistortionFactor)
             assertEquals("Persisted setting must be unchanged", initial, utilSettings.getFloat(UtilSettings.KEY_DISTORTION_FACTOR), 0.001f)
+        }
+        scenario.close()
+    }
+
+    /** bindLensView (where the resurrect restore/Snackbar happen) only runs once the lens list's
+     *  async Room load resolves - ActivityScenario.launch only guarantees RESUMED, not that this
+     *  has finished - so these two resurrect-dependent tests wait, same as
+     *  ActHomeLensShareIntegrationTest/ActHomePinchPersistenceIntegrationTest already do for the
+     *  identical reason. */
+    private fun idle() {
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+        android.os.SystemClock.sleep(300)
+    }
+
+    @Test
+    fun aLeftoverPendingValue_resurrectsTheSnackbarOnTheNextBind() {
+        utilSettings.savePendingDistortionFactor(LensWorkspace.DEFAULT_LENS_ID, 3.9f)
+
+        val scenario = ActivityScenario.launch(ActHome::class.java)
+        idle()
+        scenario.onActivity { activity ->
+            assertEquals(
+                "a leftover pending value must be restored into the live/preview state on bind",
+                3.9f,
+                activity.lensViews.liveDistortionFactor!!,
+                0.001f
+            )
+            val snackbar = activity.pinchCurvatureSnackbar
+            assertNotNull("the confirmation Snackbar must reappear for the active page", snackbar)
+            assertTrue(snackbar?.isShown == true || snackbar?.isShownOrQueued == true)
+        }
+        scenario.close()
+    }
+
+    @Test
+    fun resurrectedSnackbar_saveActionStillPersistsAndClearsPending() {
+        utilSettings.savePendingDistortionFactor(LensWorkspace.DEFAULT_LENS_ID, 3.9f)
+
+        val scenario = ActivityScenario.launch(ActHome::class.java)
+        idle()
+        scenario.onActivity { activity ->
+            val actionView = activity.pinchCurvatureSnackbar!!.view.findViewById<android.widget.Button>(
+                com.google.android.material.R.id.snackbar_action
+            )
+            actionView.performClick()
+
+            assertEquals(3.9f, utilSettings.getFloat(UtilSettings.KEY_DISTORTION_FACTOR), 0.001f)
+            assertNull(utilSettings.getPendingDistortionFactor(LensWorkspace.DEFAULT_LENS_ID))
+        }
+        scenario.close()
+    }
+
+    @Test
+    fun noPendingValue_noSnackbarOnBind() {
+        val scenario = ActivityScenario.launch(ActHome::class.java)
+        scenario.onActivity { activity ->
+            assertNull(
+                "a fresh session with nothing pending must not pop the confirmation Snackbar",
+                activity.pinchCurvatureSnackbar
+            )
         }
         scenario.close()
     }

@@ -1101,6 +1101,42 @@ git add app/src/main/java/com/mckimquyen/ui/ActHome.java \
 git commit -m "feat(fish-012): resurrect the confirmation Snackbar for a leftover pending pinch value"
 ```
 
+**Deviations found and fixed during execution (all via real device testing, not guessed):**
+
+1. **A real regression the tests themselves caught**: `onPageSelected` DOES fire for position 0 on
+   a genuine cold launch (confirmed live), so both `bindLensView`'s and `onPageSelected`'s calls to
+   `maybeShowResurrectSnackbar` fire for the same page. `showPinchCurvatureSnackbar`'s existing
+   "dismiss any prior instance" behavior meant the second call dismissed the first Snackbar - and
+   that dismissal's callback calls `resetLiveDistortionFactor()`, which (after Task 3's change)
+   also clears the pending key. Net effect: the resurrect prompt appeared and then immediately
+   un-resurrected itself, silently. Fixed with a `resurrectPromptedLensIds` guard (a
+   per-Activity-instance `Set<String>`) so only the first of the two calls for a given lens id
+   actually shows anything - the original plan's assumption that calling both was "harmless" was
+   wrong specifically because of Task 3's own new side effect.
+2. **Mutation-checks for both call sites turned out inconclusive**, honestly disclosed rather than
+   forced: removing either call site alone still left all current tests green, because (a)
+   `onPageSelected` reliably covers the cold-launch case the original bindLensView-side check was
+   meant to prove, and (b) in the cross-lens integration test, `ActivityScenario`/`ViewPager2`'s
+   real bind timing for the second page's `setCurrentItem` call happened to trigger a fresh
+   `bindLensView` rather than reusing an already-prefetched one. Both call sites are kept on the
+   architectural grounds already documented in this codebase (`bindLensView`'s own pre-existing
+   "FISH-008 Phase 3 fix" comment: a config-change rebind does not refire `onPageSelected`) -
+   this just was not the specific path either automated test happened to exercise. The dedup guard
+   above means keeping both is safe either way.
+3. **The cross-lens integration test's own `setCurrentItem` swipe persists
+   `KEY_ACTIVE_LENS_ID = secondLensId` as real production behavior, and the test's `tearDown()`
+   originally didn't reset it** - this leaked into a *separate, later* `am instrument` invocation
+   of `ActHomePinchWidgetTest` (SharedPreferences persist on-device across separate instrumentation
+   runs, not just within one), breaking its pre-existing
+   `saveAsDefaultAction_persistsValueAndCommitsLiveDistortion` test. Fixed by having this test's
+   `tearDown()` reset `KEY_ACTIVE_LENS_ID` back to `LensWorkspace.DEFAULT_LENS_ID`. Confirmed fixed
+   by rerunning both test classes back-to-back in the order that originally broke it.
+4. **One single, non-reproducing failure** in the pre-existing
+   `ActHomeLensManagementWidgetTest#deleteLens_alsoClearsThatLensOwnSettings` appeared once during
+   a full-class run; it passed standalone and passed on two subsequent full-class reruns
+   (16/16 both times). Disclosed as a one-off flake, consistent with this repo's own established
+   pattern of disclosed-not-chased non-reproducible flakes - not traced to this diff.
+
 ---
 
 ### Task 5: Full regression + Tecno smoke (real `am kill` repro) + close the story
