@@ -92,6 +92,8 @@ class UtilSettings(context: Context) {
         // user answers the confirmation Snackbar (Save or dismiss) - both of which clear it. A
         // leftover value found on the next bind means the process died before the user answered.
         const val KEY_PENDING_DISTORTION_FACTOR = "pending_distortion_factor"
+        // FISH-013: auto-export request survives here if process dies before export resolves.
+        const val KEY_PENDING_AUTO_EXPORT_LENS = "pending_auto_export_lens"
         const val KEY_SCALE_FACTOR = "scale_factor"
         const val KEY_ANIMATION_TIME = "animation_time"
         const val KEY_VIBRATE_APP_HOVER = "vibrate_app_hover"
@@ -357,6 +359,19 @@ class UtilSettings(context: Context) {
 
     fun clearPendingDistortionFactor(lensId: String?) {
         prefs.edit { remove(lensKey(KEY_PENDING_DISTORTION_FACTOR, lensId)) }
+    }
+
+    /** FISH-013: survives a process kill between the Share-lens tap and export finishing. */
+    fun hasPendingAutoExportLens(): Boolean {
+        return prefs.getBoolean(KEY_PENDING_AUTO_EXPORT_LENS, false)
+    }
+
+    fun setPendingAutoExportLens(value: Boolean) {
+        save(KEY_PENDING_AUTO_EXPORT_LENS, value)
+    }
+
+    fun clearPendingAutoExportLens() {
+        prefs.edit { remove(KEY_PENDING_AUTO_EXPORT_LENS) }
     }
 
     fun isSmartFocusBias(lensId: String?): Boolean {
