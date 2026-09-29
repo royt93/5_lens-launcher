@@ -172,6 +172,7 @@ Rows 9/10/11/13 (`FISH-006`, `UI-022`, `FEAT-007`, `FISH-009`) removed 2026-09-2
 
 ## 💭 Ideas
 
+- `UI-023`/`FISH-013` (2026-09-29, found during `FISH-012`'s transient-state audit, deliberately not fixed as part of that story per owner decision — see `FISH-012`'s own entry above): two dialogs lose typed text across a rotation (`UI-023`, one-line fix each, ready to implement) and `FrmLens`'s share button can silently no-op if the process dies mid-export (`FISH-013`, needs its own design pass first). Both filed in `todo/`.
 - Accessible list mode, large-screen support, store asset automation, local insights, privacy-first monetization, and five Fisheye Smart concepts remain captured as individual `idea` stories in `todo`.
 - `UI-021`/`PERF-004`/`FEAT-005` (2026-09-23, owner-picked from a ponytail-audit-triggered perf/Material You gap check): predictive back gesture, Baseline Profile cold-start, and a "keep screen on" toggle — scoped as full stories, see `todo/`. `FEAT-005` and `UI-021` shipped the same day (see Implemented); `PERF-004` remains in `todo/`.
 - Scoped and shipped 2026-09-25 (see Implemented): themed/monochrome adaptive app icon (Android 13+, `<monochrome>` missing from `mipmap-anydpi-v26/ic_launcher.xml` — ties into the existing dynamic-color work from `UI-005`); `StrictMode` in debug builds to catch main-thread I/O/leaked closeables during development (dev-time only, zero user-facing risk).
