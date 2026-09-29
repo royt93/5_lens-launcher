@@ -109,6 +109,19 @@ class AppSearchIntegrationTest {
                     searchView!!.show()
                 }
                 waitUntilShowing(searchView!!, true)
+                // Same race TEST-003 found and fixed in the sibling test below (RApplication's
+                // one-time real background PackageManager scan can land any time and overwrite
+                // this fake single-app list with the real device's apps - 68 on TECNO KJ7,
+                // matching the exact "expected:<1> but was:<68>" failure this re-set closes).
+                // This test's longer duration (a full ActivityScenario.launch + up to 5s poll,
+                // twice, plus a recreate() in between) gives that race a much wider window than
+                // the sibling test ever had, and unlike it, was never hardened - re-set right
+                // before each point the count is actually asserted, closing the window to zero
+                // the same way, confirmed by the failure moving between this assertion and the
+                // one after recreate() across different runs (not one fixed line).
+                singleton.apps = arrayListOf(recent)
+                AppEventManager.notifyAppsUpdated()
+                waitForMainThread()
                 scenario.onActivity { activity ->
                     assertSearch(activity, 1, "Recent Camera")
                     assertEquals(View.VISIBLE, activity.findViewById<View>(R.id.recentHeader).visibility)
@@ -120,6 +133,9 @@ class AppSearchIntegrationTest {
                     searchView!!.show()
                 }
                 waitUntilShowing(searchView!!, true)
+                singleton.apps = arrayListOf(recent)
+                AppEventManager.notifyAppsUpdated()
+                waitForMainThread()
                 scenario.onActivity { activity ->
                     assertSearch(activity, 1, "Recent Camera")
                     assertEquals(View.VISIBLE, activity.findViewById<View>(R.id.recentHeader).visibility)
