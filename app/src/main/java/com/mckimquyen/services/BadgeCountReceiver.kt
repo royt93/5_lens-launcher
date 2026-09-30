@@ -4,6 +4,8 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import com.mckimquyen.app.RAppsSingleton
+import com.mckimquyen.model.AppPersistent
 
 /**
  * UI-024: receives the de-facto "badge count" broadcast convention (popularized by
@@ -23,7 +25,12 @@ import android.os.Bundle
 class BadgeCountReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
-        // Dispatch logic added in Task 3, once RAppsSingleton snapshot validation is wired in.
+        val packageName = intent.getStringExtra(EXTRA_PACKAGE_NAME) ?: return
+        val app = RAppsSingleton.instance.apps.orEmpty()
+            .firstOrNull { it.packageName.toString() == packageName } ?: return
+        val count = parseBadgeCount(intent.extras)
+        AppPersistent.setNotificationCount(packageName, app.name.toString(), count)
+        AppEventManager.notifyAppsEdited()
     }
 
     companion object {

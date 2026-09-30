@@ -302,6 +302,20 @@
             android:enabled="true"
             android:exported="false" />
 
+        <!-- UI-024: unlike the receivers above (registered programmatically in RApplication
+             because Android 8+ ignores IMPLICIT manifest broadcasts), this one is explicit - the
+             sending app targets this package directly once it resolves the current default
+             launcher - so a static manifest declaration correctly wakes this app even when its
+             process isn't running. -->
+        <receiver
+            android:name=".services.BadgeCountReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BADGE_COUNT_UPDATE" />
+            </intent-filter>
+        </receiver>
+
     </application>
 
 </manifest>
