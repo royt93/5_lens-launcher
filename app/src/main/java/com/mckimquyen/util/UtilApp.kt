@@ -254,12 +254,16 @@ object UtilApp {
 
                 // Increment app open count
                 AppPersistent.incrementAppCount(packageName, name)
+                // UI-024: opening an app clears its notification badge immediately (optimistic),
+                // regardless of whether the notifying app ever sends its own cleared broadcast.
+                AppPersistent.setNotificationCount(packageName, name, 0)
 
                 // Resort apps if sorting by open count
                 val utilSettings = UtilSettings(context)
                 if (utilSettings.sortType in listOf(SortType.OPEN_COUNT_ASCENDING, SortType.OPEN_COUNT_DESCENDING)) {
                     context.sendBroadcast(Intent(context, AppsEditedReceiver::class.java))
                 }
+                com.mckimquyen.services.AppEventManager.notifyAppsEdited()
             } catch (_: ActivityNotFoundException) {
                 Toast.makeText(context, R.string.error_app_not_found, Toast.LENGTH_SHORT).show()
             }
