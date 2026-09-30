@@ -72,9 +72,13 @@ class AppDatabaseMigrationIntegrationTest {
                 sqlite.version = 10
             }
 
-            // Open with Room and apply MIGRATION_10_11
+            // Open with Room and apply MIGRATION_10_11 (then MIGRATION_11_12, chained - the
+            // compiled AppDatabase class always targets its current @Database version, UI-024
+            // raised that to 12, so this test's own migration list must reach it too; the
+            // assertions below only check v10/v11-introduced fields, unaffected by the
+            // NOTIFICATION_COUNT column 11->12 adds with a harmless default).
             val migrated = Room.databaseBuilder(context, AppDatabase::class.java, TEST_DB)
-                .addMigrations(migration10To11())
+                .addMigrations(migration10To11(), migration11To12())
                 .build()
             try {
                 val workspaces = migrated.lensWorkspaceDao().getAll()
@@ -184,5 +188,9 @@ class AppDatabaseMigrationIntegrationTest {
 
     private fun migration10To11(): androidx.room.migration.Migration {
         return AppDatabase.MIGRATION_10_11
+    }
+
+    private fun migration11To12(): androidx.room.migration.Migration {
+        return AppDatabase.MIGRATION_11_12
     }
 }
