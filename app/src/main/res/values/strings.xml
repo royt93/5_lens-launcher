@@ -32,6 +32,8 @@
     <string name="setting_quick_action_battery">Show Battery %%</string>
     <string name="setting_quick_action_settings_shortcut">Show Settings Shortcuts</string>
     <string name="setting_show_new_app_tag">Show New App Tag</string>
+    <string name="setting_show_notification_badges">Show notification badges</string>
+    <string name="notification_badge_count_description">%1$s, %2$d unread</string>
     <string name="setting_highlight_color">Highlight Color</string>
     <string name="setting_icon_pack">Icon Pack</string>
     <string name="setting_home_launcher">Home Launcher</string>

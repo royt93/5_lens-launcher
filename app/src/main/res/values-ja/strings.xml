@@ -31,6 +31,8 @@
     <string name="setting_quick_action_battery">バッテリー％を表示</string>
     <string name="setting_quick_action_settings_shortcut">設定ショートカットを表示</string>
     <string name="setting_show_new_app_tag">新着アプリタグを表示</string>
+    <string name="setting_show_notification_badges">通知バッジを表示</string>
+    <string name="notification_badge_count_description">%1$s、未読%2$d件</string>
     <string name="setting_highlight_color">ハイライトカラー</string>
     <string name="setting_icon_pack">アイコンパック</string>
     <string name="setting_home_launcher">デフォルトのランチャー</string>

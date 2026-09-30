@@ -31,6 +31,8 @@
     <string name="setting_quick_action_battery">แสดงเปอร์เซ็นต์แบตเตอรี่</string>
     <string name="setting_quick_action_settings_shortcut">แสดงทางลัดการตั้งค่า</string>
     <string name="setting_show_new_app_tag">แสดงป้ายกำกับแอปใหม่</string>
+    <string name="setting_show_notification_badges">แสดงป้ายแจ้งเตือน</string>
+    <string name="notification_badge_count_description">%1$s, ยังไม่อ่าน %2$d รายการ</string>
     <string name="setting_highlight_color">สีไฮไลต์</string>
     <string name="setting_icon_pack">ชุดไอคอน</string>
     <string name="setting_home_launcher">ตัวเปิดหน้าหลัก</string>

@@ -38,6 +38,7 @@ class FrmSettings : Fragment(), SettingsInterface {
     private var swVibrateAppLaunch: SwitchCompat? = null
     private var swShowNameAppHover: SwitchCompat? = null
     private var swShowNewAppTag: SwitchCompat? = null
+    private var swShowNotificationBadges: SwitchCompat? = null
     private var swShowTouchSelection: SwitchCompat? = null
     private var swShowSearchBar: SwitchCompat? = null
     private var swRecentAppsPanel: SwitchCompat? = null
@@ -100,6 +101,7 @@ class FrmSettings : Fragment(), SettingsInterface {
         swVibrateAppLaunch = view.findViewById(R.id.swVibrateAppLaunch)
         swShowNameAppHover = view.findViewById(R.id.swShowNameAppHover)
         swShowNewAppTag = view.findViewById(R.id.swShowNewAppTag)
+        swShowNotificationBadges = view.findViewById(R.id.swShowNotificationBadges)
         swShowTouchSelection = view.findViewById(R.id.swShowTouchSelection)
         swShowSearchBar = view.findViewById(R.id.swShowSearchBar)
         swRecentAppsPanel = view.findViewById(R.id.swRecentAppsPanel)
@@ -156,6 +158,7 @@ class FrmSettings : Fragment(), SettingsInterface {
         view.findViewById<View>(R.id.rlSwitchVibrateAppLaunchParent).setOnClickListener(null)
         view.findViewById<View>(R.id.rlSwitchShowNameAppHoverParent).setOnClickListener(null)
         view.findViewById<View>(R.id.swShowNewAppTagParent).setOnClickListener(null)
+        view.findViewById<View>(R.id.rlSwitchShowNotificationBadgesParent).setOnClickListener(null)
         view.findViewById<View>(R.id.rlSwitchShowTouchSelectionParent).setOnClickListener(null)
         view.findViewById<View>(R.id.rlSwitchShowSearchBarParent).setOnClickListener(null)
         view.findViewById<View>(R.id.rlSwitchRecentAppsPanelParent).setOnClickListener(null)
@@ -183,6 +186,9 @@ class FrmSettings : Fragment(), SettingsInterface {
         }
         swShowNewAppTag?.setOnCheckedChangeListener { _, isChecked ->
             utilSettings?.save(UtilSettings.KEY_SHOW_NEW_APP_TAG, isChecked)
+        }
+        swShowNotificationBadges?.setOnCheckedChangeListener { _, isChecked ->
+            utilSettings?.save(UtilSettings.KEY_SHOW_NOTIFICATION_BADGES, isChecked)
         }
         swShowTouchSelection?.setOnCheckedChangeListener { _, isChecked ->
             utilSettings?.save(UtilSettings.KEY_SHOW_TOUCH_SELECTION, isChecked)
@@ -299,6 +305,7 @@ class FrmSettings : Fragment(), SettingsInterface {
             swVibrateAppLaunch?.isChecked = us.getBoolean(UtilSettings.KEY_VIBRATE_APP_LAUNCH)
             swShowNameAppHover?.isChecked = us.getBoolean(UtilSettings.KEY_SHOW_NAME_APP_HOVER)
             swShowNewAppTag?.isChecked = us.getBoolean(UtilSettings.KEY_SHOW_NEW_APP_TAG)
+            swShowNotificationBadges?.isChecked = us.getBoolean(UtilSettings.KEY_SHOW_NOTIFICATION_BADGES)
             swShowTouchSelection?.isChecked = us.getBoolean(UtilSettings.KEY_SHOW_TOUCH_SELECTION)
             swShowSearchBar?.isChecked = us.getBoolean(UtilSettings.KEY_SHOW_SEARCH_BAR)
             swRecentAppsPanel?.isChecked = us.getBoolean(UtilSettings.KEY_RECENT_APPS_QUICK_PANEL_ENABLED)
@@ -399,6 +406,7 @@ class FrmSettings : Fragment(), SettingsInterface {
             us.save(UtilSettings.KEY_QUICK_ACTION_SETTINGS, UtilSettings.DEFAULT_QUICK_ACTION_ENABLED)
             us.save(UtilSettings.KEY_SEARCH_HINT_TEXT, "")
             us.save(UtilSettings.KEY_SHOW_NEW_APP_TAG, true)
+            us.save(UtilSettings.KEY_SHOW_NOTIFICATION_BADGES, UtilSettings.DEFAULT_SHOW_NOTIFICATION_BADGES)
             us.save(UtilSettings.DEFAULT_BACKGROUND_MODE)
             us.save(UtilSettings.KEY_BACKGROUND_COLOR, UtilSettings.DEFAULT_BACKGROUND_COLOR)
             us.save(UtilSettings.KEY_HIGHLIGHT_COLOR, UtilSettings.DEFAULT_HIGHLIGHT_COLOR)
@@ -430,6 +438,7 @@ class FrmSettings : Fragment(), SettingsInterface {
         swVibrateAppLaunch = null
         swShowNameAppHover = null
         swShowNewAppTag = null
+        swShowNotificationBadges = null
         swShowTouchSelection = null
         swShowSearchBar = null
         swRecentAppsPanel = null

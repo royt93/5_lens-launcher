@@ -31,6 +31,8 @@
     <string name="setting_quick_action_battery">ສະແດງເປີເຊັນແບັດເຕີຣີ</string>
     <string name="setting_quick_action_settings_shortcut">ສະແດງທາງລັດການຕັ້ງຄ່າ</string>
     <string name="setting_show_new_app_tag">ສະແດງປ້າຍກຳກັບແອັບໃໝ່</string>
+    <string name="setting_show_notification_badges">ສະແດງປ້າຍແຈ້ງເຕືອນ</string>
+    <string name="notification_badge_count_description">%1$s, %2$d ຍັງບໍ່ໄດ້ອ່ານ</string>
     <string name="setting_highlight_color">ສີໄຮໄລ້</string>
     <string name="setting_icon_pack">ຊຸດໄອຄອນ</string>
     <string name="setting_home_launcher">ຕົວເປີດໜ້າຫຼັກ</string>

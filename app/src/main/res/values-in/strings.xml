@@ -31,6 +31,8 @@
     <string name="setting_quick_action_battery">Tampilkan %% baterai</string>
     <string name="setting_quick_action_settings_shortcut">Tampilkan pintasan pengaturan</string>
     <string name="setting_show_new_app_tag">Tampilkan Label Aplikasi Baru</string>
+    <string name="setting_show_notification_badges">Tampilkan lencana notifikasi</string>
+    <string name="notification_badge_count_description">%1$s, %2$d belum dibaca</string>
     <string name="setting_highlight_color">Warna Sorotan</string>
     <string name="setting_icon_pack">Paket Ikon</string>
     <string name="setting_home_launcher">Peluncur Utama</string>

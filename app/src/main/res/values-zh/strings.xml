@@ -31,6 +31,8 @@
     <string name="setting_quick_action_battery">显示电池百分比</string>
     <string name="setting_quick_action_settings_shortcut">显示设置快捷方式</string>
     <string name="setting_show_new_app_tag">显示新应用标签</string>
+    <string name="setting_show_notification_badges">显示通知徽章</string>
+    <string name="notification_badge_count_description">%1$s，%2$d 条未读</string>
     <string name="setting_highlight_color">高亮颜色</string>
     <string name="setting_icon_pack">图标包</string>
     <string name="setting_home_launcher">默认桌面</string>

@@ -6,6 +6,7 @@ import android.view.accessibility.AccessibilityEvent
 import androidx.annotation.VisibleForTesting
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import androidx.customview.widget.ExploreByTouchHelper
+import com.mckimquyen.R
 import com.mckimquyen.model.App
 
 /**
@@ -53,7 +54,15 @@ class LensAccessibilityHelper(
         }
 
         val app = apps[virtualViewId]
-        val label = app.label.toString()
+        val label = if (app.notificationCount > 0) {
+            host.context.getString(
+                R.string.notification_badge_count_description,
+                app.label.toString(),
+                app.notificationCount
+            )
+        } else {
+            app.label.toString()
+        }
 
         node.text = label
         node.contentDescription = label

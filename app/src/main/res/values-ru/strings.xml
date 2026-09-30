@@ -31,6 +31,8 @@
     <string name="setting_quick_action_battery">Показать заряд батареи</string>
     <string name="setting_quick_action_settings_shortcut">Показать ярлыки настроек</string>
     <string name="setting_show_new_app_tag">Показывать метку нового приложения</string>
+    <string name="setting_show_notification_badges">Показывать значки уведомлений</string>
+    <string name="notification_badge_count_description">%1$s, непрочитано: %2$d</string>
     <string name="setting_highlight_color">Цвет выделения</string>
     <string name="setting_icon_pack">Пакет значков</string>
     <string name="setting_home_launcher">Главный экран по умолчанию</string>

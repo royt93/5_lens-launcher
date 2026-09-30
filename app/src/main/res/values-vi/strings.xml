@@ -30,6 +30,8 @@
     <string name="setting_quick_action_battery">Hiện phần trăm pin</string>
     <string name="setting_quick_action_settings_shortcut">Hiện lối tắt cài đặt</string>
     <string name="setting_show_new_app_tag">Hiện nhãn ứng dụng mới</string>
+    <string name="setting_show_notification_badges">Hiện huy hiệu thông báo</string>
+    <string name="notification_badge_count_description">%1$s, %2$d chưa đọc</string>
     <string name="setting_highlight_color">Màu nổi bật</string>
     <string name="setting_icon_pack">Gói biểu tượng</string>
     <string name="setting_home_launcher">Trình khởi chạy mặc định</string>

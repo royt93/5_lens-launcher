@@ -31,6 +31,8 @@
     <string name="setting_quick_action_battery">Mostrar %% de batería</string>
     <string name="setting_quick_action_settings_shortcut">Mostrar accesos directos de ajustes</string>
     <string name="setting_show_new_app_tag">Mostrar etiqueta de nueva app</string>
+    <string name="setting_show_notification_badges">Mostrar insignias de notificación</string>
+    <string name="notification_badge_count_description">%1$s, %2$d sin leer</string>
     <string name="setting_highlight_color">Color de resalte</string>
     <string name="setting_icon_pack">Paquete de iconos</string>
     <string name="setting_home_launcher">Lanzador predeterminado</string>

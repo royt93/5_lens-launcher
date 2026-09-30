@@ -31,6 +31,8 @@
     <string name="setting_quick_action_battery">배터리 %% 표시</string>
     <string name="setting_quick_action_settings_shortcut">설정 바로가기 표시</string>
     <string name="setting_show_new_app_tag">새 앱 태그 표시</string>
+    <string name="setting_show_notification_badges">알림 배지 표시</string>
+    <string name="notification_badge_count_description">%1$s, 읽지 않음 %2$d개</string>
     <string name="setting_highlight_color">강조 색상</string>
     <string name="setting_icon_pack">아이콘 팩</string>
     <string name="setting_home_launcher">기본 런처</string>
