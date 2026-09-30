@@ -21,6 +21,11 @@ class SearchHistoryStore(context: Context) {
         preferences.edit { putString(KEY_RECENT, updated.joinToString(SEPARATOR)) }
     }
 
+    fun removeKey(componentKey: String) {
+        val updated = recentKeys().filterNot { it == componentKey }
+        preferences.edit { putString(KEY_RECENT, updated.joinToString(SEPARATOR)) }
+    }
+
     fun clear() {
         preferences.edit { remove(KEY_RECENT) }
     }
@@ -29,6 +34,6 @@ class SearchHistoryStore(context: Context) {
         const val PREFERENCES = "app_search_history"
         const val KEY_RECENT = "recent_component_keys"
         const val SEPARATOR = "\u001F"
-        const val MAX_RECENT = 8
+        const val MAX_RECENT = 16 // FEAT-009: was 8, shared by recentHeader and the new panel
     }
 }
