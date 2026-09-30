@@ -37,6 +37,8 @@ class FrmLens : Fragment(), LensInterface {
     private var btnPresetGentle: MaterialButton? = null
     private var btnPresetStandard: MaterialButton? = null
     private var btnPresetSnappy: MaterialButton? = null
+    private var btnPresetCustom: MaterialButton? = null
+    private var btnSaveCustomPreset: MaterialButton? = null
     private var btnShareLens: MaterialButton? = null
     private var utilSettings: UtilSettings? = null
     private var activeLensId: String = LensWorkspace.DEFAULT_LENS_ID
@@ -94,6 +96,8 @@ class FrmLens : Fragment(), LensInterface {
         btnPresetGentle = view.findViewById(R.id.btnPresetGentle)
         btnPresetStandard = view.findViewById(R.id.btnPresetStandard)
         btnPresetSnappy = view.findViewById(R.id.btnPresetSnappy)
+        btnPresetCustom = view.findViewById(R.id.btnPresetCustom)
+        btnSaveCustomPreset = view.findViewById(R.id.btnSaveCustomPreset)
 
         // Empty click listeners to prevent parent click events
         view.findViewById<View>(R.id.sbMinIconSizeParent).setOnClickListener(null)
@@ -134,9 +138,37 @@ class FrmLens : Fragment(), LensInterface {
             }
         }
 
-        btnPresetGentle?.setOnClickListener { applyPreset(LensPhysicsPreset.GENTLE) }
-        btnPresetStandard?.setOnClickListener { applyPreset(LensPhysicsPreset.STANDARD) }
-        btnPresetSnappy?.setOnClickListener { applyPreset(LensPhysicsPreset.SNAPPY) }
+        btnPresetGentle?.setOnClickListener {
+            applyPreset(
+                LensPhysicsPreset.GENTLE.distortionFactor,
+                LensPhysicsPreset.GENTLE.scaleFactor,
+                LensPhysicsPreset.GENTLE.animationTimeMs
+            )
+        }
+        btnPresetStandard?.setOnClickListener {
+            applyPreset(
+                LensPhysicsPreset.STANDARD.distortionFactor,
+                LensPhysicsPreset.STANDARD.scaleFactor,
+                LensPhysicsPreset.STANDARD.animationTimeMs
+            )
+        }
+        btnPresetSnappy?.setOnClickListener {
+            applyPreset(
+                LensPhysicsPreset.SNAPPY.distortionFactor,
+                LensPhysicsPreset.SNAPPY.scaleFactor,
+                LensPhysicsPreset.SNAPPY.animationTimeMs
+            )
+        }
+        btnPresetCustom?.setOnClickListener {
+            utilSettings?.let { us ->
+                applyPreset(
+                    us.getCustomDistortionFactor(activeLensId),
+                    us.getCustomScaleFactor(),
+                    us.getCustomAnimationTime()
+                )
+            }
+        }
+        btnSaveCustomPreset?.setOnClickListener { saveCurrentAsCustomPreset() }
         btnShareLens = view.findViewById(R.id.btnShareLens)
         btnShareLens?.setOnClickListener { shareLensImage() }
     }
@@ -152,18 +184,43 @@ class FrmLens : Fragment(), LensInterface {
     }
 
     /**
-     * FISH-004: applies a named preset to the 3 sliders above in one tap - safe/instant, and
-     * fully reversible (the sliders remain fine-tunable afterward, same as after Reset to
-     * Default, which is itself just the STANDARD preset applied from a different entry point).
+     * FISH-004/FISH-015: applies a (distortion, scale, animation-time) triple to the 3 sliders
+     * above in one tap - safe/instant, and fully reversible (the sliders remain fine-tunable
+     * afterward, same as after Reset to Default). Takes raw values rather than a
+     * [LensPhysicsPreset] so the user-saved Custom preset (not a compile-time constant) can reuse
+     * this exact same path.
      */
-    private fun applyPreset(preset: LensPhysicsPreset) {
+    private fun applyPreset(distortion: Float, scale: Float, animationTimeMs: Long) {
         utilSettings?.let { us ->
-            us.saveDistortionFactor(activeLensId, preset.distortionFactor)
-            us.save(UtilSettings.KEY_SCALE_FACTOR, preset.scaleFactor)
-            us.save(UtilSettings.KEY_ANIMATION_TIME, preset.animationTimeMs)
+            us.saveDistortionFactor(activeLensId, distortion)
+            us.save(UtilSettings.KEY_SCALE_FACTOR, scale)
+            us.save(UtilSettings.KEY_ANIMATION_TIME, animationTimeMs)
         }
         assignValues()
         lensViewsSettings?.invalidate()
+    }
+
+    /** FISH-015: captures the 3 sliders' current live values into the single Custom slot. */
+    private fun saveCurrentAsCustomPreset() {
+        utilSettings?.let { us ->
+            val distortion = sbDistortionFactor?.value ?: return
+            val scale = sbScaleFactor?.value ?: return
+            val animationTimeMs = sbAnimationTime?.value?.toLong() ?: return
+            us.saveCustomDistortionFactor(activeLensId, distortion)
+            us.saveCustomScaleFactor(scale)
+            us.saveCustomAnimationTime(animationTimeMs)
+        }
+        refreshCustomPresetButtonState()
+        android.widget.Toast.makeText(
+            requireContext(),
+            R.string.lens_physics_custom_preset_saved,
+            android.widget.Toast.LENGTH_SHORT
+        ).show()
+    }
+
+    /** FISH-015: Custom is only usable once at least one save has ever happened. */
+    private fun refreshCustomPresetButtonState() {
+        btnPresetCustom?.isEnabled = utilSettings?.hasCustomPreset() == true
     }
 
     @SuppressLint("SetTextI18n")
@@ -191,6 +248,7 @@ class FrmLens : Fragment(), LensInterface {
             sbAnimationTime?.value = validAnim
             tvValueAnimationTime?.text = getString(R.string.unit_ms_format, validAnim.toLong())
         }
+        refreshCustomPresetButtonState()
     }
 
     override fun onDefaultsReset() {
@@ -225,6 +283,8 @@ class FrmLens : Fragment(), LensInterface {
         btnPresetGentle = null
         btnPresetStandard = null
         btnPresetSnappy = null
+        btnPresetCustom = null
+        btnSaveCustomPreset = null
         utilSettings = null
         super.onDestroyView()
     }
