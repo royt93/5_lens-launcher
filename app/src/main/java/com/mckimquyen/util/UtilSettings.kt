@@ -50,6 +50,7 @@ class UtilSettings(context: Context) {
         const val DEFAULT_SHOW_NAME_APP_HOVER = true
         const val DEFAULT_SHOW_TOUCH_SELECTION = false
         const val DEFAULT_SHOW_NEW_APP_TAG = true
+        const val DEFAULT_SHOW_NOTIFICATION_BADGES = true
         const val DEFAULT_SHOW_SEARCH_BAR = true
         // FEAT-005: off by default, no behavior change for existing users.
         const val DEFAULT_KEEP_SCREEN_ON = false
@@ -108,6 +109,7 @@ class UtilSettings(context: Context) {
         const val KEY_SHOW_NAME_APP_HOVER = "show_name_app_hover"
         const val KEY_SHOW_TOUCH_SELECTION = "show_touch_selection"
         const val KEY_SHOW_NEW_APP_TAG = "show_new_tag_app"
+        const val KEY_SHOW_NOTIFICATION_BADGES = "show_notification_badges"
         const val KEY_SHOW_SEARCH_BAR = "show_search_bar"
         const val KEY_KEEP_SCREEN_ON = "keep_screen_on"
         const val KEY_DEPTH_OF_FIELD = "depth_of_field_blur"
@@ -250,6 +252,7 @@ class UtilSettings(context: Context) {
         KEY_SHOW_NAME_APP_HOVER -> prefs.getBoolean(name, DEFAULT_SHOW_NAME_APP_HOVER)
         KEY_SHOW_TOUCH_SELECTION -> prefs.getBoolean(name, DEFAULT_SHOW_TOUCH_SELECTION)
         KEY_SHOW_NEW_APP_TAG -> prefs.getBoolean(name, DEFAULT_SHOW_NEW_APP_TAG)
+        KEY_SHOW_NOTIFICATION_BADGES -> prefs.getBoolean(name, DEFAULT_SHOW_NOTIFICATION_BADGES)
         KEY_SHOW_SEARCH_BAR -> prefs.getBoolean(name, DEFAULT_SHOW_SEARCH_BAR)
         KEY_KEEP_SCREEN_ON -> prefs.getBoolean(name, DEFAULT_KEEP_SCREEN_ON)
         KEY_DEPTH_OF_FIELD -> prefs.getBoolean(name, DEFAULT_DEPTH_OF_FIELD)

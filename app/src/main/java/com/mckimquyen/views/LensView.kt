@@ -134,6 +134,11 @@ class LensView : View {
         internal fun shouldTriggerEmptySpaceLongPress(armed: Boolean, moving: Boolean, selectIndex: Int): Boolean =
             armed && !moving && selectIndex < 0
 
+        /** UI-024: pure gating decision, unit-testable without a real Canvas/Paint. */
+        @androidx.annotation.VisibleForTesting
+        internal fun shouldDrawNotificationBadge(showBadgesSetting: Boolean, notificationCount: Int): Boolean =
+            showBadgesSetting && notificationCount > 0
+
         // FISH-009: Pure state-machine transition and calculation functions
 
         /**
@@ -196,6 +201,14 @@ class LensView : View {
     private var mPaintTouchSelection: Paint? = null
     private var mPaintText: Paint? = null
     private var mPaintNewAppTag: Paint? = null
+    private var mPaintBadgeBackground: Paint? = null
+    private var mPaintBadgeText: Paint? = null
+
+    /** Test hook only - mirrors LensGridCache.recomputeCount's production-counter convention. */
+    @androidx.annotation.VisibleForTesting
+    var badgeDrawCallCount: Int = 0
+        private set
+
     private var mTouchX = -Float.MAX_VALUE
     private var mTouchY = -Float.MAX_VALUE
     private var mInsideRect = false
@@ -669,6 +682,21 @@ class LensView : View {
             )
         }
 
+        mPaintBadgeBackground = Paint().apply {
+            isAntiAlias = true
+            style = Paint.Style.FILL
+            color = ContextCompat.getColor(context, R.color.colorPrimary)
+        }
+
+        mPaintBadgeText = Paint().apply {
+            isAntiAlias = true
+            style = Paint.Style.FILL
+            color = Color.WHITE
+            textAlign = Paint.Align.CENTER
+            textSize = resources.getDimension(R.dimen.text_size_notification_badge)
+            typeface = Typeface.DEFAULT_BOLD
+        }
+
         mPaintHudBackground = Paint().apply {
             isAntiAlias = true
             style = Paint.Style.FILL
@@ -1062,6 +1090,14 @@ class LensView : View {
                 ) {
                     drawNewAppTag(canvas, rect)
                 }
+
+                if (shouldDrawNotificationBadge(
+                        mUtilSettings?.getBoolean(UtilSettings.KEY_SHOW_NOTIFICATION_BADGES) == true,
+                        app.notificationCount
+                    )
+                ) {
+                    drawNotificationBadge(canvas, rect, app.notificationCount)
+                }
             }
         }
     }
@@ -1142,6 +1178,18 @@ class LensView : View {
                     )
                 }
             }
+        }
+    }
+
+    private fun drawNotificationBadge(canvas: Canvas, rect: RectF, count: Int) {
+        badgeDrawCallCount++
+        val radius = resources.getDimension(R.dimen.radius_notification_badge)
+        val cx = rect.right - radius
+        val cy = rect.top + radius
+        mPaintBadgeBackground?.let { canvas.drawCircle(cx, cy, radius, it) }
+        mPaintBadgeText?.let { p ->
+            val label = com.mckimquyen.util.NotificationBadgeFormatter.format(count)
+            canvas.drawText(label, cx, cy - (p.ascent() + p.descent()) / 2, p)
         }
     }
 

@@ -268,4 +268,26 @@ class LensViewGestureStateTest {
         assertTrue(LensView.exceedsTouchSlop(dx, dy, touchSlop = 10f))
         assertFalse(LensView.isHorizontalSwipeIntent(dx, dy, touchSlop = 10f))
     }
+
+    // ==================================================================== shouldDrawNotificationBadge
+
+    @Test
+    fun `badge draws when setting is on and count is positive`() {
+        assertTrue(LensView.shouldDrawNotificationBadge(showBadgesSetting = true, notificationCount = 1))
+    }
+
+    @Test
+    fun `badge does not draw when the setting is off`() {
+        assertFalse(LensView.shouldDrawNotificationBadge(showBadgesSetting = false, notificationCount = 5))
+    }
+
+    @Test
+    fun `badge does not draw when count is zero`() {
+        assertFalse(LensView.shouldDrawNotificationBadge(showBadgesSetting = true, notificationCount = 0))
+    }
+
+    @Test
+    fun `badge does not draw when count is negative`() {
+        assertFalse(LensView.shouldDrawNotificationBadge(showBadgesSetting = true, notificationCount = -1))
+    }
 }
