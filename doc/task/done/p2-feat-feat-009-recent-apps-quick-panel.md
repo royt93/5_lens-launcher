@@ -29,6 +29,17 @@ Full `brainstorming` → `writing-plans` → `executing-plans` pipeline —
 `docs/superpowers/specs/2026-09-30-feat-009-recent-apps-quick-panel-design.md` /
 `docs/superpowers/plans/2026-09-30-feat-009-recent-apps-quick-panel.md`.
 
+**Disclosed plan deviation** (found by `superpowers:requesting-code-review`): the plan's Global
+Constraints claimed every existing `SearchResultAdapter` call site would keep compiling
+unchanged. That held for the one production Java call site (`ActHome.java`, via `@JvmOverloads`),
+but not for Kotlin's bare-trailing-lambda call sites in `SearchResultAdapterWidgetTest.kt` — a
+second optional function-type constructor parameter makes Kotlin's trailing-lambda sugar bind to
+the new last parameter instead of `onAppClick`, so those 5 pre-existing test call sites had to be
+rewritten to explicit `onAppClick = { ... }` form. No production code was affected; the plan's
+own stated invariant was simply wrong for this specific case (Java-callable default-arg ordering
+and Kotlin trailing-lambda ordering pull in opposite directions once a second lambda param
+exists) — noted here so a future story touching this constructor doesn't rely on that claim.
+
 - `SearchHistoryStore.MAX_RECENT` raised 8 → 16 (shared by the search overlay's `recentHeader`
   and the new panel — one source of truth), plus a new `removeKey(componentKey)` for single-entry
   removal.
@@ -46,6 +57,14 @@ Full `brainstorming` → `writing-plans` → `executing-plans` pipeline —
 - Recent list stays global across all lenses (`FISH-008`), matching `App.openCount`'s existing
   "by design" scope — proven at runtime by a dedicated cross-lens integration test, not just by
   key-naming convention.
+
+**Known limitation, in-scope per spec** (found by `superpowers:requesting-code-review`):
+`RecentAppsPanelFragment` resolves its row list once at open (and again after a manual remove),
+but never re-resolves if `RAppsSingleton`'s snapshot changes underneath it — e.g. the background
+`PackageManager` scan finishing while the sheet is already open. The design spec's "Snapshot not
+ready yet" clause only promises the same empty-state treatment at open time, not eventual live
+population, so this isn't a regression — but it's a narrow rough edge (a just-scanned recent app
+stays invisible until the sheet is closed and reopened) worth revisiting if reported.
 
 ## Root-caused bug found during manual device smoke (post-implementation)
 
