@@ -436,6 +436,47 @@
 
                 </LinearLayout>
 
+                <!-- FISH-015: the single user-saved custom preset. Tap applies it (disabled
+                     until the user has saved at least once); the icon-only button next to it
+                     captures the three sliders above into this slot. -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnPresetCustom"
+                        style="?attr/materialButtonOutlinedStyle"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="4dp"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
+                        android:paddingHorizontal="0dp"
+                        android:minWidth="0dp"
+                        android:maxLines="1"
+                        android:ellipsize="end"
+                        android:textSize="13sp"
+                        android:text="@string/lens_physics_preset_custom" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnSaveCustomPreset"
+                        style="?attr/materialButtonOutlinedStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
+                        android:minWidth="0dp"
+                        android:paddingHorizontal="12dp"
+                        app:icon="@drawable/ic_save_24dp"
+                        app:iconPadding="0dp"
+                        android:contentDescription="@string/lens_physics_save_custom_preset_description" />
+
+                </LinearLayout>
+
             </LinearLayout>
 
         </com.google.android.material.card.MaterialCardView>
