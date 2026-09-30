@@ -59,6 +59,7 @@
     <string name="menu_title_reset_defaults">Standardeinstellungen zurücksetzen</string>
     <string name="menu_title_show_apps">Starten (Anzeige möglich)</string>
     <string name="menu_app_info">App-Info</string>
+    <string name="remove_from_recent">Aus „Zuletzt“ entfernen</string>
     <string name="organization_add_favorite">Zu Favoriten hinzufügen</string>
     <string name="organization_remove_favorite">Aus Favoriten entfernen</string>
     <string name="organization_set_folder">Ordner festlegen</string>

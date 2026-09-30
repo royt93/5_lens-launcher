@@ -59,6 +59,7 @@
     <string name="menu_title_reset_defaults">កំណត់ការកំណត់ឡើងវិញ</string>
     <string name="menu_title_show_apps">ចាប់ផ្តើម (អាចមានការផ្សាយពាណិជ្ជកម្ម)</string>
     <string name="menu_app_info">ព័ត៌មានកម្មវិធី</string>
+    <string name="remove_from_recent">លុបចេញពីថ្មីៗ</string>
     <string name="organization_add_favorite">បន្ថែមទៅចំណូលចិត្ត</string>
     <string name="organization_remove_favorite">លុបចេញពីចំណូលចិត្ត</string>
     <string name="organization_set_folder">កំណត់ថតឯកសារ</string>

@@ -59,6 +59,7 @@
     <string name="menu_title_reset_defaults">إعادة تعيين الإعدادات الافتراضية</string>
     <string name="menu_title_show_apps">بدء (قد تظهر إعلانات)</string>
     <string name="menu_app_info">معلومات التطبيق</string>
+    <string name="remove_from_recent">إزالة من الأخيرة</string>
     <string name="organization_add_favorite">إضافة إلى المفضلة</string>
     <string name="organization_remove_favorite">إزالة من المفضلة</string>
     <string name="organization_set_folder">تعيين المجلد</string>

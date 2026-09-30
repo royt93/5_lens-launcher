@@ -59,6 +59,7 @@
     <string name="menu_title_reset_defaults">Restablecer ajustes predeterminados</string>
     <string name="menu_title_show_apps">Comenzar (Pueden aparecer anuncios)</string>
     <string name="menu_app_info">Información de la app</string>
+    <string name="remove_from_recent">Quitar de recientes</string>
     <string name="organization_add_favorite">Añadir a favoritos</string>
     <string name="organization_remove_favorite">Quitar de favoritos</string>
     <string name="organization_set_folder">Establecer carpeta</string>

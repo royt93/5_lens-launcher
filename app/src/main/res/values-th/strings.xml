@@ -59,6 +59,7 @@
     <string name="menu_title_reset_defaults">รีเซ็ตการตั้งค่าเริ่มต้น</string>
     <string name="menu_title_show_apps">เริ่ม (อาจมีโฆษณา)</string>
     <string name="menu_app_info">ข้อมูลแอป</string>
+    <string name="remove_from_recent">ลบออกจากล่าสุด</string>
     <string name="organization_add_favorite">เพิ่มลงรายการโปรด</string>
     <string name="organization_remove_favorite">นำออกจากรายการโปรด</string>
     <string name="organization_set_folder">ตั้งค่าโฟลเดอร์</string>

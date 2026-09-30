@@ -28,4 +28,10 @@
         android:title="@string/menu_app_uninstall"
         app:iconTint="?attr/colorOnSurface" />
 
+    <!-- FEAT-009: only visible when the adapter is constructed with onRemoveFromRecent (the
+         recent-apps panel) - hidden in the search-overlay usage. -->
+    <item
+        android:id="@+id/menuItemRemoveFromRecent"
+        android:title="@string/remove_from_recent" />
+
 </menu>

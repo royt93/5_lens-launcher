@@ -59,6 +59,7 @@
     <string name="menu_title_reset_defaults">Reset Pengaturan Default</string>
     <string name="menu_title_show_apps">Mulai (Iklan mungkin muncul)</string>
     <string name="menu_app_info">Info Aplikasi</string>
+    <string name="remove_from_recent">Hapus dari terbaru</string>
     <string name="organization_add_favorite">Tambahkan ke favorit</string>
     <string name="organization_remove_favorite">Hapus dari favorit</string>
     <string name="organization_set_folder">Atur folder</string>

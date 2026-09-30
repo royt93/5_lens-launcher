@@ -61,6 +61,7 @@
     <string name="menu_title_reset_defaults">Reset Default Settings</string>
     <string name="menu_title_show_apps">Start (Ads may appear)</string>
     <string name="menu_app_info">App Info</string>
+    <string name="remove_from_recent">Remove from recent</string>
     <!-- FEAT-002 ships in the app's maintained English/Vietnamese locales first. -->
     <string name="organization_add_favorite">Add to favorites</string>
     <string name="organization_remove_favorite">Remove from favorites</string>

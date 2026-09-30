@@ -59,6 +59,7 @@
     <string name="menu_title_reset_defaults">डिफ़ॉल्ट सेटिंग्स रीसेट करें</string>
     <string name="menu_title_show_apps">प्रारंभ (विज्ञापन आ सकते हैं)</string>
     <string name="menu_app_info">ऐप की जानकारी</string>
+    <string name="remove_from_recent">हाल ही से हटाएं</string>
     <string name="organization_add_favorite">पसंदीदा में जोड़ें</string>
     <string name="organization_remove_favorite">पसंदीदा से हटाएं</string>
     <string name="organization_set_folder">फ़ोल्डर सेट करें</string>

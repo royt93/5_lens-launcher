@@ -30,10 +30,10 @@ class SearchResultAdapterWidgetTest {
                 val second = App(label = "Notes", packageName = "pkg.notes", name = "NotesActivity")
                 var clickedApp: App? = null
                 var clickedSource: android.view.View? = null
-                val adapter = SearchResultAdapter { app, source ->
+                val adapter = SearchResultAdapter(onAppClick = { app, source ->
                     clickedApp = app
                     clickedSource = source
-                }
+                })
 
                 assertFalse(adapter.hasStableIds())
                 assertNull(adapter.firstOrNull())
@@ -78,7 +78,7 @@ class SearchResultAdapterWidgetTest {
         ActivityScenario.launch(ActHome::class.java).use { scenario ->
             scenario.onActivity { activity ->
                 val app = App(label = "Camera", packageName = "pkg.camera", name = "CameraActivity")
-                val adapter = SearchResultAdapter { _, _ -> }
+                val adapter = SearchResultAdapter(onAppClick = { _, _ -> })
                 adapter.submitList(listOf(app))
 
                 val holder = adapter.onCreateViewHolder(FrameLayout(activity), 0)
@@ -101,7 +101,7 @@ class SearchResultAdapterWidgetTest {
                     name = "MissingIconActivity",
                     iconCacheKey = "missing-icon-cache-key"
                 )
-                val adapter = SearchResultAdapter { _, _ -> }
+                val adapter = SearchResultAdapter(onAppClick = { _, _ -> })
                 adapter.submitList(listOf(app))
 
                 val holder = adapter.onCreateViewHolder(FrameLayout(activity), 0)
@@ -133,7 +133,7 @@ class SearchResultAdapterWidgetTest {
                     name = "CameraActivity",
                     pinnedZone = PinnedZone.START
                 )
-                val adapter = SearchResultAdapter { _, _ -> }
+                val adapter = SearchResultAdapter(onAppClick = { _, _ -> })
                 adapter.submitList(listOf(app))
 
                 val holder = adapter.onCreateViewHolder(FrameLayout(activity), 0)
@@ -160,7 +160,8 @@ class SearchResultAdapterWidgetTest {
                         R.id.menuItemPinStart,
                         R.id.menuItemPinEnd,
                         R.id.menuItemUnpin,
-                        R.id.menuItemElementUninstall
+                        R.id.menuItemElementUninstall,
+                        R.id.menuItemRemoveFromRecent
                     ),
                     ids
                 )
@@ -193,7 +194,7 @@ class SearchResultAdapterWidgetTest {
                     name = "ReattachedActivity",
                     iconCacheKey = "reattached-cache-key"
                 )
-                val adapter = SearchResultAdapter { _, _ -> }
+                val adapter = SearchResultAdapter(onAppClick = { _, _ -> })
                 adapter.submitList(listOf(app))
 
                 val recyclerView = androidx.recyclerview.widget.RecyclerView(activity).apply {
@@ -220,6 +221,55 @@ class SearchResultAdapterWidgetTest {
                     "The adapter's scope must be alive again after re-attach",
                     adapter.isScopeActiveForTest()
                 )
+            }
+        }
+    }
+
+    /** FEAT-009: the panel passes a callback; the search overlay (existing usage) does not. */
+    @Test
+    fun removeFromRecentItemIsHiddenWhenNoCallbackIsProvided() {
+        ActivityScenario.launch(ActHome::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                val app = App(label = "Camera", packageName = "pkg.camera", name = "CameraActivity")
+                val adapter = SearchResultAdapter(onAppClick = { _, _ -> })
+                adapter.submitList(listOf(app))
+
+                val holder = adapter.onCreateViewHolder(FrameLayout(activity), 0)
+                adapter.onBindViewHolder(holder, 0)
+                holder.itemView.findViewById<View>(R.id.llSearchResultMainRow).performLongClick()
+
+                val menuItem = holder.lastActionMenu?.menu?.findItem(R.id.menuItemRemoveFromRecent)
+                assertEquals(false, menuItem?.isVisible)
+            }
+        }
+    }
+
+    /** FEAT-009: the panel usage shows the item and tapping it invokes the callback. */
+    @Test
+    fun removeFromRecentItemIsVisibleAndInvokesCallbackWhenProvided() {
+        ActivityScenario.launch(ActHome::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                val app = App(label = "Camera", packageName = "pkg.camera", name = "CameraActivity")
+                var removed: App? = null
+                val adapter = SearchResultAdapter(
+                    onAppClick = { _, _ -> },
+                    onRemoveFromRecent = { removed = it }
+                )
+                adapter.submitList(listOf(app))
+
+                val holder = adapter.onCreateViewHolder(FrameLayout(activity), 0)
+                adapter.onBindViewHolder(holder, 0)
+                holder.itemView.findViewById<View>(R.id.llSearchResultMainRow).performLongClick()
+
+                val menuItem = holder.lastActionMenu?.menu?.findItem(R.id.menuItemRemoveFromRecent)
+                assertEquals(true, menuItem?.isVisible)
+
+                // API 37 cannot inject a real popup-item click (see class docstring); call the
+                // exact handler the popup's own click listener dispatches to, same convention as
+                // ActHome.onLensMenuItemSelected.
+                val handled = holder.handleMenuAction(R.id.menuItemRemoveFromRecent, app, holder.itemView)
+                assertEquals(true, handled)
+                assertSame(app, removed)
             }
         }
     }

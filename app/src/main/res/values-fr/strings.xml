@@ -59,6 +59,7 @@
     <string name="menu_title_reset_defaults">Réinitialiser les paramètres</string>
     <string name="menu_title_show_apps">Démarrer (Des publicités peuvent apparaître)</string>
     <string name="menu_app_info">Infos sur l\'application</string>
+    <string name="remove_from_recent">Retirer des récents</string>
     <string name="organization_add_favorite">Ajouter aux favoris</string>
     <string name="organization_remove_favorite">Retirer des favoris</string>
     <string name="organization_set_folder">Définir le dossier</string>

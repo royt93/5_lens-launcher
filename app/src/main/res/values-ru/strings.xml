@@ -59,6 +59,7 @@
     <string name="menu_title_reset_defaults">Сбросить настройки по умолчанию</string>
     <string name="menu_title_show_apps">Запуск (может содержать рекламу)</string>
     <string name="menu_app_info">О приложении</string>
+    <string name="remove_from_recent">Удалить из недавних</string>
     <string name="organization_add_favorite">Добавить в избранное</string>
     <string name="organization_remove_favorite">Удалить из избранного</string>
     <string name="organization_set_folder">Задать папку</string>

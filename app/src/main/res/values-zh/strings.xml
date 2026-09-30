@@ -59,6 +59,7 @@
     <string name="menu_title_reset_defaults">重置默认设置</string>
     <string name="menu_title_show_apps">启动（可能包含广告）</string>
     <string name="menu_app_info">应用信息</string>
+    <string name="remove_from_recent">从最近使用中移除</string>
     <string name="organization_add_favorite">添加到收藏</string>
     <string name="organization_remove_favorite">从收藏中移除</string>
     <string name="organization_set_folder">设置文件夹</string>

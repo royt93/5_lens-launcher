@@ -59,6 +59,7 @@
     <string name="menu_title_reset_defaults">Restaurar configurações padrão</string>
     <string name="menu_title_show_apps">Iniciar (Anúncios podem ser exibidos)</string>
     <string name="menu_app_info">Informações do app</string>
+    <string name="remove_from_recent">Remover dos recentes</string>
     <string name="organization_add_favorite">Adicionar aos favoritos</string>
     <string name="organization_remove_favorite">Remover dos favoritos</string>
     <string name="organization_set_folder">Definir pasta</string>

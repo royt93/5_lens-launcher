@@ -59,6 +59,7 @@
     <string name="menu_title_reset_defaults">ຣີເຊັດການຕັ້ງຄ່າເລີ່ມຕົ້ນ</string>
     <string name="menu_title_show_apps">ເລີ່ມ (ອາດມີໂຄສະນາ)</string>
     <string name="menu_app_info">ຂໍ້ມູນແອັບ</string>
+    <string name="remove_from_recent">ລຶບອອກຈາກລ່າສຸດ</string>
     <string name="organization_add_favorite">ເພີ່ມໃສ່ລາຍການທີ່ມັກ</string>
     <string name="organization_remove_favorite">ລຶບອອກຈາກລາຍການທີ່ມັກ</string>
     <string name="organization_set_folder">ຕັ້ງໂຟນເດີ</string>

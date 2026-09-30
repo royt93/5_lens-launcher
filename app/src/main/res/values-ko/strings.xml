@@ -59,6 +59,7 @@
     <string name="menu_title_reset_defaults">기본 설정으로 재설정</string>
     <string name="menu_title_show_apps">시작 (광고가 포함될 수 있음)</string>
     <string name="menu_app_info">앱 정보</string>
+    <string name="remove_from_recent">최근 항목에서 삭제</string>
     <string name="organization_add_favorite">즐겨찾기에 추가</string>
     <string name="organization_remove_favorite">즐겨찾기에서 제거</string>
     <string name="organization_set_folder">폴더 설정</string>

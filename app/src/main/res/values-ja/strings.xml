@@ -59,6 +59,7 @@
     <string name="menu_title_reset_defaults">デフォルト設定に戻す</string>
     <string name="menu_title_show_apps">起動 (広告が表示される場合があります)</string>
     <string name="menu_app_info">アプリ情報</string>
+    <string name="remove_from_recent">最近から削除</string>
     <string name="organization_add_favorite">お気に入りに追加</string>
     <string name="organization_remove_favorite">お気に入りから削除</string>
     <string name="organization_set_folder">フォルダを設定</string>

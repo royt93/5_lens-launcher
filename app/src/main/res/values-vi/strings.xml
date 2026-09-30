@@ -58,6 +58,7 @@
     <string name="menu_title_reset_defaults">Khôi phục cài đặt mặc định</string>
     <string name="menu_title_show_apps">Bắt đầu (Có thể có quảng cáo)</string>
     <string name="menu_app_info">Thông tin ứng dụng</string>
+    <string name="remove_from_recent">Xóa khỏi gần đây</string>
     <string name="organization_add_favorite">Thêm vào yêu thích</string>
     <string name="organization_remove_favorite">Bỏ khỏi yêu thích</string>
     <string name="organization_set_folder">Đặt thư mục</string>

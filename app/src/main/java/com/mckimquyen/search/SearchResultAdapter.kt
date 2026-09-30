@@ -34,8 +34,9 @@ fun interface SearchResultClickListener {
     fun onAppClick(app: App, source: View)
 }
 
-class SearchResultAdapter(
-    private val onAppClick: SearchResultClickListener
+class SearchResultAdapter @JvmOverloads constructor(
+    private val onAppClick: SearchResultClickListener,
+    private val onRemoveFromRecent: ((App) -> Unit)? = null
 ) : RecyclerView.Adapter<SearchResultAdapter.ResultViewHolder>() {
     private val apps = mutableListOf<App>()
 
@@ -211,38 +212,54 @@ class SearchResultAdapter(
 
         // ==================================================================== SEARCH-003: row actions
 
+        /** Exposed for tests only - the exact popup the last long-press built, unshown state
+         *  included, mirroring ActHome.lensDialog's existing test-inspection convention. */
+        @androidx.annotation.VisibleForTesting
+        var lastActionMenu: PopupMenu? = null
+            private set
+
         private fun showActionMenu(app: App, anchor: View) {
             val wrapper = ContextThemeWrapper(anchor.context, R.style.PopupMenuTheme)
             val popupMenu = PopupMenu(wrapper, anchor, Gravity.END)
             popupMenu.inflate(R.menu.menu_search_result)
             popupMenu.menu.findItem(R.id.menuItemUnpin).isVisible = app.pinnedZone != PinnedZone.NONE
+            popupMenu.menu.findItem(R.id.menuItemRemoveFromRecent).isVisible = onRemoveFromRecent != null
             popupMenu.setForceShowIcon(true)
-            popupMenu.setOnMenuItemClickListener { item ->
-                when (item.itemId) {
-                    R.id.menuItemElementAppInfo -> {
-                        startActionIntent(anchor, UtilApp.appInfoIntent(app.packageName.toString()))
-                        true
-                    }
-                    R.id.menuItemElementUninstall -> {
-                        startActionIntent(anchor, UtilApp.uninstallIntent(app.packageName.toString()))
-                        true
-                    }
-                    R.id.menuItemPinStart -> {
-                        pin(app, anchor, PinnedZone.START)
-                        true
-                    }
-                    R.id.menuItemPinEnd -> {
-                        pin(app, anchor, PinnedZone.END)
-                        true
-                    }
-                    R.id.menuItemUnpin -> {
-                        pin(app, anchor, PinnedZone.NONE)
-                        true
-                    }
-                    else -> false
-                }
-            }
+            popupMenu.setOnMenuItemClickListener { item -> handleMenuAction(item.itemId, app, anchor) }
+            lastActionMenu = popupMenu
             popupMenu.show()
+        }
+
+        /** Split out from the popup's click listener so tests can invoke it directly instead of
+         *  simulating a real popup-item click (this project's test device cannot build Espresso's
+         *  event injector) - same convention as ActHome.onLensMenuItemSelected. */
+        @androidx.annotation.VisibleForTesting
+        fun handleMenuAction(itemId: Int, app: App, anchor: View): Boolean = when (itemId) {
+            R.id.menuItemElementAppInfo -> {
+                startActionIntent(anchor, UtilApp.appInfoIntent(app.packageName.toString()))
+                true
+            }
+            R.id.menuItemElementUninstall -> {
+                startActionIntent(anchor, UtilApp.uninstallIntent(app.packageName.toString()))
+                true
+            }
+            R.id.menuItemPinStart -> {
+                pin(app, anchor, PinnedZone.START)
+                true
+            }
+            R.id.menuItemPinEnd -> {
+                pin(app, anchor, PinnedZone.END)
+                true
+            }
+            R.id.menuItemUnpin -> {
+                pin(app, anchor, PinnedZone.NONE)
+                true
+            }
+            R.id.menuItemRemoveFromRecent -> {
+                onRemoveFromRecent?.invoke(app)
+                true
+            }
+            else -> false
         }
 
         private fun startActionIntent(anchor: View, intent: Intent) {
