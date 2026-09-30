@@ -135,7 +135,11 @@ class UtilSettingsCustomPresetTest {
 
     @Test
     fun `duplicateLensSettings copies the effective custom distortion onto the new lens`() {
+        // Real saves always write distortion + scale + animation-time together
+        // (FrmLens.saveCurrentAsCustomPreset) - saveCustomScaleFactor is what flips
+        // hasCustomPreset() true, so include it to match that real invariant.
         settings.saveCustomDistortionFactor(work, 4.5f)
+        settings.saveCustomScaleFactor(1.2f)
 
         settings.duplicateLensSettings(work, personal)
 
@@ -145,6 +149,7 @@ class UtilSettingsCustomPresetTest {
     @Test
     fun `duplicating from a lens that only inherits materializes the inherited custom value`() {
         settings.saveCustomDistortionFactor(LensWorkspace.DEFAULT_LENS_ID, 3.0f)
+        settings.saveCustomScaleFactor(1.2f)
 
         settings.duplicateLensSettings(work, personal)
 
@@ -152,6 +157,43 @@ class UtilSettingsCustomPresetTest {
             "work never saved its own override, so it inherits the base custom value - " +
                 "duplicating it must materialize that inherited value onto personal",
             3.0f,
+            settings.getCustomDistortionFactor(personal),
+            0.001f
+        )
+    }
+
+    @Test
+    fun `duplicating before any custom preset has ever been saved does not fabricate one`() {
+        // Neither lens has ever saved a Custom preset - hasCustomPreset() must stay false, and
+        // the new lens must not receive a phantom per-lens override for a feature that doesn't
+        // exist yet.
+        settings.duplicateLensSettings(work, personal)
+
+        assertFalse(
+            "Duplicating before any Custom preset exists must not silently create one",
+            settings.hasCustomPreset()
+        )
+        assertEquals(
+            "personal must still cleanly fall back to its own live distortion, not a phantom override",
+            settings.getDistortionFactor(personal),
+            settings.getCustomDistortionFactor(personal),
+            0.001f
+        )
+    }
+
+    @Test
+    fun `a pre-custom duplicate does not go stale once a real custom preset is saved afterward`() {
+        // work is duplicated to personal before anyone has ever saved a Custom preset.
+        settings.duplicateLensSettings(work, personal)
+
+        // Later, a real Custom preset is saved on the default lens.
+        settings.saveCustomDistortionFactor(LensWorkspace.DEFAULT_LENS_ID, 4.0f)
+        settings.saveCustomScaleFactor(1.5f)
+
+        assertEquals(
+            "personal never had its own Custom override - it must inherit the real saved base " +
+                "value, not a stale snapshot fabricated before Custom even existed",
+            4.0f,
             settings.getCustomDistortionFactor(personal),
             0.001f
         )

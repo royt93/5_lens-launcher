@@ -401,10 +401,16 @@ class UtilSettings(context: Context) {
     fun duplicateLensSettings(fromLensId: String, toLensId: String) {
         val distortion = getDistortionFactor(fromLensId)
         val smartFocus = isSmartFocusBias(fromLensId)
-        val customDistortion = getCustomDistortionFactor(fromLensId)
         saveDistortionFactor(toLensId, distortion)
         saveSmartFocusBias(toLensId, smartFocus)
-        saveCustomDistortionFactor(toLensId, customDistortion)
+        // FISH-015: only carry the Custom distortion forward once a real Custom preset already
+        // exists somewhere - otherwise getCustomDistortionFactor() is merely falling back to the
+        // live distortion above, which is not a saved preset. Materializing that fallback as a
+        // real per-lens override here would go stale: it would silently win over the correct
+        // base-custom fallback the moment the user saves a genuine Custom preset later.
+        if (hasCustomPreset()) {
+            saveCustomDistortionFactor(toLensId, getCustomDistortionFactor(fromLensId))
+        }
     }
 
     fun deleteLensSettings(lensId: String) {

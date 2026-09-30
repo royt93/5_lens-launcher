@@ -200,7 +200,10 @@ class ActHomeLensManagementWidgetTest {
         seedSecondLens()
         settings.saveDistortionFactor("second", 4.5f)
         settings.saveSmartFocusBias("second", true)
+        // Real saves always write distortion + scale together (FrmLens.saveCurrentAsCustomPreset)
+        // - saveCustomScaleFactor is what flips hasCustomPreset() true, so include it here too.
         settings.saveCustomDistortionFactor("second", 3.3f)
+        settings.saveCustomScaleFactor(1.3f)
 
         ActivityScenario.launch(ActHome::class.java).use { scenario ->
             idle()
