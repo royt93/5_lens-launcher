@@ -52,3 +52,6 @@ gradle.properties.bak
 
 # Claude Code local settings (YOLO/bypassPermissions — không commit)
 .claude/settings.local.json
+
+# superpowers brainstorming companion (local scratch, never commit)
+.superpowers/
