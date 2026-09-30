@@ -61,6 +61,12 @@ class ActHomeMultiLensRecentAppsIntegrationTest {
             }
             InstrumentationRegistry.getInstrumentation().waitForIdleSync()
 
+            // TEST-003-class flake guard: RApplication's real background PackageManager scan can
+            // overwrite this fake single-item snapshot with the real device's app list at any
+            // point after setUp() - re-set it immediately before the point that actually consumes
+            // it (the panel's own refreshList(), triggered by show()), not just at test start.
+            RAppsSingleton.instance.apps = arrayListOf(camera)
+
             lateinit var fragment: RecentAppsPanelFragment
             scenario.onActivity { activity ->
                 fragment = RecentAppsPanelFragment()
