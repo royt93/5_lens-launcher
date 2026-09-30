@@ -96,6 +96,13 @@ class UtilSettings(context: Context) {
         const val KEY_PENDING_AUTO_EXPORT_LENS = "pending_auto_export_lens"
         const val KEY_SCALE_FACTOR = "scale_factor"
         const val KEY_ANIMATION_TIME = "animation_time"
+        // FISH-015: the single user-saved "Custom" preset slot. Distortion follows
+        // KEY_DISTORTION_FACTOR's existing per-lens split (via lensKey()); scale/animation-time
+        // follow KEY_SCALE_FACTOR/KEY_ANIMATION_TIME's existing global scope - same split the
+        // fixed Gentle/Standard/Snappy presets already use for these three fields.
+        const val KEY_CUSTOM_DISTORTION_FACTOR = "custom_distortion_factor"
+        const val KEY_CUSTOM_SCALE_FACTOR = "custom_scale_factor"
+        const val KEY_CUSTOM_ANIMATION_TIME = "custom_animation_time"
         const val KEY_VIBRATE_APP_HOVER = "vibrate_app_hover"
         const val KEY_VIBRATE_APP_LAUNCH = "vibrate_app_launch"
         const val KEY_SHOW_NAME_APP_HOVER = "show_name_app_hover"
@@ -394,8 +401,10 @@ class UtilSettings(context: Context) {
     fun duplicateLensSettings(fromLensId: String, toLensId: String) {
         val distortion = getDistortionFactor(fromLensId)
         val smartFocus = isSmartFocusBias(fromLensId)
+        val customDistortion = getCustomDistortionFactor(fromLensId)
         saveDistortionFactor(toLensId, distortion)
         saveSmartFocusBias(toLensId, smartFocus)
+        saveCustomDistortionFactor(toLensId, customDistortion)
     }
 
     fun deleteLensSettings(lensId: String) {
@@ -404,9 +413,68 @@ class UtilSettings(context: Context) {
                 remove("${KEY_DISTORTION_FACTOR}_$lensId")
                 remove("${KEY_SMART_FOCUS_BIAS}_$lensId")
                 remove("${KEY_PENDING_DISTORTION_FACTOR}_$lensId")
+                remove("${KEY_CUSTOM_DISTORTION_FACTOR}_$lensId")
             }
         }
     }
+
+    // ========================================================================
+    // FISH-015: the single user-saved "Custom" lens physics preset. Distortion is per-lens
+    // (same lensKey() split as KEY_DISTORTION_FACTOR); scale/animation-time are global (same
+    // scope as KEY_SCALE_FACTOR/KEY_ANIMATION_TIME). Saving always writes all three together, so
+    // hasCustomPreset() checking one global key is a reliable "ever saved" signal.
+    // ========================================================================
+
+    fun getCustomDistortionFactor(lensId: String?): Float {
+        val key = lensKey(KEY_CUSTOM_DISTORTION_FACTOR, lensId)
+        return if (prefs.contains(key)) {
+            getFloatWithValidation(
+                key,
+                DEFAULT_DISTORTION_FACTOR,
+                MIN_DISTORTION_FACTOR,
+                MAX_DISTORTION_FACTOR / 2f + MIN_DISTORTION_FACTOR
+            )
+        } else if (prefs.contains(KEY_CUSTOM_DISTORTION_FACTOR)) {
+            getFloatWithValidation(
+                KEY_CUSTOM_DISTORTION_FACTOR,
+                DEFAULT_DISTORTION_FACTOR,
+                MIN_DISTORTION_FACTOR,
+                MAX_DISTORTION_FACTOR / 2f + MIN_DISTORTION_FACTOR
+            )
+        } else {
+            // No custom value has ever been saved for this lens or as a base default - show
+            // this lens's own live effective distortion rather than inventing one.
+            getDistortionFactor(lensId)
+        }
+    }
+
+    fun saveCustomDistortionFactor(lensId: String?, value: Float) {
+        save(lensKey(KEY_CUSTOM_DISTORTION_FACTOR, lensId), value)
+    }
+
+    fun getCustomScaleFactor(): Float = getFloatWithValidation(
+        KEY_CUSTOM_SCALE_FACTOR,
+        DEFAULT_SCALE_FACTOR,
+        MIN_SCALE_FACTOR,
+        MAX_SCALE_FACTOR / 2f + MIN_SCALE_FACTOR
+    )
+
+    fun saveCustomScaleFactor(value: Float) {
+        save(KEY_CUSTOM_SCALE_FACTOR, value)
+    }
+
+    fun getCustomAnimationTime(): Long {
+        val value = prefs.getLong(KEY_CUSTOM_ANIMATION_TIME, DEFAULT_ANIMATION_TIME)
+        val max = MAX_ANIMATION_TIME / 2L + MIN_ANIMATION_TIME
+        return value.coerceIn(MIN_ANIMATION_TIME, max)
+    }
+
+    fun saveCustomAnimationTime(value: Long) {
+        save(KEY_CUSTOM_ANIMATION_TIME, value)
+    }
+
+    /** True once the user has saved a Custom preset at least once, on any lens. */
+    fun hasCustomPreset(): Boolean = prefs.contains(KEY_CUSTOM_SCALE_FACTOR)
 
     private fun getFloatWithValidation(name: String?, defaultValue: Float, minValue: Float, maxValue: Float): Float {
         val value = prefs.getFloat(name, defaultValue)
