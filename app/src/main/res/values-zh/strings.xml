@@ -15,6 +15,7 @@
     <string name="setting_show_name_app_hover">悬停在应用上时显示名称</string>
     <string name="setting_show_touch_selection">显示触摸选择</string>
     <string name="setting_show_search_bar">显示搜索栏</string>
+    <string name="setting_show_recent_apps_icon">显示最近使用应用图标</string>
     <string name="setting_keep_screen_on">保持屏幕常亮</string>
     <string name="setting_keep_screen_on_hint">此应用的任意屏幕打开时屏幕将保持常亮。省电模式仍可能将其关闭。</string>
     <string name="setting_depth_of_field">景深模糊</string>

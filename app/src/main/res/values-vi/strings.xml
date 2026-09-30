@@ -14,6 +14,7 @@
     <string name="setting_show_name_app_hover">Hiện tên khi di chuột qua ứng dụng</string>
     <string name="setting_show_touch_selection">Hiện lựa chọn chạm</string>
     <string name="setting_show_search_bar">Hiện thanh tìm kiếm</string>
+    <string name="setting_show_recent_apps_icon">Hiện biểu tượng ứng dụng gần đây</string>
     <string name="setting_keep_screen_on">Giữ màn hình sáng</string>
     <string name="setting_keep_screen_on_hint">Màn hình sẽ giữ sáng khi bất kỳ màn hình nào của ứng dụng đang mở. Chế độ tiết kiệm pin vẫn có thể tắt màn hình.</string>
     <string name="setting_depth_of_field">Làm mờ theo tiêu cự</string>

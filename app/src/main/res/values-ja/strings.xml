@@ -15,6 +15,7 @@
     <string name="setting_show_name_app_hover">ホバー時に名前を表示</string>
     <string name="setting_show_touch_selection">タッチ選択範囲を表示</string>
     <string name="setting_show_search_bar">検索バーを表示</string>
+    <string name="setting_show_recent_apps_icon">最近使用したアプリのアイコンを表示</string>
     <string name="setting_keep_screen_on">画面を常にオンにする</string>
     <string name="setting_keep_screen_on_hint">このアプリのいずれかの画面が開いている間、画面はオンのままになります。バッテリーセーバーによってオフになる場合があります。</string>
     <string name="setting_depth_of_field">被写界深度ぼかし</string>

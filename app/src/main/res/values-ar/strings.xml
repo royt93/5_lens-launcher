@@ -15,6 +15,7 @@
     <string name="setting_show_name_app_hover">عرض الاسم عند التحويم فوق التطبيق</string>
     <string name="setting_show_touch_selection">عرض تحديد اللمس</string>
     <string name="setting_show_search_bar">إظهار شريط البحث</string>
+    <string name="setting_show_recent_apps_icon">إظهار أيقونة التطبيقات الأخيرة</string>
     <string name="setting_keep_screen_on">إبقاء الشاشة مضاءة</string>
     <string name="setting_keep_screen_on_hint">تبقى الشاشة مضاءة أثناء فتح أي شاشة من شاشات هذا التطبيق. قد يعمل موفر البطارية على إيقاف تشغيلها رغم ذلك.</string>
     <string name="setting_depth_of_field">تمويه عمق المجال</string>

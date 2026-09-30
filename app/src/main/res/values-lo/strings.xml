@@ -15,6 +15,7 @@
     <string name="setting_show_name_app_hover">ສະແດງຊື່ເມື່ອວາງນິ້ວເທິງແອັບ</string>
     <string name="setting_show_touch_selection">ສະແດງການເລືອກສໍາຜັດ</string>
     <string name="setting_show_search_bar">ສະແດງແຖບຄົ້ນຫາ</string>
+    <string name="setting_show_recent_apps_icon">ສະແດງໄອຄອນແອັບລ່າສຸດ</string>
     <string name="setting_keep_screen_on">ຮັກສາໜ້າຈໍໃຫ້ເປີດຢູ່</string>
     <string name="setting_keep_screen_on_hint">ໜ້າຈໍຈະເປີດຄ້າງໄວ້ໃນຂະນະທີ່ໜ້າຈໍໃດໜຶ່ງຂອງແອັບນີ້ກຳລັງເປີດຢູ່. ຕົວປະຫຍັດແບັດເຕີຣີອາດຈະປິດມັນໄດ້ຢູ່ດີ.</string>
     <string name="setting_depth_of_field">ເຮັດໃຫ້ມົວຕາມຄວາມເລິກ</string>

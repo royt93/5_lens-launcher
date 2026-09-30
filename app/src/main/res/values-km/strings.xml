@@ -15,6 +15,7 @@
     <string name="setting_show_name_app_hover">បង្ហាញឈ្មោះពេលដាក់លើកម្មវិធី</string>
     <string name="setting_show_touch_selection">បង្ហាញការជ្រើសរើសដោយការប៉ះ</string>
     <string name="setting_show_search_bar">បង្ហាញរបារស្វែងរក</string>
+    <string name="setting_show_recent_apps_icon">បង្ហាញរូបតំណាងកម្មវិធីថ្មីៗ</string>
     <string name="setting_keep_screen_on">រក្សាអេក្រង់ឱ្យបើក</string>
     <string name="setting_keep_screen_on_hint">អេក្រង់នឹងបន្តបើកនៅពេលដែលអេក្រង់ណាមួយនៃកម្មវិធីនេះកំពុងបើក។ កម្មវិធីសន្សំសំចៃថ្មអាចនៅតែបិទវាបាន។</string>
     <string name="setting_depth_of_field">ធ្វើឱ្យព្រិលតាមជម្រៅ</string>

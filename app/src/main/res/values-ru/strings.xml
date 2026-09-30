@@ -15,6 +15,7 @@
     <string name="setting_show_name_app_hover">Показывать имя при наведении</string>
     <string name="setting_show_touch_selection">Показывать выбор касанием</string>
     <string name="setting_show_search_bar">Показать строку поиска</string>
+    <string name="setting_show_recent_apps_icon">Показывать значок недавних приложений</string>
     <string name="setting_keep_screen_on">Не выключать экран</string>
     <string name="setting_keep_screen_on_hint">Экран остаётся включённым, пока открыт любой экран этого приложения. Режим энергосбережения всё же может выключить его.</string>
     <string name="setting_depth_of_field">Размытие глубины резкости</string>

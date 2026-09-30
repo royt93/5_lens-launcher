@@ -15,6 +15,7 @@
     <string name="setting_show_name_app_hover">Name beim Zeigen auf App anzeigen</string>
     <string name="setting_show_touch_selection">Berührungsauswahl anzeigen</string>
     <string name="setting_show_search_bar">Suchleiste anzeigen</string>
+    <string name="setting_show_recent_apps_icon">Symbol für zuletzt verwendete Apps anzeigen</string>
     <string name="setting_keep_screen_on">Bildschirm eingeschaltet lassen</string>
     <string name="setting_keep_screen_on_hint">Der Bildschirm bleibt eingeschaltet, während ein beliebiger Bildschirm dieser App geöffnet ist. Der Energiesparmodus kann ihn trotzdem ausschalten.</string>
     <string name="setting_depth_of_field">Tiefenschärfe-Unschärfe</string>

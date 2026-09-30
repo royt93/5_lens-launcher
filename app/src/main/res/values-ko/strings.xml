@@ -15,6 +15,7 @@
     <string name="setting_show_name_app_hover">앱에 마우스 호버 시 이름 표시</string>
     <string name="setting_show_touch_selection">터치 선택 표시</string>
     <string name="setting_show_search_bar">검색창 표시</string>
+    <string name="setting_show_recent_apps_icon">최근 앱 아이콘 표시</string>
     <string name="setting_keep_screen_on">화면 계속 켜두기</string>
     <string name="setting_keep_screen_on_hint">이 앱의 어떤 화면이든 열려 있는 동안 화면이 계속 켜져 있습니다. 배터리 절약 모드에서는 꺼질 수 있습니다.</string>
     <string name="setting_depth_of_field">피사계 심도 흐림</string>

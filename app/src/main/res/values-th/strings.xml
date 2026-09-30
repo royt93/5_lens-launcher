@@ -15,6 +15,7 @@
     <string name="setting_show_name_app_hover">แสดงชื่อเมื่อวางนิ้วเหนือแอป</string>
     <string name="setting_show_touch_selection">แสดงการเลือกสัมผัส</string>
     <string name="setting_show_search_bar">แสดงแถบค้นหา</string>
+    <string name="setting_show_recent_apps_icon">แสดงไอคอนแอปล่าสุด</string>
     <string name="setting_keep_screen_on">เปิดหน้าจอค้างไว้</string>
     <string name="setting_keep_screen_on_hint">หน้าจอจะเปิดค้างไว้ขณะที่หน้าจอใดหน้าจอหนึ่งของแอปนี้เปิดอยู่ โหมดประหยัดแบตเตอรี่อาจยังปิดหน้าจอได้</string>
     <string name="setting_depth_of_field">เบลอตามระยะชัด</string>

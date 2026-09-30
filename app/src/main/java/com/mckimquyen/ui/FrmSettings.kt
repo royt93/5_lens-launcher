@@ -40,6 +40,7 @@ class FrmSettings : Fragment(), SettingsInterface {
     private var swShowNewAppTag: SwitchCompat? = null
     private var swShowTouchSelection: SwitchCompat? = null
     private var swShowSearchBar: SwitchCompat? = null
+    private var swRecentAppsPanel: SwitchCompat? = null
     private var swKeepScreenOn: SwitchCompat? = null
     private var swDepthOfField: SwitchCompat? = null
     private var swSmartFocus: SwitchCompat? = null
@@ -101,6 +102,7 @@ class FrmSettings : Fragment(), SettingsInterface {
         swShowNewAppTag = view.findViewById(R.id.swShowNewAppTag)
         swShowTouchSelection = view.findViewById(R.id.swShowTouchSelection)
         swShowSearchBar = view.findViewById(R.id.swShowSearchBar)
+        swRecentAppsPanel = view.findViewById(R.id.swRecentAppsPanel)
         swKeepScreenOn = view.findViewById(R.id.swKeepScreenOn)
         swDepthOfField = view.findViewById(R.id.swDepthOfField)
         swSmartFocus = view.findViewById(R.id.swSmartFocus)
@@ -156,6 +158,7 @@ class FrmSettings : Fragment(), SettingsInterface {
         view.findViewById<View>(R.id.swShowNewAppTagParent).setOnClickListener(null)
         view.findViewById<View>(R.id.rlSwitchShowTouchSelectionParent).setOnClickListener(null)
         view.findViewById<View>(R.id.rlSwitchShowSearchBarParent).setOnClickListener(null)
+        view.findViewById<View>(R.id.rlSwitchRecentAppsPanelParent).setOnClickListener(null)
         view.findViewById<View>(R.id.rlSwitchKeepScreenOnParent).setOnClickListener(null)
         view.findViewById<View>(R.id.rlSwitchDepthOfFieldParent).setOnClickListener(null)
         view.findViewById<View>(R.id.rlSwitchSmartFocusParent).setOnClickListener(null)
@@ -186,6 +189,9 @@ class FrmSettings : Fragment(), SettingsInterface {
         }
         swShowSearchBar?.setOnCheckedChangeListener { _, isChecked ->
             utilSettings?.save(UtilSettings.KEY_SHOW_SEARCH_BAR, isChecked)
+        }
+        swRecentAppsPanel?.setOnCheckedChangeListener { _, isChecked ->
+            utilSettings?.save(UtilSettings.KEY_RECENT_APPS_QUICK_PANEL_ENABLED, isChecked)
         }
         swKeepScreenOn?.setOnCheckedChangeListener { _, isChecked ->
             utilSettings?.save(UtilSettings.KEY_KEEP_SCREEN_ON, isChecked)
@@ -295,6 +301,7 @@ class FrmSettings : Fragment(), SettingsInterface {
             swShowNewAppTag?.isChecked = us.getBoolean(UtilSettings.KEY_SHOW_NEW_APP_TAG)
             swShowTouchSelection?.isChecked = us.getBoolean(UtilSettings.KEY_SHOW_TOUCH_SELECTION)
             swShowSearchBar?.isChecked = us.getBoolean(UtilSettings.KEY_SHOW_SEARCH_BAR)
+            swRecentAppsPanel?.isChecked = us.getBoolean(UtilSettings.KEY_RECENT_APPS_QUICK_PANEL_ENABLED)
             swKeepScreenOn?.isChecked = us.getBoolean(UtilSettings.KEY_KEEP_SCREEN_ON)
             swDepthOfField?.isChecked = us.getBoolean(UtilSettings.KEY_DEPTH_OF_FIELD)
             activeLensId = us.getString(UtilSettings.KEY_ACTIVE_LENS_ID) ?: LensWorkspace.DEFAULT_LENS_ID
@@ -381,6 +388,7 @@ class FrmSettings : Fragment(), SettingsInterface {
             us.save(UtilSettings.KEY_SHOW_NAME_APP_HOVER, true)
             us.save(UtilSettings.KEY_SHOW_TOUCH_SELECTION, false)
             us.save(UtilSettings.KEY_SHOW_SEARCH_BAR, UtilSettings.DEFAULT_SHOW_SEARCH_BAR)
+            us.save(UtilSettings.KEY_RECENT_APPS_QUICK_PANEL_ENABLED, UtilSettings.DEFAULT_RECENT_APPS_QUICK_PANEL_ENABLED)
             us.save(UtilSettings.KEY_KEEP_SCREEN_ON, UtilSettings.DEFAULT_KEEP_SCREEN_ON)
             us.save(UtilSettings.KEY_DEPTH_OF_FIELD, UtilSettings.DEFAULT_DEPTH_OF_FIELD)
             us.saveSmartFocusBias(activeLensId, UtilSettings.DEFAULT_SMART_FOCUS_BIAS)
@@ -424,6 +432,7 @@ class FrmSettings : Fragment(), SettingsInterface {
         swShowNewAppTag = null
         swShowTouchSelection = null
         swShowSearchBar = null
+        swRecentAppsPanel = null
         swKeepScreenOn = null
         swDepthOfField = null
         swSmartFocus = null
