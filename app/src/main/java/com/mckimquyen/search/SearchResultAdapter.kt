@@ -222,8 +222,16 @@ class SearchResultAdapter @JvmOverloads constructor(
             val wrapper = ContextThemeWrapper(anchor.context, R.style.PopupMenuTheme)
             val popupMenu = PopupMenu(wrapper, anchor, Gravity.END)
             popupMenu.inflate(R.menu.menu_search_result)
-            popupMenu.menu.findItem(R.id.menuItemUnpin).isVisible = app.pinnedZone != PinnedZone.NONE
-            popupMenu.menu.findItem(R.id.menuItemRemoveFromRecent).isVisible = onRemoveFromRecent != null
+            // FEAT-009: the recent-apps panel (onRemoveFromRecent != null) offers exactly App
+            // info + Remove from recent - the organization actions below only make sense for the
+            // search overlay's stable-grid use case, never for this transient MRU list.
+            val isRecentPanel = onRemoveFromRecent != null
+            popupMenu.menu.findItem(R.id.menuItemPinStart).isVisible = !isRecentPanel
+            popupMenu.menu.findItem(R.id.menuItemPinEnd).isVisible = !isRecentPanel
+            popupMenu.menu.findItem(R.id.menuItemUnpin).isVisible =
+                !isRecentPanel && app.pinnedZone != PinnedZone.NONE
+            popupMenu.menu.findItem(R.id.menuItemElementUninstall).isVisible = !isRecentPanel
+            popupMenu.menu.findItem(R.id.menuItemRemoveFromRecent).isVisible = isRecentPanel
             popupMenu.setForceShowIcon(true)
             popupMenu.setOnMenuItemClickListener { item -> handleMenuAction(item.itemId, app, anchor) }
             lastActionMenu = popupMenu

@@ -273,4 +273,68 @@ class SearchResultAdapterWidgetTest {
             }
         }
     }
+
+    /**
+     * FEAT-009 root-cause fix: the panel context (onRemoveFromRecent != null) must offer exactly
+     * App info + Remove from recent - never Pin start/Pin end/Unpin/Uninstall, which only make
+     * sense for the search overlay's stable-grid-organization use case, not a transient MRU list.
+     */
+    @Test
+    fun panelContextShowsOnlyAppInfoAndRemoveFromRecent() {
+        ActivityScenario.launch(ActHome::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                val app = App(
+                    label = "Camera",
+                    packageName = "pkg.camera",
+                    name = "CameraActivity",
+                    pinnedZone = PinnedZone.START
+                )
+                val adapter = SearchResultAdapter(onAppClick = { _, _ -> }, onRemoveFromRecent = { })
+                adapter.submitList(listOf(app))
+
+                val holder = adapter.onCreateViewHolder(FrameLayout(activity), 0)
+                adapter.onBindViewHolder(holder, 0)
+                holder.itemView.findViewById<View>(R.id.llSearchResultMainRow).performLongClick()
+
+                val menu = holder.lastActionMenu!!.menu
+                assertEquals(true, menu.findItem(R.id.menuItemElementAppInfo).isVisible)
+                assertEquals(true, menu.findItem(R.id.menuItemRemoveFromRecent).isVisible)
+                assertEquals(false, menu.findItem(R.id.menuItemPinStart).isVisible)
+                assertEquals(false, menu.findItem(R.id.menuItemPinEnd).isVisible)
+                // pinnedZone = START would normally make Unpin visible in the search-overlay
+                // context - it must still be hidden here.
+                assertEquals(false, menu.findItem(R.id.menuItemUnpin).isVisible)
+                assertEquals(false, menu.findItem(R.id.menuItemElementUninstall).isVisible)
+            }
+        }
+    }
+
+    /** Regression guard: the search overlay's existing 5-item behavior must stay untouched. */
+    @Test
+    fun searchOverlayContextStillShowsAllOriginalActions() {
+        ActivityScenario.launch(ActHome::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                val app = App(
+                    label = "Camera",
+                    packageName = "pkg.camera",
+                    name = "CameraActivity",
+                    pinnedZone = PinnedZone.START
+                )
+                val adapter = SearchResultAdapter(onAppClick = { _, _ -> })
+                adapter.submitList(listOf(app))
+
+                val holder = adapter.onCreateViewHolder(FrameLayout(activity), 0)
+                adapter.onBindViewHolder(holder, 0)
+                holder.itemView.findViewById<View>(R.id.llSearchResultMainRow).performLongClick()
+
+                val menu = holder.lastActionMenu!!.menu
+                assertEquals(true, menu.findItem(R.id.menuItemElementAppInfo).isVisible)
+                assertEquals(true, menu.findItem(R.id.menuItemPinStart).isVisible)
+                assertEquals(true, menu.findItem(R.id.menuItemPinEnd).isVisible)
+                assertEquals(true, menu.findItem(R.id.menuItemUnpin).isVisible)
+                assertEquals(true, menu.findItem(R.id.menuItemElementUninstall).isVisible)
+                assertEquals(false, menu.findItem(R.id.menuItemRemoveFromRecent).isVisible)
+            }
+        }
+    }
 }
