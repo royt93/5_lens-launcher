@@ -430,6 +430,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
         MaterialCardView cvAppContainer;    // Container của item
         TextView tvAppLabel;        // Tên app
         TextView tvAppOrganization;
+        TextView tvAppNotificationBadge;
         ImageView ivAppIcon;        // Icon app
         ImageView ivAppHide;        // Button ẩn/hiện app
         ImageView btAppLock;        // Button khóa/mở app (biometric) — icon, tint signals state
@@ -465,6 +466,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
             this.cvAppContainer = itemView.findViewById(R.id.cvAppContainer);
             this.tvAppLabel = itemView.findViewById(R.id.tvAppLabel);
             this.tvAppOrganization = itemView.findViewById(R.id.tvAppOrganization);
+            this.tvAppNotificationBadge = itemView.findViewById(R.id.tvAppNotificationBadge);
             this.ivAppIcon = itemView.findViewById(R.id.ivAppIcon);
             this.ivAppHide = itemView.findViewById(R.id.ivAppHide);
             this.btAppLock = itemView.findViewById(R.id.btAppLock);
@@ -494,6 +496,16 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
             android.graphics.Bitmap cachedIcon = com.mckimquyen.app.RAppsSingleton.getInstance()
                     .getAppIcon(mApp.getIconCacheKey());
             ivAppIcon.setImageBitmap(cachedIcon);
+
+            boolean showBadges = new com.mckimquyen.util.UtilSettings(itemView.getContext())
+                    .getBoolean(com.mckimquyen.util.UtilSettings.KEY_SHOW_NOTIFICATION_BADGES);
+            if (showBadges && app.getNotificationCount() > 0) {
+                tvAppNotificationBadge.setText(
+                        com.mckimquyen.util.NotificationBadgeFormatter.format(app.getNotificationCount()));
+                tvAppNotificationBadge.setVisibility(View.VISIBLE);
+            } else {
+                tvAppNotificationBadge.setVisibility(View.GONE);
+            }
 
             String pkgName = Objects.requireNonNull(mApp.getPackageName()).toString();
             String name = Objects.requireNonNull(mApp.getName()).toString();
