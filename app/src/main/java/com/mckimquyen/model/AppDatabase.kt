@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
-@Database(entities = [AppPersistent::class, LensWorkspace::class], version = 11, exportSchema = true)
+@Database(entities = [AppPersistent::class, LensWorkspace::class], version = 12, exportSchema = true)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun appPersistentDao(): AppPersistentDao
     abstract fun lensWorkspaceDao(): LensWorkspaceDao
@@ -25,7 +25,7 @@ abstract class AppDatabase : RoomDatabase() {
                             AppDatabase::class.java,
                             "app_persistent.db"
                         )
-                        .addMigrations(MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11)
+                        .addMigrations(MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12)
                         .build()
                     }
                 }
@@ -111,6 +111,18 @@ abstract class AppDatabase : RoomDatabase() {
                 db.execSQL(
                     "CREATE UNIQUE INDEX IF NOT EXISTS index_APP_PERSISTENT_LENS_ID_IDENTIFIER " +
                         "ON APP_PERSISTENT (LENS_ID, IDENTIFIER)"
+                )
+            }
+        }
+
+        @androidx.annotation.VisibleForTesting
+        internal val MIGRATION_11_12 = object : Migration(11, 12) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                // UI-024: notification-count badges, global across lenses (no LENS_ID scoping),
+                // same shape PALETTE_COLOR already uses.
+                db.execSQL(
+                    "ALTER TABLE APP_PERSISTENT ADD COLUMN NOTIFICATION_COUNT " +
+                        "INTEGER NOT NULL DEFAULT 0"
                 )
             }
         }

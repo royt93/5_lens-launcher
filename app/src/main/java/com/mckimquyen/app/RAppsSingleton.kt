@@ -149,7 +149,8 @@ class RAppsSingleton private constructor() {
         isOpened: Boolean? = null,
         isVisible: Boolean? = null,
         openCount: Long? = null,
-        paletteColor: Int? = null
+        paletteColor: Int? = null,
+        notificationCount: Int? = null
     ) {
         synchronized(this) {
             val list = mApps ?: return
@@ -161,6 +162,7 @@ class RAppsSingleton private constructor() {
                         newVisible = isVisible ?: app.isVisible,
                         newOpenCount = openCount ?: app.openCount
                     ).copyWithPaletteColor(paletteColor ?: app.paletteColor)
+                        .copyWithNotificationCount(notificationCount ?: app.notificationCount)
                     break
                 }
             }

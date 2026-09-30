@@ -46,12 +46,15 @@ data class AppPersistent(
     @ColumnInfo(name = "PINNED_ZONE", defaultValue = "'NONE'")
     var pinnedZone: String = PinnedZone.NONE.name,
     @ColumnInfo(name = "LENS_ID", defaultValue = "'default'")
-    var lensId: String = LensWorkspace.DEFAULT_LENS_ID
+    var lensId: String = LensWorkspace.DEFAULT_LENS_ID,
+    @ColumnInfo(name = "NOTIFICATION_COUNT", defaultValue = "0")
+    var notificationCount: Int = 0
 ) {
     companion object {
         const val DEFAULT_LENS_ID = LensWorkspace.DEFAULT_LENS_ID
         private const val DEFAULT_ORDER_NUMBER = -1
         private const val DEFAULT_OPEN_COUNT = 0L
+        private const val MAX_STORED_NOTIFICATION_COUNT = 9999
         private val orderWriteMutexes = ConcurrentHashMap<String, Mutex>()
         private val orderWriteRevisions = ConcurrentHashMap<String, AtomicLong>()
         private val latestWriteMutexes = ConcurrentHashMap<String, Mutex>()
@@ -110,6 +113,16 @@ data class AppPersistent(
             persist {
                 val committedCount = incrementAtomic(defaults(packageName, name))
                 RAppsSingleton.instance.updateAppState(packageName, name, openCount = committedCount)
+            }
+        }
+
+        @JvmStatic
+        fun setNotificationCount(packageName: String?, name: String?, count: Int) {
+            if (packageName.isNullOrBlank() || name.isNullOrBlank()) return
+            val clamped = count.coerceIn(0, MAX_STORED_NOTIFICATION_COUNT)
+            RAppsSingleton.instance.updateAppState(packageName, name, notificationCount = clamped)
+            persist {
+                setNotificationCount(defaults(packageName, name), clamped)
             }
         }
 

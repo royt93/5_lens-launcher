@@ -53,6 +53,9 @@ interface AppPersistentDao {
     @Query("UPDATE APP_PERSISTENT SET PALETTE_COLOR = :color WHERE IDENTIFIER = :identifier")
     suspend fun updatePaletteColor(identifier: String, color: Int)
 
+    @Query("UPDATE APP_PERSISTENT SET NOTIFICATION_COUNT = :count WHERE IDENTIFIER = :identifier")
+    suspend fun updateNotificationCount(identifier: String, count: Int)
+
     @Query(
         "UPDATE APP_PERSISTENT SET IS_FAVORITE = :favorite, " +
             "FOLDER_NAME = :folderName, PINNED_ZONE = :pinnedZone " +
@@ -111,6 +114,12 @@ interface AppPersistentDao {
     suspend fun setPaletteColor(defaults: AppPersistent, color: Int) {
         insertIfAbsent(defaults.copy(paletteColor = color))
         updatePaletteColor(defaults.identifier, color)
+    }
+
+    @Transaction
+    suspend fun setNotificationCount(defaults: AppPersistent, count: Int) {
+        insertIfAbsent(defaults.copy(notificationCount = count))
+        updateNotificationCount(defaults.identifier, count)
     }
 
     @Transaction

@@ -48,7 +48,12 @@ data class App(
      * write site should pass this back to `AppPersistent.setXxx(..., lensId)` instead of
      * silently targeting the default lens.
      */
-    val lensId: String = LensWorkspace.DEFAULT_LENS_ID
+    val lensId: String = LensWorkspace.DEFAULT_LENS_ID,
+    /**
+     * UI-024: unread-item count reported by this app via the de-facto BADGE_COUNT_UPDATE
+     * broadcast convention. Global across lenses, matching [openCount]'s existing scope.
+     */
+    val notificationCount: Int = 0
 ) {
     /**
      * Creates a copy of this App with the specified properties changed.
@@ -57,6 +62,8 @@ data class App(
     fun copyWithIcon(newIcon: Bitmap?): App = copy(icon = newIcon)
 
     fun copyWithPaletteColor(@ColorInt newColor: Int): App = copy(paletteColor = newColor)
+
+    fun copyWithNotificationCount(newCount: Int): App = copy(notificationCount = newCount)
 
     fun copyWithLockAndVisibility(newOpened: Boolean, newVisible: Boolean, newOpenCount: Long): App = 
         copy(isOpened = newOpened, isVisible = newVisible, openCount = newOpenCount)

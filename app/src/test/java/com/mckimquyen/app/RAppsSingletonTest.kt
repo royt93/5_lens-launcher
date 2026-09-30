@@ -251,6 +251,20 @@ class RAppsSingletonTest {
         assertTrue("Should be empty after null assignment", retrieved!!.isEmpty())
     }
 
+    @Test
+    fun `test updateAppState applies notification count`() {
+        val app = createTestApp("com.example.badge")
+        RAppsSingleton.instance.apps = arrayListOf(app)
+
+        RAppsSingleton.instance.updateAppState(
+            app.packageName.toString(),
+            app.name.toString(),
+            notificationCount = 4
+        )
+
+        assertEquals(4, RAppsSingleton.instance.findApp(app.packageName.toString(), app.name.toString())?.notificationCount)
+    }
+
     // Helper function
     private fun createTestApp(packageName: String): App {
         return App(

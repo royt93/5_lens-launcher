@@ -220,6 +220,36 @@ class AppPersistentRoomTest {
         assertEquals(PinnedZone.NONE.name, migrated?.pinnedZone)
     }
 
+    @Test
+    fun `setNotificationCount writes and reads back the exact value`() = runBlocking {
+        val defaults = persistent("com.example.badge", "MainActivity", openCount = 0)
+
+        dao.setNotificationCount(defaults, 5)
+
+        assertEquals(5, dao.findByIdentifier(defaults.identifier)?.notificationCount)
+    }
+
+    @Test
+    fun `setNotificationCount is global across lenses, not scoped to one`() = runBlocking {
+        val onDefaultLens = persistent("com.example.crosslens", "MainActivity", openCount = 0)
+        val onSecondLens = onDefaultLens.copy(lensId = "second")
+        dao.insertIfAbsent(onDefaultLens)
+        dao.insertIfAbsent(onSecondLens)
+
+        dao.setNotificationCount(onDefaultLens, 7)
+
+        assertEquals(7, dao.findByIdentifier("second", onDefaultLens.identifier)?.notificationCount)
+    }
+
+    @Test
+    fun `setNotificationCount creates a row if none exists yet`() = runBlocking {
+        val defaults = persistent("com.example.firstbadge", "MainActivity", openCount = 0)
+
+        dao.setNotificationCount(defaults, 3)
+
+        assertEquals(3, dao.findByIdentifier(defaults.identifier)?.notificationCount)
+    }
+
     private fun persistent(packageName: String, name: String, openCount: Long) = AppPersistent(
         packageName = packageName,
         name = name,
