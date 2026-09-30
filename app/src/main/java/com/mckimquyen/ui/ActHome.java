@@ -469,6 +469,15 @@ public class ActHome extends ActBase {
         searchView = findViewById(R.id.searchView);
         searchView.setupWithSearchBar(searchBar);
         appSearch = searchView.getEditText();
+        // FEAT-009: recent-apps quick panel, reachable without opening search first.
+        searchBar.inflateMenu(R.menu.menu_search_bar);
+        searchBar.setOnMenuItemClickListener(item -> {
+            if (item.getItemId() == R.id.menuItemRecentAppsPanel) {
+                showRecentAppsPanel();
+                return true;
+            }
+            return false;
+        });
         // UI-009/UI-011: the near-opaque scrim behind the search panel is set declaratively via
         // app:backgroundTint="@color/search_view_scrim_background" in act_home.xml -
         // com.google.android.material.search.SearchView reads its panel background only from
@@ -725,8 +734,14 @@ public class ActHome extends ActBase {
         // icons proved unreliable on real hardware in UI-022.
         menu.getMenu().add(0, 4, 0, lensSmartFocusMenuLabelRes(position));
         menu.getMenu().add(0, 5, 0, R.string.lens_share_image);
+        menu.getMenu().add(0, 6, 0, R.string.recent_apps);
         menu.setOnMenuItemClickListener(item -> onLensMenuItemSelected(item.getItemId(), position));
         menu.show();
+    }
+
+    /** FEAT-009: shared by the SearchBar icon and the lens-management menu's own entry point. */
+    private void showRecentAppsPanel() {
+        new RecentAppsPanelFragment().show(getSupportFragmentManager(), RecentAppsPanelFragment.TAG);
     }
 
     /**
@@ -758,6 +773,9 @@ public class ActHome extends ActBase {
             // process-death gap between FrmLens's tap and export completing that FISH-013 exists
             // to cover; exportActiveLensImage() clearing an already-absent key is a harmless no-op.
             exportActiveLensImage();
+            return true;
+        } else if (itemId == 6) {
+            showRecentAppsPanel();
             return true;
         }
         return false;
@@ -1576,6 +1594,17 @@ public class ActHome extends ActBase {
         searchBar.setVisibility(showSearchBar ? View.VISIBLE : View.GONE);
         if (!showSearchBar && searchView.isShowing()) {
             searchView.hide();
+        }
+        updateRecentAppsPanelIconVisibility();
+    }
+
+    /** FEAT-009: the icon has its own, finer-grained toggle than the whole SearchBar. */
+    @androidx.annotation.VisibleForTesting
+    void updateRecentAppsPanelIconVisibility() {
+        boolean enabled = new UtilSettings(this).getBoolean(UtilSettings.KEY_RECENT_APPS_QUICK_PANEL_ENABLED);
+        android.view.MenuItem item = searchBar.getMenu().findItem(R.id.menuItemRecentAppsPanel);
+        if (item != null) {
+            item.setVisible(enabled);
         }
     }
 

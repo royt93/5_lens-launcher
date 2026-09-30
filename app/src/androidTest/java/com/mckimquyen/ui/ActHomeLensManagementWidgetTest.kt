@@ -47,6 +47,7 @@ class ActHomeLensManagementWidgetTest {
     private val itemDelete = 3
     private val itemSmartFocus = 4
     private val itemShare = 5
+    private val itemRecentAppsPanel = 6
 
     @Before
     fun setup() {
@@ -329,8 +330,8 @@ class ActHomeLensManagementWidgetTest {
                     .onEmptySpaceLongPressListener!!.onEmptySpaceLongPress()
 
                 assertEquals(
-                    "The menu must offer all five actions (add/rename/delete/Smart Focus/share)",
-                    5,
+                    "The menu must offer all six actions (add/rename/delete/Smart Focus/share/Recent apps)",
+                    6,
                     activity.lensManagementMenu!!.menu.size()
                 )
 
@@ -617,5 +618,22 @@ class ActHomeLensManagementWidgetTest {
         )
 
         scenario.close()
+    }
+
+    /** FEAT-009: the lens menu's Recent apps entry is a second, untoggleable entry point into
+     *  the same panel the SearchBar icon opens. */
+    @Test
+    fun selectingRecentAppsPanelItem_showsThePanel() {
+        seedSecondLens()
+        ActivityScenario.launch(ActHome::class.java).use { scenario ->
+            openMenuAndSelect(scenario, itemRecentAppsPanel, 0)
+
+            scenario.onActivity { activity ->
+                assertNotNull(
+                    "The lens menu's Recent apps entry must open the panel",
+                    activity.supportFragmentManager.findFragmentByTag(RecentAppsPanelFragment.TAG)
+                )
+            }
+        }
     }
 }
