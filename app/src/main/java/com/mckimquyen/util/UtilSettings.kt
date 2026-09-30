@@ -113,6 +113,9 @@ class UtilSettings(context: Context) {
         const val KEY_DEPTH_OF_FIELD = "depth_of_field_blur"
         // FISH-006: Smart Focus Lite toggle
         const val KEY_SMART_FOCUS_BIAS = "smart_focus_bias"
+        // FEAT-009: SearchBar recent-apps-panel icon toggle (the lens-menu entry stays untoggleable)
+        const val KEY_RECENT_APPS_QUICK_PANEL_ENABLED = "recent_apps_quick_panel_enabled"
+        const val DEFAULT_RECENT_APPS_QUICK_PANEL_ENABLED = true
         // UI-012: per-quick-action toggles + custom search hint text.
         const val KEY_QUICK_ACTION_CALCULATOR = "quick_action_calculator_enabled"
         const val KEY_QUICK_ACTION_UNIT = "quick_action_unit_enabled"
@@ -251,6 +254,7 @@ class UtilSettings(context: Context) {
         KEY_KEEP_SCREEN_ON -> prefs.getBoolean(name, DEFAULT_KEEP_SCREEN_ON)
         KEY_DEPTH_OF_FIELD -> prefs.getBoolean(name, DEFAULT_DEPTH_OF_FIELD)
         KEY_SMART_FOCUS_BIAS -> prefs.getBoolean(name, DEFAULT_SMART_FOCUS_BIAS)
+        KEY_RECENT_APPS_QUICK_PANEL_ENABLED -> prefs.getBoolean(name, DEFAULT_RECENT_APPS_QUICK_PANEL_ENABLED)
         KEY_QUICK_ACTION_CALCULATOR, KEY_QUICK_ACTION_UNIT, KEY_QUICK_ACTION_TIMER,
         KEY_QUICK_ACTION_BATTERY, KEY_QUICK_ACTION_SETTINGS,
         KEY_QUICK_ACTION_FLASHLIGHT, KEY_QUICK_ACTION_WIFI_SSID, KEY_QUICK_ACTION_DND,
