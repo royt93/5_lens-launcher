@@ -128,6 +128,7 @@
     <string name="recent_apps">हाल के ऐप</string>
     <string name="clear_recent_apps">साफ़ करें</string>
     <string name="recent_apps_cleared">हाल के ऐप साफ़ किए गए</string>
+    <string name="recent_apps_panel_empty">अभी तक कोई हालिया ऐप नहीं</string>
     <string name="no_apps_found">कोई ऐप नहीं मिला</string>
     <string name="web_search_fallback">वेब पर \"%1$s\" खोजें</string>
     <string name="search_empty_state">खोजने के लिए ऐप का नाम लिखें</string>

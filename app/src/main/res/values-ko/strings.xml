@@ -128,6 +128,7 @@
     <string name="recent_apps">최근 앱</string>
     <string name="clear_recent_apps">지우기</string>
     <string name="recent_apps_cleared">최근 앱을 지웠습니다</string>
+    <string name="recent_apps_panel_empty">아직 최근 사용한 앱이 없습니다</string>
     <string name="no_apps_found">앱을 찾을 수 없습니다</string>
     <string name="web_search_fallback">웹에서 \"%1$s\" 검색</string>
     <string name="search_empty_state">검색할 앱 이름을 입력하세요</string>

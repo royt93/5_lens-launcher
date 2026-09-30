@@ -128,6 +128,7 @@
     <string name="recent_apps">កម្មវិធីថ្មីៗ</string>
     <string name="clear_recent_apps">សម្អាត</string>
     <string name="recent_apps_cleared">បានសម្អាតកម្មវិធីថ្មីៗ</string>
+    <string name="recent_apps_panel_empty">មិនទាន់មានកម្មវិធីថ្មីៗនៅឡើយទេ</string>
     <string name="no_apps_found">រកមិនឃើញកម្មវិធី</string>
     <string name="web_search_fallback">ស្វែងរក \"%1$s\" នៅលើវេប</string>
     <string name="search_empty_state">បញ្ចូលឈ្មោះកម្មវិធីដើម្បីស្វែងរក</string>

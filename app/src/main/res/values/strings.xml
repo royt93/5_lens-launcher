@@ -150,6 +150,7 @@
     <string name="recent_apps">Recent apps</string>
     <string name="clear_recent_apps">Clear</string>
     <string name="recent_apps_cleared">Recent apps cleared</string>
+    <string name="recent_apps_panel_empty">No recent apps yet</string>
     <string name="no_apps_found">No apps found</string>
     <string name="web_search_fallback">Search the web for \"%1$s\"</string>
     <string name="contact_search_allow" translatable="false">Allow Contacts</string>

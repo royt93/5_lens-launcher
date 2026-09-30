@@ -128,6 +128,7 @@
     <string name="recent_apps">Apps recientes</string>
     <string name="clear_recent_apps">Borrar</string>
     <string name="recent_apps_cleared">Apps recientes borradas</string>
+    <string name="recent_apps_panel_empty">Aún no hay aplicaciones recientes</string>
     <string name="no_apps_found">No se encontraron apps</string>
     <string name="web_search_fallback">Buscar \"%1$s\" en la web</string>
     <string name="search_empty_state">Escribe el nombre de una app para buscar</string>

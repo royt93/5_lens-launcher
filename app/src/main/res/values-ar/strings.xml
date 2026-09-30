@@ -128,6 +128,7 @@
     <string name="recent_apps">التطبيقات الحديثة</string>
     <string name="clear_recent_apps">مسح</string>
     <string name="recent_apps_cleared">تم مسح التطبيقات الحديثة</string>
+    <string name="recent_apps_panel_empty">لا توجد تطبيقات حديثة بعد</string>
     <string name="no_apps_found">لم يتم العثور على تطبيقات</string>
     <string name="web_search_fallback">البحث عن \"%1$s\" على الويب</string>
     <string name="search_empty_state">اكتب اسم تطبيق للبحث</string>

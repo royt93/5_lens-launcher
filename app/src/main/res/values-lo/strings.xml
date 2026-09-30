@@ -128,6 +128,7 @@
     <string name="recent_apps">ແອັບຫຼ້າສຸດ</string>
     <string name="clear_recent_apps">ລ້າງ</string>
     <string name="recent_apps_cleared">ລ້າງແອັບຫຼ້າສຸດແລ້ວ</string>
+    <string name="recent_apps_panel_empty">ຍັງບໍ່ມີແອັບລ່າສຸດ</string>
     <string name="no_apps_found">ບໍ່ພົບແອັບ</string>
     <string name="web_search_fallback">ຄົ້ນຫາເວັບສຳລັບ \"%1$s\"</string>
     <string name="search_empty_state">ພິມຊື່ແອັບເພື່ອຄົ້ນຫາ</string>

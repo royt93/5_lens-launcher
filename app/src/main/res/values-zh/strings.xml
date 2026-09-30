@@ -128,6 +128,7 @@
     <string name="recent_apps">最近使用的应用</string>
     <string name="clear_recent_apps">清除</string>
     <string name="recent_apps_cleared">已清除最近使用的应用</string>
+    <string name="recent_apps_panel_empty">暂无最近使用的应用</string>
     <string name="no_apps_found">未找到应用</string>
     <string name="web_search_fallback">在网页搜索\"%1$s\"</string>
     <string name="search_empty_state">输入应用名称进行搜索</string>

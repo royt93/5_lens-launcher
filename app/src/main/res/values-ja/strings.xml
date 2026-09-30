@@ -128,6 +128,7 @@
     <string name="recent_apps">最近のアプリ</string>
     <string name="clear_recent_apps">クリア</string>
     <string name="recent_apps_cleared">最近のアプリをクリアしました</string>
+    <string name="recent_apps_panel_empty">最近使用したアプリはまだありません</string>
     <string name="no_apps_found">アプリが見つかりません</string>
     <string name="web_search_fallback">ウェブで\"%1$s\"を検索</string>
     <string name="search_empty_state">検索するアプリ名を入力してください</string>

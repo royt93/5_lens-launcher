@@ -128,6 +128,7 @@
     <string name="recent_apps">Aplikasi terbaru</string>
     <string name="clear_recent_apps">Hapus</string>
     <string name="recent_apps_cleared">Aplikasi terbaru dihapus</string>
+    <string name="recent_apps_panel_empty">Belum ada aplikasi terbaru</string>
     <string name="no_apps_found">Aplikasi tidak ditemukan</string>
     <string name="web_search_fallback">Cari \"%1$s\" di web</string>
     <string name="search_empty_state">Ketik nama aplikasi untuk mencari</string>
