@@ -180,6 +180,8 @@
     <string name="menu_bulk_uninstall">លុបកម្មវិធី</string>
     <string name="setting_launcher_mode">របៀបឡាន់ឆឺរ</string>
     <string name="setting_lens_physics_presets">អារម្មណ៍នៃចលនា</string>
+    <string name="lens_physics_save_custom_preset_description">រក្សាទុកការកំណត់បច្ចុប្បន្នជាការកំណត់ជាមុនតាមបំណង</string>
+    <string name="lens_physics_custom_preset_saved">បានរក្សាទុកការកំណត់ជាមុនតាមបំណង</string>
     <string name="unit_dp_format">%1$d dp</string>
     <string name="unit_ms_format">%1$d ms</string>
     <plurals name="apps_count">

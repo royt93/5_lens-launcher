@@ -180,6 +180,8 @@
     <string name="menu_bulk_uninstall">अनइंस्टॉल करें</string>
     <string name="setting_launcher_mode">लॉन्चर मोड</string>
     <string name="setting_lens_physics_presets">मूवमेंट फील</string>
+    <string name="lens_physics_save_custom_preset_description">मौजूदा सेटिंग्स को कस्टम प्रीसेट के रूप में सहेजें</string>
+    <string name="lens_physics_custom_preset_saved">कस्टम प्रीसेट सहेजा गया</string>
     <string name="unit_dp_format">%1$d dp</string>
     <string name="unit_ms_format">%1$d ms</string>
     <plurals name="apps_count">

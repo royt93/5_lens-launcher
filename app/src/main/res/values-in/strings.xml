@@ -180,6 +180,8 @@
     <string name="menu_bulk_uninstall">Copot pemasangan</string>
     <string name="setting_launcher_mode">Mode Launcher</string>
     <string name="setting_lens_physics_presets">Nuansa gerakan</string>
+    <string name="lens_physics_save_custom_preset_description">Simpan pengaturan saat ini sebagai preset Kustom</string>
+    <string name="lens_physics_custom_preset_saved">Preset Kustom disimpan</string>
     <string name="unit_dp_format">%1$d dp</string>
     <string name="unit_ms_format">%1$d ms</string>
     <plurals name="apps_count">

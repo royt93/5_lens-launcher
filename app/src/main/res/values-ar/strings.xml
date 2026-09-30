@@ -204,6 +204,8 @@
     <string name="menu_bulk_unhide">إظهار</string>
     <string name="menu_bulk_uninstall">إلغاء التثبيت</string>
     <string name="setting_lens_physics_presets">إحساس الحركة</string>
+    <string name="lens_physics_save_custom_preset_description">حفظ الإعدادات الحالية كإعداد مسبق مخصص</string>
+    <string name="lens_physics_custom_preset_saved">تم حفظ الإعداد المسبق المخصص</string>
     <plurals name="apps_selected_count">
         <item quantity="zero">لم يتم تحديد أي شيء</item>
         <item quantity="one">تم تحديد واحد</item>

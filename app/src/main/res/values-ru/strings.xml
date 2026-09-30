@@ -180,6 +180,8 @@
     <string name="menu_bulk_uninstall">Удалить</string>
     <string name="setting_launcher_mode">Режим лаунчера</string>
     <string name="setting_lens_physics_presets">Ощущение движения</string>
+    <string name="lens_physics_save_custom_preset_description">Сохранить текущие настройки как пользовательский пресет</string>
+    <string name="lens_physics_custom_preset_saved">Пользовательский пресет сохранён</string>
     <string name="unit_dp_format">%1$d dp</string>
     <string name="unit_ms_format">%1$d ms</string>
     <plurals name="apps_count">

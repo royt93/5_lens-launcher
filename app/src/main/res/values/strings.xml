@@ -215,6 +215,10 @@
     <string name="lens_physics_preset_gentle" translatable="false">Gentle</string>
     <string name="lens_physics_preset_standard" translatable="false">Standard</string>
     <string name="lens_physics_preset_snappy" translatable="false">Snappy</string>
+    <!-- FISH-015: the single user-saved custom preset slot. -->
+    <string name="lens_physics_preset_custom" translatable="false">Custom</string>
+    <string name="lens_physics_save_custom_preset_description">Save current settings as Custom preset</string>
+    <string name="lens_physics_custom_preset_saved">Custom preset saved</string>
 
     <!-- FISH-008: multi-lens workspace paging + management (Phase 2) and the per-lens Smart
          Focus quick toggle (Phase 3). Translated into all 16 locales, so no MissingTranslation

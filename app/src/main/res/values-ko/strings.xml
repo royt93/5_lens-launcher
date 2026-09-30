@@ -180,6 +180,8 @@
     <string name="menu_bulk_uninstall">제거</string>
     <string name="setting_launcher_mode">런처 모드</string>
     <string name="setting_lens_physics_presets">움직임 느낌</string>
+    <string name="lens_physics_save_custom_preset_description">현재 설정을 사용자 지정 프리셋으로 저장</string>
+    <string name="lens_physics_custom_preset_saved">사용자 지정 프리셋이 저장되었습니다</string>
     <string name="unit_dp_format">%1$d dp</string>
     <string name="unit_ms_format">%1$d ms</string>
     <plurals name="apps_count">

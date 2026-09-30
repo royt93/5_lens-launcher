@@ -180,6 +180,8 @@
     <string name="menu_bulk_uninstall">Désinstaller</string>
     <string name="setting_launcher_mode">Mode du launcher</string>
     <string name="setting_lens_physics_presets">Ressenti du mouvement</string>
+    <string name="lens_physics_save_custom_preset_description">Enregistrer les réglages actuels comme préréglage personnalisé</string>
+    <string name="lens_physics_custom_preset_saved">Préréglage personnalisé enregistré</string>
     <string name="unit_dp_format">%1$d dp</string>
     <string name="unit_ms_format">%1$d ms</string>
     <plurals name="apps_count">

@@ -196,6 +196,8 @@
     <string name="menu_bulk_unhide">Hiện</string>
     <string name="menu_bulk_uninstall">Gỡ cài đặt</string>
     <string name="setting_lens_physics_presets">Cảm giác chuyển động</string>
+    <string name="lens_physics_save_custom_preset_description">Lưu cài đặt hiện tại thành preset Tùy chỉnh</string>
+    <string name="lens_physics_custom_preset_saved">Đã lưu preset Tùy chỉnh</string>
     <plurals name="apps_selected_count">
         <item quantity="other">Đã chọn %1$d</item>
     </plurals>

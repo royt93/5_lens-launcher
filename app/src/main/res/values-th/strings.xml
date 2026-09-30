@@ -180,6 +180,8 @@
     <string name="menu_bulk_uninstall">ถอนการติดตั้ง</string>
     <string name="setting_launcher_mode">โหมดลอนเชอร์</string>
     <string name="setting_lens_physics_presets">ความรู้สึกการเคลื่อนไหว</string>
+    <string name="lens_physics_save_custom_preset_description">บันทึกการตั้งค่าปัจจุบันเป็นพรีเซ็ตกำหนดเอง</string>
+    <string name="lens_physics_custom_preset_saved">บันทึกพรีเซ็ตกำหนดเองแล้ว</string>
     <string name="unit_dp_format">%1$d dp</string>
     <string name="unit_ms_format">%1$d ms</string>
     <plurals name="apps_count">

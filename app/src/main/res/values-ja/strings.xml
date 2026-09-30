@@ -180,6 +180,8 @@
     <string name="menu_bulk_uninstall">アンインストール</string>
     <string name="setting_launcher_mode">ランチャーモード</string>
     <string name="setting_lens_physics_presets">動きの感触</string>
+    <string name="lens_physics_save_custom_preset_description">現在の設定をカスタムプリセットとして保存</string>
+    <string name="lens_physics_custom_preset_saved">カスタムプリセットを保存しました</string>
     <string name="unit_dp_format">%1$d dp</string>
     <string name="unit_ms_format">%1$d ms</string>
     <plurals name="apps_count">

@@ -180,6 +180,8 @@
     <string name="menu_bulk_uninstall">ຖອນການຕິດຕັ້ງ</string>
     <string name="setting_launcher_mode">ໂໝດລອນເຊີ</string>
     <string name="setting_lens_physics_presets">ຄວາມຮູ້ສຶກການເຄື່ອນໄຫວ</string>
+    <string name="lens_physics_save_custom_preset_description">ບັນທຶກການຕັ້ງຄ່າປັດຈຸບັນເປັນພຣີເຊັດແບບກຳນົດເອງ</string>
+    <string name="lens_physics_custom_preset_saved">ບັນທຶກພຣີເຊັດແບບກຳນົດເອງແລ້ວ</string>
     <string name="unit_dp_format">%1$d dp</string>
     <string name="unit_ms_format">%1$d ms</string>
     <plurals name="apps_count">

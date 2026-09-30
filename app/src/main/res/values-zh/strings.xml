@@ -180,6 +180,8 @@
     <string name="menu_bulk_uninstall">卸载</string>
     <string name="setting_launcher_mode">启动器模式</string>
     <string name="setting_lens_physics_presets">移动手感</string>
+    <string name="lens_physics_save_custom_preset_description">将当前设置保存为自定义预设</string>
+    <string name="lens_physics_custom_preset_saved">自定义预设已保存</string>
     <string name="unit_dp_format">%1$d dp</string>
     <string name="unit_ms_format">%1$d ms</string>
     <plurals name="apps_count">
