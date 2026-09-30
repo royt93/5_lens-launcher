@@ -1184,8 +1184,10 @@ class LensView : View {
     private fun drawNotificationBadge(canvas: Canvas, rect: RectF, count: Int) {
         badgeDrawCallCount++
         val radius = resources.getDimension(R.dimen.radius_notification_badge)
-        val cx = rect.right - radius
-        val cy = rect.top + radius
+        // Badge overlaps the icon's top-right corner instead of covering its center: half inside,
+        // half outside, matching the Apps-tab TextView's negative-margin placement.
+        val cx = rect.right
+        val cy = rect.top
         mPaintBadgeBackground?.let { canvas.drawCircle(cx, cy, radius, it) }
         mPaintBadgeText?.let { p ->
             val label = com.mckimquyen.util.NotificationBadgeFormatter.format(count)

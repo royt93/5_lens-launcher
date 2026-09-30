@@ -250,6 +250,23 @@ class AppPersistentRoomTest {
         assertEquals(3, dao.findByIdentifier(defaults.identifier)?.notificationCount)
     }
 
+    @Test
+    fun `mergeLensPersistence restores notification count after process-style snapshot rebuild`() = runBlocking {
+        val packageName = "com.example.restorebadge"
+        val name = "MainActivity"
+        val persisted = persistent(packageName, name, openCount = 0).copy(notificationCount = 8)
+        dao.insert(persisted)
+        val shell = App(label = "Restore", packageName = packageName, name = name)
+
+        val merged = com.mckimquyen.util.UtilApp.mergeLensPersistence(
+            listOf(shell),
+            LensWorkspace.DEFAULT_LENS_ID,
+            com.mckimquyen.enums.SortType.LABEL_ASCENDING
+        )
+
+        assertEquals(8, merged.single().notificationCount)
+    }
+
     private fun persistent(packageName: String, name: String, openCount: Long) = AppPersistent(
         packageName = packageName,
         name = name,

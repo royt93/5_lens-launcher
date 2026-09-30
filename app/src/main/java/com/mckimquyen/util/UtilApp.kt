@@ -173,7 +173,8 @@ object UtilApp {
                     isFavorite = persistent?.isFavorite ?: false,
                     folderName = persistent?.folderName,
                     pinnedZone = PinnedZone.fromStored(persistent?.pinnedZone),
-                    lensId = lensId
+                    lensId = lensId,
+                    notificationCount = persistent?.notificationCount ?: 0
                 )
             )
         }

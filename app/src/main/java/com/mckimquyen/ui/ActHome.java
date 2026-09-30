@@ -1626,7 +1626,8 @@ public class ActHome extends ActBase {
         }
     }
 
-    private boolean isSameAppList(java.util.List<App> list1, java.util.List<App> list2) {
+    @androidx.annotation.VisibleForTesting
+    boolean isSameAppList(java.util.List<App> list1, java.util.List<App> list2) {
         if (list1 == list2) return true;
         if (list1 == null || list2 == null) return false;
         if (list1.size() != list2.size()) return false;
@@ -1642,7 +1643,10 @@ public class ActHome extends ActBase {
                     || !Objects.equals(app1.getLabel().toString(), app2.getLabel().toString())
                     || app1.isVisible() != app2.isVisible()
                     || app1.isOpened() != app2.isOpened()
-                    || app1.getOpenCount() != app2.getOpenCount()) {
+                    || app1.getOpenCount() != app2.getOpenCount()
+                    // UI-024: a badge-count-only change must still trigger a re-render, or
+                    // AppEventManager.notifyAppsEdited() silently never reaches LensView/AppAdapter.
+                    || app1.getNotificationCount() != app2.getNotificationCount()) {
                 return false;
             }
         }
