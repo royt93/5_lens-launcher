@@ -75,11 +75,15 @@ class ActHomeLensManagementWidgetTest {
         val prefs = androidx.preference.PreferenceManager.getDefaultSharedPreferences(context)
         val stale = prefs.all.keys.filter {
             it.startsWith("${UtilSettings.KEY_DISTORTION_FACTOR}_") ||
-                it.startsWith("${UtilSettings.KEY_SMART_FOCUS_BIAS}_")
+                it.startsWith("${UtilSettings.KEY_SMART_FOCUS_BIAS}_") ||
+                it.startsWith("${UtilSettings.KEY_CUSTOM_DISTORTION_FACTOR}_")
         }
         prefs.edit().apply {
             stale.forEach { remove(it) }
             remove(UtilSettings.KEY_SMART_FOCUS_BIAS)
+            remove(UtilSettings.KEY_CUSTOM_DISTORTION_FACTOR)
+            remove(UtilSettings.KEY_CUSTOM_SCALE_FACTOR)
+            remove(UtilSettings.KEY_CUSTOM_ANIMATION_TIME)
             remove(UtilSettings.KEY_ACTIVE_LENS_ID)
         }.commit()
     }
@@ -196,6 +200,7 @@ class ActHomeLensManagementWidgetTest {
         seedSecondLens()
         settings.saveDistortionFactor("second", 4.5f)
         settings.saveSmartFocusBias("second", true)
+        settings.saveCustomDistortionFactor("second", 3.3f)
 
         ActivityScenario.launch(ActHome::class.java).use { scenario ->
             idle()
@@ -216,6 +221,12 @@ class ActHomeLensManagementWidgetTest {
                 "The new lens must inherit its source's Smart Focus state",
                 settings.isSmartFocusBias(created.id)
             )
+            assertEquals(
+                "FISH-015: the new lens must also inherit its source's Custom distortion override",
+                3.3f,
+                settings.getCustomDistortionFactor(created.id),
+                0.001f
+            )
         }
     }
 
@@ -224,6 +235,7 @@ class ActHomeLensManagementWidgetTest {
         seedSecondLens()
         settings.saveDistortionFactor("second", 4.5f)
         settings.saveSmartFocusBias("second", true)
+        settings.saveCustomDistortionFactor("second", 3.3f)
         settings.save(UtilSettings.KEY_DISTORTION_FACTOR, 2.0f)
 
         ActivityScenario.launch(ActHome::class.java).use { scenario ->
@@ -245,6 +257,12 @@ class ActHomeLensManagementWidgetTest {
                 0.001f
             )
             assertFalse(settings.isSmartFocusBias("second"))
+            assertEquals(
+                "FISH-015: a deleted lens's Custom override must be gone too",
+                settings.getDistortionFactor("second"),
+                settings.getCustomDistortionFactor("second"),
+                0.001f
+            )
         }
     }
 
