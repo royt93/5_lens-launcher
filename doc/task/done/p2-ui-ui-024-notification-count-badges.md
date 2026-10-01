@@ -167,6 +167,14 @@ previously-undisclosed issues — fixed the cheap/contained ones, disclosed the 
    in both `AppPersistent` and `BadgeCountReceiver`. `BadgeCountReceiver` now references
    `AppPersistent.MAX_STORED_NOTIFICATION_COUNT`.
 
+8. **Clear-on-launch asymmetry with fix #2**: `UtilApp.launchComponent` only cleared the launched
+   component's own `(packageName, name)` badge, while fix #2 above now writes the *same* count to
+   every `App` entry sharing that packageName - so on a multi-launcher-activity package, opening
+   one entry point would clear only its own badge and leave a sibling entry point's badge stale.
+   Made symmetric: launch now clears every entry sharing the package (still skipping entries
+   already at 0, so the common single-activity case stays a single no-op check). New test:
+   `LaunchClearsNotificationBadgeIntegrationTest.launchingOneActivityOfAMultiActivityPackageClearsEverySiblingEntryToo`.
+
 **Disclosed, not fixed (judged out of scope for this wrap-up):**
 
 - **Unauthenticated badge-broadcast convention**: any installed app can claim to be any other
@@ -174,10 +182,6 @@ previously-undisclosed issues — fixed the cheap/contained ones, disclosed the 
   de-facto convention has always had industry-wide (no official API exists); impact is bounded to
   a cosmetic digit, never real notification content, and only for an already-installed package.
   Documented directly in `BadgeCountReceiver`'s class doc rather than silently left unstated.
-- Clearing on launch still keys off the launched component's own `(packageName, name)`, so on the
-  same rare multi-activity-package case fix #2 above handles for *writing* a badge, clearing one
-  component doesn't clear a sibling component's independently-set badge. Narrow edge case (most
-  packages expose exactly one launcher activity); not fixed to keep this round's diff contained.
 
 **Test evidence (this wrap-up round):** 648/648 unit tests. Instrumented, full suite on TECNO KJ7
 (`adb -s 115333744A005844 shell am instrument -w com.mckimquyen.lenslauncher.test/androidx.test.runner.AndroidJUnitRunner`):
@@ -204,3 +208,72 @@ and fixed rather than shipped silently broken). Held back from higher for: the u
 badge-broadcast trust model (industry-standard, but still worth a reader's awareness) and the
 narrow multi-activity clear-on-launch asymmetry, both left as disclosed, judged-out-of-scope
 limitations rather than fixed in this round.
+
+## Follow-up filler round (2026-10-01, same session, owner picked both options offered)
+
+**1. Fixed the multi-activity clear-on-launch asymmetry** disclosed above: `UtilApp.launchComponent`
+now clears the notification count for every `App` entry sharing the launched package (symmetric
+with `BadgeCountReceiver`'s own write-side fix), not just the launched component, skipping entries
+already at 0. New test:
+`LaunchClearsNotificationBadgeIntegrationTest.launchingOneActivityOfAMultiActivityPackageClearsEverySiblingEntryToo`.
+
+**2. Root-caused the cross-test "background scan" flake** this repo has independently disclosed
+under slightly different symptoms in `LEAK-001`, `DISPLAY-001`, `LINT-002`, `PERF-003` and
+`FEAT-009` (each time as a newly-surfaced, order-dependent occurrence) — applied
+`superpowers:systematic-debugging` end to end against a fresh, live reproduction instead of
+re-reading the old write-ups:
+
+- **Phase 1 (reproduce + evidence):** the new sibling-clearing test above failed once
+  (`expected:<0> but was:<null>`) right after the file's original test, but passed reliably alone
+  and 8/8 in a stress loop of the full 2-test class. Temporary diagnostic logging around the
+  launch call, plus reading `RApplication.onCreate()`'s source directly, confirmed the mechanism:
+  `onCreate()` unconditionally calls `updateApps()` on every process start (not gated on whether
+  this is a test process or whether `RAppsSingleton` already holds data), which debounces 150ms
+  (`TaskUpdateApps.PACKAGE_EVENT_DEBOUNCE_MS`) then runs a real `PackageManager` scan and
+  wholesale-replaces `RAppsSingleton.instance.apps` via `replaceSnapshot`/a plain `.apps =`
+  assignment — and the same dynamically-registered `packageReceiver`
+  (`ACTION_PACKAGE_ADDED/REMOVED/CHANGED/REPLACED`) can re-trigger that same debounced rescan later,
+  including (plausibly) from a test's own `am force-stop` of a real external app in `tearDown()`.
+  Any androidTest that seeds `RAppsSingleton.instance.apps` with fake data and later asserts
+  against it **after** an arbitrary wait is racing this - the Room/`AppPersistent` row is not,
+  since it's written synchronously (optimistically) or already-persisted by the time any later
+  rescan lands.
+- **Phase 2/3 (pattern + hypothesis):** confirmed hypothesis by re-running the exact failing
+  sequence after instrumenting both checkpoints - the list was never found *partially* wrong, only
+  *wholesale* intact or wholesale-replaced, consistent with a full-snapshot replace racing the
+  assertion, not a logic bug in the new filter/forEach code.
+- **Phase 4 (fix, scoped):** hardened this story's own two tests
+  (`LaunchClearsNotificationBadgeIntegrationTest`'s both methods) by asserting the in-memory
+  `RAppsSingleton` side effect **synchronously inside the same `onActivity` callback** that
+  performs the real launch - before any `waitForIdleSync()`/sleep gives a real rescan time to
+  land - and moving the `Room`-row assertion (immune to this race) after the wait, matching what
+  the one Room check already did. Verified with 8 consecutive full-class runs, 0 failures.
+  **Reproduced the identical root cause a second, independent time** the same session in
+  `ActHomeMultiLensRecentAppsIntegrationTest` (which already carries its own `TEST-003`-class
+  flake-guard comment, and still failed once this session on the stated "can happen at any point"
+  risk its own comment names) - confirming this is one shared root cause across multiple
+  previously-separately-diagnosed stories, not several unrelated ones.
+- **Deliberately not fixed further**: did not retrofit this same hardening across every other
+  affected test file (`ActHomeMultiLensRecentAppsIntegrationTest`, `FrmAppsLifecycleIntegrationTest`,
+  and others these prior stories named) - each would need its own read of what it actually asserts
+  and whether a synchronous-in-callback or Room-based rewrite fits its specific shape; scoped this
+  round to this story's own two tests. The viable, now-proven pattern (assert in-memory state
+  synchronously at the point of mutation, or assert Room instead of `RAppsSingleton` when the
+  check can tolerate the async persistence delay) is recorded here for whoever picks up the
+  remaining occurrences, instead of `RApplication.onCreate()`'s unconditional scan itself being
+  changed (that would need a test-mode seam design decision, a bigger, separate change).
+
+**Test evidence (filler round):** 648/648 unit tests. Full instrumented suite on TECNO KJ7: first
+attempt crashed mid-run (`INSTRUMENTATION_RESULT: shortMsg=Process crashed`, `UiAutomation service
+owner died`, this app's own process shown force-stopped by an unrelated pid in `logcat` -
+device/USB-level hiccup, not reproducible, not a code issue - a second crash on retry at a
+different, also-unrelated test confirmed it wasn't tied to any specific class); third attempt
+completed clean: **415 run, 2 failures** - the same pre-existing `AppSearchWidgetTest` wifi-permission
+failure already disclosed above, plus one occurrence of the newly-root-caused background-scan race
+in `ActHomeMultiLensRecentAppsIntegrationTest` (confirmed pre-existing and unrelated: that file is
+untouched by this round's diff, and the failure did not reproduce when that class was re-run
+alone). Lint 0 errors/8 warnings, unchanged.
+
+Re-audited **9.5/10** for this filler round — the fix itself is small and fully proven; held at the
+same score because the broader flaky-test category this round diagnosed is intentionally left
+for a dedicated round rather than scope-creeping a full fix into a filler pick.

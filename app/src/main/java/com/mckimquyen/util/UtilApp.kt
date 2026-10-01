@@ -258,11 +258,16 @@ object UtilApp {
                 AppPersistent.incrementAppCount(packageName, name)
                 // UI-024: opening an app clears its notification badge immediately (optimistic),
                 // regardless of whether the notifying app ever sends its own cleared broadcast.
-                // Skip the write entirely when there was never a badge to clear - avoids a Room
+                // Clears every App entry sharing this packageName, not just the launched
+                // component - BadgeCountReceiver sets the same count on every entry of a
+                // multi-launcher-activity package (one badge per installed app, not per
+                // activity), so clearing must be symmetric or a sibling component's badge would
+                // be left stale after the user opens a different entry point of the same app.
+                // Skips the write entirely for an entry that was never set - avoids a Room
                 // transaction on every single app launch for the common no-badge case.
-                if (RAppsSingleton.instance.findApp(packageName, name)?.notificationCount != 0) {
-                    AppPersistent.setNotificationCount(packageName, name, 0)
-                }
+                RAppsSingleton.instance.apps.orEmpty()
+                    .filter { it.packageName.toString() == packageName && it.notificationCount != 0 }
+                    .forEach { AppPersistent.setNotificationCount(packageName, it.name.toString(), 0) }
 
                 // Resort apps if sorting by open count
                 val utilSettings = UtilSettings(context)
