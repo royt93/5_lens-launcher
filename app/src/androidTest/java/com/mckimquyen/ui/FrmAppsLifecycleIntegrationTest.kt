@@ -189,4 +189,60 @@ class FrmAppsLifecycleIntegrationTest {
             scenario.close()
         }
     }
+
+    /**
+     * UI-024 fix: `FrmApps` had no observer at all for `AppEventManager.appsEdited` (only
+     * `appsLoaded`, forwarded via `ActSettings`/`AppsInterface.onAppsUpdated`) - a change that
+     * fires only `appsEdited` (a badge count, the lighter-weight edit path `BadgeCountReceiver`/
+     * `UtilApp.launchComponent` use so a single badge doesn't trigger a full rescan) silently
+     * never reached this already-open tab, contradicting this story's own spec ("badge appears
+     * on both the fisheye grid icon and the Apps tab row" - found via real-device manual smoke,
+     * not caught by `testFrmApps_appsLoadedEvent_...` above since that only fires `appsLoaded`).
+     */
+    @Test
+    fun testFrmApps_appsEditedEvent_updatesExistingAdapterWithNewBadgeCount() {
+        val scenario = ActivityScenario.launch(ActSettings::class.java)
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+
+        try {
+            scenario.onActivity { activity ->
+                val viewPager = activity.findViewById<androidx.viewpager2.widget.ViewPager2>(R.id.viewpager)
+                viewPager.setCurrentItem(FragmentPagerAdapter.TAB_APPS, false)
+            }
+            instrumentation.waitForIdleSync()
+
+            scenario.onActivity { activity ->
+                val badge = currentRecyclerView(activity)
+                    ?.findViewHolderForAdapterPosition(0)
+                    ?.itemView
+                    ?.findViewById<android.widget.TextView>(R.id.tvAppNotificationBadge)
+                assertEquals(android.view.View.GONE, badge?.visibility)
+            }
+
+            // Mirror exactly what BadgeCountReceiver does: mutate RAppsSingleton's live snapshot
+            // in place (not a full-rescan replaceSnapshot) and fire the lighter `appsEdited` event.
+            RAppsSingleton.instance.updateAppState(
+                "com.leak001.test.app0",
+                "App 0",
+                notificationCount = 4
+            )
+            AppEventManager.notifyAppsEdited()
+            instrumentation.waitForIdleSync()
+
+            scenario.onActivity { activity ->
+                val badge = currentRecyclerView(activity)
+                    ?.findViewHolderForAdapterPosition(0)
+                    ?.itemView
+                    ?.findViewById<android.widget.TextView>(R.id.tvAppNotificationBadge)
+                assertEquals(
+                    "the already-open Apps tab must show the new badge without needing to be reopened",
+                    android.view.View.VISIBLE,
+                    badge?.visibility
+                )
+                assertEquals("4", badge?.text.toString())
+            }
+        } finally {
+            scenario.close()
+        }
+    }
 }

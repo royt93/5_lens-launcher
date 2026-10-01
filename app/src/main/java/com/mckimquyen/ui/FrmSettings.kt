@@ -189,6 +189,10 @@ class FrmSettings : Fragment(), SettingsInterface {
         }
         swShowNotificationBadges?.setOnCheckedChangeListener { _, isChecked ->
             utilSettings?.save(UtilSettings.KEY_SHOW_NOTIFICATION_BADGES, isChecked)
+            // UI-024 fix: an already-bound Apps-tab row must hide/show its badge immediately -
+            // see AppEventManager.notificationBadgeSettingChanged's doc for why this can't
+            // reuse the appsEdited/appsLoaded pipeline (DiffUtil sees no data change here).
+            com.mckimquyen.services.AppEventManager.notifyNotificationBadgeSettingChanged()
         }
         swShowTouchSelection?.setOnCheckedChangeListener { _, isChecked ->
             utilSettings?.save(UtilSettings.KEY_SHOW_TOUCH_SELECTION, isChecked)

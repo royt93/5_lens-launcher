@@ -21,15 +21,27 @@ import com.mckimquyen.model.AppPersistent
  * background-execution limits that made RApplication switch its own receivers to programmatic
  * registration; an explicit broadcast to a manifest-declared receiver still wakes this app's
  * process even when it isn't running.
+ *
+ * Accepted, disclosed tradeoff: like every other launcher implementing this de-facto convention,
+ * the broadcast carries no sender authentication - any installed app can claim to be any other
+ * installed app's `EXTRA_PACKAGE_NAME` and set its displayed count. Impact is bounded to a
+ * cosmetic unread-count digit (never real notification content, and only for a package that is
+ * actually installed), the same trust model this convention has always had industry-wide; adding
+ * real authentication would require a new non-standard contract that real senders (Gmail etc.)
+ * don't implement, defeating the feature.
  */
 class BadgeCountReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         val packageName = intent.getStringExtra(EXTRA_PACKAGE_NAME) ?: return
-        val app = RAppsSingleton.instance.apps.orEmpty()
-            .firstOrNull { it.packageName.toString() == packageName } ?: return
+        // UI-024 fix: a package can expose more than one launcher activity (more than one App
+        // entry sharing this packageName) - apply the same count to every one of them instead of
+        // just the first match, so the badge doesn't land on an arbitrary/order-dependent entry.
+        val matches = RAppsSingleton.instance.apps.orEmpty()
+            .filter { it.packageName.toString() == packageName }
+        if (matches.isEmpty()) return
         val count = parseBadgeCount(intent.extras)
-        AppPersistent.setNotificationCount(packageName, app.name.toString(), count)
+        matches.forEach { AppPersistent.setNotificationCount(packageName, it.name.toString(), count) }
         AppEventManager.notifyAppsEdited()
     }
 
@@ -39,14 +51,13 @@ class BadgeCountReceiver : BroadcastReceiver() {
         const val EXTRA_COUNT = "badge_count"
 
         // Accepted per the convention's payload shape but not read: matching by packageName
-        // alone is sufficient for this feature (one badge per installed app, not per activity).
+        // alone is sufficient for this feature (one badge per installed app, not per activity -
+        // applied to every App entry sharing that packageName, see onReceive).
         const val EXTRA_CLASS_NAME = "badge_count_class_name"
-
-        private const val MAX_STORED_NOTIFICATION_COUNT = 9999
 
         /** Pure, unit-testable: extras -> a validated, clamped count. Never throws. */
         @JvmStatic
         fun parseBadgeCount(extras: Bundle?): Int =
-            (extras?.getInt(EXTRA_COUNT, 0) ?: 0).coerceIn(0, MAX_STORED_NOTIFICATION_COUNT)
+            (extras?.getInt(EXTRA_COUNT, 0) ?: 0).coerceIn(0, AppPersistent.MAX_STORED_NOTIFICATION_COUNT)
     }
 }

@@ -75,6 +75,9 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
     // ========================================================================
     private final Context mContext;
     private final List<App> mApps;
+    // UI-024: one instance reused by every row bind instead of `new UtilSettings(...)` per bind
+    // (RecyclerView re-binds continuously while scrolling).
+    private final com.mckimquyen.util.UtilSettings mUtilSettings;
 
     // ========================================================================
     // FEAT-007: MULTI-SELECT STATE
@@ -94,6 +97,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
     public AppAdapter(Context mContext, List<App> mApps) {
         this.mContext = mContext;
         this.mApps = mApps;
+        this.mUtilSettings = new com.mckimquyen.util.UtilSettings(mContext);
     }
 
     // ========================================================================
@@ -497,8 +501,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
                     .getAppIcon(mApp.getIconCacheKey());
             ivAppIcon.setImageBitmap(cachedIcon);
 
-            boolean showBadges = new com.mckimquyen.util.UtilSettings(itemView.getContext())
-                    .getBoolean(com.mckimquyen.util.UtilSettings.KEY_SHOW_NOTIFICATION_BADGES);
+            boolean showBadges = mAdapter.mUtilSettings.getBoolean(com.mckimquyen.util.UtilSettings.KEY_SHOW_NOTIFICATION_BADGES);
             if (showBadges && app.getNotificationCount() > 0) {
                 tvAppNotificationBadge.setText(
                         com.mckimquyen.util.NotificationBadgeFormatter.format(app.getNotificationCount()));

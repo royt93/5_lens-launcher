@@ -48,6 +48,12 @@ object AppEventManager {
     private val _nightModeChanged = MutableLiveData<Any?>()
     val nightModeChanged: LiveData<Any?> = _nightModeChanged
 
+    // UI-024: LiveData cho sự kiện "Show notification badges" setting đổi. Không dùng chung
+    // appsEdited vì badge visibility là setting toàn cục, không phải dữ liệu app - DiffUtil ở
+    // AppAdapter.updateApps() sẽ luôn báo "không đổi" và bỏ qua rebind nếu đi qua pipeline đó.
+    private val _notificationBadgeSettingChanged = MutableLiveData<Any?>()
+    val notificationBadgeSettingChanged: LiveData<Any?> = _notificationBadgeSettingChanged
+
     /**
      * Thông báo sự kiện apps đã được load
      */
@@ -95,5 +101,12 @@ object AppEventManager {
      */
     fun notifyNightModeChanged(data: Any? = null) {
         _nightModeChanged.postValue(data)
+    }
+
+    /**
+     * Thông báo sự kiện "Show notification badges" setting đã thay đổi (UI-024)
+     */
+    fun notifyNotificationBadgeSettingChanged(data: Any? = null) {
+        _notificationBadgeSettingChanged.postValue(data)
     }
 }

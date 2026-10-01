@@ -71,6 +71,24 @@ class BadgeCountReceiverWidgetTest {
     }
 
     @Test
+    fun broadcastForAPackageWithTwoLauncherActivitiesUpdatesBothEntries() = runBlocking {
+        val main = App(label = "Suite", packageName = "pkg.suite", name = "MainActivity")
+        val secondary = App(label = "Suite (alt)", packageName = "pkg.suite", name = "SecondActivity")
+        RAppsSingleton.instance.apps = arrayListOf(main, secondary)
+
+        val intent = Intent(BadgeCountReceiver.ACTION_BADGE_COUNT_UPDATE).apply {
+            putExtra(BadgeCountReceiver.EXTRA_PACKAGE_NAME, "pkg.suite")
+            putExtra(BadgeCountReceiver.EXTRA_COUNT, 7)
+        }
+        receiver.onReceive(context, intent)
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+        android.os.SystemClock.sleep(250)
+
+        assertEquals(7, RAppsSingleton.instance.findApp("pkg.suite", "MainActivity")?.notificationCount)
+        assertEquals(7, RAppsSingleton.instance.findApp("pkg.suite", "SecondActivity")?.notificationCount)
+    }
+
+    @Test
     fun broadcastForAPackageNotInTheSnapshotIsDropped() = runBlocking {
         RAppsSingleton.instance.apps = ArrayList() // nothing installed per the snapshot
 

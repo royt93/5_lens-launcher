@@ -21,7 +21,10 @@ class LensAccessibilityHelper(
     private val appProvider: () -> List<App>?,
     private val rectProvider: (index: Int, outRect: Rect) -> Boolean,
     private val onAppClicked: (index: Int) -> Unit,
-    private val onAppLongClicked: ((index: Int) -> Boolean)? = null
+    private val onAppLongClicked: ((index: Int) -> Boolean)? = null,
+    // UI-024: defaults to "off" so existing tests that don't pass this still get the pre-badge
+    // announcement behavior rather than silently depending on a real SharedPreferences read.
+    private val showBadgesSettingProvider: () -> Boolean = { false }
 ) : ExploreByTouchHelper(host) {
 
     override fun getVirtualViewAt(x: Float, y: Float): Int {
@@ -54,7 +57,9 @@ class LensAccessibilityHelper(
         }
 
         val app = apps[virtualViewId]
-        val label = if (app.notificationCount > 0) {
+        // UI-024: same gate the visual badge paths use (LensView/AppAdapter) - TalkBack must not
+        // announce an unread count the user has turned the badge display off for.
+        val label = if (LensView.shouldDrawNotificationBadge(showBadgesSettingProvider(), app.notificationCount)) {
             host.context.getString(
                 R.string.notification_badge_count_description,
                 app.label.toString(),

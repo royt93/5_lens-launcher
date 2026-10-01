@@ -33,7 +33,12 @@
     <string name="setting_quick_action_settings_shortcut">Show Settings Shortcuts</string>
     <string name="setting_show_new_app_tag">Show New App Tag</string>
     <string name="setting_show_notification_badges">Show notification badges</string>
-    <string name="notification_badge_count_description">%1$s, %2$d unread</string>
+    <!-- UI-024: accessibility-only content-description (TalkBack), not visible UI text. The
+         English wording reads fine at any count ("1 unread"/"3 unread"), so a full <plurals>
+         resource across all 16 locales isn't worth the diff for a screen-reader-only string -
+         documented and suppressed rather than "fixed" into unneeded complexity (same judgment
+         call already established by LINT-009 for a different real-but-low-value lint hit). -->
+    <string name="notification_badge_count_description" tools:ignore="PluralsCandidate">%1$s, %2$d unread</string>
     <string name="setting_highlight_color">Highlight Color</string>
     <string name="setting_icon_pack">Icon Pack</string>
     <string name="setting_home_launcher">Home Launcher</string>

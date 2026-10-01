@@ -18,6 +18,7 @@ import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import com.mckimquyen.R
+import com.mckimquyen.app.RAppsSingleton
 import com.mckimquyen.enums.SortType
 import com.mckimquyen.ext.Biometric
 import com.mckimquyen.model.App
@@ -257,7 +258,11 @@ object UtilApp {
                 AppPersistent.incrementAppCount(packageName, name)
                 // UI-024: opening an app clears its notification badge immediately (optimistic),
                 // regardless of whether the notifying app ever sends its own cleared broadcast.
-                AppPersistent.setNotificationCount(packageName, name, 0)
+                // Skip the write entirely when there was never a badge to clear - avoids a Room
+                // transaction on every single app launch for the common no-badge case.
+                if (RAppsSingleton.instance.findApp(packageName, name)?.notificationCount != 0) {
+                    AppPersistent.setNotificationCount(packageName, name, 0)
+                }
 
                 // Resort apps if sorting by open count
                 val utilSettings = UtilSettings(context)

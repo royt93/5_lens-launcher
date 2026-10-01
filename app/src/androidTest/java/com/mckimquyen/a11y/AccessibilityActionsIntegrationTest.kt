@@ -126,4 +126,43 @@ class AccessibilityActionsIntegrationTest {
 
         scenario.close()
     }
+
+    /**
+     * UI-024: TalkBack must honor the same "Show notification badges" setting the visual badge
+     * paths (LensView/AppAdapter) gate on - real device/resources needed for the formatted
+     * `notification_badge_count_description` string (Robolectric's unit-test config in this
+     * project has no real resource table, so this case can't live in LensAccessibilityHelperTest).
+     */
+    @Test
+    fun testNotificationBadgeAnnouncement_honorsShowBadgesSetting() {
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+        val context = instrumentation.targetContext
+        val app = App(id = 1, label = "Gmail", packageName = "com.test.badge.app", name = "MainAct", notificationCount = 3)
+        var descriptionWhenOn = ""
+        var descriptionWhenOff = ""
+
+        instrumentation.runOnMainSync {
+            val lensView = LensView(context)
+            var showBadges = true
+            val helper = LensAccessibilityHelper(
+                host = lensView,
+                appProvider = { listOf(app) },
+                rectProvider = { _, outRect -> outRect.set(10, 10, 100, 100); true },
+                onAppClicked = {},
+                showBadgesSettingProvider = { showBadges }
+            )
+
+            val nodeOn = AccessibilityNodeInfoCompat.wrap(android.view.accessibility.AccessibilityNodeInfo.obtain())
+            helper.testPopulateNodeForVirtualView(0, nodeOn)
+            descriptionWhenOn = nodeOn.contentDescription.toString()
+
+            showBadges = false
+            val nodeOff = AccessibilityNodeInfoCompat.wrap(android.view.accessibility.AccessibilityNodeInfo.obtain())
+            helper.testPopulateNodeForVirtualView(0, nodeOff)
+            descriptionWhenOff = nodeOff.contentDescription.toString()
+        }
+
+        assertEquals(context.getString(com.mckimquyen.R.string.notification_badge_count_description, "Gmail", 3), descriptionWhenOn)
+        assertEquals("Gmail", descriptionWhenOff)
+    }
 }

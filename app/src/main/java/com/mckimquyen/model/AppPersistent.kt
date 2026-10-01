@@ -54,7 +54,8 @@ data class AppPersistent(
         const val DEFAULT_LENS_ID = LensWorkspace.DEFAULT_LENS_ID
         private const val DEFAULT_ORDER_NUMBER = -1
         private const val DEFAULT_OPEN_COUNT = 0L
-        private const val MAX_STORED_NOTIFICATION_COUNT = 9999
+        // UI-024: not private - BadgeCountReceiver shares this ceiling instead of redefining it.
+        const val MAX_STORED_NOTIFICATION_COUNT = 9999
         private val orderWriteMutexes = ConcurrentHashMap<String, Mutex>()
         private val orderWriteRevisions = ConcurrentHashMap<String, AtomicLong>()
         private val latestWriteMutexes = ConcurrentHashMap<String, Mutex>()

@@ -26,6 +26,7 @@ import com.mckimquyen.app.RAppsSingleton.Companion.instance
 import com.mckimquyen.itf.AppsInterface
 import com.mckimquyen.model.App
 import com.mckimquyen.model.PinnedZone
+import com.mckimquyen.services.AppEventManager
 import com.mckimquyen.services.BroadcastReceivers.AppsEditedReceiver
 import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.mckimquyen.util.UtilApp
@@ -72,6 +73,24 @@ class FrmApps : Fragment(), AppsInterface, AppAdapter.SelectionListener, ActionM
         utilSettings = UtilSettings(requireContext())
         setupViews(view)
         instance.apps?.let { setupRecycler(it) }
+        // UI-024 fix: without this, an app-data change that happens while this tab is already
+        // open and bound (a badge arriving, a sort/icon-pack change, anything RAppsSingleton
+        // picks up) never reaches this screen until it's recreated - this tab had no live-data
+        // observer of any kind before. ActHome's own Apps-tab-equivalent list (`homeAppAdapter`)
+        // already does this via the same `appsEdited` event; this brings FrmApps in line with it
+        // and with this story's own spec ("badge appears on both the fisheye grid icon and the
+        // Apps tab row" - docs/superpowers/specs/2026-09-30-ui-024-notification-count-badges-design.md).
+        AppEventManager.appsEdited.observe(viewLifecycleOwner) {
+            instance.apps?.let { apps -> appAdapter?.updateApps(apps) }
+        }
+        AppEventManager.notificationBadgeSettingChanged.observe(viewLifecycleOwner) {
+            // Setting changed, App data did not: force visible/all rows to rebind instead of
+            // updateApps(), whose DiffUtil correctly reports no app-field change and emits none.
+            // Lint's NotifyDataSetChanged suggestion doesn't apply - there is no per-item diff to
+            // compute here, every bound row needs the same badge-visibility rebind.
+            @Suppress("NotifyDataSetChanged")
+            appAdapter?.notifyDataSetChanged()
+        }
         requireActivity().findViewById<ViewPager2>(R.id.viewpager)?.registerOnPageChangeCallback(pageChangeCallback)
     }
 

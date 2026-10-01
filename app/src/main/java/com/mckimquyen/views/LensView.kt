@@ -134,8 +134,11 @@ class LensView : View {
         internal fun shouldTriggerEmptySpaceLongPress(armed: Boolean, moving: Boolean, selectIndex: Int): Boolean =
             armed && !moving && selectIndex < 0
 
-        /** UI-024: pure gating decision, unit-testable without a real Canvas/Paint. */
-        @androidx.annotation.VisibleForTesting
+        /**
+         * UI-024: pure gating decision, shared by every badge-rendering/announcing surface
+         * (this view's own `drawAppIcon` and [LensAccessibilityHelper]'s TalkBack label) so they
+         * can never drift out of sync on what counts as "has a visible badge".
+         */
         internal fun shouldDrawNotificationBadge(showBadgesSetting: Boolean, notificationCount: Int): Boolean =
             showBadgesSetting && notificationCount > 0
 
@@ -212,6 +215,7 @@ class LensView : View {
     private var mTouchX = -Float.MAX_VALUE
     private var mTouchY = -Float.MAX_VALUE
     private var mInsideRect = false
+    private var mShowNotificationBadgesThisFrame = false
     private var mRectToSelect: RectF? = RectF(0f, 0f, 0f, 0f)
     private var mMustVibrate = true
     private var mSelectIndex = 0
@@ -604,7 +608,9 @@ class LensView : View {
             appProvider = { mApps },
             rectProvider = { index, outRect -> getAppBounds(index, outRect) },
             onAppClicked = { index -> launchAppAtIndex(index) },
-            onAppLongClicked = { index -> showAppOptionsAtIndex(index) }
+            onAppLongClicked = { index -> showAppOptionsAtIndex(index) },
+            // UI-024: TalkBack must honor the same toggle the visual badge paths do.
+            showBadgesSettingProvider = { mUtilSettings?.getBoolean(UtilSettings.KEY_SHOW_NOTIFICATION_BADGES) == true }
         )
         ViewCompat.setAccessibilityDelegate(this, mAccessibilityHelper)
         isFocusable = true
@@ -930,6 +936,9 @@ class LensView : View {
         val iconSizeDp = us.getFloat(UtilSettings.KEY_ICON_SIZE)
         val distortionFactor = liveDistortionFactor ?: us.getDistortionFactor(lensId)
         val scaleFactor = us.getFloat(UtilSettings.KEY_SCALE_FACTOR)
+        // UI-024: one setting read per frame, not per cell - drawAppIcon() is called once per
+        // visible icon inside the loop below, which runs continuously while dragging.
+        mShowNotificationBadgesThisFrame = us.getBoolean(UtilSettings.KEY_SHOW_NOTIFICATION_BADGES)
 
         val grid = mGridCache.getOrCompute(
             context,
@@ -1091,11 +1100,7 @@ class LensView : View {
                     drawNewAppTag(canvas, rect)
                 }
 
-                if (shouldDrawNotificationBadge(
-                        mUtilSettings?.getBoolean(UtilSettings.KEY_SHOW_NOTIFICATION_BADGES) == true,
-                        app.notificationCount
-                    )
-                ) {
+                if (shouldDrawNotificationBadge(mShowNotificationBadgesThisFrame, app.notificationCount)) {
                     drawNotificationBadge(canvas, rect, app.notificationCount)
                 }
             }

@@ -56,7 +56,7 @@ class LensAccessibilityHelperTest {
         lastLongClickedIndex = -1
     }
 
-    private fun createHelper(apps: List<App>? = sampleApps): LensAccessibilityHelper {
+    private fun createHelper(apps: List<App>? = sampleApps, showBadgesSetting: Boolean = false): LensAccessibilityHelper {
         return LensAccessibilityHelper(
             host = mockLensView,
             appProvider = { apps },
@@ -73,7 +73,8 @@ class LensAccessibilityHelperTest {
             onAppLongClicked = { index ->
                 lastLongClickedIndex = index
                 true
-            }
+            },
+            showBadgesSettingProvider = { showBadgesSetting }
         )
     }
 
@@ -139,6 +140,17 @@ class LensAccessibilityHelperTest {
         @Suppress("DEPRECATION")
         node.getBoundsInParent(bounds)
         assertEquals(Rect(60, 10, 100, 50), bounds)
+    }
+
+    @Test
+    fun `onPopulateNodeForVirtualView - UI-024 stays silent on unread count when badges setting is off`() {
+        val appsWithBadge = listOf(sampleApps[0].copyWithNotificationCount(3), sampleApps[1], sampleApps[2])
+        val helper = createHelper(apps = appsWithBadge, showBadgesSetting = false)
+        val node = AccessibilityNodeInfoCompat.wrap(AccessibilityNodeInfo.obtain())
+
+        helper.testPopulateNodeForVirtualView(0, node)
+
+        assertEquals("Calculator", node.contentDescription)
     }
 
     @Test
