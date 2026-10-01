@@ -54,7 +54,7 @@ class LensViewDepthOfFieldWidgetTest {
 
     @After
     fun tearDown() {
-        RAppsSingleton.instance.clearAllData()
+        com.mckimquyen.util.BitmapCache.clear()
     }
 
     private fun render(): Bitmap {

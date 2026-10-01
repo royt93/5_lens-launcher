@@ -33,8 +33,11 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class FrmAppsLifecycleIntegrationTest {
 
+    private var originalApps: ArrayList<App>? = null
+
     @Before
     fun setup() {
+        originalApps = RAppsSingleton.instance.apps
         BitmapCache.clear()
         val apps = ArrayList<App>().apply {
             repeat(5) { i -> add(App(packageName = "com.leak001.test.app$i", name = "App $i", icon = null)) }
@@ -45,7 +48,7 @@ class FrmAppsLifecycleIntegrationTest {
     @After
     fun tearDown() {
         BitmapCache.clear()
-        RAppsSingleton.instance.clearAllData()
+        RAppsSingleton.instance.apps = originalApps
     }
 
     private fun currentRecyclerView(activity: ActSettings): RecyclerView? {

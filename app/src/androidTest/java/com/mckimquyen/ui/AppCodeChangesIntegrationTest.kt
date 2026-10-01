@@ -32,16 +32,18 @@ import java.util.concurrent.TimeUnit
 @RunWith(AndroidJUnit4::class)
 class AppCodeChangesIntegrationTest {
 
+    private var originalApps: ArrayList<App>? = null
+
     @Before
     fun setup() {
+        originalApps = RAppsSingleton.instance.apps
         BitmapCache.clear()
-        RAppsSingleton.instance.clearAllData()
     }
 
     @After
     fun tearDown() {
         BitmapCache.clear()
-        RAppsSingleton.instance.clearAllData()
+        RAppsSingleton.instance.apps = originalApps
     }
 
     // ========================================================================

@@ -23,14 +23,16 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class ActHomeFullyDrawnWidgetTest {
 
+    private var originalApps: ArrayList<App>? = null
+
     @Before
     fun setup() {
-        RAppsSingleton.instance.clearAllData()
+        originalApps = RAppsSingleton.instance.apps
     }
 
     @After
     fun tearDown() {
-        RAppsSingleton.instance.clearAllData()
+        RAppsSingleton.instance.apps = originalApps
     }
 
     private fun getHasReportedFullyDrawn(activity: ActHome): Boolean {

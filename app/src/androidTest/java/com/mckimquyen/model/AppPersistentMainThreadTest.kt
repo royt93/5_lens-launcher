@@ -26,6 +26,7 @@ class AppPersistentMainThreadTest {
                     .penaltyDeath()
                     .build()
             )
+            val originalApps = RAppsSingleton.instance.apps
             try {
                 val packageName = "com.example.strictmode"
                 val componentName = "MainActivity"
@@ -49,7 +50,7 @@ class AppPersistentMainThreadTest {
                     pinnedZone = PinnedZone.START
                 )
             } finally {
-                RAppsSingleton.instance.clearAllData()
+                RAppsSingleton.instance.apps = originalApps
                 StrictMode.setThreadPolicy(previousPolicy)
             }
         }

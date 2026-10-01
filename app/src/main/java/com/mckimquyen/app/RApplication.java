@@ -72,6 +72,25 @@ public class RApplication extends android.app.Application {
     public TaskUpdateApps getAppRefreshPipeline() {
         return appRefreshPipeline;
     }
+
+    /**
+     * Detects if the current process is running under an Android instrumentation test runner.
+     */
+    public static boolean isTestEnvironment() {
+        try {
+            Class<?> registryClass = Class.forName("androidx.test.platform.app.InstrumentationRegistry");
+            java.lang.reflect.Method getInstrumentation = registryClass.getMethod("getInstrumentation");
+            return getInstrumentation.invoke(null) != null;
+        } catch (Throwable ignored) {
+            return false;
+        }
+    }
+
+    /**
+     * TEST-SEAM: disables the unsolicited background PackageManager scan during tests to prevent
+     * clobbering test-seeded snapshots. Defaults to true when running under an instrumentation test runner.
+     */
+    public static volatile boolean sDisableAutoAppRefresh = isTestEnvironment();
     private final ComponentCallbacks2 iconCacheMemoryCallbacks = new ComponentCallbacks2() {
         // CORE-002/PERF-002: evict cached icon bitmaps under real memory pressure instead of
         // relying only on LruCache's own bounded eviction. Tiered by severity so a mild signal
@@ -191,14 +210,7 @@ public class RApplication extends android.app.Application {
      * - Lambda callback: Được gọi khi initialization hoàn tất
      */
     private void setupAdmob() {
-        boolean isTestEnv = false;
-        try {
-            Class<?> registryClass = Class.forName("androidx.test.platform.app.InstrumentationRegistry");
-            java.lang.reflect.Method getInstrumentation = registryClass.getMethod("getInstrumentation");
-            isTestEnv = (getInstrumentation.invoke(null) != null);
-        } catch (Throwable ignored) {
-            // Throws exception (e.g. IllegalStateException: No instrumentation registered) if not running under a test runner
-        }
+        boolean isTestEnv = isTestEnvironment();
 
         com.roy.sdkadbmob.AdSafetyLimits safety = com.mckimquyen.BuildConfig.DEBUG ? 
                 com.roy.sdkadbmob.AdSafetyLimits.Companion.getTEST() : 
@@ -310,6 +322,10 @@ public class RApplication extends android.app.Application {
      * - UI update trên main thread
      */
     private void updateApps() {
+        if (sDisableAutoAppRefresh) {
+            Logger.d("RApplication: auto app refresh disabled in test environment");
+            return;
+        }
         appRefreshPipeline.execute();
     }
 

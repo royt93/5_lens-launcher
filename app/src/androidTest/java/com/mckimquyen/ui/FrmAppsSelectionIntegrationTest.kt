@@ -38,15 +38,18 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class FrmAppsSelectionIntegrationTest {
 
+    private var originalApps: ArrayList<App>? = null
+
     @Before
     fun setup() {
+        originalApps = RAppsSingleton.instance.apps
         BitmapCache.clear()
     }
 
     @After
     fun tearDown() {
         BitmapCache.clear()
-        RAppsSingleton.instance.clearAllData()
+        RAppsSingleton.instance.apps = originalApps
     }
 
     private fun <T> privateField(target: Any, name: String): T? {

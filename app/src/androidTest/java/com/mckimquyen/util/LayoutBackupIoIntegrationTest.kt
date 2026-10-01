@@ -34,6 +34,12 @@ class LayoutBackupIoIntegrationTest {
     private val packageName = "com.example.layoutbackup"
     private val componentName = "com.example.layoutbackup.MainActivity"
     private val identifier = AppPersistent.generateIdentifier(packageName, componentName)
+    private var originalApps: ArrayList<App>? = null
+
+    @org.junit.Before
+    fun setup() {
+        originalApps = RAppsSingleton.instance.apps
+    }
 
     private fun tempFileUri(): Uri {
         val file = File(context.cacheDir, "layout_backup_test_${System.nanoTime()}.json")
@@ -56,7 +62,7 @@ class LayoutBackupIoIntegrationTest {
     fun tearDown() = runBlocking {
         val dao = AppDatabase.getInstance().appPersistentDao()
         dao.findByIdentifier(identifier)?.let { dao.delete(it) }
-        RAppsSingleton.instance.clearAllData()
+        RAppsSingleton.instance.apps = originalApps
     }
 
     @Test

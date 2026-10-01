@@ -47,7 +47,7 @@ class PolaroidExportHelperIntegrationTest {
 
     @After
     fun tearDown() {
-        RAppsSingleton.instance.clearAllData()
+        com.mckimquyen.util.BitmapCache.clear()
         File(context.cacheDir, "polaroid").listFiles()?.forEach { it.delete() }
     }
 

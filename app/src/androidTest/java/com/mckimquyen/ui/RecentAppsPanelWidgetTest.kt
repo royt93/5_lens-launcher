@@ -42,10 +42,19 @@ class RecentAppsPanelWidgetTest {
     }
 
     /** waitForIdleSync() must run on the test thread, never inside onActivity (main thread) -
-     *  it throws "This method can not be called from the main application thread" otherwise. */
-    private fun showPanel(scenario: ActivityScenario<ActHome>): RecentAppsPanelFragment {
+     *  it throws "This method can not be called from the main application thread" otherwise.
+     *  Hardened against RApplication's background scan: accepts an optional expectedApps list
+     *  to re-assert inside the same onActivity callback right before show(), leaving zero window
+     *  for a real background scan to replace the fake snapshot. */
+    private fun showPanel(
+        scenario: ActivityScenario<ActHome>,
+        expectedApps: List<App>? = null
+    ): RecentAppsPanelFragment {
         val fragment = RecentAppsPanelFragment()
         scenario.onActivity { activity ->
+            if (expectedApps != null) {
+                RAppsSingleton.instance.apps = ArrayList(expectedApps)
+            }
             fragment.show(activity.supportFragmentManager, RecentAppsPanelFragment.TAG)
         }
         InstrumentationRegistry.getInstrumentation().waitForIdleSync()
@@ -71,7 +80,7 @@ class RecentAppsPanelWidgetTest {
         store.recordLaunch(AppSearchEngine.componentKey(notes))
 
         ActivityScenario.launch(ActHome::class.java).use { scenario ->
-            val fragment = showPanel(scenario)
+            val fragment = showPanel(scenario, listOf(camera, notes))
             val view = requireNotNull(fragment.view)
             assertEquals(View.GONE, view.findViewById<TextView>(R.id.tvRecentAppsEmpty).visibility)
             val recyclerView = view.findViewById<RecyclerView>(R.id.rvRecentApps)
@@ -95,7 +104,7 @@ class RecentAppsPanelWidgetTest {
         store.recordLaunch(AppSearchEngine.componentKey(notes))
 
         ActivityScenario.launch(ActHome::class.java).use { scenario ->
-            val fragment = showPanel(scenario)
+            val fragment = showPanel(scenario, listOf(camera, notes))
             val recyclerView = requireNotNull(fragment.view).findViewById<RecyclerView>(R.id.rvRecentApps)
 
             var handled = false
