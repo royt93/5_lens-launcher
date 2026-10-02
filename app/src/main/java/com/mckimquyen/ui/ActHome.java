@@ -617,6 +617,8 @@ public class ActHome extends ActBase {
         // Otherwise no single-lens install (i.e. everyone, right after the v11 migration) can
         // ever create a second lens. Anchored on the page itself, same as UI-022's icon menu.
         view.setOnEmptySpaceLongPressListener(() -> showLensManagementMenu(lensMenuAnchor()));
+        // FISH-016: pull-down from the lens top opens full search, in Clean mode too.
+        view.setOnSearchSwipeDownListener(this::openSearchFromHome);
         // FISH-012: a pinch adjustment that was never resolved (Save/dismiss) before the process
         // died is restored here silently, on every bind - not just the active page - so it's
         // ready the instant the user swipes to whichever lens it belonged to. The confirmation
@@ -738,6 +740,21 @@ public class ActHome extends ActBase {
         menu.getMenu().add(0, 6, 0, R.string.recent_apps);
         menu.setOnMenuItemClickListener(item -> onLensMenuItemSelected(item.getItemId(), position));
         menu.show();
+    }
+
+    /**
+     * FISH-016: the one path into full search from Home outside the SearchBar itself - shared by
+     * the lens pull-down gesture and the lens menu's Search item. A GONE bar (Clean mode, or the
+     * user's own setting) has no layout for SearchView's morph to start from, so it is made
+     * INVISIBLE first; the HIDDEN transition restores it from settings, never unconditionally.
+     */
+    @androidx.annotation.VisibleForTesting
+    void openSearchFromHome() {
+        if (searchView == null || searchBar == null || searchView.isShowing()) return;
+        if (searchBar.getVisibility() == View.GONE) {
+            searchBar.setVisibility(View.INVISIBLE);
+        }
+        searchBar.post(searchView::show);
     }
 
     /** FEAT-009: shared by the SearchBar icon and the lens-management menu's own entry point. */
@@ -1030,7 +1047,9 @@ public class ActHome extends ActBase {
                 // its start-anchor); restored at HIDDEN below.
                 searchBar.setVisibility(View.INVISIBLE);
             } else if (newState == SearchView.TransitionState.HIDDEN) {
-                searchBar.setVisibility(View.VISIBLE);
+                // FISH-016: was an unconditional VISIBLE, which resurrected a bar that Clean mode
+                // or KEY_SHOW_SEARCH_BAR=false had deliberately hidden once search closed.
+                updateSearchBarVisibility();
             }
             // UI-009: status/nav bar color now matches the search scrim (same
             // ?attr/colorSurfaceContainerHigh tone) so the whole screen reads as one continuous

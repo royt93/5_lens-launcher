@@ -76,6 +76,78 @@ class ActHomeCleanLensModeIntegrationTest {
         return last
     }
 
+    /**
+     * Waits for SearchView's real transition state, not isShowing(): isShowing() already reads false
+     * during HIDING, before the HIDDEN callback that restores the search bar has run.
+     */
+    private fun awaitSearchState(scenario: ActivityScenario<ActHome>, expectedShowing: Boolean) {
+        val target = if (expectedShowing) {
+            com.google.android.material.search.SearchView.TransitionState.SHOWN
+        } else {
+            com.google.android.material.search.SearchView.TransitionState.HIDDEN
+        }
+        val deadline = System.currentTimeMillis() + WAIT_TIMEOUT_MS
+        var state = target
+        while (System.currentTimeMillis() < deadline) {
+            InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+            scenario.onActivity {
+                state = it.findViewById<com.google.android.material.search.SearchView>(R.id.searchView)
+                    .currentTransitionState
+            }
+            if (state == target) return
+            android.os.SystemClock.sleep(POLL_MS)
+        }
+        assertEquals("SearchView did not reach requested transition state", target, state)
+    }
+
+    @Test
+    fun pullDownCallback_opensSearchWhenCleanModeHidesSearchBar() {
+        settings.save(UtilSettings.KEY_SHOW_SEARCH_BAR, true)
+        settings.save(UtilSettings.KEY_CLEAN_LENS_MODE, true)
+        ActivityScenario.launch(ActHome::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                val lens = activity.findViewById<com.mckimquyen.views.LensView>(R.id.lensViews)
+                org.junit.Assert.assertNotNull(lens.onSearchSwipeDownListener)
+                lens.onSearchSwipeDownListener!!.onSearchSwipeDown()
+            }
+            awaitSearchState(scenario, true)
+        }
+    }
+
+    @Test
+    fun closingSearch_restoresVisibleBarWhenCleanOffAndSearchBarEnabled() {
+        settings.save(UtilSettings.KEY_SHOW_SEARCH_BAR, true)
+        settings.save(UtilSettings.KEY_CLEAN_LENS_MODE, false)
+        ActivityScenario.launch(ActHome::class.java).use { scenario ->
+            scenario.onActivity { it.openSearchFromHome() }
+            awaitSearchState(scenario, true)
+            scenario.onActivity {
+                it.findViewById<com.google.android.material.search.SearchView>(R.id.searchView).hide()
+            }
+            awaitSearchState(scenario, false)
+            scenario.onActivity {
+                assertEquals(View.VISIBLE, it.findViewById<View>(R.id.searchBar).visibility)
+            }
+        }
+    }
+
+    @Test
+    fun closingSearch_restoresGoneBarWhenCleanOn() {
+        settings.save(UtilSettings.KEY_SHOW_SEARCH_BAR, true)
+        settings.save(UtilSettings.KEY_CLEAN_LENS_MODE, true)
+        ActivityScenario.launch(ActHome::class.java).use { scenario ->
+            scenario.onActivity { it.openSearchFromHome() }
+            awaitSearchState(scenario, true)
+            scenario.onActivity {
+                it.findViewById<com.google.android.material.search.SearchView>(R.id.searchView).hide()
+            }
+            awaitSearchState(scenario, false)
+            scenario.onActivity {
+                assertEquals(View.GONE, it.findViewById<View>(R.id.searchBar).visibility)
+            }
+        }
+    }
+
     @Test
     fun cleanModeOff_withTwoLenses_showsPageIndicatorAndLensName() {
         settings.save(UtilSettings.KEY_CLEAN_LENS_MODE, false)
