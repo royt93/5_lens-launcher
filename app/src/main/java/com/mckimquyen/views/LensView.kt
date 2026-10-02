@@ -610,7 +610,10 @@ class LensView : View {
             onAppClicked = { index -> launchAppAtIndex(index) },
             onAppLongClicked = { index -> showAppOptionsAtIndex(index) },
             // UI-024: TalkBack must honor the same toggle the visual badge paths do.
-            showBadgesSettingProvider = { mUtilSettings?.getBoolean(UtilSettings.KEY_SHOW_NOTIFICATION_BADGES) == true }
+            showBadgesSettingProvider = {
+                mUtilSettings?.getBoolean(UtilSettings.KEY_SHOW_NOTIFICATION_BADGES) == true &&
+                    mUtilSettings?.getBoolean(UtilSettings.KEY_CLEAN_LENS_MODE) != true
+            }
         )
         ViewCompat.setAccessibilityDelegate(this, mAccessibilityHelper)
         isFocusable = true
@@ -938,7 +941,8 @@ class LensView : View {
         val scaleFactor = us.getFloat(UtilSettings.KEY_SCALE_FACTOR)
         // UI-024: one setting read per frame, not per cell - drawAppIcon() is called once per
         // visible icon inside the loop below, which runs continuously while dragging.
-        mShowNotificationBadgesThisFrame = us.getBoolean(UtilSettings.KEY_SHOW_NOTIFICATION_BADGES)
+        mShowNotificationBadgesThisFrame = us.getBoolean(UtilSettings.KEY_SHOW_NOTIFICATION_BADGES) &&
+            !us.getBoolean(UtilSettings.KEY_CLEAN_LENS_MODE)
 
         val grid = mGridCache.getOrCompute(
             context,
@@ -1151,7 +1155,9 @@ class LensView : View {
         rect: RectF?,
     ) {
         mUtilSettings?.let { us ->
-            if (us.getBoolean(UtilSettings.KEY_SHOW_NAME_APP_HOVER) && mMoving) {
+            if (us.getBoolean(UtilSettings.KEY_SHOW_NAME_APP_HOVER) &&
+                !us.getBoolean(UtilSettings.KEY_CLEAN_LENS_MODE) && mMoving
+            ) {
                 mApps?.let { list ->
                     rect?.let { r ->
                         mPaintText?.let { p ->

@@ -519,9 +519,10 @@ public class ActHome extends ActBase {
      */
     void updateLensNavigationChrome() {
         if (lensPageIndicator == null) return;
+        boolean isCleanMode = utilSettings != null && utilSettings.getBoolean(UtilSettings.KEY_CLEAN_LENS_MODE);
         boolean isList = utilSettings != null && utilSettings.isListMode();
         boolean isSearchShowing = searchView != null && searchView.isShowing();
-        boolean visible = !isList && !isSearchShowing && currentLenses != null && currentLenses.size() > 1;
+        boolean visible = !isCleanMode && !isList && !isSearchShowing && currentLenses != null && currentLenses.size() > 1;
 
         lensPageIndicator.setVisibility(visible ? View.VISIBLE : View.GONE);
         if (tvLensName != null) {
@@ -1590,12 +1591,15 @@ public class ActHome extends ActBase {
     // UI-001: re-read on every resume (matches updateColor's established pattern) so toggling
     // the setting in ActSettings takes effect immediately when the user returns Home.
     private void updateSearchBarVisibility() {
-        boolean showSearchBar = new UtilSettings(this).getBoolean(UtilSettings.KEY_SHOW_SEARCH_BAR);
+        UtilSettings settings = new UtilSettings(this);
+        boolean isCleanMode = settings.getBoolean(UtilSettings.KEY_CLEAN_LENS_MODE);
+        boolean showSearchBar = !isCleanMode && settings.getBoolean(UtilSettings.KEY_SHOW_SEARCH_BAR);
         searchBar.setVisibility(showSearchBar ? View.VISIBLE : View.GONE);
         if (!showSearchBar && searchView.isShowing()) {
             searchView.hide();
         }
         updateRecentAppsPanelIconVisibility();
+        updateLensNavigationChrome();
     }
 
     /** FEAT-009: the icon has its own, finer-grained toggle than the whole SearchBar. */
