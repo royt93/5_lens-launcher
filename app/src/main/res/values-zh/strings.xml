@@ -168,6 +168,8 @@
     <string name="lens_share_caption_via">来自 %1$s</string>
     <string name="lens_share_image">分享镜头图片</string>
     <string name="error_lens_share_failed">无法分享镜头图片</string>
+    <string name="setting_clean_lens_mode">清爽镜头（极简模式）</string>
+    <string name="setting_clean_lens_mode_hint">隐藏搜索栏、应用名称、通知角标和页面圆点</string>
     <string name="a11y_suggest_list_mode_title">检测到 TalkBack。是否切换到无障碍列表模式以便更轻松地使用屏幕阅读器导航？</string>
     <string name="about_version_format">版本 %1$s (%2$d)</string>
     <string name="action_switch">切换</string>

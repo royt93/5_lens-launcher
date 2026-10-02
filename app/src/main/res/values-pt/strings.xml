@@ -168,6 +168,8 @@
     <string name="lens_share_caption_via">via %1$s</string>
     <string name="lens_share_image">Compartilhar imagem da lente</string>
     <string name="error_lens_share_failed">Não foi possível compartilhar a imagem da lente</string>
+    <string name="setting_clean_lens_mode">Lente limpa (modo minimalista)</string>
+    <string name="setting_clean_lens_mode_hint">Oculta a barra de pesquisa, nomes de apps, selos de notificação e pontos de página</string>
     <string name="a11y_suggest_list_mode_title">TalkBack detectado. Mudar para o Modo de Lista Acessível para facilitar a navegação com leitor de tela?</string>
     <string name="about_version_format">Versão %1$s (%2$d)</string>
     <string name="action_switch">Alternar</string>

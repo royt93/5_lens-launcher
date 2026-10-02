@@ -248,6 +248,6 @@
     <string name="lens_share_caption_via">via %1$s</string>
     <string name="lens_share_image">Share lens image</string>
     <string name="error_lens_share_failed">Couldn\'t share lens image</string>
-    <string name="setting_clean_lens_mode" translatable="false">Clean the lens (Minimalist mode)</string>
-    <string name="setting_clean_lens_mode_hint" translatable="false">Hide search bar, app text labels, notification badges, and page dots</string>
+    <string name="setting_clean_lens_mode">Clean the lens (Minimalist mode)</string>
+    <string name="setting_clean_lens_mode_hint">Hide search bar, app text labels, notification badges, and page dots</string>
 </resources>

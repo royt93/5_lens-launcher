@@ -168,6 +168,8 @@
     <string name="lens_share_caption_via">តាមរយៈ %1$s</string>
     <string name="lens_share_image">ចែករំលែករូបភាពកែវពង្រីក</string>
     <string name="error_lens_share_failed">មិនអាចចែករំលែករូបភាពកែវពង្រីកបានទេ</string>
+    <string name="setting_clean_lens_mode">ធ្វើឲ្យកែវថតស្អាត (របៀបសាមញ្ញ)</string>
+    <string name="setting_clean_lens_mode_hint">លាក់របារស្វែងរក ឈ្មោះកម្មវិធី សញ្ញាជូនដំណឹង និងចំណុចទំព័រ</string>
     <string name="a11y_suggest_list_mode_title">បានរកឃើញ TalkBack។ ប្តូរទៅរបៀបបញ្ជីងាយស្រួលប្រើ ដើម្បីងាយស្រួលរុករកជាមួយកម្មវិធីអានអេក្រង់?</string>
     <string name="about_version_format">កំណែ %1$s (%2$d)</string>
     <string name="action_switch">ប្តូរ</string>

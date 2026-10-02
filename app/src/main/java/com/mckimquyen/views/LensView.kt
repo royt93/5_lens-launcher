@@ -142,6 +142,18 @@ class LensView : View {
         internal fun shouldDrawNotificationBadge(showBadgesSetting: Boolean, notificationCount: Int): Boolean =
             showBadgesSetting && notificationCount > 0
 
+        /** Clean the Lens: one gate for "badges on" shared by the draw path and TalkBack. */
+        internal fun shouldShowNotificationBadges(badgesSetting: Boolean, cleanMode: Boolean): Boolean =
+            badgesSetting && !cleanMode
+
+        /** Clean the Lens: hover label is suppressed regardless of its own toggle. */
+        internal fun shouldDrawAppNameLabel(showNameSetting: Boolean, cleanMode: Boolean, moving: Boolean): Boolean =
+            showNameSetting && !cleanMode && moving
+
+        /** Clean the Lens: the NEW tag counts as chrome and is suppressed too. */
+        internal fun shouldDrawNewAppTag(showTagSetting: Boolean, cleanMode: Boolean): Boolean =
+            showTagSetting && !cleanMode
+
         // FISH-009: Pure state-machine transition and calculation functions
 
         /**
@@ -611,8 +623,12 @@ class LensView : View {
             onAppLongClicked = { index -> showAppOptionsAtIndex(index) },
             // UI-024: TalkBack must honor the same toggle the visual badge paths do.
             showBadgesSettingProvider = {
-                mUtilSettings?.getBoolean(UtilSettings.KEY_SHOW_NOTIFICATION_BADGES) == true &&
-                    mUtilSettings?.getBoolean(UtilSettings.KEY_CLEAN_LENS_MODE) != true
+                mUtilSettings?.let {
+                    shouldShowNotificationBadges(
+                        it.getBoolean(UtilSettings.KEY_SHOW_NOTIFICATION_BADGES),
+                        it.getBoolean(UtilSettings.KEY_CLEAN_LENS_MODE)
+                    )
+                } == true
             }
         )
         ViewCompat.setAccessibilityDelegate(this, mAccessibilityHelper)
@@ -941,8 +957,10 @@ class LensView : View {
         val scaleFactor = us.getFloat(UtilSettings.KEY_SCALE_FACTOR)
         // UI-024: one setting read per frame, not per cell - drawAppIcon() is called once per
         // visible icon inside the loop below, which runs continuously while dragging.
-        mShowNotificationBadgesThisFrame = us.getBoolean(UtilSettings.KEY_SHOW_NOTIFICATION_BADGES) &&
-            !us.getBoolean(UtilSettings.KEY_CLEAN_LENS_MODE)
+        mShowNotificationBadgesThisFrame = shouldShowNotificationBadges(
+            us.getBoolean(UtilSettings.KEY_SHOW_NOTIFICATION_BADGES),
+            us.getBoolean(UtilSettings.KEY_CLEAN_LENS_MODE)
+        )
 
         val grid = mGridCache.getOrCompute(
             context,
@@ -1155,8 +1173,11 @@ class LensView : View {
         rect: RectF?,
     ) {
         mUtilSettings?.let { us ->
-            if (us.getBoolean(UtilSettings.KEY_SHOW_NAME_APP_HOVER) &&
-                !us.getBoolean(UtilSettings.KEY_CLEAN_LENS_MODE) && mMoving
+            if (shouldDrawAppNameLabel(
+                    us.getBoolean(UtilSettings.KEY_SHOW_NAME_APP_HOVER),
+                    us.getBoolean(UtilSettings.KEY_CLEAN_LENS_MODE),
+                    mMoving
+                )
             ) {
                 mApps?.let { list ->
                     rect?.let { r ->
@@ -1179,7 +1200,11 @@ class LensView : View {
         rect: RectF,
     ) {
         mUtilSettings?.let { us ->
-            if (us.getBoolean(UtilSettings.KEY_SHOW_NEW_APP_TAG)) {
+            if (shouldDrawNewAppTag(
+                    us.getBoolean(UtilSettings.KEY_SHOW_NEW_APP_TAG),
+                    us.getBoolean(UtilSettings.KEY_CLEAN_LENS_MODE)
+                )
+            ) {
                 mPaintNewAppTag?.let { p ->
                     canvas.drawCircle(
                         rect.centerX(),

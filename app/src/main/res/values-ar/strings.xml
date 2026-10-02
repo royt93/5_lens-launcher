@@ -202,6 +202,8 @@
     <string name="lens_share_caption_via">عبر %1$s</string>
     <string name="lens_share_image">مشاركة صورة العدسة</string>
     <string name="error_lens_share_failed">تعذرت مشاركة صورة العدسة</string>
+    <string name="setting_clean_lens_mode">نقاء العدسة (الوضع البسيط)</string>
+    <string name="setting_clean_lens_mode_hint">إخفاء شريط البحث وأسماء التطبيقات وشارات الإشعارات ونقاط الصفحات</string>
     <string name="bulk_uninstall_confirm_title">إلغاء تثبيت التطبيقات</string>
     <string name="menu_bulk_hide">إخفاء</string>
     <string name="menu_bulk_pin">تثبيت</string>

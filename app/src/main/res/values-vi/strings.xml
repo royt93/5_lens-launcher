@@ -194,6 +194,8 @@
     <string name="lens_share_caption_via">qua %1$s</string>
     <string name="lens_share_image">Chia sẻ ảnh lens</string>
     <string name="error_lens_share_failed">Không thể chia sẻ ảnh lens</string>
+    <string name="setting_clean_lens_mode">Làm sạch lens (chế độ tối giản)</string>
+    <string name="setting_clean_lens_mode_hint">Ẩn thanh tìm kiếm, tên ứng dụng, huy hiệu thông báo và chấm chuyển trang</string>
     <string name="bulk_uninstall_confirm_title">Gỡ cài đặt ứng dụng</string>
     <string name="menu_bulk_hide">Ẩn</string>
     <string name="menu_bulk_pin">Ghim</string>

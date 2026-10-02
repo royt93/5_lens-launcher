@@ -168,6 +168,8 @@
     <string name="lens_share_caption_via">%1$s 제공</string>
     <string name="lens_share_image">렌즈 이미지 공유</string>
     <string name="error_lens_share_failed">렌즈 이미지를 공유할 수 없습니다</string>
+    <string name="setting_clean_lens_mode">렌즈 깔끔하게 (미니멀 모드)</string>
+    <string name="setting_clean_lens_mode_hint">검색창, 앱 이름, 알림 배지, 페이지 점을 숨깁니다</string>
     <string name="a11y_suggest_list_mode_title">TalkBack가 감지되었습니다. 스크린 리더 탐색을 더 쉽게 하기 위해 접근성 목록 모드로 전환하시겠습니까?</string>
     <string name="about_version_format">버전 %1$s (%2$d)</string>
     <string name="action_switch">전환</string>

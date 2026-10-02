@@ -168,6 +168,8 @@
     <string name="lens_share_caption_via">через %1$s</string>
     <string name="lens_share_image">Поделиться изображением объектива</string>
     <string name="error_lens_share_failed">Не удалось поделиться изображением объектива</string>
+    <string name="setting_clean_lens_mode">Чистая линза (минималистичный режим)</string>
+    <string name="setting_clean_lens_mode_hint">Скрывает строку поиска, названия приложений, значки уведомлений и точки страниц</string>
     <string name="a11y_suggest_list_mode_title">Обнаружен TalkBack. Переключиться в режим доступного списка для упрощения навигации с экранным диктором?</string>
     <string name="about_version_format">Версия %1$s (%2$d)</string>
     <string name="action_switch">Переключить</string>
