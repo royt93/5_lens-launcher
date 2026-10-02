@@ -186,6 +186,27 @@ class ActHomeCleanLensModeIntegrationTest {
         }
     }
 
+    /** Review #4: re-running the settings pass (onResume does) must not close a search the user opened. */
+    @Test
+    fun resumingWhileSearchOpenedFromHideBar_doesNotCloseTheSearch() {
+        settings.save(UtilSettings.KEY_SHOW_SEARCH_BAR, true)
+        settings.save(UtilSettings.KEY_CLEAN_LENS_MODE, true)
+        ActivityScenario.launch(ActHome::class.java).use { scenario ->
+            scenario.onActivity { it.openSearchFromHome() }
+            awaitSearchState(scenario, true)
+            scenario.moveToState(androidx.lifecycle.Lifecycle.State.STARTED)
+            scenario.moveToState(androidx.lifecycle.Lifecycle.State.RESUMED)
+            InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+            android.os.SystemClock.sleep(SETTLE_AFTER_HIDDEN_MS)
+            scenario.onActivity {
+                org.junit.Assert.assertTrue(
+                    "search the user opened must survive a resume",
+                    it.findViewById<com.google.android.material.search.SearchView>(R.id.searchView).isShowing
+                )
+            }
+        }
+    }
+
     @Test
     fun cleanModeOff_withTwoLenses_showsPageIndicatorAndLensName() {
         settings.save(UtilSettings.KEY_CLEAN_LENS_MODE, false)

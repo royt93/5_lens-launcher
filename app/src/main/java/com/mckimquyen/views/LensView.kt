@@ -145,15 +145,6 @@ class LensView : View {
                 dy >= touchSlop * SEARCH_SWIPE_DISTANCE_MULTIPLIER &&
                 dy >= abs(dx) * SEARCH_SWIPE_VERTICAL_DOMINANCE_RATIO
 
-        /** A partial top-zone pull must not launch the icon under the finger on release. */
-        @androidx.annotation.VisibleForTesting
-        internal fun shouldConsumeSearchSwipeRelease(
-            startedInActivationZone: Boolean,
-            dx: Float,
-            dy: Float,
-            touchSlop: Float,
-        ): Boolean =
-            startedInActivationZone && dy > touchSlop && dy > abs(dx)
 
         /**
          * Should the pending long-press Runnable actually act when it fires? False whenever
@@ -385,12 +376,10 @@ class LensView : View {
     private var mTouchDownY = 0f
     private var mSearchSwipeStartedInActivationZone = false
     private var mSearchSwipeTriggered = false
-    private var mSearchSwipeConsumesRelease = false
 
     private fun resetSearchSwipeState() {
         mSearchSwipeStartedInActivationZone = false
         mSearchSwipeTriggered = false
-        mSearchSwipeConsumesRelease = false
     }
     private var mUtilSettings: UtilSettings? = null
     private var mWorkspaceBackgroundDrawable: NinePatchDrawable? = null
@@ -862,7 +851,6 @@ class LensView : View {
                 mTouchDownY = event.y
                 mSearchSwipeStartedInActivationZone = isInSearchSwipeActivationZone(event.y, height)
                 mSearchSwipeTriggered = false
-                mSearchSwipeConsumesRelease = false
                 mSelectIndex = -1
                 mMoving = false
                 mLongPressTriggered = false
@@ -877,9 +865,11 @@ class LensView : View {
             }
 
             MotionEvent.ACTION_POINTER_DOWN -> {
-                // A second finger means pinch, never pull-down search.
-                mSearchSwipeStartedInActivationZone = false
-                mSearchSwipeConsumesRelease = false
+                // A second finger before the trigger means pinch; once search has triggered, the
+                // release must still be ours, so a late second finger cannot launch an app.
+                if (!mSearchSwipeTriggered) {
+                    mSearchSwipeStartedInActivationZone = false
+                }
                 if (!reduceMotion) {
                     val nextState = resolvePointerDown(gestureState, event.pointerCount)
                     if (nextState == LensGestureState.PINCHING) {
@@ -911,23 +901,16 @@ class LensView : View {
                     )
                 ) {
                     mSearchSwipeTriggered = true
-                    mSearchSwipeConsumesRelease = true
                     mLongPressArmed = false
                     mLongPressHandler.removeCallbacks(mLongPressRunnable)
                     mSelectIndex = -1
                     mRectToSelect = null
+                    // A drag that already became a pan must be wound down, or the lens stays magnified.
+                    if (mMoving) {
+                        startAnimation(LensAnimation(false))
+                        mMoving = false
+                    }
                     onSearchSwipeDownListener?.onSearchSwipeDown()
-                    return true
-                }
-                if (shouldConsumeSearchSwipeRelease(
-                        mSearchSwipeStartedInActivationZone, searchDx, searchDy, mTouchSlop
-                    )
-                ) {
-                    mSearchSwipeConsumesRelease = true
-                    mLongPressArmed = false
-                    mLongPressHandler.removeCallbacks(mLongPressRunnable)
-                    mSelectIndex = -1
-                    mRectToSelect = null
                     return true
                 }
                 if (searchDy <= 0f || abs(searchDx) >= searchDy) {
@@ -976,16 +959,20 @@ class LensView : View {
             MotionEvent.ACTION_UP -> {
                 mLongPressArmed = false
                 mLongPressHandler.removeCallbacks(mLongPressRunnable)
-                if (mSearchSwipeConsumesRelease) {
-                    resetSearchSwipeState()
+                val searchTriggered = mSearchSwipeTriggered
+                resetSearchSwipeState()
+                if (searchTriggered) {
                     gestureState = LensGestureState.IDLE
                     mSelectIndex = -1
                     mTouchX = -Float.MAX_VALUE
                     mTouchY = -Float.MAX_VALUE
+                    if (mMoving) {
+                        startAnimation(LensAnimation(false))
+                        mMoving = false
+                    }
                     invalidate()
                     return true
                 }
-                resetSearchSwipeState()
                 if (gestureState == LensGestureState.PINCHING || gestureState == LensGestureState.PINCH_RELEASE) {
                     gestureState = LensGestureState.IDLE
                     mSelectIndex = -1

@@ -144,24 +144,6 @@ class LensViewWidgetTest {
     }
 
     @Test
-    fun partialTopPull_consumesReleaseWithoutOpeningSearchOrStartingPan() {
-        var calls = 0
-        val downTime = System.currentTimeMillis()
-        InstrumentationRegistry.getInstrumentation().runOnMainSync {
-            layoutEmptyLens()
-            lensView.onSearchSwipeDownListener = OnSearchSwipeDownListener { calls++ }
-            val partialPullY = 100f + privateField<Float>("mTouchSlop") + 1f
-            dispatchTouch(MotionEvent.ACTION_DOWN, 500f, 100f, downTime)
-            dispatchTouch(MotionEvent.ACTION_MOVE, 500f, partialPullY, downTime)
-            assertTrue(privateField<Boolean>("mSearchSwipeConsumesRelease"))
-            assertFalse(privateField<Boolean>("mMoving"))
-            dispatchTouch(MotionEvent.ACTION_UP, 500f, partialPullY, downTime)
-            assertFalse(privateField<Boolean>("mSearchSwipeConsumesRelease"))
-        }
-        assertEquals(0, calls)
-    }
-
-    @Test
     fun cancel_resetsPullDownStateForTheNextGesture() {
         var calls = 0
         val firstDown = System.currentTimeMillis()
@@ -172,7 +154,7 @@ class LensViewWidgetTest {
             dispatchTouch(MotionEvent.ACTION_DOWN, 500f, 100f, firstDown)
             dispatchTouch(MotionEvent.ACTION_MOVE, 500f, 100f + slop + 1f, firstDown)
             dispatchTouch(MotionEvent.ACTION_CANCEL, 500f, 100f + slop + 1f, firstDown)
-            assertFalse(privateField<Boolean>("mSearchSwipeConsumesRelease"))
+            assertFalse(privateField<Boolean>("mSearchSwipeTriggered"))
 
             val secondDown = System.currentTimeMillis()
             val fullPullY = 100f + slop * 5f
@@ -181,6 +163,65 @@ class LensViewWidgetTest {
             dispatchTouch(MotionEvent.ACTION_UP, 500f, fullPullY, secondDown)
         }
         assertEquals(1, calls)
+    }
+
+    // ---- FISH-016 review findings ----
+
+    /** Review #1: a downward drag from the top zone must still pan the lens until it becomes search. */
+    @Test
+    fun topZoneDownwardDrag_belowSearchThreshold_stillStartsAPan() {
+        val downTime = System.currentTimeMillis()
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            layoutEmptyLens()
+            val slop = privateField<Float>("mTouchSlop")
+            dispatchTouch(MotionEvent.ACTION_DOWN, 500f, 100f, downTime)
+            dispatchTouch(MotionEvent.ACTION_MOVE, 500f, 100f + slop * 2f, downTime)
+            assertTrue("a sub-threshold top drag must pan, not be swallowed", privateField<Boolean>("mMoving"))
+            dispatchTouch(MotionEvent.ACTION_UP, 500f, 100f + slop * 2f, downTime)
+        }
+    }
+
+    /** Review #2: if search fires mid-pan, the pan must still be ended on release. */
+    @Test
+    fun searchTriggeredMidPan_endsThePanOnRelease() {
+        val downTime = System.currentTimeMillis()
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            layoutEmptyLens()
+            val slop = privateField<Float>("mTouchSlop")
+            dispatchTouch(MotionEvent.ACTION_DOWN, 500f, 100f, downTime)
+            dispatchTouch(MotionEvent.ACTION_MOVE, 500f, 100f + slop * 2f, downTime)
+            dispatchTouch(MotionEvent.ACTION_MOVE, 500f, 100f + slop * 5f, downTime)
+            dispatchTouch(MotionEvent.ACTION_UP, 500f, 100f + slop * 5f, downTime)
+            assertFalse("pan must not stay stuck after release", privateField<Boolean>("mMoving"))
+        }
+    }
+
+    /** Review #3: a second finger after the trigger must not make the release launch an app. */
+    @Test
+    fun secondFingerAfterSearchTriggered_stillConsumesRelease() {
+        var calls = 0
+        val downTime = System.currentTimeMillis()
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            layoutEmptyLens()
+            val slop = privateField<Float>("mTouchSlop")
+            lensView.onSearchSwipeDownListener = OnSearchSwipeDownListener { calls++ }
+            dispatchTouch(MotionEvent.ACTION_DOWN, 500f, 100f, downTime)
+            dispatchTouch(MotionEvent.ACTION_MOVE, 500f, 100f + slop * 5f, downTime)
+            assertEquals(1, calls)
+            val props = arrayOf(MotionEvent.PointerProperties().apply { id = 0; toolType = MotionEvent.TOOL_TYPE_FINGER },
+                MotionEvent.PointerProperties().apply { id = 1; toolType = MotionEvent.TOOL_TYPE_FINGER })
+            val coords = arrayOf(MotionEvent.PointerCoords().apply { x = 500f; y = 100f + slop * 5f },
+                MotionEvent.PointerCoords().apply { x = 600f; y = 300f })
+            val pointerDown = MotionEvent.obtain(downTime, System.currentTimeMillis(),
+                MotionEvent.ACTION_POINTER_DOWN or (1 shl MotionEvent.ACTION_POINTER_INDEX_SHIFT),
+                2, props, coords, 0, 0, 1f, 1f, 0, 0, 0, 0)
+            lensView.dispatchTouchEvent(pointerDown)
+            pointerDown.recycle()
+            assertTrue(
+                "the already-triggered search swipe must still own the release",
+                privateField<Boolean>("mSearchSwipeTriggered")
+            )
+        }
     }
 
     @Test

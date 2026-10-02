@@ -32,7 +32,7 @@ As a user, I want a familiar pull-down gesture to open app search even when Clea
 - [x] Gesture conditions use named thresholds and a pure, unit-tested predicate.
 - [x] Gesture behaves identically whether Clean mode is on or off (`LensView` never reads `KEY_CLEAN_LENS_MODE` for it).
 - [x] Pulling down from the rest of the lens preserves current fisheye panning.
-- [x] Partial candidate pulls cannot accidentally launch an app on release (widget test; not smoke-tested by hand).
+- [x] A search-triggering pull never launches an app on release, even with a late second finger (widget test). A sub-threshold pull from the top zone still pans the lens normally (see Code review).
 - [x] Existing pinch, horizontal paging, icon long-press, and empty-space long-press remain intact.
 - [x] Empty-space menu includes Search and Clean-mode toggle using existing translated strings (no locale file changes; `AllStringsTranslationTest` green).
 - [x] Closing search restores search-bar visibility from current settings rather than forcing it visible, for both the arrow/`hide()` path and system BACK.
@@ -41,7 +41,7 @@ As a user, I want a familiar pull-down gesture to open app search even when Clea
 
 ## Implementation
 
-- `LensView.kt`: three pure predicates (`isInSearchSwipeActivationZone`, `shouldOpenSearchSwipe`, `shouldConsumeSearchSwipeRelease`), `OnSearchSwipeDownListener`, five transient fields reset on `ACTION_UP`/`ACTION_CANCEL`/detach. Classified from the fixed `ACTION_DOWN` point. A second finger cancels candidacy so pinch is untouched.
+- `LensView.kt`: two pure predicates (`isInSearchSwipeActivationZone`, `shouldOpenSearchSwipe`), `OnSearchSwipeDownListener`, four transient fields reset on `ACTION_UP`/`ACTION_CANCEL`/detach. Classified from the fixed `ACTION_DOWN` point. A second finger before the trigger cancels candidacy so pinch is untouched; after the trigger it does not.
 - `ActHome.java`: one shared `openSearchFromHome()` used by the gesture and the menu; menu items 7 (Search) and 8 (Clean toggle) named `MENU_ID_SEARCH_APPS` / `MENU_ID_TOGGLE_CLEAN_LENS`; the `HIDDEN` transition now calls `updateSearchBarVisibility()` instead of forcing `VISIBLE`.
 - No new dependency, string, preference key, timer, observer, or coroutine.
 
@@ -58,18 +58,17 @@ As a user, I want a familiar pull-down gesture to open app search even when Clea
 - **Pre-existing, unchanged:** a first full-suite run earlier in the session showed one non-repeating locale assertion and a `UiAutomationService already registered!` crash; neither reproduced in isolation or on rerun, so no speculative change was made (TEST-005 produced no diff).
 - **Not hand-tested:** partial top pull (release does not launch an app) is covered by widget test only. The 20% zone was exercised from y=400 of 2436 and the middle from y=1200; exact boundary behavior is covered by the unit test, not by hand.
 - Subagent (Explore) calls failed twice with `model_not_found` (`haiku`, `sonnet`); the plan's seam-mapping was done by reading the code directly.
-- `superpowers:requesting-code-review` was **not** run (plan Step 6); the audit below is a self-audit.
 
 ## Test evidence
 
 | Layer | Result |
 |---|---|
-| JVM unit (`testDevDebugUnitTest --rerun-tasks`) | **667 / 667** pass (663 before; +4 policy tests) |
+| JVM unit (`testDevDebugUnitTest --rerun-tasks`) | **666 / 666** pass (663 before; +3 policy tests) |
 | Lint (`lintDevDebug`) | 0 errors, 0 fatal, 8 warnings (= baseline) |
 | Widget (`LensViewWidgetTest`) | 4 new real-`MotionEvent` tests; distances derived from device `scaledTouchSlop` (first draft hardcoded pixels and failed on KJ7, fixed in the test, not the code) |
 | Integration (`ActHomeCleanLensModeIntegrationTest`, `ActHomeLensManagementWidgetTest`) | 5 new + 2 menu behavior tests, menu count 6 → 8, stale-position guard extended to ids 7/8 |
 | Regression run | `ActHomePinchWidgetTest`, `ActHomeMultiLensWidgetTest`, `LensViewQuickActionsIntegrationTest`, `ActHomePredictiveBackWidgetTest`, `AppSearchWidgetTest` green |
-| Full instrumented, direct `adb -s` on TECNO KJ7 | **441 / 441** pass, 113 classes (431 before) |
+| Full instrumented, direct `adb -s` on TECNO KJ7 | **444 / 444** pass, 113 classes (431 before) |
 
 All device work used TECNO KJ7 `115333744A005844` only; the attached Pixel 7 Pro was never addressed and no Gradle `connected*` task was run. KJ7 dropped off `adb` mid-session and was re-attached by the owner before smoke.
 
@@ -86,7 +85,25 @@ No ad appeared at any step (R4). Search-bar flag read from the live view hierarc
 
 Device left clean: `clean_lens_mode` removed from the real preferences.
 
-## Audit (self, 2026-10-02): 9.2 / 10
+## Code review (independent, `/code-review high`, range `586f3a8..HEAD`)
+
+Seven findings. Each was checked against the code; the behavioral ones were reproduced with a failing test before any fix.
+
+| # | Finding | Verdict | Action |
+|---|---|---|---|
+| 1 | A downward drag from the top 20% was swallowed, so the top icon row could not be magnified | **Confirmed** (test RED) | Fixed: removed `shouldConsumeSearchSwipeRelease`; a drag pans normally until it is long and straight enough to open search |
+| 2 | Search firing mid-pan left `mMoving` set and the lens stuck magnified | **Confirmed by reading + RED path** | Fixed: trigger and release wind the pan down (`LensAnimation(false)`) |
+| 3 | A second finger after the trigger cleared the release guard and the icon launched | **Confirmed** (test RED) | Fixed: candidacy is only cancelled while the swipe has not triggered |
+| 4 | `onResume`/`updateSearchBarVisibility()` closed a search that was opened while the bar was hidden | **Confirmed** (test RED) | Fixed: a hidden bar no longer closes an open search |
+| 5 | System-BACK fix is a timing workaround and re-runs chrome/icon updates twice | Accepted | **Not changed.** Measured, not read from Material; the BACK test guards it. Narrowing the second call is a cleanup with no behavior change |
+| 6 | New menu items show no state; Search ignores the custom hint; Clean item sits in a per-lens menu | Valid design note | **Not changed**, no behavior bug; folded into UI-025 menu polish |
+| 7 | Pull-down has no TalkBack custom action | Valid | **Not changed.** The long-press menu item is the accessible route today; an explicit accessibility action is follow-up work |
+
+Mutation checks: reverting the finding-3 guard fails `secondFingerAfterSearchTriggered_stillConsumesRelease`; restoring the auto-hide fails `resumingWhileSearchOpenedFromHideBar_doesNotCloseTheSearch`.
+
+Re-run after the fixes: JVM **666 / 666** (one dead predicate test removed), lint 0 errors / 8 warnings, full instrumented on TECNO KJ7 **444 / 444**, 113 classes, device preference cleared first so the earlier `AdaptiveOrientationWidgetTest` state leak could not recur.
+
+## Audit (2026-10-02): 9.4 / 10
 
 | Dimension | Score | Note |
 |---|---|---|
@@ -95,7 +112,7 @@ Device left clean: `clean_lens_mode` removed from the real preferences.
 | Tests | 9.5 | Predicate, `MotionEvent`, real Activity, real system BACK; mutation-checked |
 | Lifecycle / resources | 9.5 | No new listener registration, timer, or coroutine; state reset on up/cancel/detach |
 | Root-cause rigor | 8.0 | BACK behavior measured, not read from Material source |
-| Process | 8.5 | Code-review skill skipped; one misleading smoke run, caught and redone |
+| Process | 9.0 | Independent review run; 4 confirmed defects fixed test-first; one misleading smoke run caught and redone |
 | Scope discipline | 9.5 | Three-finger and global-swipe ideas dropped; no new keys or strings |
 
-Strictly greater than 9.0, so push is permitted by the audit gate. **Nothing has been pushed.**
+Strictly greater than 9.0, so push is permitted by the audit gate. **Nothing has been pushed.** Findings 5, 6 and 7 remain open and are listed above rather than silently dropped.

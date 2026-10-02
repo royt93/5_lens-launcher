@@ -302,15 +302,6 @@ class LensViewGestureStateTest {
         assertFalse(LensView.shouldOpenSearchSwipe(true, 0f, 50f, 10f, true))
     }
 
-    @Test
-    fun `partial vertical pull consumes release but horizontal upward and tiny moves do not`() {
-        assertTrue(LensView.shouldConsumeSearchSwipeRelease(true, 2f, 11f, 10f))
-        assertFalse(LensView.shouldConsumeSearchSwipeRelease(false, 2f, 11f, 10f))
-        assertFalse(LensView.shouldConsumeSearchSwipeRelease(true, 12f, 11f, 10f))
-        assertFalse(LensView.shouldConsumeSearchSwipeRelease(true, 0f, -11f, 10f))
-        assertFalse(LensView.shouldConsumeSearchSwipeRelease(true, 0f, 10f, 10f))
-    }
-
     // ==================================================================== shouldDrawNotificationBadge
 
     @Test

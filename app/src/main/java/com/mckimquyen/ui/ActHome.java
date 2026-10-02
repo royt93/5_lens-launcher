@@ -1648,9 +1648,9 @@ public class ActHome extends ActBase {
         boolean isCleanMode = settings.getBoolean(UtilSettings.KEY_CLEAN_LENS_MODE);
         boolean showSearchBar = !isCleanMode && settings.getBoolean(UtilSettings.KEY_SHOW_SEARCH_BAR);
         searchBar.setVisibility(showSearchBar ? View.VISIBLE : View.GONE);
-        if (!showSearchBar && searchView.isShowing()) {
-            searchView.hide();
-        }
+        // A hidden bar (Clean mode / KEY_SHOW_SEARCH_BAR=false) only means there is no inline entry
+        // point. It must not close a search the user opened via the pull-down or the lens menu, and
+        // onResume re-runs this method.
         updateRecentAppsPanelIconVisibility();
         updateLensNavigationChrome();
     }
