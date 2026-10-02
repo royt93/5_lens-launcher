@@ -31,7 +31,7 @@ Source of truth for implementation choices in this session. Detailed acceptance 
 
 ## 📋 Picked
 
-- None.
+- **FISH-016 — iOS-style pull-down search (02/10/2026)**: Vuốt xuống từ vùng kích hoạt phía trên `LensView` để mở tìm kiếm bằng cùng một cử chỉ dù Clean mode bật hay tắt; phần còn lại của lens giữ nguyên pan fisheye. Menu long-press vùng trống thêm lối tìm kiếm dự phòng và toggle Clean mode. Owner duyệt thiết kế sau khi audit xung đột với pan một ngón, pinch hai ngón, swipe ngang đổi lens và long-press. Spec: `docs/superpowers/specs/2026-10-02-fish-016-swipe-down-search-design.md`. Thứ tự delivery đã chọn: TEST-005 audit → FISH-016 → UI-025. TEST-005 không sinh diff: lần chạy full instrumented thứ hai trên TECNO KJ7 pass 431/431; lỗi locale/UiAutomation ở lần đầu không tái hiện qua isolation, targeted ordering hoặc full rerun nên không vá đoán.
 
 ## ⏸️ Deferred
 
@@ -44,6 +44,6 @@ Source of truth for implementation choices in this session. Detailed acceptance 
 ## 💭 Ideas
 
 - See `doc/task/todo/` for the remaining product backlog.
-- Một idea còn lại chọn cùng lượt với FISH-010/FISH-011 (27/09/2026 brainstorm) nhưng chưa viết spec: chế độ "lau lens" tối giản (vuốt 2 ngón). Sẽ viết thành story khi được yêu cầu tiếp.
-- Phát hiện chưa xử lý (từ full-suite run TEST-004, 28/09/2026, trên Pixel 7 Pro mượn tạm): 2 test `DndQuickActionIntegrationTest` fail — nghi do máy Pixel này chưa từng được cấp quyền hệ thống "Notification policy access" (quyền phải cấp thủ công qua Settings, không tự có khi cài APK), không phải lỗi code. Xác nhận không phải do session này gây ra (`git diff` sạch).
+- Idea "lau lens" bằng vuốt 2 ngón đã được audit lại và **không chọn**: xung đột trực tiếp với pinch chỉnh độ cong FISH-009, không giống thói quen iOS như owner muốn. Thay bằng FISH-016 trong 📋 Picked: vuốt 1 ngón xuống từ vùng trên cùng của lens để mở search, cộng menu dự phòng.
+- ✅ Đã xác minh lại (02/10/2026, TECNO KJ7): ghi chú cũ nói 2 test `DndQuickActionIntegrationTest` fail trên Pixel do thiếu Notification policy access không còn là issue trên device policy hiện tại. Cả 3 DND tests pass riêng; full instrumented run thứ hai pass 431/431 trên device khóa KJ7. Không thay code test dựa trên trạng thái Pixel đã bị cấm dùng.
 - ✅ Đã fix (29/09/2026, TECNO KJ7): `AppSearchIntegrationTest.recentHeaderRestoresAndClearActionRemovesHistory` fail (`expected:<1> but was:<68>`) tái diễn ≥6 lần qua nhiều round (TEST-003/004, LINT-002/003/004-6, PERF-003) mà chưa từng được vá thật — root cause giống hệt TEST-003 issue #4 đã tìm ra: `RApplication`'s real background `PackageManager` scan (không có test-env awareness) ghi đè `RAppsSingleton.apps` giả bằng list app thật của máy (68 app trên TECNO KJ7) trong lúc test chạy `ActivityScenario.launch` + `recreate()` kéo dài. TEST-003 chỉ vá 1 test method cùng file (`supportedImeActionsAndPhysicalEnterLaunchFirstResultOnly`); method này chưa từng được vá cùng pattern. Fix: re-set `singleton.apps` + `notifyAppsUpdated()` + `waitForIdleSync()` ngay trước mỗi điểm assert, đóng khung cửa sổ race giống test đã fix. Verify: full 357-test suite pass sau `pm clear`.
