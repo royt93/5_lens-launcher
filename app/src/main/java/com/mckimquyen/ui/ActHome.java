@@ -98,6 +98,13 @@ public class ActHome extends ActBase {
     private static final int REQUEST_CODE_WIFI_SSID = 1002;
     private static final int REQUEST_CODE_CONTACTS = 1003;
 
+    // FISH-016: ids 1-6 of the lens-management menu are the pre-existing literals above in
+    // showLensManagementMenu/onLensMenuItemSelected; the two new entries are named.
+    @androidx.annotation.VisibleForTesting
+    static final int MENU_ID_SEARCH_APPS = 7;
+    @androidx.annotation.VisibleForTesting
+    static final int MENU_ID_TOGGLE_CLEAN_LENS = 8;
+
     // UI-021: predictive-back shrink/fade preview bounds for the search overlay, matching
     // Android's own predictive-back design guidance (subtle scale-down + slight fade, not a
     // dramatic transform).
@@ -738,6 +745,10 @@ public class ActHome extends ActBase {
         menu.getMenu().add(0, 4, 0, lensSmartFocusMenuLabelRes(position));
         menu.getMenu().add(0, 5, 0, R.string.lens_share_image);
         menu.getMenu().add(0, 6, 0, R.string.recent_apps);
+        // FISH-016: accessible fallback to the pull-down gesture, plus a quick Clean-mode switch
+        // (reusing the Settings strings, already translated in every locale).
+        menu.getMenu().add(0, MENU_ID_SEARCH_APPS, 0, R.string.search_apps_hint);
+        menu.getMenu().add(0, MENU_ID_TOGGLE_CLEAN_LENS, 0, R.string.setting_clean_lens_mode);
         menu.setOnMenuItemClickListener(item -> onLensMenuItemSelected(item.getItemId(), position));
         menu.show();
     }
@@ -795,6 +806,12 @@ public class ActHome extends ActBase {
         } else if (itemId == 6) {
             showRecentAppsPanel();
             return true;
+        } else if (itemId == MENU_ID_SEARCH_APPS) {
+            openSearchFromHome();
+            return true;
+        } else if (itemId == MENU_ID_TOGGLE_CLEAN_LENS) {
+            toggleCleanLensMode();
+            return true;
         }
         return false;
     }
@@ -806,6 +823,18 @@ public class ActHome extends ActBase {
                 && utilSettings != null
                 && utilSettings.isSmartFocusBias(currentLenses.get(position).getId());
         return on ? R.string.lens_smart_focus_disable : R.string.lens_smart_focus_enable;
+    }
+
+    /** FISH-016: Clean mode is global, so unlike Smart Focus it flips one shared key, then
+     *  re-applies the same gates every resume already uses - no second source of truth. */
+    private void toggleCleanLensMode() {
+        if (utilSettings == null) return;
+        utilSettings.save(UtilSettings.KEY_CLEAN_LENS_MODE,
+                !utilSettings.getBoolean(UtilSettings.KEY_CLEAN_LENS_MODE));
+        updateSearchBarVisibility();
+        if (lensViews != null) {
+            lensViews.invalidate();
+        }
     }
 
     private void toggleSmartFocusForLens(LensWorkspace lens) {

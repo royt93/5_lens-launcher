@@ -48,6 +48,8 @@ class ActHomeLensManagementWidgetTest {
     private val itemSmartFocus = 4
     private val itemShare = 5
     private val itemRecentAppsPanel = 6
+    private val itemSearch = 7
+    private val itemToggleCleanLens = 8
 
     @Before
     fun setup() {
@@ -86,6 +88,8 @@ class ActHomeLensManagementWidgetTest {
             remove(UtilSettings.KEY_CUSTOM_SCALE_FACTOR)
             remove(UtilSettings.KEY_CUSTOM_ANIMATION_TIME)
             remove(UtilSettings.KEY_ACTIVE_LENS_ID)
+            remove(UtilSettings.KEY_CLEAN_LENS_MODE)
+            remove(UtilSettings.KEY_SHOW_SEARCH_BAR)
         }.commit()
     }
 
@@ -330,10 +334,14 @@ class ActHomeLensManagementWidgetTest {
                     .onEmptySpaceLongPressListener!!.onEmptySpaceLongPress()
 
                 assertEquals(
-                    "The menu must offer all six actions (add/rename/delete/Smart Focus/share/Recent apps)",
-                    6,
+                    "The menu must offer all eight actions (add/rename/delete/Smart Focus/share/Recent apps/Search/Clean)",
+                    8,
                     activity.lensManagementMenu!!.menu.size()
                 )
+                val menuTitles = (0 until activity.lensManagementMenu!!.menu.size())
+                    .map { activity.lensManagementMenu!!.menu.getItem(it).title.toString() }
+                assertTrue(menuTitles.contains(activity.getString(R.string.search_apps_hint)))
+                assertTrue(menuTitles.contains(activity.getString(R.string.setting_clean_lens_mode)))
 
                 val anchor = activity.lensMenuAnchor()
                 val lensView = activity.findViewById<com.mckimquyen.views.LensView>(R.id.lensViews)
@@ -350,6 +358,40 @@ class ActHomeLensManagementWidgetTest {
                     "The anchor must leave room below it for a four-row menu",
                     anchor.height * 4 < activity.window.decorView.height
                 )
+            }
+        }
+    }
+
+    @Test
+    fun searchMenuItem_opensTheSameFullSearchSurface() {
+        ActivityScenario.launch(ActHome::class.java).use { scenario ->
+            idle()
+            openMenuAndSelect(scenario, itemSearch, position = 0)
+            scenario.onActivity { activity ->
+                assertTrue(
+                    activity.findViewById<com.google.android.material.search.SearchView>(R.id.searchView)
+                        .isShowing
+                )
+            }
+        }
+    }
+
+    @Test
+    fun cleanMenuItem_togglesPreferenceAndHomeChromeImmediately() {
+        settings.save(UtilSettings.KEY_SHOW_SEARCH_BAR, true)
+        settings.save(UtilSettings.KEY_CLEAN_LENS_MODE, false)
+        ActivityScenario.launch(ActHome::class.java).use { scenario ->
+            idle()
+            openMenuAndSelect(scenario, itemToggleCleanLens, position = 0)
+            assertTrue(settings.getBoolean(UtilSettings.KEY_CLEAN_LENS_MODE))
+            scenario.onActivity {
+                assertEquals(View.GONE, it.findViewById<View>(R.id.searchBar).visibility)
+            }
+
+            openMenuAndSelect(scenario, itemToggleCleanLens, position = 0)
+            assertFalse(settings.getBoolean(UtilSettings.KEY_CLEAN_LENS_MODE))
+            scenario.onActivity {
+                assertEquals(View.VISIBLE, it.findViewById<View>(R.id.searchBar).visibility)
             }
         }
     }
@@ -384,7 +426,7 @@ class ActHomeLensManagementWidgetTest {
             idle()
 
             scenario.onActivity { activity ->
-                listOf(itemAdd, itemRename, itemDelete, itemSmartFocus).forEach { item ->
+                listOf(itemAdd, itemRename, itemDelete, itemSmartFocus, itemSearch, itemToggleCleanLens).forEach { item ->
                     assertFalse(
                         "Item $item must be refused for a negative position",
                         activity.onLensMenuItemSelected(item, -1)
