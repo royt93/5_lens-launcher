@@ -63,6 +63,11 @@ fun interface OnEmptySpaceLongPressListener {
     fun onEmptySpaceLongPress()
 }
 
+/** FISH-016: fired once when the user pulls down from the top slice of the lens. */
+fun interface OnSearchSwipeDownListener {
+    fun onSearchSwipeDown()
+}
+
 /**
  * FISH-009: Deterministic multi-touch gesture state machine for LensView.
  * Precedence: In-progress single-pointer pan is protected from stray second pointers.
@@ -371,6 +376,22 @@ class LensView : View {
 
     /** See [OnEmptySpaceLongPressListener]. Null (the default) keeps the pre-Phase-3 no-op. */
     var onEmptySpaceLongPressListener: OnEmptySpaceLongPressListener? = null
+
+    // FISH-016: pull-down search. Classified from the fixed ACTION_DOWN point (not the moving
+    // mTouchX/Y, which tracks the finger), and deliberately never reads Clean mode, so the
+    // gesture cannot behave differently between modes.
+    var onSearchSwipeDownListener: OnSearchSwipeDownListener? = null
+    private var mTouchDownX = 0f
+    private var mTouchDownY = 0f
+    private var mSearchSwipeStartedInActivationZone = false
+    private var mSearchSwipeTriggered = false
+    private var mSearchSwipeConsumesRelease = false
+
+    private fun resetSearchSwipeState() {
+        mSearchSwipeStartedInActivationZone = false
+        mSearchSwipeTriggered = false
+        mSearchSwipeConsumesRelease = false
+    }
     private var mUtilSettings: UtilSettings? = null
     private var mWorkspaceBackgroundDrawable: NinePatchDrawable? = null
     // UI-019: system-bar avoidance is now owned by ActHome.applyHomeColumnInsets (margins on this
@@ -837,6 +858,11 @@ class LensView : View {
                 gestureState = LensGestureState.IDLE
                 mTouchX = event.x.coerceAtLeast(0.0f)
                 mTouchY = event.y.coerceAtLeast(0.0f)
+                mTouchDownX = event.x
+                mTouchDownY = event.y
+                mSearchSwipeStartedInActivationZone = isInSearchSwipeActivationZone(event.y, height)
+                mSearchSwipeTriggered = false
+                mSearchSwipeConsumesRelease = false
                 mSelectIndex = -1
                 mMoving = false
                 mLongPressTriggered = false
@@ -851,6 +877,9 @@ class LensView : View {
             }
 
             MotionEvent.ACTION_POINTER_DOWN -> {
+                // A second finger means pinch, never pull-down search.
+                mSearchSwipeStartedInActivationZone = false
+                mSearchSwipeConsumesRelease = false
                 if (!reduceMotion) {
                     val nextState = resolvePointerDown(gestureState, event.pointerCount)
                     if (nextState == LensGestureState.PINCHING) {
@@ -874,6 +903,36 @@ class LensView : View {
                     return true
                 }
                 if (mLongPressTriggered) return true
+                val searchDx = event.x - mTouchDownX
+                val searchDy = event.y - mTouchDownY
+                if (shouldOpenSearchSwipe(
+                        mSearchSwipeStartedInActivationZone, searchDx, searchDy,
+                        mTouchSlop, mSearchSwipeTriggered
+                    )
+                ) {
+                    mSearchSwipeTriggered = true
+                    mSearchSwipeConsumesRelease = true
+                    mLongPressArmed = false
+                    mLongPressHandler.removeCallbacks(mLongPressRunnable)
+                    mSelectIndex = -1
+                    mRectToSelect = null
+                    onSearchSwipeDownListener?.onSearchSwipeDown()
+                    return true
+                }
+                if (shouldConsumeSearchSwipeRelease(
+                        mSearchSwipeStartedInActivationZone, searchDx, searchDy, mTouchSlop
+                    )
+                ) {
+                    mSearchSwipeConsumesRelease = true
+                    mLongPressArmed = false
+                    mLongPressHandler.removeCallbacks(mLongPressRunnable)
+                    mSelectIndex = -1
+                    mRectToSelect = null
+                    return true
+                }
+                if (searchDy <= 0f || abs(searchDx) >= searchDy) {
+                    mSearchSwipeStartedInActivationZone = false
+                }
                 val dx = event.x - mTouchX
                 val dy = event.y - mTouchY
                 // FISH-008 Phase 2: before a pan is confirmed, an unambiguously horizontal drag is
@@ -917,6 +976,16 @@ class LensView : View {
             MotionEvent.ACTION_UP -> {
                 mLongPressArmed = false
                 mLongPressHandler.removeCallbacks(mLongPressRunnable)
+                if (mSearchSwipeConsumesRelease) {
+                    resetSearchSwipeState()
+                    gestureState = LensGestureState.IDLE
+                    mSelectIndex = -1
+                    mTouchX = -Float.MAX_VALUE
+                    mTouchY = -Float.MAX_VALUE
+                    invalidate()
+                    return true
+                }
+                resetSearchSwipeState()
                 if (gestureState == LensGestureState.PINCHING || gestureState == LensGestureState.PINCH_RELEASE) {
                     gestureState = LensGestureState.IDLE
                     mSelectIndex = -1
@@ -949,6 +1018,7 @@ class LensView : View {
                 mLongPressArmed = false
                 mLongPressTriggered = false
                 mLongPressHandler.removeCallbacks(mLongPressRunnable)
+                resetSearchSwipeState()
                 gestureState = LensGestureState.IDLE
                 if (mMoving) {
                     val lensHideAnimation = LensAnimation(false)
@@ -1383,6 +1453,7 @@ class LensView : View {
         // UI-022: a pending long-press Runnable must never fire (and show a PopupMenu) after
         // this view is detached/destroyed.
         mLongPressHandler.removeCallbacks(mLongPressRunnable)
+        resetSearchSwipeState()
         // Fix BUG-05: Cancel animation đang chạy để tránh AnimationListener callback
         // vào LensView (inner class giữ outer reference) sau khi view bị detach/destroy
         clearAnimation()

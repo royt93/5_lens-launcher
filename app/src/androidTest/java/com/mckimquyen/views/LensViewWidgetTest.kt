@@ -92,6 +92,97 @@ class LensViewWidgetTest {
         move.recycle()
     }
 
+    private fun layoutEmptyLens() {
+        lensView.setApps(arrayListOf())
+        lensView.measure(
+            android.view.View.MeasureSpec.makeMeasureSpec(1_000, android.view.View.MeasureSpec.EXACTLY),
+            android.view.View.MeasureSpec.makeMeasureSpec(1_000, android.view.View.MeasureSpec.EXACTLY)
+        )
+        lensView.layout(0, 0, 1_000, 1_000)
+    }
+
+    private fun dispatchTouch(action: Int, x: Float, y: Float, downTime: Long): Boolean {
+        val event = MotionEvent.obtain(downTime, System.currentTimeMillis(), action, x, y, 0)
+        return try {
+            lensView.dispatchTouchEvent(event)
+        } finally {
+            event.recycle()
+        }
+    }
+
+    // ==================================================================== FISH-016
+
+    @Test
+    fun pullDownFromTop_invokesSearchExactlyOnce() {
+        var calls = 0
+        val downTime = System.currentTimeMillis()
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            layoutEmptyLens()
+            lensView.onSearchSwipeDownListener = OnSearchSwipeDownListener { calls++ }
+            val slop = privateField<Float>("mTouchSlop")
+            dispatchTouch(MotionEvent.ACTION_DOWN, 500f, 100f, downTime)
+            dispatchTouch(MotionEvent.ACTION_MOVE, 500f + slop / 2f, 100f + slop * 2f, downTime)
+            dispatchTouch(MotionEvent.ACTION_MOVE, 500f + slop / 2f, 100f + slop * 5f, downTime)
+            dispatchTouch(MotionEvent.ACTION_UP, 500f + slop / 2f, 100f + slop * 5f, downTime)
+        }
+        assertEquals(1, calls)
+    }
+
+    @Test
+    fun pullDownFromMiddle_remainsAPanAndNeverOpensSearch() {
+        var calls = 0
+        val downTime = System.currentTimeMillis()
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            layoutEmptyLens()
+            lensView.onSearchSwipeDownListener = OnSearchSwipeDownListener { calls++ }
+            dispatchTouch(MotionEvent.ACTION_DOWN, 500f, 500f, downTime)
+            dispatchTouch(MotionEvent.ACTION_MOVE, 500f, 600f, downTime)
+            assertTrue(privateField<Boolean>("mMoving"))
+            dispatchTouch(MotionEvent.ACTION_UP, 500f, 600f, downTime)
+        }
+        assertEquals(0, calls)
+    }
+
+    @Test
+    fun partialTopPull_consumesReleaseWithoutOpeningSearchOrStartingPan() {
+        var calls = 0
+        val downTime = System.currentTimeMillis()
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            layoutEmptyLens()
+            lensView.onSearchSwipeDownListener = OnSearchSwipeDownListener { calls++ }
+            val partialPullY = 100f + privateField<Float>("mTouchSlop") + 1f
+            dispatchTouch(MotionEvent.ACTION_DOWN, 500f, 100f, downTime)
+            dispatchTouch(MotionEvent.ACTION_MOVE, 500f, partialPullY, downTime)
+            assertTrue(privateField<Boolean>("mSearchSwipeConsumesRelease"))
+            assertFalse(privateField<Boolean>("mMoving"))
+            dispatchTouch(MotionEvent.ACTION_UP, 500f, partialPullY, downTime)
+            assertFalse(privateField<Boolean>("mSearchSwipeConsumesRelease"))
+        }
+        assertEquals(0, calls)
+    }
+
+    @Test
+    fun cancel_resetsPullDownStateForTheNextGesture() {
+        var calls = 0
+        val firstDown = System.currentTimeMillis()
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            layoutEmptyLens()
+            val slop = privateField<Float>("mTouchSlop")
+            lensView.onSearchSwipeDownListener = OnSearchSwipeDownListener { calls++ }
+            dispatchTouch(MotionEvent.ACTION_DOWN, 500f, 100f, firstDown)
+            dispatchTouch(MotionEvent.ACTION_MOVE, 500f, 100f + slop + 1f, firstDown)
+            dispatchTouch(MotionEvent.ACTION_CANCEL, 500f, 100f + slop + 1f, firstDown)
+            assertFalse(privateField<Boolean>("mSearchSwipeConsumesRelease"))
+
+            val secondDown = System.currentTimeMillis()
+            val fullPullY = 100f + slop * 5f
+            dispatchTouch(MotionEvent.ACTION_DOWN, 500f, 100f, secondDown)
+            dispatchTouch(MotionEvent.ACTION_MOVE, 500f, fullPullY, secondDown)
+            dispatchTouch(MotionEvent.ACTION_UP, 500f, fullPullY, secondDown)
+        }
+        assertEquals(1, calls)
+    }
+
     @Test
     fun testInitialization() {
         assertNotNull(lensView)
