@@ -33,6 +33,9 @@ class ActHomeCleanLensModeIntegrationTest {
         const val SECOND_LENS_ORDER = 1
         const val WAIT_TIMEOUT_MS = 5_000L
         const val POLL_MS = 100L
+        const val SETTLE_AFTER_HIDDEN_MS = 1_000L
+        const val SYSTEM_BACK_PRESSES_TO_CLOSE_SEARCH = 2
+        const val BACK_PRESS_GAP_MS = 700L
     }
 
     private val context get() = ApplicationProvider.getApplicationContext<android.content.Context>()
@@ -142,8 +145,43 @@ class ActHomeCleanLensModeIntegrationTest {
                 it.findViewById<com.google.android.material.search.SearchView>(R.id.searchView).hide()
             }
             awaitSearchState(scenario, false)
+            // Material re-shows the SearchBar a moment AFTER the HIDDEN callback, so asserting the
+            // instant HIDDEN is reached passes while a real user still ends up seeing the bar.
+            android.os.SystemClock.sleep(SETTLE_AFTER_HIDDEN_MS)
+            InstrumentationRegistry.getInstrumentation().waitForIdleSync()
             scenario.onActivity {
                 assertEquals(View.GONE, it.findViewById<View>(R.id.searchBar).visibility)
+            }
+        }
+    }
+
+    /**
+     * The real system BACK path: Material's SearchView handles it through its own back orchestrator
+     * (ActHome's OnBackPressedCallback never even runs for it), and that route re-shows the SearchBar
+     * after the HIDDEN callback. Closing via SearchView.hide() - what the other tests do - does not.
+     */
+    @Test
+    fun closingSearchWithSystemBack_keepsBarGoneWhenCleanOn() {
+        settings.save(UtilSettings.KEY_SHOW_SEARCH_BAR, true)
+        settings.save(UtilSettings.KEY_CLEAN_LENS_MODE, true)
+        ActivityScenario.launch(ActHome::class.java).use { scenario ->
+            scenario.onActivity { it.openSearchFromHome() }
+            awaitSearchState(scenario, true)
+            // First BACK dismisses the IME that SearchView opens; the second closes the search itself.
+            repeat(SYSTEM_BACK_PRESSES_TO_CLOSE_SEARCH) {
+                InstrumentationRegistry.getInstrumentation().uiAutomation
+                    .performGlobalAction(android.accessibilityservice.AccessibilityService.GLOBAL_ACTION_BACK)
+                android.os.SystemClock.sleep(BACK_PRESS_GAP_MS)
+            }
+            awaitSearchState(scenario, false)
+            android.os.SystemClock.sleep(SETTLE_AFTER_HIDDEN_MS)
+            InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+            scenario.onActivity {
+                assertEquals(
+                    "system BACK must not resurrect a bar Clean mode hides",
+                    View.GONE,
+                    it.findViewById<View>(R.id.searchBar).visibility
+                )
             }
         }
     }

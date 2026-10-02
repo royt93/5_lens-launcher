@@ -1079,6 +1079,11 @@ public class ActHome extends ActBase {
                 // FISH-016: was an unconditional VISIBLE, which resurrected a bar that Clean mode
                 // or KEY_SHOW_SEARCH_BAR=false had deliberately hidden once search closed.
                 updateSearchBarVisibility();
+                // Closing via system BACK goes through SearchView's own back orchestrator, which
+                // makes the SearchBar VISIBLE again right after this callback returns (measured on
+                // TECNO KJ7: GONE here, VISIBLE ~10 ms later; the arrow/hide() path does not). Re-apply
+                // from settings on the next message so settings stay the single source of truth.
+                searchBar.post(this::updateSearchBarVisibility);
             }
             // UI-009: status/nav bar color now matches the search scrim (same
             // ?attr/colorSurfaceContainerHigh tone) so the whole screen reads as one continuous
