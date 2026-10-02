@@ -43,6 +43,7 @@ class FrmSettings : Fragment(), SettingsInterface {
     private var swShowSearchBar: SwitchCompat? = null
     private var swRecentAppsPanel: SwitchCompat? = null
     private var swKeepScreenOn: SwitchCompat? = null
+    private var swCleanLensMode: SwitchCompat? = null
     private var swDepthOfField: SwitchCompat? = null
     private var swSmartFocus: SwitchCompat? = null
     private var tvSelectedSearchHint: TextView? = null
@@ -106,6 +107,7 @@ class FrmSettings : Fragment(), SettingsInterface {
         swShowSearchBar = view.findViewById(R.id.swShowSearchBar)
         swRecentAppsPanel = view.findViewById(R.id.swRecentAppsPanel)
         swKeepScreenOn = view.findViewById(R.id.swKeepScreenOn)
+        swCleanLensMode = view.findViewById(R.id.swCleanLensMode)
         swDepthOfField = view.findViewById(R.id.swDepthOfField)
         swSmartFocus = view.findViewById(R.id.swSmartFocus)
         tvSelectedSearchHint = view.findViewById(R.id.tvSelectedSearchHint)
@@ -205,6 +207,9 @@ class FrmSettings : Fragment(), SettingsInterface {
         }
         swKeepScreenOn?.setOnCheckedChangeListener { _, isChecked ->
             utilSettings?.save(UtilSettings.KEY_KEEP_SCREEN_ON, isChecked)
+        }
+        swCleanLensMode?.setOnCheckedChangeListener { _, isChecked ->
+            utilSettings?.save(UtilSettings.KEY_CLEAN_LENS_MODE, isChecked)
         }
         swDepthOfField?.setOnCheckedChangeListener { _, isChecked ->
             utilSettings?.save(UtilSettings.KEY_DEPTH_OF_FIELD, isChecked)
@@ -314,6 +319,7 @@ class FrmSettings : Fragment(), SettingsInterface {
             swShowSearchBar?.isChecked = us.getBoolean(UtilSettings.KEY_SHOW_SEARCH_BAR)
             swRecentAppsPanel?.isChecked = us.getBoolean(UtilSettings.KEY_RECENT_APPS_QUICK_PANEL_ENABLED)
             swKeepScreenOn?.isChecked = us.getBoolean(UtilSettings.KEY_KEEP_SCREEN_ON)
+            swCleanLensMode?.isChecked = us.getBoolean(UtilSettings.KEY_CLEAN_LENS_MODE)
             swDepthOfField?.isChecked = us.getBoolean(UtilSettings.KEY_DEPTH_OF_FIELD)
             activeLensId = us.getString(UtilSettings.KEY_ACTIVE_LENS_ID) ?: LensWorkspace.DEFAULT_LENS_ID
             swSmartFocus?.isChecked = us.isSmartFocusBias(activeLensId)
@@ -401,6 +407,7 @@ class FrmSettings : Fragment(), SettingsInterface {
             us.save(UtilSettings.KEY_SHOW_SEARCH_BAR, UtilSettings.DEFAULT_SHOW_SEARCH_BAR)
             us.save(UtilSettings.KEY_RECENT_APPS_QUICK_PANEL_ENABLED, UtilSettings.DEFAULT_RECENT_APPS_QUICK_PANEL_ENABLED)
             us.save(UtilSettings.KEY_KEEP_SCREEN_ON, UtilSettings.DEFAULT_KEEP_SCREEN_ON)
+            us.save(UtilSettings.KEY_CLEAN_LENS_MODE, UtilSettings.DEFAULT_CLEAN_LENS_MODE)
             us.save(UtilSettings.KEY_DEPTH_OF_FIELD, UtilSettings.DEFAULT_DEPTH_OF_FIELD)
             us.saveSmartFocusBias(activeLensId, UtilSettings.DEFAULT_SMART_FOCUS_BIAS)
             us.save(UtilSettings.KEY_QUICK_ACTION_CALCULATOR, UtilSettings.DEFAULT_QUICK_ACTION_ENABLED)
@@ -447,6 +454,7 @@ class FrmSettings : Fragment(), SettingsInterface {
         swShowSearchBar = null
         swRecentAppsPanel = null
         swKeepScreenOn = null
+        swCleanLensMode = null
         swDepthOfField = null
         swSmartFocus = null
         tvSelectedSearchHint = null
