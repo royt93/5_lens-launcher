@@ -269,6 +269,48 @@ class LensViewGestureStateTest {
         assertFalse(LensView.isHorizontalSwipeIntent(dx, dy, touchSlop = 10f))
     }
 
+    // =============================================== FISH-016: pull-down search
+
+    @Test
+    fun `top twenty percent is the search activation zone`() {
+        assertTrue(LensView.isInSearchSwipeActivationZone(downY = 0f, viewHeight = 1_000))
+        assertTrue(LensView.isInSearchSwipeActivationZone(downY = 200f, viewHeight = 1_000))
+        assertFalse(LensView.isInSearchSwipeActivationZone(downY = 200.1f, viewHeight = 1_000))
+        assertFalse(LensView.isInSearchSwipeActivationZone(downY = -1f, viewHeight = 1_000))
+        assertFalse(LensView.isInSearchSwipeActivationZone(downY = 0f, viewHeight = 0))
+    }
+
+    @Test
+    fun `top-zone downward vertical swipe at exact threshold opens search`() {
+        assertTrue(
+            LensView.shouldOpenSearchSwipe(
+                startedInActivationZone = true,
+                dx = 20f,
+                dy = 40f,
+                touchSlop = 10f,
+                alreadyTriggered = false
+            )
+        )
+    }
+
+    @Test
+    fun `pull-down search rejects wrong start direction distance dominance and repeats`() {
+        assertFalse(LensView.shouldOpenSearchSwipe(false, 0f, 50f, 10f, false))
+        assertFalse(LensView.shouldOpenSearchSwipe(true, 0f, -50f, 10f, false))
+        assertFalse(LensView.shouldOpenSearchSwipe(true, 0f, 39.9f, 10f, false))
+        assertFalse(LensView.shouldOpenSearchSwipe(true, 21f, 40f, 10f, false))
+        assertFalse(LensView.shouldOpenSearchSwipe(true, 0f, 50f, 10f, true))
+    }
+
+    @Test
+    fun `partial vertical pull consumes release but horizontal upward and tiny moves do not`() {
+        assertTrue(LensView.shouldConsumeSearchSwipeRelease(true, 2f, 11f, 10f))
+        assertFalse(LensView.shouldConsumeSearchSwipeRelease(false, 2f, 11f, 10f))
+        assertFalse(LensView.shouldConsumeSearchSwipeRelease(true, 12f, 11f, 10f))
+        assertFalse(LensView.shouldConsumeSearchSwipeRelease(true, 0f, -11f, 10f))
+        assertFalse(LensView.shouldConsumeSearchSwipeRelease(true, 0f, 10f, 10f))
+    }
+
     // ==================================================================== shouldDrawNotificationBadge
 
     @Test

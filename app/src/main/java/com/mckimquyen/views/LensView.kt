@@ -115,6 +115,41 @@ class LensView : View {
         /** How much more horizontal than vertical a move must be to count as a page swipe. */
         private const val HORIZONTAL_SWIPE_DOMINANCE_RATIO = 2.0f
 
+        // FISH-016: iOS-style pull-down search. Only the top slice of the lens is claimed, so
+        // one-finger fisheye pan everywhere else is untouched.
+        private const val SEARCH_SWIPE_ACTIVATION_ZONE_RATIO = 0.20f
+        private const val SEARCH_SWIPE_DISTANCE_MULTIPLIER = 4f
+        private const val SEARCH_SWIPE_VERTICAL_DOMINANCE_RATIO = 2f
+
+        /** Did the touch land in the top slice of the view that is reserved for pull-down search? */
+        @androidx.annotation.VisibleForTesting
+        internal fun isInSearchSwipeActivationZone(downY: Float, viewHeight: Int): Boolean =
+            viewHeight > 0 && downY >= 0f && downY <= viewHeight * SEARCH_SWIPE_ACTIVATION_ZONE_RATIO
+
+        /** Has a top-zone touch travelled far enough, down and straight enough, to open search? */
+        @androidx.annotation.VisibleForTesting
+        internal fun shouldOpenSearchSwipe(
+            startedInActivationZone: Boolean,
+            dx: Float,
+            dy: Float,
+            touchSlop: Float,
+            alreadyTriggered: Boolean,
+        ): Boolean =
+            startedInActivationZone &&
+                !alreadyTriggered &&
+                dy >= touchSlop * SEARCH_SWIPE_DISTANCE_MULTIPLIER &&
+                dy >= abs(dx) * SEARCH_SWIPE_VERTICAL_DOMINANCE_RATIO
+
+        /** A partial top-zone pull must not launch the icon under the finger on release. */
+        @androidx.annotation.VisibleForTesting
+        internal fun shouldConsumeSearchSwipeRelease(
+            startedInActivationZone: Boolean,
+            dx: Float,
+            dy: Float,
+            touchSlop: Float,
+        ): Boolean =
+            startedInActivationZone && dy > touchSlop && dy > abs(dx)
+
         /**
          * Should the pending long-press Runnable actually act when it fires? False whenever
          * the touch already turned into a pan (`moving`), was released/cancelled before the
