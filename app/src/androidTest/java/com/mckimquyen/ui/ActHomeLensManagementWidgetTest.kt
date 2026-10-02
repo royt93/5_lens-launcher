@@ -396,6 +396,35 @@ class ActHomeLensManagementWidgetTest {
         }
     }
 
+    /**
+     * UI-025: the lens menu must be built from the same rounded popup theme as every other popup.
+     * PopupMenu has no theme getter, so read the theme off its MenuBuilder's context and resolve
+     * the real `popupMenuStyle` attribute - the style a square menu would NOT resolve to.
+     */
+    @Test
+    fun lensMenu_resolvesTheRoundedPopupStyle() {
+        ActivityScenario.launch(ActHome::class.java).use { scenario ->
+            idle()
+
+            scenario.onActivity { activity ->
+                activity.findViewById<com.mckimquyen.views.LensView>(R.id.lensViews)
+                    .onEmptySpaceLongPressListener!!.onEmptySpaceLongPress()
+
+                val builder = activity.lensManagementMenu!!.menu as androidx.appcompat.view.menu.MenuBuilder
+                val resolved = android.util.TypedValue()
+                assertTrue(
+                    "popupMenuStyle must resolve in the menu's context",
+                    builder.context.theme.resolveAttribute(androidx.appcompat.R.attr.popupMenuStyle, resolved, true)
+                )
+                assertEquals(
+                    "the lens menu must use the rounded popup style, not the default square one",
+                    R.style.RoundedPopupMenuStyle,
+                    resolved.resourceId
+                )
+            }
+        }
+    }
+
     @Test
     fun emptySpaceLongPress_createsASecondLensEndToEnd() {
         ActivityScenario.launch(ActHome::class.java).use { scenario ->

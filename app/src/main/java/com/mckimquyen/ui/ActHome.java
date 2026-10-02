@@ -5,6 +5,7 @@ import static com.mckimquyen.ext.ActivityKt.rateAppInApp;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.Intent;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -20,6 +21,7 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
 import android.view.KeyEvent;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
@@ -731,7 +733,10 @@ public class ActHome extends ActBase {
     }
 
     private void showLensManagementMenu(View anchor) {
-        PopupMenu menu = new PopupMenu(this, anchor);
+        // UI-025: same rounded popup theme as AppAdapter/SearchResultAdapter/LensView - a bare
+        // Activity context skips it and renders the default square popup.
+        Context themed = new ContextThemeWrapper(this, R.style.PopupMenuTheme);
+        PopupMenu menu = new PopupMenu(themed, anchor);
         lensManagementMenu = menu;
         menu.getMenu().add(0, 1, 0, R.string.lens_add);
         menu.getMenu().add(0, 2, 0, R.string.lens_rename);
