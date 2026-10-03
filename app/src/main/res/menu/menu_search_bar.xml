@@ -5,6 +5,7 @@
     <item
         android:id="@+id/menuItemRecentAppsPanel"
         android:icon="@drawable/ic_history_24dp"
+        app:iconTint="?attr/colorOnSurfaceVariant"
         android:title="@string/recent_apps"
         app:showAsAction="always" />
 

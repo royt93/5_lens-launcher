@@ -53,6 +53,30 @@ class ActHomeSearchBarRecentPanelWidgetTest {
         }
     }
 
+    /**
+     * The glyph is a hard-white vector; without an explicit tint it is near-invisible on the light
+     * SearchBar surface and differs from the theme-tinted search icon beside it.
+     */
+    @Test
+    fun iconIsTintedWithTheThemeOnSurfaceVariantColor() {
+        ActivityScenario.launch(ActHome::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                val searchBar = activity.findViewById<com.google.android.material.search.SearchBar>(R.id.searchBar)
+                val item = searchBar.menu.findItem(R.id.menuItemRecentAppsPanel)
+                val tint = androidx.core.view.MenuItemCompat.getIconTintList(item)
+                assertNotNull("the recent icon must declare an icon tint", tint)
+                assertEquals(
+                    com.google.android.material.color.MaterialColors.getColor(
+                        activity,
+                        com.google.android.material.R.attr.colorOnSurfaceVariant,
+                        0
+                    ),
+                    tint!!.defaultColor
+                )
+            }
+        }
+    }
+
     @Test
     fun disablingTheSettingHidesTheIconOnNextResume() {
         settings.save(UtilSettings.KEY_RECENT_APPS_QUICK_PANEL_ENABLED, false)
