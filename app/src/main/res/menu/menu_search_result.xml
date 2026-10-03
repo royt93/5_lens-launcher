@@ -12,15 +12,21 @@
 
     <item
         android:id="@+id/menuItemPinStart"
-        android:title="@string/organization_pin_start" />
+        android:icon="@drawable/ic_pin_top_24dp"
+        android:title="@string/organization_pin_start"
+        app:iconTint="?attr/colorOnSurface" />
 
     <item
         android:id="@+id/menuItemPinEnd"
-        android:title="@string/organization_pin_end" />
+        android:icon="@drawable/ic_pin_bottom_24dp"
+        android:title="@string/organization_pin_end"
+        app:iconTint="?attr/colorOnSurface" />
 
     <item
         android:id="@+id/menuItemUnpin"
-        android:title="@string/organization_unpin" />
+        android:icon="@drawable/ic_close_24dp"
+        android:title="@string/organization_unpin"
+        app:iconTint="?attr/colorOnSurface" />
 
     <item
         android:id="@+id/menuItemElementUninstall"
@@ -32,6 +38,8 @@
          recent-apps panel) - hidden in the search-overlay usage. -->
     <item
         android:id="@+id/menuItemRemoveFromRecent"
-        android:title="@string/remove_from_recent" />
+        android:icon="@drawable/ic_history_off_24dp"
+        android:title="@string/remove_from_recent"
+        app:iconTint="?attr/colorOnSurface" />
 
 </menu>

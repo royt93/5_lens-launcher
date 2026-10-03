@@ -18,30 +18,44 @@
 
     <item
         android:id="@+id/menuItemFavorite"
-        android:title="@string/organization_add_favorite" />
+        android:icon="@drawable/ic_star_border_24dp"
+        android:title="@string/organization_add_favorite"
+        app:iconTint="?attr/colorOnSurface" />
 
     <item
         android:id="@+id/menuItemFolder"
-        android:title="@string/organization_set_folder" />
+        android:icon="@drawable/ic_folder_24dp"
+        android:title="@string/organization_set_folder"
+        app:iconTint="?attr/colorOnSurface" />
 
     <item
         android:id="@+id/menuItemPinStart"
-        android:title="@string/organization_pin_start" />
+        android:icon="@drawable/ic_pin_top_24dp"
+        android:title="@string/organization_pin_start"
+        app:iconTint="?attr/colorOnSurface" />
 
     <item
         android:id="@+id/menuItemPinEnd"
-        android:title="@string/organization_pin_end" />
+        android:icon="@drawable/ic_pin_bottom_24dp"
+        android:title="@string/organization_pin_end"
+        app:iconTint="?attr/colorOnSurface" />
 
     <item
         android:id="@+id/menuItemUnpin"
-        android:title="@string/organization_unpin" />
+        android:icon="@drawable/ic_close_24dp"
+        android:title="@string/organization_unpin"
+        app:iconTint="?attr/colorOnSurface" />
 
     <item
         android:id="@+id/menuItemMoveEarlier"
-        android:title="@string/organization_move_earlier" />
+        android:icon="@drawable/ic_arrow_back_24dp"
+        android:title="@string/organization_move_earlier"
+        app:iconTint="?attr/colorOnSurface" />
 
     <item
         android:id="@+id/menuItemMoveLater"
-        android:title="@string/organization_move_later" />
+        android:icon="@drawable/ic_arrow_forward_24dp"
+        android:title="@string/organization_move_later"
+        app:iconTint="?attr/colorOnSurface" />
 
 </menu>

@@ -625,7 +625,7 @@ public class ActHome extends ActBase {
         // while a single lens exists, so long-pressing empty grid space has to reach it too.
         // Otherwise no single-lens install (i.e. everyone, right after the v11 migration) can
         // ever create a second lens. Anchored on the page itself, same as UI-022's icon menu.
-        view.setOnEmptySpaceLongPressListener(() -> showLensManagementMenu(lensMenuAnchor()));
+        view.setOnEmptySpaceLongPressListener((x, y) -> showLensManagementMenu(anchorAtPressedPoint(view, x, y)));
         // FISH-016: pull-down from the lens top opens full search, in Clean mode too.
         view.setOnSearchSwipeDownListener(this::openSearchFromHome);
         // FISH-012: a pinch adjustment that was never resolved (Save/dismiss) before the process
@@ -716,6 +716,17 @@ public class ActHome extends ActBase {
     @androidx.annotation.VisibleForTesting
     PopupMenu lensManagementMenu;
 
+    /** UI-025: transient 1x1 view the lens menu is anchored to; null while no menu is open. */
+    private View lensMenuPressAnchor;
+
+    @androidx.annotation.VisibleForTesting
+    View getLensMenuAnchorForTest() {
+        return lensMenuPressAnchor;
+    }
+
+    private static final int LENS_MENU_ANCHOR_SIZE_PX = 1;
+    private static final int DISABLED_MENU_ICON_ALPHA = 97;
+
     /**
      * A PopupMenu sizes and places itself against its anchor, so anchoring to the full-screen
      * LensView pushed the menu off the top edge and clipped it to a single visible row - found on
@@ -732,29 +743,94 @@ public class ActHome extends ActBase {
         return lensPageIndicator != null ? lensPageIndicator : findViewById(R.id.rootLayout);
     }
 
+    /**
+     * UI-025: LensView draws on one canvas, so the pressed point has no view of its own. A 1x1
+     * invisible view is placed there in the root layout; the menu anchors to it and opens beside
+     * the finger. Falls back to the old indicator anchor if the root layout is unavailable.
+     */
+    private View anchorAtPressedPoint(View lens, float x, float y) {
+        removeLensMenuPressAnchor();
+        ViewGroup root = findViewById(R.id.rootLayout);
+        if (root == null) return lensMenuAnchor();
+        int[] lensOnScreen = new int[2];
+        int[] rootOnScreen = new int[2];
+        lens.getLocationOnScreen(lensOnScreen);
+        root.getLocationOnScreen(rootOnScreen);
+        int left = lensOnScreen[0] + (int) x - rootOnScreen[0];
+        int top = lensOnScreen[1] + (int) y - rootOnScreen[1];
+        View anchor = new View(this);
+        androidx.coordinatorlayout.widget.CoordinatorLayout.LayoutParams params =
+                new androidx.coordinatorlayout.widget.CoordinatorLayout.LayoutParams(
+                        LENS_MENU_ANCHOR_SIZE_PX, LENS_MENU_ANCHOR_SIZE_PX);
+        params.leftMargin = left;
+        params.topMargin = top;
+        root.addView(anchor, params);
+        // PopupMenu reads the anchor's screen position immediately, before the next layout pass.
+        anchor.measure(
+                View.MeasureSpec.makeMeasureSpec(LENS_MENU_ANCHOR_SIZE_PX, View.MeasureSpec.EXACTLY),
+                View.MeasureSpec.makeMeasureSpec(LENS_MENU_ANCHOR_SIZE_PX, View.MeasureSpec.EXACTLY));
+        anchor.layout(left, top, left + LENS_MENU_ANCHOR_SIZE_PX, top + LENS_MENU_ANCHOR_SIZE_PX);
+        lensMenuPressAnchor = anchor;
+        return anchor;
+    }
+
+    private void removeLensMenuPressAnchor() {
+        if (lensMenuPressAnchor == null) return;
+        ViewGroup parent = (ViewGroup) lensMenuPressAnchor.getParent();
+        if (parent != null) parent.removeView(lensMenuPressAnchor);
+        lensMenuPressAnchor = null;
+    }
+
+    /** UI-025: every item carries an icon so the text column is aligned like the icon menus. */
+    private void addLensMenuItem(PopupMenu menu, Context themed, int id, int titleRes, int iconRes,
+                                 boolean enabled) {
+        android.view.MenuItem item = menu.getMenu().add(0, id, 0, titleRes);
+        android.graphics.drawable.Drawable icon = androidx.appcompat.content.res.AppCompatResources
+                .getDrawable(themed, iconRes);
+        if (icon != null) {
+            icon = androidx.core.graphics.drawable.DrawableCompat.wrap(icon.mutate());
+            androidx.core.graphics.drawable.DrawableCompat.setTint(icon, MaterialColors.getColor(
+                    themed, com.google.android.material.R.attr.colorOnSurface, 0));
+            icon.setAlpha(enabled ? 255 : DISABLED_MENU_ICON_ALPHA);
+            item.setIcon(icon);
+        }
+        item.setEnabled(enabled);
+    }
+
     private void showLensManagementMenu(View anchor) {
         // UI-025: same rounded popup theme as AppAdapter/SearchResultAdapter/LensView - a bare
         // Activity context skips it and renders the default square popup.
         Context themed = new ContextThemeWrapper(this, R.style.PopupMenuTheme);
+        if (lensManagementMenu != null) {
+            lensManagementMenu.dismiss();
+        }
         PopupMenu menu = new PopupMenu(themed, anchor);
         lensManagementMenu = menu;
-        menu.getMenu().add(0, 1, 0, R.string.lens_add);
-        menu.getMenu().add(0, 2, 0, R.string.lens_rename);
-        android.view.MenuItem delete = menu.getMenu().add(0, 3, 0, R.string.lens_delete);
-        delete.setEnabled(currentLenses.size() > 1);
         int position = lensPager.getCurrentItem();
+        addLensMenuItem(menu, themed, 1, R.string.lens_add, R.drawable.ic_add_24dp, true);
+        addLensMenuItem(menu, themed, 2, R.string.lens_rename, R.drawable.ic_edit_24dp, true);
+        addLensMenuItem(menu, themed, 3, R.string.lens_delete, R.drawable.ic_delete_outline_24dp,
+                currentLenses.size() > 1);
         // FISH-008 Phase 3: Smart Focus is per-lens, so it gets a quick toggle right here on the
         // lens it applies to (FrmSettings' own switch covers the same lens from Settings). The
-        // label states the action rather than using a checkable item - PopupMenu check marks and
-        // icons proved unreliable on real hardware in UI-022.
-        menu.getMenu().add(0, 4, 0, lensSmartFocusMenuLabelRes(position));
-        menu.getMenu().add(0, 5, 0, R.string.lens_share_image);
-        menu.getMenu().add(0, 6, 0, R.string.recent_apps);
+        // label states the action rather than using a checkable item.
+        addLensMenuItem(menu, themed, 4, lensSmartFocusMenuLabelRes(position),
+                R.drawable.ic_center_focus_24dp, true);
+        addLensMenuItem(menu, themed, 5, R.string.lens_share_image, R.drawable.ic_share_24dp, true);
+        addLensMenuItem(menu, themed, 6, R.string.recent_apps, R.drawable.ic_history_24dp, true);
         // FISH-016: accessible fallback to the pull-down gesture, plus a quick Clean-mode switch
         // (reusing the Settings strings, already translated in every locale).
-        menu.getMenu().add(0, MENU_ID_SEARCH_APPS, 0, R.string.search_apps_hint);
-        menu.getMenu().add(0, MENU_ID_TOGGLE_CLEAN_LENS, 0, R.string.setting_clean_lens_mode);
+        addLensMenuItem(menu, themed, MENU_ID_SEARCH_APPS, R.string.search_apps_hint,
+                R.drawable.ic_search_menu_24dp, true);
+        addLensMenuItem(menu, themed, MENU_ID_TOGGLE_CLEAN_LENS, R.string.setting_clean_lens_mode,
+                R.drawable.ic_cleaning_24dp, true);
         menu.setOnMenuItemClickListener(item -> onLensMenuItemSelected(item.getItemId(), position));
+        menu.setForceShowIcon(true);
+        menu.setOnDismissListener(dismissed -> {
+            if (lensManagementMenu == menu) {
+                removeLensMenuPressAnchor();
+            }
+        });
         menu.show();
     }
 
@@ -1797,6 +1873,7 @@ public class ActHome extends ActBase {
             lensManagementMenu.dismiss();
             lensManagementMenu = null;
         }
+        removeLensMenuPressAnchor();
         super.onDestroy();
     }
 }

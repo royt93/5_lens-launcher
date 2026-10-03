@@ -297,7 +297,7 @@ class ActHomeLensManagementWidgetTest {
                     "ActHome must wire the empty-space long-press on every lens page",
                     lensView.onEmptySpaceLongPressListener
                 )
-                lensView.onEmptySpaceLongPressListener!!.onEmptySpaceLongPress()
+                lensView.onEmptySpaceLongPressListener!!.onEmptySpaceLongPress(0f, 0f)
 
                 val menu = activity.lensManagementMenu
                 assertNotNull("The long-press must build and show the lens menu", menu)
@@ -331,7 +331,7 @@ class ActHomeLensManagementWidgetTest {
 
             scenario.onActivity { activity ->
                 activity.findViewById<com.mckimquyen.views.LensView>(R.id.lensViews)
-                    .onEmptySpaceLongPressListener!!.onEmptySpaceLongPress()
+                    .onEmptySpaceLongPressListener!!.onEmptySpaceLongPress(0f, 0f)
 
                 assertEquals(
                     "The menu must offer all eight actions (add/rename/delete/Smart Focus/share/Recent apps/Search/Clean)",
@@ -408,7 +408,7 @@ class ActHomeLensManagementWidgetTest {
 
             scenario.onActivity { activity ->
                 activity.findViewById<com.mckimquyen.views.LensView>(R.id.lensViews)
-                    .onEmptySpaceLongPressListener!!.onEmptySpaceLongPress()
+                    .onEmptySpaceLongPressListener!!.onEmptySpaceLongPress(0f, 0f)
 
                 val builder = activity.lensManagementMenu!!.menu as androidx.appcompat.view.menu.MenuBuilder
                 val resolved = android.util.TypedValue()
@@ -425,6 +425,74 @@ class ActHomeLensManagementWidgetTest {
         }
     }
 
+    /** UI-025: a ragged text column (some items with an icon, some without) is the bug. */
+    @Test
+    fun lensMenu_everyItemHasAnIcon() {
+        ActivityScenario.launch(ActHome::class.java).use { scenario ->
+            idle()
+            scenario.onActivity { activity ->
+                activity.findViewById<com.mckimquyen.views.LensView>(R.id.lensViews)
+                    .onEmptySpaceLongPressListener!!.onEmptySpaceLongPress(0f, 0f)
+
+                val menu = activity.lensManagementMenu!!.menu
+                val missing = (0 until menu.size()).map { menu.getItem(it) }.filter { it.icon == null }
+                assertEquals(
+                    "every lens menu item needs an icon: ${missing.map { it.title }}",
+                    emptyList<CharSequence>(),
+                    missing.map { it.title }
+                )
+            }
+        }
+    }
+
+    /**
+     * UI-025: the menu used to anchor on the page-dots indicator, which is GONE on a single-lens
+     * install, so it had no bounds and the popup stuck to the top-left corner. It must open at the
+     * pressed point instead, wherever that is.
+     */
+    @Test
+    fun lensMenu_isAnchoredAtThePressedPoint() {
+        ActivityScenario.launch(ActHome::class.java).use { scenario ->
+            idle()
+            scenario.onActivity { activity ->
+                val lensView = activity.findViewById<com.mckimquyen.views.LensView>(R.id.lensViews)
+                val onScreen = IntArray(2).also { lensView.getLocationOnScreen(it) }
+                val pressX = lensView.width * 0.75f
+                val pressY = lensView.height * 0.6f
+
+                lensView.onEmptySpaceLongPressListener!!.onEmptySpaceLongPress(pressX, pressY)
+
+                val anchor = activity.lensMenuAnchorForTest
+                assertNotNull("an anchor must exist while the lens menu is open", anchor)
+                val anchorOnScreen = IntArray(2).also { anchor!!.getLocationOnScreen(it) }
+                assertEquals(onScreen[0] + pressX.toInt(), anchorOnScreen[0])
+                assertEquals(onScreen[1] + pressY.toInt(), anchorOnScreen[1])
+            }
+        }
+    }
+
+    @Test
+    fun lensMenu_removesItsAnchorWhenDismissed() {
+        ActivityScenario.launch(ActHome::class.java).use { scenario ->
+            idle()
+            var anchorParent: android.view.ViewGroup? = null
+            var before = 0
+            scenario.onActivity { activity ->
+                val lensView = activity.findViewById<com.mckimquyen.views.LensView>(R.id.lensViews)
+                anchorParent = activity.findViewById(R.id.rootLayout)
+                before = anchorParent!!.childCount
+                lensView.onEmptySpaceLongPressListener!!.onEmptySpaceLongPress(10f, 10f)
+                assertEquals("exactly one anchor may be added", before + 1, anchorParent!!.childCount)
+                activity.lensManagementMenu!!.dismiss()
+            }
+            idle()
+            scenario.onActivity { activity ->
+                assertEquals("dismissing must remove the anchor", before, anchorParent!!.childCount)
+                assertNull(activity.lensMenuAnchorForTest)
+            }
+        }
+    }
+
     @Test
     fun emptySpaceLongPress_createsASecondLensEndToEnd() {
         ActivityScenario.launch(ActHome::class.java).use { scenario ->
@@ -432,7 +500,7 @@ class ActHomeLensManagementWidgetTest {
 
             scenario.onActivity { activity ->
                 activity.findViewById<com.mckimquyen.views.LensView>(R.id.lensViews)
-                    .onEmptySpaceLongPressListener!!.onEmptySpaceLongPress()
+                    .onEmptySpaceLongPressListener!!.onEmptySpaceLongPress(0f, 0f)
                 activity.onLensMenuItemSelected(itemAdd, 0)
             }
             idle()
@@ -506,7 +574,7 @@ class ActHomeLensManagementWidgetTest {
 
             scenario.onActivity { activity ->
                 activity.findViewById<com.mckimquyen.views.LensView>(R.id.lensViews)
-                    .onEmptySpaceLongPressListener!!.onEmptySpaceLongPress()
+                    .onEmptySpaceLongPressListener!!.onEmptySpaceLongPress(0f, 0f)
                 activity.onLensMenuItemSelected(itemAdd, 0)
             }
             idle()

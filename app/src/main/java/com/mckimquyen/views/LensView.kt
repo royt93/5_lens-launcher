@@ -62,7 +62,8 @@ fun interface OnCurvatureAdjustedListener {
  * lens exists (zero clutter), so no user could ever create their second lens.
  */
 fun interface OnEmptySpaceLongPressListener {
-    fun onEmptySpaceLongPress()
+    /** [x]/[y] are the pressed point in this view's own coordinates. */
+    fun onEmptySpaceLongPress(x: Float, y: Float)
 }
 
 /** FISH-016: fired once when the user pulls down from the top slice of the lens. */
@@ -425,7 +426,7 @@ class LensView : View {
             if (!LensPhysicsPolicy.shouldReduceLensMotion(context)) {
                 performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
             }
-            onEmptySpaceLongPressListener?.onEmptySpaceLongPress()
+            onEmptySpaceLongPressListener?.onEmptySpaceLongPress(mTouchDownX, mTouchDownY)
         }
     }
 
