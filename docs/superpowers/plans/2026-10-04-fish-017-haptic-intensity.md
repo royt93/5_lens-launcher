@@ -19,7 +19,7 @@ Spec: `docs/superpowers/specs/2026-10-04-fish-017-haptic-intensity-design.md`
 - No magic numbers: levels via enum, default via named constant.
 - Every resource added in a hook/listener must be released (`LensView` hook nulled on detach).
 - Tests are part of each task: unit + widget + integration. No task is done without its tests.
-- R3: before any build/install/instrumentation run, list devices and ask which one to lock for the session. Run every `connected*` command with `ANDROID_SERIAL=<locked serial>`.
+- Device (locked this session): TECNO KJ7 `115333744A005844` only. NEVER run a Gradle `connected*` task: it fans out to every attached device (Pixel 7 Pro is attached and banned). Install with `ANDROID_SERIAL=115333744A005844 ./gradlew installDevDebug installDevDebugAndroidTest`, then run tests with `adb -s 115333744A005844 shell am instrument -w [-e class <fqcn> | -e package <pkg>] com.mckimquyen.lenslauncher.test/androidx.test.runner.AndroidJUnitRunner`. A green run prints `OK (N tests)`; any `FAILURES!!!` or `INSTRUMENTATION_FAILED` is a failure.
 - Commit trailer on every commit: `Co-Authored-By: Claude Code <noreply@anthropic.com>`.
 
 ## File Structure
@@ -504,7 +504,7 @@ class LensViewHapticIntensityIntegrationTest {
 
 - [ ] **Step 2: Run to verify it fails**
 
-Run: `ANDROID_SERIAL=<locked serial> ./gradlew connectedDevDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.mckimquyen.views.LensViewHapticIntensityIntegrationTest`
+Run: `ANDROID_SERIAL=115333744A005844 ./gradlew installDevDebug installDevDebugAndroidTest && adb -s 115333744A005844 shell am instrument -w -e class com.mckimquyen.views.LensViewHapticIntensityIntegrationTest com.mckimquyen.lenslauncher.test/androidx.test.runner.AndroidJUnitRunner`
 Expected: FAIL, compilation error `Unresolved reference: onHapticPerformed`.
 
 - [ ] **Step 3: Implement**
@@ -548,7 +548,7 @@ If `HapticFeedbackConstants` is no longer referenced in the file after this chan
 
 - [ ] **Step 4: Run to verify it passes**
 
-Run: `ANDROID_SERIAL=<locked serial> ./gradlew connectedDevDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.mckimquyen.views.LensViewHapticIntensityIntegrationTest`
+Run: `ANDROID_SERIAL=115333744A005844 ./gradlew installDevDebug installDevDebugAndroidTest && adb -s 115333744A005844 shell am instrument -w -e class com.mckimquyen.views.LensViewHapticIntensityIntegrationTest com.mckimquyen.lenslauncher.test/androidx.test.runner.AndroidJUnitRunner`
 Expected: PASS. Tests with `assumeFalse(reduced motion)` report as skipped, not failed, if the device is under battery saver or animator scale 0. Skipped is not a pass: re-run with battery saver off so `hover_light`, `hover_medium`, `hover_strong`, `launch_usesTheSavedLevel` and `noSavedLevel_keepsTheOldVirtualKeyBehavior` actually execute.
 
 Also run the JVM suite for regressions: `./gradlew testDevDebugUnitTest`
@@ -709,7 +709,7 @@ class FrmSettingsHapticIntensityWidgetTest {
 
 - [ ] **Step 2: Run to verify it fails**
 
-Run: `ANDROID_SERIAL=<locked serial> ./gradlew connectedDevDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.mckimquyen.ui.FrmSettingsHapticIntensityWidgetTest`
+Run: `ANDROID_SERIAL=115333744A005844 ./gradlew installDevDebug installDevDebugAndroidTest && adb -s 115333744A005844 shell am instrument -w -e class com.mckimquyen.ui.FrmSettingsHapticIntensityWidgetTest com.mckimquyen.lenslauncher.test/androidx.test.runner.AndroidJUnitRunner`
 Expected: FAIL, compilation error `Unresolved reference: groupHapticIntensity`.
 
 - [ ] **Step 3: Implement**
@@ -863,10 +863,10 @@ Setting `check()` here fires the listener and would play a preview on every scre
 
 - [ ] **Step 4: Run to verify it passes**
 
-Run: `ANDROID_SERIAL=<locked serial> ./gradlew connectedDevDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.mckimquyen.ui.FrmSettingsHapticIntensityWidgetTest`
+Run: `ANDROID_SERIAL=115333744A005844 ./gradlew installDevDebug installDevDebugAndroidTest && adb -s 115333744A005844 shell am instrument -w -e class com.mckimquyen.ui.FrmSettingsHapticIntensityWidgetTest com.mckimquyen.lenslauncher.test/androidx.test.runner.AndroidJUnitRunner`
 Expected: PASS, 9 tests.
 
-Then confirm no neighbour broke: `ANDROID_SERIAL=<locked serial> ./gradlew connectedDevDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.package=com.mckimquyen.ui` and `./gradlew lintDevDebug`.
+Then confirm no neighbour broke: `adb -s 115333744A005844 shell am instrument -w -e package com.mckimquyen.ui com.mckimquyen.lenslauncher.test/androidx.test.runner.AndroidJUnitRunner` and `./gradlew lintDevDebug`.
 Expected: no new failures; lint warning count not above the count recorded in `doc/task/README.md`.
 
 - [ ] **Step 5: Commit**
@@ -891,9 +891,9 @@ Co-Authored-By: Claude Code <noreply@anthropic.com>"
 Run: `./gradlew testDevDebugUnitTest`
 Expected: 0 failures. Record the new total.
 
-- [ ] **Step 2: Lock the device (R3)**
+- [ ] **Step 2: Confirm the device**
 
-Run: `adb devices`. If more than one device, use `AskUserQuestion` to choose, then lock it for the session. Memory policy lists TECNO KJ7 (`115333744A005844`) as the only allowed target, with BG6 as fallback; confirm with the user rather than assuming.
+Run `adb devices`. TECNO KJ7 `115333744A005844` must be listed. If it is not, stop and ask the user (BG6 `118743744X002560` is the only pre-approved substitute); do not fall back to Pixel.
 
 - [ ] **Step 3: Full instrumentation suite on the locked device**
 
