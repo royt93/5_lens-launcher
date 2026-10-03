@@ -897,7 +897,7 @@ Run `adb devices`. TECNO KJ7 `115333744A005844` must be listed. If it is not, st
 
 - [ ] **Step 3: Full instrumentation suite on the locked device**
 
-Run: `ANDROID_SERIAL=<locked serial> ./gradlew connectedDevDebugAndroidTest`
+Run: `ANDROID_SERIAL=115333744A005844 ./gradlew installDevDebug installDevDebugAndroidTest && adb -s 115333744A005844 shell am instrument -w com.mckimquyen.lenslauncher.test/androidx.test.runner.AndroidJUnitRunner`
 Expected: 0 failures. Skipped `assumeFalse` tests must be zero in the final run: turn battery saver off and confirm `adb -s <serial> shell settings get global animator_duration_scale` is `1.0`.
 
 - [ ] **Step 4: Manual smoke on the locked device**
