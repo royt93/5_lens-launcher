@@ -45,4 +45,31 @@ class PopupMenuIconConventionTest {
         }
         assertEquals("mixed icon/no-icon popup items render a ragged text column: $offenders", emptyList<String>(), offenders)
     }
+
+    /**
+     * A plain `?attr/colorOnSurface` tint never dims, so a disabled item kept a full-contrast icon
+     * beside greyed text. The shared selector dims the icon with the item.
+     */
+    @Test
+    fun `every popup item tints its icon with the shared disabled-aware selector`() {
+        val offenders = mutableListOf<String>()
+        for (name in popupMenuFiles) {
+            for (match in itemTag.findAll(File(menuDir(), name).readText())) {
+                if (!match.value.contains("app:iconTint=\"@color/popup_menu_icon_tint\"")) {
+                    val id = Regex("""android:id="@\+id/(\w+)"""").find(match.value)?.groupValues?.get(1)
+                    offenders += "$name: $id"
+                }
+            }
+        }
+        assertEquals("popup icons must use @color/popup_menu_icon_tint: $offenders", emptyList<String>(), offenders)
+    }
+
+    /** Move earlier/later flip with the grid in RTL, so their arrows must flip too. */
+    @Test
+    fun `directional popup icons mirror in right-to-left layouts`() {
+        val drawableDir = File(menuDir().parentFile, "drawable")
+        val notMirrored = listOf("ic_arrow_back_24dp.xml", "ic_arrow_forward_24dp.xml")
+            .filterNot { File(drawableDir, it).readText().contains("android:autoMirrored=\"true\"") }
+        assertEquals("these icons need android:autoMirrored=\"true\"", emptyList<String>(), notMirrored)
+    }
 }

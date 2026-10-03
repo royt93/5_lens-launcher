@@ -7,55 +7,55 @@
         android:icon="@drawable/ic_info_outline_24dp"
         android:title="@string/menu_app_info"
         android:visible="true"
-        app:iconTint="?attr/colorOnSurface" />
+        app:iconTint="@color/popup_menu_icon_tint" />
 
     <item
         android:id="@+id/menuItemElementUninstall"
         android:icon="@drawable/ic_delete_outline_24dp"
         android:title="@string/menu_app_uninstall"
         android:visible="true"
-        app:iconTint="?attr/colorOnSurface" />
+        app:iconTint="@color/popup_menu_icon_tint" />
 
     <item
         android:id="@+id/menuItemFavorite"
         android:icon="@drawable/ic_star_border_24dp"
         android:title="@string/organization_add_favorite"
-        app:iconTint="?attr/colorOnSurface" />
+        app:iconTint="@color/popup_menu_icon_tint" />
 
     <item
         android:id="@+id/menuItemFolder"
         android:icon="@drawable/ic_folder_24dp"
         android:title="@string/organization_set_folder"
-        app:iconTint="?attr/colorOnSurface" />
+        app:iconTint="@color/popup_menu_icon_tint" />
 
     <item
         android:id="@+id/menuItemPinStart"
         android:icon="@drawable/ic_pin_top_24dp"
         android:title="@string/organization_pin_start"
-        app:iconTint="?attr/colorOnSurface" />
+        app:iconTint="@color/popup_menu_icon_tint" />
 
     <item
         android:id="@+id/menuItemPinEnd"
         android:icon="@drawable/ic_pin_bottom_24dp"
         android:title="@string/organization_pin_end"
-        app:iconTint="?attr/colorOnSurface" />
+        app:iconTint="@color/popup_menu_icon_tint" />
 
     <item
         android:id="@+id/menuItemUnpin"
         android:icon="@drawable/ic_close_24dp"
         android:title="@string/organization_unpin"
-        app:iconTint="?attr/colorOnSurface" />
+        app:iconTint="@color/popup_menu_icon_tint" />
 
     <item
         android:id="@+id/menuItemMoveEarlier"
         android:icon="@drawable/ic_arrow_back_24dp"
         android:title="@string/organization_move_earlier"
-        app:iconTint="?attr/colorOnSurface" />
+        app:iconTint="@color/popup_menu_icon_tint" />
 
     <item
         android:id="@+id/menuItemMoveLater"
         android:icon="@drawable/ic_arrow_forward_24dp"
         android:title="@string/organization_move_later"
-        app:iconTint="?attr/colorOnSurface" />
+        app:iconTint="@color/popup_menu_icon_tint" />
 
 </menu>

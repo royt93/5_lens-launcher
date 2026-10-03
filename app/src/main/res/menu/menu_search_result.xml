@@ -8,31 +8,31 @@
         android:id="@+id/menuItemElementAppInfo"
         android:icon="@drawable/ic_info_outline_24dp"
         android:title="@string/menu_app_info"
-        app:iconTint="?attr/colorOnSurface" />
+        app:iconTint="@color/popup_menu_icon_tint" />
 
     <item
         android:id="@+id/menuItemPinStart"
         android:icon="@drawable/ic_pin_top_24dp"
         android:title="@string/organization_pin_start"
-        app:iconTint="?attr/colorOnSurface" />
+        app:iconTint="@color/popup_menu_icon_tint" />
 
     <item
         android:id="@+id/menuItemPinEnd"
         android:icon="@drawable/ic_pin_bottom_24dp"
         android:title="@string/organization_pin_end"
-        app:iconTint="?attr/colorOnSurface" />
+        app:iconTint="@color/popup_menu_icon_tint" />
 
     <item
         android:id="@+id/menuItemUnpin"
         android:icon="@drawable/ic_close_24dp"
         android:title="@string/organization_unpin"
-        app:iconTint="?attr/colorOnSurface" />
+        app:iconTint="@color/popup_menu_icon_tint" />
 
     <item
         android:id="@+id/menuItemElementUninstall"
         android:icon="@drawable/ic_delete_outline_24dp"
         android:title="@string/menu_app_uninstall"
-        app:iconTint="?attr/colorOnSurface" />
+        app:iconTint="@color/popup_menu_icon_tint" />
 
     <!-- FEAT-009: only visible when the adapter is constructed with onRemoveFromRecent (the
          recent-apps panel) - hidden in the search-overlay usage. -->
@@ -40,6 +40,6 @@
         android:id="@+id/menuItemRemoveFromRecent"
         android:icon="@drawable/ic_history_off_24dp"
         android:title="@string/remove_from_recent"
-        app:iconTint="?attr/colorOnSurface" />
+        app:iconTint="@color/popup_menu_icon_tint" />
 
 </menu>

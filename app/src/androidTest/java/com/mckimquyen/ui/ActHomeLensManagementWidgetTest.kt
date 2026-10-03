@@ -253,6 +253,13 @@ class ActHomeLensManagementWidgetTest {
             openMenuAndSelect(scenario, itemDelete, position = 1)
             confirmDialog(scenario)
 
+            // Reveal animation + async DB delete: wait for the row to go, not a guessed sleep.
+            val deadline = SystemClock.uptimeMillis() + 5_000L
+            while (runBlocking { dao.getAll() }.any { it.id == "second" } &&
+                SystemClock.uptimeMillis() < deadline
+            ) {
+                SystemClock.sleep(50)
+            }
             assertNull(
                 "The lens row must be gone",
                 runBlocking { dao.getAll() }.find { it.id == "second" }
@@ -467,6 +474,26 @@ class ActHomeLensManagementWidgetTest {
                 val anchorOnScreen = IntArray(2).also { anchor!!.getLocationOnScreen(it) }
                 assertEquals(onScreen[0] + pressX.toInt(), anchorOnScreen[0])
                 assertEquals(onScreen[1] + pressY.toInt(), anchorOnScreen[1])
+            }
+        }
+    }
+
+    /**
+     * Opening the menu again while one is showing dismisses the old menu; its dismiss listener
+     * must not tear down the anchor that the new menu was just built on.
+     */
+    @Test
+    fun lensMenu_reopenedWhileShowing_keepsTheNewAnchor() {
+        ActivityScenario.launch(ActHome::class.java).use { scenario ->
+            idle()
+            scenario.onActivity { activity ->
+                val lensView = activity.findViewById<com.mckimquyen.views.LensView>(R.id.lensViews)
+                lensView.onEmptySpaceLongPressListener!!.onEmptySpaceLongPress(10f, 10f)
+                lensView.onEmptySpaceLongPressListener!!.onEmptySpaceLongPress(200f, 300f)
+
+                val anchor = activity.lensMenuAnchorForTest
+                assertNotNull("the second menu must keep its anchor", anchor)
+                assertNotNull("the anchor must still be attached", anchor!!.parent)
             }
         }
     }

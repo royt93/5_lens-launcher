@@ -70,6 +70,13 @@ import kotlin.Unit;
  */
 public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
 
+    /** The favorite menu item's icon for the app's current state. */
+    @androidx.annotation.VisibleForTesting
+    static int favoriteMenuIconRes(boolean isFavorite) {
+        return isFavorite ? R.drawable.ic_star_24dp : R.drawable.ic_star_border_24dp;
+    }
+
+
     // ========================================================================
     // FIELDS
     // ========================================================================
@@ -678,6 +685,8 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
                     mApp.isFavorite()
                             ? R.string.organization_remove_favorite
                             : R.string.organization_add_favorite);
+            popupMenu.getMenu().findItem(R.id.menuItemFavorite).setIcon(
+                    favoriteMenuIconRes(mApp.isFavorite()));
             popupMenu.getMenu().findItem(R.id.menuItemUnpin).setVisible(
                     mApp.getPinnedZone() != PinnedZone.NONE);
             int position = getBindingAdapterPosition();

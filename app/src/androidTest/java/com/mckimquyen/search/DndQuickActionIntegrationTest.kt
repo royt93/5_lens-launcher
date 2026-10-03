@@ -6,6 +6,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import androidx.preference.PreferenceManager
 import com.mckimquyen.util.UtilSettings
 import org.junit.After
+import org.junit.Assume.assumeTrue
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -37,6 +38,16 @@ class DndQuickActionIntegrationTest {
     private fun allowDnd() = runShell("cmd notification allow_dnd $packageName")
     private fun disallowDnd() = runShell("cmd notification disallow_dnd $packageName")
 
+    /**
+     * A user's own DND (manual rule) outlives anything this app sets, so these two tests cannot
+     * observe the app's effect on it: the system filter never returns to ALL. Report SKIPPED
+     * rather than red or a fake pass; they run for real on a device whose DND is off.
+     */
+    private fun assumeSystemDndIsOff() = assumeTrue(
+        "the device has its own DND on, so the app's effect on the filter cannot be observed",
+        notificationManager().currentInterruptionFilter == NotificationManager.INTERRUPTION_FILTER_ALL
+    )
+
     @Before
     fun clearPrefsAndRevoke() {
         PreferenceManager.getDefaultSharedPreferences(context).edit().clear().commit()
@@ -63,6 +74,7 @@ class DndQuickActionIntegrationTest {
 
     @Test
     fun grantingRealAccess_resolvesToToggle_reflectingRealInterruptionFilter() {
+        assumeSystemDndIsOff()
         allowDnd()
         try {
             assertTrue(
@@ -88,6 +100,7 @@ class DndQuickActionIntegrationTest {
 
     @Test
     fun toggling_actuallyChangesTheRealSystemInterruptionFilter() {
+        assumeSystemDndIsOff()
         allowDnd()
         try {
             notificationManager().setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_ALL)

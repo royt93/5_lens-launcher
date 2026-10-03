@@ -625,7 +625,12 @@ public class ActHome extends ActBase {
         // while a single lens exists, so long-pressing empty grid space has to reach it too.
         // Otherwise no single-lens install (i.e. everyone, right after the v11 migration) can
         // ever create a second lens. Anchored on the page itself, same as UI-022's icon menu.
-        view.setOnEmptySpaceLongPressListener((x, y) -> showLensManagementMenu(anchorAtPressedPoint(view, x, y)));
+        view.setOnEmptySpaceLongPressListener((x, y) -> {
+            // The previous menu's dismiss listener removes the anchor, so it has to go first -
+            // otherwise it would tear down the anchor the new menu is about to be built on.
+            dismissLensManagementMenu();
+            showLensManagementMenu(anchorAtPressedPoint(view, x, y));
+        });
         // FISH-016: pull-down from the lens top opens full search, in Clean mode too.
         view.setOnSearchSwipeDownListener(this::openSearchFromHome);
         // FISH-012: a pinch adjustment that was never resolved (Save/dismiss) before the process
@@ -774,6 +779,15 @@ public class ActHome extends ActBase {
         return anchor;
     }
 
+    private void dismissLensManagementMenu() {
+        PopupMenu previous = lensManagementMenu;
+        lensManagementMenu = null;
+        if (previous != null) {
+            previous.dismiss();
+        }
+        removeLensMenuPressAnchor();
+    }
+
     private void removeLensMenuPressAnchor() {
         if (lensMenuPressAnchor == null) return;
         ViewGroup parent = (ViewGroup) lensMenuPressAnchor.getParent();
@@ -790,7 +804,7 @@ public class ActHome extends ActBase {
         if (icon != null) {
             icon = androidx.core.graphics.drawable.DrawableCompat.wrap(icon.mutate());
             androidx.core.graphics.drawable.DrawableCompat.setTint(icon, MaterialColors.getColor(
-                    themed, com.google.android.material.R.attr.colorOnSurface, 0));
+                    themed, com.google.android.material.R.attr.colorOnSurface, android.graphics.Color.BLACK));
             icon.setAlpha(enabled ? 255 : DISABLED_MENU_ICON_ALPHA);
             item.setIcon(icon);
         }
@@ -801,8 +815,12 @@ public class ActHome extends ActBase {
         // UI-025: same rounded popup theme as AppAdapter/SearchResultAdapter/LensView - a bare
         // Activity context skips it and renders the default square popup.
         Context themed = new ContextThemeWrapper(this, R.style.PopupMenuTheme);
-        if (lensManagementMenu != null) {
-            lensManagementMenu.dismiss();
+        // Quiet dismiss: the anchor this menu is about to use already exists, so only the old
+        // popup goes. Clearing the field first keeps its dismiss listener from removing it.
+        PopupMenu previous = lensManagementMenu;
+        lensManagementMenu = null;
+        if (previous != null) {
+            previous.dismiss();
         }
         PopupMenu menu = new PopupMenu(themed, anchor);
         lensManagementMenu = menu;
