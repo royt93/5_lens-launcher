@@ -436,17 +436,23 @@ class LensViewHapticIntensityIntegrationTest {
 
     private fun expected(level: HapticIntensity) = level.feedbackConstant(Build.VERSION.SDK_INT)
 
-    @Test
-    fun hover_usesTheSavedLevel() {
+    /** One fresh LensView per test (from @Before): a second hover on the same icon never re-fires. */
+    private fun assertHoverEmits(level: HapticIntensity) {
         assumeFalse(LensPhysicsPolicy.shouldReduceLensMotion(context))
-        for (level in HapticIntensity.entries) {
-            performed.clear()
-            settings.save(UtilSettings.KEY_VIBRATE_APP_HOVER, true)
-            settings.saveHapticIntensity(level)
-            hoverFirstIcon()
-            assertEquals("level $level", listOf(expected(level)), performed.take(1))
-        }
+        settings.save(UtilSettings.KEY_VIBRATE_APP_HOVER, true)
+        settings.saveHapticIntensity(level)
+        hoverFirstIcon()
+        assertEquals("level $level", listOf(expected(level)), performed.take(1))
     }
+
+    @Test
+    fun hover_light() = assertHoverEmits(HapticIntensity.LIGHT)
+
+    @Test
+    fun hover_medium() = assertHoverEmits(HapticIntensity.MEDIUM)
+
+    @Test
+    fun hover_strong() = assertHoverEmits(HapticIntensity.STRONG)
 
     @Test
     fun launch_usesTheSavedLevel() {
@@ -543,7 +549,7 @@ If `HapticFeedbackConstants` is no longer referenced in the file after this chan
 - [ ] **Step 4: Run to verify it passes**
 
 Run: `ANDROID_SERIAL=<locked serial> ./gradlew connectedDevDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.mckimquyen.views.LensViewHapticIntensityIntegrationTest`
-Expected: PASS. Tests with `assumeFalse(reduced motion)` report as skipped, not failed, if the device is under battery saver or animator scale 0. Skipped is not a pass: re-run with battery saver off so `hover_usesTheSavedLevel`, `launch_usesTheSavedLevel` and `noSavedLevel_keepsTheOldVirtualKeyBehavior` actually execute.
+Expected: PASS. Tests with `assumeFalse(reduced motion)` report as skipped, not failed, if the device is under battery saver or animator scale 0. Skipped is not a pass: re-run with battery saver off so `hover_light`, `hover_medium`, `hover_strong`, `launch_usesTheSavedLevel` and `noSavedLevel_keepsTheOldVirtualKeyBehavior` actually execute.
 
 Also run the JVM suite for regressions: `./gradlew testDevDebugUnitTest`
 Expected: all green.
