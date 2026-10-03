@@ -34,31 +34,34 @@ Design: `docs/superpowers/specs/2026-10-02-ui-025-unified-popup-menus-design.md`
 
 ## Evidence
 
-Device: **Pixel 7 Pro `2B051FDH3006MU`, by owner decision** ("dùng pixel 7 pro"). The policy device TECNO KJ7 was not attached; S24 Ultra dropped mid-story. Nothing here was verified on KJ7.
+Devices: Pixel 7 Pro `2B051FDH3006MU` (owner decision, used while TECNO KJ7 was not attached) for development, smoke and the first full run; then **TECNO KJ7 `115333744A005844`**, the policy device, for the final full gate once it was attached.
 
-- JVM 673/673, lint 0 errors / 8 warnings.
-- Full instrumented on Pixel: 455/455 OK. **2 of those are `DndQuickActionIntegrationTest` tests that report SKIPPED** (owner-chosen): the Pixel has its own manual DND on, so the app's effect on the filter cannot be observed. They have not run for real on any device with DND off.
+- JVM 679/679, lint 0 errors / 8 warnings.
+- Full instrumented on **KJ7: 455/455 OK**; on Pixel earlier: 455/455 OK.
+- `DndQuickActionIntegrationTest` is guarded by `assumeTrue(system filter == ALL)`. On the Pixel (manual DND on) that guard skips the 2 observing tests. On KJ7 DND is off (`zen_mode=0`, filter ALL), so the guard does not trigger and all 3 run (class run alone: OK, 3 tests). That they ran is inferred from the device state, not from a SKIPPED/passed breakdown, which the runner output does not print.
 - RED first for every behaviour change; mutation checks (anchor `bounds.bottom` -> `0`, and removing the detach cleanup) both failed the right test.
-- Real bug found by the device run: removing the anchor synchronously inside `onDetachedFromWindow` crashed the parent's detach loop (`NullPointerException` in `ViewGroup.dispatchDetachedFromWindow`). Fixed by posting the removal while detaching.
-- Smoke on Pixel, `mCurrentFocus` checked every step, no ad over the UI: icon menu opens beside the icon on top/middle/bottom rows (flips above near the bottom edge); lens menu opens at the press with 8 icons; rotate to landscape with the menu open, BACK, rotate back, 0 `FATAL EXCEPTION`, rotation settings restored; pull-down search in Clean on and off, BACK closes it; Clean toggled on and off from the lens menu; pan; `clean_lens_mode` removed afterwards.
+- Real bug found on device: removing the anchor synchronously inside `onDetachedFromWindow` crashed the parent's detach loop (`NullPointerException` in `ViewGroup.dispatchDetachedFromWindow`). Fixed by deferring the removal while detaching; the deferral now lives in one shared helper (`PointAnchor`) with its own JVM test.
+- Smoke on Pixel, `mCurrentFocus` checked every step, no ad over the UI: icon menu opens beside the icon on top/middle/bottom rows (flips above near the bottom edge); lens menu opens at the press with 8 icons; rotate to landscape with the menu open, BACK, rotate back, 0 `FATAL EXCEPTION`, rotation settings restored; pull-down search in Clean on and off, BACK closes it; Clean toggled on and off from the lens menu; pan; `clean_lens_mode` removed afterwards. **Smoke was not repeated by hand on KJ7**; KJ7 evidence is the automated suite only.
 
 ## Review (`/code-review high`, 8 findings)
 
 Fixed, each with a RED test first: reopening the lens menu removed the new menu's anchor; favorite icon did not follow state; move arrows did not mirror in RTL; disabled items kept a full-contrast icon; tint fallback colour `0` was transparent (changed to a visible fallback).
 
+Also fixed after the review: the 1x1 anchor logic duplicated in `LensView` and `ActHome` is now one `PointAnchor` helper (6 JVM tests); the `ActHome` copy had no detach-time deferral.
+
 **Not fixed:**
-- The 1x1 anchor logic is duplicated in `LensView` and `ActHome` (different `LayoutParams` and lifecycle); merging is a larger refactor than this story.
 - Icon-menu anchor ignores pager translation. Not reproduced: `LensView` uses no `translationX`/scroll. Only a theoretical case mid-settle.
 - Fully-qualified names inline in `ActHome`: style only.
 
 ## Disclosed, not verified
 
-- The anchor child count was not measured on the device (`uiautomator dump` failed on the Pixel); it rests on `quickActionsMenu_neverLeavesMoreThanOneAnchor` and `lensMenu_removesItsAnchorWhenDismissed`.
+- The anchor child count was not measured on a device (`uiautomator dump` failed on the Pixel); it rests on `quickActionsMenu_neverLeavesMoreThanOneAnchor`, `lensMenu_removesItsAnchorWhenDismissed` and the new `PointAnchorTest`.
 - Pinch was not tried by hand (`adb` cannot inject two fingers reliably); it rests on `LensViewPinchIntegrationTest`.
-- Horizontal lens paging was not tried: the Pixel has one lens.
-- No automated rotation test for the anchor; rotation was a smoke only.
-- `deleteLens_alsoClearsThatLensOwnSettings` failed once in a full run and passed alone and in 3 class runs; the fixed sleep became a condition wait. Root cause of the single failure not proven.
+- Horizontal lens paging was not tried: the test devices have one lens.
+- No automated rotation test for the anchor; rotation was a smoke on the Pixel only.
+- Manual smoke was done on the Pixel, not the policy device KJ7.
+- `deleteLens_alsoClearsThatLensOwnSettings` failed once in a full run and passed alone and in later class and full runs; the fixed sleep became a condition wait. Root cause of the single failure not proven.
 
 ## Audit
 
-Self-audit **9.1 / 10**. Deductions: not run on the policy device (KJ7), 2 DND tests skipped rather than proven, anchor count and pinch/paging not verified by hand, 3 review findings left open. Not pushed.
+Self-audit **9.3 / 10**. Deductions: manual smoke only on the Pixel, not KJ7; anchor count, pinch and paging not verified by hand; 2 review findings left open (one not reproduced, one style). Raised from 9.1 because the full suite is now green on the policy device and the duplicated anchor code is gone. Not pushed.
