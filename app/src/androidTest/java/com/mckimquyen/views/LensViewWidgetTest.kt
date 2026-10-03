@@ -225,6 +225,19 @@ class LensViewWidgetTest {
     }
 
     @Test
+    fun quickActionsMenu_onAnUnattachedView_failsCleanlyAndLeavesNoAnchor() {
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            layoutSingleAppGridAndDispatchDown()
+            val shown = lensView.showAppOptionsAtIndex(0)
+            assertFalse("no window token, so the menu cannot show", shown)
+            assertNull(
+                "no parent FrameLayout means no anchor may be created",
+                lensView.quickActionsAnchorForTest
+            )
+        }
+    }
+
+    @Test
     fun testInitialization() {
         assertNotNull(lensView)
     }

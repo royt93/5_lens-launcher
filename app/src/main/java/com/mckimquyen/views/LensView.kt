@@ -17,9 +17,11 @@ import android.view.MotionEvent
 import android.view.ScaleGestureDetector
 import android.view.View
 import android.view.ViewConfiguration
+import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.animation.Animation
 import android.view.animation.Transformation
+import android.widget.FrameLayout
 import android.widget.Toast
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.ContextCompat
@@ -123,6 +125,7 @@ class LensView : View {
         // FISH-016: iOS-style pull-down search. Only the top slice of the lens is claimed, so
         // one-finger fisheye pan everywhere else is untouched.
         private const val SEARCH_SWIPE_ACTIVATION_ZONE_RATIO = 0.20f
+        private const val QUICK_ACTIONS_ANCHOR_SIZE_PX = 1
         private const val SEARCH_SWIPE_DISTANCE_MULTIPLIER = 4f
         private const val SEARCH_SWIPE_VERTICAL_DOMINANCE_RATIO = 2f
 
@@ -346,6 +349,67 @@ class LensView : View {
     // long-press and a long-press can never fight the existing pan/launch gesture.
     private var mLongPressArmed = false
     private var mLongPressTriggered = false
+
+    // UI-025: LensView draws every icon on one canvas, so there is no child view to anchor a
+    // popup to. A transient 1x1 invisible View is placed in the parent FrameLayout at the pressed
+    // icon's resting cell and removed again on dismiss/detach. It uses the BASE rect (the cell the
+    // icon returns to), not the live magnified rect, so it does not depend on animation state.
+    private var mQuickActionsAnchor: View? = null
+    private var mQuickActionsMenu: PopupMenu? = null
+    private var mIsDetachingFromWindow = false
+
+    @androidx.annotation.VisibleForTesting
+    internal val quickActionsAnchorForTest: View? get() = mQuickActionsAnchor
+
+    @androidx.annotation.VisibleForTesting
+    internal val quickActionsMenuForTest: PopupMenu? get() = mQuickActionsMenu
+
+    /** Returns the new anchor, or null when this view has no FrameLayout parent or icon bounds. */
+    private fun attachQuickActionsAnchor(index: Int): View? {
+        removeQuickActionsAnchor()
+        val frame = parent as? FrameLayout ?: return null
+        val bounds = Rect()
+        if (!getAppBounds(index, bounds)) return null
+        val anchorX = left + bounds.centerX()
+        val anchorY = top + bounds.bottom
+        val anchor = View(context)
+        frame.addView(
+            anchor,
+            FrameLayout.LayoutParams(QUICK_ACTIONS_ANCHOR_SIZE_PX, QUICK_ACTIONS_ANCHOR_SIZE_PX).apply {
+                leftMargin = anchorX
+                topMargin = anchorY
+            }
+        )
+        // PopupMenu reads the anchor's screen position immediately, before the next layout pass.
+        anchor.measure(
+            View.MeasureSpec.makeMeasureSpec(QUICK_ACTIONS_ANCHOR_SIZE_PX, View.MeasureSpec.EXACTLY),
+            View.MeasureSpec.makeMeasureSpec(QUICK_ACTIONS_ANCHOR_SIZE_PX, View.MeasureSpec.EXACTLY)
+        )
+        anchor.layout(
+            anchorX,
+            anchorY,
+            anchorX + QUICK_ACTIONS_ANCHOR_SIZE_PX,
+            anchorY + QUICK_ACTIONS_ANCHOR_SIZE_PX
+        )
+        mQuickActionsAnchor = anchor
+        return anchor
+    }
+
+    private fun removeQuickActionsAnchor() {
+        val anchor = mQuickActionsAnchor ?: return
+        mQuickActionsAnchor = null
+        val parent = anchor.parent as? ViewGroup ?: return
+        if (mIsDetachingFromWindow) {
+            // UI-025: parent is currently in its dispatchDetachedFromWindow child loop.
+            // Mutating parent.mChildren synchronously would make children[1] null and crash
+            // the loop with NPE. Post removal to the main looper so parent finishes detaching.
+            Handler(Looper.getMainLooper()).post {
+                parent.removeView(anchor)
+            }
+        } else {
+            parent.removeView(anchor)
+        }
+    }
     private val mLongPressHandler = Handler(Looper.getMainLooper())
     private val mLongPressRunnable = Runnable {
         if (shouldTriggerLongPress(mLongPressArmed, mMoving, mSelectIndex)) {
@@ -540,7 +604,7 @@ class LensView : View {
     fun showAppOptionsAtIndex(index: Int): Boolean {
         val list = mApps ?: return false
         if (index !in list.indices) return false
-        return showQuickActionsMenu(list[index])
+        return showQuickActionsMenu(list[index], index)
     }
 
     /**
@@ -552,18 +616,21 @@ class LensView : View {
      * testing this very story - a non-Activity context with no Material3 theme applied) must
      * degrade to "no menu appears" rather than crash the app.
      *
-     * ponytail: anchored to `this` (the whole `LensView`), not the pressed icon's own rect -
-     * live-verified the menu always opens near the same corner regardless of which icon was
-     * pressed, rather than tracking the icon. `LensView` draws every icon on one `Canvas` (no
-     * per-icon child View to anchor to), so precise per-icon positioning needs a transient
-     * anchor View added to LensView's own parent ViewGroup at the icon's translated rect - real
-     * but non-trivial extra plumbing for a purely cosmetic improvement (the menu is reachable
-     * and correct either way). Upgrade if real usage shows the fixed position is confusing.
+     * UI-025: anchored at the pressed icon's cell via [attachQuickActionsAnchor]; falls back to
+     * `this` + [Gravity.CENTER] when no anchor can be made (unattached view, non-FrameLayout parent).
      */
-    private fun showQuickActionsMenu(app: App): Boolean {
+    private fun showQuickActionsMenu(app: App, index: Int): Boolean {
         return try {
+            // A previous menu's dismiss listener removes the previous anchor; dismiss it first so
+            // that listener can never remove the anchor created for this press.
+            mQuickActionsMenu?.dismiss()
+            val anchor = attachQuickActionsAnchor(index)
             val wrapper = ContextThemeWrapper(context, R.style.PopupMenuTheme)
-            val popupMenu = PopupMenu(wrapper, this, Gravity.CENTER)
+            val popupMenu = PopupMenu(
+                wrapper,
+                anchor ?: this,
+                if (anchor != null) Gravity.NO_GRAVITY else Gravity.CENTER
+            )
             popupMenu.inflate(R.menu.menu_search_result)
             popupMenu.menu.findItem(R.id.menuItemUnpin).isVisible = app.pinnedZone != PinnedZone.NONE
             popupMenu.setForceShowIcon(true)
@@ -592,9 +659,18 @@ class LensView : View {
                     else -> false
                 }
             }
+            popupMenu.setOnDismissListener {
+                if (mQuickActionsMenu === popupMenu) {
+                    removeQuickActionsAnchor()
+                    mQuickActionsMenu = null
+                }
+            }
+            mQuickActionsMenu = popupMenu
             popupMenu.show()
             true
         } catch (_: Exception) {
+            removeQuickActionsAnchor()
+            mQuickActionsMenu = null
             false
         }
     }
@@ -1437,24 +1513,34 @@ class LensView : View {
 
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
-        // UI-022: a pending long-press Runnable must never fire (and show a PopupMenu) after
-        // this view is detached/destroyed.
-        mLongPressHandler.removeCallbacks(mLongPressRunnable)
-        resetSearchSwipeState()
-        // Fix BUG-05: Cancel animation đang chạy để tránh AnimationListener callback
-        // vào LensView (inner class giữ outer reference) sau khi view bị detach/destroy
-        clearAnimation()
-        // Null toàn bộ references để GC thu hồi
-        mApps = null
-        mUtilSettings = null
-        mPackageManager = null
-        mWorkspaceBackgroundDrawable = null
-        mAccessibilityHelper = null
-        // PERF-001: drop the cached grid/base-rects too, they're only valid for this view instance.
-        mGridCache.clear()
-        // FISH-007: free the blur layers' GPU display lists.
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
-            mDofLayers?.discard()
+        mIsDetachingFromWindow = true
+        try {
+            // UI-022: a pending long-press Runnable must never fire (and show a PopupMenu) after
+            // this view is detached/destroyed.
+            mLongPressHandler.removeCallbacks(mLongPressRunnable)
+            resetSearchSwipeState()
+            // UI-025: an open icon menu is a window owned by this view; it and its anchor must not
+            // outlive the view (rotation, page recycle, Activity destroy).
+            mQuickActionsMenu?.dismiss()
+            removeQuickActionsAnchor()
+            mQuickActionsMenu = null
+            // Fix BUG-05: Cancel animation đang chạy để tránh AnimationListener callback
+            // vào LensView (inner class giữ outer reference) sau khi view bị detach/destroy
+            clearAnimation()
+            // Null toàn bộ references để GC thu hồi
+            mApps = null
+            mUtilSettings = null
+            mPackageManager = null
+            mWorkspaceBackgroundDrawable = null
+            mAccessibilityHelper = null
+            // PERF-001: drop the cached grid/base-rects too, they're only valid for this view instance.
+            mGridCache.clear()
+            // FISH-007: free the blur layers' GPU display lists.
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+                mDofLayers?.discard()
+            }
+        } finally {
+            mIsDetachingFromWindow = false
         }
     }
 }
