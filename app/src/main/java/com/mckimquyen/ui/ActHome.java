@@ -83,6 +83,7 @@ import com.mckimquyen.util.UtilCalculator;
 import com.mckimquyen.services.AppEventManager;
 import com.mckimquyen.util.UtilSettings;
 import com.mckimquyen.views.LensView;
+import com.mckimquyen.views.PointAnchor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -729,7 +730,6 @@ public class ActHome extends ActBase {
         return lensMenuPressAnchor;
     }
 
-    private static final int LENS_MENU_ANCHOR_SIZE_PX = 1;
     private static final int DISABLED_MENU_ICON_ALPHA = 97;
 
     /**
@@ -761,22 +761,13 @@ public class ActHome extends ActBase {
         int[] rootOnScreen = new int[2];
         lens.getLocationOnScreen(lensOnScreen);
         root.getLocationOnScreen(rootOnScreen);
-        int left = lensOnScreen[0] + (int) x - rootOnScreen[0];
-        int top = lensOnScreen[1] + (int) y - rootOnScreen[1];
-        View anchor = new View(this);
-        androidx.coordinatorlayout.widget.CoordinatorLayout.LayoutParams params =
+        lensMenuPressAnchor = PointAnchor.INSTANCE.attach(
+                root,
+                lensOnScreen[0] + (int) x - rootOnScreen[0],
+                lensOnScreen[1] + (int) y - rootOnScreen[1],
                 new androidx.coordinatorlayout.widget.CoordinatorLayout.LayoutParams(
-                        LENS_MENU_ANCHOR_SIZE_PX, LENS_MENU_ANCHOR_SIZE_PX);
-        params.leftMargin = left;
-        params.topMargin = top;
-        root.addView(anchor, params);
-        // PopupMenu reads the anchor's screen position immediately, before the next layout pass.
-        anchor.measure(
-                View.MeasureSpec.makeMeasureSpec(LENS_MENU_ANCHOR_SIZE_PX, View.MeasureSpec.EXACTLY),
-                View.MeasureSpec.makeMeasureSpec(LENS_MENU_ANCHOR_SIZE_PX, View.MeasureSpec.EXACTLY));
-        anchor.layout(left, top, left + LENS_MENU_ANCHOR_SIZE_PX, top + LENS_MENU_ANCHOR_SIZE_PX);
-        lensMenuPressAnchor = anchor;
-        return anchor;
+                        PointAnchor.SIZE_PX, PointAnchor.SIZE_PX));
+        return lensMenuPressAnchor;
     }
 
     private void dismissLensManagementMenu() {
@@ -790,9 +781,9 @@ public class ActHome extends ActBase {
 
     private void removeLensMenuPressAnchor() {
         if (lensMenuPressAnchor == null) return;
-        ViewGroup parent = (ViewGroup) lensMenuPressAnchor.getParent();
-        if (parent != null) parent.removeView(lensMenuPressAnchor);
+        View anchor = lensMenuPressAnchor;
         lensMenuPressAnchor = null;
+        PointAnchor.INSTANCE.remove(anchor, isFinishing() || isDestroyed());
     }
 
     /** UI-025: every item carries an icon so the text column is aligned like the icon menus. */

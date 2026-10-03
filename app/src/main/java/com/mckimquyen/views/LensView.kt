@@ -126,7 +126,6 @@ class LensView : View {
         // FISH-016: iOS-style pull-down search. Only the top slice of the lens is claimed, so
         // one-finger fisheye pan everywhere else is untouched.
         private const val SEARCH_SWIPE_ACTIVATION_ZONE_RATIO = 0.20f
-        private const val QUICK_ACTIONS_ANCHOR_SIZE_PX = 1
         private const val SEARCH_SWIPE_DISTANCE_MULTIPLIER = 4f
         private const val SEARCH_SWIPE_VERTICAL_DOMINANCE_RATIO = 2f
 
@@ -371,45 +370,18 @@ class LensView : View {
         val frame = parent as? FrameLayout ?: return null
         val bounds = Rect()
         if (!getAppBounds(index, bounds)) return null
-        val anchorX = left + bounds.centerX()
-        val anchorY = top + bounds.bottom
-        val anchor = View(context)
-        frame.addView(
-            anchor,
-            FrameLayout.LayoutParams(QUICK_ACTIONS_ANCHOR_SIZE_PX, QUICK_ACTIONS_ANCHOR_SIZE_PX).apply {
-                leftMargin = anchorX
-                topMargin = anchorY
-            }
-        )
-        // PopupMenu reads the anchor's screen position immediately, before the next layout pass.
-        anchor.measure(
-            View.MeasureSpec.makeMeasureSpec(QUICK_ACTIONS_ANCHOR_SIZE_PX, View.MeasureSpec.EXACTLY),
-            View.MeasureSpec.makeMeasureSpec(QUICK_ACTIONS_ANCHOR_SIZE_PX, View.MeasureSpec.EXACTLY)
-        )
-        anchor.layout(
-            anchorX,
-            anchorY,
-            anchorX + QUICK_ACTIONS_ANCHOR_SIZE_PX,
-            anchorY + QUICK_ACTIONS_ANCHOR_SIZE_PX
-        )
-        mQuickActionsAnchor = anchor
-        return anchor
+        return PointAnchor.attach(
+            frame,
+            left + bounds.centerX(),
+            top + bounds.bottom,
+            FrameLayout.LayoutParams(PointAnchor.SIZE_PX, PointAnchor.SIZE_PX)
+        ).also { mQuickActionsAnchor = it }
     }
 
     private fun removeQuickActionsAnchor() {
         val anchor = mQuickActionsAnchor ?: return
         mQuickActionsAnchor = null
-        val parent = anchor.parent as? ViewGroup ?: return
-        if (mIsDetachingFromWindow) {
-            // UI-025: parent is currently in its dispatchDetachedFromWindow child loop.
-            // Mutating parent.mChildren synchronously would make children[1] null and crash
-            // the loop with NPE. Post removal to the main looper so parent finishes detaching.
-            Handler(Looper.getMainLooper()).post {
-                parent.removeView(anchor)
-            }
-        } else {
-            parent.removeView(anchor)
-        }
+        PointAnchor.remove(anchor, deferUntilParentFinishes = mIsDetachingFromWindow)
     }
     private val mLongPressHandler = Handler(Looper.getMainLooper())
     private val mLongPressRunnable = Runnable {
