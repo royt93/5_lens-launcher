@@ -11,6 +11,10 @@
     <string name="setting_animation_time">រយៈពេលចលនា</string>
     <string name="setting_vibrate_app_hover">ញ័រពេលដាក់លើកម្មវិធី</string>
     <string name="setting_vibrate_app_launch">ញ័រពេលបើកដំណើរការកម្មវិធី</string>
+    <string name="setting_haptic_intensity">កម្រិតញ័រ</string>
+    <string name="haptic_intensity_light">ទន់</string>
+    <string name="haptic_intensity_medium">មធ្យម</string>
+    <string name="haptic_intensity_strong">ខ្លាំង</string>
     <string name="no_internet">គ្មានការតភ្ជាប់អ៊ីនធឺណិត</string>
     <string name="setting_show_name_app_hover">បង្ហាញឈ្មោះពេលដាក់លើកម្មវិធី</string>
     <string name="setting_show_touch_selection">បង្ហាញការជ្រើសរើសដោយការប៉ះ</string>

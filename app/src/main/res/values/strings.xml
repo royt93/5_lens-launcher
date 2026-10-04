@@ -11,6 +11,10 @@
     <string name="setting_animation_time">Animation Time</string>
     <string name="setting_vibrate_app_hover">Vibrate on App Hover</string>
     <string name="setting_vibrate_app_launch">Vibrate on App Launch</string>
+    <string name="setting_haptic_intensity">Haptic strength</string>
+    <string name="haptic_intensity_light">Light</string>
+    <string name="haptic_intensity_medium">Medium</string>
+    <string name="haptic_intensity_strong">Strong</string>
     <string name="setting_show_name_app_hover">Show Name on App Hover</string>
     <string name="setting_show_touch_selection">Show Touch Selection</string>
     <!-- UI-001 ships in the app's maintained English/Vietnamese locales first. -->

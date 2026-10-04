@@ -2,6 +2,7 @@ package com.mckimquyen.ui
 
 import android.content.Context
 import android.graphics.drawable.GradientDrawable
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -12,12 +13,15 @@ import androidx.appcompat.widget.SwitchCompat
 import androidx.core.graphics.toColorInt
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import com.google.android.material.button.MaterialButtonToggleGroup
 import com.mckimquyen.R
 import com.mckimquyen.enums.BackgroundMode
 import com.mckimquyen.enums.LauncherMode
 import com.mckimquyen.ext.searchIconPack
 import com.mckimquyen.itf.SettingsInterface
 import com.mckimquyen.model.LensWorkspace
+import com.mckimquyen.util.HapticIntensity
+import com.mckimquyen.util.LensPhysicsPolicy
 import com.mckimquyen.util.UtilLauncher
 import com.mckimquyen.util.UtilNightModeUtil
 import com.mckimquyen.util.UtilSettings
@@ -36,6 +40,9 @@ class FrmSettings : Fragment(), SettingsInterface {
     private var ivSelectedHighlightColor: ImageView? = null
     private var swVibrateAppHover: SwitchCompat? = null
     private var swVibrateAppLaunch: SwitchCompat? = null
+    private var groupHapticIntensity: MaterialButtonToggleGroup? = null
+    // Guards against assignValues()'s programmatic check() firing a preview haptic.
+    private var bindingHapticGroup = false
     private var swShowNameAppHover: SwitchCompat? = null
     private var swShowNewAppTag: SwitchCompat? = null
     private var swShowNotificationBadges: SwitchCompat? = null
@@ -100,6 +107,7 @@ class FrmSettings : Fragment(), SettingsInterface {
         ivSelectedHighlightColor = view.findViewById(R.id.ivSelectedHighlightColor)
         swVibrateAppHover = view.findViewById(R.id.swVibrateAppHover)
         swVibrateAppLaunch = view.findViewById(R.id.swVibrateAppLaunch)
+        groupHapticIntensity = view.findViewById(R.id.groupHapticIntensity)
         swShowNameAppHover = view.findViewById(R.id.swShowNameAppHover)
         swShowNewAppTag = view.findViewById(R.id.swShowNewAppTag)
         swShowNotificationBadges = view.findViewById(R.id.swShowNotificationBadges)
@@ -179,9 +187,17 @@ class FrmSettings : Fragment(), SettingsInterface {
 
         swVibrateAppHover?.setOnCheckedChangeListener { _, isChecked ->
             utilSettings?.save(UtilSettings.KEY_VIBRATE_APP_HOVER, isChecked)
+            updateHapticIntensityEnabled()
         }
         swVibrateAppLaunch?.setOnCheckedChangeListener { _, isChecked ->
             utilSettings?.save(UtilSettings.KEY_VIBRATE_APP_LAUNCH, isChecked)
+            updateHapticIntensityEnabled()
+        }
+        groupHapticIntensity?.addOnButtonCheckedListener { group, checkedId, isChecked ->
+            if (bindingHapticGroup || !isChecked) return@addOnButtonCheckedListener
+            val level = hapticLevelForButton(checkedId)
+            utilSettings?.saveHapticIntensity(level)
+            previewHaptic(group, level)
         }
         swShowNameAppHover?.setOnCheckedChangeListener { _, isChecked ->
             utilSettings?.save(UtilSettings.KEY_SHOW_NAME_APP_HOVER, isChecked)
@@ -312,6 +328,10 @@ class FrmSettings : Fragment(), SettingsInterface {
             // Switches
             swVibrateAppHover?.isChecked = us.getBoolean(UtilSettings.KEY_VIBRATE_APP_HOVER)
             swVibrateAppLaunch?.isChecked = us.getBoolean(UtilSettings.KEY_VIBRATE_APP_LAUNCH)
+            bindingHapticGroup = true
+            groupHapticIntensity?.check(buttonForHapticLevel(us.getHapticIntensity()))
+            bindingHapticGroup = false
+            updateHapticIntensityEnabled()
             swShowNameAppHover?.isChecked = us.getBoolean(UtilSettings.KEY_SHOW_NAME_APP_HOVER)
             swShowNewAppTag?.isChecked = us.getBoolean(UtilSettings.KEY_SHOW_NEW_APP_TAG)
             swShowNotificationBadges?.isChecked = us.getBoolean(UtilSettings.KEY_SHOW_NOTIFICATION_BADGES)
@@ -389,6 +409,31 @@ class FrmSettings : Fragment(), SettingsInterface {
         (activity as? ActSettings)?.showHighlightColorDialog()
     }
 
+    private fun hapticLevelForButton(buttonId: Int): HapticIntensity = when (buttonId) {
+        R.id.btnHapticLight -> HapticIntensity.LIGHT
+        R.id.btnHapticStrong -> HapticIntensity.STRONG
+        else -> HapticIntensity.MEDIUM
+    }
+
+    private fun buttonForHapticLevel(level: HapticIntensity): Int = when (level) {
+        HapticIntensity.LIGHT -> R.id.btnHapticLight
+        HapticIntensity.MEDIUM -> R.id.btnHapticMedium
+        HapticIntensity.STRONG -> R.id.btnHapticStrong
+    }
+
+    /** The row only matters while at least one haptic is on. */
+    private fun updateHapticIntensityEnabled() {
+        val group = groupHapticIntensity ?: return
+        val anyOn = swVibrateAppHover?.isChecked == true || swVibrateAppLaunch?.isChecked == true
+        for (i in 0 until group.childCount) group.getChildAt(i).isEnabled = anyOn
+    }
+
+    private fun previewHaptic(anchor: View, level: HapticIntensity) {
+        val ctx = context ?: return
+        if (LensPhysicsPolicy.shouldReduceLensMotion(ctx)) return
+        anchor.performHapticFeedback(level.feedbackConstant(Build.VERSION.SDK_INT))
+    }
+
     override fun onDefaultsReset() {
         resetToDefault()
         assignValues()
@@ -402,6 +447,7 @@ class FrmSettings : Fragment(), SettingsInterface {
         utilSettings?.let { us ->
             us.save(UtilSettings.KEY_VIBRATE_APP_HOVER, false)
             us.save(UtilSettings.KEY_VIBRATE_APP_LAUNCH, true)
+            us.saveHapticIntensity(HapticIntensity.DEFAULT)
             us.save(UtilSettings.KEY_SHOW_NAME_APP_HOVER, true)
             us.save(UtilSettings.KEY_SHOW_TOUCH_SELECTION, false)
             us.save(UtilSettings.KEY_SHOW_SEARCH_BAR, UtilSettings.DEFAULT_SHOW_SEARCH_BAR)
@@ -447,6 +493,8 @@ class FrmSettings : Fragment(), SettingsInterface {
         ivSelectedHighlightColor = null
         swVibrateAppHover = null
         swVibrateAppLaunch = null
+        groupHapticIntensity?.clearOnButtonCheckedListeners()
+        groupHapticIntensity = null
         swShowNameAppHover = null
         swShowNewAppTag = null
         swShowNotificationBadges = null

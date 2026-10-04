@@ -11,6 +11,10 @@
     <string name="setting_animation_time">Waktu Animasi</string>
     <string name="setting_vibrate_app_hover">Getar saat Melayang di atas Aplikasi</string>
     <string name="setting_vibrate_app_launch">Getar saat Membuka Aplikasi</string>
+    <string name="setting_haptic_intensity">Kekuatan Getaran</string>
+    <string name="haptic_intensity_light">Ringan</string>
+    <string name="haptic_intensity_medium">Sedang</string>
+    <string name="haptic_intensity_strong">Kuat</string>
     <string name="no_internet">Tidak ada koneksi internet</string>
     <string name="setting_show_name_app_hover">Tampilkan Nama saat Melayang</string>
     <string name="setting_show_touch_selection">Tampilkan Pilihan Sentuh</string>

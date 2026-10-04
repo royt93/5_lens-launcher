@@ -11,6 +11,10 @@
     <string name="setting_animation_time">ເວລາແອນິເມຊັນ</string>
     <string name="setting_vibrate_app_hover">ສັ່ນເມື່ອວາງນິ້ວເທິງແອັບ</string>
     <string name="setting_vibrate_app_launch">ສັ່ນເມື່ອເປີດແອັບ</string>
+    <string name="setting_haptic_intensity">ລະດັບການສັ່ນ</string>
+    <string name="haptic_intensity_light">ອ່ອນ</string>
+    <string name="haptic_intensity_medium">ປານກາງ</string>
+    <string name="haptic_intensity_strong">ແຮງ</string>
     <string name="no_internet">ບໍ່ມີການເຊື່ອມຕໍ່ອິນເຕີເນັດ</string>
     <string name="setting_show_name_app_hover">ສະແດງຊື່ເມື່ອວາງນິ້ວເທິງແອັບ</string>
     <string name="setting_show_touch_selection">ສະແດງການເລືອກສໍາຜັດ</string>

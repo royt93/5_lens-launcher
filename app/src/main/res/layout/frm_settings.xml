@@ -580,6 +580,63 @@
                     android:layout_marginStart="52dp"
                     app:dividerColor="?attr/colorOutlineVariant" />
 
+                <!-- Haptic intensity (shared by hover + launch) -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingVertical="8dp"
+                    android:paddingStart="52dp"
+                    android:paddingEnd="0dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingBottom="8dp"
+                        android:text="@string/setting_haptic_intensity"
+                        android:textColor="?android:attr/textColorSecondary"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <com.google.android.material.button.MaterialButtonToggleGroup
+                        android:id="@+id/groupHapticIntensity"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:selectionRequired="true"
+                        app:singleSelection="true">
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnHapticLight"
+                            style="?attr/materialButtonOutlinedStyle"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/haptic_intensity_light" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnHapticMedium"
+                            style="?attr/materialButtonOutlinedStyle"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/haptic_intensity_medium" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnHapticStrong"
+                            style="?attr/materialButtonOutlinedStyle"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/haptic_intensity_strong" />
+                    </com.google.android.material.button.MaterialButtonToggleGroup>
+                </LinearLayout>
+
+                <com.google.android.material.divider.MaterialDivider
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="52dp"
+                    app:dividerColor="?attr/colorOutlineVariant" />
+
                 <!-- Show Name App Hover -->
                 <RelativeLayout
                     android:id="@+id/rlSwitchShowNameAppHoverParent"

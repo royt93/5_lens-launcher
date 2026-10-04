@@ -11,6 +11,10 @@
     <string name="setting_animation_time">动画时间</string>
     <string name="setting_vibrate_app_hover">悬停在应用上时震动</string>
     <string name="setting_vibrate_app_launch">启动应用时震动</string>
+    <string name="setting_haptic_intensity">震动强度</string>
+    <string name="haptic_intensity_light">轻</string>
+    <string name="haptic_intensity_medium">中</string>
+    <string name="haptic_intensity_strong">强</string>
     <string name="no_internet">无互联网连接</string>
     <string name="setting_show_name_app_hover">悬停在应用上时显示名称</string>
     <string name="setting_show_touch_selection">显示触摸选择</string>
