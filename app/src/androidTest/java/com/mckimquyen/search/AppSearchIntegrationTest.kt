@@ -224,6 +224,55 @@ class AppSearchIntegrationTest {
         }
     }
 
+    @Test
+    fun unmatchedEnterDoesNotStickTheDownFlagForTheNextSearch() {
+        // I1/M5 regression: a physical Enter DOWN on a query with no results used to leave
+        // searchEnterDownHandled stuck true (ActHome returned false without resetting it),
+        // so TextView never replays the matching UP (DOWN returned false), and the next
+        // gesture's accounting started from a stale flag. Proves a no-match Enter DOWN+UP is
+        // fully inert and a following real match still launches on its own DOWN+UP.
+        val singleton = RAppsSingleton.instance
+        val originalApps = singleton.apps
+        val launchable = app("Launchable", visible = true)
+        val store = SearchHistoryStore(InstrumentationRegistry.getInstrumentation().targetContext)
+        store.clear()
+        singleton.apps = arrayListOf(launchable)
+
+        try {
+            ActivityScenario.launch(ActHome::class.java).use { scenario ->
+                var searchView: SearchView? = null
+                scenario.onActivity { activity ->
+                    searchView = activity.findViewById(R.id.searchView)
+                    searchView!!.show()
+                }
+                waitUntilShowing(searchView!!, true)
+
+                singleton.apps = arrayListOf(launchable)
+                AppEventManager.notifyAppsUpdated()
+                waitForMainThread()
+
+                scenario.onActivity {
+                    val search: EditText = searchView!!.editText
+
+                    search.requestFocus()
+                    search.setText("unmatched-query")
+                    search.dispatchKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER))
+                    search.dispatchKeyEvent(KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_ENTER))
+                    assertEquals("unmatched-query", search.text.toString())
+
+                    search.setText("launchable")
+                    search.dispatchKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER))
+                    search.dispatchKeyEvent(KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_ENTER))
+                    assertEquals("", search.text.toString())
+                    assertEquals(listOf(AppSearchEngine.componentKey(launchable)), store.recentKeys())
+                }
+            }
+        } finally {
+            store.clear()
+            singleton.apps = originalApps
+        }
+    }
+
     private fun assertSearch(activity: ActHome, count: Int, firstLabel: String? = null) {
         val adapter = activity.findViewById<RecyclerView>(R.id.rvSearchResults).adapter as SearchResultAdapter
         assertEquals(count, adapter.itemCount)

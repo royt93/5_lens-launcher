@@ -17,8 +17,9 @@ class SearchEnterKeyPolicyTest {
         actionId: Int = EditorInfo.IME_ACTION_UNSPECIFIED,
         keyAction: Int? = null,
         keyCode: Int? = null,
+        repeatCount: Int = 0,
         downHandled: Boolean = false
-    ) = SearchEnterKeyPolicy.decide(actionId, keyAction, keyCode, downHandled)
+    ) = SearchEnterKeyPolicy.decide(actionId, keyAction, keyCode, repeatCount, downHandled)
 
     @Test
     fun `enter down launches and remembers it`() {
@@ -88,6 +89,13 @@ class SearchEnterKeyPolicyTest {
     fun `an ignored event keeps the down flag untouched`() {
         val out = decide(keyAction = KeyEvent.ACTION_DOWN, keyCode = KeyEvent.KEYCODE_A, downHandled = true)
         assertEquals(Decision.IGNORE, out.decision)
+        assertEquals(true, out.downHandled)
+    }
+
+    @Test
+    fun `holding enter down repeats are consumed without relaunching`() {
+        val out = decide(keyAction = KeyEvent.ACTION_DOWN, keyCode = KeyEvent.KEYCODE_ENTER, repeatCount = 1)
+        assertEquals(Decision.CONSUME, out.decision)
         assertEquals(true, out.downHandled)
     }
 }

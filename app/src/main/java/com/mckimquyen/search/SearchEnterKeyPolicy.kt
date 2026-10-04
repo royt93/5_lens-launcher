@@ -25,8 +25,17 @@ object SearchEnterKeyPolicy {
     data class Outcome(val decision: Decision, val downHandled: Boolean)
 
     @JvmStatic
-    fun decide(actionId: Int, keyAction: Int?, keyCode: Int?, downHandled: Boolean): Outcome {
+    fun decide(
+        actionId: Int,
+        keyAction: Int?,
+        keyCode: Int?,
+        repeatCount: Int = 0,
+        downHandled: Boolean
+    ): Outcome {
         if (keyCode == KeyEvent.KEYCODE_ENTER) {
+            if (keyAction == KeyEvent.ACTION_DOWN && repeatCount > 0) {
+                return Outcome(Decision.CONSUME, downHandled = true)
+            }
             when (keyAction) {
                 KeyEvent.ACTION_DOWN -> return Outcome(Decision.LAUNCH, downHandled = true)
                 KeyEvent.ACTION_UP ->

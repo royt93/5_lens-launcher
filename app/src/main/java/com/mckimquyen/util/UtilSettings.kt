@@ -276,7 +276,10 @@ class UtilSettings(context: Context) {
     }
 
     fun getHapticIntensity(): HapticIntensity =
-        HapticIntensity.from(prefs.getInt(KEY_HAPTIC_INTENSITY, DEFAULT_HAPTIC_INTENSITY))
+        HapticIntensity.from(
+            runCatching { prefs.getInt(KEY_HAPTIC_INTENSITY, DEFAULT_HAPTIC_INTENSITY) }
+                .getOrDefault(DEFAULT_HAPTIC_INTENSITY)
+        )
 
     fun saveHapticIntensity(value: HapticIntensity) {
         save(KEY_HAPTIC_INTENSITY, value.ordinal)

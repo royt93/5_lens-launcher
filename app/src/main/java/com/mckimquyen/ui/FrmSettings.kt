@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.annotation.VisibleForTesting
 import androidx.appcompat.widget.SwitchCompat
 import androidx.core.graphics.toColorInt
 import androidx.core.view.isVisible
@@ -42,6 +43,7 @@ class FrmSettings : Fragment(), SettingsInterface {
     private var groupHapticIntensity: MaterialButtonToggleGroup? = null
     // Guards against assignValues()'s programmatic check() firing a preview haptic.
     private var bindingHapticGroup = false
+    @VisibleForTesting internal var onPreviewHapticPerformed: ((Int) -> Unit)? = null
     private var swShowNameAppHover: SwitchCompat? = null
     private var swShowNewAppTag: SwitchCompat? = null
     private var swShowNotificationBadges: SwitchCompat? = null
@@ -424,12 +426,14 @@ class FrmSettings : Fragment(), SettingsInterface {
     private fun updateHapticIntensityEnabled() {
         val group = groupHapticIntensity ?: return
         val anyOn = swVibrateAppHover?.isChecked == true || swVibrateAppLaunch?.isChecked == true
+        group.isEnabled = anyOn
         for (i in 0 until group.childCount) group.getChildAt(i).isEnabled = anyOn
     }
 
     private fun previewHaptic(anchor: View, level: HapticIntensity) {
         val ctx = context ?: return
         if (LensPhysicsPolicy.shouldReduceLensMotion(ctx)) return
+        onPreviewHapticPerformed?.invoke(level.feedbackConstant)
         anchor.performHapticFeedback(level.feedbackConstant)
     }
 
@@ -494,6 +498,7 @@ class FrmSettings : Fragment(), SettingsInterface {
         swVibrateAppLaunch = null
         groupHapticIntensity?.clearOnButtonCheckedListeners()
         groupHapticIntensity = null
+        onPreviewHapticPerformed = null
         swShowNameAppHover = null
         swShowNewAppTag = null
         swShowNotificationBadges = null

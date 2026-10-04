@@ -1198,19 +1198,24 @@ public class ActHome extends ActBase {
                     actionId,
                     event == null ? null : event.getAction(),
                     event == null ? null : event.getKeyCode(),
+                    event == null ? 0 : event.getRepeatCount(),
                     searchEnterDownHandled
             );
-            searchEnterDownHandled = outcome.getDownHandled();
             if (outcome.getDecision() == SearchEnterKeyPolicy.Decision.CONSUME) {
+                searchEnterDownHandled = outcome.getDownHandled();
                 return true;
             }
             if (outcome.getDecision() == SearchEnterKeyPolicy.Decision.LAUNCH) {
                 App first = searchResultAdapter.firstOrNull();
                 if (first != null) {
+                    searchEnterDownHandled = outcome.getDownHandled();
                     launchSearchResult(first, appSearch);
                     return true;
                 }
+                searchEnterDownHandled = false;
+                return false;
             }
+            searchEnterDownHandled = outcome.getDownHandled();
             return false;
         });
         // No manual clear-button wiring: SearchView's built-in clear affordance already does this.

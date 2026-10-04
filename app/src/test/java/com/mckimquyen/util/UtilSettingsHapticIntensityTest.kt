@@ -47,6 +47,15 @@ class UtilSettingsHapticIntensityTest {
     }
 
     @Test
+    fun `wrong typed stored value reads the default`() {
+        // M4: a String under the int key throws ClassCastException from prefs.getInt - must
+        // fall back cleanly instead of crashing the caller.
+        val settings = freshSettings()
+        rawPrefs().edit().putString(UtilSettings.KEY_HAPTIC_INTENSITY, "not-an-int").commit()
+        assertEquals(HapticIntensity.DEFAULT, settings.getHapticIntensity())
+    }
+
+    @Test
     fun `the key is stable and carries no lens suffix`() {
         assertEquals("haptic_intensity", UtilSettings.KEY_HAPTIC_INTENSITY)
     }
