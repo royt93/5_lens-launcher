@@ -47,6 +47,8 @@ class UtilSettings(context: Context) {
         const val DEFAULT_ANIMATION_TIME: Long = 200
         const val DEFAULT_VIBRATE_APP_HOVER = false
         const val DEFAULT_VIBRATE_APP_LAUNCH = true
+        // FISH-017: shared by the hover and launch haptics. Stored as an enum ordinal.
+        val DEFAULT_HAPTIC_INTENSITY = HapticIntensity.DEFAULT.ordinal
         const val DEFAULT_SHOW_NAME_APP_HOVER = true
         const val DEFAULT_SHOW_TOUCH_SELECTION = false
         const val DEFAULT_SHOW_NEW_APP_TAG = true
@@ -106,6 +108,7 @@ class UtilSettings(context: Context) {
         const val KEY_CUSTOM_ANIMATION_TIME = "custom_animation_time"
         const val KEY_VIBRATE_APP_HOVER = "vibrate_app_hover"
         const val KEY_VIBRATE_APP_LAUNCH = "vibrate_app_launch"
+        const val KEY_HAPTIC_INTENSITY = "haptic_intensity"
         const val KEY_SHOW_NAME_APP_HOVER = "show_name_app_hover"
         const val KEY_SHOW_TOUCH_SELECTION = "show_touch_selection"
         const val KEY_SHOW_NEW_APP_TAG = "show_new_tag_app"
@@ -270,6 +273,13 @@ class UtilSettings(context: Context) {
         // KEY_FLASHLIGHT_PERMISSION_REQUESTED / KEY_WIFI_SSID_PERMISSION_REQUESTED fall through
         // to the else branch below - default false is exactly DEFAULT_BOOLEAN already.
         else -> prefs.getBoolean(name, DEFAULT_BOOLEAN)
+    }
+
+    fun getHapticIntensity(): HapticIntensity =
+        HapticIntensity.from(prefs.getInt(KEY_HAPTIC_INTENSITY, DEFAULT_HAPTIC_INTENSITY))
+
+    fun saveHapticIntensity(value: HapticIntensity) {
+        save(KEY_HAPTIC_INTENSITY, value.ordinal)
     }
 
     val sortType: SortType
