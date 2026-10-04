@@ -163,15 +163,18 @@ class LensViewHapticIntensityIntegrationTest {
         val scenario = androidx.test.core.app.ActivityScenario.launch(com.mckimquyen.ui.ActHome::class.java)
         var homeLens: LensView? = null
         scenario.onActivity {
-            val found: LensView? = it.findViewById(R.id.lensViews)
-            assertNotNull("lensViews must be found while the Activity is alive", found)
-            found!!.onHapticPerformed = { }
+            val found = requireNotNull(it.findViewById<LensView>(R.id.lensViews)) {
+                "lensViews must be found while the Activity is alive"
+            }
+            found.onHapticPerformed = { }
             assertNotNull("hook must be non-null before destroy", found.onHapticPerformed)
             homeLens = found
         }
         scenario.close() // destroys the Activity, which detaches the view
         InstrumentationRegistry.getInstrumentation().waitForIdleSync()
-        val lensAfterDestroy: LensView = homeLens!!
+        val lensAfterDestroy = requireNotNull(homeLens) {
+            "homeLens must have been set by onActivity before scenario.close()"
+        }
         assertEquals(null, lensAfterDestroy.onHapticPerformed)
     }
 }
