@@ -1,5 +1,6 @@
 package com.mckimquyen.util
 
+import android.annotation.SuppressLint
 import android.os.Build
 import android.view.HapticFeedbackConstants
 
@@ -8,6 +9,7 @@ import android.view.HapticFeedbackConstants
  * [HapticFeedbackConstants.VIRTUAL_KEY], what `LensView` always used, so it is the default and an
  * install that never touches the setting behaves exactly as before.
  */
+@SuppressLint("InlinedApi") // CONFIRM is API 30; feedbackConstant gates it with sdkInt.
 enum class HapticIntensity {
     LIGHT,
     MEDIUM,
