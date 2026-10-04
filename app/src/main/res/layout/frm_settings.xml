@@ -585,9 +585,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:paddingVertical="8dp"
-                    android:paddingStart="52dp"
-                    android:paddingEnd="0dp">
+                    android:paddingVertical="8dp">
 
                     <TextView
                         android:layout_width="match_parent"
@@ -611,6 +609,9 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
+                            android:insetLeft="0dp"
+                            android:insetRight="0dp"
+                            android:paddingHorizontal="8dp"
                             android:text="@string/haptic_intensity_light" />
 
                         <com.google.android.material.button.MaterialButton
@@ -619,6 +620,9 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
+                            android:insetLeft="0dp"
+                            android:insetRight="0dp"
+                            android:paddingHorizontal="8dp"
                             android:text="@string/haptic_intensity_medium" />
 
                         <com.google.android.material.button.MaterialButton
@@ -627,6 +631,9 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
+                            android:insetLeft="0dp"
+                            android:insetRight="0dp"
+                            android:paddingHorizontal="8dp"
                             android:text="@string/haptic_intensity_strong" />
                     </com.google.android.material.button.MaterialButtonToggleGroup>
                 </LinearLayout>

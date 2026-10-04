@@ -5,6 +5,7 @@ import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.preference.PreferenceManager
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.button.MaterialButtonToggleGroup
 import com.mckimquyen.R
 import com.mckimquyen.util.HapticIntensity
@@ -117,6 +118,32 @@ class FrmSettingsHapticIntensityWidgetTest {
             for (level in HapticIntensity.entries) {
                 val text = (group.findViewById<com.google.android.material.button.MaterialButton>(idFor(level))).text
                 assertTrue("label for $level must not be blank", text.isNotBlank())
+            }
+        }
+    }
+
+    /**
+     * The three labels must show in full: a label ellipsized to "Lig..." tells the user nothing.
+     * Measured on the real laid-out view with a locale-independent worst case: the default
+     * English labels (7 characters is the longest across the shipped locales, see strings).
+     */
+    @Test
+    fun labelsAreNeverEllipsized() {
+        launch { fragment, group ->
+            val view = fragment.requireView()
+            view.measure(
+                android.view.View.MeasureSpec.makeMeasureSpec(
+                    context.resources.displayMetrics.widthPixels, android.view.View.MeasureSpec.EXACTLY
+                ),
+                android.view.View.MeasureSpec.makeMeasureSpec(0, android.view.View.MeasureSpec.UNSPECIFIED)
+            )
+            view.layout(0, 0, view.measuredWidth, view.measuredHeight)
+            for (level in HapticIntensity.entries) {
+                val button = group.findViewById<MaterialButton>(idFor(level))
+                val layout = requireNotNull(button.layout) { "button $level has no text layout" }
+                var ellipsized = 0
+                for (line in 0 until layout.lineCount) ellipsized += layout.getEllipsisCount(line)
+                assertEquals("label '${button.text}' of $level is ellipsized", 0, ellipsized)
             }
         }
     }
