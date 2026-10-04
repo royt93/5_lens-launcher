@@ -17,6 +17,7 @@ import com.mckimquyen.util.LensPhysicsPolicy
 import com.mckimquyen.util.UtilSettings
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Assume.assumeFalse
 import org.junit.Before
@@ -162,11 +163,15 @@ class LensViewHapticIntensityIntegrationTest {
         val scenario = androidx.test.core.app.ActivityScenario.launch(com.mckimquyen.ui.ActHome::class.java)
         var homeLens: LensView? = null
         scenario.onActivity {
-            homeLens = it.findViewById(R.id.lensViews)
-            homeLens?.onHapticPerformed = { }
+            val found: LensView? = it.findViewById(R.id.lensViews)
+            assertNotNull("lensViews must be found while the Activity is alive", found)
+            found!!.onHapticPerformed = { }
+            assertNotNull("hook must be non-null before destroy", found.onHapticPerformed)
+            homeLens = found
         }
         scenario.close() // destroys the Activity, which detaches the view
         InstrumentationRegistry.getInstrumentation().waitForIdleSync()
-        assertEquals(null, homeLens?.onHapticPerformed)
+        val lensAfterDestroy: LensView = homeLens!!
+        assertEquals(null, lensAfterDestroy.onHapticPerformed)
     }
 }
