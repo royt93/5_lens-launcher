@@ -144,16 +144,10 @@ class ActHomeAutoExportWidgetTest {
             Thread.sleep(100)
         }
 
-        // scenario.close() hits the exact same broken tracking as recreate() above (confirmed:
-        // it hangs its own moveToState(DESTROYED) wait the same way). finish() the real,
-        // already-recreated Activity ourselves for genuine cleanup, then let close() best-effort
-        // release ActivityScenario's internal resources without failing the test on its
-        // already-unreliable post-condition wait.
+        // ActivityScenario no longer recognizes this Activity after external onNewIntent changed
+        // its intent (see the lifecycle workaround above), so close() blocks forever waiting for a
+        // transition it deliberately ignores. Finish the real recreated Activity directly instead.
         InstrumentationRegistry.getInstrumentation().runOnMainSync { recreatedActivity.get()?.finish() }
-        try {
-            scenario.close()
-        } catch (e: AssertionError) {
-            // Expected - see comment above.
-        }
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync()
     }
 }
