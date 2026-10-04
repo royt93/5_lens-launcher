@@ -51,15 +51,15 @@ Both `CONFIRM` and `VIRTUAL_KEY` resolved to the same underlying `EFFECT_CLICK` 
 
 ## Evidence
 
-Device: **TECNO BG6 `118743744X002560`**. TECNO KJ7 `115333744A005844` (the preferred device) dropped off `adb devices` partway through this story; BG6 is the standing owner-approved substitute for exactly this situation, not a one-off exception — used for every build/install/test/smoke run from that point on, including this final review round.
+Devices: **TECNO BG6 `118743744X002560`** (Android 13, standing owner-approved substitute after preferred KJ7 dropped) for development and pre-review evidence; **Pixel 7 Pro `2B051FDH3006MU`** (Android 17, explicit owner-approved one-off after the post-review fix) for final verification. Pixel remained otherwise banned; no other device was touched.
 
-- JVM unit tests: 701→702 across the story's own commits (`e5979b4` baseline, `418a99d` at 702/702); final review round's changes (I1/M5, I3, M2, M4, M8, M1) add further unit cases — see the final full run recorded in `.superpowers/sdd/final-fix-report.md` for the exact post-review total.
-- Lint: 0 errors / 8 warnings, unchanged.
-- Full instrumentation on BG6: 472/472 OK at `4aafcdf` (pre-review baseline); re-verified after the review round — see the final report for the exact post-review total.
-- `FrmSettingsHapticIntensityWidgetTest`: 10/10 before the review round (widget), extended by this round's I2/I3/M2 changes.
-- `LensViewHapticIntensityIntegrationTest`: unaffected by this round's changes, re-run as part of the full suite regression.
-- `AppSearchIntegrationTest`: 3/3 before the review round, extended by one new regression test (I1/M5).
-- Manual smoke on TECNO BG6 (pre-review): Light/Medium/Strong row with Medium selected on a fresh install; each level vibrates distinctly after the LONG_PRESS fix; both switches off greys out and disables all three buttons, one switch on re-enables them; labels readable at default and 1.3x font scale; reset-to-defaults returns to Medium.
+- JVM unit tests after the post-review fixes: **703/703**, 0 skipped/failures/errors.
+- Lint after the post-review fixes: **0 errors / 8 warnings**, unchanged; all eight are pre-existing icon-asset warnings.
+- Full instrumentation after the post-review fixes on Pixel 7 Pro: **476/476 OK**, 0 failures.
+- Affected classes on Pixel 7 Pro: `LensViewHapticIntensityIntegrationTest` **7/7**, `FrmSettingsHapticIntensityWidgetTest` **13/13**, `AppSearchIntegrationTest` **4/4**, `ActHomeAutoExportWidgetTest` **1/1**.
+- Manual smoke on BG6: Light/Medium/Strong row with Medium selected on a fresh install; each level maps distinctly after the LONG_PRESS fix (`TEXTURE_TICK` / `CLICK` / `HEAVY_CLICK`); both switches off greys out and disables the group/buttons, one switch on re-enables them; labels readable at default and 1.3x font scale; reset returns Medium.
+- Manual smoke on Pixel 7 Pro: Vietnamese labels `Nhẹ / Vừa / Mạnh` render fully; selection persists (`haptic_intensity=1` after selecting Vừa); physical Enter (`KEYCODE_ENTER`) on search launched the first result on Android 17, proving the DOWN/UP policy on the newer platform too.
+- Pixel 7 Pro's Android 17 vibrator history exposes durations but not semantic effect names: Light was shorter (17–24ms), while Medium and Strong were similar (~44–47ms). Android/OEM haptic constants are semantic hints, not cross-device amplitude guarantees; the setting reliably chooses three distinct constants, but only BG6 demonstrated three distinct hardware effects.
 
 ## Review (final whole-branch review, 2026-10-04)
 
@@ -67,9 +67,11 @@ Findings I1, M5 (search Enter-key stuck-flag bug), I2 (ellipsis test only covere
 
 ## Disclosed, not verified
 
-- KJ7-specific behavior for the LONG_PRESS/CONFIRM deviation was not re-measured on KJ7 itself (it was offline for this entire story); the `dumpsys vibrator_manager` evidence above is BG6-only. The fix (LONG_PRESS on every API, no version gate) does not depend on which device measured it, but a second confirmation on KJ7 once it reconnects would close this out fully.
-- Other 15 shipped locales beyond the 4 now covered by `labelsAreNeverEllipsized` (en, ru, fr, it) were not individually measured for ellipsis; those four were picked as the longest-label candidates by inspection of `values-*/strings.xml`, not by an exhaustive per-locale pixel measurement.
+- KJ7-specific behavior was not measured because KJ7 was offline during this story. BG6 is the owner-approved substitute and Pixel 7 Pro was a one-off owner-approved final verification device.
+- The post-review instrumented run happened on Pixel 7 Pro, not BG6; BG6 full-suite evidence is the earlier 472/472 run at `4aafcdf` before the post-review commit.
+- Strong may feel similar to Medium on some OEMs: Pixel 7 Pro/Android 17 did not show a clearly longer or stronger Strong vibration than Medium by duration. A guaranteed cross-device amplitude difference would require a custom `Vibrator` waveform path, intentionally out of scope.
+- Other shipped locales beyond `en`, `ru`, `fr`, `it` were not individually measured for ellipsis; those four were picked as the longest-label candidates by inspection of `values-*/strings.xml`.
 
 ## Audit
 
-See `.superpowers/sdd/final-fix-report.md` for this round's final test counts and score.
+Pending independent re-review of the post-review fix commit `894440b`. Push only if the evidence-based audit score is above 9.0/10.
