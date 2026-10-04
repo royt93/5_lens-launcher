@@ -3,7 +3,6 @@ package com.mckimquyen.views
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Rect
-import android.os.Build
 import android.os.SystemClock
 import android.view.ContextThemeWrapper
 import android.view.MotionEvent
@@ -105,7 +104,7 @@ class LensViewHapticIntensityIntegrationTest {
         }
     }
 
-    private fun expected(level: HapticIntensity) = level.feedbackConstant(Build.VERSION.SDK_INT)
+    private fun expected(level: HapticIntensity) = level.feedbackConstant
 
     /** One fresh LensView per test (from @Before): a second hover on the same icon never re-fires. */
     private fun assertHoverEmits(level: HapticIntensity) {

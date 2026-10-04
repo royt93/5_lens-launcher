@@ -2,7 +2,6 @@ package com.mckimquyen.ui
 
 import android.content.Context
 import android.graphics.drawable.GradientDrawable
-import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -431,7 +430,7 @@ class FrmSettings : Fragment(), SettingsInterface {
     private fun previewHaptic(anchor: View, level: HapticIntensity) {
         val ctx = context ?: return
         if (LensPhysicsPolicy.shouldReduceLensMotion(ctx)) return
-        anchor.performHapticFeedback(level.feedbackConstant(Build.VERSION.SDK_INT))
+        anchor.performHapticFeedback(level.feedbackConstant)
     }
 
     override fun onDefaultsReset() {

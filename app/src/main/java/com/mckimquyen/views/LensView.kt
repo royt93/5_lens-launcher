@@ -1382,7 +1382,7 @@ class LensView : View {
 
     private fun performIntensityHaptic() {
         val level = mUtilSettings?.getHapticIntensity() ?: HapticIntensity.DEFAULT
-        val constant = level.feedbackConstant(Build.VERSION.SDK_INT)
+        val constant = level.feedbackConstant
         onHapticPerformed?.invoke(constant)
         performHapticFeedback(constant)
     }
