@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.*
 import android.graphics.drawable.NinePatchDrawable
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.util.AttributeSet
@@ -23,6 +24,7 @@ import android.view.animation.Animation
 import android.view.animation.Transformation
 import android.widget.FrameLayout
 import android.widget.Toast
+import androidx.annotation.VisibleForTesting
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.toColorInt
@@ -35,6 +37,7 @@ import com.mckimquyen.model.AppPersistent
 import com.mckimquyen.model.LensWorkspace
 import com.mckimquyen.model.PinnedZone
 import com.mckimquyen.services.BroadcastReceivers
+import com.mckimquyen.util.HapticIntensity
 import com.mckimquyen.util.LensPhysicsPolicy
 import com.mckimquyen.util.SmartFocusArranger
 import com.mckimquyen.util.UtilApp
@@ -264,6 +267,11 @@ class LensView : View {
     private var mShowNotificationBadgesThisFrame = false
     private var mRectToSelect: RectF? = RectF(0f, 0f, 0f, 0f)
     private var mMustVibrate = true
+
+    // FISH-017: test seam only. Called with the exact constant right before the haptic is
+    // performed. Nulled on detach so the view never keeps a test lambda (and its captures) alive.
+    @VisibleForTesting
+    internal var onHapticPerformed: ((Int) -> Unit)? = null
     private var mSelectIndex = 0
     private var mSourceApps: ArrayList<App>? = null
     private var mApps: ArrayList<App>? = null
@@ -1372,6 +1380,13 @@ class LensView : View {
         }
     }
 
+    private fun performIntensityHaptic() {
+        val level = mUtilSettings?.getHapticIntensity() ?: HapticIntensity.DEFAULT
+        val constant = level.feedbackConstant(Build.VERSION.SDK_INT)
+        onHapticPerformed?.invoke(constant)
+        performHapticFeedback(constant)
+    }
+
     private fun performHoverVibration() {
         if (mInsideRect) {
             if (mMustVibrate) {
@@ -1380,7 +1395,7 @@ class LensView : View {
                         && !mAnimationHiding
                         && !LensPhysicsPolicy.shouldReduceLensMotion(context)
                     ) {
-                        performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                        performIntensityHaptic()
                     }
                 }
                 mMustVibrate = false
@@ -1395,7 +1410,7 @@ class LensView : View {
             if (mUtilSettings?.getBoolean(UtilSettings.KEY_VIBRATE_APP_LAUNCH) == true
                 && !LensPhysicsPolicy.shouldReduceLensMotion(context)
             ) {
-                performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                performIntensityHaptic()
             }
         }
     }
@@ -1501,6 +1516,7 @@ class LensView : View {
             // vào LensView (inner class giữ outer reference) sau khi view bị detach/destroy
             clearAnimation()
             // Null toàn bộ references để GC thu hồi
+            onHapticPerformed = null
             mApps = null
             mUtilSettings = null
             mPackageManager = null
