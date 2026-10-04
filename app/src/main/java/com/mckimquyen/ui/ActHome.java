@@ -22,9 +22,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
-import android.view.KeyEvent;
 import android.view.ViewGroup;
-import android.view.inputmethod.EditorInfo;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -72,6 +70,7 @@ import com.mckimquyen.search.ContactSearchEngine;
 import com.mckimquyen.search.ContactSearchResult;
 import com.mckimquyen.search.QuickAction;
 import com.mckimquyen.search.QuickActionEngine;
+import com.mckimquyen.search.SearchEnterKeyPolicy;
 import com.mckimquyen.search.SearchHistoryStore;
 import com.mckimquyen.search.SearchResultAdapter;
 import com.mckimquyen.util.ApertureRevealHelper;
@@ -259,6 +258,7 @@ public class ActHome extends ActBase {
     private Button btContactMessage;
     private SearchResultAdapter searchResultAdapter;
     private SearchHistoryStore searchHistoryStore;
+    private boolean searchEnterDownHandled;
 
     private void updateColor() {
         var mUtilSettings = new UtilSettings(this);
@@ -1194,13 +1194,17 @@ public class ActHome extends ActBase {
             }
         });
         appSearch.setOnEditorActionListener((view, actionId, event) -> {
-            boolean isEnterKey = event != null
-                    && event.getAction() == KeyEvent.ACTION_UP
-                    && event.getKeyCode() == KeyEvent.KEYCODE_ENTER;
-            if (actionId == EditorInfo.IME_ACTION_SEARCH
-                    || actionId == EditorInfo.IME_ACTION_GO
-                    || actionId == EditorInfo.IME_ACTION_DONE
-                    || isEnterKey) {
+            SearchEnterKeyPolicy.Outcome outcome = SearchEnterKeyPolicy.decide(
+                    actionId,
+                    event == null ? null : event.getAction(),
+                    event == null ? null : event.getKeyCode(),
+                    searchEnterDownHandled
+            );
+            searchEnterDownHandled = outcome.getDownHandled();
+            if (outcome.getDecision() == SearchEnterKeyPolicy.Decision.CONSUME) {
+                return true;
+            }
+            if (outcome.getDecision() == SearchEnterKeyPolicy.Decision.LAUNCH) {
                 App first = searchResultAdapter.firstOrNull();
                 if (first != null) {
                     launchSearchResult(first, appSearch);
