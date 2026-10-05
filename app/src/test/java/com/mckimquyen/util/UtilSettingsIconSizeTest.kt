@@ -100,10 +100,25 @@ class UtilSettingsIconSizeTest {
     }
 
     @Test
-    fun `a wrong typed stored value falls back instead of throwing`() {
+    fun `a wrong typed per lens value falls back instead of throwing`() {
         rawPrefs().edit().putString("${UtilSettings.KEY_ICON_SIZE}_$work", "huge").commit()
         val result = settings.getIconSize(work)
         assertTrue("fell back to a value inside the allowed range", result in UtilSettings.MIN_ICON_SIZE..maxAllowed)
+    }
+
+    @Test
+    fun `a wrong typed inherited shared value falls back instead of throwing`() {
+        rawPrefs().edit().putString(UtilSettings.KEY_ICON_SIZE, "huge").commit()
+        val result = settings.getIconSize(work)
+        assertTrue("fell back to a value inside the allowed range", result in UtilSettings.MIN_ICON_SIZE..maxAllowed)
+    }
+
+    @Test
+    fun `a stored NaN falls back to a finite value`() {
+        settings.saveIconSize(work, Float.NaN)
+        val result = settings.getIconSize(work)
+        assertTrue("NaN must not reach LensGridCache", result.isFinite())
+        assertTrue("fallback stays inside the allowed range", result in UtilSettings.MIN_ICON_SIZE..maxAllowed)
     }
 
     @Test

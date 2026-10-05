@@ -73,15 +73,18 @@ class LensViewReattachIntegrationTest {
         host.addView(view, FrameLayout.LayoutParams(VIEW_WIDTH, VIEW_HEIGHT))
     }
 
-    private fun drawWithApps(view: LensView) {
-        // The pager's onPageSelected hands the shared list to the page again after a swipe.
-        view.setApps(apps())
+    private fun draw(view: LensView) {
         view.measure(
             View.MeasureSpec.makeMeasureSpec(VIEW_WIDTH, View.MeasureSpec.EXACTLY),
             View.MeasureSpec.makeMeasureSpec(VIEW_HEIGHT, View.MeasureSpec.EXACTLY)
         )
         view.layout(0, 0, VIEW_WIDTH, VIEW_HEIGHT)
         view.draw(Canvas())
+    }
+
+    private fun drawWithApps(view: LensView) {
+        view.setApps(apps())
+        draw(view)
     }
 
     /** What a pager does when the user swipes away and back: detach, then attach the same view. */
@@ -115,6 +118,22 @@ class LensViewReattachIntegrationTest {
             drawWithApps(view)
 
             assertTrue("a re-attached page must draw its grid, not come back blank", hasDrawnGrid(view))
+        }
+    }
+
+    @Test
+    fun aReattachedView_drawsWithoutBeingHandedItsAppsAgain() {
+        withAttachedContainer { host, newView ->
+            val view = newView()
+            attach(host, view)
+            drawWithApps(view)
+
+            detachAndReattach(host, view)
+            // No setApps here: a pager only re-hands the list on onPageSelected, and a page can be
+            // recycled (lens added/renamed/deleted) without a selection event.
+            draw(view)
+
+            assertTrue("a re-attached page must keep its apps, not wait for setApps", hasDrawnGrid(view))
         }
     }
 

@@ -385,19 +385,17 @@ class UtilSettings(context: Context) {
      */
     fun getIconSize(lensId: String?): Float {
         val key = lensKey(KEY_ICON_SIZE, lensId)
-        return if (prefs.contains(key)) {
-            // runCatching: a wrong-typed value under the key must not crash every caller.
-            runCatching {
-                getFloatWithValidation(
-                    key,
-                    autoDefaultIconSize,
-                    MIN_ICON_SIZE,
-                    MAX_ICON_SIZE.toFloat() + MIN_ICON_SIZE
-                )
-            }.getOrDefault(autoDefaultIconSize)
-        } else {
-            getFloat(KEY_ICON_SIZE)
-        }
+        // The shared key is also read through runCatching: a lens that inherits it must not crash
+        // onDraw because of one wrong-typed value.
+        val effectiveKey = if (prefs.contains(key)) key else KEY_ICON_SIZE
+        return runCatching {
+            getFloatWithValidation(
+                effectiveKey,
+                autoDefaultIconSize,
+                MIN_ICON_SIZE,
+                MAX_ICON_SIZE.toFloat() + MIN_ICON_SIZE
+            )
+        }.getOrDefault(autoDefaultIconSize).takeIf { it.isFinite() } ?: autoDefaultIconSize
     }
 
     fun saveIconSize(lensId: String?, value: Float) {

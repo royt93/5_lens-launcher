@@ -748,6 +748,11 @@ class LensView : View {
         if (mPackageManager == null) {
             mPackageManager = context.packageManager
         }
+        // Detach also nulls the displayed list; rebuild it from the surviving source so the page
+        // does not stay blank until the pager happens to call setApps again.
+        if (mApps == null && mSourceApps != null) {
+            applySmartFocusArrangement(force = true)
+        }
         // The grid cache was cleared on detach; the next draw recomputes it from the settings above.
         invalidate()
     }
