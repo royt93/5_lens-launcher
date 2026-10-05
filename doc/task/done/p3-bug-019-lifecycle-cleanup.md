@@ -20,7 +20,7 @@ Owner selected the lifecycle-cleanup option before the three larger stories defe
 - [x] `FrmLens.onDefaultsReset()` invalidates the preview lens after settings and slider values are restored.
 - [x] `ActSettings` retains and releases its `TabLayoutMediator` and page callback, then clears the ViewPager2 adapter on destroy.
 - [x] Unit, widget, integration, lint and full instrumented verification on the locked device.
-- [ ] Independent whole-branch audit >9.0 (push gate pending).
+- [x] Independent whole-branch audit: 9.3/10, 0 Critical, 0 Important (push gate passed).
 
 ## TDD evidence
 
@@ -55,4 +55,4 @@ The first full-suite attempt ran JVM/lint and APK build/install concurrently aga
 - Task 1: spec PASS, quality APPROVED, no Critical/Important. Minor: reflection on private `mSelectIndex` makes the test rename-sensitive but avoids adding a production-only setter.
 - Task 2: spec PASS, quality APPROVED, no findings.
 - Task 3: spec PASS, quality APPROVED, no Critical/Important. Minor: its test proves adapter and retained fields become null, but does not mutation-pin the internal `detach()` and `unregisterOnPageChangeCallback()` calls independently.
-- Final whole-branch audit score: pending.
+- Final whole-branch audit: **9.3/10**, 0 Critical, 0 Important. Minor test-depth gaps: `LensViewReattachIntegrationTest` does not mutation-pin every field reset by `resetTouchState()`; `ActSettingsArchitectureWidgetTest` does not mutation-pin `detach()` and `unregisterOnPageChangeCallback()` independently. Production code is correct; push gate passed.
