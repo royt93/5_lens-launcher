@@ -23,7 +23,7 @@ Per-lens icon size only; per-lens icon pack is split out as its own later story 
 - [x] Duplicating a lens copies the size; deleting a lens removes its override.
 - [x] Corrupt/out-of-range stored values clamp or fall back to the default.
 - [x] Unit, widget, integration tests; lint; full instrumentation; device smoke.
-- [ ] Audit > 9.0 (independent review; push gate)
+- [x] Audit > 9.0 (independent review: 9.2/10; push gate passed)
 - Deferred: per-lens icon pack (separate story).
 
 ## Bug found during device smoke (pre-existing, fixed in `a223616`)
@@ -42,3 +42,9 @@ Devices: **Samsung S24 Ultra `R5CX613VZBR`** (owner-requested for FISH-018) for 
 - KJ7, final HEAD (`a223616`): JVM **722/722**, lint **0 errors / 8 warnings** (pre-existing icon warnings), full instrumentation **501/501 OK**.
 - KJ7 manual smoke: cold start, swipe lens 1 -> 2 -> 1, all pages draw icon grids after the fix.
 - Not seen on screen: two lenses with different icon sizes side by side; covered by `LensViewIconSizeIntegrationTest` (8) and `FrmLensIconSizeWidgetTest` (8, real drag), plus `UtilSettingsIconSizeTest` (15).
+
+## Audit
+
+- Round 1 (8.0/10): `mApps` null after re-attach, corrupt shared key / NaN handling, Reset doc claim.
+- Round 2 (**9.2/10**): all round 1 findings resolved. 0 Critical, 0 Important. Push gate > 9.0 passed.
+
