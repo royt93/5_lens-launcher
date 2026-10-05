@@ -130,4 +130,30 @@ class SearchEnterKeyPolicyTest {
         }
         assertEquals(false, handled)
     }
+
+    /**
+     * TextView treats KEYCODE_NUMPAD_ENTER exactly like KEYCODE_ENTER. Matching only ENTER sent a
+     * numpad Enter DOWN through the IME-action branch (LAUNCH, flag false), then the replayed UP took
+     * the same branch and launched a second time.
+     */
+    @Test
+    fun `numpad enter behaves exactly like enter`() {
+        val down = decide(keyAction = KeyEvent.ACTION_DOWN, keyCode = KeyEvent.KEYCODE_NUMPAD_ENTER)
+        assertEquals(Decision.LAUNCH, down.decision)
+        assertEquals(true, down.downHandled)
+
+        val up = decide(
+            keyAction = KeyEvent.ACTION_UP, keyCode = KeyEvent.KEYCODE_NUMPAD_ENTER, downHandled = down.downHandled
+        )
+        assertEquals(Decision.CONSUME, up.decision)
+        assertEquals(false, up.downHandled)
+    }
+
+    @Test
+    fun `numpad enter held after a no-result down is ignored like enter`() {
+        val out = decide(
+            keyAction = KeyEvent.ACTION_DOWN, keyCode = KeyEvent.KEYCODE_NUMPAD_ENTER, repeatCount = 1, downHandled = false
+        )
+        assertEquals(Decision.IGNORE, out.decision)
+    }
 }

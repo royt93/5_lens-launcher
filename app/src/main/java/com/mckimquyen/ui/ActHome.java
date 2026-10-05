@@ -265,6 +265,14 @@ public class ActHome extends ActBase {
         return searchEnterDownHandled;
     }
 
+    private int searchLaunchCount;
+
+    /** How many times a search result has been launched from this Activity instance. */
+    @androidx.annotation.VisibleForTesting(otherwise = androidx.annotation.VisibleForTesting.NONE)
+    public int getSearchLaunchCountForTest() {
+        return searchLaunchCount;
+    }
+
     private void updateColor() {
         var mUtilSettings = new UtilSettings(this);
         var kBackground = mUtilSettings.getBackgroundMode();
@@ -1595,6 +1603,7 @@ public class ActHome extends ActBase {
         // second before the target app's launch animation covers the screen, i.e. a visible
         // flash of the result the user just tapped disappearing. Launching first means whatever
         // the user sees next is the app's own reveal animation, not our own UI clearing itself.
+        searchLaunchCount++;
         searchHistoryStore.recordLaunch(AppSearchEngine.componentKey(app));
         com.mckimquyen.util.UtilApp.launchComponent(
                 this,

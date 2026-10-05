@@ -332,6 +332,49 @@ class AppSearchIntegrationTest {
         }
     }
 
+    /**
+     * A numpad Enter must launch exactly once. Before NUMPAD_ENTER was matched, the DOWN went down the
+     * IME-action branch (flag stayed false), TextView replayed the UP, and the UP launched again.
+     */
+    @Test
+    fun numpadEnterLaunchesTheFirstResultExactlyOnce() {
+        val singleton = RAppsSingleton.instance
+        val originalApps = singleton.apps
+        val launchable = app("Launchable", visible = true)
+        val store = SearchHistoryStore(InstrumentationRegistry.getInstrumentation().targetContext)
+        store.clear()
+        singleton.apps = arrayListOf(launchable)
+
+        try {
+            ActivityScenario.launch(ActHome::class.java).use { scenario ->
+                var searchView: SearchView? = null
+                scenario.onActivity { activity ->
+                    searchView = activity.findViewById(R.id.searchView)
+                    requireNotNull(searchView) { "R.id.searchView not found" }.show()
+                }
+                waitUntilShowing(requireNotNull(searchView) { "R.id.searchView not found" }, true)
+                singleton.apps = arrayListOf(launchable)
+                AppEventManager.notifyAppsUpdated()
+                waitForMainThread()
+
+                scenario.onActivity { activity ->
+                    val search: EditText = requireNotNull(searchView) { "searchView not bound yet" }.editText
+                    search.requestFocus()
+                    search.setText("launchable")
+                    search.dispatchKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_NUMPAD_ENTER))
+                    search.dispatchKeyEvent(KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_NUMPAD_ENTER))
+                    assertEquals("", search.text.toString())
+                    assertEquals("a numpad Enter must launch exactly once", 1, activity.searchLaunchCountForTest)
+                    assertEquals(listOf(AppSearchEngine.componentKey(launchable)), store.recentKeys())
+                    assertFalse(activity.isSearchEnterDownHandledForTest())
+                }
+            }
+        } finally {
+            store.clear()
+            singleton.apps = originalApps
+        }
+    }
+
     private fun assertSearch(activity: ActHome, count: Int, firstLabel: String? = null) {
         val adapter = activity.findViewById<RecyclerView>(R.id.rvSearchResults).adapter as SearchResultAdapter
         assertEquals(count, adapter.itemCount)

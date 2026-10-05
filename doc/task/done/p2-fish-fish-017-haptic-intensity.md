@@ -57,10 +57,10 @@ Both `CONFIRM` and `VIRTUAL_KEY` resolved to the same underlying `EFFECT_CLICK` 
 
 Devices: **TECNO BG6 `118743744X002560`** (Android 13, standing owner-approved substitute after preferred KJ7 dropped) for development and pre-review evidence; **Pixel 7 Pro `2B051FDH3006MU`** (Android 17, explicit owner-approved one-off after the post-review fix) for final verification. Pixel remained otherwise banned; no other device was touched.
 
-- JVM unit tests after the re-review fixes: **705/705**, 0 skipped/failures/errors.
+- JVM unit tests after the re-review fixes: **707/707**, 0 skipped/failures/errors.
 - Lint after the re-review fixes: **0 errors / 8 warnings**, unchanged; all eight are pre-existing icon-asset warnings.
 - Full instrumentation after the re-review fixes on Pixel 7 Pro: **477/477 OK**, 0 failures.
-- Final run on **Samsung S24 Ultra `R5CX613VZBR`** (Android 16, owner-chosen replacement after the Pixel disconnected), HEAD with the round 4 fixes: full instrumentation **477/477 OK**; `AppSearchIntegrationTest` 5/5, `FrmSettingsHapticIntensityWidgetTest` 13/13, `LensViewHapticIntensityIntegrationTest` 7/7; JVM 705/705; lint 0 errors / 8 warnings.
+- Final run on **Samsung S24 Ultra `R5CX613VZBR`** (Android 16, owner-chosen replacement after the Pixel disconnected), HEAD with the round 4 fixes and the numpad fix: full instrumentation **478/478 OK**; `AppSearchIntegrationTest` 6/6, `FrmSettingsHapticIntensityWidgetTest` 13/13, `LensViewHapticIntensityIntegrationTest` 7/7; JVM 707/707; lint 0 errors / 8 warnings.
 - Affected classes on Pixel 7 Pro: `LensViewHapticIntensityIntegrationTest` **7/7**, `FrmSettingsHapticIntensityWidgetTest` **13/13**, `AppSearchIntegrationTest` **5/5**, `ActHomeAutoExportWidgetTest` **1/1**.
 - Manual smoke on BG6: Light/Medium/Strong row with Medium selected on a fresh install; each level maps distinctly after the LONG_PRESS fix (`TEXTURE_TICK` / `CLICK` / `HEAVY_CLICK`); both switches off greys out and disables the buttons (this smoke predated `group.isEnabled` — see M8), one switch on re-enables them; labels readable at default and 1.3x font scale; reset returns Medium.
 - Manual smoke on Pixel 7 Pro: Vietnamese labels `Nhẹ / Vừa / Mạnh` render fully; selection persists (`haptic_intensity=1` after selecting Vừa); physical Enter (`KEYCODE_ENTER`) on search launched the first result on Android 17, proving the DOWN/UP policy on the newer platform too.
@@ -78,10 +78,11 @@ The re-review found the I1 regression test green on the buggy code and M8 untest
 
 Findings I1, M5 (search Enter-key stuck-flag bug), I2 (ellipsis test only covered the default locale), I3 (no test seam for the preview haptic), I4 (missing backlog/feature-doc records), M1 (dead import), M2 (non-vacuous persistence test), M4 (unsafe pref read), M8 (group `isEnabled` not set) — all fixed, each described above with its own test. No findings left open from this round.
 
-## Re-review rounds 2 and 3
+## Re-review rounds 2 to 4
 
 - **Round 2** (8.7): I1 test vacuous, M8 untested, preview-haptic tests coupled to a global setting, contradictory acceptance checkbox, English locale not actually covered, BG6 smoke credited with post-M8 behavior, AutoExport hang misattributed, dead default parameter, `!!` in new test code. All fixed in `ada6cda` with RED proof on Pixel 7 Pro for I1 and M8.
 - **Round 3** (8.8): the round-2 fix #8 (repeat DOWN returns the incoming flag) was itself wrong. With no results, the first DOWN returns false (no `enterDown`), then a repeat DOWN was CONSUMEd, so ActHome returned true, TextView set `enterDown` and replayed the UP on release; the policy read it as a lone UP and launched whatever result had appeared during the hold. Fixed: a repeat DOWN is CONSUMEd only while the first DOWN launched, otherwise IGNOREd. Proven on Pixel 7 Pro: `AppSearchIntegrationTest.heldEnterWithNoResultsNeverLaunchesOnRelease` FAILS on the previous policy (the search box was cleared, i.e. an app was launched on release) and passes after the fix; two new `SearchEnterKeyPolicyTest` cases pin the invariant.
+- **Round 4** (8.9): no behavior bug; five key sequences confirmed (held Enter with and without results, lone UP, results appearing mid-hold, IME actions). Findings were evidence drift (instrumented counts, a stale sentence about the superseded repeat rule, the lone-UP rationale) and one pre-existing duplicate launch: `KEYCODE_NUMPAD_ENTER` was not matched, so a numpad Enter DOWN went down the IME-action branch (flag false), TextView replayed the UP, and the UP launched a second time. Fixed by matching `NUMPAD_ENTER` like `ENTER` (TextView treats them identically). Proven on Samsung S24 Ultra: `AppSearchIntegrationTest.numpadEnterLaunchesTheFirstResultExactlyOnce` FAILED against an ENTER-only policy with `a numpad Enter must launch exactly once expected:<1> but was:<2>` and passes after the fix; it counts launches through `ActHome.getSearchLaunchCountForTest()` (`@VisibleForTesting(otherwise = NONE)`), because history dedupes by component and cannot distinguish one launch from two. Two unit cases pin the same behavior.
 - Disclosed: `labelsAreNeverEllipsized` measures at the device's `displayMetrics.widthPixels`, so its margin varies with device width; `AppSearchIntegrationTest` still carries its pre-existing `!!` in older tests (none added by this branch).
 
 ## Disclosed, not verified
@@ -93,4 +94,4 @@ Findings I1, M5 (search Enter-key stuck-flag bug), I2 (ellipsis test only covere
 
 ## Audit
 
-Reviews: 8.3 (whole branch), 8.7 (re-review of `894440b`), 8.8 (third review of `ada6cda`). The third review found a real regression in the repeat-DOWN handling (below); after that fix the branch awaits one more independent review. Push only if the evidence-based audit score is above 9.0/10.
+Reviews: 8.3 (whole branch), 8.7 (re-review of `894440b`), 8.8 (third review of `ada6cda`), 8.9 (fourth review of `25f834d`). Round 3 found a real regression in the repeat-DOWN handling and round 4 a pre-existing numpad double launch (both fixed, see below); the branch awaits one more independent review. Push only if the evidence-based audit score is above 9.0/10.

@@ -32,7 +32,8 @@ object SearchEnterKeyPolicy {
         repeatCount: Int,
         downHandled: Boolean
     ): Outcome {
-        if (keyCode == KeyEvent.KEYCODE_ENTER) {
+        // TextView handles both identically (doKeyDown/onKeyUp list both case labels).
+        if (keyCode == KeyEvent.KEYCODE_ENTER || keyCode == KeyEvent.KEYCODE_NUMPAD_ENTER) {
             if (keyAction == KeyEvent.ACTION_DOWN && repeatCount > 0) {
                 // TextView replays the UP to the listener only if the listener returned true for a
                 // DOWN. Consume repeats only while the first DOWN launched (flag true); otherwise
