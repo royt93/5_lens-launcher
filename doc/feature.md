@@ -38,11 +38,13 @@ Source of truth for implementation choices in this session. Detailed acceptance 
 
 ## 📋 Picked
 
-- None.
+- **BUG-019 — Dọn minor lifecycle LensView & FrmLens (05/10/2026)**: (1) `LensView.onDetachedFromWindow` reset trạng thái cảm ứng (hủy pinch/gesture state, clear touch coordinates/mSelectIndex, dọn accessibility delegate sạch sẽ); (2) `FrmLens.onDefaultsReset` gọi `lensViewsSettings?.invalidate()` để preview trên màn hình Settings cập nhật ngay sau khi bấm Reset. Kèm unit/widget test.
 
 ## ⏸️ Deferred
 
-- None.
+- **FISH-019 — Per-lens icon pack (hoãn sang tháng 11/2026)**: cần đổi cấu trúc `BitmapCache` từ global cache sang namespace theo lens hoặc cấu trúc icon identity độc lập; user chọn làm sau.
+- **FEAT-010 — Auto-switch lens theo lịch (hoãn sang tháng 11/2026)**: AlarmManager/WorkManager đổi lens tự động theo giờ hoặc ngày; user chọn làm sau.
+- **FISH-020 — Mức rung Mạnh custom amplitude bằng Vibrator (hoãn sang tháng 11/2026)**: dùng API Vibrator/VibrationEffect chỉnh amplitude đảm bảo Mạnh thực sự mạnh hơn trên mọi máy; user chọn làm sau.
 
 ## ❌ Skipped
 
