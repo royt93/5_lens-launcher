@@ -117,18 +117,15 @@ class SearchEnterKeyPolicyTest {
     }
 
     @Test
-    fun `holding enter with no results never launches at any point of the gesture`() {
+    fun `holding enter with no results launches only on the first down, never on a repeat`() {
         var handled = false
-        val steps = listOf(
-            Triple(KeyEvent.ACTION_DOWN, 0, false),
-            Triple(KeyEvent.ACTION_DOWN, 1, false),
-            Triple(KeyEvent.ACTION_DOWN, 2, false)
-        )
-        for ((action, repeat, _) in steps) {
-            val out = decide(keyAction = action, keyCode = KeyEvent.KEYCODE_ENTER, repeatCount = repeat, downHandled = handled)
+        for (repeat in 0..2) {
+            val out = decide(
+                keyAction = KeyEvent.ACTION_DOWN, keyCode = KeyEvent.KEYCODE_ENTER,
+                repeatCount = repeat, downHandled = handled
+            )
             // ActHome resets the flag to false whenever a LAUNCH finds no result and returns false.
             handled = if (out.decision == Decision.LAUNCH) false else out.downHandled
-            // A repeat DOWN is only consumed (listener returns true) when the first DOWN launched.
             if (repeat > 0) assertEquals("repeat $repeat", Decision.IGNORE, out.decision)
         }
         assertEquals(false, handled)

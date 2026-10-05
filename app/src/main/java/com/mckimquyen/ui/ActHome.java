@@ -260,7 +260,7 @@ public class ActHome extends ActBase {
     private SearchHistoryStore searchHistoryStore;
     private boolean searchEnterDownHandled;
 
-    @androidx.annotation.VisibleForTesting
+    @androidx.annotation.VisibleForTesting(otherwise = androidx.annotation.VisibleForTesting.NONE)
     public boolean isSearchEnterDownHandledForTest() {
         return searchEnterDownHandled;
     }
