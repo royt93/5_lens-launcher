@@ -378,6 +378,32 @@ class UtilSettings(context: Context) {
         save(lensKey(KEY_DISTORTION_FACTOR, lensId), value)
     }
 
+    /**
+     * FISH-018: per-lens icon size, same shape as [getDistortionFactor]. The default lens maps to
+     * the legacy unsuffixed key (via [lensKey]); a lens with no override of its own inherits the
+     * shared, already-validated value.
+     */
+    fun getIconSize(lensId: String?): Float {
+        val key = lensKey(KEY_ICON_SIZE, lensId)
+        return if (prefs.contains(key)) {
+            // runCatching: a wrong-typed value under the key must not crash every caller.
+            runCatching {
+                getFloatWithValidation(
+                    key,
+                    autoDefaultIconSize,
+                    MIN_ICON_SIZE,
+                    MAX_ICON_SIZE.toFloat() + MIN_ICON_SIZE
+                )
+            }.getOrDefault(autoDefaultIconSize)
+        } else {
+            getFloat(KEY_ICON_SIZE)
+        }
+    }
+
+    fun saveIconSize(lensId: String?, value: Float) {
+        save(lensKey(KEY_ICON_SIZE, lensId), value)
+    }
+
     /** FISH-012: null means no pinch was left unresolved for this lens. */
     fun getPendingDistortionFactor(lensId: String?): Float? {
         val key = lensKey(KEY_PENDING_DISTORTION_FACTOR, lensId)
@@ -427,6 +453,7 @@ class UtilSettings(context: Context) {
         val smartFocus = isSmartFocusBias(fromLensId)
         saveDistortionFactor(toLensId, distortion)
         saveSmartFocusBias(toLensId, smartFocus)
+        saveIconSize(toLensId, getIconSize(fromLensId))
         // FISH-015: only carry the Custom distortion forward once a real Custom preset already
         // exists somewhere - otherwise getCustomDistortionFactor() is merely falling back to the
         // live distortion above, which is not a saved preset. Materializing that fallback as a
@@ -442,6 +469,7 @@ class UtilSettings(context: Context) {
             prefs.edit {
                 remove("${KEY_DISTORTION_FACTOR}_$lensId")
                 remove("${KEY_SMART_FOCUS_BIAS}_$lensId")
+                remove("${KEY_ICON_SIZE}_$lensId")
                 remove("${KEY_PENDING_DISTORTION_FACTOR}_$lensId")
                 remove("${KEY_CUSTOM_DISTORTION_FACTOR}_$lensId")
             }
