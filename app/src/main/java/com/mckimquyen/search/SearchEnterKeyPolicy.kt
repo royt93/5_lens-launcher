@@ -7,7 +7,8 @@ import android.view.inputmethod.EditorInfo
  * Decides what the search box's editor-action listener should do with an event. A physical Enter
  * arrives as ACTION_DOWN and TextView only replays the matching ACTION_UP to the listener when the
  * DOWN was consumed, so launching on UP alone never fires. Launch on DOWN, swallow its UP, and
- * keep UP-only delivery working for devices that skip the DOWN.
+ * still launch on a lone UP as a defensive branch (not observed on any measured device: TextView
+ * replays an UP to the listener only after the listener consumed a DOWN).
  */
 object SearchEnterKeyPolicy {
 

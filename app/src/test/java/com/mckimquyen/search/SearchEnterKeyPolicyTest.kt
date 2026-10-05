@@ -36,7 +36,7 @@ class SearchEnterKeyPolicyTest {
     }
 
     @Test
-    fun `enter up alone still launches for devices that only deliver up`() {
+    fun `enter up alone still launches as a defensive branch`() {
         val out = decide(keyAction = KeyEvent.ACTION_UP, keyCode = KeyEvent.KEYCODE_ENTER)
         assertEquals(Decision.LAUNCH, out.decision)
         assertEquals(false, out.downHandled)
@@ -126,6 +126,7 @@ class SearchEnterKeyPolicyTest {
             )
             // ActHome resets the flag to false whenever a LAUNCH finds no result and returns false.
             handled = if (out.decision == Decision.LAUNCH) false else out.downHandled
+            if (repeat == 0) assertEquals("first down", Decision.LAUNCH, out.decision)
             if (repeat > 0) assertEquals("repeat $repeat", Decision.IGNORE, out.decision)
         }
         assertEquals(false, handled)

@@ -259,13 +259,12 @@ public class ActHome extends ActBase {
     private SearchResultAdapter searchResultAdapter;
     private SearchHistoryStore searchHistoryStore;
     private boolean searchEnterDownHandled;
+    private int searchLaunchCount;
 
     @androidx.annotation.VisibleForTesting(otherwise = androidx.annotation.VisibleForTesting.NONE)
     public boolean isSearchEnterDownHandledForTest() {
         return searchEnterDownHandled;
     }
-
-    private int searchLaunchCount;
 
     /** How many times a search result has been launched from this Activity instance. */
     @androidx.annotation.VisibleForTesting(otherwise = androidx.annotation.VisibleForTesting.NONE)
