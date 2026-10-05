@@ -94,6 +94,8 @@ public class ActSettings extends ActBase implements SettingsMenuHost {
     FloatingActionButton fabSort;
     LinearLayout flAdOpenApp;
     private View adView = null;
+    private ViewPager2.OnPageChangeCallback pageChangeCallback;
+    private TabLayoutMediator tabLayoutMediator;
 
     private final SettingsDialogCoordinator dialogCoordinator = new SettingsDialogCoordinator();
     private final SettingsAdVipDelegate adVipDelegate = new SettingsAdVipDelegate();
@@ -182,10 +184,12 @@ public class ActSettings extends ActBase implements SettingsMenuHost {
         viewpager.setAdapter(mPagerAdapter);
 
         // Setup TabLayout with TabLayoutMediator (ViewPager2 requirement)
-        new TabLayoutMediator(tabs, viewpager, (tab, position) -> tab.setText(mPagerAdapter.getPageTitle(position)))
-                .attach();
+        tabLayoutMediator = new TabLayoutMediator(tabs, viewpager,
+                (tab, position) -> tab.setText(mPagerAdapter.getPageTitle(position)));
+        tabLayoutMediator.attach();
 
-        viewpager.registerOnPageChangeCallback(new PageChangeCallback(fabSort));
+        pageChangeCallback = new PageChangeCallback(fabSort);
+        viewpager.registerOnPageChangeCallback(pageChangeCallback);
         listApp = Objects.requireNonNull(RAppsSingleton.getInstance()).getApps();
 
         android.view.View chipVipBadge = findViewById(R.id.chipVipBadge);
@@ -555,6 +559,17 @@ public class ActSettings extends ActBase implements SettingsMenuHost {
     protected void onDestroy() {
         try {
             dismissAllDialogs();
+            if (tabLayoutMediator != null) {
+                tabLayoutMediator.detach();
+                tabLayoutMediator = null;
+            }
+            if (viewpager != null) {
+                if (pageChangeCallback != null) {
+                    viewpager.unregisterOnPageChangeCallback(pageChangeCallback);
+                    pageChangeCallback = null;
+                }
+                viewpager.setAdapter(null);
+            }
             lensInterface = null;
             appsInterface = null;
             settingsInterface = null;

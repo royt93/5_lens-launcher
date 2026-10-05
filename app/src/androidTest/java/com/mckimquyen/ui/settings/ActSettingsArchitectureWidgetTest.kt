@@ -5,12 +5,14 @@ import android.widget.TextView
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.tabs.TabLayout
 import com.mckimquyen.R
 import com.mckimquyen.ui.ActSettings
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -90,5 +92,23 @@ class ActSettingsArchitectureWidgetTest {
             activity.resetTabDefaults(2)
         }
         scenario.close()
+    }
+
+    @Test
+    fun testActSettingsDestroyCleansUpViewPagerAndCallbacks() {
+        val scenario = ActivityScenario.launch(ActSettings::class.java)
+        lateinit var activity: ActSettings
+        lateinit var viewPager: ViewPager2
+        scenario.onActivity {
+            activity = it
+            viewPager = it.findViewById(R.id.viewpager)
+            assertNotNull(viewPager.adapter)
+        }
+        scenario.close()
+        assertNull("ViewPager adapter must be nulled on destroy", viewPager.adapter)
+        val callback = ActSettings::class.java.getDeclaredField("pageChangeCallback").apply { isAccessible = true }
+        val mediator = ActSettings::class.java.getDeclaredField("tabLayoutMediator").apply { isAccessible = true }
+        assertNull("pageChangeCallback field must be nulled on destroy", callback.get(activity))
+        assertNull("tabLayoutMediator field must be nulled on destroy", mediator.get(activity))
     }
 }
