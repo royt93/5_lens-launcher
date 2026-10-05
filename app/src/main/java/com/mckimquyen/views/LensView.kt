@@ -1100,7 +1100,7 @@ class LensView : View {
 
     private fun drawGrid(canvas: Canvas, itemCount: Int) {
         val us = mUtilSettings ?: return
-        val iconSizeDp = us.getFloat(UtilSettings.KEY_ICON_SIZE)
+        val iconSizeDp = us.getIconSize(lensId)
         val distortionFactor = liveDistortionFactor ?: us.getDistortionFactor(lensId)
         val scaleFactor = us.getFloat(UtilSettings.KEY_SCALE_FACTOR)
         // UI-024: one setting read per frame, not per cell - drawAppIcon() is called once per
