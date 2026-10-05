@@ -172,4 +172,22 @@ class FrmLensWidgetTest {
         assertNotNull("newInstance() must return a Fragment", fragment)
         assertTrue("FrmLens must extend Fragment", fragment is androidx.fragment.app.Fragment)
     }
+
+    @Test
+    fun onDefaultsReset_triggersInvalidateOnPreviewLens() {
+        val scenario = launchFragmentInContainer<FrmLens>(themeResId = R.style.AppTheme)
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+
+        scenario.onFragment { fragment ->
+            val preview = fragment.view?.findViewById<com.mckimquyen.views.LensView>(R.id.lensViewsSettings)
+            assertNotNull(preview)
+
+            // Invoke onDefaultsReset()
+            fragment.onDefaultsReset()
+
+            // Verify preview was dirtied/invalidated for redraw
+            assertTrue("preview must be invalidated when defaults are reset", preview?.isDirty == true)
+        }
+        scenario.close()
+    }
 }

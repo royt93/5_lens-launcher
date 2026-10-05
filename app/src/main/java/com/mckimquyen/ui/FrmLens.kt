@@ -254,6 +254,7 @@ class FrmLens : Fragment(), LensInterface {
     override fun onDefaultsReset() {
         resetToDefault()
         assignValues()
+        lensViewsSettings?.invalidate()
     }
 
     private fun resetToDefault() {
