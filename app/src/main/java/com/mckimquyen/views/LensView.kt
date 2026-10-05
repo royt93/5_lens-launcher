@@ -478,9 +478,21 @@ class LensView : View {
      *  than setLensStateForTest above (that one also drives animation/reduceMotion state for a
      *  different testing purpose this export path has no reason to touch). */
     internal fun resetToIdleForExport() {
+        resetTouchState()
+    }
+
+    /** BUG-019: a ViewPager2 page detach must not leave stale touch/selection/gesture state behind
+     *  for the next attach of this SAME instance (pager recycles rather than recreating views) —
+     *  otherwise a re-attached page can redraw mid-gesture or with a stale selected cell highlighted. */
+    private fun resetTouchState() {
         mTouchX = -Float.MAX_VALUE
         mTouchY = -Float.MAX_VALUE
         gestureState = LensGestureState.IDLE
+        mSelectIndex = -1
+        mRectToSelect = null
+        mMoving = false
+        mLongPressArmed = false
+        mMustVibrate = true
     }
 
     @androidx.annotation.VisibleForTesting
@@ -1547,6 +1559,14 @@ class LensView : View {
             // Fix BUG-05: Cancel animation đang chạy để tránh AnimationListener callback
             // vào LensView (inner class giữ outer reference) sau khi view bị detach/destroy
             clearAnimation()
+            // BUG-019: a stale touch/selection/gesture state must not survive into the next attach
+            // of this SAME instance, and the accessibility delegate this view installed on itself
+            // must not outlive it either.
+            resetTouchState()
+            // ViewCompat.setAccessibilityDelegate(this, null) does NOT clear it: AndroidX swaps a
+            // previously-installed compat delegate for a neutral no-op one instead of a real null,
+            // so hasAccessibilityDelegate() stays true. Call the framework setter directly.
+            setAccessibilityDelegate(null)
             // Null toàn bộ references để GC thu hồi
             onHapticPerformed = null
             mApps = null

@@ -5,6 +5,7 @@ import android.graphics.Rect
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import androidx.core.view.ViewCompat
 import androidx.preference.PreferenceManager
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -13,6 +14,8 @@ import com.mckimquyen.model.App
 import com.mckimquyen.ui.ActHome
 import com.mckimquyen.util.UtilSettings
 import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -209,6 +212,41 @@ class LensViewReattachIntegrationTest {
 
             val after = firstCellWidth(view)
             assertTrue("a re-attached page must read settings again ($before -> $after)", after > before)
+        }
+    }
+
+    @Test
+    fun aDetachedView_resetsTouchAndSelectionState() {
+        withAttachedContainer { host, newView ->
+            val view = newView()
+            attach(host, view)
+            drawWithApps(view)
+
+            val selectIndexField = LensView::class.java.getDeclaredField("mSelectIndex").apply { isAccessible = true }
+            selectIndexField.setInt(view, 2)
+            view.gestureState = LensGestureState.PANNING
+
+            detachAndReattach(host, view)
+
+            assertEquals("a re-attached page must not keep a stale selected cell", -1, view.selectedIndexForTest)
+            assertEquals("a re-attached page must not resume mid-gesture", LensGestureState.IDLE, view.gestureState)
+        }
+    }
+
+    @Test
+    fun aDetachedView_clearsAccessibilityDelegate() {
+        withAttachedContainer { host, newView ->
+            val view = newView()
+            attach(host, view)
+            drawWithApps(view)
+            assertTrue("sanity: delegate installed while attached", ViewCompat.hasAccessibilityDelegate(view))
+
+            host.removeView(view)
+
+            assertFalse(
+                "the delegate this view installed on itself must not outlive it",
+                ViewCompat.hasAccessibilityDelegate(view)
+            )
         }
     }
 }
