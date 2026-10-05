@@ -1,5 +1,6 @@
 package com.mckimquyen.util
 
+import android.net.Uri
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.preference.PreferenceManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -10,6 +11,7 @@ import com.mckimquyen.model.AppDatabase
 import com.mckimquyen.model.AppPersistent
 import com.mckimquyen.model.LayoutBackup
 import com.mckimquyen.model.LayoutBackupEntry
+import com.mckimquyen.model.LayoutBackupParseResult
 import com.mckimquyen.model.PinnedZone
 import com.mckimquyen.model.LensWorkspace
 import kotlinx.coroutines.runBlocking
@@ -20,6 +22,9 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.io.File
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
 @RunWith(AndroidJUnit4::class)
 class WorkspaceBackupImportIntegrationTest {
@@ -121,6 +126,53 @@ class WorkspaceBackupImportIntegrationTest {
             )
         )
     )
+
+    @Test
+    fun malformedV2ImportDoesNotChangeWorkspaceOrPreferences() {
+        runBlocking {
+            seedTwoLensWorkspace()
+            val workspaceDao = database.lensWorkspaceDao()
+            val appDao = database.appPersistentDao()
+            val previousLenses = workspaceDao.getAll()
+            val previousRows = appDao.getAllRows()
+            val previousActiveLens = settings.getString(UtilSettings.KEY_ACTIVE_LENS_ID)
+            val previousPreferences = previousLenses.associate { lens ->
+                lens.id to LensAppSettingsBackup(
+                    lens.id,
+                    settings.getLensAppScope(lens.id),
+                    settings.getLensAppSelection(lens.id),
+                    settings.isLensFrozen(lens.id)
+                )
+            }
+            val file = File(context.cacheDir, "malformed_selected_scope_${System.nanoTime()}.json")
+            val uri = Uri.fromFile(file)
+            file.writeText(
+                """{"schemaVersion":2,"exportedAt":0,"activeLensId":"default","lenses":[{"id":"default","name":"Home","orderIndex":0,"scope":"SELECTED","selectedAppIds":[],"frozen":false,"entries":[]},{"id":"work","name":"Work","orderIndex":1,"scope":"SELECTED","selectedAppIds":["com.example.work-com.example.work.Main"],"frozen":true,"entries":[]}]}"""
+            )
+            val latch = CountDownLatch(1)
+            var result: LayoutBackupParseResult? = null
+
+            try {
+                LayoutBackupIo.importAsync(context, uri) {
+                    result = it
+                    latch.countDown()
+                }
+
+                assertTrue("import parse must complete", latch.await(5, TimeUnit.SECONDS))
+                assertEquals(LayoutBackupParseResult.Malformed, result)
+                assertEquals(previousLenses, workspaceDao.getAll())
+                assertEquals(previousRows, appDao.getAllRows())
+                assertEquals(previousActiveLens, settings.getString(UtilSettings.KEY_ACTIVE_LENS_ID))
+                previousPreferences.forEach { (lensId, preference) ->
+                    assertEquals(preference.scope, settings.getLensAppScope(lensId))
+                    assertEquals(preference.selectedAppIds, settings.getLensAppSelection(lensId))
+                    assertEquals(preference.frozen, settings.isLensFrozen(lensId))
+                }
+            } finally {
+                file.delete()
+            }
+        }
+    }
 
     @Test
     fun v1ImportSkipsEntriesForAppsNotInstalled() = runBlocking {

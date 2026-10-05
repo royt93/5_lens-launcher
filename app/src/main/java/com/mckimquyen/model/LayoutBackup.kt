@@ -181,6 +181,7 @@ data class LayoutBackupLens(
                 selectedIds.add(selectedId.takeIf(String::isNotBlank) ?: return null)
             }
             if (selectedIds.toSet().size != selectedIds.size) return null
+            if (scope == LensAppScope.SELECTED && selectedIds.isEmpty()) return null
 
             val entriesJson = json.optJSONArray(KEY_ENTRIES) ?: return null
             val entries = mutableListOf<LayoutBackupEntry>()

@@ -386,6 +386,34 @@ class LayoutBackupTest {
     }
 
     @Test
+    fun `v2 selected scope with empty selected ids is malformed`() {
+        val json = """
+            {"schemaVersion":2,"exportedAt":0,"activeLensId":"default","lenses":[
+                {"id":"default","name":"Home","orderIndex":0,"scope":"SELECTED","selectedAppIds":[],"frozen":false,"entries":[]}
+            ]}
+        """.trimIndent()
+
+        assertEquals(LayoutBackupParseResult.Malformed, LayoutBackup.parse(json))
+    }
+
+    @Test
+    fun `v2 permits empty selected ids only when scope is all`() {
+        val allScope = LayoutBackup.parse("""
+            {"schemaVersion":2,"exportedAt":0,"activeLensId":"default","lenses":[
+                {"id":"default","name":"Home","orderIndex":0,"scope":"ALL","selectedAppIds":[],"frozen":false,"entries":[]}
+            ]}
+        """.trimIndent())
+        val selectedScope = LayoutBackup.parse("""
+            {"schemaVersion":2,"exportedAt":0,"activeLensId":"default","lenses":[
+                {"id":"default","name":"Home","orderIndex":0,"scope":"SELECTED","selectedAppIds":["app-id"],"frozen":false,"entries":[]}
+            ]}
+        """.trimIndent())
+
+        assertTrue(allScope is LayoutBackupParseResult.Success)
+        assertTrue(selectedScope is LayoutBackupParseResult.Success)
+    }
+
+    @Test
     fun `v2 with duplicate selected ids is malformed`() {
         val json = """
             {"schemaVersion":2,"exportedAt":0,"lenses":[
