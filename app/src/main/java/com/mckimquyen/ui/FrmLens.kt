@@ -110,7 +110,7 @@ class FrmLens : Fragment(), LensInterface {
         sbMinIconSize?.addOnChangeListener { _, value, fromUser ->
             tvValueMinIconSize?.text = getString(R.string.unit_dp_format, value.toInt())
             if (fromUser) {
-                utilSettings?.save(UtilSettings.KEY_ICON_SIZE, value)
+                utilSettings?.saveIconSize(activeLensId, value)
                 lensViewsSettings?.invalidate()
             }
         }
@@ -226,7 +226,7 @@ class FrmLens : Fragment(), LensInterface {
     @SuppressLint("SetTextI18n")
     private fun assignValues() {
         utilSettings?.let { us ->
-            val iconSize = us.getFloat(UtilSettings.KEY_ICON_SIZE)
+            val iconSize = us.getIconSize(activeLensId)
             val minIcon = UtilSettings.MIN_ICON_SIZE
             val maxIcon = UtilSettings.MAX_ICON_SIZE.toFloat() + UtilSettings.MIN_ICON_SIZE
             val validIcon = iconSize.coerceIn(minIcon, maxIcon)
@@ -258,7 +258,7 @@ class FrmLens : Fragment(), LensInterface {
 
     private fun resetToDefault() {
         utilSettings?.let { us ->
-            us.save(UtilSettings.KEY_ICON_SIZE, us.autoDefaultIconSize)
+            us.saveIconSize(activeLensId, us.autoDefaultIconSize)
             us.saveDistortionFactor(activeLensId, UtilSettings.DEFAULT_DISTORTION_FACTOR)
             us.save(UtilSettings.KEY_SCALE_FACTOR, UtilSettings.DEFAULT_SCALE_FACTOR)
             us.save(UtilSettings.KEY_ANIMATION_TIME, UtilSettings.DEFAULT_ANIMATION_TIME)
