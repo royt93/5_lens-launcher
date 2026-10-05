@@ -101,14 +101,36 @@ class SearchEnterKeyPolicyTest {
         assertEquals(true, out.downHandled)
     }
 
+    /**
+     * TextView sets `enterDown` (and later replays the UP to the listener) only when the listener
+     * returned true for a DOWN. After a no-result DOWN the flag is false and the listener returned
+     * false, so a repeat DOWN must be IGNOREd too (listener returns false): consuming it would make
+     * TextView replay the UP, which the policy would then read as a lone UP and launch on release.
+     */
     @Test
-    fun `holding enter down repeats after a no-result down stay unhandled, not resurrected`() {
-        // #8 (re-review): a repeat DOWN following a DOWN that decided LAUNCH-but-found-nothing
-        // (which resets the flag to false) must not resurrect it to true.
+    fun `holding enter down repeats after a no-result down are ignored so no up is replayed`() {
         val out = decide(
             keyAction = KeyEvent.ACTION_DOWN, keyCode = KeyEvent.KEYCODE_ENTER, repeatCount = 1, downHandled = false
         )
-        assertEquals(Decision.CONSUME, out.decision)
+        assertEquals(Decision.IGNORE, out.decision)
         assertEquals(false, out.downHandled)
+    }
+
+    @Test
+    fun `holding enter with no results never launches at any point of the gesture`() {
+        var handled = false
+        val steps = listOf(
+            Triple(KeyEvent.ACTION_DOWN, 0, false),
+            Triple(KeyEvent.ACTION_DOWN, 1, false),
+            Triple(KeyEvent.ACTION_DOWN, 2, false)
+        )
+        for ((action, repeat, _) in steps) {
+            val out = decide(keyAction = action, keyCode = KeyEvent.KEYCODE_ENTER, repeatCount = repeat, downHandled = handled)
+            // ActHome resets the flag to false whenever a LAUNCH finds no result and returns false.
+            handled = if (out.decision == Decision.LAUNCH) false else out.downHandled
+            // A repeat DOWN is only consumed (listener returns true) when the first DOWN launched.
+            if (repeat > 0) assertEquals("repeat $repeat", Decision.IGNORE, out.decision)
+        }
+        assertEquals(false, handled)
     }
 }

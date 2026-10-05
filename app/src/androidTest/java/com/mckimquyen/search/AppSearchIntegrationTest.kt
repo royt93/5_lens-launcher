@@ -264,10 +264,9 @@ class AppSearchIntegrationTest {
                     // returned false for the no-first-result DOWN without resetting it), which a
                     // test only reading ACTION_UP's branch can't observe - TextView never replays
                     // the matching UP once DOWN returns false, so that branch is unreachable here.
-                    val activityHome = activity as ActHome
                     assertFalse(
                         "searchEnterDownHandled must be reset after a no-match Enter DOWN",
-                        activityHome.isSearchEnterDownHandledForTest()
+                        activity.isSearchEnterDownHandledForTest()
                     )
 
                     search.setText("launchable")
@@ -275,6 +274,56 @@ class AppSearchIntegrationTest {
                     search.dispatchKeyEvent(KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_ENTER))
                     assertEquals("", search.text.toString())
                     assertEquals(listOf(AppSearchEngine.componentKey(launchable)), store.recentKeys())
+                }
+            }
+        } finally {
+            store.clear()
+            singleton.apps = originalApps
+        }
+    }
+
+    /**
+     * Held Enter on a query with no results: the first DOWN finds nothing (listener returns false),
+     * so TextView must NOT replay an UP, and a repeat DOWN must be ignored rather than consumed.
+     * If a repeat were consumed (listener true), TextView would replay the UP on release, the policy
+     * would read it as a lone UP and launch whatever result appeared during the hold.
+     */
+    @Test
+    fun heldEnterWithNoResultsNeverLaunchesOnRelease() {
+        val singleton = RAppsSingleton.instance
+        val originalApps = singleton.apps
+        val launchable = app("Launchable", visible = true)
+        val store = SearchHistoryStore(InstrumentationRegistry.getInstrumentation().targetContext)
+        store.clear()
+        singleton.apps = arrayListOf(launchable)
+
+        try {
+            ActivityScenario.launch(ActHome::class.java).use { scenario ->
+                var searchView: SearchView? = null
+                scenario.onActivity { activity ->
+                    searchView = activity.findViewById(R.id.searchView)
+                    requireNotNull(searchView) { "R.id.searchView not found" }.show()
+                }
+                waitUntilShowing(requireNotNull(searchView) { "R.id.searchView not found" }, true)
+                singleton.apps = arrayListOf(launchable)
+                AppEventManager.notifyAppsUpdated()
+                waitForMainThread()
+
+                scenario.onActivity { activity ->
+                    val search: EditText = requireNotNull(searchView) { "searchView not bound yet" }.editText
+                    search.requestFocus()
+                    search.setText("unmatched-query")
+                    val down = KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER)
+                    val repeat = KeyEvent(0L, 0L, KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER, 1)
+                    search.dispatchKeyEvent(down)
+                    search.dispatchKeyEvent(repeat)
+                    search.dispatchKeyEvent(repeat)
+                    // A result that appears while Enter is still held must not be launched on release.
+                    search.setText("launchable")
+                    search.dispatchKeyEvent(KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_ENTER))
+                    assertEquals("launchable", search.text.toString())
+                    assertTrue("no launch must be recorded", store.recentKeys().isEmpty())
+                    assertFalse(activity.isSearchEnterDownHandledForTest())
                 }
             }
         } finally {

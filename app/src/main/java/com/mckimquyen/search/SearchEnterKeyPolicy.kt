@@ -34,10 +34,12 @@ object SearchEnterKeyPolicy {
     ): Outcome {
         if (keyCode == KeyEvent.KEYCODE_ENTER) {
             if (keyAction == KeyEvent.ACTION_DOWN && repeatCount > 0) {
-                // #8 (re-review): pass the incoming flag through instead of hardcoding true - a
-                // held-Enter repeat after a no-first-result DOWN (which already reset the flag to
-                // false) must stay false, not resurrect a stale "handled" state.
-                return Outcome(Decision.CONSUME, downHandled)
+                // TextView replays the UP to the listener only if the listener returned true for a
+                // DOWN. Consume repeats only while the first DOWN launched (flag true); otherwise
+                // IGNORE so the listener returns false and no stray UP is replayed (which would be
+                // read as a lone UP and launch on release).
+                return if (downHandled) Outcome(Decision.CONSUME, downHandled = true)
+                else Outcome(Decision.IGNORE, downHandled = false)
             }
             when (keyAction) {
                 KeyEvent.ACTION_DOWN -> return Outcome(Decision.LAUNCH, downHandled = true)
