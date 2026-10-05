@@ -708,14 +708,7 @@ class LensView : View {
         }
     }
 
-    private fun init() {
-        mApps = ArrayList()
-        mDrawType = DrawType.APPS
-        setBackgroundColor(ContextCompat.getColor(context, R.color.colorTransparent))
-        mUtilSettings = UtilSettings(context)
-        setupPaints()
-        mTouchSlop = ViewConfiguration.get(context).scaledTouchSlop.toFloat()
-
+    private fun installAccessibilityHelper() {
         mAccessibilityHelper = LensAccessibilityHelper(
             host = this,
             appProvider = { mApps },
@@ -733,6 +726,41 @@ class LensView : View {
             }
         )
         ViewCompat.setAccessibilityDelegate(this, mAccessibilityHelper)
+    }
+
+    /**
+     * A ViewPager2 page is a RecyclerView item: swiping away detaches it and swiping back attaches
+     * the SAME instance again, without running the constructor. [onDetachedFromWindow] frees this
+     * view's references, so they have to be rebuilt here or the page comes back blank (onDraw finds
+     * its settings null) and TalkBack loses its virtual nodes. Only what detach nulled is rebuilt,
+     * so a first attach (everything still set by [init]) is untouched.
+     */
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        if (mUtilSettings == null) {
+            mUtilSettings = UtilSettings(context)
+        }
+        if (mAccessibilityHelper == null) {
+            installAccessibilityHelper()
+        }
+        // Detach nulls this too and only ActHome.bindLensView sets it; without it a re-attached
+        // page draws but a tap on an icon launches nothing.
+        if (mPackageManager == null) {
+            mPackageManager = context.packageManager
+        }
+        // The grid cache was cleared on detach; the next draw recomputes it from the settings above.
+        invalidate()
+    }
+
+    private fun init() {
+        mApps = ArrayList()
+        mDrawType = DrawType.APPS
+        setBackgroundColor(ContextCompat.getColor(context, R.color.colorTransparent))
+        mUtilSettings = UtilSettings(context)
+        setupPaints()
+        mTouchSlop = ViewConfiguration.get(context).scaledTouchSlop.toFloat()
+
+        installAccessibilityHelper()
         isFocusable = true
 
         // FISH-009: Live pinch gesture detector for real-time curvature adjustment
