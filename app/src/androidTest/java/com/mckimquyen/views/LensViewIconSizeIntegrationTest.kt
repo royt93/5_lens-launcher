@@ -145,4 +145,43 @@ class LensViewIconSizeIntegrationTest {
         val small = cellWidth(laidOutView(LensWorkspace.DEFAULT_LENS_ID))
         assertTrue("default lens tracks the unsuffixed key ($large -> $small)", small < large)
     }
+
+    @Test
+    fun aDuplicatedLens_keepsTheSourceSizeEvenAfterTheSharedValueChanges() {
+        settings.save(UtilSettings.KEY_ICON_SIZE, SMALL_DP)
+        settings.saveIconSize(OTHER_LENS, LARGE_DP)
+        settings.duplicateLensSettings(OTHER_LENS, THIRD_LENS)
+
+        val source = cellWidth(laidOutView(OTHER_LENS))
+        val copy = cellWidth(laidOutView(THIRD_LENS))
+        assertEquals("a duplicated lens starts at the source size", source, copy)
+
+        settings.save(UtilSettings.KEY_ICON_SIZE, SMALL_DP + 5f)
+        assertEquals(
+            "the copy was materialized, so a shared change must not move it",
+            copy,
+            cellWidth(laidOutView(THIRD_LENS))
+        )
+    }
+
+    @Test
+    fun deletingALens_makesAReusedIdInheritTheSharedValueAgain() {
+        settings.save(UtilSettings.KEY_ICON_SIZE, SMALL_DP)
+        settings.saveIconSize(OTHER_LENS, LARGE_DP)
+        val withOverride = cellWidth(laidOutView(OTHER_LENS))
+
+        settings.deleteLensSettings(OTHER_LENS)
+        val afterDelete = cellWidth(laidOutView(OTHER_LENS))
+
+        assertTrue("after delete the id follows the (smaller) shared size", afterDelete < withOverride)
+    }
+
+    @Test
+    fun aValueSavedOutOfRange_stillLaysOutWithAClampedSize() {
+        settings.saveIconSize(OTHER_LENS, 10_000f)
+        val view = laidOutView(OTHER_LENS)
+        val bounds = Rect()
+        assertTrue(view.getAppBounds(FIRST_INDEX, bounds))
+        assertTrue("an absurd stored value must not break the layout", bounds.width() in 1..VIEW_WIDTH)
+    }
 }
