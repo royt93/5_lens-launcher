@@ -83,14 +83,22 @@ class FrmSettingsHapticIntensityWidgetTest {
     fun groupIsEnabledWhenAtLeastOneHapticSwitchIsOn() {
         UtilSettings(context).save(UtilSettings.KEY_VIBRATE_APP_HOVER, false)
         UtilSettings(context).save(UtilSettings.KEY_VIBRATE_APP_LAUNCH, true)
-        launch { _, group -> assertTrue(group.children().all { it.isEnabled }) }
+        launch { _, group ->
+            // M8: the group container itself (not just its children) must be enabled.
+            assertTrue(group.isEnabled)
+            assertTrue(group.children().all { it.isEnabled })
+        }
     }
 
     @Test
     fun groupIsDisabledWhenBothHapticSwitchesAreOff() {
         UtilSettings(context).save(UtilSettings.KEY_VIBRATE_APP_HOVER, false)
         UtilSettings(context).save(UtilSettings.KEY_VIBRATE_APP_LAUNCH, false)
-        launch { _, group -> assertTrue(group.children().none { it.isEnabled }) }
+        launch { _, group ->
+            // M8: the group container itself (not just its children) must be disabled.
+            assertFalse(group.isEnabled)
+            assertTrue(group.children().none { it.isEnabled })
+        }
     }
 
     @Test
@@ -98,10 +106,13 @@ class FrmSettingsHapticIntensityWidgetTest {
         UtilSettings(context).save(UtilSettings.KEY_VIBRATE_APP_HOVER, false)
         UtilSettings(context).save(UtilSettings.KEY_VIBRATE_APP_LAUNCH, false)
         launch { fragment, group ->
+            assertFalse(group.isEnabled)
             assertTrue(group.children().none { it.isEnabled })
             fragment.requireView().findViewById<CompoundButton>(R.id.swVibrateAppHover).isChecked = true
+            assertTrue(group.isEnabled)
             assertTrue(group.children().all { it.isEnabled })
             fragment.requireView().findViewById<CompoundButton>(R.id.swVibrateAppHover).isChecked = false
+            assertFalse(group.isEnabled)
             assertFalse(group.children().any { it.isEnabled })
         }
     }
@@ -133,11 +144,15 @@ class FrmSettingsHapticIntensityWidgetTest {
      * run longer ("Сильная", "Moyenne", "Leggera"), so this inflates the real row's layout
      * (frm_settings.xml, not the full fragment) once per locale under a fixed fontScale=1.0
      * configuration and lays it out at the real device width.
+     * #5 (re-review): `Locale.getDefault()` alone does not actually cover English - this device's
+     * default locale is Vietnamese. `Locale.ENGLISH` is now listed explicitly; the device default
+     * is kept as an extra entry alongside it.
      */
     @Test
     fun labelsAreNeverEllipsized() {
         val targetContext = androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().targetContext
         for (locale in listOf(
+            java.util.Locale.ENGLISH,
             java.util.Locale.getDefault(),
             java.util.Locale.forLanguageTag("ru"),
             java.util.Locale.forLanguageTag("fr"),
@@ -196,8 +211,31 @@ class FrmSettingsHapticIntensityWidgetTest {
         }
     }
 
+    /**
+     * I3 re-review finding #3: forces `LensPhysicsPolicy.shouldReduceLensMotion` false (the exact
+     * inverse of [withReducedMotionForced]) so the positive preview-haptic tests are deterministic
+     * on a device with battery saver / thermal throttling / animator scale already at 0, instead of
+     * silently passing for the wrong reason.
+     */
+    private fun withNormalMotionForced(block: () -> Unit) {
+        val original = runShell("settings get global animator_duration_scale").trim()
+        runShell("settings put global animator_duration_scale 1")
+        try {
+            assertFalse(
+                "test precondition: device must not be in reduced-motion mode",
+                com.mckimquyen.util.LensPhysicsPolicy.shouldReduceLensMotion(context)
+            )
+            block()
+        } finally {
+            runShell(
+                "settings put global animator_duration_scale " +
+                    if (original.isBlank() || original == "null") "1" else original
+            )
+        }
+    }
+
     @Test
-    fun tappingAButton_firesThePreviewHapticCallback() {
+    fun tappingAButton_firesThePreviewHapticCallback() = withNormalMotionForced {
         val performed = mutableListOf<Int>()
         launchFragmentInContainer<FrmSettings>(themeResId = R.style.AppTheme_NoActionBar).use { scenario ->
             scenario.onFragment { fragment ->
@@ -221,7 +259,7 @@ class FrmSettingsHapticIntensityWidgetTest {
     }
 
     @Test
-    fun programmaticBinding_doesNotFireThePreviewHapticCallback() {
+    fun programmaticBinding_doesNotFireThePreviewHapticCallback() = withNormalMotionForced {
         UtilSettings(context).saveHapticIntensity(HapticIntensity.STRONG)
         val performed = mutableListOf<Int>()
         launchFragmentInContainer<FrmSettings>(themeResId = R.style.AppTheme_NoActionBar).use { scenario ->

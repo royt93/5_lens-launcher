@@ -93,9 +93,22 @@ class SearchEnterKeyPolicyTest {
     }
 
     @Test
-    fun `holding enter down repeats are consumed without relaunching`() {
-        val out = decide(keyAction = KeyEvent.ACTION_DOWN, keyCode = KeyEvent.KEYCODE_ENTER, repeatCount = 1)
+    fun `holding enter down repeats are consumed without relaunching, preserving an already-handled down`() {
+        val out = decide(
+            keyAction = KeyEvent.ACTION_DOWN, keyCode = KeyEvent.KEYCODE_ENTER, repeatCount = 1, downHandled = true
+        )
         assertEquals(Decision.CONSUME, out.decision)
         assertEquals(true, out.downHandled)
+    }
+
+    @Test
+    fun `holding enter down repeats after a no-result down stay unhandled, not resurrected`() {
+        // #8 (re-review): a repeat DOWN following a DOWN that decided LAUNCH-but-found-nothing
+        // (which resets the flag to false) must not resurrect it to true.
+        val out = decide(
+            keyAction = KeyEvent.ACTION_DOWN, keyCode = KeyEvent.KEYCODE_ENTER, repeatCount = 1, downHandled = false
+        )
+        assertEquals(Decision.CONSUME, out.decision)
+        assertEquals(false, out.downHandled)
     }
 }

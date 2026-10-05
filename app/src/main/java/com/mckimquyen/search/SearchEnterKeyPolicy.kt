@@ -29,12 +29,15 @@ object SearchEnterKeyPolicy {
         actionId: Int,
         keyAction: Int?,
         keyCode: Int?,
-        repeatCount: Int = 0,
+        repeatCount: Int,
         downHandled: Boolean
     ): Outcome {
         if (keyCode == KeyEvent.KEYCODE_ENTER) {
             if (keyAction == KeyEvent.ACTION_DOWN && repeatCount > 0) {
-                return Outcome(Decision.CONSUME, downHandled = true)
+                // #8 (re-review): pass the incoming flag through instead of hardcoding true - a
+                // held-Enter repeat after a no-first-result DOWN (which already reset the flag to
+                // false) must stay false, not resurrect a stale "handled" state.
+                return Outcome(Decision.CONSUME, downHandled)
             }
             when (keyAction) {
                 KeyEvent.ACTION_DOWN -> return Outcome(Decision.LAUNCH, downHandled = true)

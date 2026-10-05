@@ -15,6 +15,7 @@ import com.mckimquyen.model.App
 import com.mckimquyen.services.AppEventManager
 import com.mckimquyen.ui.ActHome
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -243,22 +244,31 @@ class AppSearchIntegrationTest {
                 var searchView: SearchView? = null
                 scenario.onActivity { activity ->
                     searchView = activity.findViewById(R.id.searchView)
-                    searchView!!.show()
+                    requireNotNull(searchView) { "R.id.searchView not found" }.show()
                 }
-                waitUntilShowing(searchView!!, true)
+                waitUntilShowing(requireNotNull(searchView) { "R.id.searchView not found" }, true)
 
                 singleton.apps = arrayListOf(launchable)
                 AppEventManager.notifyAppsUpdated()
                 waitForMainThread()
 
-                scenario.onActivity {
-                    val search: EditText = searchView!!.editText
+                scenario.onActivity { activity ->
+                    val search: EditText = requireNotNull(searchView) { "searchView not bound yet" }.editText
 
                     search.requestFocus()
                     search.setText("unmatched-query")
                     search.dispatchKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER))
                     search.dispatchKeyEvent(KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_ENTER))
                     assertEquals("unmatched-query", search.text.toString())
+                    // I1 regression check: the pre-fix code left this flag stuck true (ActHome
+                    // returned false for the no-first-result DOWN without resetting it), which a
+                    // test only reading ACTION_UP's branch can't observe - TextView never replays
+                    // the matching UP once DOWN returns false, so that branch is unreachable here.
+                    val activityHome = activity as ActHome
+                    assertFalse(
+                        "searchEnterDownHandled must be reset after a no-match Enter DOWN",
+                        activityHome.isSearchEnterDownHandledForTest()
+                    )
 
                     search.setText("launchable")
                     search.dispatchKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER))

@@ -260,6 +260,11 @@ public class ActHome extends ActBase {
     private SearchHistoryStore searchHistoryStore;
     private boolean searchEnterDownHandled;
 
+    @androidx.annotation.VisibleForTesting
+    public boolean isSearchEnterDownHandledForTest() {
+        return searchEnterDownHandled;
+    }
+
     private void updateColor() {
         var mUtilSettings = new UtilSettings(this);
         var kBackground = mUtilSettings.getBackgroundMode();
