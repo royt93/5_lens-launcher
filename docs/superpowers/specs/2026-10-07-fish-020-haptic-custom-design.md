@@ -22,6 +22,14 @@ Replace `HapticFeedbackConstants` with `VibrationEffect.createOneShot(duration, 
 
 This approach gives us direct control over both duration and intensity, independent of platform variations.
 
+## Known limits (added after self-review)
+
+- Duration/amplitude values above are **starting points, not measured**. Tune on TECNO KJ7 during smoke; final numbers are recorded in the story file.
+- `amplitude` only applies when `Vibrator.hasAmplitudeControl()` is true. On motors without it Android ignores amplitude, so only **duration** separates the levels there. Keep duration gaps large enough (>= 20 ms) to stay distinguishable without amplitude.
+- `onHapticPerformed` test seam changes meaning: it now receives `(durationMs, amplitude)` on API 26+ and the legacy constant on API 25. Existing `LensViewHapticIntensityIntegrationTest` assertions on constants must be rewritten, not just re-run.
+- Integration tests cannot spy the system `Vibrator` directly; add one injectable seam (`internal var vibratorProvider`) in `LensView`, same style as `onHapticPerformed`.
+- Prerequisite: Gradle dependency verification (6 `-sources.jar`) was reported failing and is **not proven fixed**. Plan task 0 re-checks it with a clean `./gradlew testDevDebugUnitTest --rerun-tasks` before any code change.
+
 ## Architecture
 
 ### 1. HapticIntensity Enum (Update)
