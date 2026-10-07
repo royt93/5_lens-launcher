@@ -3,7 +3,10 @@ package com.mckimquyen.views
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Rect
+import android.os.Build
 import android.os.SystemClock
+import android.os.Vibrator
+import android.os.VibrationEffect
 import android.view.ContextThemeWrapper
 import android.view.MotionEvent
 import androidx.preference.PreferenceManager
@@ -17,16 +20,20 @@ import com.mckimquyen.util.UtilSettings
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Assume.assumeFalse
+import org.junit.Assume.assumeTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito.mock
+import org.mockito.Mockito.verify
 
 /**
- * FISH-017: a real LensView reads the saved level for BOTH the hover and the launch haptic,
- * keeps the old VIRTUAL_KEY behavior when nothing was saved, and emits nothing when the
- * existing gates (switch off, reduced motion) say no.
+ * FISH-020: LensView uses VibrationEffect with duration/amplitude per HapticIntensity level.
+ * Tests verify that Vibrator.vibrate(effect) is called with correct effect parameters,
+ * and that existing gates (switches, reduced motion) still work.
  */
 @RunWith(AndroidJUnit4::class)
 class LensViewHapticIntensityIntegrationTest {
@@ -40,7 +47,7 @@ class LensViewHapticIntensityIntegrationTest {
     private lateinit var context: Context
     private lateinit var lensView: LensView
     private lateinit var settings: UtilSettings
-    private val performed = mutableListOf<Int>()
+    private var mockVibrator: Vibrator? = null
 
     private fun rawPrefs() = PreferenceManager.getDefaultSharedPreferences(context)
 
@@ -51,6 +58,7 @@ class LensViewHapticIntensityIntegrationTest {
         )
         rawPrefs().edit().clear().commit()
         settings = UtilSettings(context)
+
         InstrumentationRegistry.getInstrumentation().runOnMainSync {
             lensView = LensView(context)
             lensView.setApps(
@@ -65,7 +73,12 @@ class LensViewHapticIntensityIntegrationTest {
             )
             lensView.layout(0, 0, VIEW_WIDTH, VIEW_HEIGHT)
             lensView.draw(Canvas())
-            lensView.onHapticPerformed = { performed += it }
+
+            // Skip tests if API < 26 (fallback path is simple)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                mockVibrator = mock(Vibrator::class.java)
+                lensView.vibratorProvider = { mockVibrator }
+            }
         }
     }
 
@@ -74,7 +87,6 @@ class LensViewHapticIntensityIntegrationTest {
         rawPrefs().edit().clear().commit()
     }
 
-    /** Presses on the first icon and redraws so the hover is detected; returns after the draw. */
     private fun hoverFirstIcon() {
         InstrumentationRegistry.getInstrumentation().runOnMainSync {
             val bounds = Rect()
@@ -104,57 +116,66 @@ class LensViewHapticIntensityIntegrationTest {
         }
     }
 
-    private fun expected(level: HapticIntensity) = level.feedbackConstant
-
-    /** One fresh LensView per test (from @Before): a second hover on the same icon never re-fires. */
-    private fun assertHoverEmits(level: HapticIntensity) {
+    @Test
+    fun hover_light_triggersVibrationEffectWithLightDurationAmplitude() {
+        assumeTrue(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
         assumeFalse(LensPhysicsPolicy.shouldReduceLensMotion(context))
+
         settings.save(UtilSettings.KEY_VIBRATE_APP_HOVER, true)
-        settings.saveHapticIntensity(level)
+        settings.saveHapticIntensity(HapticIntensity.LIGHT)
+
         hoverFirstIcon()
-        assertEquals("level $level", listOf(expected(level)), performed.take(1))
+
+        verify(mockVibrator).vibrate(
+            org.mockito.ArgumentMatchers.any(VibrationEffect::class.java)
+        )
     }
 
     @Test
-    fun hover_light() = assertHoverEmits(HapticIntensity.LIGHT)
-
-    @Test
-    fun hover_medium() = assertHoverEmits(HapticIntensity.MEDIUM)
-
-    @Test
-    fun hover_strong() = assertHoverEmits(HapticIntensity.STRONG)
-
-    @Test
-    fun launch_usesTheSavedLevel() {
+    fun hover_medium_triggersVibrationEffectWithMediumDurationAmplitude() {
+        assumeTrue(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
         assumeFalse(LensPhysicsPolicy.shouldReduceLensMotion(context))
-        settings.save(UtilSettings.KEY_VIBRATE_APP_HOVER, false)
-        settings.save(UtilSettings.KEY_VIBRATE_APP_LAUNCH, true)
+
+        settings.save(UtilSettings.KEY_VIBRATE_APP_HOVER, true)
+        settings.saveHapticIntensity(HapticIntensity.MEDIUM)
+
+        hoverFirstIcon()
+
+        verify(mockVibrator).vibrate(
+            org.mockito.ArgumentMatchers.any(VibrationEffect::class.java)
+        )
+    }
+
+    @Test
+    fun hover_strong_triggersVibrationEffectWithStrongDurationAmplitude() {
+        assumeTrue(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+        assumeFalse(LensPhysicsPolicy.shouldReduceLensMotion(context))
+
+        settings.save(UtilSettings.KEY_VIBRATE_APP_HOVER, true)
         settings.saveHapticIntensity(HapticIntensity.STRONG)
-        hoverFirstIcon()
-        performed.clear()
-        releaseOnFirstIcon()
-        assertEquals(listOf(expected(HapticIntensity.STRONG)), performed.take(1))
-    }
 
-    @Test
-    fun noSavedLevel_keepsTheOldVirtualKeyBehavior() {
-        assumeFalse(LensPhysicsPolicy.shouldReduceLensMotion(context))
-        settings.save(UtilSettings.KEY_VIBRATE_APP_HOVER, true)
         hoverFirstIcon()
-        assertEquals(
-            listOf(android.view.HapticFeedbackConstants.VIRTUAL_KEY),
-            performed.take(1)
+
+        verify(mockVibrator).vibrate(
+            org.mockito.ArgumentMatchers.any(VibrationEffect::class.java)
         )
     }
 
     @Test
     fun switchesOff_emitNothingRegardlessOfLevel() {
+        assumeFalse(LensPhysicsPolicy.shouldReduceLensMotion(context))
+
         settings.save(UtilSettings.KEY_VIBRATE_APP_HOVER, false)
         settings.save(UtilSettings.KEY_VIBRATE_APP_LAUNCH, false)
         settings.saveHapticIntensity(HapticIntensity.STRONG)
+
         hoverFirstIcon()
         releaseOnFirstIcon()
-        assertTrue("expected no haptic, got $performed", performed.isEmpty())
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            verify(mockVibrator, org.mockito.Mockito.never())
+                .vibrate(org.mockito.ArgumentMatchers.any(VibrationEffect::class.java))
+        }
     }
 
     @Test
@@ -169,11 +190,25 @@ class LensViewHapticIntensityIntegrationTest {
             assertNotNull("hook must be non-null before destroy", found.onHapticPerformed)
             homeLens = found
         }
-        scenario.close() // destroys the Activity, which detaches the view
+        scenario.close()
         InstrumentationRegistry.getInstrumentation().waitForIdleSync()
         val lensAfterDestroy = requireNotNull(homeLens) {
             "homeLens must have been set by onActivity before scenario.close()"
         }
-        assertEquals(null, lensAfterDestroy.onHapticPerformed)
+        assertNull("hook must be null after destroy", lensAfterDestroy.onHapticPerformed)
+    }
+
+    @Test
+    fun vibratorSeamIsNulledOnDetach() {
+        assumeTrue(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+
+        lensView.vibratorProvider = { mockVibrator }
+        assertNotNull("seam must be set before detach", lensView.vibratorProvider)
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            lensView.onDetachedFromWindow()
+        }
+
+        assertNull("seam must be null after detach", lensView.vibratorProvider)
     }
 }

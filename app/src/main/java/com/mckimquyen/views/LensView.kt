@@ -1597,6 +1597,7 @@ class LensView : View {
             setAccessibilityDelegate(null)
             // Null toàn bộ references để GC thu hồi
             onHapticPerformed = null
+            vibratorProvider = null  // FISH-020: null the test seam
             mApps = null
             mUtilSettings = null
             mPackageManager = null
