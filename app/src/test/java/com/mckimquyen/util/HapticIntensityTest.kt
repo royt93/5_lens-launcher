@@ -1,42 +1,39 @@
 package com.mckimquyen.util
 
-import android.view.HapticFeedbackConstants
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class HapticIntensityTest {
 
     @Test
-    fun `light maps to clock tick`() {
-        assertEquals(HapticFeedbackConstants.CLOCK_TICK, HapticIntensity.LIGHT.feedbackConstant)
+    fun `light has duration 20ms and amplitude 80`() {
+        assertEquals(20L, HapticIntensity.LIGHT.duration)
+        assertEquals(80, HapticIntensity.LIGHT.amplitude)
     }
 
     @Test
-    fun `medium maps to virtual key which is the pre-existing behavior`() {
-        assertEquals(HapticFeedbackConstants.VIRTUAL_KEY, HapticIntensity.MEDIUM.feedbackConstant)
-    }
-
-    /**
-     * Measured on TECNO BG6 (Android 13) via `dumpsys vibrator_manager`: CONFIRM and VIRTUAL_KEY both
-     * played CLICK, so "Strong" felt identical to "Medium". LONG_PRESS played HEAVY_CLICK there.
-     */
-    @Test
-    fun `strong maps to long press`() {
-        assertEquals(HapticFeedbackConstants.LONG_PRESS, HapticIntensity.STRONG.feedbackConstant)
+    fun `medium has duration 40ms and amplitude 128`() {
+        assertEquals(40L, HapticIntensity.MEDIUM.duration)
+        assertEquals(128, HapticIntensity.MEDIUM.amplitude)
     }
 
     @Test
-    fun `the three levels produce three distinct constants`() {
-        val constants = HapticIntensity.entries.map { it.feedbackConstant }.toSet()
-        assertEquals(HapticIntensity.entries.size, constants.size)
+    fun `strong has duration 70ms and amplitude 200`() {
+        assertEquals(70L, HapticIntensity.STRONG.duration)
+        assertEquals(200, HapticIntensity.STRONG.amplitude)
     }
 
     @Test
-    fun `no level uses confirm which needs api 30 and played the same effect as medium on device`() {
-        for (level in HapticIntensity.entries) {
-            assertNotEquals(HapticFeedbackConstants.CONFIRM, level.feedbackConstant)
-        }
+    fun `durations strictly increase`() {
+        assertTrue(HapticIntensity.LIGHT.duration < HapticIntensity.MEDIUM.duration)
+        assertTrue(HapticIntensity.MEDIUM.duration < HapticIntensity.STRONG.duration)
+    }
+
+    @Test
+    fun `amplitudes strictly increase`() {
+        assertTrue(HapticIntensity.LIGHT.amplitude < HapticIntensity.MEDIUM.amplitude)
+        assertTrue(HapticIntensity.MEDIUM.amplitude < HapticIntensity.STRONG.amplitude)
     }
 
     @Test
@@ -58,5 +55,4 @@ class HapticIntensityTest {
         assertEquals(HapticIntensity.DEFAULT, HapticIntensity.from(Int.MAX_VALUE))
         assertEquals(HapticIntensity.DEFAULT, HapticIntensity.from(Int.MIN_VALUE))
     }
-
 }

@@ -1,26 +1,29 @@
 package com.mckimquyen.util
 
-import android.view.HapticFeedbackConstants
-
 /**
- * FISH-017: one shared strength for the hover and launch haptics. [MEDIUM] is
- * [HapticFeedbackConstants.VIRTUAL_KEY], what `LensView` always used, so it is the default and an
- * install that never touches the setting behaves exactly as before.
- *
- * [STRONG] is LONG_PRESS, not CONFIRM: on TECNO BG6 (Android 13) `dumpsys vibrator_manager` showed
- * CONFIRM and VIRTUAL_KEY both playing CLICK, so "Strong" felt like "Medium", while LONG_PRESS
- * played HEAVY_CLICK. LONG_PRESS also exists on every supported API level, so no version gate.
+ * FISH-020: Haptic intensity with explicit duration (ms) and amplitude (0–255) for each level.
+ * Values tuned on TECNO KJ7 to ensure clear differentiation across devices.
+ * API 25 (minSdk) falls back to performHapticFeedback(VIRTUAL_KEY) for all levels.
  */
 enum class HapticIntensity {
-    LIGHT,
-    MEDIUM,
-    STRONG;
+    LIGHT,      // 20 ms, amplitude 80
+    MEDIUM,     // 40 ms, amplitude 128
+    STRONG;     // 70 ms, amplitude 200
 
-    val feedbackConstant: Int
+    /** Duration in milliseconds. */
+    val duration: Long
         get() = when (this) {
-            LIGHT -> HapticFeedbackConstants.CLOCK_TICK
-            MEDIUM -> HapticFeedbackConstants.VIRTUAL_KEY
-            STRONG -> HapticFeedbackConstants.LONG_PRESS
+            LIGHT -> 20L
+            MEDIUM -> 40L
+            STRONG -> 70L
+        }
+
+    /** Vibration amplitude (0–255; ignored on motors without amplitude control). */
+    val amplitude: Int
+        get() = when (this) {
+            LIGHT -> 80
+            MEDIUM -> 128
+            STRONG -> 200
         }
 
     companion object {

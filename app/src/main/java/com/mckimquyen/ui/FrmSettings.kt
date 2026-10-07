@@ -433,8 +433,25 @@ class FrmSettings : Fragment(), SettingsInterface {
     private fun previewHaptic(anchor: View, level: HapticIntensity) {
         val ctx = context ?: return
         if (LensPhysicsPolicy.shouldReduceLensMotion(ctx)) return
-        onPreviewHapticPerformed?.invoke(level.feedbackConstant)
-        anchor.performHapticFeedback(level.feedbackConstant)
+
+        // FISH-020: use VibrationEffect on API 26+, fallback to performHapticFeedback on API 25
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            val vibrator = ctx.getSystemService(android.content.Context.VIBRATOR_SERVICE) as? android.os.Vibrator
+            if (vibrator != null && vibrator.hasVibrator()) {
+                try {
+                    val effect = android.os.VibrationEffect.createOneShot(level.duration, level.amplitude)
+                    vibrator.vibrate(effect)
+                    onPreviewHapticPerformed?.invoke(level.amplitude)
+                } catch (e: Exception) {
+                    // Gracefully handle any vibrator errors; fall back to legacy
+                    anchor.performHapticFeedback(android.view.HapticFeedbackConstants.VIRTUAL_KEY)
+                }
+            }
+        } else {
+            // API 25: fallback to performHapticFeedback
+            anchor.performHapticFeedback(android.view.HapticFeedbackConstants.VIRTUAL_KEY)
+            onPreviewHapticPerformed?.invoke(android.view.HapticFeedbackConstants.VIRTUAL_KEY)
+        }
     }
 
     override fun onDefaultsReset() {

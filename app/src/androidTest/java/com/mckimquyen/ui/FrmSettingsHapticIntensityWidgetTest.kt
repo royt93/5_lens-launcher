@@ -243,7 +243,8 @@ class FrmSettingsHapticIntensityWidgetTest {
                 fragment.requireView().findViewById<android.view.View>(R.id.btnHapticStrong).performClick()
             }
         }
-        assertEquals(listOf(HapticIntensity.STRONG.feedbackConstant), performed)
+        // FISH-020: seam now passes amplitude (200 for STRONG) instead of feedbackConstant
+        assertEquals(listOf(HapticIntensity.STRONG.amplitude), performed)
     }
 
     @Test

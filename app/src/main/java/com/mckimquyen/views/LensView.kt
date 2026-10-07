@@ -6,8 +6,11 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.*
 import android.graphics.drawable.NinePatchDrawable
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.os.Vibrator
+import android.os.VibrationEffect
 import android.util.AttributeSet
 import android.view.ContextThemeWrapper
 import android.view.Gravity
@@ -271,6 +274,11 @@ class LensView : View {
     // performed. Nulled on detach so the view never keeps a test lambda (and its captures) alive.
     @VisibleForTesting
     internal var onHapticPerformed: ((Int) -> Unit)? = null
+
+    // FISH-020: injectable Vibrator provider for testing; defaults to system service.
+    @VisibleForTesting
+    internal var vibratorProvider: (() -> Vibrator?)? = null
+
     private var mSelectIndex = 0
     private var mSourceApps: ArrayList<App>? = null
     private var mApps: ArrayList<App>? = null
@@ -1426,9 +1434,29 @@ class LensView : View {
 
     private fun performIntensityHaptic() {
         val level = mUtilSettings?.getHapticIntensity() ?: HapticIntensity.DEFAULT
-        val constant = level.feedbackConstant
-        onHapticPerformed?.invoke(constant)
-        performHapticFeedback(constant)
+
+        // API 26+: use VibrationEffect for duration/amplitude control
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val vibrator = vibratorProvider?.invoke()
+                ?: context.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
+
+            if (vibrator != null && vibrator.hasVibrator()) {
+                try {
+                    val effect = VibrationEffect.createOneShot(
+                        level.duration,
+                        level.amplitude
+                    )
+                    vibrator.vibrate(effect)
+                    onHapticPerformed?.invoke(level.amplitude) // encode amplitude in seam for test verification
+                } catch (e: Exception) {
+                    // Gracefully handle any vibrator errors
+                }
+            }
+        } else {
+            // API 25: fallback to performHapticFeedback (acceptable baseline per FISH-017)
+            performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+            onHapticPerformed?.invoke(HapticFeedbackConstants.VIRTUAL_KEY)
+        }
     }
 
     private fun performHoverVibration() {
