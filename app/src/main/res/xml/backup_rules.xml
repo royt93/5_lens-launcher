@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- REL-002: legacy (API < 31) auto-backup. Layout/lens data (Room + default prefs) is kept;
+     entitlement, search history and review state are device-local. -->
+<full-backup-content>
+    <exclude domain="sharedpref" path="vip_screen_prefs.xml" />
+    <exclude domain="sharedpref" path="app_search_history.xml" />
+    <exclude domain="sharedpref" path="app_preferences.xml" />
+</full-backup-content>

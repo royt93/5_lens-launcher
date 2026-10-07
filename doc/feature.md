@@ -37,7 +37,7 @@ Source of truth for implementation choices in this session. Detailed acceptance 
 
 ## 🟡 In progress
 
-- None.
+- **REL-2026.10.07 — Chuẩn bị release store (07/10/2026)**: audit tĩnh xong; code-side đã bump version, thêm backup rules (`BackupRulesTest` 3/3), R8 release build + 16 KB zipalign OK, unit 725/725. Owner quyết (07/10): giữ rewarded ID test, skip consent ADS-001, giữ 3 permission nhạy cảm, dùng key hiện tại (SEC-001 để sau). Còn lại: smoke TECNO + audit >9. Xem `doc/task/RELEASE_OWNER_CHECKLIST.md`.
 
 ## 📋 Picked
 
