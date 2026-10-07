@@ -51,31 +51,30 @@ Replaced system constants with duration + amplitude tuple:
 
 ## Verification
 
-### Code Coverage
-- JVM unit tests: 8/8 pass (HapticIntensity properties and ordering)
-- Integration tests: 6/6 pass (gates, switches, seams)
-- Lint: 0 new errors
-- Regression: full suite baseline maintained
+All device work on TECNO KJ7 `115333744A005844` only, via direct `adb -s`; no Gradle `connected*` task. Pixel/S24U never addressed.
 
-### Device Smoke (TECNO KJ7 Android 14)
+| Layer | Result |
+|---|---|
+| JVM unit (`testDevDebugUnitTest --rerun-tasks`) | **722 / 722**, 0 failures (8 in `HapticIntensityTest`) |
+| Lint (`lintDevDebug`) | 0 errors, 0 fatal, 8 warnings (= baseline) |
+| Full instrumented on KJ7 | **504 run, 500 pass, 3 skipped (assumptions), 1 fail** |
+| Failing test rerun alone | `ActHomeMultiLensRecentAppsIntegrationTest` OK x3; not touched by this diff, one-off in the full run |
+| Haptic classes alone | `LensViewHapticIntensityIntegrationTest` 6/6, `FrmSettingsHapticIntensityWidgetTest` 13/13 |
 
-**Device state:** TECNO KJ7 (115333744A005844), 1080×2436, system haptic_feedback_enabled=0 (disabled by user/prior testing)
+Skipped: 2 DND tests (device DND on) and `reducedMotion_preventsHaptic` (reduced motion not forced on KJ7), so the reduced-motion gate is not exercised on device by the new test.
 
-**Dumpsys Evidence:**
-```
-createTime: 10-07 14:10:10.699, durationMs: 0 (metadata only; actual timing in effect),
-effect: Mono{mEffect=Composed{segments=[Step{amplitude=0.5019608, frequencyHz=0.0, duration=40}], repeat=-1}},
-opPkg=com.mckimquyen.lenslauncher
-```
+### Device smoke (KJ7, Android 14)
 
-**Findings:**
-- ✅ MEDIUM level (40ms, amplitude 128) confirmed firing with correct duration
-- ✅ System recorded amplitude 0.5 (normalized to 0–1 scale; maps to amplitude 128/255)
-- ⚠️ System haptic_feedback_enabled=0 caused all vibrations to report `ignored_for_settings` — no hand-feel verification possible without re-enabling system haptics
-- ✅ VibrationEffect created with correct parameters; system gating prevents execution
-- ✅ App successfully calls vibrate(effect) on MEDIUM tap; dumpsys shows the 40ms duration
+First run had `haptic_feedback_enabled=0`, so every record was `ignored_for_settings`. After enabling it, tapping Nhe / Vua / Manh in Settings produced `finished` records:
 
-**Limitation:** Final hand-feel comparison (LIGHT < MEDIUM < STRONG distinctness) requires system haptics enabled. Duration/amplitude values confirmed correct via code inspection and dumpsys call parameters.
+| Level | System record | Code |
+|---|---|---|
+| Nhe | `duration=20`, `amplitude=0.314` | 20 ms / 80 |
+| Vua | `duration=40`, `amplitude=0.502` | 40 ms / 128 |
+| Manh | `duration=70`, `amplitude=0.784` | 70 ms / 200 |
+
+KJ7 motor reports `mCapabilities=[]` (no amplitude control), so only duration separates the levels there.
+Setting restored to `0` afterwards.
 
 ## Scope & Non-Scope
 
@@ -114,34 +113,13 @@ opPkg=com.mckimquyen.lenslauncher
 5. `app/src/androidTest/java/com/mckimquyen/views/LensViewHapticIntensityIntegrationTest.kt` — 6 integration tests
 6. `app/src/androidTest/java/com/mckimquyen/ui/FrmSettingsHapticIntensityWidgetTest.kt` — seam expectation updated
 
-## Test Results Summary
-
-| Layer | Result | Notes |
-|---|---|---|
-| JVM unit | 722/722 pass (8 new) | Duration/amplitude/ordering/edge cases all green |
-| Lint | 0 errors | No new warnings |
-| Integration | 6/6 pass | Gates, seams, lifecycle verified |
-| Regression | baseline maintained | No existing test failures introduced |
-| Device smoke | dumpsys confirmed | TECNO KJ7: effect fired with 40ms duration, amplitude 128 encoded correctly |
-
 ## Audit
 
-Self-audit: **9.1/10**
-
-| Dimension | Score | Notes |
-|---|---|---|
-| Correctness | 9.0 | Duration/amplitude confirmed via dumpsys; hand-feel deferred to user re-enabling system haptics |
-| Test coverage | 9.5 | Unit + integration + lifecycle seam tests; VibrationEffect internals not inspectable post-creation |
-| Regression safety | 9.5 | Full suite green; old constant-based tests replaced cleanly |
-| Lifecycle/resources | 9.0 | Both seams nulled on detach; no lingering references |
-| Scope discipline | 9.5 | Only LensView/FrmSettings in scope; user-customizable amplitude deferred |
-| Device verification | 8.5 | Code-path verified on TECNO KJ7; hand-feel deferred (system haptics disabled) |
-
-Deductions: hand-feel comparison requires device re-enabling system haptics (user action, not code); VibrationEffect duration/amplitude cannot be inspected at runtime (accepted trade-off vs. reflection).
+Self-audit **pending owner hand-feel check**. Not scored above the push gate until the owner confirms the three levels feel distinct on KJ7 (not measurable by `dumpsys`). Open items: hand-feel unconfirmed; `reducedMotion_preventsHaptic` skipped on device; integration tests prove gates and seams, not the `VibrationEffect` arguments (those are proven by the `dumpsys` records above); one unrelated flake in the full run.
 
 ## Next
 
-Ready to merge pending manual hand-feel verification once system haptics re-enabled on device. FEAT-010 (auto-switch lens by schedule) planned for next sprint.
+Not pushed. Waiting on owner hand-feel verdict; if Vua and Manh feel alike, raise Manh duration (e.g. 100 ms). FEAT-010 (auto-switch lens by schedule) planned for next sprint.
 
 ---
 

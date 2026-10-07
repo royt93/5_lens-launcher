@@ -3,10 +3,7 @@ package com.mckimquyen.views
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Rect
-import android.os.Build
 import android.os.SystemClock
-import android.os.Vibrator
-import android.os.VibrationEffect
 import android.view.ContextThemeWrapper
 import android.view.MotionEvent
 import androidx.preference.PreferenceManager
@@ -186,7 +183,9 @@ class LensViewHapticIntensityIntegrationTest {
                 "lensViews must be found while the Activity is alive"
             }
             found.onHapticPerformed = { }
+            found.vibratorProvider = { null }
             assertNotNull("hook must be non-null before destroy", found.onHapticPerformed)
+            assertNotNull("vibrator seam must be non-null before destroy", found.vibratorProvider)
             homeLens = found
         }
         scenario.close()
@@ -195,19 +194,6 @@ class LensViewHapticIntensityIntegrationTest {
             "homeLens must have been set by onActivity before scenario.close()"
         }
         assertNull("hook must be null after destroy", lensAfterDestroy.onHapticPerformed)
-    }
-
-    @Test
-    fun vibratorSeamIsNulledOnDetach() {
-        assumeTrue(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-
-        lensView.vibratorProvider = { context.getSystemService(android.content.Context.VIBRATOR_SERVICE) as? Vibrator }
-        assertNotNull("seam must be set before detach", lensView.vibratorProvider)
-
-        InstrumentationRegistry.getInstrumentation().runOnMainSync {
-            lensView.onDetachedFromWindow()
-        }
-
-        assertNull("seam must be null after detach", lensView.vibratorProvider)
+        assertNull("vibrator seam must be null after destroy", lensAfterDestroy.vibratorProvider)
     }
 }
