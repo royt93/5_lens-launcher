@@ -168,6 +168,11 @@ class UtilSettings(context: Context) {
 
         // FISH-008 Phase 2: which LensWorkspace.id the home screen is currently showing.
         const val KEY_ACTIVE_LENS_ID = "active_lens_id"
+
+        /** FISH-021: per-lens app scope, selection and frozen flag (suffixed `_<lensId>`, never inherited). */
+        const val KEY_LENS_APP_SCOPE = "lens_app_scope"
+        const val KEY_LENS_APP_SELECTION = "lens_app_selection"
+        const val KEY_LENS_FROZEN = "lens_frozen"
     }
 
     fun save(name: String?, value: Int) {
@@ -402,6 +407,34 @@ class UtilSettings(context: Context) {
         save(lensKey(KEY_ICON_SIZE, lensId), value)
     }
 
+    // FISH-021: unlike distortion/icon size these never fall back to the shared key - the default
+    // lens owns the unsuffixed key, so a fallback would copy its selection into every new lens.
+    // Each read goes through runCatching so one wrong-typed value can never crash a draw or bind.
+    fun getLensAppScope(lensId: String?): LensAppScope =
+        runCatching { prefs.getString(lensKey(KEY_LENS_APP_SCOPE, lensId), null) }
+            .getOrNull()
+            .let(LensAppScope::fromStored)
+
+    fun saveLensAppScope(lensId: String?, scope: LensAppScope) {
+        save(lensKey(KEY_LENS_APP_SCOPE, lensId), scope.name)
+    }
+
+    fun getLensAppSelection(lensId: String?): Set<String> =
+        runCatching { prefs.getStringSet(lensKey(KEY_LENS_APP_SELECTION, lensId), null)?.toSet() }
+            .getOrNull() ?: emptySet()
+
+    fun saveLensAppSelection(lensId: String?, ids: Set<String>) {
+        // Copy: SharedPreferences must never be handed a set the caller can still mutate.
+        prefs.edit { putStringSet(lensKey(KEY_LENS_APP_SELECTION, lensId), HashSet(ids)) }
+    }
+
+    fun isLensFrozen(lensId: String?): Boolean =
+        runCatching { prefs.getBoolean(lensKey(KEY_LENS_FROZEN, lensId), false) }.getOrDefault(false)
+
+    fun saveLensFrozen(lensId: String?, frozen: Boolean) {
+        save(lensKey(KEY_LENS_FROZEN, lensId), frozen)
+    }
+
     /** FISH-012: null means no pinch was left unresolved for this lens. */
     fun getPendingDistortionFactor(lensId: String?): Float? {
         val key = lensKey(KEY_PENDING_DISTORTION_FACTOR, lensId)
@@ -452,6 +485,9 @@ class UtilSettings(context: Context) {
         saveDistortionFactor(toLensId, distortion)
         saveSmartFocusBias(toLensId, smartFocus)
         saveIconSize(toLensId, getIconSize(fromLensId))
+        saveLensAppScope(toLensId, getLensAppScope(fromLensId))
+        saveLensAppSelection(toLensId, getLensAppSelection(fromLensId))
+        saveLensFrozen(toLensId, isLensFrozen(fromLensId))
         // FISH-015: only carry the Custom distortion forward once a real Custom preset already
         // exists somewhere - otherwise getCustomDistortionFactor() is merely falling back to the
         // live distortion above, which is not a saved preset. Materializing that fallback as a
@@ -468,6 +504,9 @@ class UtilSettings(context: Context) {
                 remove("${KEY_DISTORTION_FACTOR}_$lensId")
                 remove("${KEY_SMART_FOCUS_BIAS}_$lensId")
                 remove("${KEY_ICON_SIZE}_$lensId")
+                remove("${KEY_LENS_APP_SCOPE}_$lensId")
+                remove("${KEY_LENS_APP_SELECTION}_$lensId")
+                remove("${KEY_LENS_FROZEN}_$lensId")
                 remove("${KEY_PENDING_DISTORTION_FACTOR}_$lensId")
                 remove("${KEY_CUSTOM_DISTORTION_FACTOR}_$lensId")
             }
