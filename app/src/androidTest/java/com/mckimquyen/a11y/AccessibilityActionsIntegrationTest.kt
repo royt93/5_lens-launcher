@@ -71,6 +71,9 @@ class AccessibilityActionsIntegrationTest {
             val label = "Accessible Hidden Test"
 
             val testApp = App(id = 999, label = label, packageName = pkg, name = name, isVisible = true)
+            // Restore the real snapshot afterwards: clearAllData() alone leaves the shared singleton
+            // empty and breaks later tests that need apps (e.g. AdaptiveOrientationWidgetTest's LIST mode).
+            val originalApps = com.mckimquyen.app.RAppsSingleton.instance.apps
             com.mckimquyen.app.RAppsSingleton.instance.apps = arrayListOf(testApp)
 
             try {
@@ -96,7 +99,7 @@ class AccessibilityActionsIntegrationTest {
                 assertFalse("App must now be hidden in AppPersistent", AppPersistent.getAppVisibility(pkg, name))
             } finally {
                 AppPersistent.setAppVisibility(pkg, name, true)
-                com.mckimquyen.app.RAppsSingleton.instance.clearAllData()
+                com.mckimquyen.app.RAppsSingleton.instance.apps = originalApps
             }
         }
 
