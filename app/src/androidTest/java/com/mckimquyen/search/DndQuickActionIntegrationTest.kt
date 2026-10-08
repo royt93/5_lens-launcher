@@ -35,6 +35,19 @@ class DndQuickActionIntegrationTest {
             .use { it.readText() }
     }
 
+    /**
+     * `setInterruptionFilter` is asynchronous: reading `currentInterruptionFilter` right after it can
+     * still return the old value (observed up to ~22ms on an OPPO CPH1989). Poll until it settles.
+     */
+    private fun setFilterAndAwait(filter: Int): Int {
+        notificationManager().setInterruptionFilter(filter)
+        val deadline = System.nanoTime() + FILTER_SETTLE_TIMEOUT_MS * NANOS_PER_MS
+        while (notificationManager().currentInterruptionFilter != filter && System.nanoTime() < deadline) {
+            Thread.sleep(FILTER_POLL_INTERVAL_MS)
+        }
+        return notificationManager().currentInterruptionFilter
+    }
+
     private fun allowDnd() = runShell("cmd notification allow_dnd $packageName")
     private fun disallowDnd() = runShell("cmd notification disallow_dnd $packageName")
 
@@ -82,13 +95,13 @@ class DndQuickActionIntegrationTest {
                 notificationManager().isNotificationPolicyAccessGranted
             )
 
-            notificationManager().setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_ALL)
+            setFilterAndAwait(NotificationManager.INTERRUPTION_FILTER_ALL)
             assertEquals(
                 QuickAction.DndToggle("dnd", isOn = false),
                 QuickActionEngine.resolveDnd(context, "dnd")
             )
 
-            notificationManager().setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_NONE)
+            setFilterAndAwait(NotificationManager.INTERRUPTION_FILTER_NONE)
             assertEquals(
                 QuickAction.DndToggle("dnd", isOn = true),
                 QuickActionEngine.resolveDnd(context, "dnd")
@@ -103,23 +116,27 @@ class DndQuickActionIntegrationTest {
         assumeSystemDndIsOff()
         allowDnd()
         try {
-            notificationManager().setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_ALL)
+            setFilterAndAwait(NotificationManager.INTERRUPTION_FILTER_ALL)
 
             // Same side effect ActHome.performDndToggle() performs on tap.
-            notificationManager().setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_NONE)
             assertEquals(
                 "real system DND state must actually flip, not just this app's cached view of it",
                 NotificationManager.INTERRUPTION_FILTER_NONE,
-                notificationManager().currentInterruptionFilter
+                setFilterAndAwait(NotificationManager.INTERRUPTION_FILTER_NONE)
             )
 
-            notificationManager().setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_ALL)
             assertEquals(
                 NotificationManager.INTERRUPTION_FILTER_ALL,
-                notificationManager().currentInterruptionFilter
+                setFilterAndAwait(NotificationManager.INTERRUPTION_FILTER_ALL)
             )
         } finally {
             notificationManager().setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_ALL)
         }
+    }
+
+    private companion object {
+        const val FILTER_SETTLE_TIMEOUT_MS = 3_000L
+        const val FILTER_POLL_INTERVAL_MS = 5L
+        const val NANOS_PER_MS = 1_000_000L
     }
 }
