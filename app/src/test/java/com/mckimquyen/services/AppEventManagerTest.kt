@@ -33,6 +33,33 @@ class AppEventManagerTest {
     }
 
     @Test
+    fun `notifyLensScopeChanged delivers the lens id to observers`() {
+        val observer = mock<Observer<Any?>>()
+        AppEventManager.lensScopeChanged.observeForever(observer)
+
+        AppEventManager.notifyLensScopeChanged("work-lens-id")
+
+        verify(observer, times(1)).onChanged("work-lens-id")
+        AppEventManager.lensScopeChanged.removeObserver(observer)
+    }
+
+    @Test
+    fun `notifyLensScopeChanged does not fire the other app events`() {
+        val edited = mock<Observer<Any?>>()
+        val loaded = mock<Observer<Any?>>()
+        AppEventManager.appsEdited.observeForever(edited)
+        AppEventManager.appsLoaded.observeForever(loaded)
+        // LiveData replays the last value to a new observer; clear that replay before asserting.
+        org.mockito.kotlin.clearInvocations(edited, loaded)
+
+        AppEventManager.notifyLensScopeChanged("work-lens-id")
+
+        org.mockito.kotlin.verifyNoInteractions(edited, loaded)
+        AppEventManager.appsEdited.removeObserver(edited)
+        AppEventManager.appsLoaded.removeObserver(loaded)
+    }
+
+    @Test
     fun `test notify apps loaded triggers observer`() {
         // Given
         val observer = mock<Observer<Any?>>()

@@ -53,4 +53,29 @@ class LensAppScopeTest {
         assertEquals(LensAppScope.ALL, LensAppScope.fromStored("bogus"))
         assertEquals(LensAppScope.SELECTED, LensAppScope.fromStored("SELECTED"))
     }
+
+    @Test
+    fun `filter keeps the input order`() {
+        val maps = app("com.maps", "Main")
+        val result = LensAppScope.filter(
+            listOf(maps, mail, chat), LensAppScope.SELECTED,
+            setOf(LensAppScope.identifierOf(chat), LensAppScope.identifierOf(maps))
+        )
+        assertEquals(listOf(maps, chat), result)
+    }
+
+    @Test
+    fun `filter never mutates its input`() {
+        val input = arrayListOf(mail, chat)
+        LensAppScope.filter(input, LensAppScope.SELECTED, setOf(LensAppScope.identifierOf(mail)))
+        assertEquals(listOf(mail, chat), input)
+    }
+
+    @Test
+    fun `the same package with a different activity name is a different app`() {
+        val a = app("com.same", "ActA")
+        val b = app("com.same", "ActB")
+        val result = LensAppScope.filter(listOf(a, b), LensAppScope.SELECTED, setOf(LensAppScope.identifierOf(a)))
+        assertEquals(listOf(a), result)
+    }
 }
