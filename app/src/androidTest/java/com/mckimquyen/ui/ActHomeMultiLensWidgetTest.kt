@@ -31,6 +31,11 @@ class ActHomeMultiLensWidgetTest {
     @After
     fun tearDown(): Unit {
         cleanDb()
+        // savedActiveLens_isRestoredOnLaunch points the saved active lens at one that cleanDb()
+        // then deletes. Left behind, the next test to open ActHome sees a "different" lens and
+        // calls switchLens(), whose real PackageManager merge overwrites that test's seeded apps.
+        com.mckimquyen.util.UtilSettings(InstrumentationRegistry.getInstrumentation().targetContext)
+            .save(com.mckimquyen.util.UtilSettings.KEY_ACTIVE_LENS_ID, LensWorkspace.DEFAULT_LENS_ID)
     }
 
     private fun cleanDb() = runBlocking {

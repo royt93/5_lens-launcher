@@ -282,6 +282,7 @@ class LensView : View {
     private var mSelectIndex = 0
     private var mSourceApps: ArrayList<App>? = null
     private var mApps: ArrayList<App>? = null
+    internal val appsForTest: List<App>? get() = mApps
     private var mSmartFocusCols = -1
     private var mSmartFocusRows = -1
     private var mPackageManager: PackageManager? = null

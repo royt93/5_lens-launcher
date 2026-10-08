@@ -1,5 +1,7 @@
 package com.mckimquyen.util
 
+import com.mckimquyen.services.AppEventManager
+
 /**
  * FISH-021: the single writer of a lens's app scope. The Apps tab, the lens-menu checklist and
  * the grid's "Remove from this lens" all go through here, so none of them can leave a lens
@@ -25,6 +27,7 @@ class LensAppScopeEditor(private val settings: UtilSettings) {
         val scope = if (ids.isEmpty()) LensAppScope.ALL else LensAppScope.SELECTED
         settings.saveLensAppSelection(lensId, ids)
         settings.saveLensAppScope(lensId, scope)
+        AppEventManager.notifyLensScopeChanged(lensId)
         return scope
     }
 }

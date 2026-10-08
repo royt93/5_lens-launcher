@@ -74,6 +74,7 @@ import com.mckimquyen.search.SearchEnterKeyPolicy;
 import com.mckimquyen.search.SearchHistoryStore;
 import com.mckimquyen.search.SearchResultAdapter;
 import com.mckimquyen.util.ApertureRevealHelper;
+import com.mckimquyen.util.LensAppScope;
 import com.mckimquyen.util.LensLabelResolver;
 import com.mckimquyen.util.Logger;
 import com.mckimquyen.util.PolaroidExportHelper;
@@ -204,7 +205,7 @@ public class ActHome extends ActBase {
             if (view != null) {
                 lensViews = view;
                 if (listApp != null) {
-                    view.setApps(listApp);
+                    view.setApps(scopedApps(view.getLensId()));
                 }
             }
             if (position >= 0 && position < currentLenses.size()) {
@@ -316,6 +317,8 @@ public class ActHome extends ActBase {
 
         AppEventManager.INSTANCE.getLockChanged().observe(this,
                 data -> assignApps(Objects.requireNonNull(RAppsSingleton.getInstance().getApps())));
+
+        AppEventManager.INSTANCE.getLensScopeChanged().observe(this, data -> refreshLensScope());
 
         AppEventManager.INSTANCE.getBackgroundChanged().observe(this, data -> setBackground());
 
@@ -666,7 +669,7 @@ public class ActHome extends ActBase {
         if (lensViews == null || lensViews == view || isActiveLensPage) {
             lensViews = view;
             if (listApp != null) {
-                view.setApps(listApp);
+                view.setApps(scopedApps(view.getLensId()));
             }
             maybeShowResurrectSnackbar(lens);
             // B3 (test-audit): must fire from here, the exact point lensViews first becomes
@@ -1825,6 +1828,25 @@ public class ActHome extends ActBase {
         return true;
     }
 
+    /** FISH-021: {@code listApp} narrowed by one lens's scope. Search keeps using the full {@code listApp}. */
+    private ArrayList<App> scopedApps(String lensId) {
+        if (listApp == null || utilSettings == null) return listApp;
+        return LensAppScope.filter(listApp,
+                utilSettings.getLensAppScope(lensId), utilSettings.getLensAppSelection(lensId));
+    }
+
+    /** FISH-021: re-applies each bound page's scope after a selection change. */
+    @androidx.annotation.VisibleForTesting
+    void refreshLensScope() {
+        if (listApp == null) return;
+        for (int i = 0; i < currentLenses.size(); i++) {
+            LensView page = lensViewAt(i);
+            if (page != null) {
+                page.setApps(scopedApps(page.getLensId()));
+            }
+        }
+    }
+
     private void assignApps(ArrayList<App> lApp) {
         Logger.d("ActHome: assignApps called, input list size: " + (lApp != null ? lApp.size() : "null"));
         if (lApp == null || lApp.isEmpty()) {
@@ -1869,7 +1891,7 @@ public class ActHome extends ActBase {
         listApp = visibleApps;
         Logger.d("ActHome: Setting " + listApp.size() + " apps to lensViews and homeAppAdapter");
         if (lensViews != null) {
-            lensViews.setApps(listApp);
+            lensViews.setApps(scopedApps(lensViews.getLensId()));
         }
         if (homeAppAdapter != null) {
             homeAppAdapter.updateApps(listApp);

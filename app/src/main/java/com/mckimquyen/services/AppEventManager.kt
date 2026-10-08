@@ -32,6 +32,10 @@ object AppEventManager {
     private val _appsEdited = MutableLiveData<Any?>()
     val appsEdited: LiveData<Any?> = _appsEdited
 
+    // FISH-021: a lens's app selection changed; ActHome re-filters every bound page.
+    private val _lensScopeChanged = MutableLiveData<Any?>()
+    val lensScopeChanged: LiveData<Any?> = _lensScopeChanged
+
     // LiveData cho sự kiện background changed
     private val _backgroundChanged = MutableLiveData<Any?>()
     val backgroundChanged: LiveData<Any?> = _backgroundChanged
@@ -73,6 +77,10 @@ object AppEventManager {
      */
     fun notifyAppsEdited(data: Any? = null) {
         _appsEdited.postValue(data)
+    }
+
+    fun notifyLensScopeChanged(data: Any? = null) {
+        _lensScopeChanged.postValue(data)
     }
 
     /**
