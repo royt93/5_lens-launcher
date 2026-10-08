@@ -173,6 +173,8 @@ public class ActHome extends ActBase {
     // prefetched page can't clobber it with the wrong lens's view.
     LensView lensViews;
     private ViewPager2 lensPager;
+    // Held so onDestroy can detach() it: the mediator registers observers on the pager/adapter.
+    private TabLayoutMediator lensTabMediator;
     private TabLayout lensPageIndicator;
     private TextView tvLensName;
     private LensPagerAdapter lensPagerAdapter;
@@ -470,8 +472,9 @@ public class ActHome extends ActBase {
             return Unit.INSTANCE;
         });
         lensPager.setAdapter(lensPagerAdapter);
-        new TabLayoutMediator(lensPageIndicator, lensPager,
-                (tab, position) -> tab.setIcon(R.drawable.lens_page_indicator_dot)).attach();
+        lensTabMediator = new TabLayoutMediator(lensPageIndicator, lensPager,
+                (tab, position) -> tab.setIcon(R.drawable.lens_page_indicator_dot));
+        lensTabMediator.attach();
         lensPager.registerOnPageChangeCallback(lensPageChangeCallback);
         lensPageIndicator.setOnLongClickListener(v -> {
             showLensManagementMenu(v);
@@ -1888,6 +1891,10 @@ public class ActHome extends ActBase {
 
     @Override
     protected void onDestroy() {
+        if (lensTabMediator != null) {
+            lensTabMediator.detach();
+            lensTabMediator = null;
+        }
         if (lensPager != null && lensPageChangeCallback != null) {
             lensPager.unregisterOnPageChangeCallback(lensPageChangeCallback);
         }

@@ -168,8 +168,8 @@
 | 3 | STORE-002 Add revision-safe project persistence | P1 | 5 |
 | 4 | REL-002 Add Play/privacy release gate | P1 | 8 |
 | 5 | TEST-001 Establish trustworthy CI test gates | P1 | 8 |
-| 6 | TEST-002 Build complete test coverage and Tecno smoke matrix | P1 | 8 |
-| 7 | AUDIT-001 Score every change round and gate push | P1 | 3 |
+| 6 | TEST-002 Build complete test coverage and Tecno smoke matrix | P1 | 8 (done, see Implemented) |
+| 7 | AUDIT-001 Score every change round and gate push | P1 | 3 (done, see Implemented) |
 
 Owner-approved 4-story delivery loop (2026-09-29): FISH-014 (done) → FISH-015 (done) → FEAT-009 (done) → UI-024 (done, including its 2026-10-01 wrap-up round). The loop's picked list is now exhausted — every remaining row above is blocked on external dependencies (`ADS-001`, `SEC-001`) or owner-declined categories (`store-assets`, `TEST-001`/`TEST-002`/`AUDIT-001`). Next loop needs a fresh owner pick or brainstorm.
 
@@ -186,7 +186,7 @@ Owner-approved 4-story delivery loop (2026-09-29): FISH-014 (done) → FISH-015 
 ## 💭 Ideas
 
 - Accessible list mode, large-screen support, store asset automation, local insights, privacy-first monetization, and five Fisheye Smart concepts remain captured as individual `idea` stories in `todo`.
-- `UI-021`/`PERF-004`/`FEAT-005` (2026-09-23, owner-picked from a ponytail-audit-triggered perf/Material You gap check): predictive back gesture, Baseline Profile cold-start, and a "keep screen on" toggle — scoped as full stories, see `todo/`. `FEAT-005` and `UI-021` shipped the same day (see Implemented); `PERF-004` remains in `todo/`.
+- `UI-021`/`PERF-004`/`FEAT-005` (2026-09-23, owner-picked from a ponytail-audit-triggered perf/Material You gap check): predictive back gesture, Baseline Profile cold-start, and a "keep screen on" toggle — scoped as full stories, see `todo/`. `FEAT-005` and `UI-021` shipped the same day (see Implemented); `PERF-004` shipped 2026-09-25 (see Implemented; file now in `done/`).
 - Scoped and shipped 2026-09-25 (see Implemented): themed/monochrome adaptive app icon (Android 13+, `<monochrome>` missing from `mipmap-anydpi-v26/ic_launcher.xml` — ties into the existing dynamic-color work from `UI-005`); `StrictMode` in debug builds to catch main-thread I/O/leaked closeables during development (dev-time only, zero user-facing risk).
 - `FISH-006`/`FEAT-006`/`UI-022` (2026-09-23, owner-picked exclusive-feature brainstorm, deliberately scoped to avoid the declined `ADS-001`/`INSIGHT-001`/`VIP-001`/`REL-002` chain): a lite re-scope of `FISH-001`'s Smart Focus using only the `open count` Room already persists (no new tracking), export/import of the existing layout data model, and lens-grid gesture shortcuts reusing `SEARCH-003`'s already-extracted intent helpers. `FISH-006` is explicitly a re-scope proposal for owner sign-off, not an automatic go — see the story file.
 - `SEARCH-007`/`SEARCH-008`/`FEAT-007` (2026-09-23, same brainstorm, round 2): DND/Focus quick toggle and QR-scan delegation follow the exact `QuickActionEngine`/`SEARCH-006` delegate-to-installed-app pattern (zero new dependency); multi-select bulk actions in the Apps tab uses native `ActionMode`, addressing the large-app-count pain point `UI-020` already documented live (346 apps on one owner device).
