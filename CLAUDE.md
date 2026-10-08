@@ -16,11 +16,16 @@ Two product flavors (dimension `type`): `dev` and `production` (app name differs
 
 ./gradlew testDevDebugUnitTest          # JVM unit tests (Robolectric + JUnit4 + Mockito)
 ./gradlew test --tests BitmapCacheTest  # single test class
-./run_tests.sh                          # convenience wrapper around `./gradlew test`, tees to test_output.log
+./run_tests.sh                          # wrapper: runs `./gradlew clean` first, then `./gradlew test`, tees to test_output.log
 
 ./gradlew connectedDevDebugAndroidTest  # instrumentation tests, needs a connected device/emulator
 ./gradlew lintDevDebug                  # Android Lint
+python3 scripts/test_release_signing_contract.py   # checks the release-signing contract above
 ```
+
+The only CI is `.github/workflows/secret-scan.yml` (gitleaks on push/PR to `dev`/`master`; `scripts/check-secrets.sh` is the local equivalent). There is no build/test CI by owner decision. Branches: work on `dev`, PRs target `master`.
+
+`:baselineprofile` is a second Gradle module (macrobenchmark, minSdk 28, always targets the `production` flavor) that generates the baseline profile and measures cold start; it is not shipped.
 
 Release signing (`assemble*Release`, `bundle*Release`) reads `ANDROID_RELEASE_STORE_FILE` / `_STORE_PASSWORD` / `_KEY_ALIAS` / `_KEY_PASSWORD` from the environment first, falling back to an untracked `keystore.properties` (copy `keystore.properties.example`). A release-artifact task throws a `GradleException` at configuration time if none of this is present; debug builds never need it.
 
@@ -34,7 +39,7 @@ Dependency verification is enabled (`gradle/verification-metadata.xml`, checksum
 
 **Eventing**: `services/AppEventManager` exposes these as LiveData; observe it directly. (The `services/*Observable.kt` backward-compat wrapper classes that used to sit in front of it — `EditedObservable`, `LoadedObservable`, etc. — were removed once an audit confirmed every call site had already migrated to `AppEventManager`.)
 
-**Persistence**: Room (`model/AppDatabase`, `model/AppPersistent`, `model/AppPersistentDao`) stores per-app user state that must survive process death and isn't re-derivable from `PackageManager` — visibility, lock, favorite/folder/pinned-zone organization (`model/AppOrganizationRules`, `model/PinnedZone`), open count, custom order. `AppPersistent` rows are keyed by `(LENS_ID, IDENTIFIER)` — see multi-lens workspaces below — with `OPEN_COUNT`/palette color staying global across lenses by design. All DB access is async; `model/App` itself is an immutable data class with `copyWith*` methods used to apply DB/organization updates onto the in-memory snapshot without mutating shared references.
+**Persistence**: Room (`model/AppDatabase`, `model/AppPersistent`, `model/AppPersistentDao`) stores per-app user state that must survive process death and isn't re-derivable from `PackageManager` — visibility, lock, favorite/folder/pinned-zone organization (`model/AppOrganizationRules`, `model/PinnedZone`), open count, custom order. `AppPersistent` rows are keyed by `(LENS_ID, IDENTIFIER)` — see multi-lens workspaces below — with `OPEN_COUNT`/palette color staying global across lenses by design. Schema is at version 12 with `exportSchema = true` (JSON snapshots in `app/schemas/`, written by the `room.schemaLocation` kapt arg) — a schema bump needs a migration plus the new snapshot committed. Backup is deliberately split: `res/xml/backup_rules.xml` (API < 31) and `data_extraction_rules.xml` (API 31+) keep Room/layout data but exclude entitlement (`vip_screen_prefs`), search history and `app_preferences` as device-local; keep both files in sync when adding a prefs file. All DB access is async; `model/App` itself is an immutable data class with `copyWith*` methods used to apply DB/organization updates onto the in-memory snapshot without mutating shared references.
 
 **UI shell**: `ui/ActSettings` (Java) is the `LAUNCHER`-category entry point; it hosts three tabs — `ui/FrmLens`, `ui/FrmApps`, `ui/FrmSettings` — via `adt/FragmentPagerAdapter` behind a `ViewPager2` + `TabLayoutMediator`. Each fragment casts its `context`/`activity` back to `ActSettings` to reach interfaces defined in `itf/` (`LensInterface`, `AppsInterface`, `SettingsInterface`) rather than holding a direct dependency. `ui/ActHome` is the separate `HOME`-category activity (what the OS launches when this app is set as the default launcher); `ui/ActFakeLauncher` is a disabled-by-default decoy activity toggled on/off at runtime purely to force the system's "choose default launcher" dialog. `ui/BaseActivity`/`ui/ActBase` centralize locale override (`util/LocaleHelper`, applied in `attachBaseContext`) and adaptive refresh-rate selection (API 30+).
 
@@ -51,6 +56,8 @@ Dependency verification is enabled (`gradle/verification-metadata.xml`, checksum
 ## Working with the backlog
 
 `doc/task/README.md` is the source of truth for product/engineering backlog and owner decisions (scope, device policy, deferred/declined work). Stories move as whole files `doc/task/todo/` → `inprogress/` → `done/`, named `{priority}-{domain}-{id}-{slug}.md`. Read that file before assuming a feature is missing or a decision is still open — several things (CI gates, `store-assets` hardening) have been explicitly declined or deferred by the owner and should not be re-proposed without being asked.
+
+`doc/feature.md` tracks feature-idea status (Implemented / In progress / Picked / Deferred / Skipped / Ideas) and is updated right after each owner decision. Older `doc/*.md` files (`FIX_SUMMARY`, `UNIT_TEST_SUMMARY`, `memory_leak`, …) are superseded historical snapshots — don't trust them over `doc/task/README.md`.
 
 ## store-assets/
 
