@@ -109,6 +109,8 @@ public class ActHome extends ActBase {
     static final int MENU_ID_TOGGLE_CLEAN_LENS = 8;
     @androidx.annotation.VisibleForTesting
     public static final int MENU_ID_LENS_APPS = 9;
+    @androidx.annotation.VisibleForTesting
+    public static final int MENU_ID_FREEZE_LENS = 10;
 
     // UI-021: predictive-back shrink/fade preview bounds for the search overlay, matching
     // Android's own predictive-back design guidance (subtle scale-down + slight fade, not a
@@ -855,6 +857,8 @@ public class ActHome extends ActBase {
                 R.drawable.ic_cleaning_24dp, true);
         addLensMenuItem(menu, themed, MENU_ID_LENS_APPS, R.string.lens_choose_apps,
                 R.drawable.ic_apps_24dp, true);
+        addLensMenuItem(menu, themed, MENU_ID_FREEZE_LENS, lensFreezeMenuLabelRes(position),
+                R.drawable.ic_lock_24dp, true);
         menu.setOnMenuItemClickListener(item -> onLensMenuItemSelected(item.getItemId(), position));
         menu.setForceShowIcon(true);
         menu.setOnDismissListener(dismissed -> {
@@ -927,6 +931,9 @@ public class ActHome extends ActBase {
         } else if (itemId == MENU_ID_LENS_APPS) {
             showLensAppsDialog(current);
             return true;
+        } else if (itemId == MENU_ID_FREEZE_LENS) {
+            toggleFreezeForLens(current);
+            return true;
         }
         return false;
     }
@@ -949,6 +956,51 @@ public class ActHome extends ActBase {
         updateSearchBarVisibility();
         if (lensViews != null) {
             lensViews.invalidate();
+        }
+    }
+
+    /** Like {@link #lensSmartFocusMenuLabelRes}: the entry names the action, so it reads current state. */
+    @androidx.annotation.VisibleForTesting
+    int lensFreezeMenuLabelRes(int position) {
+        boolean frozen = position >= 0 && position < currentLenses.size() && utilSettings != null
+                && utilSettings.isLensFrozen(currentLenses.get(position).getId());
+        return frozen ? R.string.lens_unfreeze_positions : R.string.lens_freeze_positions;
+    }
+
+    /**
+     * FISH-021: freezing writes the order the user currently sees as each app's orderNumber, so
+     * the sorter keeps it and Smart Focus stops rearranging this lens. Unfreezing also discards
+     * any manual drag order, hence the confirmation.
+     */
+    private void toggleFreezeForLens(LensWorkspace lens) {
+        if (utilSettings == null) return;
+        if (utilSettings.isLensFrozen(lens.getId())) {
+            lensDialog = new MaterialAlertDialogBuilder(this, R.style.MaterialYouDialogTheme)
+                    .setTitle(R.string.lens_unfreeze_title)
+                    .setMessage(R.string.lens_unfreeze_message)
+                    .setPositiveButton(R.string.lens_unfreeze_positions, (d, w) -> {
+                        utilSettings.saveLensFrozen(lens.getId(), false);
+                        AppPersistent.clearOrderForLens(lens.getId());
+                        reloadLensAfterOrderChange(lens);
+                    })
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .show();
+            return;
+        }
+        LensView view = lensViews;
+        if (view == null) return;
+        AppPersistent.setAppOrderBatch(new ArrayList<>(view.getDisplayedApps()), lens.getId());
+        utilSettings.saveLensFrozen(lens.getId(), true);
+        view.refreshSmartFocus();
+    }
+
+    private void reloadLensAfterOrderChange(LensWorkspace lens) {
+        Object application = getApplication();
+        if (application instanceof RApplication) {
+            ((RApplication) application).getAppRefreshPipeline().switchLens(lens.getId());
+        }
+        if (lensViews != null) {
+            lensViews.refreshSmartFocus();
         }
     }
 

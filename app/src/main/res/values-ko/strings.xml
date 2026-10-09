@@ -211,4 +211,8 @@
     <string name="menu_bulk_add_to_lens">렌즈에 추가…</string>
     <string name="menu_bulk_remove_from_lens">렌즈에서 제거…</string>
     <string name="menu_remove_from_lens">이 렌즈에서 제거</string>
+    <string name="lens_freeze_positions">앱 위치 고정</string>
+    <string name="lens_unfreeze_positions">앱 위치 고정 해제</string>
+    <string name="lens_unfreeze_title">위치 고정을 해제할까요?</string>
+    <string name="lens_unfreeze_message">드래그로 정한 순서도 함께 사라집니다.</string>
 </resources>

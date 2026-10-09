@@ -44,6 +44,10 @@ interface AppPersistentDao {
     @Query("UPDATE APP_PERSISTENT SET ORDER_NUMBER = :orderNumber WHERE LENS_ID = :lensId AND IDENTIFIER = :identifier")
     suspend fun updateOrder(lensId: String, identifier: String, orderNumber: Int)
 
+    /** FISH-021: unfreeze - every app of the lens goes back to "no manual position". */
+    @Query("UPDATE APP_PERSISTENT SET ORDER_NUMBER = -1 WHERE LENS_ID = :lensId")
+    suspend fun clearOrderForLens(lensId: String): Int
+
     @Query("UPDATE APP_PERSISTENT SET APP_OPENED = :opened WHERE LENS_ID = :lensId AND IDENTIFIER = :identifier")
     suspend fun updateOpened(lensId: String, identifier: String, opened: Boolean)
 

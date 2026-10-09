@@ -127,6 +127,11 @@ data class AppPersistent(
             }
         }
 
+        @JvmStatic
+        fun clearOrderForLens(lensId: String) {
+            persist { clearOrderForLens(lensId) }
+        }
+
         @JvmOverloads
         @JvmStatic
         fun setAppOrderBatch(apps: List<App>, lensId: String = DEFAULT_LENS_ID) {

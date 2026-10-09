@@ -191,6 +191,13 @@ class LensView : View {
         internal fun shouldDrawAppNameLabel(showNameSetting: Boolean, cleanMode: Boolean, moving: Boolean): Boolean =
             showNameSetting && !cleanMode && moving
 
+        /**
+         * FISH-021: Smart Focus only rearranges a lens the user has not frozen, and only once the
+         * grid has been measured. A frozen lens keeps its frozen positions whatever its toggle says.
+         */
+        internal fun shouldArrangeBySmartFocus(enabled: Boolean, frozen: Boolean, cols: Int, rows: Int): Boolean =
+            enabled && !frozen && cols > 0 && rows > 0
+
         /** FISH-021: "Remove from this lens" only makes sense where the lens holds a chosen subset. */
         internal fun shouldOfferRemoveFromLens(scope: LensAppScope?): Boolean =
             scope == LensAppScope.SELECTED
@@ -289,6 +296,12 @@ class LensView : View {
     private var mSourceApps: ArrayList<App>? = null
     private var mApps: ArrayList<App>? = null
     internal val appsForTest: List<App>? get() = mApps
+
+    /** FISH-021: the order actually drawn (after any Smart Focus arrangement). */
+    val displayedApps: List<App> get() = mApps.orEmpty()
+
+    private var mSmartFocusApplied = false
+    internal val smartFocusAppliedForTest: Boolean get() = mSmartFocusApplied
     private var mSmartFocusCols = -1
     private var mSmartFocusRows = -1
     private var mPackageManager: PackageManager? = null
@@ -562,7 +575,9 @@ class LensView : View {
         mSmartFocusRows = rows
         val enabled = mUtilSettings?.isSmartFocusBias(lensId)
             ?: UtilSettings.DEFAULT_SMART_FOCUS_BIAS
-        mApps = if (enabled && cols > 0 && rows > 0) {
+        val frozen = mUtilSettings?.isLensFrozen(lensId) == true
+        mSmartFocusApplied = shouldArrangeBySmartFocus(enabled, frozen, cols, rows)
+        mApps = if (mSmartFocusApplied) {
             SmartFocusArranger.arrange(source, cols, rows, smartFocusEnabled = true)
         } else {
             ArrayList(source)

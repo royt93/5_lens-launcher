@@ -211,4 +211,8 @@
     <string name="menu_bulk_add_to_lens">เพิ่มในเลนส์…</string>
     <string name="menu_bulk_remove_from_lens">นำออกจากเลนส์…</string>
     <string name="menu_remove_from_lens">นำออกจากเลนส์นี้</string>
+    <string name="lens_freeze_positions">ตรึงตำแหน่งแอป</string>
+    <string name="lens_unfreeze_positions">เลิกตรึงตำแหน่งแอป</string>
+    <string name="lens_unfreeze_title">เลิกตรึงตำแหน่ง?</string>
+    <string name="lens_unfreeze_message">ลำดับที่คุณลากจัดไว้จะถูกล้างด้วย</string>
 </resources>

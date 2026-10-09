@@ -211,4 +211,8 @@
     <string name="menu_bulk_add_to_lens">添加到镜头…</string>
     <string name="menu_bulk_remove_from_lens">从镜头移除…</string>
     <string name="menu_remove_from_lens">从此镜头移除</string>
+    <string name="lens_freeze_positions">固定应用位置</string>
+    <string name="lens_unfreeze_positions">取消固定应用位置</string>
+    <string name="lens_unfreeze_title">取消固定位置？</string>
+    <string name="lens_unfreeze_message">这也会丢弃你通过拖动设置的顺序。</string>
 </resources>

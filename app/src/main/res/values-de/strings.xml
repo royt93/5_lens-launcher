@@ -215,4 +215,8 @@
     <string name="menu_bulk_add_to_lens">Zu Linse hinzufügen …</string>
     <string name="menu_bulk_remove_from_lens">Aus Linse entfernen …</string>
     <string name="menu_remove_from_lens">Aus dieser Linse entfernen</string>
+    <string name="lens_freeze_positions">App-Positionen fixieren</string>
+    <string name="lens_unfreeze_positions">App-Positionen lösen</string>
+    <string name="lens_unfreeze_title">Positionen lösen?</string>
+    <string name="lens_unfreeze_message">Dadurch geht auch jede per Ziehen festgelegte Reihenfolge verloren.</string>
 </resources>

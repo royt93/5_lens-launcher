@@ -211,4 +211,8 @@
     <string name="menu_bulk_add_to_lens">Tambahkan ke lensa…</string>
     <string name="menu_bulk_remove_from_lens">Hapus dari lensa…</string>
     <string name="menu_remove_from_lens">Hapus dari lensa ini</string>
+    <string name="lens_freeze_positions">Kunci posisi aplikasi</string>
+    <string name="lens_unfreeze_positions">Lepas kunci posisi aplikasi</string>
+    <string name="lens_unfreeze_title">Lepas kunci posisi?</string>
+    <string name="lens_unfreeze_message">Ini juga menghapus urutan yang Anda atur dengan menyeret.</string>
 </resources>

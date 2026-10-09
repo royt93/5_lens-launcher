@@ -223,4 +223,8 @@
     <string name="menu_bulk_add_to_lens">Добавить в линзу…</string>
     <string name="menu_bulk_remove_from_lens">Убрать из линзы…</string>
     <string name="menu_remove_from_lens">Убрать из этой линзы</string>
+    <string name="lens_freeze_positions">Закрепить позиции приложений</string>
+    <string name="lens_unfreeze_positions">Открепить позиции приложений</string>
+    <string name="lens_unfreeze_title">Открепить позиции?</string>
+    <string name="lens_unfreeze_message">Также будет сброшен порядок, заданный перетаскиванием.</string>
 </resources>

@@ -219,4 +219,8 @@
     <string name="menu_bulk_add_to_lens">Ajouter à une lentille…</string>
     <string name="menu_bulk_remove_from_lens">Retirer d\'une lentille…</string>
     <string name="menu_remove_from_lens">Retirer de cette lentille</string>
+    <string name="lens_freeze_positions">Figer la position des applis</string>
+    <string name="lens_unfreeze_positions">Libérer la position des applis</string>
+    <string name="lens_unfreeze_title">Libérer les positions ?</string>
+    <string name="lens_unfreeze_message">Cela supprime aussi l\u2019ordre défini par glisser-déposer.</string>
 </resources>

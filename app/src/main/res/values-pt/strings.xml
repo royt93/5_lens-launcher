@@ -219,4 +219,8 @@
     <string name="menu_bulk_add_to_lens">Adicionar a uma lente…</string>
     <string name="menu_bulk_remove_from_lens">Remover de uma lente…</string>
     <string name="menu_remove_from_lens">Remover desta lente</string>
+    <string name="lens_freeze_positions">Fixar posições dos apps</string>
+    <string name="lens_unfreeze_positions">Soltar posições dos apps</string>
+    <string name="lens_unfreeze_title">Soltar posições?</string>
+    <string name="lens_unfreeze_message">Isso também descarta a ordem definida ao arrastar.</string>
 </resources>

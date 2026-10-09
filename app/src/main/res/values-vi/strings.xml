@@ -219,4 +219,8 @@
     <string name="menu_bulk_add_to_lens">Thêm vào thấu kính…</string>
     <string name="menu_bulk_remove_from_lens">Xóa khỏi thấu kính…</string>
     <string name="menu_remove_from_lens">Xóa khỏi thấu kính này</string>
+    <string name="lens_freeze_positions">Cố định vị trí ứng dụng</string>
+    <string name="lens_unfreeze_positions">Bỏ cố định vị trí ứng dụng</string>
+    <string name="lens_unfreeze_title">Bỏ cố định vị trí?</string>
+    <string name="lens_unfreeze_message">Thao tác này cũng xóa thứ tự bạn đã kéo thả.</string>
 </resources>

@@ -237,4 +237,8 @@
     <string name="menu_bulk_add_to_lens">إضافة إلى عدسة…</string>
     <string name="menu_bulk_remove_from_lens">إزالة من عدسة…</string>
     <string name="menu_remove_from_lens">إزالة من هذه العدسة</string>
+    <string name="lens_freeze_positions">تثبيت مواضع التطبيقات</string>
+    <string name="lens_unfreeze_positions">إلغاء تثبيت مواضع التطبيقات</string>
+    <string name="lens_unfreeze_title">إلغاء التثبيت؟</string>
+    <string name="lens_unfreeze_message">سيؤدي هذا أيضًا إلى تجاهل أي ترتيب ضبطته بالسحب.</string>
 </resources>
