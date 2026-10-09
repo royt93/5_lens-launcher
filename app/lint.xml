@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lint>
+    <!-- Ignore legacy launcher icon shape issues since adaptive icons are used for API 26+ -->
+    <issue id="IconLauncherShape" severity="ignore" />
+    <!-- Ignore missing density folders for legacy bitmaps -->
+    <issue id="IconMissingDensityFolder" severity="ignore" />
+</lint>
