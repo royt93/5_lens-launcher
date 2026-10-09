@@ -107,6 +107,8 @@ public class ActHome extends ActBase {
     static final int MENU_ID_SEARCH_APPS = 7;
     @androidx.annotation.VisibleForTesting
     static final int MENU_ID_TOGGLE_CLEAN_LENS = 8;
+    @androidx.annotation.VisibleForTesting
+    public static final int MENU_ID_LENS_APPS = 9;
 
     // UI-021: predictive-back shrink/fade preview bounds for the search overlay, matching
     // Android's own predictive-back design guidance (subtle scale-down + slight fade, not a
@@ -851,6 +853,8 @@ public class ActHome extends ActBase {
                 R.drawable.ic_search_menu_24dp, true);
         addLensMenuItem(menu, themed, MENU_ID_TOGGLE_CLEAN_LENS, R.string.setting_clean_lens_mode,
                 R.drawable.ic_cleaning_24dp, true);
+        addLensMenuItem(menu, themed, MENU_ID_LENS_APPS, R.string.lens_choose_apps,
+                R.drawable.ic_apps_24dp, true);
         menu.setOnMenuItemClickListener(item -> onLensMenuItemSelected(item.getItemId(), position));
         menu.setForceShowIcon(true);
         menu.setOnDismissListener(dismissed -> {
@@ -919,6 +923,9 @@ public class ActHome extends ActBase {
             return true;
         } else if (itemId == MENU_ID_TOGGLE_CLEAN_LENS) {
             toggleCleanLensMode();
+            return true;
+        } else if (itemId == MENU_ID_LENS_APPS) {
+            showLensAppsDialog(current);
             return true;
         }
         return false;
@@ -1066,6 +1073,46 @@ public class ActHome extends ActBase {
      */
     @androidx.annotation.VisibleForTesting
     androidx.appcompat.app.AlertDialog lensDialog;
+
+    /**
+     * FISH-021: tick the apps a lens shows. Reuses {@link #lensDialog}, so onDestroy and rotation
+     * already dismiss it. Search is deliberately not filtered, so this lists every installed app.
+     */
+    @androidx.annotation.VisibleForTesting
+    void showLensAppsDialog(com.mckimquyen.model.LensWorkspace lens) {
+        if (listApp == null || listApp.isEmpty() || utilSettings == null) return;
+        java.util.ArrayList<com.mckimquyen.model.App> apps = new java.util.ArrayList<>(listApp);
+        java.util.Set<String> allIds = new java.util.HashSet<>();
+        for (com.mckimquyen.model.App app : apps) allIds.add(com.mckimquyen.util.LensAppScope.identifierOf(app));
+        com.mckimquyen.util.LensAppScopeEditor editor = new com.mckimquyen.util.LensAppScopeEditor(utilSettings);
+        java.util.Set<String> shown = editor.effectiveIds(lens.getId(), allIds);
+
+        CharSequence[] labels = new CharSequence[apps.size()];
+        boolean[] checked = new boolean[apps.size()];
+        for (int i = 0; i < apps.size(); i++) {
+            labels[i] = apps.get(i).getLabel();
+            checked[i] = shown.contains(com.mckimquyen.util.LensAppScope.identifierOf(apps.get(i)));
+        }
+
+        lensDialog = new com.google.android.material.dialog.MaterialAlertDialogBuilder(this, com.mckimquyen.R.style.MaterialYouDialogTheme)
+                .setTitle(com.mckimquyen.R.string.lens_choose_apps)
+                .setMultiChoiceItems(labels, checked, (d, which, isChecked) -> { })
+                .setPositiveButton(android.R.string.ok, null)
+                .setNegativeButton(android.R.string.cancel, null)
+                .create();
+        lensDialog.show();
+        lensDialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE).setOnClickListener(v -> {
+            java.util.Set<String> picked = new java.util.HashSet<>();
+            android.widget.ListView list = lensDialog.getListView();
+            for (int i = 0; i < apps.size(); i++) {
+                if (list.isItemChecked(i)) picked.add(com.mckimquyen.util.LensAppScope.identifierOf(apps.get(i)));
+            }
+            editor.apply(lens.getId(), picked);
+            lensDialog.dismiss();
+        });
+        lensDialog.getButton(android.content.DialogInterface.BUTTON_NEGATIVE)
+                .setOnClickListener(v -> lensDialog.dismiss());
+    }
 
     private void showLensNameDialog(int titleRes, String initialText, LensNameCallback onDone) {
         EditText input = new EditText(this);

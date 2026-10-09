@@ -341,8 +341,8 @@ class ActHomeLensManagementWidgetTest {
                     .onEmptySpaceLongPressListener!!.onEmptySpaceLongPress(0f, 0f)
 
                 assertEquals(
-                    "The menu must offer all eight actions (add/rename/delete/Smart Focus/share/Recent apps/Search/Clean)",
-                    8,
+                    "The menu must offer all nine actions (add/rename/delete/Smart Focus/share/Recent apps/Search/Clean/Choose apps)",
+                    9,
                     activity.lensManagementMenu!!.menu.size()
                 )
                 val menuTitles = (0 until activity.lensManagementMenu!!.menu.size())

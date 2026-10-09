@@ -5,6 +5,7 @@ import android.widget.ListView
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import com.mckimquyen.R
 import com.mckimquyen.app.RApplication
 import com.mckimquyen.app.RAppsSingleton
 import com.mckimquyen.model.App
@@ -48,14 +49,22 @@ class ActHomeLensAppsDialogWidgetTest {
         RAppsSingleton.instance.apps = originalApps
     }
 
+    /**
+     * Waits until the home grid really holds the two seeded apps. showLensAppsDialog() returns
+     * silently while ActHome's app list is still empty, so opening the menu any earlier races it.
+     */
     private fun waitForApps(scenario: ActivityScenario<ActHome>) {
         val deadline = System.currentTimeMillis() + WAIT_MS
-        var ready = false
-        while (System.currentTimeMillis() < deadline && !ready) {
+        var shown = 0
+        while (System.currentTimeMillis() < deadline && shown != SEEDED_APP_COUNT) {
             InstrumentationRegistry.getInstrumentation().waitForIdleSync()
-            scenario.onActivity { ready = it.lensDialog == null && !it.isFinishing }
-            Thread.sleep(POLL_MS)
+            scenario.onActivity {
+                shown = it.findViewById<com.mckimquyen.views.LensView>(R.id.lensViews)
+                    ?.appsForTest?.size ?: 0
+            }
+            if (shown != SEEDED_APP_COUNT) Thread.sleep(POLL_MS)
         }
+        assertEquals("the seeded apps never reached the lens grid", SEEDED_APP_COUNT, shown)
     }
 
     @Test
@@ -64,9 +73,14 @@ class ActHomeLensAppsDialogWidgetTest {
             waitForApps(scenario)
             scenario.onActivity { activity ->
                 assertTrue(activity.onLensMenuItemSelected(ActHome.MENU_ID_LENS_APPS, 0))
-                val dialog = activity.lensDialog
-                assertNotNull("The checklist dialog must be showing", dialog)
-                val list: ListView = dialog!!.listView
+                assertNotNull("The checklist dialog must be showing", activity.lensDialog)
+            }
+            // AlertDialog applies the initial ticks to its ListView during layout, so read them
+            // only after the UI has gone idle, not in the same message that called show().
+            InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+            scenario.onActivity { activity ->
+                val list: ListView = activity.lensDialog!!.listView
+                assertEquals("The list must hold the seeded apps", 2, list.count)
                 val checked = (0 until list.count).count { list.isItemChecked(it) }
                 assertEquals("An ALL lens starts with every app ticked", list.count, checked)
             }
@@ -110,6 +124,7 @@ class ActHomeLensAppsDialogWidgetTest {
     }
 
     private companion object {
+        const val SEEDED_APP_COUNT = 2
         const val WAIT_MS = 5_000L
         const val POLL_MS = 100L
     }
