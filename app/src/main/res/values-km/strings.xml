@@ -207,4 +207,5 @@
     <plurals name="bulk_uninstall_confirm_message">
         <item quantity="other">អ្នកនឹងត្រូវបានស្នើសុំឱ្យបញ្ជាក់ការលុបកម្មវិធីចំនួន %1$d ម្តងមួយៗ។</item>
     </plurals>
+    <string name="lens_choose_apps">ជ្រើសរើសកម្មវិធីសម្រាប់កញ្ចក់នេះ</string>
 </resources>

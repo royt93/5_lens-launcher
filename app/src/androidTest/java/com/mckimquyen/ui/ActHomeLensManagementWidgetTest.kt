@@ -67,9 +67,7 @@ class ActHomeLensManagementWidgetTest {
     private fun cleanDb(): Unit = runBlocking {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         AppDatabase.init(context)
-        dao.getAll().filter { it.id != LensWorkspace.DEFAULT_LENS_ID }.forEach { dao.delete(it) }
-        // insertOrUpdate, not insertIfAbsent: the rename tests rename the default lens itself, and
-        // insertIfAbsent would leave that name behind for every test class that runs afterwards.
+        dao.getAll().forEach { dao.delete(it) }
         dao.insertOrUpdate(LensWorkspace.createDefault())
         Unit
     }

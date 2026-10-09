@@ -215,4 +215,5 @@
     <plurals name="bulk_uninstall_confirm_message">
         <item quantity="other">Bạn sẽ được yêu cầu xác nhận gỡ cài đặt từng ứng dụng trong số %1$d ứng dụng.</item>
     </plurals>
+    <string name="lens_choose_apps">Chọn ứng dụng cho thấu kính này</string>
 </resources>

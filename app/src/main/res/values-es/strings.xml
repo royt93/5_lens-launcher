@@ -215,4 +215,5 @@
         <item quantity="other">Se te pedirá que confirmes la desinstalación de %1$d aplicaciones, una a la vez.</item>
         <item quantity="many">Se te pedirá que confirmes la desinstalación de %1$d aplicaciones, una a la vez.</item>
     </plurals>
+    <string name="lens_choose_apps">Elegir apps para esta lente</string>
 </resources>

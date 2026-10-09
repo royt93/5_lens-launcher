@@ -211,4 +211,5 @@
         <item quantity="one">आपसे %1$d ऐप को अनइंस्टॉल करने की पुष्टि करने को कहा जाएगा।</item>
         <item quantity="other">आपसे %1$d ऐप्स को एक-एक करके अनइंस्टॉल करने की पुष्टि करने को कहा जाएगा।</item>
     </plurals>
+    <string name="lens_choose_apps">इस लेंस के लिए ऐप चुनें</string>
 </resources>

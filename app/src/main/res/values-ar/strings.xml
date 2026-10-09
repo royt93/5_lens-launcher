@@ -233,4 +233,5 @@
         <item quantity="many">سيُطلب منك تأكيد إلغاء تثبيت %1$d تطبيقًا، واحدًا تلو الآخر.</item>
         <item quantity="other">سيُطلب منك تأكيد إلغاء تثبيت %1$d تطبيق، واحدًا تلو الآخر.</item>
     </plurals>
+    <string name="lens_choose_apps">اختيار التطبيقات لهذه العدسة</string>
 </resources>

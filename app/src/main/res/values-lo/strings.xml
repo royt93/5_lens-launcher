@@ -207,4 +207,5 @@
     <plurals name="bulk_uninstall_confirm_message">
         <item quantity="other">ທ່ານຈະຖືກຂໍໃຫ້ຢືນຢັນການຖອນການຕິດຕັ້ງແອັບ %1$d ອັນ ເທື່ອລະອັນ.</item>
     </plurals>
+    <string name="lens_choose_apps">ເລືອກແອັບສຳລັບເລນນີ້</string>
 </resources>

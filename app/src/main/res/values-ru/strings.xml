@@ -219,4 +219,5 @@
         <item quantity="many">Вам будет предложено подтвердить удаление %1$d приложений по одному.</item>
         <item quantity="other">Вам будет предложено подтвердить удаление %1$d приложения по одному.</item>
     </plurals>
+    <string name="lens_choose_apps">Выбрать приложения для этой линзы</string>
 </resources>

@@ -207,4 +207,5 @@
     <plurals name="bulk_uninstall_confirm_message">
         <item quantity="other">คุณจะถูกขอให้ยืนยันการถอนการติดตั้งแอป %1$d รายการทีละรายการ</item>
     </plurals>
+    <string name="lens_choose_apps">เลือกแอปสำหรับเลนส์นี้</string>
 </resources>

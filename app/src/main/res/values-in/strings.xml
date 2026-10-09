@@ -207,4 +207,5 @@
     <plurals name="bulk_uninstall_confirm_message">
         <item quantity="other">Anda akan diminta mengonfirmasi pencopotan pemasangan %1$d aplikasi, satu per satu.</item>
     </plurals>
+    <string name="lens_choose_apps">Pilih aplikasi untuk lensa ini</string>
 </resources>

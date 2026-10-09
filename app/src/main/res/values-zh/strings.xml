@@ -207,4 +207,5 @@
     <plurals name="bulk_uninstall_confirm_message">
         <item quantity="other">系统将要求你逐个确认卸载 %1$d 个应用。</item>
     </plurals>
+    <string name="lens_choose_apps">为此镜头选择应用</string>
 </resources>

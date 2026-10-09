@@ -207,4 +207,5 @@
     <plurals name="bulk_uninstall_confirm_message">
         <item quantity="other">%1$d個のアプリのアンインストールを1つずつ確認します。</item>
     </plurals>
+    <string name="lens_choose_apps">このレンズのアプリを選択</string>
 </resources>

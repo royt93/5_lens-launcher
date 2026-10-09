@@ -215,4 +215,5 @@
         <item quantity="other">Il vous sera demandé de confirmer la désinstallation de %1$d applications, une à la fois.</item>
         <item quantity="many">Il vous sera demandé de confirmer la désinstallation de %1$d applications, une à la fois.</item>
     </plurals>
+    <string name="lens_choose_apps">Choisir les applis de cette lentille</string>
 </resources>

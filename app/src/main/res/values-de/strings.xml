@@ -211,4 +211,5 @@
         <item quantity="one">Du wirst gebeten, die Deinstallation von %1$d App zu bestätigen.</item>
         <item quantity="other">Du wirst gebeten, die Deinstallation von %1$d Apps einzeln zu bestätigen.</item>
     </plurals>
+    <string name="lens_choose_apps">Apps für diese Linse auswählen</string>
 </resources>

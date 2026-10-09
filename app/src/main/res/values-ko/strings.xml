@@ -207,4 +207,5 @@
     <plurals name="bulk_uninstall_confirm_message">
         <item quantity="other">앱 %1$d개를 하나씩 제거하도록 확인 요청됩니다.</item>
     </plurals>
+    <string name="lens_choose_apps">이 렌즈에 표시할 앱 선택</string>
 </resources>
