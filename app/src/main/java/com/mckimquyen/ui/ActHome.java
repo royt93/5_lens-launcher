@@ -1195,24 +1195,24 @@ public class ActHome extends ActBase {
         // than the screen the rows not yet scrolled into view report "unticked" untouched.
         final java.util.Set<String> picked = new java.util.HashSet<>(editor.effectiveIds(lens.getId(), allIds));
 
-        CharSequence[] labels = new CharSequence[apps.size()];
         String[] ids = new String[apps.size()];
-        boolean[] checked = new boolean[apps.size()];
         for (int i = 0; i < apps.size(); i++) {
-            labels[i] = apps.get(i).getLabel();
             ids[i] = com.mckimquyen.util.LensAppScope.identifierOf(apps.get(i));
-            checked[i] = picked.contains(ids[i]);
         }
 
         lensDialog = new com.google.android.material.dialog.MaterialAlertDialogBuilder(this, com.mckimquyen.R.style.MaterialYouDialogTheme)
                 .setTitle(com.mckimquyen.R.string.lens_choose_apps)
-                .setMultiChoiceItems(labels, checked, (d, which, isChecked) -> {
-                    if (isChecked) picked.add(ids[which]); else picked.remove(ids[which]);
-                })
+                .setAdapter(new com.mckimquyen.adt.LensAppChoiceAdapter(this, apps), null)
                 .setPositiveButton(android.R.string.ok, null)
                 .setNegativeButton(android.R.string.cancel, null)
                 .create();
         lensDialog.show();
+        android.widget.ListView choices = lensDialog.getListView();
+        choices.setChoiceMode(android.widget.ListView.CHOICE_MODE_MULTIPLE);
+        for (int i = 0; i < ids.length; i++) choices.setItemChecked(i, picked.contains(ids[i]));
+        choices.setOnItemClickListener((parent, row, position, id) -> {
+            if (choices.isItemChecked(position)) picked.add(ids[position]); else picked.remove(ids[position]);
+        });
         lensDialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE).setOnClickListener(v -> {
             editor.apply(lens.getId(), new java.util.HashSet<>(picked));
             lensDialog.dismiss();

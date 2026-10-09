@@ -127,6 +127,41 @@ class ActHomeLensAppsDialogLongListTest {
         }
     }
 
+    @Test
+    fun scrollingAndRecyclingKeepIconsAndDraftTicks() {
+        ActivityScenario.launch(ActHome::class.java).use { scenario ->
+            waitForApps(scenario)
+            scenario.onActivity { it.onLensMenuItemSelected(ActHome.MENU_ID_LENS_APPS, 0) }
+            InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+            var removedId = ""
+            scenario.onActivity { activity ->
+                val list = requireNotNull(activity.lensDialog).listView
+                val label = list.adapter.getItem(0).toString()
+                removedId = LensAppScope.identifierOf(apps.first { it.label.toString() == label })
+                list.performItemClick(list.getChildAt(0), 0, list.adapter.getItemId(0))
+                list.setSelection(APP_COUNT - 1)
+            }
+            InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+            scenario.onActivity { activity ->
+                val list = requireNotNull(activity.lensDialog).listView
+                org.junit.Assert.assertTrue("last row must be visible", list.lastVisiblePosition == APP_COUNT - 1)
+                for (i in 0 until list.childCount) {
+                    val row = list.getChildAt(i) as android.widget.CheckedTextView
+                    org.junit.Assert.assertNotNull("recycled rows must retain an app icon", row.compoundDrawablesRelative[0])
+                    org.junit.Assert.assertTrue("untouched rows remain selected", row.isChecked)
+                }
+                list.setSelection(0)
+            }
+            InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+            scenario.onActivity { activity ->
+                val dialog = requireNotNull(activity.lensDialog)
+                org.junit.Assert.assertFalse("first row must stay unticked after recycling", dialog.listView.isItemChecked(0))
+                dialog.getButton(DialogInterface.BUTTON_POSITIVE).performClick()
+            }
+            assertEquals(allIds - removedId, effective())
+        }
+    }
+
     private companion object {
         const val APP_COUNT = 60
         const val WAIT_MS = 5_000L

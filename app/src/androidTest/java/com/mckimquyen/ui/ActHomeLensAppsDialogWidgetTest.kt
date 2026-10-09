@@ -127,6 +127,42 @@ class ActHomeLensAppsDialogWidgetTest {
         }
     }
 
+    @Test
+    fun everyVisibleRowHasAnIconAndNativeCheckbox() {
+        ActivityScenario.launch(ActHome::class.java).use { scenario ->
+            waitForApps(scenario)
+            scenario.onActivity { it.onLensMenuItemSelected(ActHome.MENU_ID_LENS_APPS, 0) }
+            InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+            scenario.onActivity { activity ->
+                val list = requireNotNull(activity.lensDialog).listView
+                assertEquals(ListView.CHOICE_MODE_MULTIPLE, list.choiceMode)
+                assertTrue(list.childCount > 0)
+                for (i in 0 until list.childCount) {
+                    val row = list.getChildAt(i) as android.widget.CheckedTextView
+                    assertNotNull("each app must have an icon", row.compoundDrawablesRelative[0])
+                    assertNotNull("each app must remain checkable", row.checkMarkDrawable)
+                    assertTrue(row.isChecked)
+                }
+            }
+        }
+    }
+
+    @Test
+    fun cancelDiscardsDraftTicks() {
+        ActivityScenario.launch(ActHome::class.java).use { scenario ->
+            waitForApps(scenario)
+            scenario.onActivity { it.onLensMenuItemSelected(ActHome.MENU_ID_LENS_APPS, 0) }
+            InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+            scenario.onActivity { activity ->
+                val dialog = requireNotNull(activity.lensDialog)
+                tapRow(dialog.listView, 0)
+                dialog.getButton(DialogInterface.BUTTON_NEGATIVE).performClick()
+            }
+            assertEquals(LensAppScope.ALL, UtilSettings(context).getLensAppScope(lensId))
+            assertEquals(emptySet<String>(), UtilSettings(context).getLensAppSelection(lensId))
+        }
+    }
+
     /** A user tap on row [index]: toggles it and fires the dialog's own multi-choice listener. */
     private fun tapRow(list: ListView, index: Int) {
         list.performItemClick(list.getChildAt(index), index, list.adapter.getItemId(index))
