@@ -223,4 +223,5 @@
     <string name="lens_unfreeze_positions">Bỏ cố định vị trí ứng dụng</string>
     <string name="lens_unfreeze_title">Bỏ cố định vị trí?</string>
     <string name="lens_unfreeze_message">Thao tác này cũng xóa thứ tự bạn đã kéo thả.</string>
+    <string name="lens_switch_title">Chuyển thấu kính</string>
 </resources>

@@ -219,4 +219,5 @@
     <string name="lens_unfreeze_positions">ऐप की स्थिति अनफ़िक्स करें</string>
     <string name="lens_unfreeze_title">स्थिति अनफ़िक्स करें?</string>
     <string name="lens_unfreeze_message">इससे खींचकर तय किया गया क्रम भी हट जाएगा।</string>
+    <string name="lens_switch_title">लेंस बदलें</string>
 </resources>

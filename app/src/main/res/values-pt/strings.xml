@@ -223,4 +223,5 @@
     <string name="lens_unfreeze_positions">Soltar posições dos apps</string>
     <string name="lens_unfreeze_title">Soltar posições?</string>
     <string name="lens_unfreeze_message">Isso também descarta a ordem definida ao arrastar.</string>
+    <string name="lens_switch_title">Trocar de lente</string>
 </resources>

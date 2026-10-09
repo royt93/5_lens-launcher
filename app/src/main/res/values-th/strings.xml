@@ -215,4 +215,5 @@
     <string name="lens_unfreeze_positions">เลิกตรึงตำแหน่งแอป</string>
     <string name="lens_unfreeze_title">เลิกตรึงตำแหน่ง?</string>
     <string name="lens_unfreeze_message">ลำดับที่คุณลากจัดไว้จะถูกล้างด้วย</string>
+    <string name="lens_switch_title">สลับเลนส์</string>
 </resources>

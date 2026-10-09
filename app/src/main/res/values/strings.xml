@@ -262,4 +262,5 @@
     <string name="lens_unfreeze_positions">Unfreeze app positions</string>
     <string name="lens_unfreeze_title">Unfreeze positions?</string>
     <string name="lens_unfreeze_message">This also discards any order you set by dragging.</string>
+    <string name="lens_switch_title">Switch lens</string>
 </resources>

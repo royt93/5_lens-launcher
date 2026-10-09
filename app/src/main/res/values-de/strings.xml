@@ -219,4 +219,5 @@
     <string name="lens_unfreeze_positions">App-Positionen lösen</string>
     <string name="lens_unfreeze_title">Positionen lösen?</string>
     <string name="lens_unfreeze_message">Dadurch geht auch jede per Ziehen festgelegte Reihenfolge verloren.</string>
+    <string name="lens_switch_title">Linse wechseln</string>
 </resources>

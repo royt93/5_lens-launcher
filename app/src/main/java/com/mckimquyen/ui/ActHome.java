@@ -76,6 +76,7 @@ import com.mckimquyen.search.SearchResultAdapter;
 import com.mckimquyen.util.ApertureRevealHelper;
 import com.mckimquyen.util.LensAppScope;
 import com.mckimquyen.util.LensLabelResolver;
+import com.mckimquyen.util.LensShortcuts;
 import com.mckimquyen.util.Logger;
 import com.mckimquyen.util.PolaroidExportHelper;
 import com.mckimquyen.util.UIUtils;
@@ -190,6 +191,10 @@ public class ActHome extends ActBase {
      *  loaded, instead of FrmLens needing its own copy of the export logic. */
     public static final String EXTRA_AUTO_EXPORT_LENS =
             "com.mckimquyen.lenslauncher.EXTRA_AUTO_EXPORT_LENS";
+
+    /** FISH-021: set by a lens launcher shortcut; {@link #handleTargetLensIntent} consumes it. */
+    public static final String EXTRA_TARGET_LENS_ID =
+            "com.mckimquyen.lenslauncher.EXTRA_TARGET_LENS_ID";
     private boolean pendingAutoExportLens = false;
 
     /** Test seam so PolaroidExportHelperWidgetTest-style tests can capture the built chooser
@@ -303,6 +308,9 @@ public class ActHome extends ActBase {
         setupSearch();
         // updateColor();
         consumeAutoExportExtra(getIntent());
+        // FISH-021: a lens shortcut's target becomes the saved active lens before the list loads,
+        // so refreshLensList's existing "restore the saved lens" path does the paging.
+        applyTargetLensExtra(getIntent());
         refreshLensList();
         assignApps(Objects.requireNonNull(Objects.requireNonNull(RAppsSingleton.getInstance()).getApps()));
 
@@ -341,6 +349,27 @@ public class ActHome extends ActBase {
         super.onNewIntent(intent);
         setIntent(intent);
         consumeAutoExportExtra(intent);
+        handleTargetLensIntent(intent);
+    }
+
+    /**
+     * FISH-021: saves a shortcut's target lens as the active one and removes the extra so a later
+     * recreate never replays it. Returns whether a usable id was present. An id that no longer
+     * exists is handled by refreshLensList exactly like a stale saved id: the pager stays put.
+     */
+    private boolean applyTargetLensExtra(Intent intent) {
+        if (intent == null || utilSettings == null) return false;
+        String target = intent.getStringExtra(EXTRA_TARGET_LENS_ID);
+        if (target == null) return false;
+        intent.removeExtra(EXTRA_TARGET_LENS_ID);
+        if (target.isEmpty()) return false;
+        utilSettings.save(UtilSettings.KEY_ACTIVE_LENS_ID, target);
+        return true;
+    }
+
+    @androidx.annotation.VisibleForTesting
+    void handleTargetLensIntent(Intent intent) {
+        applyTargetLensExtra(intent);
         refreshLensList();
     }
 
@@ -487,6 +516,7 @@ public class ActHome extends ActBase {
             showLensManagementMenu(v);
             return true;
         });
+        tvLensName.setOnClickListener(v -> showLensSwitcherDialog());
         tvLensName.setOnLongClickListener(v -> {
             showLensManagementMenu(v);
             return true;
@@ -583,7 +613,7 @@ public class ActHome extends ActBase {
     @androidx.annotation.VisibleForTesting
     void refreshLensList() {
         LensWorkspace.loadAll(lenses -> {
-            currentLenses = lenses;
+            onLensesChanged(lenses);
             lensPagerAdapter.submitLenses(lenses);
             updateLensNavigationChrome();
             // FISH-008 Phase 2 r2: restore active page after rotation/recreate so the user stays on
@@ -959,6 +989,27 @@ public class ActHome extends ActBase {
         }
     }
 
+    /** FISH-021: one place that adopts a fresh lens list, so the launcher shortcuts never go stale. */
+    private void onLensesChanged(List<LensWorkspace> lenses) {
+        currentLenses = lenses;
+        LensShortcuts.refresh(getApplicationContext(), lenses);
+    }
+
+    /** FISH-021: tapping the lens name lists every lens; picking one pages to it. */
+    private void showLensSwitcherDialog() {
+        if (currentLenses.size() < 2 || lensPager == null) return;
+        CharSequence[] names = new CharSequence[currentLenses.size()];
+        for (int i = 0; i < names.length; i++) names[i] = currentLenses.get(i).getName();
+        lensDialog = new MaterialAlertDialogBuilder(this, R.style.MaterialYouDialogTheme)
+                .setTitle(R.string.lens_switch_title)
+                .setSingleChoiceItems(names, lensPager.getCurrentItem(), (dialog, which) -> {
+                    lensPager.setCurrentItem(which, true);
+                    dialog.dismiss();
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
     /** Like {@link #lensSmartFocusMenuLabelRes}: the entry names the action, so it reads current state. */
     @androidx.annotation.VisibleForTesting
     int lensFreezeMenuLabelRes(int position) {
@@ -1090,7 +1141,7 @@ public class ActHome extends ActBase {
                             }
                         }
                     }
-                    currentLenses = lenses;
+                    onLensesChanged(lenses);
                     lensPagerAdapter.submitLenses(lenses);
                     updateLensNavigationChrome();
                     return Unit.INSTANCE;
@@ -1107,7 +1158,7 @@ public class ActHome extends ActBase {
     private void renameLensDialog(LensWorkspace lens) {
         showLensNameDialog(R.string.lens_rename_title, lens.getName(), name ->
                 LensWorkspace.renameLens(lens, name, lenses -> {
-                    currentLenses = lenses;
+                    onLensesChanged(lenses);
                     lensPagerAdapter.submitLenses(lenses);
                     updateLensNavigationChrome();
                     return Unit.INSTANCE;
@@ -1228,7 +1279,7 @@ public class ActHome extends ActBase {
                             if (utilSettings != null) {
                                 utilSettings.deleteLensSettings(lens.getId());
                             }
-                            currentLenses = lenses;
+                            onLensesChanged(lenses);
                             lensPagerAdapter.submitLenses(lenses);
                             updateLensNavigationChrome();
                             // FISH-008 Phase 2 r2: if we just deleted the active lens, clamp the

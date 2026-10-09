@@ -215,4 +215,5 @@
     <string name="lens_unfreeze_positions">取消固定应用位置</string>
     <string name="lens_unfreeze_title">取消固定位置？</string>
     <string name="lens_unfreeze_message">这也会丢弃你通过拖动设置的顺序。</string>
+    <string name="lens_switch_title">切换镜头</string>
 </resources>

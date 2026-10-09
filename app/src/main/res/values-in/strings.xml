@@ -215,4 +215,5 @@
     <string name="lens_unfreeze_positions">Lepas kunci posisi aplikasi</string>
     <string name="lens_unfreeze_title">Lepas kunci posisi?</string>
     <string name="lens_unfreeze_message">Ini juga menghapus urutan yang Anda atur dengan menyeret.</string>
+    <string name="lens_switch_title">Ganti lensa</string>
 </resources>

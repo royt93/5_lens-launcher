@@ -215,4 +215,5 @@
     <string name="lens_unfreeze_positions">앱 위치 고정 해제</string>
     <string name="lens_unfreeze_title">위치 고정을 해제할까요?</string>
     <string name="lens_unfreeze_message">드래그로 정한 순서도 함께 사라집니다.</string>
+    <string name="lens_switch_title">렌즈 전환</string>
 </resources>

@@ -215,4 +215,5 @@
     <string name="lens_unfreeze_positions">アプリの位置の固定を解除</string>
     <string name="lens_unfreeze_title">固定を解除しますか？</string>
     <string name="lens_unfreeze_message">ドラッグで設定した並び順も破棄されます。</string>
+    <string name="lens_switch_title">レンズを切り替え</string>
 </resources>

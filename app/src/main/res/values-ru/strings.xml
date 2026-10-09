@@ -227,4 +227,5 @@
     <string name="lens_unfreeze_positions">Открепить позиции приложений</string>
     <string name="lens_unfreeze_title">Открепить позиции?</string>
     <string name="lens_unfreeze_message">Также будет сброшен порядок, заданный перетаскиванием.</string>
+    <string name="lens_switch_title">Сменить линзу</string>
 </resources>

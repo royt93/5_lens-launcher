@@ -223,4 +223,5 @@
     <string name="lens_unfreeze_positions">Sblocca posizioni delle app</string>
     <string name="lens_unfreeze_title">Sbloccare le posizioni?</string>
     <string name="lens_unfreeze_message">Verrà scartato anche l\u2019ordine impostato trascinando.</string>
+    <string name="lens_switch_title">Cambia lente</string>
 </resources>

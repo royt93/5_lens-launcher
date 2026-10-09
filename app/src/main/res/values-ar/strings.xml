@@ -241,4 +241,5 @@
     <string name="lens_unfreeze_positions">إلغاء تثبيت مواضع التطبيقات</string>
     <string name="lens_unfreeze_title">إلغاء التثبيت؟</string>
     <string name="lens_unfreeze_message">سيؤدي هذا أيضًا إلى تجاهل أي ترتيب ضبطته بالسحب.</string>
+    <string name="lens_switch_title">تبديل العدسة</string>
 </resources>

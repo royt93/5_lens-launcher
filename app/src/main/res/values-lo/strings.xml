@@ -215,4 +215,5 @@
     <string name="lens_unfreeze_positions">ປົດລັອກຕຳແໜ່ງແອັບ</string>
     <string name="lens_unfreeze_title">ປົດລັອກຕຳແໜ່ງບໍ?</string>
     <string name="lens_unfreeze_message">ນີ້ຈະລຶບລຳດັບທີ່ທ່ານຕັ້ງດ້ວຍການລາກນຳ.</string>
+    <string name="lens_switch_title">ປ່ຽນເລນ</string>
 </resources>

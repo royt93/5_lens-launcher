@@ -215,4 +215,5 @@
     <string name="lens_unfreeze_positions">ដោះសោទីតាំងកម្មវិធី</string>
     <string name="lens_unfreeze_title">ដោះសោទីតាំង?</string>
     <string name="lens_unfreeze_message">វាក៏លុបចោលលំដាប់ដែលអ្នកកំណត់ដោយអូសផងដែរ។</string>
+    <string name="lens_switch_title">ប្តូរកញ្ចក់</string>
 </resources>

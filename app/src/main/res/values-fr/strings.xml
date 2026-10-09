@@ -223,4 +223,5 @@
     <string name="lens_unfreeze_positions">Libérer la position des applis</string>
     <string name="lens_unfreeze_title">Libérer les positions ?</string>
     <string name="lens_unfreeze_message">Cela supprime aussi l\u2019ordre défini par glisser-déposer.</string>
+    <string name="lens_switch_title">Changer de lentille</string>
 </resources>
