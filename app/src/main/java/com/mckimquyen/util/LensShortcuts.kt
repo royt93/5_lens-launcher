@@ -31,6 +31,16 @@ object LensShortcuts {
         return lenses.sortedBy { it.orderIndex }.take(room)
     }
 
+    /**
+     * Tells the system a lens shortcut was used so launchers can rank shortcuts by real activation
+     * history. Safe to call for ids that are no longer published; never throws.
+     */
+    @JvmStatic
+    fun reportUsed(context: Context, lensId: String) {
+        runCatching { ShortcutManagerCompat.reportShortcutUsed(context, shortcutIdFor(lensId)) }
+            .onFailure { Logger.e("LensShortcuts: could not report shortcut usage", it) }
+    }
+
     /** Never throws: a launcher that rejects shortcuts must not break the home screen. */
     @JvmStatic
     fun refresh(context: Context, lenses: List<LensWorkspace>) {

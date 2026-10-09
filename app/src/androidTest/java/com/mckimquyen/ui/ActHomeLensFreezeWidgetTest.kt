@@ -54,9 +54,10 @@ class ActHomeLensFreezeWidgetTest {
         RAppsSingleton.instance.apps = originalApps
     }
 
+    /** Starts and ends every test with no persisted rows for the default lens (other tests write there). */
     private fun clearRows() = runBlocking {
         AppDatabase.init(context)
-        apps.forEach { dao.deleteForLens("freeze-probe") }
+        dao.deleteForLens(lensId)
         Unit
     }
 

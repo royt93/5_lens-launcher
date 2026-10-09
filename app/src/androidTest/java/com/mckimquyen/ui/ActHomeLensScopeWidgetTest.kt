@@ -10,6 +10,7 @@ import com.mckimquyen.adt.LensPagerAdapter
 import com.mckimquyen.model.App
 import com.mckimquyen.model.AppDatabase
 import com.mckimquyen.model.LensWorkspace
+import com.mckimquyen.services.AppEventManager
 import com.mckimquyen.util.LensAppScope
 import com.mckimquyen.util.LensAppScopeEditor
 import com.mckimquyen.util.UtilSettings
@@ -95,11 +96,26 @@ class ActHomeLensScopeWidgetTest {
         return labels
     }
 
+    /**
+     * Reseeds the three fake apps whenever a real PackageManager snapshot has replaced them.
+     * Swiping to a lens runs switchLens(), which merges the cached real app list (lastShells,
+     * which cancel() does not clear) and commits it on top of the seed; seeding again is the only
+     * way to keep this test about scope filtering rather than about that background commit.
+     */
+    private fun reseedIfOverwritten() {
+        val current = RAppsSingleton.instance.apps.orEmpty().map { it.packageName.toString() }
+        if (current.toSet() != setOf(mail, chat, maps).map { it.packageName.toString() }.toSet()) {
+            RAppsSingleton.instance.apps = arrayListOf(mail, chat, maps)
+            AppEventManager.notifyAppsUpdated()
+        }
+    }
+
     private fun waitForPage(scenario: ActivityScenario<ActHome>, position: Int, expected: List<String>): List<String> {
         var labels = emptyList<String>()
         val deadline = System.currentTimeMillis() + WAIT_MS
         while (System.currentTimeMillis() < deadline && labels.toSet() != expected.toSet()) {
             InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+            reseedIfOverwritten()
             labels = labelsOnPage(scenario, position)
             if (labels.toSet() != expected.toSet()) Thread.sleep(POLL_MS)
         }

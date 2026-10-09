@@ -229,6 +229,21 @@ class ActHomeQuickLensSwitchWidgetTest {
         }
     }
 
+    @Test
+    fun reportingUsageNeverThrowsForPublishedOrUnknownLenses() {
+        // The shortcut manager may ignore an id it does not know; the app must still not crash.
+        LensShortcuts.reportUsed(context, secondId)
+        LensShortcuts.reportUsed(context, "no-such-lens")
+        LensShortcuts.reportUsed(context, "")
+    }
+
+    @Test
+    fun aShortcutTargetIsReportedAsUsedWithoutBreakingNavigation() {
+        ActivityScenario.launch<ActHome>(targetIntent(secondId)).use { scenario ->
+            assertEquals(1, waitForPage(scenario, expected = 1))
+        }
+    }
+
     private companion object {
         const val WAIT_MS = 5_000L
         const val POLL_MS = 100L

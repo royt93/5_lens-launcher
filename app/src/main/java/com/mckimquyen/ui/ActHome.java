@@ -364,6 +364,7 @@ public class ActHome extends ActBase {
         intent.removeExtra(EXTRA_TARGET_LENS_ID);
         if (target.isEmpty()) return false;
         utilSettings.save(UtilSettings.KEY_ACTIVE_LENS_ID, target);
+        LensShortcuts.reportUsed(getApplicationContext(), target);
         return true;
     }
 
