@@ -218,4 +218,5 @@
     <string name="lens_choose_apps">Chọn ứng dụng cho thấu kính này</string>
     <string name="menu_bulk_add_to_lens">Thêm vào thấu kính…</string>
     <string name="menu_bulk_remove_from_lens">Xóa khỏi thấu kính…</string>
+    <string name="menu_remove_from_lens">Xóa khỏi thấu kính này</string>
 </resources>

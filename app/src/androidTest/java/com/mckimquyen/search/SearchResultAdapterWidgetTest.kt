@@ -160,6 +160,7 @@ class SearchResultAdapterWidgetTest {
                         R.id.menuItemPinStart,
                         R.id.menuItemPinEnd,
                         R.id.menuItemUnpin,
+                        R.id.menuItemRemoveFromLens,
                         R.id.menuItemElementUninstall,
                         R.id.menuItemRemoveFromRecent
                     ),
@@ -305,6 +306,8 @@ class SearchResultAdapterWidgetTest {
                 // context - it must still be hidden here.
                 assertEquals(false, menu.findItem(R.id.menuItemUnpin).isVisible)
                 assertEquals(false, menu.findItem(R.id.menuItemElementUninstall).isVisible)
+                // FISH-021: a lens-only entry never belongs in the recent-apps panel.
+                assertEquals(false, menu.findItem(R.id.menuItemRemoveFromLens).isVisible)
             }
         }
     }
@@ -333,6 +336,8 @@ class SearchResultAdapterWidgetTest {
                 assertEquals(true, menu.findItem(R.id.menuItemPinEnd).isVisible)
                 assertEquals(true, menu.findItem(R.id.menuItemUnpin).isVisible)
                 assertEquals(true, menu.findItem(R.id.menuItemElementUninstall).isVisible)
+                // FISH-021: nor in the search overlay, whatever the lens scope is.
+                assertEquals(false, menu.findItem(R.id.menuItemRemoveFromLens).isVisible)
                 assertEquals(false, menu.findItem(R.id.menuItemRemoveFromRecent).isVisible)
             }
         }

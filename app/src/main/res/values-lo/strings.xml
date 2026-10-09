@@ -210,4 +210,5 @@
     <string name="lens_choose_apps">ເລືອກແອັບສຳລັບເລນນີ້</string>
     <string name="menu_bulk_add_to_lens">ເພີ່ມໃສ່ເລນ…</string>
     <string name="menu_bulk_remove_from_lens">ເອົາອອກຈາກເລນ…</string>
+    <string name="menu_remove_from_lens">ເອົາອອກຈາກເລນນີ້</string>
 </resources>

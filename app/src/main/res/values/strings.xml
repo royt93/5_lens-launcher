@@ -257,4 +257,5 @@
     <string name="lens_choose_apps">Choose apps for this lens</string>
     <string name="menu_bulk_add_to_lens">Add to lens…</string>
     <string name="menu_bulk_remove_from_lens">Remove from lens…</string>
+    <string name="menu_remove_from_lens">Remove from this lens</string>
 </resources>

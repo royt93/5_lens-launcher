@@ -214,4 +214,5 @@
     <string name="lens_choose_apps">इस लेंस के लिए ऐप चुनें</string>
     <string name="menu_bulk_add_to_lens">लेंस में जोड़ें…</string>
     <string name="menu_bulk_remove_from_lens">लेंस से हटाएं…</string>
+    <string name="menu_remove_from_lens">इस लेंस से हटाएं</string>
 </resources>

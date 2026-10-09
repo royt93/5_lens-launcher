@@ -210,4 +210,5 @@
     <string name="lens_choose_apps">이 렌즈에 표시할 앱 선택</string>
     <string name="menu_bulk_add_to_lens">렌즈에 추가…</string>
     <string name="menu_bulk_remove_from_lens">렌즈에서 제거…</string>
+    <string name="menu_remove_from_lens">이 렌즈에서 제거</string>
 </resources>

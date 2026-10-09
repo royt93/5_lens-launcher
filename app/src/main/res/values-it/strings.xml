@@ -218,4 +218,5 @@
     <string name="lens_choose_apps">Scegli le app per questa lente</string>
     <string name="menu_bulk_add_to_lens">Aggiungi a una lente…</string>
     <string name="menu_bulk_remove_from_lens">Rimuovi da una lente…</string>
+    <string name="menu_remove_from_lens">Rimuovi da questa lente</string>
 </resources>

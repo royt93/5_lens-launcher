@@ -210,4 +210,5 @@
     <string name="lens_choose_apps">Pilih aplikasi untuk lensa ini</string>
     <string name="menu_bulk_add_to_lens">Tambahkan ke lensa…</string>
     <string name="menu_bulk_remove_from_lens">Hapus dari lensa…</string>
+    <string name="menu_remove_from_lens">Hapus dari lensa ini</string>
 </resources>

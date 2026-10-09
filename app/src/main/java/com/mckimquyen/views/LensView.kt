@@ -44,6 +44,8 @@ import com.mckimquyen.util.LensPhysicsPolicy
 import com.mckimquyen.util.SmartFocusArranger
 import com.mckimquyen.util.UtilApp
 import com.mckimquyen.util.UtilCalculator
+import com.mckimquyen.util.LensAppScope
+import com.mckimquyen.util.LensAppScopeEditor
 import com.mckimquyen.util.UtilSettings
 import kotlinx.coroutines.launch
 import java.util.Locale
@@ -188,6 +190,10 @@ class LensView : View {
         /** Clean the Lens: hover label is suppressed regardless of its own toggle. */
         internal fun shouldDrawAppNameLabel(showNameSetting: Boolean, cleanMode: Boolean, moving: Boolean): Boolean =
             showNameSetting && !cleanMode && moving
+
+        /** FISH-021: "Remove from this lens" only makes sense where the lens holds a chosen subset. */
+        internal fun shouldOfferRemoveFromLens(scope: LensAppScope?): Boolean =
+            scope == LensAppScope.SELECTED
 
         /** Clean the Lens: the NEW tag counts as chrome and is suppressed too. */
         internal fun shouldDrawNewAppTag(showTagSetting: Boolean, cleanMode: Boolean): Boolean =
@@ -634,6 +640,8 @@ class LensView : View {
             )
             popupMenu.inflate(R.menu.menu_search_result)
             popupMenu.menu.findItem(R.id.menuItemUnpin).isVisible = app.pinnedZone != PinnedZone.NONE
+            popupMenu.menu.findItem(R.id.menuItemRemoveFromLens).isVisible =
+                shouldOfferRemoveFromLens(mUtilSettings?.getLensAppScope(lensId))
             popupMenu.setForceShowIcon(true)
             popupMenu.setOnMenuItemClickListener { item ->
                 when (item.itemId) {
@@ -655,6 +663,10 @@ class LensView : View {
                     }
                     R.id.menuItemUnpin -> {
                         pinQuickAction(app, PinnedZone.NONE)
+                        true
+                    }
+                    R.id.menuItemRemoveFromLens -> {
+                        removeFromLens(app)
                         true
                     }
                     else -> false
@@ -682,6 +694,12 @@ class LensView : View {
         } catch (_: Exception) {
             Toast.makeText(context, R.string.error_app_not_found, Toast.LENGTH_SHORT).show()
         }
+    }
+
+    /** FISH-021: only reachable on a SELECTED lens, so no "all apps" set is needed to subtract from. */
+    private fun removeFromLens(app: App) {
+        val settings = mUtilSettings ?: return
+        LensAppScopeEditor(settings).remove(lensId, setOf(LensAppScope.identifierOf(app)), emptySet())
     }
 
     private fun pinQuickAction(app: App, zone: PinnedZone) {

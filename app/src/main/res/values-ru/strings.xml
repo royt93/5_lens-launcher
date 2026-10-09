@@ -222,4 +222,5 @@
     <string name="lens_choose_apps">Выбрать приложения для этой линзы</string>
     <string name="menu_bulk_add_to_lens">Добавить в линзу…</string>
     <string name="menu_bulk_remove_from_lens">Убрать из линзы…</string>
+    <string name="menu_remove_from_lens">Убрать из этой линзы</string>
 </resources>

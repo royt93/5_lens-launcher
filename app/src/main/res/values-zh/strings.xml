@@ -210,4 +210,5 @@
     <string name="lens_choose_apps">为此镜头选择应用</string>
     <string name="menu_bulk_add_to_lens">添加到镜头…</string>
     <string name="menu_bulk_remove_from_lens">从镜头移除…</string>
+    <string name="menu_remove_from_lens">从此镜头移除</string>
 </resources>

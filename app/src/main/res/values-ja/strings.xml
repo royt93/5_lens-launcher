@@ -210,4 +210,5 @@
     <string name="lens_choose_apps">このレンズのアプリを選択</string>
     <string name="menu_bulk_add_to_lens">レンズに追加…</string>
     <string name="menu_bulk_remove_from_lens">レンズから削除…</string>
+    <string name="menu_remove_from_lens">このレンズから削除</string>
 </resources>

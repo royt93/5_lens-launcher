@@ -231,6 +231,8 @@ class SearchResultAdapter @JvmOverloads constructor(
             popupMenu.menu.findItem(R.id.menuItemUnpin).isVisible =
                 !isRecentPanel && app.pinnedZone != PinnedZone.NONE
             popupMenu.menu.findItem(R.id.menuItemElementUninstall).isVisible = !isRecentPanel
+            // FISH-021: removing from a lens only makes sense on the lens grid itself.
+            popupMenu.menu.findItem(R.id.menuItemRemoveFromLens).isVisible = false
             popupMenu.menu.findItem(R.id.menuItemRemoveFromRecent).isVisible = isRecentPanel
             popupMenu.setForceShowIcon(true)
             popupMenu.setOnMenuItemClickListener { item -> handleMenuAction(item.itemId, app, anchor) }

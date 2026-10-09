@@ -214,4 +214,5 @@
     <string name="lens_choose_apps">Apps für diese Linse auswählen</string>
     <string name="menu_bulk_add_to_lens">Zu Linse hinzufügen …</string>
     <string name="menu_bulk_remove_from_lens">Aus Linse entfernen …</string>
+    <string name="menu_remove_from_lens">Aus dieser Linse entfernen</string>
 </resources>

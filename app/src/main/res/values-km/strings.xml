@@ -210,4 +210,5 @@
     <string name="lens_choose_apps">ជ្រើសរើសកម្មវិធីសម្រាប់កញ្ចក់នេះ</string>
     <string name="menu_bulk_add_to_lens">បន្ថែមទៅកញ្ចក់…</string>
     <string name="menu_bulk_remove_from_lens">ដកចេញពីកញ្ចក់…</string>
+    <string name="menu_remove_from_lens">ដកចេញពីកញ្ចក់នេះ</string>
 </resources>
