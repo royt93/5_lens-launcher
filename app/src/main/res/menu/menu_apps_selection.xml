@@ -35,4 +35,15 @@
         app:iconTint="?attr/colorOnPrimary"
         app:showAsAction="ifRoom" />
 
+
+    <item
+        android:id="@+id/menuItemBulkAddToLens"
+        android:title="@string/menu_bulk_add_to_lens"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/menuItemBulkRemoveFromLens"
+        android:title="@string/menu_bulk_remove_from_lens"
+        app:showAsAction="never" />
+
 </menu>

@@ -255,4 +255,6 @@
     <string name="setting_clean_lens_mode">Clean the lens (Minimalist mode)</string>
     <string name="setting_clean_lens_mode_hint">Hide search bar, app text labels, notification badges, and page dots</string>
     <string name="lens_choose_apps">Choose apps for this lens</string>
+    <string name="menu_bulk_add_to_lens">Add to lens…</string>
+    <string name="menu_bulk_remove_from_lens">Remove from lens…</string>
 </resources>

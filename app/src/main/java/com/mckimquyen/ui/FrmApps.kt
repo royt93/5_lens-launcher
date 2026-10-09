@@ -30,7 +30,12 @@ import com.mckimquyen.services.AppEventManager
 import com.mckimquyen.services.BroadcastReceivers.AppsEditedReceiver
 import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.mckimquyen.util.UtilApp
+import com.mckimquyen.app.RAppsSingleton
+import com.mckimquyen.model.LensWorkspace
+import com.mckimquyen.util.LensAppScope
+import com.mckimquyen.util.LensAppScopeEditor
 import com.mckimquyen.util.UtilSettings
+import androidx.annotation.VisibleForTesting
 
 class FrmApps : Fragment(), AppsInterface, AppAdapter.SelectionListener, ActionMode.Callback {
 
@@ -44,6 +49,7 @@ class FrmApps : Fragment(), AppsInterface, AppAdapter.SelectionListener, ActionM
     private var appAdapter: AppAdapter? = null
     private var indexScrolledItem = 0
     private var actionMode: ActionMode? = null
+    private var lensPickerDialog: androidx.appcompat.app.AlertDialog? = null
 
     /**
      * FEAT-007: `ActSettings` sets `viewpager.setOffscreenPageLimit(2)`, and with only 3
@@ -200,6 +206,8 @@ class FrmApps : Fragment(), AppsInterface, AppAdapter.SelectionListener, ActionM
         appAdapter = null
         rvApps = null
         progressBarApps = null
+        lensPickerDialog?.dismiss()
+        lensPickerDialog = null
         utilSettings = null
         super.onDestroyView()
     }
@@ -251,6 +259,13 @@ class FrmApps : Fragment(), AppsInterface, AppAdapter.SelectionListener, ActionM
                 confirmAndUninstallSelected()
                 mode.finish()
             }
+            R.id.menuItemBulkAddToLens, R.id.menuItemBulkRemoveFromLens -> {
+                // Capture before finish(): onDestroyActionMode clears the adapter's selection.
+                val ids = appAdapter?.selectedApps.orEmpty().map(LensAppScope::identifierOf).toSet()
+                val add = item.itemId == R.id.menuItemBulkAddToLens
+                mode.finish()
+                pickLensThen { lensId -> applyBulkLensScope(lensId, ids, add) }
+            }
             else -> return false
         }
         return true
@@ -294,4 +309,34 @@ class FrmApps : Fragment(), AppsInterface, AppAdapter.SelectionListener, ActionM
             .setNegativeButton(android.R.string.cancel, null)
             .show()
     }
+    /** One lens: no question asked. Several: a chooser, preselecting the lens being viewed. */
+    private fun pickLensThen(onPicked: (String) -> Unit) {
+        LensWorkspace.loadAll { lenses ->
+            val ctx = context
+            if (!isAdded || ctx == null || lenses.isEmpty()) return@loadAll
+            if (lenses.size == 1) {
+                onPicked(lenses.first().id)
+                return@loadAll
+            }
+            val activeId = utilSettings?.getString(UtilSettings.KEY_ACTIVE_LENS_ID)
+            val checked = lenses.indexOfFirst { it.id == activeId }.coerceAtLeast(0)
+            lensPickerDialog?.dismiss()
+            lensPickerDialog = MaterialAlertDialogBuilder(ctx, R.style.MaterialYouDialogTheme)
+                .setSingleChoiceItems(lenses.map { it.name }.toTypedArray(), checked) { dialog, which ->
+                    onPicked(lenses[which].id)
+                    dialog.dismiss()
+                }
+                .setNegativeButton(android.R.string.cancel, null)
+                .show()
+        }
+    }
+
+    @VisibleForTesting
+    internal fun applyBulkLensScope(lensId: String, ids: Set<String>, add: Boolean) {
+        val settings = utilSettings ?: return
+        val allIds = RAppsSingleton.instance.apps.orEmpty().map(LensAppScope::identifierOf).toSet()
+        val editor = LensAppScopeEditor(settings)
+        if (add) editor.add(lensId, ids, allIds) else editor.remove(lensId, ids, allIds)
+    }
+
 }
