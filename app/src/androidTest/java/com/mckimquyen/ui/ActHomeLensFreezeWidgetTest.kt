@@ -11,6 +11,7 @@ import com.mckimquyen.model.App
 import com.mckimquyen.model.AppDatabase
 import com.mckimquyen.model.AppPersistent
 import com.mckimquyen.model.LensWorkspace
+import com.mckimquyen.util.LensAppScope
 import com.mckimquyen.util.UtilSettings
 import com.mckimquyen.views.LensView
 import kotlinx.coroutines.runBlocking
@@ -213,6 +214,68 @@ class ActHomeLensFreezeWidgetTest {
                 assertNotNull(after)
                 assertEquals(apps.size, after.displayedApps.size)
             }
+        }
+    }
+
+    /** Shows only [chosen] on the default lens, as a user who picked a subset would have it. */
+    private fun selectOnly(vararg chosen: App) {
+        val settings = UtilSettings(context)
+        settings.saveLensAppSelection(lensId, chosen.map(LensAppScope::identifierOf).toSet())
+        settings.saveLensAppScope(lensId, LensAppScope.SELECTED)
+    }
+
+    @Test
+    fun freezingASelectedLensStoresOrderOnlyForTheAppsItShows() {
+        selectOnly(apps[0], apps[2])
+        try {
+            ActivityScenario.launch(ActHome::class.java).use { scenario ->
+                var shown = 0
+                val deadline = System.currentTimeMillis() + WAIT_MS
+                while (System.currentTimeMillis() < deadline && shown != 2) {
+                    InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+                    scenario.onActivity { shown = it.findViewById<LensView>(R.id.lensViews)?.displayedApps?.size ?: 0 }
+                    if (shown != 2) Thread.sleep(POLL_MS)
+                }
+                assertEquals("the selected lens must show exactly 2 apps", 2, shown)
+                scenario.onActivity { assertTrue(it.onLensMenuItemSelected(ActHome.MENU_ID_FREEZE_LENS, 0)) }
+                waitUntil("order rows for the 2 visible apps") { orderRows().size == 2 }
+                val stored = orderRows()
+                assertEquals(setOf(0, 1), stored.values.toSet())
+                assertFalse(
+                    "the app this lens does not show must get no order number",
+                    stored.containsKey(AppPersistent.generateIdentifier(apps[1].packageName.toString(), "Main"))
+                )
+                assertTrue(UtilSettings(context).isLensFrozen(lensId))
+            }
+        } finally {
+            UtilSettings(context).saveLensAppScope(lensId, LensAppScope.ALL)
+            UtilSettings(context).saveLensAppSelection(lensId, emptySet())
+        }
+    }
+
+    @Test
+    fun unfreezingASelectedLensKeepsItsSelection() {
+        selectOnly(apps[0], apps[2])
+        UtilSettings(context).saveLensFrozen(lensId, true)
+        try {
+            ActivityScenario.launch(ActHome::class.java).use { scenario ->
+                var shown = 0
+                val deadline = System.currentTimeMillis() + WAIT_MS
+                while (System.currentTimeMillis() < deadline && shown != 2) {
+                    InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+                    scenario.onActivity { shown = it.findViewById<LensView>(R.id.lensViews)?.displayedApps?.size ?: 0 }
+                    if (shown != 2) Thread.sleep(POLL_MS)
+                }
+                scenario.onActivity { it.onLensMenuItemSelected(ActHome.MENU_ID_FREEZE_LENS, 0) }
+                InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+                scenario.onActivity { it.lensDialog!!.getButton(DialogInterface.BUTTON_POSITIVE).performClick() }
+                waitUntil("the lens to be unfrozen") { !UtilSettings(context).isLensFrozen(lensId) }
+                assertEquals(LensAppScope.SELECTED, UtilSettings(context).getLensAppScope(lensId))
+                assertEquals(2, UtilSettings(context).getLensAppSelection(lensId).size)
+            }
+        } finally {
+            UtilSettings(context).saveLensAppScope(lensId, LensAppScope.ALL)
+            UtilSettings(context).saveLensAppSelection(lensId, emptySet())
         }
     }
 
