@@ -91,14 +91,17 @@ class ActHomeLensAppsDialogWidgetTest {
     fun confirmingASubsetSelectsOnlyThoseApps() {
         ActivityScenario.launch(ActHome::class.java).use { scenario ->
             waitForApps(scenario)
+            scenario.onActivity { it.onLensMenuItemSelected(ActHome.MENU_ID_LENS_APPS, 0) }
+            // Rows are bound during layout: tap them only once the dialog has gone idle.
+            InstrumentationRegistry.getInstrumentation().waitForIdleSync()
             scenario.onActivity { activity ->
-                activity.onLensMenuItemSelected(ActHome.MENU_ID_LENS_APPS, 0)
                 val dialog = activity.lensDialog!!
                 val list = dialog.listView
                 val keepIndex = (0 until list.count).first {
                     list.adapter.getItem(it).toString() == chat.label.toString()
                 }
-                (0 until list.count).forEach { list.setItemChecked(it, it == keepIndex) }
+                // Tap the rows like a user does: setItemChecked() alone skips the dialog's click callback.
+                (0 until list.count).filter { it != keepIndex }.forEach { tapRow(list, it) }
                 dialog.getButton(DialogInterface.BUTTON_POSITIVE).performClick()
             }
             InstrumentationRegistry.getInstrumentation().waitForIdleSync()
@@ -112,15 +115,21 @@ class ActHomeLensAppsDialogWidgetTest {
     fun untickingEverythingKeepsTheLensOnAll() {
         ActivityScenario.launch(ActHome::class.java).use { scenario ->
             waitForApps(scenario)
+            scenario.onActivity { it.onLensMenuItemSelected(ActHome.MENU_ID_LENS_APPS, 0) }
+            InstrumentationRegistry.getInstrumentation().waitForIdleSync()
             scenario.onActivity { activity ->
-                activity.onLensMenuItemSelected(ActHome.MENU_ID_LENS_APPS, 0)
                 val dialog = activity.lensDialog!!
-                (0 until dialog.listView.count).forEach { dialog.listView.setItemChecked(it, false) }
+                (0 until dialog.listView.count).forEach { tapRow(dialog.listView, it) }
                 dialog.getButton(DialogInterface.BUTTON_POSITIVE).performClick()
             }
             InstrumentationRegistry.getInstrumentation().waitForIdleSync()
             assertEquals(LensAppScope.ALL, UtilSettings(context).getLensAppScope(lensId))
         }
+    }
+
+    /** A user tap on row [index]: toggles it and fires the dialog's own multi-choice listener. */
+    private fun tapRow(list: ListView, index: Int) {
+        list.performItemClick(list.getChildAt(index), index, list.adapter.getItemId(index))
     }
 
     private companion object {

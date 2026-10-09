@@ -1189,29 +1189,32 @@ public class ActHome extends ActBase {
         java.util.Set<String> allIds = new java.util.HashSet<>();
         for (com.mckimquyen.model.App app : apps) allIds.add(com.mckimquyen.util.LensAppScope.identifierOf(app));
         com.mckimquyen.util.LensAppScopeEditor editor = new com.mckimquyen.util.LensAppScopeEditor(utilSettings);
-        java.util.Set<String> shown = editor.effectiveIds(lens.getId(), allIds);
+
+        // The choice lives in this set, updated by the dialog's own click callback. Never read it
+        // back from the ListView: it only knows rows that have been bound, so on a list longer
+        // than the screen the rows not yet scrolled into view report "unticked" untouched.
+        final java.util.Set<String> picked = new java.util.HashSet<>(editor.effectiveIds(lens.getId(), allIds));
 
         CharSequence[] labels = new CharSequence[apps.size()];
+        String[] ids = new String[apps.size()];
         boolean[] checked = new boolean[apps.size()];
         for (int i = 0; i < apps.size(); i++) {
             labels[i] = apps.get(i).getLabel();
-            checked[i] = shown.contains(com.mckimquyen.util.LensAppScope.identifierOf(apps.get(i)));
+            ids[i] = com.mckimquyen.util.LensAppScope.identifierOf(apps.get(i));
+            checked[i] = picked.contains(ids[i]);
         }
 
         lensDialog = new com.google.android.material.dialog.MaterialAlertDialogBuilder(this, com.mckimquyen.R.style.MaterialYouDialogTheme)
                 .setTitle(com.mckimquyen.R.string.lens_choose_apps)
-                .setMultiChoiceItems(labels, checked, (d, which, isChecked) -> { })
+                .setMultiChoiceItems(labels, checked, (d, which, isChecked) -> {
+                    if (isChecked) picked.add(ids[which]); else picked.remove(ids[which]);
+                })
                 .setPositiveButton(android.R.string.ok, null)
                 .setNegativeButton(android.R.string.cancel, null)
                 .create();
         lensDialog.show();
         lensDialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE).setOnClickListener(v -> {
-            java.util.Set<String> picked = new java.util.HashSet<>();
-            android.widget.ListView list = lensDialog.getListView();
-            for (int i = 0; i < apps.size(); i++) {
-                if (list.isItemChecked(i)) picked.add(com.mckimquyen.util.LensAppScope.identifierOf(apps.get(i)));
-            }
-            editor.apply(lens.getId(), picked);
+            editor.apply(lens.getId(), new java.util.HashSet<>(picked));
             lensDialog.dismiss();
         });
         lensDialog.getButton(android.content.DialogInterface.BUTTON_NEGATIVE)
