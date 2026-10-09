@@ -29,7 +29,7 @@ Three directions picked together and delivered in one batch: a per-lens app set,
 - [x] Duplicating a lens copies its scope, selection and frozen flag; deleting one removes them.
 - [x] New strings translated in all 16 locales (`AllStringsTranslationTest`).
 - [x] Unit, widget and integration tests for every case below; lint; full instrumentation; device smoke.
-- [ ] Audit > 9.0 — **not met: 8.9/10**, see `doc/task/AUDIT_ROUND_2026-10-09.md` (push gate not passed; the audit lists what would move it above 9.0).
+- [x] Audit > 9.0 — **9.1/10, a narrow pass** (was 8.9 before the follow-up tests), see `doc/task/AUDIT_ROUND_2026-10-09.md`; the weakest dimension (device smoke) did not improve.
 
 ## Bugs found while building it
 
@@ -40,14 +40,14 @@ Three directions picked together and delivered in one batch: a per-lens app set,
 ## Verification
 
 - JVM: 770/770.
-- Instrumented, full suite on TECNO KJ7: 552/552 (run 3, after the last code change). Earlier runs on the same device: 547 (2 red, root-caused above) then 549/549.
+- Instrumented, full suite on TECNO KJ7: 558/558 (run 4, after the last test change). Earlier runs on the same device: 547 (2 red, root-caused above), 549/549, 552/552.
 - Lint: 0 errors, 7 warnings (5x `IconLauncherShape`, `IconLocation`, `IconMissingDensityFolder`, all pre-existing launcher-asset findings).
 
 | Layer | Where |
 |---|---|
 | Unit | `LensAppScopeTest` (8), `LensAppScopeEditorTest` (11), `UtilSettingsLensScopeTest` (9), `AppEventManagerTest`, `LensViewRemoveFromLensTest` (3), `LensViewFreezeTest` (4), `LensShortcutsTest` (8) |
 | Widget | `ActHomeLensScopeWidgetTest` (7), `ActHomeLensAppsDialogWidgetTest` (3), `ActHomeLensAppsDialogLongListTest` (3), `ActHomeLensFreezeWidgetTest` (8), `ActHomeQuickLensSwitchWidgetTest` (15), `SearchResultAdapterWidgetTest` |
-| Integration | `FrmAppsLensScopeIntegrationTest`, `LensViewRemoveFromLensIntegrationTest` (6), `AppPersistentClearOrderTest` (3) |
+| Integration | `FrmAppsLensScopeIntegrationTest`, `LensViewRemoveFromLensIntegrationTest` (6), `AppPersistentClearOrderTest` (3), `LensRemoveFromLensAccessibilityIntegrationTest` (4) |
 
 ## Device smoke (TECNO KJ7, 2026-10-09, fresh install data)
 
@@ -62,7 +62,6 @@ Screenshots read, not assumed:
 ## Not covered / known limits
 
 - **Shortcuts on the launcher UI**: registered with the system, but the TECNO launcher (`com.transsion.hilauncher`) menu for this app could not be opened by script, so they were not seen on screen.
-- **TalkBack** path for "Remove from this lens" (`onAppLongClicked`) has no test of its own.
-- Freezing a lens that is filtered to `SELECTED` stores order numbers only for the visible apps (by design; hidden ones keep theirs). No dedicated test.
+- Freezing a lens filtered to `SELECTED` stores order numbers only for the visible apps (by design; hidden ones keep theirs); covered by `ActHomeLensFreezeWidgetTest`. The TalkBack path for "Remove from this lens" is covered by `LensRemoveFromLensAccessibilityIntegrationTest`.
 - The choice is not in `LayoutBackup`, so it is not exported/imported (out of scope).
 - Only one device (API 34) and one run of the smoke; no second-device confirmation.
