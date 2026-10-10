@@ -10,6 +10,9 @@ import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.search.SearchBar
 import com.google.android.material.tabs.TabLayout
 import com.mckimquyen.R
+import com.mckimquyen.app.RApplication
+import com.mckimquyen.app.RAppsSingleton
+import com.mckimquyen.model.App
 import com.mckimquyen.enums.LauncherMode
 import com.mckimquyen.ui.ActHome
 import com.mckimquyen.ui.ActSettings
@@ -30,10 +33,13 @@ import org.junit.runner.RunWith
 class AdaptiveOrientationWidgetTest {
 
     private lateinit var utilSettings: UtilSettings
+    private var originalApps: ArrayList<App>? = null
 
     @Before
     fun setUp() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
+        (context.applicationContext as RApplication).appRefreshPipeline.cancel()
+        originalApps = RAppsSingleton.instance.apps
         utilSettings = UtilSettings(context)
         utilSettings.setLauncherMode(LauncherMode.FISHEYE)
     }
@@ -41,6 +47,7 @@ class AdaptiveOrientationWidgetTest {
     @After
     fun tearDown() {
         utilSettings.setLauncherMode(LauncherMode.FISHEYE)
+        RAppsSingleton.instance.apps = originalApps
     }
 
     @Test
@@ -81,6 +88,9 @@ class AdaptiveOrientationWidgetTest {
 
     @Test
     fun testActHomeListModeOrientationChange() {
+        RAppsSingleton.instance.apps = arrayListOf(
+            App(id = 1, label = "List mode fixture", packageName = "com.test.orientation.list", name = "Main", isVisible = true)
+        )
         utilSettings.setLauncherMode(LauncherMode.LIST)
         ActivityScenario.launch(ActHome::class.java).use { scenario ->
             scenario.onActivity { activity ->
