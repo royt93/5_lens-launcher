@@ -49,7 +49,8 @@ class LensAppChoiceAdapterTest {
     @Test
     fun recycledRowNeverKeepsThePreviousAppsIcon() {
         val icon = bitmap()
-        val adapter = LensAppChoiceAdapter(context, listOf(app("Mail", icon), app("Missing")))
+        val replacementIcon = bitmap()
+        val adapter = LensAppChoiceAdapter(context, listOf(app("Mail", icon), app("Missing", replacementIcon)))
         val parent = FrameLayout(context)
         val first = adapter.getView(0, null, parent) as CheckedTextView
         val originalDrawable = first.compoundDrawablesRelative[0]
@@ -57,6 +58,7 @@ class LensAppChoiceAdapterTest {
         assertSame(first, recycled)
         assertEquals("Missing", recycled.text.toString())
         assertNotNull(recycled.compoundDrawablesRelative[0])
+        assertSame(replacementIcon, (recycled.compoundDrawablesRelative[0] as BitmapDrawable).bitmap)
         assertNotSame(originalDrawable, recycled.compoundDrawablesRelative[0])
     }
 
