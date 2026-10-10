@@ -42,6 +42,7 @@ class AdaptiveOrientationWidgetTest {
         originalApps = RAppsSingleton.instance.apps
         utilSettings = UtilSettings(context)
         utilSettings.setLauncherMode(LauncherMode.FISHEYE)
+        RAppsSingleton.instance.apps = originalApps
     }
 
     @After
@@ -88,6 +89,12 @@ class AdaptiveOrientationWidgetTest {
 
     @Test
     fun testActHomeListModeOrientationChange() {
+        // The list is intentionally GONE when there are no visible apps. Seed one real App and stop
+        // the unsolicited PackageManager refresh so this test proves LIST-mode orientation, not
+        // whichever installed apps happen to be on the test device.
+        (InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as RApplication)
+            .appRefreshPipeline.cancel()
+        originalApps = RAppsSingleton.instance.apps
         RAppsSingleton.instance.apps = arrayListOf(
             App(id = 1, label = "List mode fixture", packageName = "com.test.orientation.list", name = "Main", isVisible = true)
         )
