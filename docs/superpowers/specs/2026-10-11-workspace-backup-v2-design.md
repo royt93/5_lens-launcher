@@ -22,7 +22,7 @@ Extend the existing layout backup so users can move or restore a complete multi-
 
 ## Backup format
 
-Schema v2 root contains `schemaVersion`, `exportedAt`, and a `lenses` array; it has no v1 root-level `entries`. Each lens contains `id`, `name`, `orderIndex`, `scope`, `selectedAppIds`, `frozen`, and its app-layout `entries`. Entry fields retain v1 names: package/component identity, order, visibility, lock, favorite, folder, and pinned zone. Stable component IDs use `AppPersistent.generateIdentifier(packageName, componentName)`. The default lens ID remains `default`; IDs restore unchanged, intentionally replacing any local lens with the same ID.
+Schema v2 root contains `schemaVersion`, `exportedAt`, and a `lenses` array; it has no v1 root-level `entries`. The v2 root also contains `activeLensId`, which must reference one lens ID. Each lens contains `id`, `name`, `orderIndex`, `scope`, `selectedAppIds`, `frozen`, and its app-layout `entries`. Entry fields retain v1 names: package/component identity, order, visibility, lock, favorite, folder, and pinned zone. Stable component IDs use `AppPersistent.generateIdentifier(packageName, componentName)`. The default lens ID remains `default`; IDs restore unchanged, intentionally replacing any local lens with the same ID.
 
 Parser validates root shape/schema, unique nonblank lens IDs, exactly one `default`, nonblank names, unique nonnegative order indices, valid scope, unique nonblank selected IDs, and valid app entries. Any invalid v2 input returns typed parse failure and leaves stores untouched. Unknown fields may be ignored; higher schema versions are unsupported.
 

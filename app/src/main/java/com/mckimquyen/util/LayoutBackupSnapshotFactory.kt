@@ -11,7 +11,8 @@ object LayoutBackupSnapshotFactory {
         lenses: List<LensWorkspace>,
         rows: List<AppPersistent>,
         appSettings: List<LensAppSettingsBackup>,
-        exportedAt: Long
+        exportedAt: Long,
+        activeLensId: String = LensWorkspace.DEFAULT_LENS_ID
     ): LayoutBackup {
         require(lenses.isNotEmpty()) { "Workspace is empty" }
         require(lenses.map { it.id }.toSet().size == lenses.size) { "Duplicate lens IDs" }
@@ -25,6 +26,7 @@ object LayoutBackupSnapshotFactory {
         return LayoutBackup(
             schemaVersion = LayoutBackup.CURRENT_SCHEMA_VERSION,
             exportedAt = exportedAt,
+            activeLensId = activeLensId.takeIf(settingsById::containsKey) ?: LensWorkspace.DEFAULT_LENS_ID,
             lenses = lenses.sortedWith(compareBy<LensWorkspace> { it.orderIndex }.thenBy { it.createdAt }).map { lens ->
                 val settings = settingsById.getValue(lens.id)
                 val entries = byLens[lens.id].orEmpty().mapNotNull(LayoutBackupEntry::fromPersistent)

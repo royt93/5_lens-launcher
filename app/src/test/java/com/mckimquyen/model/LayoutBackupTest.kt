@@ -222,9 +222,49 @@ class LayoutBackupTest {
     }
 
     @Test
+    fun `v2 round trips active lens id`() {
+        val json = """
+            {"schemaVersion":2,"exportedAt":0,"activeLensId":"work","lenses":[
+                {"id":"default","name":"Home","orderIndex":0,"scope":"ALL","selectedAppIds":[],"frozen":false,"entries":[]},
+                {"id":"work","name":"Work","orderIndex":1,"scope":"ALL","selectedAppIds":[],"frozen":false,"entries":[]}
+            ]}
+        """.trimIndent()
+        val result = LayoutBackup.parse(json) as LayoutBackupParseResult.Success
+        assertEquals("work", result.backup.activeLensId)
+        val reparsed = LayoutBackup.parse(result.backup.toJson()) as LayoutBackupParseResult.Success
+        assertEquals("work", reparsed.backup.activeLensId)
+    }
+
+    @Test
+    fun `v2 rejects active lens id not present in lenses`() {
+        val json = """
+            {"schemaVersion":2,"exportedAt":0,"activeLensId":"missing","lenses":[
+                {"id":"default","name":"Home","orderIndex":0,"scope":"ALL","selectedAppIds":[],"frozen":false,"entries":[]}
+            ]}
+        """.trimIndent()
+        assertEquals(LayoutBackupParseResult.Malformed, LayoutBackup.parse(json))
+    }
+
+    @Test
+    fun `v2 requires activeLensId string referencing an existing lens`() {
+        val missing = """
+            {"schemaVersion":2,"exportedAt":0,"lenses":[
+                {"id":"default","name":"Home","orderIndex":0,"scope":"ALL","selectedAppIds":[],"frozen":false,"entries":[]}
+            ]}
+        """.trimIndent()
+        val wrongType = """
+            {"schemaVersion":2,"exportedAt":0,"activeLensId":7,"lenses":[
+                {"id":"default","name":"Home","orderIndex":0,"scope":"ALL","selectedAppIds":[],"frozen":false,"entries":[]}
+            ]}
+        """.trimIndent()
+        assertEquals(LayoutBackupParseResult.Malformed, LayoutBackup.parse(missing))
+        assertEquals(LayoutBackupParseResult.Malformed, LayoutBackup.parse(wrongType))
+    }
+
+    @Test
     fun `v2 complete lens with complete entry parses`() {
         val json = """
-            {"schemaVersion":2,"exportedAt":0,"lenses":[
+            {"schemaVersion":2,"exportedAt":0,"activeLensId":"default","lenses":[
                 {"id":"default","name":"Lens 1","orderIndex":0,"scope":"ALL","selectedAppIds":[],"frozen":false,"entries":[
                     {"packageName":"com.a","name":"com.a.Main","orderNumber":0,"appVisible":true,"appOpened":true,"isFavorite":false,"folderName":null,"pinnedZone":"NONE"}
                 ]}
@@ -392,7 +432,7 @@ class LayoutBackupTest {
     @Test
     fun `v2 tolerates unknown additive fields at root and lens level`() {
         val json = """
-            {"schemaVersion":2,"exportedAt":0,"futureRootField":"x","lenses":[
+            {"schemaVersion":2,"exportedAt":0,"activeLensId":"default","futureRootField":"x","lenses":[
                 {"id":"default","name":"Lens 1","orderIndex":0,"scope":"ALL","selectedAppIds":[],"frozen":false,"entries":[],"futureLensField":42}
             ]}
         """.trimIndent()

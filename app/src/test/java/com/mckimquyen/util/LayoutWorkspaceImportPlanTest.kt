@@ -72,6 +72,7 @@ class LayoutWorkspaceImportPlanTest {
         val plan = LayoutImportApplier.planV2(backup)
 
         assertEquals(2, plan.lenses.size)
+        assertEquals("default", plan.activeLensId)
         val restored = plan.lenses.single { it.id == "work" }
         assertEquals(1, restored.orderIndex)
         assertEquals(LensAppScope.SELECTED, restored.scope)
@@ -123,6 +124,7 @@ class LayoutWorkspaceImportPlanTest {
     fun `previewCounts rejects duplicate lens IDs instead of undercounting`() {
         val duplicatePlan = LayoutImportApplier.WorkspacePlan(
             schemaVersion = LayoutBackup.CURRENT_SCHEMA_VERSION,
+            activeLensId = "work",
             lenses = listOf(
                 LayoutImportApplier.WorkspaceLensPlan("work", "Work", 0, LensAppScope.ALL, emptySet(), false, listOf(entry("com.a"))),
                 LayoutImportApplier.WorkspaceLensPlan("work", "Work copy", 1, LensAppScope.ALL, emptySet(), false, listOf(entry("com.b")))

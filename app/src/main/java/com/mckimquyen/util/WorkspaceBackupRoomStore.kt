@@ -44,10 +44,9 @@ class WorkspaceBackupRoomStore(context: Context) : WorkspaceBackupImportStore {
 
     override fun replacePreferences(plan: LayoutImportApplier.WorkspacePlan) {
         require(plan.schemaVersion == LayoutBackup.CURRENT_SCHEMA_VERSION)
-        val active = settings.getString(UtilSettings.KEY_ACTIVE_LENS_ID)
         check(settings.replaceWorkspacePreferences(
             plan.lenses.map { LensAppSettingsBackup(it.id, it.scope, it.selectedAppIds, it.frozen) },
-            active?.takeIf { id -> plan.lenses.any { it.id == id } } ?: LensWorkspace.DEFAULT_LENS_ID
+            plan.activeLensId
         )) { "Unable to commit workspace preferences" }
     }
 

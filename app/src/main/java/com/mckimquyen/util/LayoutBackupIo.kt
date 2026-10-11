@@ -6,6 +6,7 @@ import com.mckimquyen.app.ApplicationScope
 import com.mckimquyen.model.AppDatabase
 import com.mckimquyen.model.LayoutBackup
 import com.mckimquyen.model.LayoutBackupParseResult
+import com.mckimquyen.model.LensWorkspace
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -37,7 +38,12 @@ object LayoutBackupIo {
                         settings.isLensFrozen(lens.id)
                     )
                 }
-                val json = LayoutBackupSnapshotFactory.create(lenses, rows, appSettings, System.currentTimeMillis()).toJson()
+                val activeLensId = settings.getString(UtilSettings.KEY_ACTIVE_LENS_ID)
+                    ?.takeIf { id -> lenses.any { it.id == id } }
+                    ?: LensWorkspace.DEFAULT_LENS_ID
+                val json = LayoutBackupSnapshotFactory.create(
+                    lenses, rows, appSettings, System.currentTimeMillis(), activeLensId
+                ).toJson()
                 context.applicationContext.contentResolver.openOutputStream(uri)?.use { stream ->
                     stream.write(json.toByteArray(Charsets.UTF_8))
                 } ?: error("Unable to open backup destination")

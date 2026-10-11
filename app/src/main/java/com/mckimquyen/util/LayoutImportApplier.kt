@@ -79,7 +79,7 @@ object LayoutImportApplier {
     )
 
     /** Pure plan for a full workspace restore - no Context/PackageManager/Room/prefs/IO. */
-    data class WorkspacePlan(val schemaVersion: Int, val lenses: List<WorkspaceLensPlan>)
+    data class WorkspacePlan(val schemaVersion: Int, val lenses: List<WorkspaceLensPlan>, val activeLensId: String)
 
     data class PreviewCounts(
         val lensCount: Int,
@@ -94,6 +94,7 @@ object LayoutImportApplier {
         }
         return WorkspacePlan(
         schemaVersion = LayoutBackup.SCHEMA_VERSION_V1,
+        activeLensId = LensWorkspace.DEFAULT_LENS_ID,
         lenses = listOf(
             WorkspaceLensPlan(
                 id = LensWorkspace.DEFAULT_LENS_ID,
@@ -119,6 +120,7 @@ object LayoutImportApplier {
         }
         return WorkspacePlan(
         schemaVersion = backup.schemaVersion,
+        activeLensId = backup.activeLensId ?: LensWorkspace.DEFAULT_LENS_ID,
         lenses = backup.lenses.map {
             WorkspaceLensPlan(it.id, it.name, it.orderIndex, it.scope, it.selectedAppIds, it.frozen, it.entries)
         }

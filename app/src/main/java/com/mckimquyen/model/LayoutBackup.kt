@@ -220,13 +220,15 @@ data class LayoutBackup(
     val schemaVersion: Int,
     val exportedAt: Long,
     val entries: List<LayoutBackupEntry> = emptyList(),
-    val lenses: List<LayoutBackupLens> = emptyList()
+    val lenses: List<LayoutBackupLens> = emptyList(),
+    val activeLensId: String? = null
 ) {
     /** Schema v2 omits the legacy root `entries` key entirely (design: "no v1 root entries"). */
     fun toJson(): String = JSONObject().apply {
         put(KEY_SCHEMA_VERSION, schemaVersion)
         put(KEY_EXPORTED_AT, exportedAt)
         if (schemaVersion >= SCHEMA_VERSION_V2) {
+            put(KEY_ACTIVE_LENS_ID, activeLensId ?: LensWorkspace.DEFAULT_LENS_ID)
             put(KEY_LENSES, JSONArray(lenses.map { it.toJson() }))
         } else {
             put(KEY_ENTRIES, JSONArray(entries.map { it.toJson() }))
@@ -242,6 +244,7 @@ data class LayoutBackup(
         private const val KEY_EXPORTED_AT = "exportedAt"
         private const val KEY_ENTRIES = "entries"
         private const val KEY_LENSES = "lenses"
+        private const val KEY_ACTIVE_LENS_ID = "activeLensId"
 
         // ponytail: still produces a flat, single-lens v1-shaped entries list tagged as v1 -
         // real per-lens-grouped v2 export (reading every workspace lens + FISH-021 state) is
@@ -301,7 +304,14 @@ data class LayoutBackup(
             if (orderIndices.any { it < 0 }) return LayoutBackupParseResult.Malformed
             if (orderIndices.toSet().size != orderIndices.size) return LayoutBackupParseResult.Malformed
 
-            return LayoutBackupParseResult.Success(LayoutBackup(SCHEMA_VERSION_V2, exportedAt, lenses = lenses))
+            val activeLensId = root.opt(KEY_ACTIVE_LENS_ID) as? String
+                ?: return LayoutBackupParseResult.Malformed
+            if (activeLensId.isBlank()) return LayoutBackupParseResult.Malformed
+            if (lenses.none { it.id == activeLensId }) return LayoutBackupParseResult.Malformed
+
+            return LayoutBackupParseResult.Success(
+                LayoutBackup(SCHEMA_VERSION_V2, exportedAt, lenses = lenses, activeLensId = activeLensId)
+            )
         }
     }
 }
