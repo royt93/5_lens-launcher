@@ -57,18 +57,18 @@ Completed in commits `19b6a6f..f00b40b`; parser tests include v1 compatibility, 
 - [ ] Step 4: Run focused class; expect all PASS.
 - [ ] Step 5: Commit `feat(backup): plan full workspace restore`.
 
-## Task 3: Add atomic Room workspace/layout replacement
+## Task 3: Add atomic Room workspace/layout replacement — COMPLETE
 
 **Files:** `AppPersistentDao.kt`, `LensWorkspaceDao.kt`; tests in `LensWorkspaceDaoTest.kt`.
 
 **Interface:** one `@Transaction` replacing all workspace rows and all per-lens app rows from validated records; preserve non-layout fields by stable identifier before deletion.
 
-- [ ] Step 1: Add in-memory Room tests seeded with two lenses, stale rows, open counts, palette colors, notification counts; assert replace semantics and preserved non-layout values.
-- [ ] Step 2: Run focused DAO test; confirm RED.
-- [ ] Step 3: Implement transaction: snapshot old rows; replace workspace/app rows; insert imported layout with original IDs and backed-up fields; preserve `openCount`, `paletteColor`, `notificationCount` and fields outside backup according to their existing global/per-lens semantics. For identities absent from backup, keep one default-lens parked row with layout reset and `appVisible=false`; do not make them visible. Any exception rolls back.
-- [ ] Step 4: Test v1 updates default layout only; v2 removes stale layout; inject DB failure through a testable store boundary and assert rollback.
-- [ ] Step 5: Run focused DAO tests; expect PASS; Room schema remains v12 (file format only).
-- [ ] Step 6: Commit `feat(backup): replace workspace transactionally`.
+- [x] Step 1: Add in-memory Room tests seeded with two lenses, stale rows, open counts, palette colors, notification counts; assert replace semantics and preserved non-layout values.
+- [x] Step 2: Run focused DAO test; confirm RED.
+- [x] Step 3: Implement transaction: snapshot old rows; replace workspace/app rows; insert imported layout with original IDs and backed-up fields; preserve `openCount`, `paletteColor`, `notificationCount` and fields outside backup according to their existing global/per-lens semantics. For identities absent from backup, keep one default-lens parked row with layout reset and `appVisible=false`; do not make them visible. Any exception rolls back.
+- [x] Step 4: Test v2 replacement, hidden parking rows for absent app identities, preserved stats, and DB transaction rollback on a genuine unique-index constraint failure. V1 import bypasses this v2-only API; v1 isolation is covered at orchestration in Task 6.
+- [x] Step 5: Run `./gradlew testDevDebugUnitTest --tests com.mckimquyen.model.LensWorkspaceDaoTest`; 6 tests, 0 failures; Room schema remains v12 (file format only).
+- [x] Step 6: Commit `feat(backup): replace workspace transactionally` (`8a31e4d`; review follow-ups `dc02daa`, `0a52ee0`).
 
 ## Task 4: Apply per-lens preferences and recover active lens
 
