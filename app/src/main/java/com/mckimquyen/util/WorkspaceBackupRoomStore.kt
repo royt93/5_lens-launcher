@@ -45,6 +45,9 @@ class WorkspaceBackupRoomStore(context: Context) : WorkspaceBackupImportStore {
     override suspend fun applyLegacyV1(plan: LayoutImportApplier.WorkspacePlan) {
         require(plan.schemaVersion == LayoutBackup.SCHEMA_VERSION_V1)
         val dao = database.appPersistentDao()
+        val allRows = dao.getAllRows()
+        val oldDefault = allRows.filter { it.lensId == LensWorkspace.DEFAULT_LENS_ID }
+        val preservedByIdentifier = allRows.associateBy { it.identifier }
         val imported = plan.lenses.single().entries.map { entry ->
             AppPersistent(
                 packageName = entry.packageName,
@@ -59,10 +62,9 @@ class WorkspaceBackupRoomStore(context: Context) : WorkspaceBackupImportStore {
                 lensId = LensWorkspace.DEFAULT_LENS_ID
             )
         }
-        val oldDefault = dao.getAll()
         val importedIds = imported.mapTo(mutableSetOf()) { it.identifier }
         val merged = imported.map { row ->
-            val old = oldDefault.firstOrNull { it.identifier == row.identifier }
+            val old = preservedByIdentifier[row.identifier]
             row.copy(
                 openCount = old?.openCount ?: row.openCount,
                 paletteColor = old?.paletteColor ?: row.paletteColor,

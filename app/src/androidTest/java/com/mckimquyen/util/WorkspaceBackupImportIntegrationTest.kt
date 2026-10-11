@@ -5,6 +5,9 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.mckimquyen.model.AppDatabase
 import com.mckimquyen.model.AppPersistent
+import com.mckimquyen.model.LayoutBackup
+import com.mckimquyen.model.LayoutBackupEntry
+import com.mckimquyen.model.PinnedZone
 import com.mckimquyen.model.LensWorkspace
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -25,14 +28,19 @@ class WorkspaceBackupImportIntegrationTest {
     fun setup() {
         AppDatabase.init(context)
         PreferenceManager.getDefaultSharedPreferences(context).edit().clear().commit()
-        runBlocking { database.lensWorkspaceDao().replaceWorkspace(listOf(LensWorkspace.createDefault()), emptyList()) }
+        resetWorkspace()
+    }
+
+    // replaceWorkspace deliberately parks old rows to preserve their stats, so tests must delete
+    // rows explicitly or openCount/paletteColor leak between tests.
+    private fun resetWorkspace() = runBlocking {
+        database.appPersistentDao().deleteAllRows()
+        database.lensWorkspaceDao().replaceWorkspace(listOf(LensWorkspace.createDefault()), emptyList())
     }
 
     @After
     fun tearDown() {
-        runBlocking {
-            database.lensWorkspaceDao().replaceWorkspace(listOf(LensWorkspace.createDefault()), emptyList())
-        }
+        resetWorkspace()
         PreferenceManager.getDefaultSharedPreferences(context).edit().clear().commit()
     }
 
@@ -78,5 +86,109 @@ class WorkspaceBackupImportIntegrationTest {
         assertEquals(77, parked?.paletteColor)
         assertEquals(5, parked?.notificationCount)
         assertFalse(parked?.appVisible ?: true)
+    }
+
+    private fun seedTwoLensWorkspace() = runBlocking {
+        database.lensWorkspaceDao().replaceWorkspace(
+            listOf(LensWorkspace.createDefault(), LensWorkspace("work", "Work", 1, 2L)),
+            listOf(
+                AppPersistent(packageName="com.example.home", name="com.example.home.Main", identifier="com.example.home-com.example.home.Main", openCount=4, paletteColor=11, isFavorite=false, lensId="default"),
+                AppPersistent(packageName="com.example.work", name="com.example.work.Main", identifier="com.example.work-com.example.work.Main", isFavorite=true, folderName="Keep", lensId="work")
+            )
+        )
+        settings.replaceWorkspacePreferences(
+            listOf(
+                LensAppSettingsBackup("default", LensAppScope.ALL, emptySet(), false),
+                LensAppSettingsBackup("work", LensAppScope.SELECTED, setOf("com.example.work-com.example.work.Main"), true)
+            ), "work"
+        )
+    }
+
+    private fun v2Backup() = LayoutBackup(
+        LayoutBackup.CURRENT_SCHEMA_VERSION, 0L, activeLensId = "default",
+        lenses = listOf(
+            com.mckimquyen.model.LayoutBackupLens(
+                "default", "Only", 0, LensAppScope.ALL, emptySet(), false,
+                listOf(LayoutBackupEntry("com.example.home", "com.example.home.Main", 0, true, true, true, null, PinnedZone.NONE.name))
+            )
+        )
+    )
+
+    @Test
+    fun v1ImportOnlyChangesDefaultLens() = runBlocking {
+        seedTwoLensWorkspace()
+        val legacy = LayoutBackup(
+            LayoutBackup.SCHEMA_VERSION_V1, 0L,
+            entries = listOf(LayoutBackupEntry("com.example.home", "com.example.home.Main", 0, true, true, true, "Imported", PinnedZone.NONE.name))
+        )
+
+        val result = WorkspaceBackupImportCoordinator(WorkspaceBackupRoomStore(context)).apply(legacy)
+
+        assertEquals(WorkspaceBackupImportResult.Applied, result)
+        assertEquals(listOf("default", "work"), database.lensWorkspaceDao().getAll().map { it.id })
+        val home = database.appPersistentDao().findByIdentifier("default", "com.example.home-com.example.home.Main")
+        assertEquals("Imported", home?.folderName)
+        assertEquals(4L, home?.openCount)
+        assertEquals(11, home?.paletteColor)
+        assertEquals("Keep", database.appPersistentDao().findByIdentifier("work", "com.example.work-com.example.work.Main")?.folderName)
+        assertEquals("work", settings.getString(UtilSettings.KEY_ACTIVE_LENS_ID))
+        assertEquals(LensAppScope.SELECTED, settings.getLensAppScope("work"))
+        assertTrue(settings.isLensFrozen("work"))
+    }
+
+    @Test
+    fun v1ImportPreservesGlobalStatsWhenIdentityOnlyExistsOnAnotherLens() = runBlocking {
+        database.lensWorkspaceDao().replaceWorkspace(
+            listOf(LensWorkspace.createDefault(), LensWorkspace("work", "Work", 1, 2L)),
+            listOf(AppPersistent(
+                packageName="com.example.work", name="com.example.work.Main",
+                identifier="com.example.work-com.example.work.Main", openCount=9,
+                paletteColor=44, notificationCount=6, lensId="work"
+            ))
+        )
+        val legacy = LayoutBackup(
+            LayoutBackup.SCHEMA_VERSION_V1, 0L,
+            entries = listOf(LayoutBackupEntry("com.example.work", "com.example.work.Main", 0, true, true, true, null, PinnedZone.NONE.name))
+        )
+
+        val result = WorkspaceBackupImportCoordinator(WorkspaceBackupRoomStore(context)).apply(legacy)
+
+        assertEquals(WorkspaceBackupImportResult.Applied, result)
+        val restored = database.appPersistentDao().findByIdentifier("default", "com.example.work-com.example.work.Main")
+        assertEquals(9L, restored?.openCount)
+        assertEquals(44, restored?.paletteColor)
+        assertEquals(6, restored?.notificationCount)
+        assertEquals(9L, database.appPersistentDao().findByIdentifier("work", "com.example.work-com.example.work.Main")?.openCount)
+    }
+
+    @Test
+    fun preferenceFailureRestoresDatabaseAndPreferences() = runBlocking {
+        seedTwoLensWorkspace()
+        val real = WorkspaceBackupRoomStore(context)
+        val failingPrefs = object : WorkspaceBackupImportStore by real {
+            override fun replacePreferences(plan: LayoutImportApplier.WorkspacePlan) = error("injected prefs failure")
+        }
+
+        val result = WorkspaceBackupImportCoordinator(failingPrefs).apply(v2Backup())
+
+        assertTrue(result is WorkspaceBackupImportResult.Failed)
+        assertEquals(listOf("default", "work"), database.lensWorkspaceDao().getAll().map { it.id })
+        assertEquals("Keep", database.appPersistentDao().findByIdentifier("work", "com.example.work-com.example.work.Main")?.folderName)
+        assertEquals("work", settings.getString(UtilSettings.KEY_ACTIVE_LENS_ID))
+        assertTrue(settings.isLensFrozen("work"))
+    }
+
+    @Test
+    fun rollbackFailureReportsRecoveryRequired() = runBlocking {
+        seedTwoLensWorkspace()
+        val real = WorkspaceBackupRoomStore(context)
+        val failingBoth = object : WorkspaceBackupImportStore by real {
+            override fun replacePreferences(plan: LayoutImportApplier.WorkspacePlan) = error("injected prefs failure")
+            override fun restorePreferences(snapshot: Any): Boolean = false
+        }
+
+        val result = WorkspaceBackupImportCoordinator(failingBoth).apply(v2Backup())
+
+        assertTrue(result is WorkspaceBackupImportResult.RecoveryRequired)
     }
 }
