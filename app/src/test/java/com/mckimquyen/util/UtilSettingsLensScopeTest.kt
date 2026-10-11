@@ -77,6 +77,20 @@ class UtilSettingsLensScopeTest {
     }
 
     @Test
+    fun `reconcileActiveLens repairs missing id to default without touching lens settings`() {
+        settings.save(UtilSettings.KEY_ACTIVE_LENS_ID, "missing")
+        settings.saveLensAppScope(work, LensAppScope.SELECTED)
+        settings.saveLensAppSelection(work, setOf("kept"))
+        settings.saveLensFrozen(work, true)
+
+        assertTrue(settings.reconcileActiveLens(setOf(default, work)))
+        assertEquals(default, settings.getString(UtilSettings.KEY_ACTIVE_LENS_ID))
+        assertEquals(LensAppScope.SELECTED, settings.getLensAppScope(work))
+        assertEquals(setOf("kept"), settings.getLensAppSelection(work))
+        assertTrue(settings.isLensFrozen(work))
+    }
+
+    @Test
     fun `keys are stable`() {
         assertEquals("lens_app_scope", UtilSettings.KEY_LENS_APP_SCOPE)
         assertEquals("lens_app_selection", UtilSettings.KEY_LENS_APP_SELECTION)

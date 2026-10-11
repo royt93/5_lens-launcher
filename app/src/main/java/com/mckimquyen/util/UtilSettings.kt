@@ -473,6 +473,12 @@ class UtilSettings(context: Context) {
         activeLensId: String
     ): Boolean = if (schemaVersion == 1) true else replaceWorkspacePreferences(lensSettings, activeLensId)
 
+    fun reconcileActiveLens(validLensIds: Set<String>): Boolean {
+        val activeLensId = prefs.getString(KEY_ACTIVE_LENS_ID, LensWorkspace.DEFAULT_LENS_ID)
+        if (activeLensId in validLensIds) return true
+        return prefs.edit().putString(KEY_ACTIVE_LENS_ID, LensWorkspace.DEFAULT_LENS_ID).commit()
+    }
+
     fun restoreWorkspacePreferences(snapshot: WorkspacePreferencesSnapshot): Boolean {
         val editor = prefs.edit()
         prefs.all.keys.filter(::isWorkspacePreferenceKey).forEach(editor::remove)

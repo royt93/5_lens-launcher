@@ -620,6 +620,9 @@ public class ActHome extends ActBase {
             // FISH-008 Phase 2 r2: restore active page after rotation/recreate so the user stays on
             // the lens they were viewing instead of bouncing back to page 0.
             if (utilSettings != null && !lenses.isEmpty()) {
+                java.util.Set<String> validLensIds = new java.util.HashSet<>();
+                for (LensWorkspace lens : lenses) validLensIds.add(lens.getId());
+                utilSettings.reconcileActiveLens(validLensIds);
                 String savedActive = utilSettings.getString(UtilSettings.KEY_ACTIVE_LENS_ID);
                 for (int i = 0; i < lenses.size(); i++) {
                     if (lenses.get(i).getId().equals(savedActive)) {
