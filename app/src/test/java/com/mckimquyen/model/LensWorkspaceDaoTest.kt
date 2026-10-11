@@ -11,16 +11,13 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
 
-/**
- * FISH-008 Phase 2: the LensWorkspace CRUD surface now has real production callers
- * (ActHome's add/rename/delete flows), so its contract is pinned here.
- */
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE, sdk = [28])
 class LensWorkspaceDaoTest {
 
     private lateinit var db: AppDatabase
     private lateinit var dao: LensWorkspaceDao
+    private lateinit var apps: AppPersistentDao
 
     private fun setDatabaseInstance(database: AppDatabase?) {
         val field = AppDatabase::class.java.getDeclaredField("INSTANCE")
@@ -36,6 +33,7 @@ class LensWorkspaceDaoTest {
         AppDatabase.init(context)
         db = AppDatabase.getInstance()
         dao = db.lensWorkspaceDao()
+        apps = db.appPersistentDao()
     }
 
     @After
@@ -84,5 +82,74 @@ class LensWorkspaceDaoTest {
 
         assertNull(dao.findById("work"))
         assertEquals(listOf(LensWorkspace.DEFAULT_LENS_ID), dao.getAll().map { it.id })
+    }
+
+    @Test
+    fun `replaceWorkspace restores lenses and rows while preserving non-layout data`() = runBlocking {
+        dao.insertOrUpdate(LensWorkspace.createDefault())
+        dao.insertOrUpdate(LensWorkspace("old-work", "Old work", 1, 11L))
+        apps.insert(AppPersistent(packageName="com.keep", name="com.keep.Main", identifier="com.keep-com.keep.Main", openCount=9, paletteColor=123, notificationCount=4, orderNumber=8, lensId="default"))
+        apps.insert(AppPersistent(packageName="com.keep", name="com.keep.Main", identifier="com.keep-com.keep.Main", openCount=9, paletteColor=123, notificationCount=4, orderNumber=3, lensId="old-work"))
+        apps.insert(AppPersistent(packageName="com.stale", name="com.stale.Main", identifier="com.stale-com.stale.Main", openCount=5, paletteColor=77, notificationCount=2, isFavorite=true, lensId="old-work"))
+
+        val backupLenses = listOf(
+            LensWorkspace("default", "Home", 0, 101L),
+            LensWorkspace("work", "Work", 1, 202L)
+        )
+        val backupRows = listOf(
+            AppPersistent(packageName="com.keep", name="com.keep.Main", identifier="com.keep-com.keep.Main", orderNumber=2, appVisible=false, appOpened=false, isFavorite=true, folderName="Saved", pinnedZone="START", lensId="default"),
+            AppPersistent(packageName="com.keep", name="com.keep.Main", identifier="com.keep-com.keep.Main", orderNumber=0, appVisible=true, isFavorite=false, lensId="work"),
+            AppPersistent(packageName="com.gone", name="com.gone.Main", identifier="com.gone-com.gone.Main", orderNumber=1, lensId="work")
+        )
+
+        dao.replaceWorkspace(backupLenses, backupRows)
+
+        assertEquals(listOf("default", "work"), dao.getAll().map { it.id })
+        assertEquals(listOf("Home", "Work"), dao.getAll().map { it.name })
+        val defaultRow = apps.findByIdentifier("default", "com.keep-com.keep.Main") ?: throw AssertionError("missing default row")
+        val workRows = apps.getAllForLens("work").associateBy { it.identifier }
+        val workKeep = workRows["com.keep-com.keep.Main"] ?: throw AssertionError("missing work row")
+        assertEquals(2, defaultRow.orderNumber)
+        assertEquals(false, defaultRow.appVisible)
+        assertEquals(true, defaultRow.isFavorite)
+        assertEquals("Saved", defaultRow.folderName)
+        assertEquals(9L, defaultRow.openCount)
+        assertEquals(123, defaultRow.paletteColor)
+        assertEquals(4, defaultRow.notificationCount)
+        assertEquals(0, workKeep.orderNumber)
+        assertEquals(9L, workKeep.openCount)
+        assertEquals(123, workKeep.paletteColor)
+        assertEquals(4, workKeep.notificationCount)
+        assertEquals(setOf("com.keep-com.keep.Main", "com.gone-com.gone.Main"), workRows.keys)
+        assertNull(apps.findByIdentifier("old-work", "com.keep-com.keep.Main"))
+        assertNull(apps.findByIdentifier("old-work", "com.stale-com.stale.Main"))
+        val retainedStats = apps.findByIdentifier("default", "com.stale-com.stale.Main") ?: throw AssertionError("missing preserved non-layout data")
+        assertEquals(5L, retainedStats.openCount)
+        assertEquals(77, retainedStats.paletteColor)
+        assertEquals(2, retainedStats.notificationCount)
+        assertEquals(-1, retainedStats.orderNumber)
+        assertEquals(false, retainedStats.isFavorite)
+        assertNull(retainedStats.folderName)
+    }
+
+    @Test
+    fun `replaceWorkspace transaction rolls back when an insert fails`() = runBlocking {
+        dao.insertOrUpdate(LensWorkspace.createDefault())
+        apps.insert(AppPersistent(packageName="com.keep", name="com.keep.Main", identifier="com.keep-com.keep.Main", orderNumber=5, lensId="default"))
+        val originalLens = dao.getAll()
+        val originalRows = apps.getAllForLens("default")
+        try {
+            dao.replaceWorkspace(
+                listOf(LensWorkspace("default", "Replacement", 0)),
+                listOf(
+                    AppPersistent(packageName="com.a", name="com.a.Main", identifier="duplicate", lensId="default"),
+                    AppPersistent(packageName="com.b", name="com.b.Main", identifier="duplicate", lensId="default")
+                )
+            )
+            throw AssertionError("Expected unique-key insert to fail")
+        } catch (_: Exception) {
+            assertEquals(originalLens, dao.getAll())
+            assertEquals(originalRows, apps.getAllForLens("default"))
+        }
     }
 }

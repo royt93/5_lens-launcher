@@ -4,6 +4,9 @@ import androidx.room.*
 
 @Dao
 interface AppPersistentDao {
+    @Query("SELECT * FROM APP_PERSISTENT")
+    suspend fun getAllRows(): List<AppPersistent>
+
     @Query("SELECT * FROM APP_PERSISTENT WHERE LENS_ID = 'default'")
     suspend fun getAll(): List<AppPersistent>
 
@@ -75,6 +78,18 @@ interface AppPersistentDao {
 
     @Query("DELETE FROM APP_PERSISTENT WHERE LENS_ID = :lensId")
     suspend fun deleteForLens(lensId: String): Int
+
+    @Query("DELETE FROM APP_PERSISTENT")
+    suspend fun deleteAllRows(): Int
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(rows: List<AppPersistent>)
+
+    @Transaction
+    suspend fun replaceWorkspaceLayout(rows: List<AppPersistent>) {
+        deleteAllRows()
+        insertAll(rows)
+    }
 
     @Transaction
     suspend fun duplicateLensLayout(sourceLensId: String, targetLensId: String) {
