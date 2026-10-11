@@ -92,7 +92,7 @@ Completed in commits `19b6a6f..f00b40b`; parser tests include v1 compatibility, 
 - [ ] Step 1: Write failing export snapshot tests for two lenses, app layouts, scope/selection/frozen.
 - [ ] Step 2: Write failing orchestration tests proving DB then prefs commit, DB restoration after preference failure, recovery-required after failed rollback, and no success on any failure.
 - [ ] Step 3: Run targeted tests; confirm RED.
-- [ ] Step 4: Implement export snapshot collection off main thread and SAF write with failure propagation.
+- [x] Step 4: Implement export snapshot collection off main thread and SAF write with failure propagation; v2 includes activeLensId.
 - [ ] Step 5: Implement v2 import: snapshot DB/prefs → Room transaction → synchronous prefs commit → refresh shortcuts → success. On prefs failure, restore DB/prefs; rollback failure emits recovery-required + diagnostic log. Process death between stores documented; startup reconciles active lens. V1 routes existing semantics unchanged.
 - [ ] Step 6: UI preview v2 shows lens and entry counts + destructive replace warning; Cancel performs no writes; confirm invokes persistence; v1 copy says it applies to default lens only. Dismiss dialog on Activity destroy.
 - [ ] Step 7: Run `./gradlew testDevDebugUnitTest --tests '*LayoutBackup*' --tests '*LayoutImport*'`; expect PASS.
