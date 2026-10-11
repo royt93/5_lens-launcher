@@ -91,6 +91,19 @@ interface AppPersistentDao {
         insertAll(rows)
     }
 
+    @Query("DELETE FROM APP_PERSISTENT WHERE LENS_ID = 'default'")
+    suspend fun deleteDefaultLensRows(): Int
+
+    @Insert(onConflict = OnConflictStrategy.ABORT)
+    suspend fun insertDefaultLensRows(rows: List<AppPersistent>)
+
+    @Transaction
+    suspend fun replaceDefaultLensLayout(rows: List<AppPersistent>) {
+        require(rows.all { it.lensId == LensWorkspace.DEFAULT_LENS_ID })
+        deleteDefaultLensRows()
+        insertDefaultLensRows(rows)
+    }
+
     @Transaction
     suspend fun duplicateLensLayout(sourceLensId: String, targetLensId: String) {
         val sourceApps = getAllForLens(sourceLensId)

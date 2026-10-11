@@ -34,6 +34,7 @@ class WorkspaceBackupImportCoordinatorTest {
             override suspend fun snapshotDatabase(): Any { events += "snapshot-db"; return "db" }
             override fun snapshotPreferences(): Any { events += "snapshot-prefs"; return "prefs" }
             override suspend fun replaceDatabase(plan: LayoutImportApplier.WorkspacePlan) { events += "db" }
+            override suspend fun applyLegacyV1(plan: LayoutImportApplier.WorkspacePlan) { events += "v1-${plan.lenses.single().id}" }
             override fun replacePreferences(plan: LayoutImportApplier.WorkspacePlan) { events += "prefs" }
             override suspend fun restoreDatabase(snapshot: Any) { events += "restore-db" }
             override fun restorePreferences(snapshot: Any): Boolean { events += "restore-prefs"; return true }
@@ -51,6 +52,7 @@ class WorkspaceBackupImportCoordinatorTest {
             override suspend fun snapshotDatabase(): Any { events += "snapshot-db"; return "db" }
             override fun snapshotPreferences(): Any { events += "snapshot-prefs"; return "prefs" }
             override suspend fun replaceDatabase(plan: LayoutImportApplier.WorkspacePlan) { events += "db" }
+            override suspend fun applyLegacyV1(plan: LayoutImportApplier.WorkspacePlan) { events += "v1-${plan.lenses.single().id}" }
             override fun replacePreferences(plan: LayoutImportApplier.WorkspacePlan) { events += "prefs"; error("prefs failed") }
             override suspend fun restoreDatabase(snapshot: Any) { events += "restore-db" }
             override fun restorePreferences(snapshot: Any): Boolean { events += "restore-prefs"; return true }
@@ -67,6 +69,7 @@ class WorkspaceBackupImportCoordinatorTest {
             override suspend fun snapshotDatabase(): Any = "db"
             override fun snapshotPreferences(): Any = "prefs"
             override suspend fun replaceDatabase(plan: LayoutImportApplier.WorkspacePlan) = Unit
+            override suspend fun applyLegacyV1(plan: LayoutImportApplier.WorkspacePlan) = Unit
             override fun replacePreferences(plan: LayoutImportApplier.WorkspacePlan) { error("prefs failed") }
             override suspend fun restoreDatabase(snapshot: Any) { error("db restore failed") }
             override fun restorePreferences(snapshot: Any): Boolean = false

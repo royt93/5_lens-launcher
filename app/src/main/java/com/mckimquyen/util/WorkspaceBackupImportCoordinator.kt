@@ -8,6 +8,7 @@ interface WorkspaceBackupImportStore {
     suspend fun snapshotDatabase(): Any
     fun snapshotPreferences(): Any
     suspend fun replaceDatabase(plan: LayoutImportApplier.WorkspacePlan)
+    suspend fun applyLegacyV1(plan: LayoutImportApplier.WorkspacePlan)
     fun replacePreferences(plan: LayoutImportApplier.WorkspacePlan)
     suspend fun restoreDatabase(snapshot: Any)
     fun restorePreferences(snapshot: Any): Boolean
@@ -36,7 +37,7 @@ class WorkspaceBackupImportCoordinator(private val store: WorkspaceBackupImportS
 
         if (backup.schemaVersion == LayoutBackup.SCHEMA_VERSION_V1) {
             return try {
-                store.replaceDatabase(plan)
+                store.applyLegacyV1(plan)
                 store.refreshWorkspace()
                 WorkspaceBackupImportResult.Applied
             } catch (cancelled: CancellationException) {

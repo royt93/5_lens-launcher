@@ -42,6 +42,36 @@ class WorkspaceBackupRoomStore(context: Context) : WorkspaceBackupImportStore {
         )
     }
 
+    override suspend fun applyLegacyV1(plan: LayoutImportApplier.WorkspacePlan) {
+        require(plan.schemaVersion == LayoutBackup.SCHEMA_VERSION_V1)
+        val dao = database.appPersistentDao()
+        val imported = plan.lenses.single().entries.map { entry ->
+            AppPersistent(
+                packageName = entry.packageName,
+                name = entry.name,
+                identifier = AppPersistent.generateIdentifier(entry.packageName, entry.name),
+                orderNumber = entry.orderNumber,
+                appVisible = entry.appVisible,
+                appOpened = entry.appOpened,
+                isFavorite = entry.isFavorite,
+                folderName = entry.folderName,
+                pinnedZone = entry.pinnedZone,
+                lensId = LensWorkspace.DEFAULT_LENS_ID
+            )
+        }
+        val oldDefault = dao.getAll()
+        val importedIds = imported.mapTo(mutableSetOf()) { it.identifier }
+        val merged = imported.map { row ->
+            val old = oldDefault.firstOrNull { it.identifier == row.identifier }
+            row.copy(
+                openCount = old?.openCount ?: row.openCount,
+                paletteColor = old?.paletteColor ?: row.paletteColor,
+                notificationCount = old?.notificationCount ?: row.notificationCount
+            )
+        } + oldDefault.filter { it.identifier !in importedIds }
+        dao.replaceDefaultLensLayout(merged)
+    }
+
     override fun replacePreferences(plan: LayoutImportApplier.WorkspacePlan) {
         require(plan.schemaVersion == LayoutBackup.CURRENT_SCHEMA_VERSION)
         check(settings.replaceWorkspacePreferences(
