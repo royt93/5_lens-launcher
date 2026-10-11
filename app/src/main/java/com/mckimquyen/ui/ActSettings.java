@@ -501,6 +501,9 @@ public class ActSettings extends ActBase implements SettingsMenuHost {
                         return Unit.INSTANCE;
                     });
                 }));
+        layoutImportDialog.setOnDismissListener(dialog -> {
+            if (layoutImportDialog == dialog) layoutImportDialog = null;
+        });
         layoutImportDialog.show();
     }
 
