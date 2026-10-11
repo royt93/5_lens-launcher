@@ -88,7 +88,11 @@ object LayoutImportApplier {
     )
 
     /** v1 has only ever applied to the default lens; this plan is intentionally always one lens. */
-    fun planV1(backup: LayoutBackup): WorkspacePlan = WorkspacePlan(
+    fun planV1(backup: LayoutBackup): WorkspacePlan {
+        require(backup.schemaVersion == LayoutBackup.SCHEMA_VERSION_V1) {
+            "planV1 requires schema ${LayoutBackup.SCHEMA_VERSION_V1}, got ${backup.schemaVersion}"
+        }
+        return WorkspacePlan(
         schemaVersion = LayoutBackup.SCHEMA_VERSION_V1,
         lenses = listOf(
             WorkspaceLensPlan(
@@ -101,26 +105,33 @@ object LayoutImportApplier {
                 entries = backup.entries
             )
         )
-    )
+        )
+    }
 
     /**
      * Carries every parsed lens through unchanged, including entries/selections for packages not
      * currently installed - Task 2 never consults an installed-app list, so there is nothing to
      * filter against.
      */
-    fun planV2(backup: LayoutBackup): WorkspacePlan = WorkspacePlan(
+    fun planV2(backup: LayoutBackup): WorkspacePlan {
+        require(backup.schemaVersion == LayoutBackup.CURRENT_SCHEMA_VERSION) {
+            "planV2 requires schema ${LayoutBackup.CURRENT_SCHEMA_VERSION}, got ${backup.schemaVersion}"
+        }
+        return WorkspacePlan(
         schemaVersion = backup.schemaVersion,
         lenses = backup.lenses.map {
             WorkspaceLensPlan(it.id, it.name, it.orderIndex, it.scope, it.selectedAppIds, it.frozen, it.entries)
         }
-    )
+        )
+    }
 
     /** Deterministic: a pure fold over [plan], safe to call repeatedly for preview re-renders. */
     fun previewCounts(plan: WorkspacePlan): PreviewCounts {
         val perLens = plan.lenses.associate { it.id to it.entries.size }
+        require(perLens.size == plan.lenses.size) { "Workspace plan contains duplicate lens IDs" }
         return PreviewCounts(
             lensCount = plan.lenses.size,
-            totalEntryCount = perLens.values.sum(),
+            totalEntryCount = plan.lenses.sumOf { it.entries.size },
             perLensEntryCounts = perLens
         )
     }
