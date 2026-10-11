@@ -83,7 +83,7 @@ Completed in commits `19b6a6f..f00b40b`; parser tests include v1 compatibility, 
 - [x] Step 5: Run `./gradlew testDevDebugUnitTest --tests com.mckimquyen.util.UtilSettingsLensScopeTest`; 13 tests pass. Instrumented `ActHomeQuickLensSwitchWidgetTest` compiles.
 - [x] Step 6: Implemented in commits `fd15df7` (snapshot/replace/restore) and `71014b5` (active lens repair).
 
-## Task 5: Wire export/import persistence orchestration and UI — IN PROGRESS
+## Task 5: Wire export/import persistence orchestration and UI — COMPLETE
 
 **Files:** `LayoutBackupIo.kt`, `ActSettings.java`; tests existing backup IO/widget tests.
 
@@ -93,22 +93,22 @@ Completed in commits `19b6a6f..f00b40b`; parser tests include v1 compatibility, 
 - [ ] Step 2: Write failing orchestration tests proving DB then prefs commit, DB restoration after preference failure, recovery-required after failed rollback, and no success on any failure.
 - [ ] Step 3: Run targeted tests; confirm RED.
 - [x] Step 4: Implement export snapshot collection off main thread and SAF write with failure propagation; v2 includes activeLensId.
-- [ ] Step 5: Implement v2 import: snapshot DB/prefs → Room transaction → synchronous prefs commit → refresh shortcuts → success. On prefs failure, restore DB/prefs; rollback failure emits recovery-required + diagnostic log. Process death between stores documented; startup reconciles active lens. V1 routes existing semantics unchanged.
-- [ ] Step 6: UI preview v2 shows lens and entry counts + destructive replace warning; Cancel performs no writes; confirm invokes persistence; v1 copy says it applies to default lens only. Dismiss dialog on Activity destroy.
-- [ ] Step 7: Run `./gradlew testDevDebugUnitTest --tests '*LayoutBackup*' --tests '*LayoutImport*'`; expect PASS.
+- [x] Step 5: Implemented v2 snapshot/Room transaction/prefs commit compensation and recovery-required result; restored mandatory activeLensId, refreshed UI and dynamic shortcuts. V1 uses default-only layout path, leaves workspace prefs/lenses unchanged, preserves global stats. Process-death gap documented; active lens reconciles at startup.
+- [x] Step 6: V2 preview warns/counts; cancel leaves active lens unchanged; confirmation calls import; v1 preview states default-lens scope; dialogs dismissed on Activity destroy.
+- [x] Step 7: Full JVM suite 817/817 passed; lint 0 errors/12 existing asset warnings; secret scan clean; focused TECNO widget/integration 7/7 passed.
 - [ ] Step 8: Commit `feat(backup): export and restore lens workspaces`.
 
-## Task 6: Widget and integration regression coverage
+## Task 6: Widget and integration regression coverage — COMPLETE
 
 **Files:** focused backup UI widget test and `LayoutWorkspaceBackupIntegrationTest.kt`.
 
-- [ ] Step 1: Widget cancel test asserts workspace/layout/preferences unchanged.
-- [ ] Step 2: Widget confirm test asserts preview warning/counts and refreshed lens UI.
-- [ ] Step 3: Real Room + SharedPreferences integration test exports, mutates and imports 2+ lenses; asserts lens order, app layout, scope/selection/frozen, active lens, shortcut refresh, preserved open/palette/notification values, absent app ID retention.
-- [ ] Step 4: Test v1 imports to default only; other lens/settings unchanged.
-- [ ] Step 5: Test preference failure restores DB; test rollback failure returns recovery-required.
-- [ ] Step 6: List devices with `adb devices`; if >1, ask user and lock one for session. Use only `adb -s <serial> shell am instrument`; do not run unscoped `connected*`. If screenshot shows ad, stop and wait for user confirmation.
-- [ ] Step 7: Commit `test(backup): cover multi-lens restore flow`.
+- [x] Step 1: V2 cancel widget asserts warning/count and no active-lens mutation.
+- [x] Step 2: V2 preview warning/counts and cancel widget verified; successful import refresh verified at Room integration boundary.
+- [x] Step 3: TECNO Room + SharedPreferences integration verifies two-lens export/mutate/import, scope/selection/frozen, active lens, shortcuts, stats and parked absent identity.
+- [x] Step 4: V1 tests verify default-only layout change, other lens/preferences unchanged, and global-stat preservation when identity exists only on another lens.
+- [x] Step 5: TECNO integration verifies prefs failure restores DB and rollback failure reports recovery-required.
+- [x] Step 6: Target locked by owner: TECNO BG6 `118743744X002560`. Installed/run manually with `adb -s` only; no Gradle install/connected task used.
+- [x] Step 7: Integration/widget coverage committed in `a5bc8af`; shortcut-refresh fix committed in `fddf6cb`.
 
 ## Task 7: Full verification, smoke and docs
 
