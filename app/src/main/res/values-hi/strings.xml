@@ -220,4 +220,8 @@
     <string name="lens_unfreeze_title">स्थिति अनफ़िक्स करें?</string>
     <string name="lens_unfreeze_message">इससे खींचकर तय किया गया क्रम भी हट जाएगा।</string>
     <string name="lens_switch_title">लेंस बदलें</string>
+    <string name="layout_import_workspace_preview_message">This replaces your current workspace: %1$d lenses and %2$d app layout entries. Apps absent from this backup stay hidden on the default lens.</string>
+    <string name="layout_import_workspace_failed">Workspace import failed. Your previous workspace was restored.</string>
+    <string name="layout_import_workspace_recovery_required">Workspace restore failed and automatic recovery was incomplete. Reopen the app and verify your lenses.</string>
+    <string name="layout_import_v1_default_lens_note">This older backup updates the default lens layout only; other lenses stay unchanged.</string>
 </resources>

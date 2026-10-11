@@ -216,4 +216,8 @@
     <string name="lens_unfreeze_title">取消固定位置？</string>
     <string name="lens_unfreeze_message">这也会丢弃你通过拖动设置的顺序。</string>
     <string name="lens_switch_title">切换镜头</string>
+    <string name="layout_import_workspace_preview_message">This replaces your current workspace: %1$d lenses and %2$d app layout entries. Apps absent from this backup stay hidden on the default lens.</string>
+    <string name="layout_import_workspace_failed">Workspace import failed. Your previous workspace was restored.</string>
+    <string name="layout_import_workspace_recovery_required">Workspace restore failed and automatic recovery was incomplete. Reopen the app and verify your lenses.</string>
+    <string name="layout_import_v1_default_lens_note">This older backup updates the default lens layout only; other lenses stay unchanged.</string>
 </resources>
