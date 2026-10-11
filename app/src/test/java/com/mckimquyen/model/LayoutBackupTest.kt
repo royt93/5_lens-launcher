@@ -222,6 +222,93 @@ class LayoutBackupTest {
     }
 
     @Test
+    fun `v2 complete lens with complete entry parses`() {
+        val json = """
+            {"schemaVersion":2,"exportedAt":0,"lenses":[
+                {"id":"default","name":"Lens 1","orderIndex":0,"scope":"ALL","selectedAppIds":[],"frozen":false,"entries":[
+                    {"packageName":"com.a","name":"com.a.Main","orderNumber":0,"appVisible":true,"appOpened":true,"isFavorite":false,"folderName":null,"pinnedZone":"NONE"}
+                ]}
+            ]}
+        """.trimIndent()
+        val result = LayoutBackup.parse(json)
+        assertTrue(result is LayoutBackupParseResult.Success)
+        val entry = (result as LayoutBackupParseResult.Success).backup.lenses.single().entries.single()
+        assertEquals(0, entry.orderNumber)
+        assertEquals("com.a", entry.packageName)
+        assertEquals("com.a.Main", entry.name)
+        assertTrue(entry.appVisible)
+        assertTrue(entry.appOpened)
+        assertEquals(false, entry.isFavorite)
+        assertNull(entry.folderName)
+        assertEquals(PinnedZone.NONE.name, entry.pinnedZone)
+    }
+
+    @Test
+    fun `v2 lens rejects missing or non-boolean frozen`() {
+        val missing = """
+            {"schemaVersion":2,"exportedAt":0,"lenses":[
+                {"id":"default","name":"Lens 1","orderIndex":0,"scope":"ALL","selectedAppIds":[],"entries":[]}
+            ]}
+        """.trimIndent()
+        val wrongType = """
+            {"schemaVersion":2,"exportedAt":0,"lenses":[
+                {"id":"default","name":"Lens 1","orderIndex":0,"scope":"ALL","selectedAppIds":[],"frozen":"false","entries":[]}
+            ]}
+        """.trimIndent()
+        assertEquals(LayoutBackupParseResult.Malformed, LayoutBackup.parse(missing))
+        assertEquals(LayoutBackupParseResult.Malformed, LayoutBackup.parse(wrongType))
+    }
+
+    @Test
+    fun `v2 lens rejects wrong-typed identity and numeric fields`() {
+        val wrongId = """
+            {"schemaVersion":2,"exportedAt":0,"lenses":[
+                {"id":7,"name":"Lens 1","orderIndex":0,"scope":"ALL","selectedAppIds":[],"frozen":false,"entries":[]}
+            ]}
+        """.trimIndent()
+        val wrongOrder = """
+            {"schemaVersion":2,"exportedAt":0,"lenses":[
+                {"id":"default","name":"Lens 1","orderIndex":"0","scope":"ALL","selectedAppIds":[],"frozen":false,"entries":[]}
+            ]}
+        """.trimIndent()
+        assertEquals(LayoutBackupParseResult.Malformed, LayoutBackup.parse(wrongId))
+        assertEquals(LayoutBackupParseResult.Malformed, LayoutBackup.parse(wrongOrder))
+    }
+
+    @Test
+    fun `v2 entry rejects missing and wrong-typed required fields`() {
+        val missingOrder = """
+            {"schemaVersion":2,"exportedAt":0,"lenses":[
+                {"id":"default","name":"Lens 1","orderIndex":0,"scope":"ALL","selectedAppIds":[],"frozen":false,"entries":[
+                    {"packageName":"com.a","name":"com.a.Main","appVisible":true,"appOpened":true,"isFavorite":false,"folderName":null,"pinnedZone":"NONE"}
+                ]}
+            ]}
+        """.trimIndent()
+        val wrongVisibility = """
+            {"schemaVersion":2,"exportedAt":0,"lenses":[
+                {"id":"default","name":"Lens 1","orderIndex":0,"scope":"ALL","selectedAppIds":[],"frozen":false,"entries":[
+                    {"packageName":"com.a","name":"com.a.Main","orderNumber":0,"appVisible":"true","appOpened":true,"isFavorite":false,"folderName":null,"pinnedZone":"NONE"}
+                ]}
+            ]}
+        """.trimIndent()
+        assertEquals(LayoutBackupParseResult.Malformed, LayoutBackup.parse(missingOrder))
+        assertEquals(LayoutBackupParseResult.Malformed, LayoutBackup.parse(wrongVisibility))
+    }
+
+    @Test
+    fun `v2 rejects duplicate app identities within one lens`() {
+        val json = """
+            {"schemaVersion":2,"exportedAt":0,"lenses":[
+                {"id":"default","name":"Lens 1","orderIndex":0,"scope":"ALL","selectedAppIds":[],"frozen":false,"entries":[
+                    {"packageName":"com.a","name":"com.a.Main","orderNumber":0,"appVisible":true,"appOpened":true,"isFavorite":false,"folderName":null,"pinnedZone":"NONE"},
+                    {"packageName":"com.a","name":"com.a.Main","orderNumber":1,"appVisible":true,"appOpened":true,"isFavorite":true,"folderName":null,"pinnedZone":"NONE"}
+                ]}
+            ]}
+        """.trimIndent()
+        assertEquals(LayoutBackupParseResult.Malformed, LayoutBackup.parse(json))
+    }
+
+    @Test
     fun `v2 with no default lens is malformed`() {
         val backup = LayoutBackup(2, 0L, lenses = listOf(sampleLens(id = "work")))
         assertEquals(LayoutBackupParseResult.Malformed, LayoutBackup.parse(backup.toJson()))

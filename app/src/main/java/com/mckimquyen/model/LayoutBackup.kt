@@ -80,9 +80,34 @@ data class LayoutBackupEntry(
          * [PinnedZone] name is rejected rather than defaulted to [PinnedZone.NONE].
          */
         fun fromJsonStrict(json: JSONObject): LayoutBackupEntry? {
-            val entry = fromJson(json) ?: return null
-            if (PinnedZone.entries.none { it.name == entry.pinnedZone }) return null
-            return entry
+            val packageName = json.strictString(KEY_PACKAGE_NAME)?.takeIf(String::isNotBlank) ?: return null
+            val name = json.strictString(KEY_NAME)?.takeIf(String::isNotBlank) ?: return null
+            val orderNumber = json.strictInt(KEY_ORDER_NUMBER) ?: return null
+            val appVisible = json.strictBoolean(KEY_APP_VISIBLE) ?: return null
+            val appOpened = json.strictBoolean(KEY_APP_OPENED) ?: return null
+            val isFavorite = json.strictBoolean(KEY_IS_FAVORITE) ?: return null
+            if (!json.has(KEY_FOLDER_NAME)) return null
+            val folderName = when (val value = json.opt(KEY_FOLDER_NAME)) {
+                JSONObject.NULL -> null
+                is String -> value
+                else -> return null
+            }
+            val pinnedZone = json.strictString(KEY_PINNED_ZONE) ?: return null
+            if (PinnedZone.entries.none { it.name == pinnedZone }) return null
+            return LayoutBackupEntry(packageName, name, orderNumber, appVisible, appOpened, isFavorite, folderName, pinnedZone)
+        }
+
+        private fun JSONObject.strictString(key: String): String? =
+            if (opt(key) is String) optString(key) else null
+
+        private fun JSONObject.strictBoolean(key: String): Boolean? =
+            (opt(key) as? Boolean)
+
+        private fun JSONObject.strictInt(key: String): Int? {
+            val number = opt(key) as? Number ?: return null
+            val longValue = number.toLong()
+            if (number.toDouble() != longValue.toDouble() || longValue !in Int.MIN_VALUE..Int.MAX_VALUE) return null
+            return longValue.toInt()
         }
     }
 }
@@ -120,6 +145,18 @@ data class LayoutBackupLens(
         private const val KEY_FROZEN = "frozen"
         private const val KEY_ENTRIES = "entries"
 
+        private fun JSONObject.stringField(key: String): String? =
+            if (opt(key) is String) optString(key) else null
+
+        private fun JSONObject.intField(key: String): Int? {
+            val number = opt(key) as? Number ?: return null
+            val longValue = number.toLong()
+            if (number.toDouble() != longValue.toDouble() || longValue !in Int.MIN_VALUE..Int.MAX_VALUE) return null
+            return longValue.toInt()
+        }
+
+        private fun JSONObject.booleanField(key: String): Boolean? = opt(key) as? Boolean
+
         /**
          * Returns null (malformed) rather than a best-effort lens - a single bad lens must fail
          * the whole v2 file, never partially import a workspace. Cross-lens checks (unique ids,
@@ -127,10 +164,11 @@ data class LayoutBackupLens(
          * lens here has parsed individually.
          */
         fun fromJson(json: JSONObject): LayoutBackupLens? {
-            val id = json.optString(KEY_ID).takeIf(String::isNotBlank) ?: return null
-            val name = json.optString(KEY_NAME).takeIf(String::isNotBlank) ?: return null
-            val orderIndex = json.optInt(KEY_ORDER_INDEX, -1)
-            val scope = when (json.optString(KEY_SCOPE)) {
+            val id = json.stringField(KEY_ID)?.takeIf(String::isNotBlank) ?: return null
+            val name = json.stringField(KEY_NAME)?.takeIf(String::isNotBlank) ?: return null
+            val orderIndex = json.intField(KEY_ORDER_INDEX) ?: return null
+            val scopeName = json.stringField(KEY_SCOPE) ?: return null
+            val scope = when (scopeName) {
                 LensAppScope.ALL.name -> LensAppScope.ALL
                 LensAppScope.SELECTED.name -> LensAppScope.SELECTED
                 else -> return null
@@ -139,7 +177,8 @@ data class LayoutBackupLens(
             val selectedIdsJson = json.optJSONArray(KEY_SELECTED_APP_IDS) ?: return null
             val selectedIds = mutableListOf<String>()
             for (i in 0 until selectedIdsJson.length()) {
-                selectedIds.add(selectedIdsJson.optString(i).takeIf(String::isNotBlank) ?: return null)
+                val selectedId = selectedIdsJson.opt(i) as? String ?: return null
+                selectedIds.add(selectedId.takeIf(String::isNotBlank) ?: return null)
             }
             if (selectedIds.toSet().size != selectedIds.size) return null
 
@@ -156,7 +195,7 @@ data class LayoutBackupLens(
                 orderIndex = orderIndex,
                 scope = scope,
                 selectedAppIds = selectedIds.toSet(),
-                frozen = json.optBoolean(KEY_FROZEN, false),
+                frozen = json.booleanField(KEY_FROZEN) ?: return null,
                 entries = entries
             )
         }
@@ -249,6 +288,9 @@ data class LayoutBackup(
             for (index in 0 until lensesArray.length()) {
                 val lensObject = lensesArray.optJSONObject(index) ?: return LayoutBackupParseResult.Malformed
                 lenses.add(LayoutBackupLens.fromJson(lensObject) ?: return LayoutBackupParseResult.Malformed)
+            }
+            if (lenses.any { it.entries.map { entry -> AppPersistent.generateIdentifier(entry.packageName, entry.name) }.toSet().size != it.entries.size }) {
+                return LayoutBackupParseResult.Malformed
             }
 
             val ids = lenses.map { it.id }
