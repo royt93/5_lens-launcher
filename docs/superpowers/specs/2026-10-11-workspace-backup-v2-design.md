@@ -41,7 +41,7 @@ Parser validates root shape/schema, unique nonblank lens IDs, exactly one `defau
 2. Preview lens count/app-entry counts to be replaced and warn clearly that current workspace/layout will be replaced. Cancel means no mutation.
 3. Snapshot current workspace/layout rows and exact per-lens scope/selection/frozen and active-lens preference values.
 4. Replace lens rows and per-lens app-layout rows in one Room transaction; restore IDs unchanged including `default`.
-5. Preserve `openCount`, `paletteColor`, and other fields outside backup schema. Remove stale old app-layout rows for replaced lenses when absent from backup, without changing those preserved fields. Keep entries for uninstalled apps in Room and selection IDs.
+5. Preserve `openCount`, `paletteColor`, notification counts, and other fields outside backup schema. For old app identities absent from the backup, retain one parked row under the default lens with layout fields reset and `appVisible=false`; this preserves global stats without making the app appear. Imported entries for uninstalled apps remain in Room and selection IDs.
 6. Since Room and SharedPreferences cannot share a platform transaction, commit DB first, then synchronously commit preference replacement on IO. If prefs fail, transactionally restore prior DB snapshot and restore prior prefs; report failure. If rollback fails, report distinct recovery-required error with diagnostics. A process death between DB and prefs commits remains an atomicity ceiling; startup reconciles an active lens missing from DB to `default`.
 7. On success refresh active lens UI and dynamic shortcuts.
 

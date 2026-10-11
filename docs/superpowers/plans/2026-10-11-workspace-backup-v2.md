@@ -65,7 +65,7 @@ Completed in commits `19b6a6f..f00b40b`; parser tests include v1 compatibility, 
 
 - [ ] Step 1: Add in-memory Room tests seeded with two lenses, stale rows, open counts, palette colors, notification counts; assert replace semantics and preserved non-layout values.
 - [ ] Step 2: Run focused DAO test; confirm RED.
-- [ ] Step 3: Implement transaction: snapshot old rows; delete workspace/app rows; insert imported workspace; insert imported layout with original IDs and backed-up fields; preserve `openCount`, `paletteColor`, `notificationCount` and fields outside backup according to their existing global/per-lens semantics. Any exception rolls back.
+- [ ] Step 3: Implement transaction: snapshot old rows; replace workspace/app rows; insert imported layout with original IDs and backed-up fields; preserve `openCount`, `paletteColor`, `notificationCount` and fields outside backup according to their existing global/per-lens semantics. For identities absent from backup, keep one default-lens parked row with layout reset and `appVisible=false`; do not make them visible. Any exception rolls back.
 - [ ] Step 4: Test v1 updates default layout only; v2 removes stale layout; inject DB failure through a testable store boundary and assert rollback.
 - [ ] Step 5: Run focused DAO tests; expect PASS; Room schema remains v12 (file format only).
 - [ ] Step 6: Commit `feat(backup): replace workspace transactionally`.

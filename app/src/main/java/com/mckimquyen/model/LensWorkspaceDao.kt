@@ -41,6 +41,7 @@ interface LensWorkspaceDao {
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insertAll(workspaces: List<LensWorkspace>)
 
+    /** v2-only destructive replacement; v1 imports use the default-lens layout applier instead. */
     @Transaction
     suspend fun replaceWorkspace(workspaces: List<LensWorkspace>, importedRows: List<AppPersistent>) {
         require(workspaces.isNotEmpty()) { "Workspace must contain at least the default lens" }
@@ -50,7 +51,6 @@ interface LensWorkspaceDao {
         require(workspaces.map { it.id }.toSet().size == workspaces.size) { "Workspace contains duplicate lens IDs" }
         val lensIds = workspaces.map { it.id }.toSet()
         require(importedRows.all { it.lensId in lensIds })
-        require(importedRows.map { it.lensId to it.identifier }.toSet().size == importedRows.size)
 
         val appDao = AppDatabase.getInstance().appPersistentDao()
         val oldRows = appDao.getAllRows()
@@ -70,7 +70,7 @@ interface LensWorkspaceDao {
                 old.copy(
                     id = null,
                     orderNumber = -1,
-                    appVisible = true,
+                    appVisible = false,
                     appOpened = true,
                     isFavorite = false,
                     folderName = null,

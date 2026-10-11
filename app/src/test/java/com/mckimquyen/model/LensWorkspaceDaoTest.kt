@@ -4,6 +4,7 @@ import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
+import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -128,6 +129,7 @@ class LensWorkspaceDaoTest {
         assertEquals(77, retainedStats.paletteColor)
         assertEquals(2, retainedStats.notificationCount)
         assertEquals(-1, retainedStats.orderNumber)
+        assertEquals(false, retainedStats.appVisible)
         assertEquals(false, retainedStats.isFavorite)
         assertNull(retainedStats.folderName)
     }
@@ -150,6 +152,8 @@ class LensWorkspaceDaoTest {
         } catch (_: Exception) {
             assertEquals(originalLens, dao.getAll())
             assertEquals(originalRows, apps.getAllForLens("default"))
+            return@runBlocking
         }
+        fail("Expected unique-key insert to fail")
     }
 }

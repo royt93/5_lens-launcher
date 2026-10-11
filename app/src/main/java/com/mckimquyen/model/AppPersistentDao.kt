@@ -82,7 +82,7 @@ interface AppPersistentDao {
     @Query("DELETE FROM APP_PERSISTENT")
     suspend fun deleteAllRows(): Int
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insertAll(rows: List<AppPersistent>)
 
     @Transaction
