@@ -9,8 +9,9 @@ import com.mckimquyen.model.LensWorkspace
 class WorkspaceBackupRoomSnapshot(val lenses: List<LensWorkspace>, val rows: List<AppPersistent>)
 
 class WorkspaceBackupRoomStore(context: Context) : WorkspaceBackupImportStore {
+    private val appContext = context.applicationContext
     private val database = AppDatabase.getInstance()
-    private val settings = UtilSettings(context.applicationContext)
+    private val settings = UtilSettings(appContext)
 
     override suspend fun snapshotDatabase(): Any = WorkspaceBackupRoomSnapshot(
         database.lensWorkspaceDao().getAll(),
@@ -44,6 +45,10 @@ class WorkspaceBackupRoomStore(context: Context) : WorkspaceBackupImportStore {
 
     override suspend fun applyLegacyV1(plan: LayoutImportApplier.WorkspacePlan) {
         require(plan.schemaVersion == LayoutBackup.SCHEMA_VERSION_V1)
+        require(plan.lenses.size == 1) { "V1 backup must contain exactly one default lens" }
+        require(plan.lenses.single().id == LensWorkspace.DEFAULT_LENS_ID) {
+            "V1 backup must target the default lens"
+        }
         val dao = database.appPersistentDao()
         val allRows = dao.getAllRows()
         val oldDefault = allRows.filter { it.lensId == LensWorkspace.DEFAULT_LENS_ID }
@@ -93,5 +98,6 @@ class WorkspaceBackupRoomStore(context: Context) : WorkspaceBackupImportStore {
     override suspend fun refreshWorkspace() {
         com.mckimquyen.services.AppEventManager.notifyAppsEdited()
         com.mckimquyen.services.AppEventManager.notifyLensScopeChanged()
+        LensShortcuts.refresh(appContext, database.lensWorkspaceDao().getAll())
     }
 }

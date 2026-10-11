@@ -1,5 +1,6 @@
 package com.mckimquyen.util
 
+import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.preference.PreferenceManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -86,6 +87,8 @@ class WorkspaceBackupImportIntegrationTest {
         assertEquals(77, parked?.paletteColor)
         assertEquals(5, parked?.notificationCount)
         assertFalse(parked?.appVisible ?: true)
+        val shortcutIds = ShortcutManagerCompat.getDynamicShortcuts(context).map { it.id }
+        assertEquals(setOf("lens_default", "lens_work"), shortcutIds.toSet())
     }
 
     private fun seedTwoLensWorkspace() = runBlocking {
