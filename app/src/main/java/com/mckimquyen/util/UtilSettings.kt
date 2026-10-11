@@ -18,6 +18,18 @@ import kotlin.math.roundToInt
  *
  * Fix: 4.4 - Sử dụng Application Context thay vì Activity Context để tránh memory leak
  */
+data class LensAppSettingsBackup(
+    val lensId: String,
+    val scope: LensAppScope,
+    val selectedAppIds: Set<String>,
+    val frozen: Boolean
+)
+
+data class WorkspacePreferencesSnapshot(
+    val values: Map<String, Any>,
+    val activeLensId: String?
+)
+
 class UtilSettings(context: Context) {
     // Sử dụng Application Context thay vì giữ Activity Context để tránh memory leak
     private val appContext: Context = context.applicationContext
@@ -434,6 +446,52 @@ class UtilSettings(context: Context) {
     fun saveLensFrozen(lensId: String?, frozen: Boolean) {
         save(lensKey(KEY_LENS_FROZEN, lensId), frozen)
     }
+
+    fun snapshotWorkspacePreferences(): WorkspacePreferencesSnapshot {
+        val appState = prefs.all.filterKeys(::isWorkspacePreferenceKey).mapNotNull { (key, value) -> value?.let { key to it } }.toMap()
+        return WorkspacePreferencesSnapshot(appState, prefs.getString(KEY_ACTIVE_LENS_ID, null))
+    }
+
+    fun replaceWorkspacePreferences(lensSettings: List<LensAppSettingsBackup>, activeLensId: String): Boolean {
+        val lensIds = lensSettings.map { it.lensId }
+        require(lensIds.toSet().size == lensIds.size) { "Duplicate lens settings IDs" }
+        require(LensWorkspace.DEFAULT_LENS_ID in lensIds) { "Default lens settings are required" }
+        val editor = prefs.edit()
+        prefs.all.keys.filter(::isWorkspacePreferenceKey).forEach(editor::remove)
+        lensSettings.forEach { lens ->
+            editor.putString(lensKey(KEY_LENS_APP_SCOPE, lens.lensId), lens.scope.name)
+            editor.putStringSet(lensKey(KEY_LENS_APP_SELECTION, lens.lensId), HashSet(lens.selectedAppIds))
+            editor.putBoolean(lensKey(KEY_LENS_FROZEN, lens.lensId), lens.frozen)
+        }
+        editor.putString(KEY_ACTIVE_LENS_ID, activeLensId.takeIf(lensIds::contains) ?: LensWorkspace.DEFAULT_LENS_ID)
+        return editor.commit()
+    }
+
+    fun replaceWorkspacePreferencesForSchema(
+        schemaVersion: Int,
+        lensSettings: List<LensAppSettingsBackup>,
+        activeLensId: String
+    ): Boolean = if (schemaVersion == 1) true else replaceWorkspacePreferences(lensSettings, activeLensId)
+
+    fun restoreWorkspacePreferences(snapshot: WorkspacePreferencesSnapshot): Boolean {
+        val editor = prefs.edit()
+        prefs.all.keys.filter(::isWorkspacePreferenceKey).forEach(editor::remove)
+        snapshot.values.forEach { (key, value) ->
+            when (value) {
+                is String -> editor.putString(key, value)
+                is Boolean -> editor.putBoolean(key, value)
+                is Set<*> -> editor.putStringSet(key, value.filterIsInstance<String>().toSet())
+            }
+        }
+        if (snapshot.activeLensId == null) editor.remove(KEY_ACTIVE_LENS_ID)
+        else editor.putString(KEY_ACTIVE_LENS_ID, snapshot.activeLensId)
+        return editor.commit()
+    }
+
+    private fun isWorkspacePreferenceKey(key: String): Boolean =
+        key == KEY_LENS_APP_SCOPE || key.startsWith("${KEY_LENS_APP_SCOPE}_") ||
+            key == KEY_LENS_APP_SELECTION || key.startsWith("${KEY_LENS_APP_SELECTION}_") ||
+            key == KEY_LENS_FROZEN || key.startsWith("${KEY_LENS_FROZEN}_")
 
     /** FISH-012: null means no pinch was left unresolved for this lens. */
     fun getPendingDistortionFactor(lensId: String?): Float? {

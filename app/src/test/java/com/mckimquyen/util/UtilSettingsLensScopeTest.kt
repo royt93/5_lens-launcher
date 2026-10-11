@@ -34,6 +34,49 @@ class UtilSettingsLensScopeTest {
     }
 
     @Test
+    fun `workspace snapshot preserves exactly app scope selection frozen and active lens values`() {
+        settings.saveLensAppScope(default, LensAppScope.SELECTED)
+        settings.saveLensAppSelection(default, setOf("pkg-A"))
+        settings.saveLensFrozen(default, true)
+        settings.saveLensAppScope(work, LensAppScope.ALL)
+        settings.saveLensAppSelection(work, setOf("pkg-B"))
+        settings.saveLensFrozen(work, false)
+        settings.save(UtilSettings.KEY_ACTIVE_LENS_ID, work)
+        val snapshot = settings.snapshotWorkspacePreferences()
+        settings.restoreWorkspacePreferences(snapshot)
+        assertEquals(LensAppScope.SELECTED, settings.getLensAppScope(default))
+        assertEquals(setOf("pkg-A"), settings.getLensAppSelection(default))
+        assertTrue(settings.isLensFrozen(default))
+        assertEquals(work, settings.getString(UtilSettings.KEY_ACTIVE_LENS_ID))
+    }
+
+    @Test
+    fun `replaceWorkspacePreferences clears only app-state keys`() {
+        settings.saveLensAppScope(work, LensAppScope.SELECTED)
+        settings.saveLensAppSelection(work, setOf("old"))
+        settings.saveLensFrozen(work, true)
+        settings.save(UtilSettings.KEY_DISTORTION_FACTOR + "_$work", 5f)
+        assertTrue(settings.replaceWorkspacePreferences(
+            listOf(LensAppSettingsBackup("default", LensAppScope.ALL, emptySet(), false)),
+            LensWorkspace.DEFAULT_LENS_ID
+        ))
+        assertEquals(LensAppScope.ALL, settings.getLensAppScope(default))
+        assertFalse(settings.isLensFrozen(default))
+        assertEquals(5f, settings.getFloat(UtilSettings.KEY_DISTORTION_FACTOR + "_$work"))
+        assertFalse(rawPrefs().contains("${UtilSettings.KEY_LENS_APP_SCOPE}_$work"))
+    }
+
+    @Test
+    fun `v1 replacement leaves preferences unchanged`() {
+        settings.saveLensAppScope(work, LensAppScope.SELECTED)
+        settings.saveLensAppSelection(work, setOf("keep"))
+        settings.saveLensFrozen(work, true)
+        val before = HashMap(rawPrefs().all)
+        assertTrue(settings.replaceWorkspacePreferencesForSchema(1, emptyList(), default))
+        assertEquals(before, rawPrefs().all)
+    }
+
+    @Test
     fun `keys are stable`() {
         assertEquals("lens_app_scope", UtilSettings.KEY_LENS_APP_SCOPE)
         assertEquals("lens_app_selection", UtilSettings.KEY_LENS_APP_SELECTION)
