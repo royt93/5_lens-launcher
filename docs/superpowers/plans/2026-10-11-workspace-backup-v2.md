@@ -70,7 +70,7 @@ Completed in commits `19b6a6f..f00b40b`; parser tests include v1 compatibility, 
 - [x] Step 5: Run `./gradlew testDevDebugUnitTest --tests com.mckimquyen.model.LensWorkspaceDaoTest`; 6 tests, 0 failures; Room schema remains v12 (file format only).
 - [x] Step 6: Commit `feat(backup): replace workspace transactionally` (`8a31e4d`; review follow-ups `dc02daa`, `0a52ee0`).
 
-## Task 4: Apply per-lens preferences and recover active lens — IN PROGRESS
+## Task 4: Apply per-lens preferences and recover active lens — COMPLETE
 
 **Files:** `app/src/main/java/com/mckimquyen/util/UtilSettings.kt`; active-lens reconciliation at the central lens-bind boundary in `app/src/main/java/com/mckimquyen/ui/ActHome.java`; tests `app/src/test/java/com/mckimquyen/util/UtilSettingsLensScopeTest.kt` and a focused `ActHome` test.
 
@@ -78,12 +78,12 @@ Completed in commits `19b6a6f..f00b40b`; parser tests include v1 compatibility, 
 
 - [x] Step 1: Add failing tests for snapshot, replacement, preserving unrelated per-lens/global settings, active-lens fallback, and v1 no-op.
 - [x] Step 2: Run focused tests; confirm RED (`UtilSettings` workspace APIs missing).
-- [ ] Step 3: Add exact preference snapshot/replace/restore methods; remove only scope/selection/frozen key families, then write imported lens keys and active ID. Return false if commit fails.
+- [x] Step 3: Add exact preference snapshot/replace/restore methods; remove only scope/selection/frozen key families, then write imported lens keys and active ID. Return false if commit fails.
 - [x] Step 4: Add startup reconciliation: if active ID absent from current workspace, set `default` without touching other per-lens settings.
 - [x] Step 5: Run `./gradlew testDevDebugUnitTest --tests com.mckimquyen.util.UtilSettingsLensScopeTest`; 13 tests pass. Instrumented `ActHomeQuickLensSwitchWidgetTest` compiles.
-- [ ] Step 6: Commit `feat(backup): restore per-lens preferences safely`.
+- [x] Step 6: Implemented in commits `fd15df7` (snapshot/replace/restore) and `71014b5` (active lens repair).
 
-## Task 5: Wire export/import persistence orchestration and UI
+## Task 5: Wire export/import persistence orchestration and UI — IN PROGRESS
 
 **Files:** `LayoutBackupIo.kt`, `ActSettings.java`; tests existing backup IO/widget tests.
 

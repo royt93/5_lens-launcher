@@ -54,8 +54,12 @@ import com.mckimquyen.itf.LensInterface;
 import com.mckimquyen.itf.SettingsInterface;
 import com.mckimquyen.model.App;
 import com.mckimquyen.model.LayoutBackupParseResult;
+import com.mckimquyen.model.LayoutBackup;
+import com.mckimquyen.model.LayoutBackup;
 import com.mckimquyen.util.LayoutBackupIo;
 import com.mckimquyen.util.LayoutImportApplier;
+import com.mckimquyen.util.WorkspaceBackupImportResult;
+import com.mckimquyen.util.WorkspaceBackupImportResult;
 import com.mckimquyen.util.UIUtils;
 import com.mckimquyen.services.AppEventManager;
 import com.mckimquyen.services.BroadcastReceivers;
@@ -123,6 +127,7 @@ public class ActSettings extends ActBase implements SettingsMenuHost {
     private AlertDialog dlgBackground;
     private AlertDialog dlgHighlightColor;
     private AlertDialog dlgTerms;
+    AlertDialog layoutImportDialog;
     private LensInterface lensInterface;
 
     // Flag to prevent showing Terms dialog multiple times in same session
@@ -451,6 +456,7 @@ public class ActSettings extends ActBase implements SettingsMenuHost {
 
     private void onLayoutImportUriPicked(Uri uri) {
         LayoutBackupIo.importAsync(this, uri, result -> {
+            if (isFinishing() || isDestroyed()) return Unit.INSTANCE;
             if (result instanceof LayoutBackupParseResult.Malformed) {
                 Toast.makeText(this, R.string.layout_import_failed_malformed, Toast.LENGTH_SHORT).show();
             } else if (result instanceof LayoutBackupParseResult.UnsupportedSchemaVersion) {
@@ -462,21 +468,52 @@ public class ActSettings extends ActBase implements SettingsMenuHost {
         });
     }
 
-    private void showLayoutImportPreview(com.mckimquyen.model.LayoutBackup backup) {
+    @androidx.annotation.VisibleForTesting
+    void showLayoutImportPreview(LayoutBackup backup) {
+        if (backup.getSchemaVersion() == LayoutBackup.SCHEMA_VERSION_V1) {
+            showLegacyLayoutImportPreview(backup);
+            return;
+        }
+        LayoutImportApplier.WorkspacePlan plan = LayoutImportApplier.INSTANCE.planV2(backup);
+        LayoutImportApplier.PreviewCounts counts = LayoutImportApplier.INSTANCE.previewCounts(plan);
+        String message = getString(R.string.layout_import_workspace_preview_message,
+                counts.getLensCount(), counts.getTotalEntryCount());
+        layoutImportDialog = new MaterialAlertDialogBuilder(this, R.style.MaterialYouDialogTheme)
+                .setTitle(R.string.layout_import_preview_title)
+                .setMessage(message)
+                .setPositiveButton(android.R.string.ok, null)
+                .setNegativeButton(android.R.string.cancel, null)
+                .create();
+        layoutImportDialog.setOnShowListener(dialog -> layoutImportDialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                .setOnClickListener(view -> {
+                    AlertDialog confirmed = layoutImportDialog;
+                    layoutImportDialog = null;
+                    if (confirmed != null) confirmed.dismiss();
+                    LayoutBackupIo.applyWorkspaceAsync(this, backup, result -> {
+                        if (isFinishing() || isDestroyed()) return Unit.INSTANCE;
+                        if (result instanceof WorkspaceBackupImportResult.Applied) {
+                            Toast.makeText(this, R.string.layout_import_success, Toast.LENGTH_SHORT).show();
+                        } else if (result instanceof WorkspaceBackupImportResult.RecoveryRequired) {
+                            Toast.makeText(this, R.string.layout_import_workspace_recovery_required, Toast.LENGTH_LONG).show();
+                        } else {
+                            Toast.makeText(this, R.string.layout_import_workspace_failed, Toast.LENGTH_LONG).show();
+                        }
+                        return Unit.INSTANCE;
+                    });
+                }));
+        layoutImportDialog.show();
+    }
+
+    private void showLegacyLayoutImportPreview(LayoutBackup backup) {
         List<App> installedApps = RAppsSingleton.getInstance().getApps();
         LayoutImportApplier.Plan plan = LayoutImportApplier.INSTANCE.plan(
-                backup,
-                installedApps != null ? installedApps : Collections.emptyList()
-        );
+                backup, installedApps != null ? installedApps : Collections.emptyList());
         if (plan.getMatched().isEmpty()) {
             Toast.makeText(this, R.string.layout_import_nothing_to_import, Toast.LENGTH_SHORT).show();
             return;
         }
-        String message = getString(
-                R.string.layout_import_preview_message,
-                plan.getMatched().size(),
-                plan.getSkippedCount()
-        );
+        String message = getString(R.string.layout_import_preview_message, plan.getMatched().size(), plan.getSkippedCount())
+                + "\n" + getString(R.string.layout_import_v1_default_lens_note);
         new MaterialAlertDialogBuilder(this, R.style.MaterialYouDialogTheme)
                 .setTitle(R.string.layout_import_preview_title)
                 .setMessage(message)
@@ -559,6 +596,10 @@ public class ActSettings extends ActBase implements SettingsMenuHost {
     protected void onDestroy() {
         try {
             dismissAllDialogs();
+            if (layoutImportDialog != null) {
+                if (layoutImportDialog.isShowing()) layoutImportDialog.dismiss();
+                layoutImportDialog = null;
+            }
             if (tabLayoutMediator != null) {
                 tabLayoutMediator.detach();
                 tabLayoutMediator = null;

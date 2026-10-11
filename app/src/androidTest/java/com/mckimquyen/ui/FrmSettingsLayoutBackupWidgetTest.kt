@@ -1,9 +1,17 @@
 package com.mckimquyen.ui
 
 import android.view.View
+import androidx.appcompat.app.AlertDialog
+import androidx.test.core.app.ActivityScenario
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.mckimquyen.R
+import com.mckimquyen.model.LayoutBackup
+import com.mckimquyen.model.LayoutBackupEntry
+import com.mckimquyen.model.LayoutBackupLens
+import com.mckimquyen.model.LensWorkspace
+import com.mckimquyen.model.PinnedZone
+import com.mckimquyen.util.LensAppScope
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -18,6 +26,31 @@ import org.junit.runner.RunWith
  */
 @RunWith(AndroidJUnit4::class)
 class FrmSettingsLayoutBackupWidgetTest {
+
+    @Test
+    fun v2PreviewWarnsAndCancelDoesNotChangeWorkspace() {
+        val backup = LayoutBackup(
+            LayoutBackup.CURRENT_SCHEMA_VERSION,
+            0L,
+            lenses = listOf(
+                LayoutBackupLens(
+                    LensWorkspace.DEFAULT_LENS_ID, "Backup", 0,
+                    LensAppScope.SELECTED, setOf("com.example-com.example.Main"), true,
+                    listOf(LayoutBackupEntry("com.example", "com.example.Main", 0, true, true, false, null, PinnedZone.NONE.name))
+                )
+            )
+        )
+        ActivityScenario.launch(ActSettings::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                activity.showLayoutImportPreview(backup)
+                val dialog = activity.layoutImportDialog ?: throw AssertionError("v2 preview missing")
+                assertTrue(dialog.isShowing)
+                assertTrue(dialog.findViewById<android.widget.TextView>(android.R.id.message)?.text.toString().contains("workspace"))
+                dialog.getButton(AlertDialog.BUTTON_NEGATIVE).performClick()
+                assertTrue("Cancel must not mutate backup state", activity.layoutImportDialog == null)
+            }
+        }
+    }
 
     @Test
     fun exportAndImportRows_areClickable_onARealAttachedFragment() {
