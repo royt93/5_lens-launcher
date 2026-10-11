@@ -112,13 +112,13 @@ Completed in commits `19b6a6f..f00b40b`; parser tests include v1 compatibility, 
 
 ## Task 7: Full verification, smoke and docs
 
-- [ ] Step 1: `./gradlew testDevDebugUnitTest`; expect zero failures; diagnose failures before reporting.
-- [ ] Step 2: `./gradlew lintDevDebug` and `scripts/check-secrets.sh`; expect no new lint errors/warnings over baseline and clean scan of changed content.
-- [ ] Step 3: Run targeted and applicable full instrumentation only on locked device via scoped `adb -s` command; record exact results/device/model/OS/build SHA.
-- [ ] Step 4: Manual smoke export → mutate workspace → import; verify two or more lenses, names/order, active lens, app selection, freeze, app order; repeat import; verify cancel path; inspect logcat for crashes.
-- [ ] Step 5: Update FEAT-006 follow-up story, `doc/feature.md`, `doc/task/README.md` with schema, compatibility, test/smoke evidence and limitations; do not rewrite historical evidence.
-- [ ] Step 6: `git diff --check && git status --short && git diff --stat`; inspect callbacks/dialog lifecycle and transaction/compensation.
-- [ ] Step 7: Whole-branch review; self-score using repo rubric. Do not push unless explicitly requested and required score/checks pass.
+- [x] Step 1: `./gradlew testDevDebugUnitTest --rerun-tasks`; 817 tests, 0 failures/errors.
+- [x] Step 2: `lintDevDebug` — 0 errors/12 existing warnings; `scripts/check-secrets.sh` and `git diff --check` clean.
+- [x] Step 3: TECNO BG6 `118743744X002560` / Android 13, focused instrumentation 7/7 via explicit `adb -s`; APK SHA-256 recorded in `doc/task/AUDIT_FEAT_006_V2_2026-10-11.md`. No Pixel commands.
+- [ ] Step 4: Manual SAF export → mutate → import remains unverified. Focused Room/settings integration and startup smoke pass; do not claim full UI smoke.
+- [x] Step 5: Updated FEAT-006 follow-up story, `doc/feature.md`, `doc/task/README.md` and `doc/task/AUDIT_FEAT_006_V2_2026-10-11.md`; prior evidence retained.
+- [x] Step 6: Diff check and lifecycle/transaction/compensation review complete; worktree clean at audit point.
+- [x] Step 7: Whole-branch review and audit `9.2/10` recorded in `doc/task/AUDIT_FEAT_006_V2_2026-10-11.md`. No push; owner did not request it.
 
 ## Self-review
 
