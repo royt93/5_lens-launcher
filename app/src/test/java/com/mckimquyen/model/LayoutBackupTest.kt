@@ -202,6 +202,26 @@ class LayoutBackupTest {
     }
 
     @Test
+    fun `v2 lens with non-array selectedAppIds is malformed`() {
+        val json = """
+            {"schemaVersion":2,"exportedAt":0,"lenses":[
+                {"id":"default","name":"Lens 1","orderIndex":0,"scope":"SELECTED","selectedAppIds":"app-id","frozen":false,"entries":[]}
+            ]}
+        """.trimIndent()
+        assertEquals(LayoutBackupParseResult.Malformed, LayoutBackup.parse(json))
+    }
+
+    @Test
+    fun `v2 lens with non-array entries is malformed`() {
+        val json = """
+            {"schemaVersion":2,"exportedAt":0,"lenses":[
+                {"id":"default","name":"Lens 1","orderIndex":0,"scope":"ALL","selectedAppIds":[],"frozen":false,"entries":{}}
+            ]}
+        """.trimIndent()
+        assertEquals(LayoutBackupParseResult.Malformed, LayoutBackup.parse(json))
+    }
+
+    @Test
     fun `v2 with no default lens is malformed`() {
         val backup = LayoutBackup(2, 0L, lenses = listOf(sampleLens(id = "work")))
         assertEquals(LayoutBackupParseResult.Malformed, LayoutBackup.parse(backup.toJson()))
