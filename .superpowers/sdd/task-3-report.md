@@ -19,5 +19,9 @@
 ## Commit
 - `8a31e4d feat(backup): replace workspace transactionally`
 
-## Remaining concern
-- Per-lens SharedPreferences are not part of this Room transaction; Task 4/5 must implement snapshot/commit/compensation and explicit process-death limitation. No preferences/UI were touched here.
+## Review follow-up
+- Owner selected hidden default-lens parking rows for apps absent from a backup. Updated `appVisible=false`, default layout/order/favorite/folder/pinned-zone reset, while preserving usage/palette/notification values. Updated spec and plan to match. The absent-app test asserts the row stays hidden.
+- Marked `replaceWorkspace` explicitly v2-only; v1 must use the default-lens layout applier. Added `OnConflictStrategy.ABORT` for batch row inserts.
+- Rollback test needed a genuine post-delete insert failure, not preflight validation. Duplicate identities now reach Room insert and produce a constraint exception; assertions verify both workspace and app rows roll back.
+- Re-ran `./gradlew testDevDebugUnitTest --tests com.mckimquyen.model.LensWorkspaceDaoTest`: BUILD SUCCESSFUL, 6 tests, 0 failures.
+- Per-lens SharedPreferences remain outside this Room transaction; Task 4/5 must implement snapshot/commit/compensation and document process-death gap. No preferences/UI changed here.
