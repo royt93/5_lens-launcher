@@ -136,14 +136,14 @@ data class LayoutBackupLens(
                 else -> return null
             }
 
-            val selectedIdsJson = json.optJSONArray(KEY_SELECTED_APP_IDS) ?: JSONArray()
+            val selectedIdsJson = json.optJSONArray(KEY_SELECTED_APP_IDS) ?: return null
             val selectedIds = mutableListOf<String>()
             for (i in 0 until selectedIdsJson.length()) {
                 selectedIds.add(selectedIdsJson.optString(i).takeIf(String::isNotBlank) ?: return null)
             }
             if (selectedIds.toSet().size != selectedIds.size) return null
 
-            val entriesJson = json.optJSONArray(KEY_ENTRIES) ?: JSONArray()
+            val entriesJson = json.optJSONArray(KEY_ENTRIES) ?: return null
             val entries = mutableListOf<LayoutBackupEntry>()
             for (i in 0 until entriesJson.length()) {
                 val entryObject = entriesJson.optJSONObject(i) ?: return null
