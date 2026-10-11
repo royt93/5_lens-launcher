@@ -484,11 +484,11 @@ public class ActSettings extends ActBase implements SettingsMenuHost {
                 .setPositiveButton(android.R.string.ok, null)
                 .setNegativeButton(android.R.string.cancel, null)
                 .create();
-        layoutImportDialog.setOnShowListener(dialog -> layoutImportDialog.getButton(AlertDialog.BUTTON_POSITIVE)
+        AlertDialog previewDialog = layoutImportDialog;
+        previewDialog.setOnShowListener(dialog -> previewDialog.getButton(AlertDialog.BUTTON_POSITIVE)
                 .setOnClickListener(view -> {
-                    AlertDialog confirmed = layoutImportDialog;
                     layoutImportDialog = null;
-                    if (confirmed != null) confirmed.dismiss();
+                    previewDialog.dismiss();
                     LayoutBackupIo.applyWorkspaceAsync(this, backup, result -> {
                         if (isFinishing() || isDestroyed()) return Unit.INSTANCE;
                         if (result instanceof WorkspaceBackupImportResult.Applied) {
@@ -501,10 +501,10 @@ public class ActSettings extends ActBase implements SettingsMenuHost {
                         return Unit.INSTANCE;
                     });
                 }));
-        layoutImportDialog.setOnDismissListener(dialog -> {
-            if (layoutImportDialog == dialog) layoutImportDialog = null;
+        previewDialog.setOnDismissListener(dialog -> {
+            if (layoutImportDialog == previewDialog) layoutImportDialog = null;
         });
-        layoutImportDialog.show();
+        previewDialog.show();
     }
 
     private void showLegacyLayoutImportPreview(LayoutBackup backup) {

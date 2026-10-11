@@ -5,6 +5,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.test.core.app.ActivityScenario
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
 import com.mckimquyen.R
 import com.mckimquyen.model.LayoutBackup
 import com.mckimquyen.model.LayoutBackupEntry
@@ -12,6 +13,8 @@ import com.mckimquyen.model.LayoutBackupLens
 import com.mckimquyen.model.LensWorkspace
 import com.mckimquyen.model.PinnedZone
 import com.mckimquyen.util.LensAppScope
+import com.mckimquyen.util.UtilSettings
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -32,6 +35,7 @@ class FrmSettingsLayoutBackupWidgetTest {
         val backup = LayoutBackup(
             LayoutBackup.CURRENT_SCHEMA_VERSION,
             0L,
+            activeLensId = "default",
             lenses = listOf(
                 LayoutBackupLens(
                     LensWorkspace.DEFAULT_LENS_ID, "Backup", 0,
@@ -45,9 +49,13 @@ class FrmSettingsLayoutBackupWidgetTest {
                 activity.showLayoutImportPreview(backup)
                 val dialog = activity.layoutImportDialog ?: throw AssertionError("v2 preview missing")
                 assertTrue(dialog.isShowing)
-                assertTrue(dialog.findViewById<android.widget.TextView>(android.R.id.message)?.text.toString().contains("workspace"))
-                dialog.getButton(AlertDialog.BUTTON_NEGATIVE).performClick()
-                assertTrue("Cancel must not mutate backup state", activity.layoutImportDialog == null)
+                val message = dialog.findViewById<android.widget.TextView>(android.R.id.message)?.text.toString()
+                assertTrue(message.contains("workspace"))
+                assertTrue(message.contains("1"))
+                val originalActive = UtilSettings(activity).getString(UtilSettings.KEY_ACTIVE_LENS_ID)
+                dialog.cancel()
+                assertEquals("Cancel must not change active lens", originalActive,
+                    UtilSettings(activity).getString(UtilSettings.KEY_ACTIVE_LENS_ID))
             }
         }
     }
