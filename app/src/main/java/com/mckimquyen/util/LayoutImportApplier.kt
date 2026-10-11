@@ -4,6 +4,7 @@ import com.mckimquyen.model.App
 import com.mckimquyen.model.AppPersistent
 import com.mckimquyen.model.LayoutBackup
 import com.mckimquyen.model.LayoutBackupEntry
+import com.mckimquyen.model.LensWorkspace
 import com.mckimquyen.model.PinnedZone
 
 /**
@@ -59,5 +60,68 @@ object LayoutImportApplier {
                 app.lensId
             )
         }
+    }
+
+    /**
+     * workspace-backup-v2 Task 2: one lens's restorable state, carried verbatim from the parsed
+     * backup - [scope]/[selectedAppIds]/[frozen] are meaningless for a v1-sourced plan (v1 has no
+     * per-lens settings) and callers must ignore them there; [WorkspacePlan.schemaVersion] is what
+     * tells a consumer (Task 3/4) which fields apply.
+     */
+    data class WorkspaceLensPlan(
+        val id: String,
+        val name: String,
+        val orderIndex: Int,
+        val scope: LensAppScope,
+        val selectedAppIds: Set<String>,
+        val frozen: Boolean,
+        val entries: List<LayoutBackupEntry>
+    )
+
+    /** Pure plan for a full workspace restore - no Context/PackageManager/Room/prefs/IO. */
+    data class WorkspacePlan(val schemaVersion: Int, val lenses: List<WorkspaceLensPlan>)
+
+    data class PreviewCounts(
+        val lensCount: Int,
+        val totalEntryCount: Int,
+        val perLensEntryCounts: Map<String, Int>
+    )
+
+    /** v1 has only ever applied to the default lens; this plan is intentionally always one lens. */
+    fun planV1(backup: LayoutBackup): WorkspacePlan = WorkspacePlan(
+        schemaVersion = LayoutBackup.SCHEMA_VERSION_V1,
+        lenses = listOf(
+            WorkspaceLensPlan(
+                id = LensWorkspace.DEFAULT_LENS_ID,
+                name = LensWorkspace.DEFAULT_LENS_NAME,
+                orderIndex = 0,
+                scope = LensAppScope.ALL,
+                selectedAppIds = emptySet(),
+                frozen = false,
+                entries = backup.entries
+            )
+        )
+    )
+
+    /**
+     * Carries every parsed lens through unchanged, including entries/selections for packages not
+     * currently installed - Task 2 never consults an installed-app list, so there is nothing to
+     * filter against.
+     */
+    fun planV2(backup: LayoutBackup): WorkspacePlan = WorkspacePlan(
+        schemaVersion = backup.schemaVersion,
+        lenses = backup.lenses.map {
+            WorkspaceLensPlan(it.id, it.name, it.orderIndex, it.scope, it.selectedAppIds, it.frozen, it.entries)
+        }
+    )
+
+    /** Deterministic: a pure fold over [plan], safe to call repeatedly for preview re-renders. */
+    fun previewCounts(plan: WorkspacePlan): PreviewCounts {
+        val perLens = plan.lenses.associate { it.id to it.entries.size }
+        return PreviewCounts(
+            lensCount = plan.lenses.size,
+            totalEntryCount = perLens.values.sum(),
+            perLensEntryCounts = perLens
+        )
     }
 }
