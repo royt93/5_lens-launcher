@@ -5,6 +5,7 @@ import com.mckimquyen.model.LayoutBackupEntry
 import com.mckimquyen.model.LayoutBackupLens
 import com.mckimquyen.model.LensWorkspace
 import com.mckimquyen.model.PinnedZone
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -61,6 +62,118 @@ class WorkspaceBackupImportCoordinatorTest {
         val result = runBlocking { WorkspaceBackupImportCoordinator(store).apply(backup) }
         assertTrue(result is WorkspaceBackupImportResult.Failed)
         assertEquals(listOf("snapshot-db", "snapshot-prefs", "db", "prefs", "restore-db", "restore-prefs"), events)
+    }
+
+    @Test
+    fun `database replacement failure skips preference write and refresh`() {
+        val events = mutableListOf<String>()
+        val store = object : WorkspaceBackupImportStore {
+            override suspend fun snapshotDatabase(): Any { events += "snapshot-db"; return "db" }
+            override fun snapshotPreferences(): Any { events += "snapshot-prefs"; return "prefs" }
+            override suspend fun replaceDatabase(plan: LayoutImportApplier.WorkspacePlan) { events += "db"; error("db failure") }
+            override suspend fun applyLegacyV1(plan: LayoutImportApplier.WorkspacePlan) { events += "v1" }
+            override fun replacePreferences(plan: LayoutImportApplier.WorkspacePlan) { events += "prefs" }
+            override suspend fun restoreDatabase(snapshot: Any) { events += "restore-db" }
+            override fun restorePreferences(snapshot: Any): Boolean { events += "restore-prefs"; return true }
+            override suspend fun refreshWorkspace() { events += "refresh" }
+        }
+
+        val result = runBlocking { WorkspaceBackupImportCoordinator(store).apply(backup) }
+
+        assertTrue(result is WorkspaceBackupImportResult.Failed)
+        assertEquals(listOf("snapshot-db", "snapshot-prefs", "db"), events)
+    }
+
+    @Test
+    fun `refresh failure rolls database and preferences back`() {
+        val events = mutableListOf<String>()
+        val store = object : WorkspaceBackupImportStore {
+            override suspend fun snapshotDatabase(): Any { events += "snapshot-db"; return "db" }
+            override fun snapshotPreferences(): Any { events += "snapshot-prefs"; return "prefs" }
+            override suspend fun replaceDatabase(plan: LayoutImportApplier.WorkspacePlan) { events += "db" }
+            override suspend fun applyLegacyV1(plan: LayoutImportApplier.WorkspacePlan) { events += "v1" }
+            override fun replacePreferences(plan: LayoutImportApplier.WorkspacePlan) { events += "prefs" }
+            override suspend fun restoreDatabase(snapshot: Any) { events += "restore-db" }
+            override fun restorePreferences(snapshot: Any): Boolean { events += "restore-prefs"; return true }
+            override suspend fun refreshWorkspace() { events += "refresh"; error("refresh failure") }
+        }
+
+        val result = runBlocking { WorkspaceBackupImportCoordinator(store).apply(backup) }
+
+        assertTrue(result is WorkspaceBackupImportResult.Failed)
+        assertEquals(listOf("snapshot-db", "snapshot-prefs", "db", "prefs", "refresh", "restore-db", "restore-prefs"), events)
+    }
+
+    @Test
+    fun `failed compensation after refresh failure reports recovery required`() {
+        val store = object : WorkspaceBackupImportStore {
+            override suspend fun snapshotDatabase(): Any = "db"
+            override fun snapshotPreferences(): Any = "prefs"
+            override suspend fun replaceDatabase(plan: LayoutImportApplier.WorkspacePlan) = Unit
+            override suspend fun applyLegacyV1(plan: LayoutImportApplier.WorkspacePlan) = Unit
+            override fun replacePreferences(plan: LayoutImportApplier.WorkspacePlan) = Unit
+            override suspend fun restoreDatabase(snapshot: Any) = error("restore failure")
+            override fun restorePreferences(snapshot: Any): Boolean = false
+            override suspend fun refreshWorkspace() = error("refresh failure")
+        }
+
+        val result = runBlocking { WorkspaceBackupImportCoordinator(store).apply(backup) }
+
+        assertTrue(result is WorkspaceBackupImportResult.RecoveryRequired)
+    }
+
+    @Test
+    fun `cancellation after database replacement compensates then propagates`() {
+        val events = mutableListOf<String>()
+        val store = object : WorkspaceBackupImportStore {
+            override suspend fun snapshotDatabase(): Any { events += "snapshot-db"; return "db" }
+            override fun snapshotPreferences(): Any { events += "snapshot-prefs"; return "prefs" }
+            override suspend fun replaceDatabase(plan: LayoutImportApplier.WorkspacePlan) { events += "db" }
+            override suspend fun applyLegacyV1(plan: LayoutImportApplier.WorkspacePlan) { events += "v1" }
+            override fun replacePreferences(plan: LayoutImportApplier.WorkspacePlan) {
+                events += "prefs"
+                throw CancellationException("cancel import")
+            }
+            override suspend fun restoreDatabase(snapshot: Any) { events += "restore-db" }
+            override fun restorePreferences(snapshot: Any): Boolean { events += "restore-prefs"; return true }
+            override suspend fun refreshWorkspace() { events += "refresh" }
+        }
+
+        try {
+            runBlocking { WorkspaceBackupImportCoordinator(store).apply(backup) }
+            throw AssertionError("Cancellation must propagate")
+        } catch (expected: CancellationException) {
+            assertEquals("cancel import", expected.message)
+        }
+
+        assertEquals(listOf("snapshot-db", "snapshot-prefs", "db", "prefs", "restore-db", "restore-prefs"), events)
+    }
+
+    @Test
+    fun `v1 cancellation propagates without converting to an import result`() {
+        val legacy = LayoutBackup(
+            LayoutBackup.SCHEMA_VERSION_V1, 0L,
+            entries = backup.lenses.single().entries
+        )
+        val store = object : WorkspaceBackupImportStore {
+            override suspend fun snapshotDatabase(): Any = error("v1 must not snapshot")
+            override fun snapshotPreferences(): Any = error("v1 must not snapshot")
+            override suspend fun replaceDatabase(plan: LayoutImportApplier.WorkspacePlan) = Unit
+            override suspend fun applyLegacyV1(plan: LayoutImportApplier.WorkspacePlan) {
+                throw CancellationException("cancel v1")
+            }
+            override fun replacePreferences(plan: LayoutImportApplier.WorkspacePlan) = Unit
+            override suspend fun restoreDatabase(snapshot: Any) = Unit
+            override fun restorePreferences(snapshot: Any): Boolean = true
+            override suspend fun refreshWorkspace() = error("cancelled v1 must not refresh")
+        }
+
+        try {
+            runBlocking { WorkspaceBackupImportCoordinator(store).apply(legacy) }
+            throw AssertionError("V1 cancellation must propagate")
+        } catch (expected: CancellationException) {
+            assertEquals("cancel v1", expected.message)
+        }
     }
 
     @Test

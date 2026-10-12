@@ -823,7 +823,9 @@
                         android:layout_centerVertical="true"
                         android:contentDescription="@string/app_name"
                         android:padding="8dp"
-                        android:src="@drawable/ic_history_24dp" />
+                        android:src="@drawable/ic_history_24dp"
+                        android:tint="?attr/colorPrimary"
+                        tools:ignore="UseAppTint" />
 
                     <com.google.android.material.materialswitch.MaterialSwitch
                         android:id="@+id/swRecentAppsPanel"
@@ -1398,11 +1400,14 @@
                     android:padding="12dp">
 
                     <ImageView
+                        android:id="@+id/iconExportLayout"
                         android:layout_width="40dp"
                         android:layout_height="40dp"
                         android:contentDescription="@string/app_name"
                         android:padding="8dp"
-                        android:src="@drawable/ic_share_24dp" />
+                        android:src="@drawable/ic_share_24dp"
+                        android:tint="?attr/colorPrimary"
+                        tools:ignore="UseAppTint" />
 
                     <TextView
                         android:layout_width="0dp"
@@ -1431,11 +1436,14 @@
                     android:padding="12dp">
 
                     <ImageView
+                        android:id="@+id/iconImportLayout"
                         android:layout_width="40dp"
                         android:layout_height="40dp"
                         android:contentDescription="@string/app_name"
                         android:padding="8dp"
-                        android:src="@drawable/ic_restore_24dp" />
+                        android:src="@drawable/ic_restore_24dp"
+                        android:tint="?attr/colorPrimary"
+                        tools:ignore="UseAppTint" />
 
                     <TextView
                         android:layout_width="0dp"

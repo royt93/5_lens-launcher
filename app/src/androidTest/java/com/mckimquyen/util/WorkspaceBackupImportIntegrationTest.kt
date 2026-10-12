@@ -4,6 +4,8 @@ import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.preference.PreferenceManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import com.mckimquyen.app.RAppsSingleton
+import com.mckimquyen.model.App
 import com.mckimquyen.model.AppDatabase
 import com.mckimquyen.model.AppPersistent
 import com.mckimquyen.model.LayoutBackup
@@ -24,11 +26,13 @@ class WorkspaceBackupImportIntegrationTest {
     private val context get() = InstrumentationRegistry.getInstrumentation().targetContext
     private val database get() = AppDatabase.getInstance()
     private val settings get() = UtilSettings(context)
+    private var originalApps: ArrayList<App>? = null
 
     @Before
     fun setup() {
         AppDatabase.init(context)
         PreferenceManager.getDefaultSharedPreferences(context).edit().clear().commit()
+        originalApps = RAppsSingleton.instance.apps
         resetWorkspace()
     }
 
@@ -43,6 +47,7 @@ class WorkspaceBackupImportIntegrationTest {
     fun tearDown() {
         resetWorkspace()
         PreferenceManager.getDefaultSharedPreferences(context).edit().clear().commit()
+        RAppsSingleton.instance.apps = originalApps
     }
 
     @Test
@@ -118,8 +123,34 @@ class WorkspaceBackupImportIntegrationTest {
     )
 
     @Test
+    fun v1ImportSkipsEntriesForAppsNotInstalled() = runBlocking {
+        val installed = App(packageName = "com.example.present", name = "com.example.present.Main")
+        RAppsSingleton.instance.apps = arrayListOf(installed)
+        val legacy = LayoutBackup(
+            LayoutBackup.SCHEMA_VERSION_V1, 0L,
+            entries = listOf(
+                LayoutBackupEntry("com.example.present", "com.example.present.Main", 2, true, true, true, "Keep", PinnedZone.NONE.name),
+                LayoutBackupEntry("com.example.gone", "com.example.gone.Main", 1, true, true, true, "Missing", PinnedZone.NONE.name)
+            )
+        )
+
+        val result = WorkspaceBackupImportCoordinator(WorkspaceBackupRoomStore(context)).apply(legacy)
+
+        assertEquals(WorkspaceBackupImportResult.Applied, result)
+        assertEquals("Keep", database.appPersistentDao().findByIdentifier(
+            "default", "com.example.present-com.example.present.Main"
+        )?.folderName)
+        assertEquals(null, database.appPersistentDao().findByIdentifier(
+            "default", "com.example.gone-com.example.gone.Main"
+        ))
+    }
+
+    @Test
     fun v1ImportOnlyChangesDefaultLens() = runBlocking {
         seedTwoLensWorkspace()
+        RAppsSingleton.instance.apps = arrayListOf(
+            App(packageName = "com.example.home", name = "com.example.home.Main")
+        )
         val legacy = LayoutBackup(
             LayoutBackup.SCHEMA_VERSION_V1, 0L,
             entries = listOf(LayoutBackupEntry("com.example.home", "com.example.home.Main", 0, true, true, true, "Imported", PinnedZone.NONE.name))
@@ -141,6 +172,9 @@ class WorkspaceBackupImportIntegrationTest {
 
     @Test
     fun v1ImportPreservesGlobalStatsWhenIdentityOnlyExistsOnAnotherLens() = runBlocking {
+        RAppsSingleton.instance.apps = arrayListOf(
+            App(packageName = "com.example.work", name = "com.example.work.Main")
+        )
         database.lensWorkspaceDao().replaceWorkspace(
             listOf(LensWorkspace.createDefault(), LensWorkspace("work", "Work", 1, 2L)),
             listOf(AppPersistent(

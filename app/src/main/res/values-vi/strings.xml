@@ -224,8 +224,8 @@
     <string name="lens_unfreeze_title">Bỏ cố định vị trí?</string>
     <string name="lens_unfreeze_message">Thao tác này cũng xóa thứ tự bạn đã kéo thả.</string>
     <string name="lens_switch_title">Chuyển thấu kính</string>
-    <string name="layout_import_workspace_preview_message">This replaces your current workspace: %1$d lenses and %2$d app layout entries. Apps absent from this backup stay hidden on the default lens.</string>
-    <string name="layout_import_workspace_failed">Workspace import failed. Your previous workspace was restored.</string>
-    <string name="layout_import_workspace_recovery_required">Workspace restore failed and automatic recovery was incomplete. Reopen the app and verify your lenses.</string>
-    <string name="layout_import_v1_default_lens_note">This older backup updates the default lens layout only; other lenses stay unchanged.</string>
+    <string name="layout_import_workspace_preview_message">Thao tác này thay thế toàn bộ không gian làm việc hiện tại: %1$d thấu kính và %2$d mục bố cục ứng dụng. Ứng dụng không có trong bản sao lưu sẽ bị ẩn ở thấu kính mặc định.</string>
+    <string name="layout_import_workspace_failed">Nhập không gian làm việc thất bại. Đã khôi phục không gian trước đó.</string>
+    <string name="layout_import_workspace_recovery_required">Khôi phục không gian làm việc thất bại và tự phục hồi chưa hoàn tất. Hãy mở lại ứng dụng và kiểm tra các thấu kính.</string>
+    <string name="layout_import_v1_default_lens_note">Bản sao lưu cũ này chỉ cập nhật bố cục thấu kính mặc định; các thấu kính khác giữ nguyên.</string>
 </resources>

@@ -53,7 +53,13 @@ class WorkspaceBackupRoomStore(context: Context) : WorkspaceBackupImportStore {
         val allRows = dao.getAllRows()
         val oldDefault = allRows.filter { it.lensId == LensWorkspace.DEFAULT_LENS_ID }
         val preservedByIdentifier = allRows.associateBy { it.identifier }
-        val imported = plan.lenses.single().entries.map { entry ->
+        val installedIds = com.mckimquyen.app.RAppsSingleton.instance.apps.orEmpty().mapTo(mutableSetOf()) {
+            AppPersistent.generateIdentifier(it.packageName?.toString(), it.name?.toString())
+        }
+        val installedEntries = plan.lenses.single().entries.filter { entry ->
+            AppPersistent.generateIdentifier(entry.packageName, entry.name) in installedIds
+        }
+        val imported = installedEntries.map { entry ->
             AppPersistent(
                 packageName = entry.packageName,
                 name = entry.name,

@@ -91,7 +91,10 @@ class LayoutBackupIoIntegrationTest {
         assertTrue("import parse must complete", importLatch.await(5, TimeUnit.SECONDS))
 
         val success = importResult as LayoutBackupParseResult.Success
-        val entry = success.backup.entries.first { it.packageName == packageName }
+        assertEquals(com.mckimquyen.model.LayoutBackup.CURRENT_SCHEMA_VERSION, success.backup.schemaVersion)
+        assertEquals(com.mckimquyen.model.LensWorkspace.DEFAULT_LENS_ID, success.backup.activeLensId)
+        val defaultLens = success.backup.lenses.single { it.id == com.mckimquyen.model.LensWorkspace.DEFAULT_LENS_ID }
+        val entry = defaultLens.entries.first { it.packageName == packageName }
         assertEquals(packageName, entry.packageName)
         assertEquals(componentName, entry.name)
         assertEquals(false, entry.appVisible)
