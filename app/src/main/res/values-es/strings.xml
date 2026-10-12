@@ -224,8 +224,8 @@
     <string name="lens_unfreeze_title">¿Soltar posiciones?</string>
     <string name="lens_unfreeze_message">Esto también descarta el orden que definiste arrastrando.</string>
     <string name="lens_switch_title">Cambiar de lente</string>
-    <string name="layout_import_workspace_preview_message">This replaces your current workspace: %1$d lenses and %2$d app layout entries. Apps absent from this backup stay hidden on the default lens.</string>
-    <string name="layout_import_workspace_failed">Workspace import failed. Your previous workspace was restored.</string>
-    <string name="layout_import_workspace_recovery_required">Workspace restore failed and automatic recovery was incomplete. Reopen the app and verify your lenses.</string>
-    <string name="layout_import_v1_default_lens_note">This older backup updates the default lens layout only; other lenses stay unchanged.</string>
+    <string name="layout_import_workspace_preview_message">Esto reemplaza tu espacio de trabajo actual: %1$d lentes y %2$d entradas de diseño de apps. Las apps ausentes de esta copia permanecen ocultas en la lente predeterminada.</string>
+    <string name="layout_import_workspace_failed">Error al importar el espacio de trabajo. Se restauró tu espacio anterior.</string>
+    <string name="layout_import_workspace_recovery_required">Error al restaurar el espacio de trabajo y la recuperación automática quedó incompleta. Vuelve a abrir la app y revisa tus lentes.</string>
+    <string name="layout_import_v1_default_lens_note">Esta copia antigua solo actualiza el diseño de la lente predeterminada; las demás lentes no cambian.</string>
 </resources>

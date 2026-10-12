@@ -216,8 +216,8 @@
     <string name="lens_unfreeze_title">ដោះសោទីតាំង?</string>
     <string name="lens_unfreeze_message">វាក៏លុបចោលលំដាប់ដែលអ្នកកំណត់ដោយអូសផងដែរ។</string>
     <string name="lens_switch_title">ប្តូរកញ្ចក់</string>
-    <string name="layout_import_workspace_preview_message">This replaces your current workspace: %1$d lenses and %2$d app layout entries. Apps absent from this backup stay hidden on the default lens.</string>
-    <string name="layout_import_workspace_failed">Workspace import failed. Your previous workspace was restored.</string>
-    <string name="layout_import_workspace_recovery_required">Workspace restore failed and automatic recovery was incomplete. Reopen the app and verify your lenses.</string>
-    <string name="layout_import_v1_default_lens_note">This older backup updates the default lens layout only; other lenses stay unchanged.</string>
+    <string name="layout_import_workspace_preview_message">វាជំនួសកន្លែងធ្វើការបច្ចុប្បន្នរបស់អ្នក៖ ឡេន %1$d និងធាតុប្លង់កម្មវិធី %2$d។ កម្មវិធីដែលមិនមានក្នុងការបម្រុងទុកនេះនៅតែលាក់នៅឡេនលំនាំដើម។</string>
+    <string name="layout_import_workspace_failed">ការនាំចូលកន្លែងធ្វើការបរាជ័យ។ កន្លែងធ្វើការមុនត្រូវបានស្ដារឡើងវិញ។</string>
+    <string name="layout_import_workspace_recovery_required">ការស្ដារកន្លែងធ្វើការបរាជ័យ ហើយការស្ដារដោយស្វ័យប្រវត្តិមិនពេញលេញ។ សូមបើកកម្មវិធីម្ដងទៀត ហើយពិនិត្យឡេនរបស់អ្នក។</string>
+    <string name="layout_import_v1_default_lens_note">ការបម្រុងទុកចាស់នេះធ្វើបច្ចុប្បន្នភាពតែប្លង់ឡេនលំនាំដើមប៉ុណ្ណោះ ឡេនផ្សេងទៀតមិនផ្លាស់ប្ដូរទេ។</string>
 </resources>

@@ -216,8 +216,8 @@
     <string name="lens_unfreeze_title">เลิกตรึงตำแหน่ง?</string>
     <string name="lens_unfreeze_message">ลำดับที่คุณลากจัดไว้จะถูกล้างด้วย</string>
     <string name="lens_switch_title">สลับเลนส์</string>
-    <string name="layout_import_workspace_preview_message">This replaces your current workspace: %1$d lenses and %2$d app layout entries. Apps absent from this backup stay hidden on the default lens.</string>
-    <string name="layout_import_workspace_failed">Workspace import failed. Your previous workspace was restored.</string>
-    <string name="layout_import_workspace_recovery_required">Workspace restore failed and automatic recovery was incomplete. Reopen the app and verify your lenses.</string>
-    <string name="layout_import_v1_default_lens_note">This older backup updates the default lens layout only; other lenses stay unchanged.</string>
+    <string name="layout_import_workspace_preview_message">การดำเนินการนี้จะแทนที่พื้นที่ทำงานปัจจุบันของคุณ: เลนส์ %1$d รายการ และรายการเลย์เอาต์แอป %2$d รายการ แอปที่ไม่มีในข้อมูลสำรองนี้จะยังถูกซ่อนอยู่ในเลนส์เริ่มต้น</string>
+    <string name="layout_import_workspace_failed">นำเข้าพื้นที่ทำงานไม่สำเร็จ กู้คืนพื้นที่ทำงานก่อนหน้าแล้ว</string>
+    <string name="layout_import_workspace_recovery_required">กู้คืนพื้นที่ทำงานไม่สำเร็จและการกู้คืนอัตโนมัติไม่สมบูรณ์ โปรดเปิดแอปอีกครั้งและตรวจสอบเลนส์ของคุณ</string>
+    <string name="layout_import_v1_default_lens_note">ข้อมูลสำรองเก่านี้อัปเดตเฉพาะเลย์เอาต์ของเลนส์เริ่มต้น เลนส์อื่นจะไม่เปลี่ยนแปลง</string>
 </resources>

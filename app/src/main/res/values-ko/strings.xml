@@ -216,8 +216,8 @@
     <string name="lens_unfreeze_title">위치 고정을 해제할까요?</string>
     <string name="lens_unfreeze_message">드래그로 정한 순서도 함께 사라집니다.</string>
     <string name="lens_switch_title">렌즈 전환</string>
-    <string name="layout_import_workspace_preview_message">This replaces your current workspace: %1$d lenses and %2$d app layout entries. Apps absent from this backup stay hidden on the default lens.</string>
-    <string name="layout_import_workspace_failed">Workspace import failed. Your previous workspace was restored.</string>
-    <string name="layout_import_workspace_recovery_required">Workspace restore failed and automatic recovery was incomplete. Reopen the app and verify your lenses.</string>
-    <string name="layout_import_v1_default_lens_note">This older backup updates the default lens layout only; other lenses stay unchanged.</string>
+    <string name="layout_import_workspace_preview_message">현재 작업 공간을 교체합니다: 렌즈 %1$d개, 앱 배치 항목 %2$d개. 이 백업에 없는 앱은 기본 렌즈에서 숨겨진 상태로 유지됩니다.</string>
+    <string name="layout_import_workspace_failed">작업 공간 가져오기에 실패했습니다. 이전 작업 공간을 복원했습니다.</string>
+    <string name="layout_import_workspace_recovery_required">작업 공간 복원에 실패했고 자동 복구도 완료되지 않았습니다. 앱을 다시 열어 렌즈를 확인하세요.</string>
+    <string name="layout_import_v1_default_lens_note">이 이전 백업은 기본 렌즈의 배치만 업데이트하며 다른 렌즈는 변경되지 않습니다.</string>
 </resources>

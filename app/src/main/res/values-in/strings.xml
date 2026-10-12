@@ -216,8 +216,8 @@
     <string name="lens_unfreeze_title">Lepas kunci posisi?</string>
     <string name="lens_unfreeze_message">Ini juga menghapus urutan yang Anda atur dengan menyeret.</string>
     <string name="lens_switch_title">Ganti lensa</string>
-    <string name="layout_import_workspace_preview_message">This replaces your current workspace: %1$d lenses and %2$d app layout entries. Apps absent from this backup stay hidden on the default lens.</string>
-    <string name="layout_import_workspace_failed">Workspace import failed. Your previous workspace was restored.</string>
-    <string name="layout_import_workspace_recovery_required">Workspace restore failed and automatic recovery was incomplete. Reopen the app and verify your lenses.</string>
-    <string name="layout_import_v1_default_lens_note">This older backup updates the default lens layout only; other lenses stay unchanged.</string>
+    <string name="layout_import_workspace_preview_message">Ini akan mengganti ruang kerja Anda saat ini: %1$d lensa dan %2$d entri tata letak aplikasi. Aplikasi yang tidak ada di cadangan ini tetap disembunyikan di lensa default.</string>
+    <string name="layout_import_workspace_failed">Impor ruang kerja gagal. Ruang kerja sebelumnya telah dipulihkan.</string>
+    <string name="layout_import_workspace_recovery_required">Pemulihan ruang kerja gagal dan pemulihan otomatis tidak lengkap. Buka ulang aplikasi dan periksa lensa Anda.</string>
+    <string name="layout_import_v1_default_lens_note">Cadangan lama ini hanya memperbarui tata letak lensa default; lensa lain tidak berubah.</string>
 </resources>

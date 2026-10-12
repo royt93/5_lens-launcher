@@ -228,8 +228,8 @@
     <string name="lens_unfreeze_title">Открепить позиции?</string>
     <string name="lens_unfreeze_message">Также будет сброшен порядок, заданный перетаскиванием.</string>
     <string name="lens_switch_title">Сменить линзу</string>
-    <string name="layout_import_workspace_preview_message">This replaces your current workspace: %1$d lenses and %2$d app layout entries. Apps absent from this backup stay hidden on the default lens.</string>
-    <string name="layout_import_workspace_failed">Workspace import failed. Your previous workspace was restored.</string>
-    <string name="layout_import_workspace_recovery_required">Workspace restore failed and automatic recovery was incomplete. Reopen the app and verify your lenses.</string>
-    <string name="layout_import_v1_default_lens_note">This older backup updates the default lens layout only; other lenses stay unchanged.</string>
+    <string name="layout_import_workspace_preview_message">Это заменит ваше текущее рабочее пространство: линз — %1$d, записей раскладки приложений — %2$d. Приложения, которых нет в этой копии, останутся скрытыми в линзе по умолчанию.</string>
+    <string name="layout_import_workspace_failed">Не удалось импортировать рабочее пространство. Предыдущее пространство восстановлено.</string>
+    <string name="layout_import_workspace_recovery_required">Не удалось восстановить рабочее пространство, автоматическое восстановление не завершено. Откройте приложение снова и проверьте свои линзы.</string>
+    <string name="layout_import_v1_default_lens_note">Эта старая копия обновляет только раскладку линзы по умолчанию; остальные линзы не меняются.</string>
 </resources>
