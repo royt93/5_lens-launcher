@@ -36,18 +36,50 @@
 
 ---
 
-### Task 1: Pure group-name and grouping policy
+### Task 1: Room v13 group metadata and migration
+
+**Files:**
+- Modify: `app/src/main/java/com/mckimquyen/model/LensWorkspace.kt`
+- Modify: `app/src/main/java/com/mckimquyen/model/AppDatabase.kt`
+- Create: `app/schemas/com.mckimquyen.model.AppDatabase/13.json`
+- Test: `app/src/androidTest/java/com/mckimquyen/model/AppDatabaseMigrationIntegrationTest.kt`
+
+**Interfaces:**
+- `LensWorkspace.groupName: String? = null` mapped to nullable column `GROUP_NAME`.
+- Existing Room CRUD continues to preserve `groupName` through entity reads/writes; `LensWorkspace.renameLens` and `createLens` copy behavior are implemented after the field exists.
+
+- [ ] **Step 1: Add RED migration test**
+
+Extend `AppDatabaseMigrationIntegrationTest` to create the existing real v10 SQLite fixture, open/migrate it through `MIGRATION_10_11` and `MIGRATION_11_12` into a v12 database, close it, then reopen with the production migration chain including `MIGRATION_12_13`. Assert old lens rows retain ID/name/order/createdAt, `groupName == null`, and app-layout rows remain unchanged. Update the existing v10→current helper chain to include the 12→13 migration as well.
+
+- [ ] **Step 2: Run migration test and confirm RED**
+
+Run `./gradlew assembleDevDebugAndroidTest`, install the test APK on TECNO KJ7 with explicit `adb -s 115333744A005844`, then run the single migration test using direct `am instrument`. Expected: test fails because version-13 entity/migration is missing. Do not use `connected*` tasks.
+
+- [ ] **Step 3: Implement schema and migration**
+
+Set `@Database(... version = 13)`, register `MIGRATION_12_13`, and execute exactly `ALTER TABLE LENS_WORKSPACE ADD COLUMN GROUP_NAME TEXT` (nullable). Add `groupName` with Room `@ColumnInfo(name = "GROUP_NAME")`. Export Room schema with the repository's existing Room schema workflow.
+
+- [ ] **Step 4: Run migration test and confirm GREEN**
+
+Expected: migration passes; schema export diff only adds v13.
+
+### Task 2: Pure group-name and grouping policy
 
 **Files:**
 - Create: `app/src/main/java/com/mckimquyen/util/LensGroupPolicy.kt`
 - Create: `app/src/test/java/com/mckimquyen/util/LensGroupPolicyTest.kt`
+- Modify: `app/src/main/java/com/mckimquyen/model/LayoutBackup.kt` to call backup-label canonicalization.
 
 **Interfaces:**
 - `data class LensGroupSection(val groupName: String?, val lenses: List<LensWorkspace>)`: `groupName == null` is the ungrouped section.
+- Backup overload accepts `List<LayoutBackupLens>` and uses `(orderIndex, inputIndex)` to canonicalize before parser returns a successful model; Room/UI overload accepts `List<LensWorkspace>` and uses `(orderIndex, createdAt)`.
 - `normalizeName(raw: String): String?`: trim; return null for blank.
-- `canonicalize(lenses: List<LensWorkspace>): List<LensWorkspace>`: first non-null spelling by lens order becomes canonical for names equal after trim/case-fold.
-- `sections(lenses: List<LensWorkspace>): List<LensGroupSection>`: emit ungrouped section first, then groups in first-appearance order; preserve lens order within section.
-- `canonicalizeCollapsedNames(names: Set<String>, lenses: List<LensWorkspace>): Set<String>`: map stored names onto current canonical spellings and discard unknown groups.
+- `canonicalKey(name: String): String`: `name.trim().lowercase(Locale.ROOT)`; never use device-default locale.
+- `canonicalize(lenses: List<LensWorkspace>): List<LensWorkspace>` and `canonicalizeBackup(lenses: List<LayoutBackupLens>): List<LayoutBackupLens>`: process by `(orderIndex, createdAt)` for Room or `(orderIndex, inputIndex)` for backup; first trimmed spelling per canonical key wins; return canonicalized labels in original list order.
+- `sections(lenses: List<LensWorkspace>): List<LensGroupSection>`: sort by `(orderIndex, createdAt)`, emit ungrouped section first, then grouped sections by first canonical appearance; preserve sorted order within each section.
+- `canonicalizeCollapsedNames(names: Set<String>, lenses: List<LensWorkspace>): Set<String>`: map to canonical display spelling from `canonicalize(lenses)` and discard unknown groups.
+- Ordering comparator for Room: `compareBy<LensWorkspace> { it.orderIndex }.thenBy { it.createdAt }`, matching existing `LensWorkspaceDao.getAll()`.
 
 - [ ] **Step 1: Add RED tests**
 
@@ -66,41 +98,32 @@ Implement the four functions with standard Kotlin collections; no Android or Roo
 
 Expected: all policy cases pass; `git diff --check` clean.
 
-### Task 2: Room v13 group metadata and transactional bulk DAO
+### Task 3: Transactional bulk DAO
 
 **Files:**
-- Modify: `app/src/main/java/com/mckimquyen/model/LensWorkspace.kt`
-- Modify: `app/src/main/java/com/mckimquyen/model/AppDatabase.kt`
 - Modify: `app/src/main/java/com/mckimquyen/model/LensWorkspaceDao.kt`
-- Create: `app/schemas/com.mckimquyen.model.AppDatabase/13.json`
 - Test: `app/src/test/java/com/mckimquyen/model/LensWorkspaceDaoTest.kt`
-- Test: `app/src/androidTest/java/com/mckimquyen/model/AppDatabaseMigrationIntegrationTest.kt`
 
 **Interfaces:**
-- `LensWorkspace.groupName: String? = null` mapped to nullable column `GROUP_NAME`.
 - DAO `assignGroup(lensIds: Set<String>, groupName: String?)`: transactionally updates exactly the provided existing lens IDs; groupName is already normalized/canonicalized by policy; fail atomically if IDs missing or blank non-null name supplied.
 
-- [ ] **Step 1: Add RED migration/DAO tests**
+- [ ] **Step 1: Add RED DAO tests**
 
-Add a migration test from 12 to 13 proving existing lenses retain ID/name/order/createdAt and receive null group. Add DAO tests for assign, ungroup, missing-ID rollback, and no change to global lens order.
+Add DAO tests for assign, ungroup, missing-ID rollback, and no change to global lens order.
 
-- [ ] **Step 2: Run focused tests and confirm RED**
+- [ ] **Step 2: Run focused DAO tests and confirm RED**
 
-Run the exact migration and DAO test classes. Expected: schema/API unavailable or migration test fails before implementation.
+Run `./gradlew testDevDebugUnitTest --tests com.mckimquyen.model.LensWorkspaceDaoTest`. Expected: missing DAO API or failing assertions before implementation.
 
-- [ ] **Step 3: Implement schema and migration**
-
-Set `@Database(... version = 13)`, register `MIGRATION_12_13`, and execute exactly `ALTER TABLE LENS_WORKSPACE ADD COLUMN GROUP_NAME TEXT` (nullable). Add `groupName` with Room `@ColumnInfo(name = "GROUP_NAME")`. Preserve group label in `renameLens`; new lens duplication copies source label. Export Room schema with the repository's existing Room schema workflow.
-
-- [ ] **Step 4: Implement bulk DAO transaction**
+- [ ] **Step 3: Implement bulk DAO transaction**
 
 Validate non-empty ID set; require each ID exists; require non-null name is nonblank and already canonical (equal to `LensGroupPolicy.normalizeName(name)`); perform updates in one `@Transaction`. Do not reorder rows.
 
-- [ ] **Step 5: Run migration/DAO tests and confirm GREEN**
+- [ ] **Step 4: Run DAO tests and confirm GREEN**
 
-Expected: migration and all DAO tests pass; schema export diff only adds v13.
+Expected: all migration/DAO behavior passes.
 
-### Task 3: Schema-v2 backup group metadata and collapsed-state rollback
+### Task 4: Schema-v2 backup group metadata and collapsed-state rollback
 
 **Files:**
 - Modify: `app/src/main/java/com/mckimquyen/model/LayoutBackup.kt`
@@ -132,7 +155,7 @@ Expected: tests fail to compile or fail assertions before implementation.
 
 - [ ] **Step 3: Extend data model and strict parser/export**
 
-Append optional `groupName` and `collapsedGroupNames` with defaults to avoid breaking Kotlin constructors. Export writes `groupName` (JSON null when ungrouped) and root array every time. Parser accepts missing fields as null/empty; reject wrong types and whitespace-only non-null group names; canonicalize names using Task 1 policy.
+Append optional `groupName` and `collapsedGroupNames` with defaults to avoid breaking Kotlin constructors. Export writes `groupName` (JSON null when ungrouped) and root array every time. Parser accepts missing fields as null/empty; reject wrong types and whitespace-only non-null group names; canonicalize names using Task 2 policy.
 
 - [ ] **Step 4: Extend plan and Room replacement**
 
@@ -146,9 +169,9 @@ Add one collapsed-group preference key. `snapshotWorkspacePreferences` captures 
 
 Extend coordinator fake-store tests so preference commit failure followed by rollback restores previous collapsed names as well as prior DB/lens/prefs. Extend device integration round-trip and old-v2 fixture tests.
 
-Run the focused model/coordinator tests and existing `WorkspaceBackupImportIntegrationTest`/`LayoutBackupIoIntegrationTest` on TECNO in Task 7.
+Run the focused model/coordinator tests and existing `WorkspaceBackupImportIntegrationTest`/`LayoutBackupIoIntegrationTest` on TECNO in Task 8.
 
-### Task 4: Management Activity browse/switch UI
+### Task 5: Management Activity browse/switch UI
 
 **Files:**
 - Create: `app/src/main/java/com/mckimquyen/ui/LensManagementActivity.kt`
@@ -192,7 +215,7 @@ Handle explicit selected-lens extra from Activity result/intent; validate agains
 
 Run `LensManagementActivityWidgetTest`, `ActHomeQuickLensSwitchWidgetTest`, `ActHomeLensManagementWidgetTest`, and `ActHomeMultiLensWidgetTest`; expected all pass.
 
-### Task 5: Bulk group edit and current-lens popup action
+### Task 6: Bulk group edit and current-lens popup action
 
 **Files:**
 - Modify: `app/src/main/java/com/mckimquyen/ui/LensManagementActivity.kt`
@@ -201,7 +224,7 @@ Run `LensManagementActivityWidgetTest`, `ActHomeQuickLensSwitchWidgetTest`, `Act
 
 **Interfaces:**
 - Activity edit mode holds selected lens IDs, not adapter positions.
-- DAO `assignGroup(lensIds, groupName)` from Task 2 is the only mutation path; callbacks refresh derived sections from Room.
+- DAO `assignGroup(lensIds, groupName)` from Task 3 is the only mutation path; callbacks refresh derived sections from Room.
 
 - [ ] **Step 1: Add RED bulk tests**
 
@@ -219,7 +242,7 @@ Add popup item “Manage group” that opens a one-lens group editor (reuse norm
 
 Expected: all selected lens management tests pass; `./gradlew lintDevDebug` has zero new errors.
 
-### Task 6: Complete locales and feature/backlog documentation
+### Task 7: Complete locales and feature/backlog documentation
 
 **Files:**
 - Modify: `app/src/main/res/values*/strings.xml` for all supported locale directories.
@@ -239,7 +262,7 @@ Run `LensStringTranslationTest` and long-label overflow/fit tests. Add one regre
 
 Record owner-approved design, tests and exact limits in feature tracker/story. Move the story file to `done/` only after all tests, smoke, audit score, and gates succeed.
 
-### Task 7: End-to-end verification on locked TECNO
+### Task 8: End-to-end verification on locked TECNO
 
 **Files:**
 - No new production files; evidence recorded in story.
@@ -267,5 +290,7 @@ Review full diff against spec, score with repo rubric, verify only `dev` changed
 ## Plan self-review
 
 - Spec coverage: model/migration, grouping rules, browse/switch Activity, bulk CRUD, popup, backup compatibility/collapsed state, rollback, localization, tests, TECNO smoke and docs all have explicit tasks.
-- No unresolved placeholders; all named interfaces are defined in Task 1–3 or by the existing Room/Activity flow.
-- Ordering: pure policy → Room → backup transaction → browse UI → bulk UI → locales/docs → device verification. No task requires a later interface.
+- No unresolved placeholders; all named interfaces are defined in Tasks 1–4 or by the existing Room/Activity flow.
+- Dependency cycle resolved: Task 1 adds the nullable `LensWorkspace.groupName` field with Room migration; Task 2 policy consumes that field; Task 3 DAO consumes Task 2 policy. The database v12→13 test explicitly stages v12 through existing migrations before opening with the production 12→13 migration.
+- Backup canonicalization boundary is explicit: `LayoutBackupLens` labels canonicalize by `(orderIndex, inputIndex)` in parser; Room/UI labels canonicalize by `(orderIndex, createdAt)`; both use `canonicalKey = trim().lowercase(Locale.ROOT)` and preserve first spelling in each ordering.
+- Ordering: Room field/migration → pure policy/parser overload → bulk DAO → backup transaction → browse UI → bulk UI → locales/docs → device verification. No task requires a later interface.

@@ -29,7 +29,8 @@ Help users organize and switch between many lenses without changing current lens
 
 - Extend schema-v2 lens objects additively with optional `groupName`; absence means `null`, so existing v2 backups continue to parse. New exports always write the field, using JSON null for ungrouped lenses.
 - Extend the v2 root additively with optional `collapsedGroupNames: string[]`; absence means no collapsed sections. New exports always write the array.
-- Strict validation rejects non-string/non-null group names and blank names after trimming. Repeated names across lenses are expected group membership. Compare group keys after trimming and case-folding; if a backup contains spellings that differ only by case/whitespace (for example `Work` and ` work `), use the first normalized spelling encountered in lens order as the display spelling and normalize all member lenses to it. Apply the same canonicalization to `collapsedGroupNames`; duplicate collapsed keys collapse to one state.
+- Strict validation rejects non-string/non-null group names and blank names after trimming. Repeated names across lenses are expected group membership. `LensGroupPolicy.canonicalKey(name)` is `name.trim().lowercase(Locale.ROOT)`. Canonicalization is shared by parsed backup lenses and Room/UI lenses; for backup, process lenses by `orderIndex` then JSON array order, and for Room/UI use `ORDER_INDEX` then `CREATED_AT`. The first trimmed spelling per key becomes display spelling; normalize member lenses and `collapsedGroupNames` to it. Case/whitespace variants in a backup are valid and collapse into one group.
+- `LensGroupPolicy` exposes pure overloads for `LayoutBackupLens` and `LensWorkspace` so strict parser and UI/DAO paths share the same key and canonical-label implementation without Android/Room dependencies.
 - Import replaces all existing lenses and preferences, so collapsed-group state is also replaced wholesale. It participates in the existing preference snapshot/restore compensation and rollback path; no partially applied group state is allowed.
 - No schema-version bump: v2 already has additive-field compatibility and older v2 files remain readable.
 
@@ -72,3 +73,4 @@ Help users organize and switch between many lenses without changing current lens
 - **Leave collapsed state local-only:** rejected by owner choice; collapsed sections must travel with the workspace backup.
 - **Keep the existing dialog and add grouped headers:** rejected when the owner selected an Activity replacing the dialog, due to bulk-management needs.
 - **Reject repeated group labels across lenses:** rejected because repeated labels are the normal representation of group membership; only the canonical display spelling must be unique.
+- **Preserve raw case/whitespace variants through import:** rejected because Room/UI/backup would not share one deterministic grouping key.
