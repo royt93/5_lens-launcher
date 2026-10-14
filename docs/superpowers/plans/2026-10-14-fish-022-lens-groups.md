@@ -69,11 +69,11 @@ Expected: migration passes; schema export diff only adds v13.
 **Files:**
 - Create: `app/src/main/java/com/mckimquyen/util/LensGroupPolicy.kt`
 - Create: `app/src/test/java/com/mckimquyen/util/LensGroupPolicyTest.kt`
-- Modify: `app/src/main/java/com/mckimquyen/model/LayoutBackup.kt` to call backup-label canonicalization.
+- Modify: `app/src/main/java/com/mckimquyen/model/LayoutBackup.kt` to add defaulted `LayoutBackupLens.groupName: String? = null` only; parser/export wiring remains Task 4.
 
 **Interfaces:**
 - `data class LensGroupSection(val groupName: String?, val lenses: List<LensWorkspace>)`: `groupName == null` is the ungrouped section.
-- Backup overload accepts `List<LayoutBackupLens>` and uses `(orderIndex, inputIndex)` to canonicalize before parser returns a successful model; Room/UI overload accepts `List<LensWorkspace>` and uses `(orderIndex, createdAt)`.
+- Task 2 adds defaulted `LayoutBackupLens.groupName: String? = null` so backup overload tests compile before Task 4 changes JSON parsing/export. Backup overload accepts `List<LayoutBackupLens>` and uses `(orderIndex, inputIndex)`; Room/UI overload accepts `List<LensWorkspace>` and uses `(orderIndex, createdAt)`.
 - `normalizeName(raw: String): String?`: trim; return null for blank.
 - `canonicalKey(name: String): String`: `name.trim().lowercase(Locale.ROOT)`; never use device-default locale.
 - `canonicalize(lenses: List<LensWorkspace>): List<LensWorkspace>` and `canonicalizeBackup(lenses: List<LayoutBackupLens>): List<LayoutBackupLens>`: process by `(orderIndex, createdAt)` for Room or `(orderIndex, inputIndex)` for backup; first trimmed spelling per canonical key wins; return canonicalized labels in original list order.
@@ -83,7 +83,7 @@ Expected: migration passes; schema export diff only adds v13.
 
 - [ ] **Step 1: Add RED tests**
 
-Cover blank names, whitespace trim, case-fold equivalence, first-spelling wins under `(orderIndex, createdAt)`, ungrouped-first section ordering, lens order preservation, empty group removal, and collapsed-state canonicalization/removal of unknown groups.
+Cover blank names, whitespace trim, case-fold equivalence, first-spelling wins for both `LensWorkspace` `(orderIndex, createdAt)` and `LayoutBackupLens` `(orderIndex, inputIndex)`, ungrouped-first section ordering, lens order preservation, empty group removal, and collapsed-state canonicalization/removal of unknown groups.
 
 - [ ] **Step 2: Run pure unit tests and confirm RED**
 
@@ -92,7 +92,7 @@ Expected: compilation/test failure because policy does not exist.
 
 - [ ] **Step 3: Implement pure policy only**
 
-Implement the four functions with standard Kotlin collections; no Android or Room dependency.
+Implement the policy functions with standard Kotlin collections; no Android or Room dependency.
 
 - [ ] **Step 4: Run unit tests and confirm GREEN**
 
@@ -139,7 +139,7 @@ Expected: all migration/DAO behavior passes.
 - Test: `app/src/androidTest/java/com/mckimquyen/util/LayoutBackupIoIntegrationTest.kt`
 
 **Interfaces:**
-- `LayoutBackupLens.groupName: String? = null`.
+- `LayoutBackupLens.groupName: String? = null` already exists from Task 2; this task wires parser/export for it.
 - `LayoutBackup.collapsedGroupNames: Set<String> = emptySet()`.
 - `LayoutImportApplier.WorkspaceLensPlan.groupName: String?` and `WorkspacePlan.collapsedGroupNames: Set<String>`.
 - Workspace preference snapshot/replace/restore includes collapsed group names as one workspace-owned key.
@@ -155,7 +155,7 @@ Expected: tests fail to compile or fail assertions before implementation.
 
 - [ ] **Step 3: Extend data model and strict parser/export**
 
-Append optional `groupName` and `collapsedGroupNames` with defaults to avoid breaking Kotlin constructors. Export writes `groupName` (JSON null when ungrouped) and root array every time. Parser accepts missing fields as null/empty; reject wrong types and whitespace-only non-null group names; canonicalize names using Task 2 policy.
+Append optional `collapsedGroupNames` with a default to avoid breaking Kotlin constructors; reuse the Task 2 `LayoutBackupLens.groupName` default. Export writes `groupName` (JSON null when ungrouped) and root array every time. Parser accepts missing fields as null/empty; reject wrong types and whitespace-only non-null group names; canonicalize names using Task 2 policy.
 
 - [ ] **Step 4: Extend plan and Room replacement**
 
@@ -291,6 +291,6 @@ Review full diff against spec, score with repo rubric, verify only `dev` changed
 
 - Spec coverage: model/migration, grouping rules, browse/switch Activity, bulk CRUD, popup, backup compatibility/collapsed state, rollback, localization, tests, TECNO smoke and docs all have explicit tasks.
 - No unresolved placeholders; all named interfaces are defined in Tasks 1–4 or by the existing Room/Activity flow.
-- Dependency cycle resolved: Task 1 adds the nullable `LensWorkspace.groupName` field with Room migration; Task 2 policy consumes that field; Task 3 DAO consumes Task 2 policy. The database v12→13 test explicitly stages v12 through existing migrations before opening with the production 12→13 migration.
+- Dependency cycle resolved: Task 1 adds the nullable `LensWorkspace.groupName` field with Room migration; Task 2 adds defaulted `LayoutBackupLens.groupName` and policy consuming both fields; Task 3 DAO consumes Task 2 policy. The database v12→13 test explicitly stages v12 through existing migrations before opening with the production 12→13 migration.
 - Backup canonicalization boundary is explicit: `LayoutBackupLens` labels canonicalize by `(orderIndex, inputIndex)` in parser; Room/UI labels canonicalize by `(orderIndex, createdAt)`; both use `canonicalKey = trim().lowercase(Locale.ROOT)` and preserve first spelling in each ordering.
 - Ordering: Room field/migration → pure policy/parser overload → bulk DAO → backup transaction → browse UI → bulk UI → locales/docs → device verification. No task requires a later interface.
