@@ -29,7 +29,7 @@ Help users organize and switch between many lenses without changing current lens
 
 - Extend schema-v2 lens objects additively with optional `groupName`; absence means `null`, so existing v2 backups continue to parse. New exports always write the field, using JSON null for ungrouped lenses.
 - Extend the v2 root additively with optional `collapsedGroupNames: string[]`; absence means no collapsed sections. New exports always write the array.
-- Strict validation rejects non-string/non-null group names, blank names after trimming, and case-insensitive duplicate group labels that differ only by spelling/whitespace. Normalize accepted names before storing.
+- Strict validation rejects non-string/non-null group names and blank names after trimming. Repeated names across lenses are expected group membership. Compare group keys after trimming and case-folding; if a backup contains spellings that differ only by case/whitespace (for example `Work` and ` work `), use the first normalized spelling encountered in lens order as the display spelling and normalize all member lenses to it. Apply the same canonicalization to `collapsedGroupNames`; duplicate collapsed keys collapse to one state.
 - Import replaces all existing lenses and preferences, so collapsed-group state is also replaced wholesale. It participates in the existing preference snapshot/restore compensation and rollback path; no partially applied group state is allowed.
 - No schema-version bump: v2 already has additive-field compatibility and older v2 files remain readable.
 
@@ -71,3 +71,4 @@ Help users organize and switch between many lenses without changing current lens
 - **Separate Group table:** rejected because groups are only labels attached to lenses and empty groups should disappear; independent ordering/metadata is explicitly out of scope.
 - **Leave collapsed state local-only:** rejected by owner choice; collapsed sections must travel with the workspace backup.
 - **Keep the existing dialog and add grouped headers:** rejected when the owner selected an Activity replacing the dialog, due to bulk-management needs.
+- **Reject repeated group labels across lenses:** rejected because repeated labels are the normal representation of group membership; only the canonical display spelling must be unique.
