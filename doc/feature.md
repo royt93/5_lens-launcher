@@ -46,6 +46,9 @@ Source of truth for implementation choices in this session. Detailed acceptance 
 
 ## 📋 Picked
 
+1. **FISH-022 — Nhóm lens (2026-10-14, owner-approved design)**: Add nullable `groupName` to `LensWorkspace` (Room v13 + migration); group sections are derived from lens labels, trimmed and compared case-insensitively, with empty groups removed. Replace lens-switch dialog with a dedicated management Activity: browse/collapse group sections and tap a lens to switch; edit mode supports bulk assign-to-existing-group, create-group-from-selection, and ungroup. Keep a quick current-lens group action and manager entry in the existing lens popup. Export/import optional `groupName` and root `collapsedGroupNames` additively in backup schema v2; old v2 files default collapsed state to empty. Import replaces collapsed state and includes it in existing prefs snapshot/rollback. No change to paging order, active-lens semantics, app scope, ads/VIP, or store-assets. Spec: `docs/superpowers/specs/2026-10-14-lens-groups-design.md` (awaiting review).
+2. **FEAT-011 — Tạm ẩn app riêng theo lens (idea, 2026-10-14)**: Distinguish per-lens exclusion from global `appVisible` and `LensAppScope.SELECTED`; exact interaction/data semantics not designed.
+3. **SEARCH-009 — Bộ lọc tìm kiếm lưu sẵn (idea, 2026-10-14)**: Save local search filters such as active-lens, favorites, and app subsets; exact filter set and UI not designed.
 
 ## ⏸️ Deferred
 
