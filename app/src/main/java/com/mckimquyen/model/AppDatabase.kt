@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
-@Database(entities = [AppPersistent::class, LensWorkspace::class], version = 12, exportSchema = true)
+@Database(entities = [AppPersistent::class, LensWorkspace::class], version = 13, exportSchema = true)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun appPersistentDao(): AppPersistentDao
     abstract fun lensWorkspaceDao(): LensWorkspaceDao
@@ -25,7 +25,7 @@ abstract class AppDatabase : RoomDatabase() {
                             AppDatabase::class.java,
                             "app_persistent.db"
                         )
-                        .addMigrations(MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12)
+                        .addMigrations(MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13)
                         .build()
                     }
                 }
@@ -124,6 +124,13 @@ abstract class AppDatabase : RoomDatabase() {
                     "ALTER TABLE APP_PERSISTENT ADD COLUMN NOTIFICATION_COUNT " +
                         "INTEGER NOT NULL DEFAULT 0"
                 )
+            }
+        }
+
+        @androidx.annotation.VisibleForTesting
+        internal val MIGRATION_12_13 = object : Migration(12, 13) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE LENS_WORKSPACE ADD COLUMN GROUP_NAME TEXT")
             }
         }
 

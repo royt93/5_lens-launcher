@@ -23,6 +23,7 @@ class AppDatabaseMigrationIntegrationTest {
 
     companion object {
         private const val TEST_DB = "fish-008-migration-test.db"
+        private const val V12_DB = "fish-022-v12-migration-test.db"
         private const val TEST_WRITE_TIMEOUT_MILLIS = 5_000L
         private const val TEST_WRITE_POLL_MILLIS = 10L
     }
@@ -72,13 +73,11 @@ class AppDatabaseMigrationIntegrationTest {
                 sqlite.version = 10
             }
 
-            // Open with Room and apply MIGRATION_10_11 (then MIGRATION_11_12, chained - the
-            // compiled AppDatabase class always targets its current @Database version, UI-024
-            // raised that to 12, so this test's own migration list must reach it too; the
-            // assertions below only check v10/v11-introduced fields, unaffected by the
-            // NOTIFICATION_COUNT column 11->12 adds with a harmless default).
+            // Open with Room and apply every migration from the handcrafted v10 schema to the
+            // compiled database version. Assertions below focus on fields introduced by 10->11;
+            // later columns have harmless defaults.
             val migrated = Room.databaseBuilder(context, AppDatabase::class.java, TEST_DB)
-                .addMigrations(migration10To11(), migration11To12())
+                .addMigrations(migration10To11(), migration11To12(), AppDatabase.MIGRATION_12_13)
                 .build()
             try {
                 val workspaces = migrated.lensWorkspaceDao().getAll()
@@ -99,6 +98,55 @@ class AppDatabaseMigrationIntegrationTest {
                 migrated.close()
                 context.deleteDatabase(TEST_DB)
             }
+        }
+    }
+
+    @Test
+    fun migrate12To13_preservesLensMetadataAndLayout() = runBlocking {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        context.deleteDatabase(V12_DB)
+        val source = context.getDatabasePath(V12_DB)
+        source.parentFile?.mkdirs()
+        SQLiteDatabase.openOrCreateDatabase(source, null).use { sqlite ->
+            sqlite.execSQL(
+                "CREATE TABLE APP_PERSISTENT (ID INTEGER PRIMARY KEY AUTOINCREMENT, PACKAGE_NAME TEXT, NAME TEXT, IDENTIFIER TEXT NOT NULL, OPEN_COUNT INTEGER NOT NULL, ORDER_NUMBER INTEGER NOT NULL, APP_VISIBLE INTEGER NOT NULL, APP_OPENED INTEGER NOT NULL, PALETTE_COLOR INTEGER NOT NULL DEFAULT 0, IS_FAVORITE INTEGER NOT NULL DEFAULT 0, FOLDER_NAME TEXT, PINNED_ZONE TEXT NOT NULL DEFAULT 'NONE', LENS_ID TEXT NOT NULL DEFAULT 'default', NOTIFICATION_COUNT INTEGER NOT NULL DEFAULT 0)"
+            )
+            sqlite.execSQL(
+                "CREATE UNIQUE INDEX index_APP_PERSISTENT_LENS_ID_IDENTIFIER ON APP_PERSISTENT (LENS_ID, IDENTIFIER)"
+            )
+            sqlite.execSQL(
+                "CREATE TABLE LENS_WORKSPACE (ID TEXT PRIMARY KEY NOT NULL, NAME TEXT NOT NULL, ORDER_INDEX INTEGER NOT NULL DEFAULT 0, CREATED_AT INTEGER NOT NULL DEFAULT 0)"
+            )
+            sqlite.execSQL(
+                "INSERT INTO LENS_WORKSPACE (ID, NAME, ORDER_INDEX, CREATED_AT) VALUES ('default', 'Home', 0, 101)"
+            )
+            sqlite.execSQL(
+                "INSERT INTO LENS_WORKSPACE (ID, NAME, ORDER_INDEX, CREATED_AT) VALUES ('work', 'Work', 1, 202)"
+            )
+            sqlite.execSQL(
+                "INSERT INTO APP_PERSISTENT (PACKAGE_NAME, NAME, IDENTIFIER, OPEN_COUNT, ORDER_NUMBER, APP_VISIBLE, APP_OPENED, FOLDER_NAME, LENS_ID) VALUES ('com.example', 'Main', 'com.example-Main', 9, 4, 0, 1, 'Keep', 'work')"
+            )
+            sqlite.version = 12
+        }
+
+        val migrated = Room.databaseBuilder(context, AppDatabase::class.java, V12_DB)
+            .addMigrations(migration12To13())
+            .build()
+        try {
+            val lenses = migrated.lensWorkspaceDao().getAll()
+            assertEquals(listOf("default", "work"), lenses.map { it.id })
+            assertEquals(listOf("Home", "Work"), lenses.map { it.name })
+            assertEquals(listOf(0, 1), lenses.map { it.orderIndex })
+            assertEquals(listOf(101L, 202L), lenses.map { it.createdAt })
+            assertTrue(lenses.all { it.groupName == null })
+            val row = migrated.appPersistentDao().findByIdentifier("work", "com.example-Main")
+            assertEquals("Keep", row?.folderName)
+            assertEquals(9L, row?.openCount)
+            assertEquals(4, row?.orderNumber)
+            assertFalse(row?.appVisible ?: true)
+        } finally {
+            migrated.close()
+            context.deleteDatabase(V12_DB)
         }
     }
 
@@ -192,5 +240,9 @@ class AppDatabaseMigrationIntegrationTest {
 
     private fun migration11To12(): androidx.room.migration.Migration {
         return AppDatabase.MIGRATION_11_12
+    }
+
+    private fun migration12To13(): androidx.room.migration.Migration {
+        return AppDatabase.MIGRATION_12_13
     }
 }

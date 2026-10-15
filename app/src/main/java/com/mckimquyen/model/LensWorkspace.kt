@@ -25,7 +25,9 @@ data class LensWorkspace(
     @ColumnInfo(name = "ORDER_INDEX", defaultValue = "0")
     val orderIndex: Int = 0,
     @ColumnInfo(name = "CREATED_AT", defaultValue = "0")
-    val createdAt: Long = System.currentTimeMillis()
+    val createdAt: Long = System.currentTimeMillis(),
+    @ColumnInfo(name = "GROUP_NAME")
+    val groupName: String? = null
 ) {
     companion object {
         const val DEFAULT_LENS_ID = "default"
