@@ -238,4 +238,14 @@
     <string name="lens_group_error_blank">समूह का नाम दर्ज करें</string>
     <string name="lens_group_edit_title">लेंस समूह चुनें</string>
     <string name="lens_group_edit_action">समूह संपादित करें</string>
+
+    <string name="lens_group_active">सक्रिय</string>
+    <string name="lens_group_selected_count">%1$d चुने गए</string>
+    <string name="lens_group_header_description">%1$s, %2$d लेंस, %3$s</string>
+    <string name="lens_group_lens_active_description">%1$s, सक्रिय लेंस</string>
+    <plurals name="lens_group_lens_count">
+        <item quantity="one">%1$d लेंस</item>
+        <item quantity="other">%1$d लेंस</item>
+    </plurals>
+    <string name="lens_group_save_failed">समूह अपडेट नहीं हो सका</string>
 </resources>

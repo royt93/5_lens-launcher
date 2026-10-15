@@ -128,6 +128,75 @@ class LensWorkspaceDaoTest {
     }
 
     @Test
+    fun `assignGroup rejects an empty selection and leaves rows untouched`() = runBlocking {
+        dao.insertOrUpdate(LensWorkspace.createDefault().copy(groupName = "Work"))
+        val before = dao.getAll()
+
+        try {
+            dao.assignGroup(emptySet(), "Other")
+            fail("Expected empty selection to be rejected")
+        } catch (_: IllegalArgumentException) {
+            assertEquals(before, dao.getAll())
+        }
+    }
+
+    @Test
+    fun `assignGroup rejects a blank group name`() = runBlocking {
+        dao.insertOrUpdate(LensWorkspace.createDefault())
+        val before = dao.getAll()
+
+        try {
+            dao.assignGroup(setOf(LensWorkspace.DEFAULT_LENS_ID), "   ")
+            fail("Expected blank name to be rejected")
+        } catch (_: IllegalArgumentException) {
+            assertEquals(before, dao.getAll())
+        }
+    }
+
+    @Test
+    fun `createLens copies the source lens group so Add lens keeps the user's grouping`() {
+        runBlocking {
+            dao.insertOrUpdate(LensWorkspace.createDefault().copy(groupName = "Work"))
+        }
+        var delivered: List<LensWorkspace>? = null
+
+        LensWorkspace.createLens("Copy", LensWorkspace.DEFAULT_LENS_ID) { delivered = it }
+        // Room work runs on Dispatchers.IO (real threads); pump the main looper until it posts back.
+        val deadline = System.currentTimeMillis() + 5_000L
+        while (delivered == null && System.currentTimeMillis() < deadline) {
+            org.robolectric.shadows.ShadowLooper.idleMainLooper()
+            Thread.sleep(20)
+        }
+        val created = requireNotNull(delivered) { "createLens must finish" }
+
+        val copy = created.single { it.name == "Copy" }
+        assertEquals("Work", copy.groupName)
+        assertEquals("Work", created.single { it.id == LensWorkspace.DEFAULT_LENS_ID }.groupName)
+    }
+
+    @Test
+    fun `update keeps the group when a lens is renamed`() = runBlocking {
+        val lens = LensWorkspace("work", "Work", orderIndex = 1, groupName = "Team")
+        dao.insertOrUpdate(lens)
+
+        dao.update(lens.copy(name = "Renamed"))
+
+        assertEquals("Team", dao.findById("work")?.groupName)
+        assertEquals("Renamed", dao.findById("work")?.name)
+    }
+
+    @Test
+    fun `deleting the last lens of a group removes that group from the derived sections`() = runBlocking {
+        dao.insertOrUpdate(LensWorkspace.createDefault())
+        dao.insertOrUpdate(LensWorkspace("solo", "Solo", orderIndex = 1, groupName = "Lonely"))
+        assertEquals(listOf(null, "Lonely"), com.mckimquyen.util.LensGroupPolicy.sections(dao.getAll()).map { it.groupName })
+
+        dao.deleteById("solo")
+
+        assertEquals(listOf<String?>(null), com.mckimquyen.util.LensGroupPolicy.sections(dao.getAll()).map { it.groupName })
+    }
+
+    @Test
     fun `assignGroup rejects noncanonical group labels`() = runBlocking {
         dao.insertOrUpdate(LensWorkspace.createDefault())
         val before = dao.getAll()

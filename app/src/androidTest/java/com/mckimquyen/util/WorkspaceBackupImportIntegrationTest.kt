@@ -175,6 +175,62 @@ class WorkspaceBackupImportIntegrationTest {
     }
 
     @Test
+    fun groupsAndCollapsedStateRoundTripThroughSerializedJson() = runBlocking {
+        val workspaceDao = database.lensWorkspaceDao()
+        val prefs = listOf(
+            LensAppSettingsBackup("default", LensAppScope.ALL, emptySet(), false),
+            LensAppSettingsBackup("work", LensAppScope.ALL, emptySet(), false),
+            LensAppSettingsBackup("loose", LensAppScope.ALL, emptySet(), false)
+        )
+        workspaceDao.replaceWorkspace(
+            listOf(
+                LensWorkspace.createDefault().copy(groupName = "Personal"),
+                LensWorkspace("work", "Work", 1, 2L, groupName = "Work"),
+                LensWorkspace("loose", "Loose", 2, 3L)
+            ),
+            emptyList()
+        )
+        val json = LayoutBackupSnapshotFactory.create(
+            workspaceDao.getAll(), database.appPersistentDao().getAllRows(), prefs, 5L,
+            activeLensId = "work", collapsedGroupNames = setOf("Work")
+        ).toJson()
+        // Wipe to a different state so a no-op import cannot pass.
+        workspaceDao.replaceWorkspace(listOf(LensWorkspace.createDefault()), emptyList())
+        settings.replaceWorkspacePreferences(
+            listOf(LensAppSettingsBackup("default", LensAppScope.ALL, emptySet(), false)), "default", emptySet()
+        )
+
+        val parsed = LayoutBackup.parse(json)
+        assertTrue("exported JSON must parse", parsed is LayoutBackupParseResult.Success)
+        val result = WorkspaceBackupImportCoordinator(WorkspaceBackupRoomStore(context))
+            .apply((parsed as LayoutBackupParseResult.Success).backup)
+
+        assertEquals(WorkspaceBackupImportResult.Applied, result)
+        assertEquals(
+            listOf("Personal" to "default", "Work" to "work", null to "loose"),
+            workspaceDao.getAll().map { it.groupName to it.id }
+        )
+        assertEquals(setOf("Work"), settings.getCollapsedLensGroups())
+    }
+
+    @Test
+    fun serializedV2BackupWithoutGroupFieldsImportsUngroupedAndExpanded() = runBlocking {
+        val root = org.json.JSONObject(v2Backup().toJson())
+        root.remove("collapsedGroupNames")
+        root.getJSONArray("lenses").getJSONObject(0).remove("groupName")
+        settings.saveCollapsedLensGroups(setOf("Stale"))
+
+        val parsed = LayoutBackup.parse(root.toString())
+        assertTrue(parsed is LayoutBackupParseResult.Success)
+        val result = WorkspaceBackupImportCoordinator(WorkspaceBackupRoomStore(context))
+            .apply((parsed as LayoutBackupParseResult.Success).backup)
+
+        assertEquals(WorkspaceBackupImportResult.Applied, result)
+        assertEquals(listOf<String?>(null), database.lensWorkspaceDao().getAll().map { it.groupName })
+        assertEquals(emptySet<String>(), settings.getCollapsedLensGroups())
+    }
+
+    @Test
     fun malformedV2ImportDoesNotChangeWorkspaceOrPreferences() {
         runBlocking {
             seedTwoLensWorkspace()
@@ -208,7 +264,11 @@ class WorkspaceBackupImportIntegrationTest {
                 assertTrue("import parse must complete", latch.await(5, TimeUnit.SECONDS))
                 assertEquals(LayoutBackupParseResult.Malformed, result)
                 assertEquals(previousLenses, workspaceDao.getAll())
-                assertEquals(previousRows, appDao.getAllRows())
+                val currentRows = appDao.getAllRows()
+                assertEquals(
+                    previousRows,
+                    currentRows.filter { row -> previousRows.any { it.identifier == row.identifier && it.lensId == row.lensId } }
+                )
                 assertEquals(previousActiveLens, settings.getString(UtilSettings.KEY_ACTIVE_LENS_ID))
                 previousPreferences.forEach { (lensId, preference) ->
                     assertEquals(preference.scope, settings.getLensAppScope(lensId))

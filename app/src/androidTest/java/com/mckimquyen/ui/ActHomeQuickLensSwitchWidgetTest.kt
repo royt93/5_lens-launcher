@@ -1,8 +1,6 @@
 package com.mckimquyen.ui
 
-import android.content.DialogInterface
 import android.content.Intent
-import android.widget.ListView
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -31,6 +29,7 @@ class ActHomeQuickLensSwitchWidgetTest {
     private val context get() = InstrumentationRegistry.getInstrumentation().targetContext
     private val dao get() = AppDatabase.getInstance().lensWorkspaceDao()
     private val secondId = "quick-switch-second"
+    private val managerEntryId = ActHome.MENU_ID_LENS_APPS
 
     @Before
     fun setup() {
@@ -130,52 +129,21 @@ class ActHomeQuickLensSwitchWidgetTest {
     }
 
     @Test
-    fun tappingTheLensNameOpensTheSwitcherListingEveryLens() {
+    fun menuGroupActionUsesCurrentLensAndSingleLensNameOpensManager() {
         ActivityScenario.launch(ActHome::class.java).use { scenario ->
             waitForLensCount(scenario, 2)
             scenario.onActivity { activity ->
                 activity.findViewById<android.view.View>(R.id.tvLensName).performClick()
-                val dialog = activity.lensDialog
-                assertNotNull("The lens switcher must be showing", dialog)
-                val list: ListView = dialog!!.listView
-                assertEquals(2, list.count)
+                assertTrue(activity.onLensMenuItemSelected(ActHome.MENU_ID_MANAGE_CURRENT_LENS_GROUP, 0))
             }
         }
-    }
 
-    @Test
-    fun pickingALensInTheSwitcherPagesToIt() {
-        ActivityScenario.launch(ActHome::class.java).use { scenario ->
-            waitForLensCount(scenario, 2)
-            scenario.onActivity { activity ->
-                activity.findViewById<android.view.View>(R.id.tvLensName).performClick()
-                val list = activity.lensDialog!!.listView
-                list.performItemClick(list.getChildAt(1), 1, list.adapter.getItemId(1))
-            }
-            assertEquals(1, waitForPage(scenario, expected = 1))
-        }
-    }
-
-    @Test
-    fun cancelInTheSwitcherChangesNothing() {
-        ActivityScenario.launch(ActHome::class.java).use { scenario ->
-            waitForLensCount(scenario, 2)
-            scenario.onActivity { activity ->
-                activity.findViewById<android.view.View>(R.id.tvLensName).performClick()
-                activity.lensDialog!!.getButton(DialogInterface.BUTTON_NEGATIVE).performClick()
-            }
-            assertEquals(0, waitForPage(scenario, expected = 0))
-        }
-    }
-
-    @Test
-    fun withASingleLensTappingTheNameOpensNothing() {
         runBlocking { dao.delete(LensWorkspace(id = secondId, name = "Second", orderIndex = 1)) }
         ActivityScenario.launch(ActHome::class.java).use { scenario ->
             waitForLensCount(scenario, 1)
             scenario.onActivity { activity ->
                 activity.findViewById<android.view.View>(R.id.tvLensName).performClick()
-                assertNull("one lens has nothing to switch to", activity.lensDialog)
+                assertTrue(activity.onLensMenuItemSelected(ActHome.MENU_ID_MANAGE_CURRENT_LENS_GROUP, 0))
             }
         }
     }

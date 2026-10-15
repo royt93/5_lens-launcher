@@ -219,6 +219,7 @@
             android:name=".ui.LensManagementActivity"
             android:exported="false"
             android:parentActivityName=".ui.ActHome"
+            android:taskAffinity=""
             android:theme="@style/AppTheme.NoActionBar" />
 
         <activity

@@ -112,6 +112,8 @@ public class ActHome extends ActBase {
     public static final int MENU_ID_LENS_APPS = 9;
     @androidx.annotation.VisibleForTesting
     public static final int MENU_ID_FREEZE_LENS = 10;
+    @androidx.annotation.VisibleForTesting
+    static final int MENU_ID_MANAGE_CURRENT_LENS_GROUP = 11;
 
     // UI-021: predictive-back shrink/fade preview bounds for the search overlay, matching
     // Android's own predictive-back design guidance (subtle scale-down + slight fade, not a
@@ -806,8 +808,6 @@ public class ActHome extends ActBase {
         return lensMenuPressAnchor;
     }
 
-    private static final int DISABLED_MENU_ICON_ALPHA = 97;
-
     /**
      * A PopupMenu sizes and places itself against its anchor, so anchoring to the full-screen
      * LensView pushed the menu off the top edge and clipped it to a single visible row - found on
@@ -872,7 +872,6 @@ public class ActHome extends ActBase {
             icon = androidx.core.graphics.drawable.DrawableCompat.wrap(icon.mutate());
             androidx.core.graphics.drawable.DrawableCompat.setTint(icon, MaterialColors.getColor(
                     themed, com.google.android.material.R.attr.colorOnSurface, android.graphics.Color.BLACK));
-            icon.setAlpha(enabled ? 255 : DISABLED_MENU_ICON_ALPHA);
             item.setIcon(icon);
         }
         item.setEnabled(enabled);
@@ -913,6 +912,8 @@ public class ActHome extends ActBase {
                 R.drawable.ic_apps_24dp, true);
         addLensMenuItem(menu, themed, MENU_ID_FREEZE_LENS, lensFreezeMenuLabelRes(position),
                 R.drawable.ic_lock_24dp, true);
+        addLensMenuItem(menu, themed, MENU_ID_MANAGE_CURRENT_LENS_GROUP, R.string.lens_group_manage,
+                R.drawable.ic_group_24dp, true);
         menu.setOnMenuItemClickListener(item -> onLensMenuItemSelected(item.getItemId(), position));
         menu.setForceShowIcon(true);
         menu.setOnDismissListener(dismissed -> {
@@ -988,6 +989,9 @@ public class ActHome extends ActBase {
         } else if (itemId == MENU_ID_FREEZE_LENS) {
             toggleFreezeForLens(current);
             return true;
+        } else if (itemId == MENU_ID_MANAGE_CURRENT_LENS_GROUP) {
+            openLensManagement(current.getId());
+            return true;
         }
         return false;
     }
@@ -1022,7 +1026,17 @@ public class ActHome extends ActBase {
     /** FISH-022: lens name opens grouped lens management and selection in a separate Activity. */
     @androidx.annotation.VisibleForTesting
     void openLensManagement() {
-        startActivity(new Intent(this, LensManagementActivity.class));
+        openLensManagement(null);
+    }
+
+    @androidx.annotation.VisibleForTesting
+    Intent lensManagementLaunchIntentForTest;
+
+    private void openLensManagement(String lensId) {
+        Intent intent = new Intent(this, LensManagementActivity.class);
+        lensManagementLaunchIntentForTest = intent;
+        if (lensId != null) intent.putExtra(LensManagementActivity.EXTRA_MANAGE_LENS_ID, lensId);
+        startActivity(intent);
     }
 
     /** Like {@link #lensSmartFocusMenuLabelRes}: the entry names the action, so it reads current state. */

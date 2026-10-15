@@ -242,4 +242,14 @@
     <string name="lens_group_error_blank">Introduza um nome de grupo</string>
     <string name="lens_group_edit_title">Escolher grupo de lentes</string>
     <string name="lens_group_edit_action">Editar grupo</string>
+
+    <string name="lens_group_active">Ativa</string>
+    <string name="lens_group_selected_count">%1$d selecionadas</string>
+    <string name="lens_group_header_description">%1$s, %2$d lentes, %3$s</string>
+    <string name="lens_group_lens_active_description">%1$s, lente ativa</string>
+    <plurals name="lens_group_lens_count">
+        <item quantity="one">%1$d lente</item>
+        <item quantity="other">%1$d lentes</item>
+    </plurals>
+    <string name="lens_group_save_failed">Não foi possível atualizar o grupo</string>
 </resources>

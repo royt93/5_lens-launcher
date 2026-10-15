@@ -246,4 +246,16 @@
     <string name="lens_group_error_blank">Введите название группы</string>
     <string name="lens_group_edit_title">Выбрать группу линз</string>
     <string name="lens_group_edit_action">Изменить группу</string>
+
+    <string name="lens_group_active">Активна</string>
+    <string name="lens_group_selected_count">Выбрано: %1$d</string>
+    <string name="lens_group_header_description">%1$s, линз: %2$d, %3$s</string>
+    <string name="lens_group_lens_active_description">%1$s, активная линза</string>
+    <plurals name="lens_group_lens_count">
+        <item quantity="one">Линза: %1$d</item>
+        <item quantity="few">Линзы: %1$d</item>
+        <item quantity="many">Линз: %1$d</item>
+        <item quantity="other">Линз: %1$d</item>
+    </plurals>
+    <string name="lens_group_save_failed">Не удалось обновить группу</string>
 </resources>

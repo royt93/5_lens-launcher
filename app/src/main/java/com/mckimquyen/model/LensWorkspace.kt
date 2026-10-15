@@ -75,7 +75,9 @@ data class LensWorkspace(
                     val newLens = LensWorkspace(
                         id = java.util.UUID.randomUUID().toString(),
                         name = name,
-                        orderIndex = existing.size
+                        orderIndex = existing.size,
+                        // FISH-022: a copy joins its source's group (spec: duplicate copies group).
+                        groupName = existing.firstOrNull { it.id == copyFromLensId }?.groupName
                     )
                     dao().insertOrUpdate(newLens)
                     AppDatabase.getInstance().appPersistentDao()

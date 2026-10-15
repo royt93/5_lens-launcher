@@ -50,6 +50,7 @@ class ActHomeLensManagementWidgetTest {
     private val itemRecentAppsPanel = 6
     private val itemSearch = 7
     private val itemToggleCleanLens = 8
+    private val itemManageCurrentLensGroup = ActHome.MENU_ID_MANAGE_CURRENT_LENS_GROUP
 
     @Before
     fun setup() {
@@ -341,9 +342,13 @@ class ActHomeLensManagementWidgetTest {
                     .onEmptySpaceLongPressListener!!.onEmptySpaceLongPress(0f, 0f)
 
                 assertEquals(
-                    "The menu must offer all ten actions (add/rename/delete/Smart Focus/share/Recent apps/Search/Clean/Choose apps/Freeze)",
-                    10,
+                    "The menu must offer all eleven actions including current-lens group management",
+                    11,
                     activity.lensManagementMenu!!.menu.size()
+                )
+                assertEquals(
+                    activity.getString(R.string.lens_group_manage),
+                    activity.lensManagementMenu!!.menu.getItem(10).title.toString()
                 )
                 val menuTitles = (0 until activity.lensManagementMenu!!.menu.size())
                     .map { activity.lensManagementMenu!!.menu.getItem(it).title.toString() }
@@ -434,6 +439,23 @@ class ActHomeLensManagementWidgetTest {
 
     /** UI-025: a ragged text column (some items with an icon, some without) is the bug. */
     @Test
+    fun disabledDeleteIconKeepsSameTintAsEnabledMenuIcons() {
+        ActivityScenario.launch(ActHome::class.java).use { scenario ->
+            idle()
+            scenario.onActivity { activity ->
+                activity.findViewById<com.mckimquyen.views.LensView>(R.id.lensViews)
+                    .onEmptySpaceLongPressListener!!.onEmptySpaceLongPress(0f, 0f)
+                val menu = activity.lensManagementMenu!!.menu
+                val addIcon = requireNotNull(menu.findItem(itemAdd).icon)
+                val deleteIcon = requireNotNull(menu.findItem(itemDelete).icon)
+                assertFalse(menu.findItem(itemDelete).isEnabled)
+                assertEquals("Disabled Delete keeps normal icon tint", 255, deleteIcon.alpha)
+                assertEquals("Icon tint matches enabled menu items", addIcon.colorFilter, deleteIcon.colorFilter)
+            }
+        }
+    }
+
+    @Test
     fun lensMenu_everyItemHasAnIcon() {
         ActivityScenario.launch(ActHome::class.java).use { scenario ->
             idle()
@@ -516,6 +538,21 @@ class ActHomeLensManagementWidgetTest {
             scenario.onActivity { activity ->
                 assertEquals("dismissing must remove the anchor", before, anchorParent!!.childCount)
                 assertNull(activity.lensMenuAnchorForTest)
+            }
+        }
+    }
+
+    @Test
+    fun currentLensGroupMenuEntryLaunchesManagerWithActiveLensSelected() {
+        seedSecondLens()
+        ActivityScenario.launch(ActHome::class.java).use { scenario ->
+            idle()
+            scenario.onActivity { activity ->
+                activity.onLensMenuItemSelected(itemManageCurrentLensGroup, 0)
+                val intent = requireNotNull(activity.lensManagementLaunchIntentForTest)
+                assertEquals(LensManagementActivity::class.java.name, intent.component?.className)
+                assertEquals(LensWorkspace.DEFAULT_LENS_ID,
+                    intent.getStringExtra(LensManagementActivity.EXTRA_MANAGE_LENS_ID))
             }
         }
     }

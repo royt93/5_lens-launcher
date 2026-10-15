@@ -260,4 +260,18 @@
     <string name="lens_group_error_blank">أدخل اسم المجموعة</string>
     <string name="lens_group_edit_title">اختيار مجموعة العدسة</string>
     <string name="lens_group_edit_action">تعديل المجموعة</string>
+
+    <string name="lens_group_active">نشطة</string>
+    <string name="lens_group_selected_count">تم تحديد %1$d</string>
+    <string name="lens_group_header_description">%1$s، %2$d عدسات، %3$s</string>
+    <string name="lens_group_lens_active_description">%1$s، العدسة النشطة</string>
+    <plurals name="lens_group_lens_count">
+        <item quantity="zero">لا توجد عدسات</item>
+        <item quantity="one">عدسة واحدة</item>
+        <item quantity="two">عدستان</item>
+        <item quantity="few">%1$d عدسات</item>
+        <item quantity="many">%1$d عدسة</item>
+        <item quantity="other">%1$d عدسة</item>
+    </plurals>
+    <string name="lens_group_save_failed">تعذر تحديث المجموعة</string>
 </resources>

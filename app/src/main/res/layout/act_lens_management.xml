@@ -1,18 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/lensManagementRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:paddingHorizontal="16dp">
+    android:background="?attr/colorSurface"
+    android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/tvLensManagementTitle"
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/tbLensManagement"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:accessibilityHeading="true"
-        android:paddingVertical="16dp"
-        android:text="@string/lens_management_title"
-        android:textAppearance="?attr/textAppearanceHeadlineSmall" />
+        android:minHeight="56dp"
+        android:background="?attr/colorSurface"
+        android:elevation="0dp"
+        app:navigationIcon="@drawable/ic_arrow_back_24dp"
+        app:title="@string/lens_management_title"
+        app:titleTextAppearance="?attr/textAppearanceTitleLarge" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvLensGroups"
@@ -20,6 +24,35 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:clipToPadding="false"
+        android:paddingHorizontal="16dp"
         android:paddingBottom="16dp" />
 
+    <LinearLayout
+        android:id="@+id/lensGroupActions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorSurfaceContainer"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:visibility="gone">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btLensGroupAssign"
+            style="@style/Widget.Material3.Button.TonalButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
+            android:text="@string/lens_group_assign" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btLensGroupUngroup"
+            style="@style/Widget.Material3.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
+            android:text="@string/lens_group_ungroup" />
+    </LinearLayout>
 </LinearLayout>

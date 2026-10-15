@@ -234,4 +234,14 @@
     <string name="lens_group_error_blank">グループ名を入力</string>
     <string name="lens_group_edit_title">レンズグループを選択</string>
     <string name="lens_group_edit_action">グループを編集</string>
+
+    <string name="lens_group_active">使用中</string>
+    <string name="lens_group_selected_count">%1$d件を選択</string>
+    <string name="lens_group_header_description">%1$s、レンズ%2$d個、%3$s</string>
+    <string name="lens_group_lens_active_description">%1$s、使用中のレンズ</string>
+    <plurals name="lens_group_lens_count">
+        <item quantity="one">レンズ%1$d個</item>
+        <item quantity="other">レンズ%1$d個</item>
+    </plurals>
+    <string name="lens_group_save_failed">グループを更新できませんでした</string>
 </resources>

@@ -234,4 +234,14 @@
     <string name="lens_group_error_blank">그룹 이름 입력</string>
     <string name="lens_group_edit_title">렌즈 그룹 선택</string>
     <string name="lens_group_edit_action">그룹 편집</string>
+
+    <string name="lens_group_active">활성</string>
+    <string name="lens_group_selected_count">%1$d개 선택됨</string>
+    <string name="lens_group_header_description">%1$s, 렌즈 %2$d개, %3$s</string>
+    <string name="lens_group_lens_active_description">%1$s, 활성 렌즈</string>
+    <plurals name="lens_group_lens_count">
+        <item quantity="one">렌즈 %1$d개</item>
+        <item quantity="other">렌즈 %1$d개</item>
+    </plurals>
+    <string name="lens_group_save_failed">그룹을 업데이트하지 못했습니다</string>
 </resources>

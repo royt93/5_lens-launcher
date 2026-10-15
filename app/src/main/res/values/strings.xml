@@ -279,6 +279,15 @@
     <string name="lens_group_ungroup">Remove from group</string>
     <string name="lens_group_name_hint">Group name</string>
     <string name="lens_group_error_blank">Enter a group name</string>
+    <string name="lens_group_save_failed">Group update failed</string>
     <string name="lens_group_edit_title">Choose lens group</string>
     <string name="lens_group_edit_action">Edit group</string>
+    <string name="lens_group_active">Active</string>
+    <string name="lens_group_selected_count">%1$d selected</string>
+    <string name="lens_group_header_description">%1$s, %2$d lenses, %3$s</string>
+    <string name="lens_group_lens_active_description">%1$s, active lens</string>
+    <plurals name="lens_group_lens_count">
+        <item quantity="one">%1$d lens</item>
+        <item quantity="other">%1$d lenses</item>
+    </plurals>
 </resources>

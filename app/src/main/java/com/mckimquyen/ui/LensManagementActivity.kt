@@ -2,42 +2,342 @@ package com.mckimquyen.ui
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.MenuItem
-import androidx.appcompat.app.AppCompatActivity
+import android.widget.EditText
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.mckimquyen.R
+import com.mckimquyen.model.AppDatabase
 import com.mckimquyen.model.LensWorkspace
+import com.mckimquyen.model.LensWorkspaceDao
+import com.mckimquyen.util.LensGroupPolicy
 import com.mckimquyen.util.UtilSettings
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
-class LensManagementActivity : AppCompatActivity() {
+class LensManagementActivity : ActBase() {
+    companion object {
+        const val EXTRA_MANAGE_LENS_ID = "com.mckimquyen.lenslauncher.EXTRA_MANAGE_LENS_ID"
+        private const val STATE_EDITING = "state_editing_groups"
+        private const val STATE_SELECTED = "state_selected_lens_ids"
+    }
+
     private lateinit var list: RecyclerView
     private lateinit var adapter: LensGroupAdapter
     private lateinit var settings: UtilSettings
+    private val dao: LensWorkspaceDao by lazy { AppDatabase.getInstance().lensWorkspaceDao() }
+    private val selectedLensIds = mutableSetOf<String>()
+    private var editingGroups = false
+    private var lensGroupDialog: AlertDialog? = null
+    private var groupOperationInProgress = false
+    private var groupLoadVersion = 0
+    private var lastGroupOperationError: Throwable? = null
+    private lateinit var managementToolbar: com.google.android.material.appbar.MaterialToolbar
+    private lateinit var groupActions: android.view.View
+    private var originalStatusBarColor = android.graphics.Color.TRANSPARENT
+    private var originalNavigationBarColor = android.graphics.Color.TRANSPARENT
+    private var originalLightStatusBars = false
+    private var originalLightNavigationBars = false
+    private var activeLensId: String? = null
+
+    @androidx.annotation.VisibleForTesting
+    var groupPickerFailureForTest: Throwable? = null
+        private set
+
+    @androidx.annotation.VisibleForTesting
+    val groupOperationErrorForTest: Throwable?
+        get() = lastGroupOperationError
+
+    @androidx.annotation.VisibleForTesting
+    val lensGroupDialogForTest: AlertDialog?
+        get() = lensGroupDialog
+
+    @androidx.annotation.VisibleForTesting
+    fun toggleEditModeForTest() = toggleEditMode()
+
+    @androidx.annotation.VisibleForTesting
+    fun selectLensForGroupEdit(lensId: String, selected: Boolean) {
+        if (selected) selectedLensIds.add(lensId) else selectedLensIds.remove(lensId)
+        adapter.setGroupEditSelection(selectedLensIds.toSet())
+        onGroupSelectionChanged(selectedLensIds)
+    }
+
+    @androidx.annotation.VisibleForTesting
+    fun selectLensForTest(lensId: String) = selectLens(lensId)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        originalStatusBarColor = window.statusBarColor
+        originalNavigationBarColor = window.navigationBarColor
+        val originalBars = androidx.core.view.WindowCompat.getInsetsController(window, window.decorView)
+        originalLightStatusBars = originalBars.isAppearanceLightStatusBars
+        originalLightNavigationBars = originalBars.isAppearanceLightNavigationBars
         setContentView(R.layout.act_lens_management)
         settings = UtilSettings(this)
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        activeLensId = settings.getString(UtilSettings.KEY_ACTIVE_LENS_ID)
         list = findViewById(R.id.rvLensGroups)
-        adapter = LensGroupAdapter(::selectLens, settings::saveCollapsedLensGroups)
+        managementToolbar = findViewById(R.id.tbLensManagement)
+        groupActions = findViewById(R.id.lensGroupActions)
+        groupActions.visibility = android.view.View.GONE
+        val onSurface = com.google.android.material.color.MaterialColors.getColor(
+            this, com.google.android.material.R.attr.colorOnSurface, android.graphics.Color.BLACK
+        )
+        val surface = com.google.android.material.color.MaterialColors.getColor(
+            this, com.google.android.material.R.attr.colorSurface, android.graphics.Color.WHITE
+        )
+        managementToolbar.setBackgroundColor(surface)
+        managementToolbar.setNavigationIconTint(onSurface)
+        managementToolbar.setNavigationOnClickListener { finish() }
+        androidx.core.view.WindowCompat.getInsetsController(window, window.decorView).apply {
+            isAppearanceLightStatusBars = android.graphics.Color.luminance(surface) > 0.5f
+            isAppearanceLightNavigationBars = android.graphics.Color.luminance(surface) > 0.5f
+        }
+        managementToolbar.inflateMenu(R.menu.menu_lens_group_edit)
+        managementToolbar.menu.findItem(R.id.menuLensGroupEditToggle).icon?.setTint(onSurface)
+        managementToolbar.menu.findItem(R.id.menuLensGroupEditToggle).isVisible = true
+        managementToolbar.menu.findItem(R.id.menuLensGroupEditDone).isVisible = false
+        androidx.core.view.ViewCompat.requestApplyInsets(findViewById(R.id.lensManagementRoot))
+        managementToolbar.setOnMenuItemClickListener { item ->
+            if (item.itemId == R.id.menuLensGroupEditToggle || item.itemId == R.id.menuLensGroupEditDone) {
+                toggleEditMode()
+                true
+            } else false
+        }
+        val manageLensId = intent.getStringExtra(EXTRA_MANAGE_LENS_ID)
+        val restoredEditing = savedInstanceState?.getBoolean(STATE_EDITING) == true
+        val restoredSelection = savedInstanceState?.getStringArrayList(STATE_SELECTED).orEmpty()
+        adapter = LensGroupAdapter(
+            onLensSelected = ::selectLens,
+            onCollapsedGroupsChanged = settings::saveCollapsedLensGroups,
+            onGroupEditSelectionChanged = { ids ->
+                selectedLensIds.clear()
+                selectedLensIds.addAll(ids)
+                onGroupSelectionChanged(selectedLensIds)
+            },
+            isEditingGroups = { editingGroups },
+            selectedLensIds = selectedLensIds
+        )
         list.layoutManager = LinearLayoutManager(this)
         list.adapter = adapter
+        groupActions.findViewById<com.google.android.material.button.MaterialButton>(R.id.btLensGroupAssign)
+            .setOnClickListener { showAssignGroupDialog() }
+        groupActions.findViewById<com.google.android.material.button.MaterialButton>(R.id.btLensGroupUngroup)
+            .setOnClickListener { ungroupSelected() }
         LensWorkspace.loadAll { lenses ->
             if (!isFinishing && !isDestroyed) {
-                adapter.submit(lenses, settings.getCollapsedLensGroups())
+                adapter.submit(lenses, settings.getCollapsedLensGroups(), activeLensId)
+                // Selection is only trusted once checked against live Room rows: a stale or
+                // unknown ID (deleted lens, bad intent extra) must never enter edit mode.
+                val knownIds = lenses.mapTo(mutableSetOf()) { it.id }
+                if (restoredEditing) {
+                    editingGroups = true
+                    selectedLensIds.addAll(restoredSelection.filter { it in knownIds })
+                    adapter.setGroupEditSelection(selectedLensIds.toSet())
+                    onGroupSelectionChanged(selectedLensIds)
+                } else if (!manageLensId.isNullOrBlank() && manageLensId in knownIds) {
+                    beginManagingLens(manageLensId)
+                }
             }
         }
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (item.itemId == android.R.id.home) {
-            finish()
-            return true
-        }
-        return super.onOptionsItemSelected(item)
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putBoolean(STATE_EDITING, editingGroups)
+        outState.putStringArrayList(STATE_SELECTED, ArrayList(selectedLensIds))
     }
+
+    override fun onDestroy() {
+        lensGroupDialog?.dismiss()
+        lensGroupDialog = null
+        androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.lensManagementRoot), null)
+        window.statusBarColor = originalStatusBarColor
+        window.navigationBarColor = originalNavigationBarColor
+        androidx.core.view.WindowCompat.setDecorFitsSystemWindows(window, true)
+        androidx.core.view.WindowCompat.getInsetsController(window, window.decorView).apply {
+            isAppearanceLightStatusBars = originalLightStatusBars
+            isAppearanceLightNavigationBars = originalLightNavigationBars
+        }
+        super.onDestroy()
+    }
+
+    @androidx.annotation.VisibleForTesting
+    fun reloadGroupsForTest() {
+        LensWorkspace.loadAll { lenses ->
+            if (!isFinishing && !isDestroyed) adapter.submit(lenses, settings.getCollapsedLensGroups(), activeLensId)
+        }
+    }
+
+    private fun reloadGroups() = reloadGroupsForTest()
+
+    private fun beginManagingLens(lensId: String) {
+        if (lensId.isBlank()) return
+        editingGroups = true
+        selectedLensIds.add(lensId)
+        adapter.setGroupEditSelection(selectedLensIds.toSet())
+        onGroupSelectionChanged(selectedLensIds)
+    }
+
+    private fun onGroupSelectionChanged(ids: Set<String>) {
+        managementToolbar.title = if (editingGroups) {
+            getString(R.string.lens_group_selected_count, ids.size)
+        } else {
+            getString(R.string.lens_management_title)
+        }
+        groupActions.visibility = if (editingGroups) android.view.View.VISIBLE else android.view.View.GONE
+        val canEditSelection = editingGroups && ids.isNotEmpty() && !groupOperationInProgress
+        groupActions.findViewById<com.google.android.material.button.MaterialButton>(R.id.btLensGroupAssign).apply {
+            isEnabled = canEditSelection
+        }
+        groupActions.findViewById<com.google.android.material.button.MaterialButton>(R.id.btLensGroupUngroup).apply {
+            isEnabled = canEditSelection
+        }
+        managementToolbar.menu.findItem(R.id.menuLensGroupEditToggle).isVisible = !editingGroups
+        managementToolbar.menu.findItem(R.id.menuLensGroupEditDone)?.isVisible = editingGroups
+    }
+
+    private fun toggleEditMode() {
+        if (groupOperationInProgress) return
+        editingGroups = !editingGroups
+        if (!editingGroups) {
+            selectedLensIds.clear()
+            adapter.setGroupEditSelection(emptySet())
+        }
+        managementToolbar.menu.findItem(R.id.menuLensGroupEditToggle).isVisible = !editingGroups
+        managementToolbar.menu.findItem(R.id.menuLensGroupEditDone).isVisible = editingGroups
+        onGroupSelectionChanged(selectedLensIds)
+        androidx.core.view.ViewCompat.requestApplyInsets(groupActions)
+    }
+
+    private fun showAssignGroupDialog() {
+        val selectedIds = selectedLensIds.toSet()
+        if (!editingGroups || selectedIds.isEmpty() || groupOperationInProgress) return
+        groupOperationInProgress = true
+        onGroupSelectionChanged(selectedLensIds)
+        val version = ++groupLoadVersion
+        LensWorkspace.loadAll { lenses ->
+            if (isFinishing || isDestroyed || version != groupLoadVersion) return@loadAll
+            try {
+                val groupNames = LensGroupPolicy.sections(lenses).mapNotNull { it.groupName }.distinct()
+                val options = groupNames + getString(R.string.lens_group_create)
+                lensGroupDialog = AlertDialog.Builder(this)
+                    .setTitle(R.string.lens_group_edit_title)
+                    .setItems(options.toTypedArray()) { dialog, which ->
+                        dialog.dismiss()
+                        lensGroupDialog = null
+                        setGroupOperationIdle()
+                        if (which < groupNames.size) assignGroup(selectedIds, groupNames[which])
+                        else showCreateGroupDialog(selectedIds)
+                    }
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .setOnCancelListener {
+                        lensGroupDialog = null
+                        if (version == groupLoadVersion) setGroupOperationIdle()
+                    }
+                    .show()
+            } catch (error: Exception) {
+                groupPickerFailureForTest = error
+                if (version == groupLoadVersion) setGroupOperationIdle()
+                com.mckimquyen.util.Logger.e("LensManagementActivity: failed to render group picker", error)
+                Toast.makeText(this, R.string.lens_group_save_failed, Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun showCreateGroupDialog(selectedIds: Set<String>) {
+        groupOperationInProgress = false
+        lensGroupDialog = null
+        onGroupSelectionChanged(selectedLensIds)
+        val input = EditText(this).apply {
+            id = android.R.id.edit
+            setHint(R.string.lens_group_name_hint)
+        }
+        lensGroupDialog = AlertDialog.Builder(this)
+            .setTitle(R.string.lens_group_create)
+            .setView(input)
+            .setPositiveButton(android.R.string.ok, null)
+            .setNegativeButton(android.R.string.cancel, null)
+            .create()
+        lensGroupDialog?.setOnCancelListener {
+            lensGroupDialog = null
+            setGroupOperationIdle()
+        }
+        lensGroupDialog?.setOnShowListener {
+            lensGroupDialog?.getButton(AlertDialog.BUTTON_POSITIVE)?.setOnClickListener {
+                val name = LensGroupPolicy.normalizeName(input.text.toString())
+                if (name == null) {
+                    input.error = getString(R.string.lens_group_error_blank)
+                    return@setOnClickListener
+                }
+                lensGroupDialog?.dismiss()
+                lensGroupDialog = null
+                assignGroup(selectedIds, name)
+            }
+        }
+        lensGroupDialog?.show()
+    }
+
+    private fun setGroupOperationIdle() {
+        groupOperationInProgress = false
+        if (!isFinishing && !isDestroyed) onGroupSelectionChanged(adapter.selectedIds())
+    }
+
+    private fun assignGroup(selectedIds: Set<String>, name: String) {
+        val canonicalInput = LensGroupPolicy.normalizeName(name) ?: run {
+            Toast.makeText(this, R.string.lens_group_error_blank, Toast.LENGTH_SHORT).show()
+            return
+        }
+        if (groupOperationInProgress) return
+        groupOperationInProgress = true
+        onGroupSelectionChanged(selectedLensIds)
+        lifecycleScope.launch {
+            try {
+                val canonical = withContext(Dispatchers.IO) {
+                    val currentGroups = LensGroupPolicy.canonicalize(dao.getAll())
+                    currentGroups.firstOrNull {
+                        it.groupName?.let(LensGroupPolicy::canonicalKey) == LensGroupPolicy.canonicalKey(canonicalInput)
+                    }?.groupName ?: canonicalInput
+                }
+                withContext(Dispatchers.IO) { dao.assignGroup(selectedIds, canonical) }
+                reloadGroups()
+                setGroupOperationIdle()
+                toggleEditMode()
+            } catch (error: Exception) {
+                lastGroupOperationError = error
+                setGroupOperationIdle()
+                Toast.makeText(this@LensManagementActivity, R.string.lens_group_save_failed, Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun ungroupSelected() {
+        val selectedIds = selectedLensIds.toSet()
+        if (!editingGroups || selectedIds.isEmpty() || groupOperationInProgress) return
+        groupOperationInProgress = true
+        onGroupSelectionChanged(selectedLensIds)
+        lifecycleScope.launch {
+            try {
+                withContext(Dispatchers.IO) { dao.assignGroup(selectedIds, null) }
+                reloadGroups()
+                setGroupOperationIdle()
+                toggleEditMode()
+            } catch (error: Exception) {
+                setGroupOperationIdle()
+                Toast.makeText(this@LensManagementActivity, R.string.lens_group_save_failed, Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    @androidx.annotation.VisibleForTesting
+    val editingGroupsForTest: Boolean
+        get() = editingGroups
+
+    @androidx.annotation.VisibleForTesting
+    val selectedLensIdsForTest: Set<String>
+        get() = selectedLensIds.toSet()
 
     private fun selectLens(lensId: String) {
         val intent = Intent(this, ActHome::class.java)

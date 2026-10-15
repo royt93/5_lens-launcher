@@ -99,6 +99,49 @@ class LensGroupPolicyTest {
     }
 
     @Test
+    fun canonicalKey_isIndependentOfDefaultLocale() {
+        val original = java.util.Locale.getDefault()
+        try {
+            java.util.Locale.setDefault(java.util.Locale("tr", "TR"))
+            // Locale-sensitive lowercase would map "I" to dotless "ı" and split "INBOX"/"inbox".
+            assertEquals(LensGroupPolicy.canonicalKey("inbox"), LensGroupPolicy.canonicalKey("INBOX"))
+        } finally {
+            java.util.Locale.setDefault(original)
+        }
+    }
+
+    @Test
+    fun canonicalize_createdAtBreaksOrderIndexTieForDisplaySpelling() {
+        val newer = lens("newer", order = 1, created = 50, group = "work")
+        val older = lens("older", order = 1, created = 10, group = "WORK")
+
+        val result = LensGroupPolicy.canonicalize(listOf(newer, older))
+
+        assertEquals(listOf("WORK", "WORK"), result.map { it.groupName })
+    }
+
+    @Test
+    fun sections_dropGroupOnceItsLastLensIsUngrouped() {
+        val before = LensGroupPolicy.sections(listOf(lens("a", 0, 0, "Solo"), lens("b", 1, 1, null)))
+        assertEquals(listOf(null, "Solo"), before.map { it.groupName })
+
+        val after = LensGroupPolicy.sections(listOf(lens("a", 0, 0, null), lens("b", 1, 1, null)))
+
+        assertEquals(listOf<String?>(null), after.map { it.groupName })
+        assertEquals(listOf("a", "b"), after.single().lenses.map { it.id })
+    }
+
+    @Test
+    fun sections_ofNoLensesIsEmpty() {
+        assertEquals(emptyList<Any>(), LensGroupPolicy.sections(emptyList()))
+    }
+
+    @Test
+    fun canonicalizeCollapsedNames_ofEmptyInputIsEmpty() {
+        assertEquals(emptySet<String>(), LensGroupPolicy.canonicalizeCollapsedNames(emptySet(), listOf(lens("a", 0, 0, "A"))))
+    }
+
+    @Test
     fun canonicalizeCollapsedNames_mapsToCanonicalSpellingAndDropsUnknownGroups() {
         val lenses = listOf(
             lens("first", 0, 0, "Work"),

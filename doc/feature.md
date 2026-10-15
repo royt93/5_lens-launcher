@@ -40,6 +40,8 @@ Source of truth for implementation choices in this session. Detailed acceptance 
 
 ## 🟡 In progress
 
+- **FISH-022 — Nhóm lens (2026-10-15)**: Room group metadata + backup v2, `LensManagementActivity` Material You (active lens, count, edit theo ngữ cảnh), bulk assign/create/ungroup, popup action, đủ locale. Audit sửa 3 lỗi (manage-id lạ, mất edit state khi recreate, `createLens` không copy group). TECNO BG6: manager 19/19, Home 26/26, quick-switch 12/12, multi-lens 4/4, backup 10/10, migration 4/4; unit 856/856, lint 0 lỗi, secret scan, diff check xanh. Smoke tay trên máy: popup, tạo/collapse/ungroup, 2 lens, chuyển lens, xóa lens tạm; không thấy ad. Chưa smoke tay file picker export/import (có integration test). Story: `doc/task/inprogress/p2-fish-fish-022-lens-groups.md`.
+
 - **FISH-021 follow-up — Icon trong danh sách chọn app (09/10/2026)**: owner duyệt mỗi dòng gồm icon launcher 40dp + tên + checkbox. Tái dùng iconCacheKey/cache và ListView multi-choice; Set vẫn là nguồn lựa chọn để cuộn không mất tick. Thiết bị khóa hiện tại: Pixel 7 Pro `2B051FDH3006MU`. Chưa kiểm chứng và chưa push; plan `docs/superpowers/plans/2026-10-09-lens-picker-icons.md`.
 
 - **REL-2026.10.07 — Chuẩn bị release store (07/10/2026)**: audit tĩnh xong; code-side đã bump version, thêm backup rules (`BackupRulesTest` 3/3), R8 release build + 16 KB zipalign OK, unit 725/725. Owner quyết (07/10): giữ rewarded ID test, skip consent ADS-001, giữ 3 permission nhạy cảm, dùng key hiện tại (SEC-001 để sau). Còn lại: smoke TECNO + audit >9. Xem `doc/task/RELEASE_OWNER_CHECKLIST.md`.

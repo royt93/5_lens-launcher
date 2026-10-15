@@ -242,4 +242,14 @@
     <string name="lens_group_error_blank">Saisissez un nom de groupe</string>
     <string name="lens_group_edit_title">Choisir un groupe de lentilles</string>
     <string name="lens_group_edit_action">Modifier le groupe</string>
+
+    <string name="lens_group_active">En cours</string>
+    <string name="lens_group_selected_count">%1$d sélectionnées</string>
+    <string name="lens_group_header_description">%1$s, %2$d lentilles, %3$s</string>
+    <string name="lens_group_lens_active_description">%1$s, lentille active</string>
+    <plurals name="lens_group_lens_count">
+        <item quantity="one">%1$d lentille</item>
+        <item quantity="other">%1$d lentilles</item>
+    </plurals>
+    <string name="lens_group_save_failed">Impossible de mettre à jour le groupe</string>
 </resources>
