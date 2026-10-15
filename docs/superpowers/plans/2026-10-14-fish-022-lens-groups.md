@@ -83,7 +83,7 @@ Expected: migration passes; schema export diff only adds v13.
 
 - [ ] **Step 1: Add RED tests**
 
-Cover blank names, whitespace trim, case-fold equivalence, first-spelling wins for both `LensWorkspace` `(orderIndex, createdAt)` and `LayoutBackupLens` `(orderIndex, inputIndex)`, ungrouped-first section ordering, lens order preservation, empty group removal, and collapsed-state canonicalization/removal of unknown groups.
+Cover blank names, whitespace trim, case-fold equivalence, first-spelling wins for both `LensWorkspace` `(orderIndex, createdAt)` and `LayoutBackupLens` `(orderIndex, inputIndex)`, ungrouped-first section ordering, lens order preservation, empty group removal, and collapsed-state canonicalization/removal of unknown groups. Use `LayoutBackupLens(id, name, orderIndex, scope, selectedAppIds, frozen, entries, groupName)` and verify canonicalization changes only `groupName`; preserve every other field. For each input list, assert returned list remains in its original order even though canonical spelling is chosen by sorted order.
 
 - [ ] **Step 2: Run pure unit tests and confirm RED**
 
@@ -92,7 +92,7 @@ Expected: compilation/test failure because policy does not exist.
 
 - [ ] **Step 3: Implement pure policy only**
 
-Implement the policy functions with standard Kotlin collections; no Android or Room dependency.
+Implement the policy functions with standard Kotlin collections; no Android or Room dependency. Use `java.util.Locale.ROOT` for `canonicalKey`. Use `copy(groupName = canonicalDisplay)` on both `LensWorkspace` and `LayoutBackupLens`; do not mutate input lists or any non-group fields. Implement `sections` by first canonicalizing, sorting a separate view by `(orderIndex, createdAt)`, then emitting `null` group first followed by first canonical group appearance.
 
 - [ ] **Step 4: Run unit tests and confirm GREEN**
 

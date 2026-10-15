@@ -124,7 +124,8 @@ data class LayoutBackupLens(
     val scope: LensAppScope,
     val selectedAppIds: Set<String>,
     val frozen: Boolean,
-    val entries: List<LayoutBackupEntry>
+    val entries: List<LayoutBackupEntry>,
+    val groupName: String? = null
 ) {
     fun toJson(): JSONObject = JSONObject().apply {
         put(KEY_ID, id)
