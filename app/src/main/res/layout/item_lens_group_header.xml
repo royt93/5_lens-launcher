@@ -17,7 +17,6 @@
         android:layout_height="48dp"
         android:contentDescription="@string/lens_group_toggle"
         android:gravity="center"
-        android:text="⌄"
         android:textAppearance="?attr/textAppearanceTitleMedium"
         android:textColor="?attr/colorOnSurfaceVariant" />
 

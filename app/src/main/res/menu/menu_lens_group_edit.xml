@@ -5,10 +5,10 @@
         android:id="@+id/menuLensGroupEditToggle"
         android:title="@string/lens_group_edit_action"
         android:icon="@drawable/ic_edit_24dp"
-        app:showAsAction="always" />
+        app:showAsAction="ifRoom" />
     <item
         android:id="@+id/menuLensGroupEditDone"
         android:title="@string/done"
         android:visible="false"
-        app:showAsAction="always" />
+        app:showAsAction="ifRoom" />
 </menu>
