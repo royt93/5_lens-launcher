@@ -214,6 +214,40 @@ class WorkspaceBackupImportIntegrationTest {
     }
 
     @Test
+    fun exportIgnoresOrphanAppRowsOfDeletedLensesInsteadOfFailing() {
+        runBlocking {
+            database.lensWorkspaceDao().replaceWorkspace(
+                listOf(LensWorkspace.createDefault().copy(groupName = "Smoke")), emptyList()
+            )
+            // Orphan rows outlive a deleted lens whenever something writes after deleteLens().
+            database.appPersistentDao().insert(
+                AppPersistent(
+                    packageName = "com.ghost", name = "com.ghost.Main",
+                    identifier = "com.ghost-com.ghost.Main", lensId = "ghost-lens"
+                )
+            )
+            settings.replaceWorkspacePreferences(
+                listOf(LensAppSettingsBackup("default", LensAppScope.ALL, emptySet(), false)), "default", setOf("Smoke")
+            )
+        }
+        val target = File(context.cacheDir, "orphan-export.json").apply { delete() }
+        val done = CountDownLatch(1)
+        var ok = false
+
+        LayoutBackupIo.exportAsync(context, Uri.fromFile(target)) { ok = it; done.countDown() }
+
+        assertTrue("export must finish", done.await(5, TimeUnit.SECONDS))
+        assertTrue("orphan rows must not abort the export", ok)
+        val parsed = LayoutBackup.parse(target.readText())
+        assertTrue(parsed is LayoutBackupParseResult.Success)
+        val backup = (parsed as LayoutBackupParseResult.Success).backup
+        assertEquals(listOf("Smoke"), backup.lenses.map { it.groupName })
+        assertEquals(setOf("Smoke"), backup.collapsedGroupNames)
+        assertTrue("ghost app must not leak into any lens", backup.lenses.flatMap { it.entries }.none { it.packageName == "com.ghost" })
+        target.delete()
+    }
+
+    @Test
     fun serializedV2BackupWithoutGroupFieldsImportsUngroupedAndExpanded() = runBlocking {
         val root = org.json.JSONObject(v2Backup().toJson())
         root.remove("collapsedGroupNames")

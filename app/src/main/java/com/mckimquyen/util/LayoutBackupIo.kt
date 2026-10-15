@@ -28,7 +28,10 @@ object LayoutBackupIo {
             val success = try {
                 val database = AppDatabase.getInstance()
                 val lenses = database.lensWorkspaceDao().getAll()
-                val rows = database.appPersistentDao().getAllRows()
+                // Rows of a deleted lens can reappear (a late per-app write after deleteLens), and
+                // the snapshot factory rightly rejects unknown lenses - so export only live ones.
+                val liveLensIds = lenses.mapTo(mutableSetOf()) { it.id }
+                val rows = database.appPersistentDao().getAllRows().filter { it.lensId in liveLensIds }
                 val settings = UtilSettings(context.applicationContext)
                 val appSettings = lenses.map { lens ->
                     LensAppSettingsBackup(
