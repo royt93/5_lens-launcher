@@ -7,6 +7,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
+import com.mckimquyen.util.LensGroupPolicy
 
 /**
  * FISH-008: Data access object for managing Lens workspaces.
@@ -40,6 +41,19 @@ interface LensWorkspaceDao {
 
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insertAll(workspaces: List<LensWorkspace>)
+
+    @Transaction
+    suspend fun assignGroup(lensIds: Set<String>, groupName: String?) {
+        require(lensIds.isNotEmpty()) { "At least one lens is required" }
+        require(groupName == null || groupName.isNotBlank()) { "Group name must not be blank" }
+        require(groupName == null || LensGroupPolicy.normalizeName(groupName) == groupName) {
+            "Group name must already be normalized"
+        }
+        val lenses = lensIds.map { id ->
+            findById(id) ?: throw IllegalArgumentException("Unknown lens ID: $id")
+        }
+        lenses.forEach { update(it.copy(groupName = groupName)) }
+    }
 
     /** v2-only destructive replacement; v1 imports use the default-lens layout applier instead. */
     @Transaction

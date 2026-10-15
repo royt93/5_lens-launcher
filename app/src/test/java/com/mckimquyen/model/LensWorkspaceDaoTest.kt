@@ -86,6 +86,61 @@ class LensWorkspaceDaoTest {
     }
 
     @Test
+    fun `assignGroup updates selected lens labels without changing lens order`() = runBlocking {
+        dao.insertOrUpdate(LensWorkspace.createDefault())
+        dao.insertOrUpdate(LensWorkspace("work", "Work", orderIndex = 1, createdAt = 20L))
+        dao.insertOrUpdate(LensWorkspace("travel", "Travel", orderIndex = 2, createdAt = 30L))
+        val before = dao.getAll()
+
+        dao.assignGroup(setOf("default", "travel"), "Personal")
+
+        val after = dao.getAll()
+        assertEquals(before.map { it.id }, after.map { it.id })
+        assertEquals(before.map { it.orderIndex }, after.map { it.orderIndex })
+        assertEquals("Personal", dao.findById("default")?.groupName)
+        assertNull(dao.findById("work")?.groupName)
+        assertEquals("Personal", dao.findById("travel")?.groupName)
+    }
+
+    @Test
+    fun `assignGroup null removes group from selected lenses`() = runBlocking {
+        dao.insertOrUpdate(LensWorkspace.createDefault().copy(groupName = "Work"))
+        dao.insertOrUpdate(LensWorkspace("work", "Work", orderIndex = 1, groupName = "Work"))
+
+        dao.assignGroup(setOf("work"), null)
+
+        assertNull(dao.findById("work")?.groupName)
+        assertEquals("Work", dao.findById(LensWorkspace.DEFAULT_LENS_ID)?.groupName)
+    }
+
+    @Test
+    fun `assignGroup rejects missing lens atomically`() = runBlocking {
+        dao.insertOrUpdate(LensWorkspace.createDefault())
+        dao.insertOrUpdate(LensWorkspace("work", "Work", orderIndex = 1))
+        val before = dao.getAll()
+
+        try {
+            dao.assignGroup(setOf("default", "missing"), "Work")
+            fail("Expected missing lens to reject the bulk update")
+        } catch (_: IllegalArgumentException) {
+            assertEquals(before, dao.getAll())
+        }
+    }
+
+    @Test
+    fun `assignGroup rejects noncanonical group labels`() = runBlocking {
+        dao.insertOrUpdate(LensWorkspace.createDefault())
+        val before = dao.getAll()
+
+        try {
+            dao.assignGroup(setOf(LensWorkspace.DEFAULT_LENS_ID), " Work ")
+            fail("Expected noncanonical label to be rejected")
+        } catch (_: IllegalArgumentException) {
+            assertEquals(before, dao.getAll())
+        }
+    }
+
+    @Test
     fun `replaceWorkspace restores lenses and rows while preserving non-layout data`() = runBlocking {
         dao.insertOrUpdate(LensWorkspace.createDefault())
         dao.insertOrUpdate(LensWorkspace("old-work", "Old work", 1, 11L))
