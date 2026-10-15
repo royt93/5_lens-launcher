@@ -38,8 +38,9 @@ class LayoutBackupTest {
         scope: LensAppScope = LensAppScope.ALL,
         selectedAppIds: Set<String> = emptySet(),
         frozen: Boolean = false,
-        entries: List<LayoutBackupEntry> = listOf(sampleEntry())
-    ) = LayoutBackupLens(id, name, orderIndex, scope, selectedAppIds, frozen, entries)
+        entries: List<LayoutBackupEntry> = listOf(sampleEntry()),
+        groupName: String? = null
+    ) = LayoutBackupLens(id, name, orderIndex, scope, selectedAppIds, frozen, entries, groupName)
 
     // --- entry-level (schema-neutral) ---
 
@@ -148,11 +149,103 @@ class LayoutBackupTest {
         assertEquals(PinnedZone.NONE.name, entry.pinnedZone)
     }
 
+    @Test
+    fun `v2 lens group name round trips and trims`() {
+        val backup = LayoutBackup(
+            LayoutBackup.CURRENT_SCHEMA_VERSION,
+            0L,
+            activeLensId = "default",
+            lenses = listOf(sampleLens(groupName = " Work ")),
+            collapsedGroupNames = setOf(" work ")
+        )
+
+        val restored = LayoutBackup.parse(backup.toJson()) as LayoutBackupParseResult.Success
+
+        assertEquals("Work", restored.backup.lenses.single().groupName)
+        assertEquals(setOf("Work"), restored.backup.collapsedGroupNames)
+    }
+
+    @Test
+    fun `older v2 backup without group fields defaults to ungrouped and expanded`() {
+        val json = """
+            {"schemaVersion":2,"exportedAt":0,"activeLensId":"default","lenses":[
+                {"id":"default","name":"Home","orderIndex":0,"scope":"ALL","selectedAppIds":[],"frozen":false,"entries":[]}
+            ]}
+        """.trimIndent()
+
+        val backup = (LayoutBackup.parse(json) as LayoutBackupParseResult.Success).backup
+
+        assertNull(backup.lenses.single().groupName)
+        assertTrue(backup.collapsedGroupNames.isEmpty())
+    }
+
+    @Test
+    fun `v2 collapsed group names map to canonical lens names and ignore unknowns`() {
+        val json = """
+            {"schemaVersion":2,"exportedAt":0,"activeLensId":"default","collapsedGroupNames":[" work ","missing"],"lenses":[
+                {"id":"default","name":"Home","orderIndex":0,"scope":"ALL","selectedAppIds":[],"frozen":false,"groupName":"Work","entries":[]}
+            ]}
+        """.trimIndent()
+
+        val backup = (LayoutBackup.parse(json) as LayoutBackupParseResult.Success).backup
+
+        assertEquals(setOf("Work"), backup.collapsedGroupNames)
+    }
+
+    @Test
+    fun `v2 collapsed group names rejects non-array and invalid names`() {
+        val nonArray = """
+            {"schemaVersion":2,"exportedAt":0,"activeLensId":"default","collapsedGroupNames":"Work","lenses":[
+                {"id":"default","name":"Home","orderIndex":0,"scope":"ALL","selectedAppIds":[],"frozen":false,"entries":[]}
+            ]}
+        """.trimIndent()
+        val blankName = """
+            {"schemaVersion":2,"exportedAt":0,"activeLensId":"default","collapsedGroupNames":[" "],"lenses":[
+                {"id":"default","name":"Home","orderIndex":0,"scope":"ALL","selectedAppIds":[],"frozen":false,"entries":[]}
+            ]}
+        """.trimIndent()
+
+        assertEquals(LayoutBackupParseResult.Malformed, LayoutBackup.parse(nonArray))
+        assertEquals(LayoutBackupParseResult.Malformed, LayoutBackup.parse(blankName))
+    }
+
+    @Test
+    fun `v2 group labels and collapsed groups canonicalize by lens order`() {
+        val json = """
+            {"schemaVersion":2,"exportedAt":0,"activeLensId":"default","collapsedGroupNames":[" work ","missing"],"lenses":[
+                {"id":"default","name":"Home","orderIndex":0,"scope":"ALL","selectedAppIds":[],"frozen":false,"groupName":" Work ","entries":[]},
+                {"id":"work","name":"Work","orderIndex":1,"scope":"ALL","selectedAppIds":[],"frozen":false,"groupName":"WORK","entries":[]}
+            ]}
+        """.trimIndent()
+
+        val backup = (LayoutBackup.parse(json) as LayoutBackupParseResult.Success).backup
+
+        assertEquals(listOf("Work", "Work"), backup.lenses.map { it.groupName })
+        assertEquals(setOf("Work"), backup.collapsedGroupNames)
+    }
+
+    @Test
+    fun `v2 lens group name wrong type or blank is malformed`() {
+        val wrongType = """
+            {"schemaVersion":2,"exportedAt":0,"activeLensId":"default","lenses":[
+                {"id":"default","name":"Home","orderIndex":0,"scope":"ALL","selectedAppIds":[],"frozen":false,"groupName":7,"entries":[]}
+            ]}
+        """.trimIndent()
+        val blank = """
+            {"schemaVersion":2,"exportedAt":0,"activeLensId":"default","lenses":[
+                {"id":"default","name":"Home","orderIndex":0,"scope":"ALL","selectedAppIds":[],"frozen":false,"groupName":"  ","entries":[]}
+            ]}
+        """.trimIndent()
+
+        assertEquals(LayoutBackupParseResult.Malformed, LayoutBackup.parse(wrongType))
+        assertEquals(LayoutBackupParseResult.Malformed, LayoutBackup.parse(blank))
+    }
+
     // --- schema v2: round trip ---
 
     @Test
     fun `v2 backup round-trips through toJson-parse with lenses, scope, selection and frozen state`() {
-        val defaultLens = sampleLens()
+        val defaultLens = sampleLens(groupName = "Home")
         val workLens = sampleLens(
             id = "work",
             name = "Work",
@@ -171,6 +264,7 @@ class LayoutBackupTest {
         assertEquals(LayoutBackup.CURRENT_SCHEMA_VERSION, restored.schemaVersion)
         assertTrue(restored.entries.isEmpty())
         assertEquals(listOf(defaultLens, workLens), restored.lenses)
+        assertEquals("Home", restored.lenses.first().groupName)
     }
 
     // --- schema v2: adversarial ---

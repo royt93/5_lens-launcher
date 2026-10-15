@@ -54,10 +54,15 @@ object LensGroupPolicy {
         return sections
     }
 
-    fun canonicalizeCollapsedNames(names: Set<String>, lenses: List<LensWorkspace>): Set<String> {
-        val canonical = canonicalize(lenses).mapNotNull { lens ->
-            lens.groupName?.let { canonicalKey(it) to it }
-        }.toMap()
+    fun canonicalizeCollapsedNames(names: Set<String>, lenses: List<LensWorkspace>): Set<String> =
+        canonicalizeCollapsedGroupNames(names, lenses.map { it.groupName })
+
+    fun canonicalizeCollapsedGroupNames(names: Set<String>, groupNames: List<String?>): Set<String> {
+        val canonical = mutableMapOf<String, String>()
+        groupNames.forEach { groupName ->
+            val normalized = groupName?.let(::normalizeName) ?: return@forEach
+            canonical.putIfAbsent(canonicalKey(normalized), normalized)
+        }
         return names.mapNotNull { name -> canonical[canonicalKey(name)] }.toSet()
     }
 }

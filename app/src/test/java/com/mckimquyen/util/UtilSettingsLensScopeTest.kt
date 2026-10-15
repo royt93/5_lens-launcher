@@ -67,6 +67,22 @@ class UtilSettingsLensScopeTest {
     }
 
     @Test
+    fun `workspace snapshot restores collapsed groups and v2 replacement replaces them`() {
+        settings.saveCollapsedLensGroups(setOf("Work"))
+        val snapshot = settings.snapshotWorkspacePreferences()
+
+        assertTrue(settings.replaceWorkspacePreferences(
+            listOf(LensAppSettingsBackup(default, LensAppScope.ALL, emptySet(), false)),
+            default,
+            setOf("Personal")
+        ))
+        assertEquals(setOf("Personal"), settings.getCollapsedLensGroups())
+
+        assertTrue(settings.restoreWorkspacePreferences(snapshot))
+        assertEquals(setOf("Work"), settings.getCollapsedLensGroups())
+    }
+
+    @Test
     fun `v1 replacement leaves preferences unchanged`() {
         settings.saveLensAppScope(work, LensAppScope.SELECTED)
         settings.saveLensAppSelection(work, setOf("keep"))

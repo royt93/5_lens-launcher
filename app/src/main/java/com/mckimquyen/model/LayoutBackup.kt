@@ -135,6 +135,7 @@ data class LayoutBackupLens(
         put(KEY_SELECTED_APP_IDS, JSONArray(selectedAppIds.toList()))
         put(KEY_FROZEN, frozen)
         put(KEY_ENTRIES, JSONArray(entries.map { it.toJson() }))
+        put(KEY_GROUP_NAME, groupName ?: JSONObject.NULL)
     }
 
     companion object {
@@ -145,6 +146,7 @@ data class LayoutBackupLens(
         private const val KEY_SELECTED_APP_IDS = "selectedAppIds"
         private const val KEY_FROZEN = "frozen"
         private const val KEY_ENTRIES = "entries"
+        private const val KEY_GROUP_NAME = "groupName"
 
         private fun JSONObject.stringField(key: String): String? =
             if (opt(key) is String) optString(key) else null
@@ -184,6 +186,11 @@ data class LayoutBackupLens(
             if (selectedIds.toSet().size != selectedIds.size) return null
             if (scope == LensAppScope.SELECTED && selectedIds.isEmpty()) return null
 
+            val groupName = when (val value = json.opt(KEY_GROUP_NAME)) {
+                null, JSONObject.NULL -> null
+                is String -> value.takeIf(String::isNotBlank)?.trim() ?: return null
+                else -> return null
+            }
             val entriesJson = json.optJSONArray(KEY_ENTRIES) ?: return null
             val entries = mutableListOf<LayoutBackupEntry>()
             for (i in 0 until entriesJson.length()) {
@@ -198,7 +205,8 @@ data class LayoutBackupLens(
                 scope = scope,
                 selectedAppIds = selectedIds.toSet(),
                 frozen = json.booleanField(KEY_FROZEN) ?: return null,
-                entries = entries
+                entries = entries,
+                groupName = groupName
             )
         }
     }
@@ -223,7 +231,8 @@ data class LayoutBackup(
     val exportedAt: Long,
     val entries: List<LayoutBackupEntry> = emptyList(),
     val lenses: List<LayoutBackupLens> = emptyList(),
-    val activeLensId: String? = null
+    val activeLensId: String? = null,
+    val collapsedGroupNames: Set<String> = emptySet()
 ) {
     /** Schema v2 omits the legacy root `entries` key entirely (design: "no v1 root entries"). */
     fun toJson(): String = JSONObject().apply {
@@ -231,6 +240,7 @@ data class LayoutBackup(
         put(KEY_EXPORTED_AT, exportedAt)
         if (schemaVersion >= SCHEMA_VERSION_V2) {
             put(KEY_ACTIVE_LENS_ID, activeLensId ?: LensWorkspace.DEFAULT_LENS_ID)
+            put(KEY_COLLAPSED_GROUP_NAMES, JSONArray(collapsedGroupNames.toList()))
             put(KEY_LENSES, JSONArray(lenses.map { it.toJson() }))
         } else {
             put(KEY_ENTRIES, JSONArray(entries.map { it.toJson() }))
@@ -247,6 +257,7 @@ data class LayoutBackup(
         private const val KEY_ENTRIES = "entries"
         private const val KEY_LENSES = "lenses"
         private const val KEY_ACTIVE_LENS_ID = "activeLensId"
+        private const val KEY_COLLAPSED_GROUP_NAMES = "collapsedGroupNames"
 
         // ponytail: still produces a flat, single-lens v1-shaped entries list tagged as v1 -
         // real per-lens-grouped v2 export (reading every workspace lens + FISH-021 state) is
@@ -310,9 +321,30 @@ data class LayoutBackup(
                 ?: return LayoutBackupParseResult.Malformed
             if (activeLensId.isBlank()) return LayoutBackupParseResult.Malformed
             if (lenses.none { it.id == activeLensId }) return LayoutBackupParseResult.Malformed
+            val collapsedArray = root.optJSONArray(KEY_COLLAPSED_GROUP_NAMES)
+            if (root.has(KEY_COLLAPSED_GROUP_NAMES) && collapsedArray == null) return LayoutBackupParseResult.Malformed
+            val collapsedGroupNames = mutableSetOf<String>()
+            if (collapsedArray != null) {
+                for (index in 0 until collapsedArray.length()) {
+                    val name = collapsedArray.opt(index) as? String ?: return LayoutBackupParseResult.Malformed
+                    if (name.isBlank()) return LayoutBackupParseResult.Malformed
+                    collapsedGroupNames += name
+                }
+            }
+            val canonicalLenses = com.mckimquyen.util.LensGroupPolicy.canonicalizeBackup(lenses)
+            val canonicalCollapsed = com.mckimquyen.util.LensGroupPolicy.canonicalizeCollapsedGroupNames(
+                collapsedGroupNames,
+                canonicalLenses.map { it.groupName }
+            )
 
             return LayoutBackupParseResult.Success(
-                LayoutBackup(SCHEMA_VERSION_V2, exportedAt, lenses = lenses, activeLensId = activeLensId)
+                LayoutBackup(
+                    SCHEMA_VERSION_V2,
+                    exportedAt,
+                    lenses = canonicalLenses,
+                    activeLensId = activeLensId,
+                    collapsedGroupNames = canonicalCollapsed
+                )
             )
         }
     }

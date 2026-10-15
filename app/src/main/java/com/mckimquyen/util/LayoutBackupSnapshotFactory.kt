@@ -12,7 +12,8 @@ object LayoutBackupSnapshotFactory {
         rows: List<AppPersistent>,
         appSettings: List<LensAppSettingsBackup>,
         exportedAt: Long,
-        activeLensId: String = LensWorkspace.DEFAULT_LENS_ID
+        activeLensId: String = LensWorkspace.DEFAULT_LENS_ID,
+        collapsedGroupNames: Set<String> = emptySet()
     ): LayoutBackup {
         require(lenses.isNotEmpty()) { "Workspace is empty" }
         require(lenses.map { it.id }.toSet().size == lenses.size) { "Duplicate lens IDs" }
@@ -27,13 +28,14 @@ object LayoutBackupSnapshotFactory {
             schemaVersion = LayoutBackup.CURRENT_SCHEMA_VERSION,
             exportedAt = exportedAt,
             activeLensId = activeLensId.takeIf(settingsById::containsKey) ?: LensWorkspace.DEFAULT_LENS_ID,
+            collapsedGroupNames = LensGroupPolicy.canonicalizeCollapsedNames(collapsedGroupNames, lenses),
             lenses = lenses.sortedWith(compareBy<LensWorkspace> { it.orderIndex }.thenBy { it.createdAt }).map { lens ->
                 val settings = settingsById.getValue(lens.id)
                 val entries = byLens[lens.id].orEmpty().mapNotNull(LayoutBackupEntry::fromPersistent)
                 require(entries.map { AppPersistent.generateIdentifier(it.packageName, it.name) }.toSet().size == entries.size) {
                     "Duplicate app identity in lens ${lens.id}"
                 }
-                LayoutBackupLens(lens.id, lens.name, lens.orderIndex, settings.scope, settings.selectedAppIds, settings.frozen, entries)
+                LayoutBackupLens(lens.id, lens.name, lens.orderIndex, settings.scope, settings.selectedAppIds, settings.frozen, entries, lens.groupName)
             }
         )
     }

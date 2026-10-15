@@ -23,9 +23,11 @@ class WorkspaceBackupImportCoordinatorTest {
                 LensAppScope.ALL,
                 emptySet(),
                 false,
-                listOf(LayoutBackupEntry("com.a", "com.a.Main", 0, true, true, false, null, PinnedZone.NONE.name))
+                listOf(LayoutBackupEntry("com.a", "com.a.Main", 0, true, true, false, null, PinnedZone.NONE.name)),
+                "Work"
             )
-        )
+        ),
+        collapsedGroupNames = setOf("Work")
     )
 
     @Test
@@ -44,6 +46,30 @@ class WorkspaceBackupImportCoordinatorTest {
         val result = runBlocking { WorkspaceBackupImportCoordinator(store).apply(backup) }
         assertEquals(WorkspaceBackupImportResult.Applied, result)
         assertEquals(listOf("snapshot-db", "snapshot-prefs", "db", "prefs", "refresh"), events)
+    }
+
+    @Test
+    fun `plan preserves group labels and collapsed state`() {
+        val events = mutableListOf<String>()
+        val store = object : WorkspaceBackupImportStore {
+            override suspend fun snapshotDatabase(): Any = "db"
+            override fun snapshotPreferences(): Any = "prefs"
+            override suspend fun replaceDatabase(plan: LayoutImportApplier.WorkspacePlan) {
+                events += "group=${plan.lenses.single().groupName}"
+            }
+            override suspend fun applyLegacyV1(plan: LayoutImportApplier.WorkspacePlan) = Unit
+            override fun replacePreferences(plan: LayoutImportApplier.WorkspacePlan) {
+                events += "collapsed=${plan.collapsedGroupNames}"
+            }
+            override suspend fun restoreDatabase(snapshot: Any) = Unit
+            override fun restorePreferences(snapshot: Any): Boolean = true
+            override suspend fun refreshWorkspace() = Unit
+        }
+
+        val result = runBlocking { WorkspaceBackupImportCoordinator(store).apply(backup) }
+
+        assertEquals(WorkspaceBackupImportResult.Applied, result)
+        assertEquals(listOf("group=Work", "collapsed=[Work]"), events)
     }
 
     @Test

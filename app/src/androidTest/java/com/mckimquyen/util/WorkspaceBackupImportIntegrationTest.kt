@@ -59,7 +59,10 @@ class WorkspaceBackupImportIntegrationTest {
     fun exportMutateImportRestoresWorkspaceAndKeepsNonLayoutStats() = runBlocking {
         val workspaceDao = database.lensWorkspaceDao()
         val appDao = database.appPersistentDao()
-        val original = listOf(LensWorkspace.createDefault(), LensWorkspace("work", "Work", 1, 2L))
+        val original = listOf(
+            LensWorkspace.createDefault().copy(groupName = "Personal"),
+            LensWorkspace("work", "Work", 1, 2L, groupName = "Work")
+        )
         val originalRows = listOf(
             AppPersistent(packageName="com.example.home", name="com.example.home.Main", identifier="com.example.home-com.example.home.Main", isFavorite=true, folderName="Home", lensId="default"),
             AppPersistent(packageName="com.example.work", name="com.example.work.Main", identifier="com.example.work-com.example.work.Main", orderNumber=3, isFavorite=true, folderName="Project", lensId="work")
@@ -69,14 +72,14 @@ class WorkspaceBackupImportIntegrationTest {
             listOf(
                 LensAppSettingsBackup("default", LensAppScope.ALL, emptySet(), false),
                 LensAppSettingsBackup("work", LensAppScope.SELECTED, setOf("com.example.work-com.example.work.Main"), true)
-            ), "work"
+            ), "work", setOf("Personal")
         )
         val backup = LayoutBackupSnapshotFactory.create(
             workspaceDao.getAll(), appDao.getAllRows(),
             listOf(
                 LensAppSettingsBackup("default", settings.getLensAppScope("default"), settings.getLensAppSelection("default"), settings.isLensFrozen("default")),
                 LensAppSettingsBackup("work", settings.getLensAppScope("work"), settings.getLensAppSelection("work"), settings.isLensFrozen("work"))
-            ), 10L, activeLensId = "work"
+            ), 10L, activeLensId = "work", collapsedGroupNames = setOf("Work")
         )
         workspaceDao.replaceWorkspace(listOf(LensWorkspace.createDefault()), listOf(
             AppPersistent(packageName="com.local", name="com.local.Main", identifier="com.local-com.local.Main", openCount=8, paletteColor=77, notificationCount=5, isFavorite=true, lensId="default")
@@ -126,6 +129,50 @@ class WorkspaceBackupImportIntegrationTest {
             )
         )
     )
+
+    @Test
+    fun groupAndCollapsedStateSurviveV2ImportAndPreferenceRollback() = runBlocking {
+        val workspaceDao = database.lensWorkspaceDao()
+        val appDao = database.appPersistentDao()
+        val grouped = listOf(
+            LensWorkspace.createDefault().copy(groupName = "Personal"),
+            LensWorkspace("work", "Work", 1, 2L, groupName = "Work")
+        )
+        workspaceDao.replaceWorkspace(grouped, emptyList())
+        settings.replaceWorkspacePreferences(
+            listOf(
+                LensAppSettingsBackup("default", LensAppScope.ALL, emptySet(), false),
+                LensAppSettingsBackup("work", LensAppScope.ALL, emptySet(), false)
+            ), "work", setOf("Personal")
+        )
+        val backup = LayoutBackupSnapshotFactory.create(
+            workspaceDao.getAll(), appDao.getAllRows(),
+            listOf(
+                LensAppSettingsBackup("default", LensAppScope.ALL, emptySet(), false),
+                LensAppSettingsBackup("work", LensAppScope.ALL, emptySet(), false)
+            ), 11L, activeLensId = "work", collapsedGroupNames = setOf("Work")
+        )
+        workspaceDao.replaceWorkspace(listOf(LensWorkspace.createDefault()), emptyList())
+        settings.replaceWorkspacePreferences(
+            listOf(LensAppSettingsBackup("default", LensAppScope.ALL, emptySet(), false)), "default", emptySet()
+        )
+
+        val result = WorkspaceBackupImportCoordinator(WorkspaceBackupRoomStore(context)).apply(backup)
+
+        assertEquals(WorkspaceBackupImportResult.Applied, result)
+        assertEquals(listOf("Personal", "Work"), workspaceDao.getAll().map { it.groupName })
+        assertEquals(setOf("Work"), settings.getCollapsedLensGroups())
+
+        settings.saveCollapsedLensGroups(setOf("LocalState"))
+        val failingPrefs = object : WorkspaceBackupImportStore by WorkspaceBackupRoomStore(context) {
+            override fun replacePreferences(plan: LayoutImportApplier.WorkspacePlan) = error("injected prefs failure")
+        }
+        val failed = WorkspaceBackupImportCoordinator(failingPrefs).apply(backup)
+
+        assertTrue(failed is WorkspaceBackupImportResult.Failed)
+        assertEquals(listOf("Personal", "Work"), workspaceDao.getAll().map { it.groupName })
+        assertEquals(setOf("LocalState"), settings.getCollapsedLensGroups())
+    }
 
     @Test
     fun malformedV2ImportDoesNotChangeWorkspaceOrPreferences() {

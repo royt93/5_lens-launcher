@@ -42,7 +42,12 @@ object LayoutBackupIo {
                     ?.takeIf { id -> lenses.any { it.id == id } }
                     ?: LensWorkspace.DEFAULT_LENS_ID
                 val json = LayoutBackupSnapshotFactory.create(
-                    lenses, rows, appSettings, System.currentTimeMillis(), activeLensId
+                    lenses,
+                    rows,
+                    appSettings,
+                    System.currentTimeMillis(),
+                    activeLensId,
+                    settings.getCollapsedLensGroups()
                 ).toJson()
                 context.applicationContext.contentResolver.openOutputStream(uri)?.use { stream ->
                     stream.write(json.toByteArray(Charsets.UTF_8))

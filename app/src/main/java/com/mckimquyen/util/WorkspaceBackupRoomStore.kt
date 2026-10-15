@@ -23,7 +23,7 @@ class WorkspaceBackupRoomStore(context: Context) : WorkspaceBackupImportStore {
     override suspend fun replaceDatabase(plan: LayoutImportApplier.WorkspacePlan) {
         require(plan.schemaVersion == LayoutBackup.CURRENT_SCHEMA_VERSION)
         database.lensWorkspaceDao().replaceWorkspace(
-            plan.lenses.map { LensWorkspace(it.id, it.name, it.orderIndex) },
+            plan.lenses.map { LensWorkspace(it.id, it.name, it.orderIndex, groupName = it.groupName) },
             plan.lenses.flatMap { lens ->
                 lens.entries.map { entry ->
                     AppPersistent(
@@ -89,7 +89,8 @@ class WorkspaceBackupRoomStore(context: Context) : WorkspaceBackupImportStore {
         require(plan.schemaVersion == LayoutBackup.CURRENT_SCHEMA_VERSION)
         check(settings.replaceWorkspacePreferences(
             plan.lenses.map { LensAppSettingsBackup(it.id, it.scope, it.selectedAppIds, it.frozen) },
-            plan.activeLensId
+            plan.activeLensId,
+            plan.collapsedGroupNames
         )) { "Unable to commit workspace preferences" }
     }
 

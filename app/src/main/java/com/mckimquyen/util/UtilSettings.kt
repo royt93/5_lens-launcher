@@ -27,7 +27,8 @@ data class LensAppSettingsBackup(
 
 data class WorkspacePreferencesSnapshot(
     val values: Map<String, Any>,
-    val activeLensId: String?
+    val activeLensId: String?,
+    val collapsedGroupNames: Set<String>
 )
 
 class UtilSettings(context: Context) {
@@ -185,6 +186,7 @@ class UtilSettings(context: Context) {
         const val KEY_LENS_APP_SCOPE = "lens_app_scope"
         const val KEY_LENS_APP_SELECTION = "lens_app_selection"
         const val KEY_LENS_FROZEN = "lens_frozen"
+        const val KEY_COLLAPSED_LENS_GROUPS = "collapsed_lens_groups"
     }
 
     fun save(name: String?, value: Int) {
@@ -449,10 +451,25 @@ class UtilSettings(context: Context) {
 
     fun snapshotWorkspacePreferences(): WorkspacePreferencesSnapshot {
         val appState = prefs.all.filterKeys(::isWorkspacePreferenceKey).mapNotNull { (key, value) -> value?.let { key to it } }.toMap()
-        return WorkspacePreferencesSnapshot(appState, prefs.getString(KEY_ACTIVE_LENS_ID, null))
+        return WorkspacePreferencesSnapshot(
+            appState,
+            prefs.getString(KEY_ACTIVE_LENS_ID, null),
+            getCollapsedLensGroups()
+        )
     }
 
-    fun replaceWorkspacePreferences(lensSettings: List<LensAppSettingsBackup>, activeLensId: String): Boolean {
+    fun getCollapsedLensGroups(): Set<String> =
+        runCatching { prefs.getStringSet(KEY_COLLAPSED_LENS_GROUPS, null)?.toSet() }.getOrNull().orEmpty()
+
+    fun saveCollapsedLensGroups(groupNames: Set<String>) {
+        prefs.edit { putStringSet(KEY_COLLAPSED_LENS_GROUPS, HashSet(groupNames)) }
+    }
+
+    fun replaceWorkspacePreferences(
+        lensSettings: List<LensAppSettingsBackup>,
+        activeLensId: String,
+        collapsedGroupNames: Set<String> = emptySet()
+    ): Boolean {
         val lensIds = lensSettings.map { it.lensId }
         require(lensIds.toSet().size == lensIds.size) { "Duplicate lens settings IDs" }
         require(LensWorkspace.DEFAULT_LENS_ID in lensIds) { "Default lens settings are required" }
@@ -464,6 +481,7 @@ class UtilSettings(context: Context) {
             editor.putBoolean(lensKey(KEY_LENS_FROZEN, lens.lensId), lens.frozen)
         }
         editor.putString(KEY_ACTIVE_LENS_ID, activeLensId.takeIf(lensIds::contains) ?: LensWorkspace.DEFAULT_LENS_ID)
+        editor.putStringSet(KEY_COLLAPSED_LENS_GROUPS, HashSet(collapsedGroupNames))
         return editor.commit()
     }
 
@@ -491,13 +509,15 @@ class UtilSettings(context: Context) {
         }
         if (snapshot.activeLensId == null) editor.remove(KEY_ACTIVE_LENS_ID)
         else editor.putString(KEY_ACTIVE_LENS_ID, snapshot.activeLensId)
+        editor.putStringSet(KEY_COLLAPSED_LENS_GROUPS, HashSet(snapshot.collapsedGroupNames))
         return editor.commit()
     }
 
     private fun isWorkspacePreferenceKey(key: String): Boolean =
         key == KEY_LENS_APP_SCOPE || key.startsWith("${KEY_LENS_APP_SCOPE}_") ||
             key == KEY_LENS_APP_SELECTION || key.startsWith("${KEY_LENS_APP_SELECTION}_") ||
-            key == KEY_LENS_FROZEN || key.startsWith("${KEY_LENS_FROZEN}_")
+            key == KEY_LENS_FROZEN || key.startsWith("${KEY_LENS_FROZEN}_") ||
+            key == KEY_COLLAPSED_LENS_GROUPS
 
     /** FISH-012: null means no pinch was left unresolved for this lens. */
     fun getPendingDistortionFactor(lensId: String?): Float? {
