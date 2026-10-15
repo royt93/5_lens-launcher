@@ -220,4 +220,18 @@
     <string name="layout_import_workspace_failed">ការនាំចូលកន្លែងធ្វើការបរាជ័យ។ កន្លែងធ្វើការមុនត្រូវបានស្ដារឡើងវិញ។</string>
     <string name="layout_import_workspace_recovery_required">ការស្ដារកន្លែងធ្វើការបរាជ័យ ហើយការស្ដារដោយស្វ័យប្រវត្តិមិនពេញលេញ។ សូមបើកកម្មវិធីម្ដងទៀត ហើយពិនិត្យឡេនរបស់អ្នក។</string>
     <string name="layout_import_v1_default_lens_note">ការបម្រុងទុកចាស់នេះធ្វើបច្ចុប្បន្នភាពតែប្លង់ឡេនលំនាំដើមប៉ុណ្ណោះ ឡេនផ្សេងទៀតមិនផ្លាស់ប្ដូរទេ។</string>
+    <string name="lens_management_title">គ្រប់គ្រងកែវ</string>
+    <string name="lens_group_ungrouped">គ្មានក្រុម</string>
+    <string name="lens_group_expand">ពង្រីកក្រុម</string>
+    <string name="lens_group_collapse">បង្រួមក្រុម</string>
+    <string name="lens_group_toggle">បិទបើកក្រុម</string>
+    <string name="lens_group_manage">គ្រប់គ្រងក្រុម</string>
+    <string name="lens_group_manage_all">គ្រប់គ្រងកែវ</string>
+    <string name="lens_group_assign">ដាក់ក្នុងក្រុម</string>
+    <string name="lens_group_create">បង្កើតក្រុម</string>
+    <string name="lens_group_ungroup">ដកចេញពីក្រុម</string>
+    <string name="lens_group_name_hint">ឈ្មោះក្រុម</string>
+    <string name="lens_group_error_blank">បញ្ចូលឈ្មោះក្រុម</string>
+    <string name="lens_group_edit_title">ជ្រើសក្រុមកែវ</string>
+    <string name="lens_group_edit_action">កែសម្រួលក្រុម</string>
 </resources>

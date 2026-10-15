@@ -228,4 +228,18 @@
     <string name="layout_import_workspace_failed">Importazione dello spazio di lavoro non riuscita. Lo spazio precedente è stato ripristinato.</string>
     <string name="layout_import_workspace_recovery_required">Ripristino dello spazio di lavoro non riuscito e il recupero automatico è incompleto. Riapri l’app e controlla le tue lenti.</string>
     <string name="layout_import_v1_default_lens_note">Questo vecchio backup aggiorna solo il layout della lente predefinita; le altre lenti restano invariate.</string>
+    <string name="lens_management_title">Gestisci lenti</string>
+    <string name="lens_group_ungrouped">Senza gruppo</string>
+    <string name="lens_group_expand">Espandi gruppo</string>
+    <string name="lens_group_collapse">Comprimi gruppo</string>
+    <string name="lens_group_toggle">Attiva/disattiva gruppo</string>
+    <string name="lens_group_manage">Gestisci gruppo</string>
+    <string name="lens_group_manage_all">Gestisci lenti</string>
+    <string name="lens_group_assign">Assegna a un gruppo</string>
+    <string name="lens_group_create">Crea gruppo</string>
+    <string name="lens_group_ungroup">Rimuovi dal gruppo</string>
+    <string name="lens_group_name_hint">Nome gruppo</string>
+    <string name="lens_group_error_blank">Inserisci un nome per il gruppo</string>
+    <string name="lens_group_edit_title">Scegli gruppo lenti</string>
+    <string name="lens_group_edit_action">Modifica gruppo</string>
 </resources>

@@ -228,4 +228,18 @@
     <string name="layout_import_workspace_failed">Échec de l’importation de l’espace de travail. Votre espace précédent a été restauré.</string>
     <string name="layout_import_workspace_recovery_required">Échec de la restauration de l’espace de travail et la récupération automatique est incomplète. Rouvrez l’app et vérifiez vos lentilles.</string>
     <string name="layout_import_v1_default_lens_note">Cette ancienne sauvegarde ne met à jour que la disposition de la lentille par défaut ; les autres lentilles restent inchangées.</string>
+    <string name="lens_management_title">Gérer les lentilles</string>
+    <string name="lens_group_ungrouped">Sans groupe</string>
+    <string name="lens_group_expand">Développer le groupe</string>
+    <string name="lens_group_collapse">Réduire le groupe</string>
+    <string name="lens_group_toggle">Basculer le groupe</string>
+    <string name="lens_group_manage">Gérer le groupe</string>
+    <string name="lens_group_manage_all">Gérer les lentilles</string>
+    <string name="lens_group_assign">Ajouter à un groupe</string>
+    <string name="lens_group_create">Créer un groupe</string>
+    <string name="lens_group_ungroup">Retirer du groupe</string>
+    <string name="lens_group_name_hint">Nom du groupe</string>
+    <string name="lens_group_error_blank">Saisissez un nom de groupe</string>
+    <string name="lens_group_edit_title">Choisir un groupe de lentilles</string>
+    <string name="lens_group_edit_action">Modifier le groupe</string>
 </resources>

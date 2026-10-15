@@ -267,4 +267,18 @@
     <string name="lens_unfreeze_title">Unfreeze positions?</string>
     <string name="lens_unfreeze_message">This also discards any order you set by dragging.</string>
     <string name="lens_switch_title">Switch lens</string>
+    <string name="lens_management_title">Manage lenses</string>
+    <string name="lens_group_ungrouped">No group</string>
+    <string name="lens_group_expand">Expand group</string>
+    <string name="lens_group_collapse">Collapse group</string>
+    <string name="lens_group_toggle">Toggle group</string>
+    <string name="lens_group_manage">Manage group</string>
+    <string name="lens_group_manage_all">Manage lenses</string>
+    <string name="lens_group_assign">Assign to group</string>
+    <string name="lens_group_create">Create group</string>
+    <string name="lens_group_ungroup">Remove from group</string>
+    <string name="lens_group_name_hint">Group name</string>
+    <string name="lens_group_error_blank">Enter a group name</string>
+    <string name="lens_group_edit_title">Choose lens group</string>
+    <string name="lens_group_edit_action">Edit group</string>
 </resources>

@@ -220,4 +220,18 @@
     <string name="layout_import_workspace_failed">นำเข้าพื้นที่ทำงานไม่สำเร็จ กู้คืนพื้นที่ทำงานก่อนหน้าแล้ว</string>
     <string name="layout_import_workspace_recovery_required">กู้คืนพื้นที่ทำงานไม่สำเร็จและการกู้คืนอัตโนมัติไม่สมบูรณ์ โปรดเปิดแอปอีกครั้งและตรวจสอบเลนส์ของคุณ</string>
     <string name="layout_import_v1_default_lens_note">ข้อมูลสำรองเก่านี้อัปเดตเฉพาะเลย์เอาต์ของเลนส์เริ่มต้น เลนส์อื่นจะไม่เปลี่ยนแปลง</string>
+    <string name="lens_management_title">จัดการเลนส์</string>
+    <string name="lens_group_ungrouped">ไม่มีกลุ่ม</string>
+    <string name="lens_group_expand">ขยายกลุ่ม</string>
+    <string name="lens_group_collapse">ยุบกลุ่ม</string>
+    <string name="lens_group_toggle">สลับกลุ่ม</string>
+    <string name="lens_group_manage">จัดการกลุ่ม</string>
+    <string name="lens_group_manage_all">จัดการเลนส์</string>
+    <string name="lens_group_assign">กำหนดให้กลุ่ม</string>
+    <string name="lens_group_create">สร้างกลุ่ม</string>
+    <string name="lens_group_ungroup">นำออกจากกลุ่ม</string>
+    <string name="lens_group_name_hint">ชื่อกลุ่ม</string>
+    <string name="lens_group_error_blank">ป้อนชื่อกลุ่ม</string>
+    <string name="lens_group_edit_title">เลือกกลุ่มเลนส์</string>
+    <string name="lens_group_edit_action">แก้ไขกลุ่ม</string>
 </resources>

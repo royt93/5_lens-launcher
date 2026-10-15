@@ -228,4 +228,18 @@
     <string name="layout_import_workspace_failed">Error al importar el espacio de trabajo. Se restauró tu espacio anterior.</string>
     <string name="layout_import_workspace_recovery_required">Error al restaurar el espacio de trabajo y la recuperación automática quedó incompleta. Vuelve a abrir la app y revisa tus lentes.</string>
     <string name="layout_import_v1_default_lens_note">Esta copia antigua solo actualiza el diseño de la lente predeterminada; las demás lentes no cambian.</string>
+    <string name="lens_management_title">Gestionar lentes</string>
+    <string name="lens_group_ungrouped">Sin grupo</string>
+    <string name="lens_group_expand">Expandir grupo</string>
+    <string name="lens_group_collapse">Contraer grupo</string>
+    <string name="lens_group_toggle">Alternar grupo</string>
+    <string name="lens_group_manage">Gestionar grupo</string>
+    <string name="lens_group_manage_all">Gestionar lentes</string>
+    <string name="lens_group_assign">Asignar a un grupo</string>
+    <string name="lens_group_create">Crear grupo</string>
+    <string name="lens_group_ungroup">Quitar del grupo</string>
+    <string name="lens_group_name_hint">Nombre del grupo</string>
+    <string name="lens_group_error_blank">Introduce un nombre de grupo</string>
+    <string name="lens_group_edit_title">Elegir grupo de lentes</string>
+    <string name="lens_group_edit_action">Editar grupo</string>
 </resources>

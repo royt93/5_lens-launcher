@@ -220,4 +220,18 @@
     <string name="layout_import_workspace_failed">ການນຳເຂົ້າພື້ນທີ່ເຮັດວຽກລົ້ມເຫຼວ. ພື້ນທີ່ເຮັດວຽກກ່ອນໜ້າຖືກກູ້ຄືນແລ້ວ.</string>
     <string name="layout_import_workspace_recovery_required">ການກູ້ຄືນພື້ນທີ່ເຮັດວຽກລົ້ມເຫຼວ ແລະ ການກູ້ຄືນອັດຕະໂນມັດບໍ່ສົມບູນ. ກະລຸນາເປີດແອັບອີກຄັ້ງ ແລ້ວກວດເບິ່ງເລນຂອງທ່ານ.</string>
     <string name="layout_import_v1_default_lens_note">ການສຳຮອງເກົ່ານີ້ອັບເດດສະເພາະຮູບແບບຂອງເລນເລີ່ມຕົ້ນ; ເລນອື່ນບໍ່ປ່ຽນແປງ.</string>
+    <string name="lens_management_title">ຈັດການເລນ</string>
+    <string name="lens_group_ungrouped">ບໍ່ມີກຸ່ມ</string>
+    <string name="lens_group_expand">ຂະຫຍາຍກຸ່ມ</string>
+    <string name="lens_group_collapse">ຫຍໍ້ກຸ່ມ</string>
+    <string name="lens_group_toggle">ສະຫຼັບກຸ່ມ</string>
+    <string name="lens_group_manage">ຈັດການກຸ່ມ</string>
+    <string name="lens_group_manage_all">ຈັດການເລນ</string>
+    <string name="lens_group_assign">ກຳນົດໃຫ້ກຸ່ມ</string>
+    <string name="lens_group_create">ສ້າງກຸ່ມ</string>
+    <string name="lens_group_ungroup">ເອົາອອກຈາກກຸ່ມ</string>
+    <string name="lens_group_name_hint">ຊື່ກຸ່ມ</string>
+    <string name="lens_group_error_blank">ປ້ອນຊື່ກຸ່ມ</string>
+    <string name="lens_group_edit_title">ເລືອກກຸ່ມເລນ</string>
+    <string name="lens_group_edit_action">ແກ້ໄຂກຸ່ມ</string>
 </resources>

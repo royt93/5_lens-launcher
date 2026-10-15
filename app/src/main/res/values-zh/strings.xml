@@ -220,4 +220,18 @@
     <string name="layout_import_workspace_failed">工作区导入失败。已恢复您之前的工作区。</string>
     <string name="layout_import_workspace_recovery_required">工作区恢复失败，自动恢复未完成。请重新打开应用并检查您的镜头。</string>
     <string name="layout_import_v1_default_lens_note">此旧版备份仅更新默认镜头的布局；其他镜头保持不变。</string>
+    <string name="lens_management_title">管理镜头</string>
+    <string name="lens_group_ungrouped">未分组</string>
+    <string name="lens_group_expand">展开分组</string>
+    <string name="lens_group_collapse">收起分组</string>
+    <string name="lens_group_toggle">切换分组</string>
+    <string name="lens_group_manage">管理分组</string>
+    <string name="lens_group_manage_all">管理镜头</string>
+    <string name="lens_group_assign">分配到分组</string>
+    <string name="lens_group_create">创建分组</string>
+    <string name="lens_group_ungroup">从分组移除</string>
+    <string name="lens_group_name_hint">分组名称</string>
+    <string name="lens_group_error_blank">请输入分组名称</string>
+    <string name="lens_group_edit_title">选择镜头分组</string>
+    <string name="lens_group_edit_action">编辑分组</string>
 </resources>

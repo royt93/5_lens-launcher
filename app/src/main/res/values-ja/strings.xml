@@ -220,4 +220,18 @@
     <string name="layout_import_workspace_failed">ワークスペースのインポートに失敗しました。以前のワークスペースを復元しました。</string>
     <string name="layout_import_workspace_recovery_required">ワークスペースの復元に失敗し、自動復旧も完了しませんでした。アプリを開き直してレンズを確認してください。</string>
     <string name="layout_import_v1_default_lens_note">この古いバックアップはデフォルトのレンズの配置のみ更新します。他のレンズは変更されません。</string>
+    <string name="lens_management_title">レンズを管理</string>
+    <string name="lens_group_ungrouped">グループなし</string>
+    <string name="lens_group_expand">グループを展開</string>
+    <string name="lens_group_collapse">グループを折りたたむ</string>
+    <string name="lens_group_toggle">グループを切り替え</string>
+    <string name="lens_group_manage">グループを管理</string>
+    <string name="lens_group_manage_all">レンズを管理</string>
+    <string name="lens_group_assign">グループに割り当て</string>
+    <string name="lens_group_create">グループを作成</string>
+    <string name="lens_group_ungroup">グループから削除</string>
+    <string name="lens_group_name_hint">グループ名</string>
+    <string name="lens_group_error_blank">グループ名を入力</string>
+    <string name="lens_group_edit_title">レンズグループを選択</string>
+    <string name="lens_group_edit_action">グループを編集</string>
 </resources>

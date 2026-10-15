@@ -216,6 +216,12 @@
              VIP MANAGEMENT ACTIVITY
              ==================================================================== -->
         <activity
+            android:name=".ui.LensManagementActivity"
+            android:exported="false"
+            android:parentActivityName=".ui.ActHome"
+            android:theme="@style/AppTheme.NoActionBar" />
+
+        <activity
             android:name=".feature.vip.ActVipManagement"
             android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize"
             android:exported="false"

@@ -183,6 +183,7 @@ public class ActHome extends ActBase {
     private TabLayoutMediator lensTabMediator;
     private TabLayout lensPageIndicator;
     private TextView tvLensName;
+    private String lensManagementReturnTargetId;
     private LensPagerAdapter lensPagerAdapter;
     private List<LensWorkspace> currentLenses = new ArrayList<>();
 
@@ -370,7 +371,11 @@ public class ActHome extends ActBase {
 
     @androidx.annotation.VisibleForTesting
     void handleTargetLensIntent(Intent intent) {
+        String requestedLensId = intent != null ? intent.getStringExtra(EXTRA_TARGET_LENS_ID) : null;
         applyTargetLensExtra(intent);
+        if (requestedLensId != null && !requestedLensId.isEmpty()) {
+            lensManagementReturnTargetId = requestedLensId;
+        }
         refreshLensList();
     }
 
@@ -517,7 +522,7 @@ public class ActHome extends ActBase {
             showLensManagementMenu(v);
             return true;
         });
-        tvLensName.setOnClickListener(v -> showLensSwitcherDialog());
+        tvLensName.setOnClickListener(v -> openLensManagement());
         tvLensName.setOnLongClickListener(v -> {
             showLensManagementMenu(v);
             return true;
@@ -617,6 +622,21 @@ public class ActHome extends ActBase {
             onLensesChanged(lenses);
             lensPagerAdapter.submitLenses(lenses);
             updateLensNavigationChrome();
+            if (lensManagementReturnTargetId != null) {
+                String targetId = lensManagementReturnTargetId;
+                lensManagementReturnTargetId = null;
+                for (int index = 0; index < lenses.size(); index++) {
+                    if (lenses.get(index).getId().equals(targetId)) {
+                        int targetIndex = index;
+                        lensPager.post(() -> {
+                            if (lensPager != null && lensPager.getCurrentItem() != targetIndex) {
+                                lensPager.setCurrentItem(targetIndex, false);
+                            }
+                        });
+                        break;
+                    }
+                }
+            }
             // FISH-008 Phase 2 r2: restore active page after rotation/recreate so the user stays on
             // the lens they were viewing instead of bouncing back to page 0.
             if (utilSettings != null && !lenses.isEmpty()) {
@@ -999,19 +1019,10 @@ public class ActHome extends ActBase {
         LensShortcuts.refresh(getApplicationContext(), lenses);
     }
 
-    /** FISH-021: tapping the lens name lists every lens; picking one pages to it. */
-    private void showLensSwitcherDialog() {
-        if (currentLenses.size() < 2 || lensPager == null) return;
-        CharSequence[] names = new CharSequence[currentLenses.size()];
-        for (int i = 0; i < names.length; i++) names[i] = currentLenses.get(i).getName();
-        lensDialog = new MaterialAlertDialogBuilder(this, R.style.MaterialYouDialogTheme)
-                .setTitle(R.string.lens_switch_title)
-                .setSingleChoiceItems(names, lensPager.getCurrentItem(), (dialog, which) -> {
-                    lensPager.setCurrentItem(which, true);
-                    dialog.dismiss();
-                })
-                .setNegativeButton(android.R.string.cancel, null)
-                .show();
+    /** FISH-022: lens name opens grouped lens management and selection in a separate Activity. */
+    @androidx.annotation.VisibleForTesting
+    void openLensManagement() {
+        startActivity(new Intent(this, LensManagementActivity.class));
     }
 
     /** Like {@link #lensSmartFocusMenuLabelRes}: the entry names the action, so it reads current state. */

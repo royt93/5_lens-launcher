@@ -220,4 +220,18 @@
     <string name="layout_import_workspace_failed">작업 공간 가져오기에 실패했습니다. 이전 작업 공간을 복원했습니다.</string>
     <string name="layout_import_workspace_recovery_required">작업 공간 복원에 실패했고 자동 복구도 완료되지 않았습니다. 앱을 다시 열어 렌즈를 확인하세요.</string>
     <string name="layout_import_v1_default_lens_note">이 이전 백업은 기본 렌즈의 배치만 업데이트하며 다른 렌즈는 변경되지 않습니다.</string>
+    <string name="lens_management_title">렌즈 관리</string>
+    <string name="lens_group_ungrouped">그룹 없음</string>
+    <string name="lens_group_expand">그룹 펼치기</string>
+    <string name="lens_group_collapse">그룹 접기</string>
+    <string name="lens_group_toggle">그룹 전환</string>
+    <string name="lens_group_manage">그룹 관리</string>
+    <string name="lens_group_manage_all">렌즈 관리</string>
+    <string name="lens_group_assign">그룹에 할당</string>
+    <string name="lens_group_create">그룹 만들기</string>
+    <string name="lens_group_ungroup">그룹에서 제거</string>
+    <string name="lens_group_name_hint">그룹 이름</string>
+    <string name="lens_group_error_blank">그룹 이름 입력</string>
+    <string name="lens_group_edit_title">렌즈 그룹 선택</string>
+    <string name="lens_group_edit_action">그룹 편집</string>
 </resources>

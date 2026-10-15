@@ -220,4 +220,18 @@
     <string name="layout_import_workspace_failed">Impor ruang kerja gagal. Ruang kerja sebelumnya telah dipulihkan.</string>
     <string name="layout_import_workspace_recovery_required">Pemulihan ruang kerja gagal dan pemulihan otomatis tidak lengkap. Buka ulang aplikasi dan periksa lensa Anda.</string>
     <string name="layout_import_v1_default_lens_note">Cadangan lama ini hanya memperbarui tata letak lensa default; lensa lain tidak berubah.</string>
+    <string name="lens_management_title">Kelola lensa</string>
+    <string name="lens_group_ungrouped">Tanpa grup</string>
+    <string name="lens_group_expand">Perluas grup</string>
+    <string name="lens_group_collapse">Ciutkan grup</string>
+    <string name="lens_group_toggle">Alihkan grup</string>
+    <string name="lens_group_manage">Kelola grup</string>
+    <string name="lens_group_manage_all">Kelola lensa</string>
+    <string name="lens_group_assign">Tetapkan ke grup</string>
+    <string name="lens_group_create">Buat grup</string>
+    <string name="lens_group_ungroup">Hapus dari grup</string>
+    <string name="lens_group_name_hint">Nama grup</string>
+    <string name="lens_group_error_blank">Masukkan nama grup</string>
+    <string name="lens_group_edit_title">Pilih grup lensa</string>
+    <string name="lens_group_edit_action">Edit grup</string>
 </resources>

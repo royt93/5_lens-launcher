@@ -224,4 +224,18 @@
     <string name="layout_import_workspace_failed">Import des Arbeitsbereichs fehlgeschlagen. Dein vorheriger Arbeitsbereich wurde wiederhergestellt.</string>
     <string name="layout_import_workspace_recovery_required">Wiederherstellung des Arbeitsbereichs fehlgeschlagen und die automatische Wiederherstellung war unvollständig. Öffne die App erneut und prüfe deine Linsen.</string>
     <string name="layout_import_v1_default_lens_note">Diese ältere Sicherung aktualisiert nur das Layout der Standardlinse; andere Linsen bleiben unverändert.</string>
+    <string name="lens_management_title">Linsen verwalten</string>
+    <string name="lens_group_ungrouped">Ohne Gruppe</string>
+    <string name="lens_group_expand">Gruppe erweitern</string>
+    <string name="lens_group_collapse">Gruppe einklappen</string>
+    <string name="lens_group_toggle">Gruppe umschalten</string>
+    <string name="lens_group_manage">Gruppe verwalten</string>
+    <string name="lens_group_manage_all">Linsen verwalten</string>
+    <string name="lens_group_assign">Gruppe zuweisen</string>
+    <string name="lens_group_create">Gruppe erstellen</string>
+    <string name="lens_group_ungroup">Aus Gruppe entfernen</string>
+    <string name="lens_group_name_hint">Gruppenname</string>
+    <string name="lens_group_error_blank">Gruppennamen eingeben</string>
+    <string name="lens_group_edit_title">Lens-Gruppe auswählen</string>
+    <string name="lens_group_edit_action">Gruppe bearbeiten</string>
 </resources>

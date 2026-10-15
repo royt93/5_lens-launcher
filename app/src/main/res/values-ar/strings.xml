@@ -246,4 +246,18 @@
     <string name="layout_import_workspace_failed">فشل استيراد مساحة العمل. تمت استعادة مساحة العمل السابقة.</string>
     <string name="layout_import_workspace_recovery_required">فشلت استعادة مساحة العمل ولم تكتمل الاستعادة التلقائية. أعد فتح التطبيق وتحقق من العدسات.</string>
     <string name="layout_import_v1_default_lens_note">هذه النسخة القديمة تحدّث تخطيط العدسة الافتراضية فقط؛ تبقى العدسات الأخرى دون تغيير.</string>
+    <string name="lens_management_title">إدارة العدسات</string>
+    <string name="lens_group_ungrouped">بدون مجموعة</string>
+    <string name="lens_group_expand">توسيع المجموعة</string>
+    <string name="lens_group_collapse">طيّ المجموعة</string>
+    <string name="lens_group_toggle">تبديل المجموعة</string>
+    <string name="lens_group_manage">إدارة المجموعة</string>
+    <string name="lens_group_manage_all">إدارة العدسات</string>
+    <string name="lens_group_assign">تعيين إلى مجموعة</string>
+    <string name="lens_group_create">إنشاء مجموعة</string>
+    <string name="lens_group_ungroup">إزالة من المجموعة</string>
+    <string name="lens_group_name_hint">اسم المجموعة</string>
+    <string name="lens_group_error_blank">أدخل اسم المجموعة</string>
+    <string name="lens_group_edit_title">اختيار مجموعة العدسة</string>
+    <string name="lens_group_edit_action">تعديل المجموعة</string>
 </resources>

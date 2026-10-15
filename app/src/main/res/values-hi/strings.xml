@@ -224,4 +224,18 @@
     <string name="layout_import_workspace_failed">वर्कस्पेस आयात विफल रहा। आपका पिछला वर्कस्पेस वापस बहाल कर दिया गया।</string>
     <string name="layout_import_workspace_recovery_required">वर्कस्पेस बहाली विफल रही और स्वचालित रिकवरी अधूरी रही। ऐप फिर से खोलें और अपने लेंस जाँचें।</string>
     <string name="layout_import_v1_default_lens_note">यह पुराना बैकअप केवल डिफ़ॉल्ट लेंस का लेआउट अपडेट करता है; अन्य लेंस जैसे हैं वैसे रहेंगे।</string>
+    <string name="lens_management_title">लेंस प्रबंधित करें</string>
+    <string name="lens_group_ungrouped">बिना समूह</string>
+    <string name="lens_group_expand">समूह खोलें</string>
+    <string name="lens_group_collapse">समूह समेटें</string>
+    <string name="lens_group_toggle">समूह टॉगल करें</string>
+    <string name="lens_group_manage">समूह प्रबंधित करें</string>
+    <string name="lens_group_manage_all">लेंस प्रबंधित करें</string>
+    <string name="lens_group_assign">समूह में जोड़ें</string>
+    <string name="lens_group_create">समूह बनाएँ</string>
+    <string name="lens_group_ungroup">समूह से हटाएँ</string>
+    <string name="lens_group_name_hint">समूह का नाम</string>
+    <string name="lens_group_error_blank">समूह का नाम दर्ज करें</string>
+    <string name="lens_group_edit_title">लेंस समूह चुनें</string>
+    <string name="lens_group_edit_action">समूह संपादित करें</string>
 </resources>
