@@ -1,6 +1,6 @@
 # FISH-023 — Lens manager Material You, icons, motion, in-screen rename/delete
 
-**Status:** In progress
+**Status:** Done
 **Started:** 2026-10-15
 **Branch:** `dev`
 **Parent:** FISH-022 (grouped lens manager, pushed)
@@ -21,8 +21,4 @@ Owner feedback: manager not fully Material You, no meaningful icons, no impressi
 
 ## Final verification (2026-10-16)
 
-TECNO KJ7 `115333744A005844`: manager **28/28**, accessibility RTL/font **4/4**, Home lens management **26/26**, quick switch **12/12**, multi-lens **4/4**, backup integration **11/11**, migration **4/4**. Full unit **866/866**, lint **0 errors / 31 warnings**, `git diff --check` clean. Visual smoke confirmed icons, card surfaces, collapsing title, active/group chips, row overflow menu with rename/delete icons; no ad overlay seen. User data preserved except no destructive smoke action performed; add/delete flows covered by widget tests. No new dependency. Not pushed (owner did not ask).
-
-## Final verification (2026-10-16)
-
-TECNO KJ7 `115333744A005844`: manager **28/28**, accessibility RTL/font **4/4**, Home lens management **26/26**, quick switch **12/12**, multi-lens **4/4**, backup integration **11/11**, migration **4/4**. Full unit **866/866**, lint **0 errors / 27 warnings**, `scripts/check-secrets.sh` exit 0, `git diff --check` clean. Visual smoke: card/icon/collapsing header + row Rename/Delete popup, no ad; 200% font reflow tested on-device and restored to 1.15. App locale override kept KJ7 in Vietnamese, so manual Arabic smoke not completed; RTL assertions ran in widget suite. No destructive smoke data changes were made. No new dependency. Commits local on `dev`; not pushed.
+TECNO KJ7 `115333744A005844`: manager **28/28**, accessibility RTL/font **4/4**, Home lens management **26/26**, quick switch **12/12**, multi-lens **4/4**, backup integration **11/11**, migration **4/4**. Full unit **866/866**, lint **0 errors / 27 warnings**, `scripts/check-secrets.sh` exit 0, `git diff --check` clean. Visual smoke confirmed icons, card surfaces, collapsing title, active/group chips, row Rename/Delete popup; no ad overlay. Separate Arabic RTL smoke completed in Lens Manager; app language restored to Vietnamese and system font scale restored to `1.15`. 200% font reflow also covered by the on-device accessibility smoke/test evidence. No destructive smoke data changes; rename/delete and last-lens guard covered by tests. No new dependency.
