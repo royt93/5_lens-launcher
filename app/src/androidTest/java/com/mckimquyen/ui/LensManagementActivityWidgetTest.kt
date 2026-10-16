@@ -86,6 +86,47 @@ class LensManagementActivityWidgetTest {
     }
 
     @Test
+    fun headerChevronIsAVectorThatRotatesWithExpandState() {
+        ActivityScenario.launch(LensManagementActivity::class.java).use { scenario ->
+            InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+            scenario.onActivity { activity ->
+                val list = activity.findViewById<RecyclerView>(R.id.rvLensGroups)
+                val header = requireNotNull(list.findViewHolderForAdapterPosition(4)).itemView
+                val chevron = header.findViewById<View>(R.id.tvLensGroupExpanded)
+                assertTrue("Chevron must be an ImageView, not a text glyph", chevron is android.widget.ImageView)
+                assertEquals("Expanded chevron points down (no rotation)", 0f, chevron.rotation, 0.01f)
+                assertTrue("Group header needs a leading folder icon", header.findViewById<View>(R.id.ivLensGroupIcon) is android.widget.ImageView)
+                header.performClick()
+            }
+            InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+            scenario.onActivity { activity ->
+                val list = activity.findViewById<RecyclerView>(R.id.rvLensGroups)
+                val chevron = requireNotNull(list.findViewHolderForAdapterPosition(4)).itemView
+                    .findViewById<View>(R.id.tvLensGroupExpanded)
+                assertEquals("Collapsed chevron is rotated", -90f, chevron.rotation, 0.01f)
+            }
+        }
+    }
+
+    @Test
+    fun lensRowsShowALensIconAndActiveRowShowsCheckInsideItsChip() {
+        ActivityScenario.launch(LensManagementActivity::class.java).use { scenario ->
+            InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+            scenario.onActivity { activity ->
+                val list = activity.findViewById<RecyclerView>(R.id.rvLensGroups)
+                val row = requireNotNull(list.findViewHolderForAdapterPosition(3)).itemView
+                assertEquals("Lens 1", row.findViewById<TextView>(R.id.tvLensGroupRow).text.toString())
+                assertTrue("Lens row needs a leading lens icon", row.findViewById<View>(R.id.ivLensGroupRowIcon) is android.widget.ImageView)
+                val chip = row.findViewById<TextView>(R.id.tvLensGroupActive)
+                assertEquals(View.VISIBLE, chip.visibility)
+                assertTrue("Active chip must carry a check icon", chip.compoundDrawablesRelative[0] != null)
+                val other = requireNotNull(list.findViewHolderForAdapterPosition(1)).itemView
+                assertEquals(View.GONE, other.findViewById<View>(R.id.tvLensGroupActive).visibility)
+            }
+        }
+    }
+
+    @Test
     fun managerBarsFollowSurfaceLuminanceInNightMode() {
         // ActBase applies UtilSettings.nightMode in onCreate, so drive the app's own preference.
         val prefs = androidx.preference.PreferenceManager.getDefaultSharedPreferences(context)

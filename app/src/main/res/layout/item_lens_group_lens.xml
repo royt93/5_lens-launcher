@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/lensGroupRow"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -18,6 +19,15 @@
         android:buttonTint="?attr/colorPrimary"
         android:visibility="gone" />
 
+    <ImageView
+        android:id="@+id/ivLensGroupRowIcon"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginEnd="16dp"
+        android:importantForAccessibility="no"
+        android:src="@drawable/ic_color_lens_24dp"
+        app:tint="?attr/colorOnSurfaceVariant" />
+
     <TextView
         android:id="@+id/tvLensGroupRow"
         android:layout_width="0dp"
@@ -34,6 +44,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/bg_lens_group_active"
+        android:drawablePadding="4dp"
+        android:drawableStart="@drawable/ic_done_chip_16dp"
+        android:gravity="center_vertical"
         android:paddingHorizontal="10dp"
         android:paddingVertical="4dp"
         android:text="@string/lens_group_active"

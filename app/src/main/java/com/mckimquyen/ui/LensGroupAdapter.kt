@@ -84,7 +84,8 @@ internal class LensGroupAdapter(
 
     private inner class HeaderHolder(view: View) : RecyclerView.ViewHolder(view) {
         private val title: TextView = view.findViewById(R.id.tvLensGroupHeader)
-        private val state: TextView = view.findViewById(R.id.tvLensGroupExpanded)
+        private val state: android.widget.ImageView = view.findViewById(R.id.tvLensGroupExpanded)
+        private val icon: android.widget.ImageView = view.findViewById(R.id.ivLensGroupIcon)
         private val count: TextView = view.findViewById(R.id.tvLensGroupCount)
 
         fun bind(row: LensGroupRow.Header) {
@@ -97,8 +98,11 @@ internal class LensGroupAdapter(
             itemView.contentDescription = itemView.context.getString(
                 R.string.lens_group_header_description, displayName, row.lensCount, action
             )
-            state.text = if (row.expanded) "⌄" else "›"
+            // Down chevron when expanded; turned a quarter-turn when collapsed. Rotation (not a
+            // second drawable) keeps one asset and lets P3 animate the same property.
+            state.rotation = if (row.expanded) EXPANDED_ROTATION else COLLAPSED_ROTATION
             state.contentDescription = action
+            icon.setImageResource(if (row.groupName == null) R.drawable.ic_apps_24dp else R.drawable.ic_folder_24dp)
             itemView.setOnClickListener { toggle(row.groupName) }
         }
     }
@@ -148,5 +152,7 @@ internal class LensGroupAdapter(
     private companion object {
         const val TYPE_HEADER = 0
         const val TYPE_LENS = 1
+        const val EXPANDED_ROTATION = 0f
+        const val COLLAPSED_ROTATION = -90f
     }
 }
