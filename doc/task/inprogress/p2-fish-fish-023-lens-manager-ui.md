@@ -16,9 +16,13 @@ Owner feedback: manager not fully Material You, no meaningful icons, no impressi
 - [x] P2 surface + DiffUtil: tonal M3 row cards with corner-position variants; AppBarLayout collapsing title; `LensGroupRowDiff` replaces full refreshes. KJ7 manager widget 23/23, JVM row/diff tests 8/8, `lintDevDebug` zero errors. On-device smoke confirmed expanded title + card composition; no ad overlay.
 - [x] P3 motion: DiffUtil expand/collapse animations + chevron rotation; action bar slides in/out; all motion gated by `LensPhysicsPolicy`, reduced-motion snaps and disables itemAnimator. KJ7 manager widget 28/28 (motion-on/off tests pass). Regression classes: Home 26, quick-switch 12, multi-lens 4, backup 11 — all green. Full unit 866/866 + lint 0 errors/31 warnings.
 - [x] P4 haptics + 1-lens state: system-respecting selection/success/rejection feedback (reduced-motion gate), one-lens guidance card reuses translated strings.
-- [x] P5 rename/delete in manager: icon overflow popup, rename persists, delete confirms/cancels, active-lens fallback, last-lens delete guard in transactional DAO path. Tests cover rename/delete/cancel/last lens; popup theme/icons.
+- [x] P5 rename/delete in manager: icon overflow popup, rename persists, delete confirms/cancels, active-lens fallback, last-lens delete guard in transactional DAO path. Widget/DAO tests cover rename/delete/cancel/last lens; popup theme/icons.
 - [x] P6 a11y / RTL / large font: 4 widget tests cover Arabic RTL mirroring, 200% font reflow/48dp target, header/row/button labels.
 
 ## Final verification (2026-10-16)
 
 TECNO KJ7 `115333744A005844`: manager **28/28**, accessibility RTL/font **4/4**, Home lens management **26/26**, quick switch **12/12**, multi-lens **4/4**, backup integration **11/11**, migration **4/4**. Full unit **866/866**, lint **0 errors / 31 warnings**, `git diff --check` clean. Visual smoke confirmed icons, card surfaces, collapsing title, active/group chips, row overflow menu with rename/delete icons; no ad overlay seen. User data preserved except no destructive smoke action performed; add/delete flows covered by widget tests. No new dependency. Not pushed (owner did not ask).
+
+## Final verification (2026-10-16)
+
+TECNO KJ7 `115333744A005844`: manager **28/28**, accessibility RTL/font **4/4**, Home lens management **26/26**, quick switch **12/12**, multi-lens **4/4**, backup integration **11/11**, migration **4/4**. Full unit **866/866**, lint **0 errors / 27 warnings**, `scripts/check-secrets.sh` exit 0, `git diff --check` clean. Visual smoke: card/icon/collapsing header + row Rename/Delete popup, no ad; 200% font reflow tested on-device and restored to 1.15. App locale override kept KJ7 in Vietnamese, so manual Arabic smoke not completed; RTL assertions ran in widget suite. No destructive smoke data changes were made. No new dependency. Commits local on `dev`; not pushed.
