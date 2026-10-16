@@ -54,6 +54,8 @@ class LensManagementActivityWidgetTest {
 
     @Test
     fun disabledDeleteIconKeepsSameTintAsEnabledMenuIcons() {
+        // Delete is disabled only while a single lens remains; setUp seeds four.
+        runBlocking { dao.deleteAll(); dao.insertIfAbsent(LensWorkspace.createDefault()) }
         ActivityScenario.launch(ActHome::class.java).use { scenario ->
             InstrumentationRegistry.getInstrumentation().waitForIdleSync()
             scenario.onActivity { activity ->
@@ -62,7 +64,11 @@ class LensManagementActivityWidgetTest {
                 val menu = requireNotNull(activity.lensManagementMenu).menu
                 val addIcon = requireNotNull(menu.findItem(1).icon)
                 val deleteIcon = requireNotNull(menu.findItem(3).icon)
-                assertEquals(addIcon.alpha, deleteIcon.alpha)
+                assertTrue("Delete must be disabled with a single lens", !menu.findItem(3).isEnabled)
+                assertTrue(
+                    "Disabled Delete icon must be dimmed like its label: add=${addIcon.alpha}, delete=${deleteIcon.alpha}",
+                    deleteIcon.alpha < addIcon.alpha
+                )
             }
         }
     }

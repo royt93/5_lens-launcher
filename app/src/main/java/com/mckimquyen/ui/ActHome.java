@@ -872,6 +872,15 @@ public class ActHome extends ActBase {
             icon = androidx.core.graphics.drawable.DrawableCompat.wrap(icon.mutate());
             androidx.core.graphics.drawable.DrawableCompat.setTint(icon, MaterialColors.getColor(
                     themed, com.google.android.material.R.attr.colorOnSurface, android.graphics.Color.BLACK));
+            if (!enabled) {
+                android.content.res.TypedArray disabledAlpha = themed.getTheme().obtainStyledAttributes(
+                        new int[]{android.R.attr.disabledAlpha});
+                try {
+                    icon.setAlpha(Math.round(disabledAlpha.getFloat(0, 0f) * 255));
+                } finally {
+                    disabledAlpha.recycle();
+                }
+            }
             item.setIcon(icon);
         }
         item.setEnabled(enabled);
