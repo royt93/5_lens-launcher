@@ -98,12 +98,17 @@ class LensManagementActivityWidgetTest {
                 assertTrue("Group header needs a leading folder icon", header.findViewById<View>(R.id.ivLensGroupIcon) is android.widget.ImageView)
                 header.performClick()
             }
-            InstrumentationRegistry.getInstrumentation().waitForIdleSync()
-            scenario.onActivity { activity ->
+            awaitActivity(scenario, "collapsed chevron animation must settle") { activity ->
                 val list = activity.findViewById<RecyclerView>(R.id.rvLensGroups)
-                val chevron = requireNotNull(list.findViewHolderForAdapterPosition(4)).itemView
-                    .findViewById<View>(R.id.tvLensGroupExpanded)
-                assertEquals("Collapsed chevron is rotated", -90f, chevron.rotation, 0.01f)
+                val rotation = requireNotNull(list.findViewHolderForAdapterPosition(4)).itemView
+                    .findViewById<View>(R.id.tvLensGroupExpanded).rotation
+                kotlin.math.abs(rotation + 90f) <= 0.01f
+            }
+            scenario.onActivity { activity ->
+                val chevron = requireNotNull(
+                    activity.findViewById<RecyclerView>(R.id.rvLensGroups).findViewHolderForAdapterPosition(4)
+                ).itemView.findViewById<View>(R.id.tvLensGroupExpanded)
+                assertEquals("Collapsed chevron animates to rotated position", -90f, chevron.rotation, 0.01f)
             }
         }
     }
@@ -122,6 +127,77 @@ class LensManagementActivityWidgetTest {
                 assertTrue("Active chip must carry a check icon", chip.compoundDrawablesRelative[0] != null)
                 val other = requireNotNull(list.findViewHolderForAdapterPosition(1)).itemView
                 assertEquals(View.GONE, other.findViewById<View>(R.id.tvLensGroupActive).visibility)
+            }
+        }
+    }
+
+    private fun withAnimatorScale(scale: String, block: () -> Unit) {
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+        fun shell(cmd: String) = java.io.BufferedReader(
+            java.io.InputStreamReader(
+                android.os.ParcelFileDescriptor.AutoCloseInputStream(instrumentation.uiAutomation.executeShellCommand(cmd))
+            )
+        ).use { it.readText() }
+        val original = shell("settings get global animator_duration_scale").trim().let { if (it == "null" || it.isBlank()) "1" else it }
+        shell("settings put global animator_duration_scale $scale")
+        try { block() } finally { shell("settings put global animator_duration_scale $original") }
+    }
+
+    @Test
+    fun actionBarSlidesInWhenMotionIsAllowedAndSnapsWhenReduced() {
+        withAnimatorScale("1") {
+            ActivityScenario.launch(LensManagementActivity::class.java).use { scenario ->
+                InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+                var startTranslation = 0f
+                scenario.onActivity { activity ->
+                    activity.toggleEditModeForTest()
+                    val bar = activity.findViewById<View>(R.id.lensGroupActions)
+                    assertEquals(View.VISIBLE, bar.visibility)
+                    startTranslation = bar.translationY
+                    assertTrue("With motion on, the bar must start off-screen below its rest position", startTranslation > 0f)
+                }
+                InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+                Thread.sleep(600)
+                scenario.onActivity { activity ->
+                    assertEquals("Bar settles at rest", 0f, activity.findViewById<View>(R.id.lensGroupActions).translationY, 0.5f)
+                }
+            }
+        }
+        withAnimatorScale("0") {
+            ActivityScenario.launch(LensManagementActivity::class.java).use { scenario ->
+                InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+                scenario.onActivity { activity ->
+                    activity.toggleEditModeForTest()
+                    val bar = activity.findViewById<View>(R.id.lensGroupActions)
+                    assertEquals(View.VISIBLE, bar.visibility)
+                    assertEquals("Reduced motion: no slide, bar is at rest immediately", 0f, bar.translationY, 0.01f)
+                }
+            }
+        }
+    }
+
+    @Test
+    fun chevronRotationAnimatesWhenAllowedAndIsImmediateWhenReduced() {
+        withAnimatorScale("0") {
+            ActivityScenario.launch(LensManagementActivity::class.java).use { scenario ->
+                InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+                scenario.onActivity { activity ->
+                    val list = activity.findViewById<RecyclerView>(R.id.rvLensGroups)
+                    requireNotNull(list.findViewHolderForAdapterPosition(4)).itemView.performClick()
+                }
+                InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+                scenario.onActivity { activity ->
+                    val chevron = requireNotNull(
+                        activity.findViewById<RecyclerView>(R.id.rvLensGroups).findViewHolderForAdapterPosition(4)
+                    ).itemView.findViewById<View>(R.id.tvLensGroupExpanded)
+                    assertEquals("Reduced motion rotates instantly", -90f, chevron.rotation, 0.01f)
+                    assertEquals("No interpolation offset is retained", -90f, chevron.rotation, 0.01f)
+                    assertEquals(
+                        "Reduced motion disables RecyclerView item animation",
+                        null,
+                        activity.findViewById<RecyclerView>(R.id.rvLensGroups).itemAnimator
+                    )
+                }
             }
         }
     }
@@ -421,12 +497,18 @@ class LensManagementActivityWidgetTest {
                 activity.toggleEditModeForTest()
                 assertEquals(View.VISIBLE, activity.findViewById<View>(R.id.lensGroupActions).visibility)
             }
-            InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+            // Translated bounds are transient motion, not layout geometry: let the entrance settle.
+            assertTrue("Action-bar entrance must settle", awaitViewRest(scenario, R.id.lensGroupActions))
             scenario.onActivity { activity ->
-                assertEquals(
-                    "Assign actions group bar above bottom surface",
-                    activity.findViewById<View>(R.id.rvLensGroups).bottom,
-                    activity.findViewById<View>(R.id.lensGroupActions).top
+                val content = activity.findViewById<View>(R.id.lensManagerContent)
+                val actions = activity.findViewById<View>(R.id.lensGroupActions)
+                val contentLocation = IntArray(2).also(content::getLocationOnScreen)
+                val actionsLocation = IntArray(2).also(actions::getLocationOnScreen)
+                val contentBottom = contentLocation[1] + content.height
+                val actionsTop = actionsLocation[1]
+                assertTrue(
+                    "Content viewport must end before the pinned action bar; contentBottom=$contentBottom actionsTop=$actionsTop",
+                    contentBottom <= actionsTop
                 )
                 activity.selectLensForGroupEdit(LensWorkspace.DEFAULT_LENS_ID, true)
                 activity.selectLensForGroupEdit("work", true)
@@ -556,6 +638,24 @@ class LensManagementActivityWidgetTest {
             if (actual != expected) Thread.sleep(50)
         }
         assertEquals(expected, actual)
+    }
+
+    /** Wait until an entering/leaving surface reaches its non-translated rest state. */
+    private fun awaitViewRest(
+        scenario: ActivityScenario<LensManagementActivity>,
+        viewId: Int
+    ): Boolean {
+        val deadline = System.currentTimeMillis() + 2_000L
+        var atRest = false
+        while (!atRest && System.currentTimeMillis() < deadline) {
+            InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+            scenario.onActivity { activity ->
+                val view = activity.findViewById<View>(viewId)
+                atRest = view.translationY == 0f && view.alpha >= 0.99f
+            }
+            if (!atRest) Thread.sleep(25)
+        }
+        return atRest
     }
 
     /** Polls on the test thread; the manager loads Room asynchronously so state settles after idle. */

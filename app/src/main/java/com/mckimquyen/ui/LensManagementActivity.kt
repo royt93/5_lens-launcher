@@ -13,6 +13,7 @@ import com.mckimquyen.model.AppDatabase
 import com.mckimquyen.model.LensWorkspace
 import com.mckimquyen.model.LensWorkspaceDao
 import com.mckimquyen.util.LensGroupPolicy
+import com.mckimquyen.util.LensPhysicsPolicy
 import com.mckimquyen.util.UtilSettings
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -23,6 +24,12 @@ class LensManagementActivity : ActBase() {
         const val EXTRA_MANAGE_LENS_ID = "com.mckimquyen.lenslauncher.EXTRA_MANAGE_LENS_ID"
         private const val STATE_EDITING = "state_editing_groups"
         private const val STATE_SELECTED = "state_selected_lens_ids"
+        private const val ACTION_BAR_DURATION_MS = 220L
+        private const val LIST_ADD_DURATION_MS = 180L
+        private const val LIST_REMOVE_DURATION_MS = 160L
+        private const val LIST_MOVE_DURATION_MS = 180L
+        private const val LIST_CHANGE_DURATION_MS = 120L
+        private const val ACTION_BAR_START_OFFSET_DP = 48f
     }
 
     private lateinit var list: RecyclerView
@@ -37,6 +44,7 @@ class LensManagementActivity : ActBase() {
     private var lastGroupOperationError: Throwable? = null
     private lateinit var managementToolbar: com.google.android.material.appbar.MaterialToolbar
     private lateinit var groupActions: android.view.View
+    private lateinit var collapsingToolbar: com.google.android.material.appbar.CollapsingToolbarLayout
     private var originalStatusBarColor = android.graphics.Color.TRANSPARENT
     private var originalNavigationBarColor = android.graphics.Color.TRANSPARENT
     private var originalLightStatusBars = false
@@ -88,7 +96,13 @@ class LensManagementActivity : ActBase() {
         val surface = com.google.android.material.color.MaterialColors.getColor(
             this, com.google.android.material.R.attr.colorSurface, android.graphics.Color.WHITE
         )
-        managementToolbar.setBackgroundColor(surface)
+        // The collapsing layout paints the large title itself; the toolbar stays transparent and
+        // keeps its own title text invisible-but-present so TalkBack and tests still read it.
+        managementToolbar.setTitleTextColor(android.graphics.Color.TRANSPARENT)
+        collapsingToolbar = findViewById(R.id.lensManagerCollapsingToolbar)
+        collapsingToolbar.setCollapsedTitleTextColor(onSurface)
+        collapsingToolbar.setExpandedTitleColor(onSurface)
+        setScreenTitle(getString(R.string.lens_management_title))
         managementToolbar.setNavigationIconTint(onSurface)
         managementToolbar.setNavigationOnClickListener { finish() }
         androidx.core.view.WindowCompat.getInsetsController(window, window.decorView).apply {
@@ -121,6 +135,12 @@ class LensManagementActivity : ActBase() {
             selectedLensIds = selectedLensIds
         )
         list.layoutManager = LinearLayoutManager(this)
+        list.itemAnimator = if (LensPhysicsPolicy.shouldReduceLensMotion(this)) null else androidx.recyclerview.widget.DefaultItemAnimator().apply {
+            addDuration = LIST_ADD_DURATION_MS
+            removeDuration = LIST_REMOVE_DURATION_MS
+            moveDuration = LIST_MOVE_DURATION_MS
+            changeDuration = LIST_CHANGE_DURATION_MS
+        }
         list.adapter = adapter
         groupActions.findViewById<com.google.android.material.button.MaterialButton>(R.id.btLensGroupAssign)
             .setOnClickListener { showAssignGroupDialog() }
@@ -173,6 +193,12 @@ class LensManagementActivity : ActBase() {
 
     private fun reloadGroups() = reloadGroupsForTest()
 
+    /** One title, two views: the collapsing layout draws it, the toolbar keeps the text for a11y. */
+    private fun setScreenTitle(title: String) {
+        managementToolbar.title = title
+        collapsingToolbar.title = title
+    }
+
     private fun beginManagingLens(lensId: String) {
         if (lensId.isBlank()) return
         editingGroups = true
@@ -182,12 +208,11 @@ class LensManagementActivity : ActBase() {
     }
 
     private fun onGroupSelectionChanged(ids: Set<String>) {
-        managementToolbar.title = if (editingGroups) {
-            getString(R.string.lens_group_selected_count, ids.size)
-        } else {
-            getString(R.string.lens_management_title)
-        }
-        groupActions.visibility = if (editingGroups) android.view.View.VISIBLE else android.view.View.GONE
+        setScreenTitle(
+            if (editingGroups) getString(R.string.lens_group_selected_count, ids.size)
+            else getString(R.string.lens_management_title)
+        )
+        updateGroupActionsVisibility(editingGroups)
         val canEditSelection = editingGroups && ids.isNotEmpty() && !groupOperationInProgress
         groupActions.findViewById<com.google.android.material.button.MaterialButton>(R.id.btLensGroupAssign).apply {
             isEnabled = canEditSelection
@@ -197,6 +222,38 @@ class LensManagementActivity : ActBase() {
         }
         managementToolbar.menu.findItem(R.id.menuLensGroupEditToggle).isVisible = !editingGroups
         managementToolbar.menu.findItem(R.id.menuLensGroupEditDone)?.isVisible = editingGroups
+    }
+
+    private fun updateGroupActionsVisibility(show: Boolean) {
+        val targetVisibility = if (show) android.view.View.VISIBLE else android.view.View.GONE
+        if (show && groupActions.visibility == targetVisibility) return
+        if (!show && groupActions.visibility == android.view.View.GONE) return
+        groupActions.animate().cancel()
+        if (LensPhysicsPolicy.shouldReduceLensMotion(this)) {
+            groupActions.visibility = targetVisibility
+            groupActions.translationY = 0f
+            groupActions.alpha = 1f
+            return
+        }
+        if (show) {
+            groupActions.visibility = android.view.View.VISIBLE
+            // Before the first layout pass the bar has no height, so start translated by a
+            // minimum offset; the settle animation then runs to rest.
+            groupActions.translationY = groupActions.height.toFloat().coerceAtLeast(
+                ACTION_BAR_START_OFFSET_DP * resources.displayMetrics.density
+            )
+            groupActions.alpha = 0f
+            groupActions.animate()
+                .translationY(0f)
+                .alpha(1f)
+                .setDuration(ACTION_BAR_DURATION_MS)
+                .start()
+        } else {
+            groupActions.animate().cancel()
+            groupActions.visibility = android.view.View.GONE
+            groupActions.translationY = 0f
+            groupActions.alpha = 1f
+        }
     }
 
     private fun toggleEditMode() {
