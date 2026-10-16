@@ -252,4 +252,5 @@
         <item quantity="other">%1$d lentes</item>
     </plurals>
     <string name="lens_group_save_failed">Não foi possível atualizar o grupo</string>
+    <string name="lens_group_lens_options">Opções da lente</string>
 </resources>

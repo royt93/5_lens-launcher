@@ -258,4 +258,5 @@
         <item quantity="other">Линз: %1$d</item>
     </plurals>
     <string name="lens_group_save_failed">Не удалось обновить группу</string>
+    <string name="lens_group_lens_options">Параметры линзы</string>
 </resources>

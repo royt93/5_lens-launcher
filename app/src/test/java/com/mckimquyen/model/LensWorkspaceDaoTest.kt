@@ -79,7 +79,7 @@ class LensWorkspaceDaoTest {
         dao.insertOrUpdate(LensWorkspace.createDefault())
         dao.insertOrUpdate(LensWorkspace(id = "work", name = "Work", orderIndex = 1))
 
-        assertEquals(1, dao.deleteById("work"))
+        assertEquals(true, dao.deleteLensIfMoreThanOne("work"))
 
         assertNull(dao.findById("work"))
         assertEquals(listOf(LensWorkspace.DEFAULT_LENS_ID), dao.getAll().map { it.id })
@@ -175,6 +175,40 @@ class LensWorkspaceDaoTest {
     }
 
     @Test
+    fun `deleteLens refuses to remove the only remaining lens`() {
+        runBlocking { dao.insertOrUpdate(LensWorkspace.createDefault()) }
+        var delivered: List<LensWorkspace>? = null
+
+        LensWorkspace.deleteLens(LensWorkspace.DEFAULT_LENS_ID) { delivered = it }
+        val deadline = System.currentTimeMillis() + 5_000L
+        while (delivered == null && System.currentTimeMillis() < deadline) {
+            org.robolectric.shadows.ShadowLooper.idleMainLooper()
+            Thread.sleep(20)
+        }
+
+        assertEquals(listOf(LensWorkspace.DEFAULT_LENS_ID), requireNotNull(delivered) { "deleteLens must finish" }.map { it.id })
+        assertEquals(1, runBlocking { dao.getAll() }.size)
+    }
+
+    @Test
+    fun `deleteLens removes a lens when another remains`() {
+        runBlocking {
+            dao.insertOrUpdate(LensWorkspace.createDefault())
+            dao.insertOrUpdate(LensWorkspace("work", "Work", orderIndex = 1))
+        }
+        var delivered: List<LensWorkspace>? = null
+
+        LensWorkspace.deleteLens("work") { delivered = it }
+        val deadline = System.currentTimeMillis() + 5_000L
+        while (delivered == null && System.currentTimeMillis() < deadline) {
+            org.robolectric.shadows.ShadowLooper.idleMainLooper()
+            Thread.sleep(20)
+        }
+
+        assertEquals(listOf(LensWorkspace.DEFAULT_LENS_ID), requireNotNull(delivered).map { it.id })
+    }
+
+    @Test
     fun `update keeps the group when a lens is renamed`() = runBlocking {
         val lens = LensWorkspace("work", "Work", orderIndex = 1, groupName = "Team")
         dao.insertOrUpdate(lens)
@@ -191,7 +225,7 @@ class LensWorkspaceDaoTest {
         dao.insertOrUpdate(LensWorkspace("solo", "Solo", orderIndex = 1, groupName = "Lonely"))
         assertEquals(listOf(null, "Lonely"), com.mckimquyen.util.LensGroupPolicy.sections(dao.getAll()).map { it.groupName })
 
-        dao.deleteById("solo")
+        assertEquals(true, dao.deleteLensIfMoreThanOne("solo"))
 
         assertEquals(listOf<String?>(null), com.mckimquyen.util.LensGroupPolicy.sections(dao.getAll()).map { it.groupName })
     }

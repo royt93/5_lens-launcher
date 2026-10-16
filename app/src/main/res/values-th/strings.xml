@@ -244,4 +244,5 @@
         <item quantity="other">เลนส์ %1$d</item>
     </plurals>
     <string name="lens_group_save_failed">อัปเดตกลุ่มไม่สำเร็จ</string>
+    <string name="lens_group_lens_options">ตัวเลือกเลนส์</string>
 </resources>

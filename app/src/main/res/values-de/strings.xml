@@ -248,4 +248,5 @@
         <item quantity="other">%1$d Linsen</item>
     </plurals>
     <string name="lens_group_save_failed">Gruppe konnte nicht aktualisiert werden</string>
+    <string name="lens_group_lens_options">Linsenoptionen</string>
 </resources>

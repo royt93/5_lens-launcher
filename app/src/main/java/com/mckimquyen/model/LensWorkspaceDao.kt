@@ -33,8 +33,16 @@ interface LensWorkspaceDao {
     @Delete
     suspend fun delete(workspace: LensWorkspace)
 
-    @Query("DELETE FROM LENS_WORKSPACE WHERE ID = :id")
-    suspend fun deleteById(id: String): Int
+    /** Refuses to delete the final lens; deleting its workspace and layout rows is atomic. */
+    @Transaction
+    suspend fun deleteLensIfMoreThanOne(id: String): Boolean {
+        val lenses = getAll()
+        if (lenses.size <= 1) return false
+        val lens = findById(id) ?: return false
+        delete(lens)
+        AppDatabase.getInstance().appPersistentDao().deleteForLens(id)
+        return true
+    }
 
     @Query("DELETE FROM LENS_WORKSPACE")
     suspend fun deleteAll(): Int

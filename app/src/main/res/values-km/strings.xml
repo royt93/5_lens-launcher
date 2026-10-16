@@ -244,4 +244,5 @@
         <item quantity="other">កែវ %1$d</item>
     </plurals>
     <string name="lens_group_save_failed">មិនអាចធ្វើបច្ចុប្បន្នក្រុមបានទេ</string>
+    <string name="lens_group_lens_options">ជម្រើសកែវឡេន</string>
 </resources>

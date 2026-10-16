@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/menuLensRename"
+        android:icon="@drawable/ic_edit_24dp"
+        android:title="@string/lens_rename" />
+    <item
+        android:id="@+id/menuLensDelete"
+        android:icon="@drawable/ic_delete_outline_24dp"
+        android:title="@string/lens_delete" />
+</menu>

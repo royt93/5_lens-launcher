@@ -12,9 +12,13 @@ Owner feedback: manager not fully Material You, no meaningful icons, no impressi
 
 ## Progress
 
-- [x] P1 icons: vector chevron + rotation, folder/apps/lens icons, check in Active chip. Verified TECNO KJ7 `115333744A005844`: manager widget 21/21. No ad visible; screenshot smoke confirmed icons/tints/chip.
-- [x] P2 surface + DiffUtil: tonal M3 row cards with corner-position variants; AppBarLayout collapsing title; `LensGroupRowDiff` replaces full refreshes. KJ7 manager widget 21/21, JVM row/diff tests 8/8, `lintDevDebug` zero errors. On-device smoke confirmed expanded title + card composition; no ad overlay.
-- [x] P3 motion: DiffUtil expand/collapse animations + chevron rotation; action bar slides in/out; all motion gated by `LensPhysicsPolicy`, reduced-motion snaps and disables itemAnimator. KJ7 manager widget 23/23 (motion-on/off tests pass). Regression classes: Home 26, quick-switch 12, multi-lens 4, backup 11 — all green. Full unit + lint build successful.
-- [ ] P4 haptics + 1-lens state
-- [ ] P5 rename/delete in manager
-- [ ] P6 a11y / RTL / large font
+- [x] P1 icons: vector chevron + rotation, folder/apps/lens icons, check in Active chip. Verified TECNO KJ7 `115333744A005844`: manager widget 21/21. No ad visible; screenshot confirmed icons/tints/chip.
+- [x] P2 surface + DiffUtil: tonal M3 row cards with corner-position variants; AppBarLayout collapsing title; `LensGroupRowDiff` replaces full refreshes. KJ7 manager widget 23/23, JVM row/diff tests 8/8, `lintDevDebug` zero errors. On-device smoke confirmed expanded title + card composition; no ad overlay.
+- [x] P3 motion: DiffUtil expand/collapse animations + chevron rotation; action bar slides in/out; all motion gated by `LensPhysicsPolicy`, reduced-motion snaps and disables itemAnimator. KJ7 manager widget 28/28 (motion-on/off tests pass). Regression classes: Home 26, quick-switch 12, multi-lens 4, backup 11 — all green. Full unit 866/866 + lint 0 errors/31 warnings.
+- [x] P4 haptics + 1-lens state: system-respecting selection/success/rejection feedback (reduced-motion gate), one-lens guidance card reuses translated strings.
+- [x] P5 rename/delete in manager: icon overflow popup, rename persists, delete confirms/cancels, active-lens fallback, last-lens delete guard in transactional DAO path. Tests cover rename/delete/cancel/last lens; popup theme/icons.
+- [x] P6 a11y / RTL / large font: 4 widget tests cover Arabic RTL mirroring, 200% font reflow/48dp target, header/row/button labels.
+
+## Final verification (2026-10-16)
+
+TECNO KJ7 `115333744A005844`: manager **28/28**, accessibility RTL/font **4/4**, Home lens management **26/26**, quick switch **12/12**, multi-lens **4/4**, backup integration **11/11**, migration **4/4**. Full unit **866/866**, lint **0 errors / 31 warnings**, `git diff --check` clean. Visual smoke confirmed icons, card surfaces, collapsing title, active/group chips, row overflow menu with rename/delete icons; no ad overlay seen. User data preserved except no destructive smoke action performed; add/delete flows covered by widget tests. No new dependency. Not pushed (owner did not ask).

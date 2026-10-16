@@ -252,4 +252,5 @@
         <item quantity="other">%1$d lentilles</item>
     </plurals>
     <string name="lens_group_save_failed">Impossible de mettre à jour le groupe</string>
+    <string name="lens_group_lens_options">Options de lentille</string>
 </resources>

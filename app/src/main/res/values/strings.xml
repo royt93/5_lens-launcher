@@ -290,4 +290,5 @@
         <item quantity="one">%1$d lens</item>
         <item quantity="other">%1$d lenses</item>
     </plurals>
+    <string name="lens_group_lens_options">Lens options</string>
 </resources>

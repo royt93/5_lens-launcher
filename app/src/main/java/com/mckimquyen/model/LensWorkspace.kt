@@ -101,8 +101,7 @@ data class LensWorkspace(
         fun deleteLens(lensId: String, onDone: (List<LensWorkspace>) -> Unit) {
             ApplicationScope.scope.launch(Dispatchers.Main.immediate) {
                 withContext(Dispatchers.IO) {
-                    dao().deleteById(lensId)
-                    AppDatabase.getInstance().appPersistentDao().deleteForLens(lensId)
+                    dao().deleteLensIfMoreThanOne(lensId)
                 }
                 notifyLensesChanged(onDone)
             }

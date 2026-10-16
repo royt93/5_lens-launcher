@@ -203,6 +203,125 @@ class LensManagementActivityWidgetTest {
     }
 
     @Test
+    fun lensOverflowMenuHasIconicRenameDeleteAndGuardsLastLensDeletion() {
+        runBlocking { dao.deleteAll(); dao.insertIfAbsent(LensWorkspace.createDefault()) }
+        ActivityScenario.launch(LensManagementActivity::class.java).use { scenario ->
+            awaitActivity(scenario, "single lens row must load") {
+                (it.findViewById<RecyclerView>(R.id.rvLensGroups).adapter?.itemCount ?: 0) == 2
+            }
+            scenario.onActivity { activity ->
+                val row = requireNotNull(activity.findViewById<RecyclerView>(R.id.rvLensGroups)
+                    .findViewHolderForAdapterPosition(1)).itemView
+                row.findViewById<View>(R.id.btLensGroupMore).performClick()
+                val menu = requireNotNull(activity.lensRowMenuForTest)
+                val rename = requireNotNull(menu.menu.findItem(R.id.menuLensRename))
+                val delete = requireNotNull(menu.menu.findItem(R.id.menuLensDelete))
+                assertTrue(rename.isVisible && rename.isEnabled)
+                assertTrue("Delete last lens must be unavailable", !delete.isEnabled)
+                assertNotNull(rename.icon)
+                assertNotNull(delete.icon)
+            }
+        }
+    }
+
+    @Test
+    fun rowRenameUsesExistingLensNameDialogAndPersistsName() {
+        ActivityScenario.launch(LensManagementActivity::class.java).use { scenario ->
+            InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+            scenario.onActivity { activity ->
+                activity.findViewById<RecyclerView>(R.id.rvLensGroups)
+                    .findViewHolderForAdapterPosition(5)!!.itemView.findViewById<View>(R.id.btLensGroupMore).performClick()
+                activity.lensRowMenuForTest!!.menu.performIdentifierAction(R.id.menuLensRename, 0)
+            }
+            awaitLensGroupDialog(scenario)
+            scenario.onActivity { activity ->
+                val dialog = activity.lensGroupDialogForTest!!
+                val input = dialog.findViewById<android.widget.EditText>(android.R.id.edit)!!
+                assertEquals("Work", input.text.toString())
+                input.setText("Renamed Work")
+                dialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE).performClick()
+            }
+            awaitActivity(scenario, "rename must update visible row") { activity ->
+                activity.findViewById<RecyclerView>(R.id.rvLensGroups).let { list ->
+                    (0 until requireNotNull(list.adapter).itemCount).any { rowText(list, it) == "Renamed Work" }
+                }
+            }
+            assertEquals("Renamed Work", runBlocking { dao.findById("work")?.name })
+        }
+    }
+
+    @Test
+    fun rowDeleteCancelKeepsLensAndDeleteSuccessRemovesItAndCleansActiveId() {
+        UtilSettings(context).save(UtilSettings.KEY_ACTIVE_LENS_ID, "work")
+        ActivityScenario.launch(LensManagementActivity::class.java).use { scenario ->
+            InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+            scenario.onActivity { activity ->
+                activity.findViewById<RecyclerView>(R.id.rvLensGroups)
+                    .findViewHolderForAdapterPosition(5)!!.itemView.findViewById<View>(R.id.btLensGroupMore).performClick()
+                activity.lensRowMenuForTest!!.menu.performIdentifierAction(R.id.menuLensDelete, 0)
+            }
+            awaitLensGroupDialog(scenario)
+            scenario.onActivity { activity ->
+                activity.lensGroupDialogForTest!!.getButton(android.content.DialogInterface.BUTTON_NEGATIVE).performClick()
+            }
+            assertNotNull(runBlocking { dao.findById("work") })
+
+            scenario.onActivity { activity ->
+                activity.findViewById<RecyclerView>(R.id.rvLensGroups)
+                    .findViewHolderForAdapterPosition(5)!!.itemView.findViewById<View>(R.id.btLensGroupMore).performClick()
+                activity.lensRowMenuForTest!!.menu.performIdentifierAction(R.id.menuLensDelete, 0)
+            }
+            awaitLensGroupDialog(scenario)
+            scenario.onActivity { activity ->
+                activity.lensGroupDialogForTest!!.getButton(android.content.DialogInterface.BUTTON_POSITIVE).performClick()
+            }
+            // The row disappears in Room before the Activity callback has cleaned up the active id,
+            // so wait for the observable end state instead of asserting between the two steps.
+            awaitActivity(scenario, "delete must remove the lens and fall back the active id") {
+                runBlocking { dao.findById("work") == null } &&
+                    UtilSettings(context).getString(UtilSettings.KEY_ACTIVE_LENS_ID) == LensWorkspace.DEFAULT_LENS_ID
+            }
+            assertEquals(LensWorkspace.DEFAULT_LENS_ID, UtilSettings(context).getString(UtilSettings.KEY_ACTIVE_LENS_ID))
+        }
+    }
+
+    @Test
+    fun multipleLensOverflowMenuAllowsDelete() {
+        ActivityScenario.launch(LensManagementActivity::class.java).use { scenario ->
+            InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+            scenario.onActivity { activity ->
+                val row = requireNotNull(activity.findViewById<RecyclerView>(R.id.rvLensGroups)
+                    .findViewHolderForAdapterPosition(1)).itemView
+                row.findViewById<View>(R.id.btLensGroupMore).performClick()
+                assertTrue(requireNotNull(activity.lensRowMenuForTest).menu.findItem(R.id.menuLensDelete).isEnabled)
+            }
+        }
+    }
+
+    @Test
+    fun singleLensShowsGuidanceAndMultipleLensesHideIt() {
+        // setUp seeds four lenses: the guidance must stay hidden while there is something to manage.
+        ActivityScenario.launch(LensManagementActivity::class.java).use { scenario ->
+            awaitActivity(scenario, "lenses must load") {
+                (it.findViewById<RecyclerView>(R.id.rvLensGroups).adapter?.itemCount ?: 0) > 0
+            }
+            scenario.onActivity { activity ->
+                assertEquals(View.GONE, activity.findViewById<View>(R.id.lensManagerSingleLensHint).visibility)
+            }
+        }
+        runBlocking { dao.deleteAll(); dao.insertIfAbsent(LensWorkspace.createDefault()) }
+        ActivityScenario.launch(LensManagementActivity::class.java).use { scenario ->
+            awaitActivity(scenario, "single lens guidance must appear") {
+                it.findViewById<View>(R.id.lensManagerSingleLensHint).visibility == View.VISIBLE
+            }
+            scenario.onActivity { activity ->
+                val hint = activity.findViewById<View>(R.id.lensManagerSingleLensHint)
+                assertTrue(hint.findViewById<View>(R.id.ivSingleLensHintIcon) is android.widget.ImageView)
+            }
+        }
+    }
+
+    @Test
     fun managerBarsFollowSurfaceLuminanceInNightMode() {
         // ActBase applies UtilSettings.nightMode in onCreate, so drive the app's own preference.
         val prefs = androidx.preference.PreferenceManager.getDefaultSharedPreferences(context)
@@ -420,7 +539,7 @@ class LensManagementActivityWidgetTest {
             scenario.onActivity { activity ->
                 val list = activity.findViewById<RecyclerView>(R.id.rvLensGroups)
                 val checkbox = requireNotNull(list.findViewHolderForAdapterPosition(5))
-                    .itemView.findViewById<android.widget.CheckBox>(R.id.cbLensGroupRow)
+                    .itemView.findViewById<com.google.android.material.checkbox.MaterialCheckBox>(R.id.cbLensGroupRow)
                 assertTrue("Re-expanded row must still be checked", checkbox.isChecked)
                 assertEquals(setOf("work"), activity.selectedLensIdsForTest)
             }

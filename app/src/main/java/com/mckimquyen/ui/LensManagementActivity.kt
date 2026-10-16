@@ -5,6 +5,8 @@ import android.os.Bundle
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.core.view.forEach
+import androidx.core.view.isGone
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -132,23 +134,21 @@ class LensManagementActivity : ActBase() {
                 onGroupSelectionChanged(selectedLensIds)
             },
             isEditingGroups = { editingGroups },
-            selectedLensIds = selectedLensIds
+            selectedLensIds = selectedLensIds,
+            onLensOverflow = ::showLensRowMenu
         )
         list.layoutManager = LinearLayoutManager(this)
-        list.itemAnimator = if (LensPhysicsPolicy.shouldReduceLensMotion(this)) null else androidx.recyclerview.widget.DefaultItemAnimator().apply {
-            addDuration = LIST_ADD_DURATION_MS
-            removeDuration = LIST_REMOVE_DURATION_MS
-            moveDuration = LIST_MOVE_DURATION_MS
-            changeDuration = LIST_CHANGE_DURATION_MS
-        }
         list.adapter = adapter
         groupActions.findViewById<com.google.android.material.button.MaterialButton>(R.id.btLensGroupAssign)
             .setOnClickListener { showAssignGroupDialog() }
         groupActions.findViewById<com.google.android.material.button.MaterialButton>(R.id.btLensGroupUngroup)
             .setOnClickListener { ungroupSelected() }
+        updateItemAnimator()
         LensWorkspace.loadAll { lenses ->
             if (!isFinishing && !isDestroyed) {
                 adapter.submit(lenses, settings.getCollapsedLensGroups(), activeLensId)
+                findViewById<android.view.View>(R.id.lensManagerSingleLensHint).visibility =
+                    if (lenses.size == 1) android.view.View.VISIBLE else android.view.View.GONE
                 // Selection is only trusted once checked against live Room rows: a stale or
                 // unknown ID (deleted lens, bad intent extra) must never enter edit mode.
                 val knownIds = lenses.mapTo(mutableSetOf()) { it.id }
@@ -164,6 +164,148 @@ class LensManagementActivity : ActBase() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        // Reduced-motion / battery-saver can change while the screen is backgrounded.
+        updateItemAnimator()
+    }
+
+    private fun updateItemAnimator() {
+        list.itemAnimator = if (LensPhysicsPolicy.shouldReduceLensMotion(this)) {
+            null
+        } else {
+            androidx.recyclerview.widget.DefaultItemAnimator().apply {
+                addDuration = LIST_ADD_DURATION_MS
+                removeDuration = LIST_REMOVE_DURATION_MS
+                moveDuration = LIST_MOVE_DURATION_MS
+                changeDuration = LIST_CHANGE_DURATION_MS
+            }
+        }
+    }
+
+    private fun confirmFeedbackConstant(): Int =
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) android.view.HapticFeedbackConstants.CONFIRM
+        else android.view.HapticFeedbackConstants.VIRTUAL_KEY
+
+    private fun rejectFeedbackConstant(): Int =
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) android.view.HapticFeedbackConstants.REJECT
+        else android.view.HapticFeedbackConstants.VIRTUAL_KEY
+
+    private fun confirmHaptic(feedback: Int) {
+        performLensManagerHaptic(list, feedback)
+    }
+
+    private fun lensOperationFeedback() =
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+            android.view.HapticFeedbackConstants.CONFIRM
+        } else android.view.HapticFeedbackConstants.VIRTUAL_KEY
+
+    @androidx.annotation.VisibleForTesting
+    var lensRowMenuForTest: androidx.appcompat.widget.PopupMenu? = null
+        private set
+
+    private fun showLensRowMenu(anchor: android.view.View, lens: LensWorkspace) {
+        lensRowMenuForTest?.dismiss()
+        val themed = androidx.appcompat.view.ContextThemeWrapper(this, R.style.PopupMenuTheme)
+        val menu = androidx.appcompat.widget.PopupMenu(themed, anchor)
+        menu.menuInflater.inflate(R.menu.menu_lens_row, menu.menu)
+        menu.menu.findItem(R.id.menuLensDelete).isEnabled = adapter.lensCount() > 1
+        val onSurface = com.google.android.material.color.MaterialColors.getColor(
+            themed, com.google.android.material.R.attr.colorOnSurface, android.graphics.Color.BLACK
+        )
+        menu.menu.forEach { it.icon?.mutate()?.setTint(onSurface) }
+        menu.setForceShowIcon(true)
+        menu.setOnMenuItemClickListener { item ->
+            when (item.itemId) {
+                R.id.menuLensRename -> { showRenameLensDialog(lens); true }
+                R.id.menuLensDelete -> { showDeleteLensDialog(lens); true }
+                else -> false
+            }
+        }
+        menu.setOnDismissListener { if (lensRowMenuForTest === menu) lensRowMenuForTest = null }
+        lensRowMenuForTest = menu
+        menu.show()
+    }
+
+    private fun showRenameLensDialog(lens: LensWorkspace) {
+        val input = EditText(this).apply {
+            id = android.R.id.edit
+            setText(lens.name)
+            setHint(R.string.lens_name_hint)
+            setSingleLine(true)
+            setSelectAllOnFocus(true)
+        }
+        val container = android.widget.FrameLayout(this).apply {
+            val horizontal = (24 * resources.displayMetrics.density).toInt()
+            val vertical = (8 * resources.displayMetrics.density).toInt()
+            setPadding(horizontal, vertical, horizontal, 0)
+            addView(input)
+        }
+        lensGroupDialog = com.google.android.material.dialog.MaterialAlertDialogBuilder(this, R.style.MaterialYouDialogTheme)
+            .setTitle(R.string.lens_rename_title)
+            .setView(container)
+            .setPositiveButton(android.R.string.ok, null)
+            .setNegativeButton(android.R.string.cancel, null)
+            .create()
+        lensGroupDialog?.setOnDismissListener { lensGroupDialog = null }
+        lensGroupDialog?.setOnShowListener {
+            lensGroupDialog?.getButton(AlertDialog.BUTTON_POSITIVE)?.setOnClickListener {
+                val name = input.text?.toString()?.trim().orEmpty()
+                if (name.isEmpty()) {
+                    input.error = getString(R.string.lens_group_error_blank)
+                    confirmHaptic(rejectFeedbackConstant())
+                    return@setOnClickListener
+                }
+                lensGroupDialog?.dismiss()
+                LensWorkspace.renameLens(lens, name) { lenses ->
+                    if (!isFinishing && !isDestroyed) {
+                        refreshAfterLensChange(lenses)
+                        confirmHaptic(lensOperationFeedback())
+                    }
+                }
+            }
+        }
+        lensGroupDialog?.show()
+    }
+
+    private fun showDeleteLensDialog(lens: LensWorkspace) {
+        lensGroupDialog = com.google.android.material.dialog.MaterialAlertDialogBuilder(this, R.style.MaterialYouDialogTheme)
+            .setTitle(R.string.lens_delete)
+            .setMessage(getString(R.string.lens_delete_confirm_message, lens.name))
+            .setPositiveButton(R.string.lens_delete) { _, _ ->
+                LensWorkspace.deleteLens(lens.id) { lenses ->
+                    if (!isFinishing && !isDestroyed) {
+                        finishLensDeletion(lens.id, lenses)
+                    }
+                }
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .create()
+        lensGroupDialog?.setOnDismissListener { lensGroupDialog = null }
+        lensGroupDialog?.show()
+    }
+
+    private fun finishLensDeletion(deletedId: String, lenses: List<LensWorkspace>) {
+        selectedLensIds.remove(deletedId)
+        settings.deleteLensSettings(deletedId)
+        com.mckimquyen.util.LensShortcuts.refresh(applicationContext, lenses)
+        if (activeLensId == deletedId && lenses.isNotEmpty()) {
+            val fallback = lenses.first()
+            activeLensId = fallback.id
+            settings.save(UtilSettings.KEY_ACTIVE_LENS_ID, fallback.id)
+            (application as? com.mckimquyen.app.RApplication)?.appRefreshPipeline?.switchLens(fallback.id)
+        }
+        refreshAfterLensChange(lenses)
+        confirmHaptic(lensOperationFeedback())
+    }
+
+    private fun refreshAfterLensChange(lenses: List<LensWorkspace>) {
+        adapter.submit(lenses, settings.getCollapsedLensGroups(), activeLensId)
+        findViewById<android.view.View>(R.id.lensManagerSingleLensHint).visibility =
+            if (lenses.size == 1) android.view.View.VISIBLE else android.view.View.GONE
+        onGroupSelectionChanged(selectedLensIds)
+    }
+
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putBoolean(STATE_EDITING, editingGroups)
@@ -171,6 +313,8 @@ class LensManagementActivity : ActBase() {
     }
 
     override fun onDestroy() {
+        lensRowMenuForTest?.dismiss()
+        lensRowMenuForTest = null
         lensGroupDialog?.dismiss()
         lensGroupDialog = null
         androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.lensManagementRoot), null)
@@ -227,7 +371,7 @@ class LensManagementActivity : ActBase() {
     private fun updateGroupActionsVisibility(show: Boolean) {
         val targetVisibility = if (show) android.view.View.VISIBLE else android.view.View.GONE
         if (show && groupActions.visibility == targetVisibility) return
-        if (!show && groupActions.visibility == android.view.View.GONE) return
+        if (!show && groupActions.isGone) return
         groupActions.animate().cancel()
         if (LensPhysicsPolicy.shouldReduceLensMotion(this)) {
             groupActions.visibility = targetVisibility
@@ -327,6 +471,7 @@ class LensManagementActivity : ActBase() {
                 val name = LensGroupPolicy.normalizeName(input.text.toString())
                 if (name == null) {
                     input.error = getString(R.string.lens_group_error_blank)
+                    confirmHaptic(rejectFeedbackConstant())
                     return@setOnClickListener
                 }
                 lensGroupDialog?.dismiss()
@@ -360,6 +505,7 @@ class LensManagementActivity : ActBase() {
                 }
                 withContext(Dispatchers.IO) { dao.assignGroup(selectedIds, canonical) }
                 reloadGroups()
+                confirmHaptic(confirmFeedbackConstant())
                 setGroupOperationIdle()
                 toggleEditMode()
             } catch (error: Exception) {
@@ -379,6 +525,7 @@ class LensManagementActivity : ActBase() {
             try {
                 withContext(Dispatchers.IO) { dao.assignGroup(selectedIds, null) }
                 reloadGroups()
+                confirmHaptic(confirmFeedbackConstant())
                 setGroupOperationIdle()
                 toggleEditMode()
             } catch (error: Exception) {

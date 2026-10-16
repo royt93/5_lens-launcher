@@ -244,4 +244,5 @@
         <item quantity="other">렌즈 %1$d개</item>
     </plurals>
     <string name="lens_group_save_failed">그룹을 업데이트하지 못했습니다</string>
+    <string name="lens_group_lens_options">렌즈 옵션</string>
 </resources>

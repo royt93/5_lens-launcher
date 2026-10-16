@@ -11,6 +11,10 @@ import com.mckimquyen.R
 import com.mckimquyen.model.LensWorkspace
 import com.mckimquyen.util.LensGroupPolicy
 
+/** Plays only platform haptic feedback, which respects the user's system touch-feedback setting. */
+internal fun performLensManagerHaptic(view: View, feedback: Int): Boolean =
+    if (LensPhysicsPolicy.shouldReduceLensMotion(view.context)) false else view.performHapticFeedback(feedback)
+
 /** M3 card position within one group section — drives corner radii. */
 enum class CardPosition { ONLY, TOP, MIDDLE, BOTTOM }
 
@@ -97,7 +101,8 @@ internal class LensGroupAdapter(
     private val onCollapsedGroupsChanged: (Set<String>) -> Unit,
     private val onGroupEditSelectionChanged: (Set<String>) -> Unit = {},
     private val isEditingGroups: () -> Boolean = { false },
-    private val selectedLensIds: MutableSet<String> = mutableSetOf()
+    private val selectedLensIds: MutableSet<String> = mutableSetOf(),
+    private val onLensOverflow: (View, LensWorkspace) -> Unit = { _, _ -> }
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     private val lenses = mutableListOf<LensWorkspace>()
     private val collapsedGroups = mutableSetOf<String>()
@@ -111,6 +116,8 @@ internal class LensGroupAdapter(
     }
 
     fun selectedIds(): Set<String> = selectedLensIds.toSet()
+
+    fun lensCount(): Int = lenses.size
 
     fun submit(lenses: List<LensWorkspace>, collapsedNames: Set<String>, activeLensId: String? = this.activeLensId) {
         this.lenses.clear()
@@ -194,7 +201,7 @@ internal class LensGroupAdapter(
 
     private inner class LensHolder(view: View) : RecyclerView.ViewHolder(view) {
         private val title: TextView = view.findViewById(R.id.tvLensGroupRow)
-        private val checkBox: android.widget.CheckBox = itemView.findViewById(R.id.cbLensGroupRow)
+        private val checkBox: com.google.android.material.checkbox.MaterialCheckBox = itemView.findViewById(R.id.cbLensGroupRow)
         private val activeBadge: TextView = itemView.findViewById(R.id.tvLensGroupActive)
 
         fun bind(row: LensGroupRow.Lens) {
@@ -212,7 +219,12 @@ internal class LensGroupAdapter(
             checkBox.isChecked = row.selected
             checkBox.setOnCheckedChangeListener { _, checked ->
                 if (checked) selectedLensIds.add(lens.id) else selectedLensIds.remove(lens.id)
+                performLensManagerHaptic(itemView, android.view.HapticFeedbackConstants.CONTEXT_CLICK)
                 onGroupEditSelectionChanged(selectedLensIds.toSet())
+            }
+            itemView.findViewById<View>(R.id.btLensGroupMore)?.apply {
+                visibility = if (row.editing) View.GONE else View.VISIBLE
+                setOnClickListener { onLensOverflow(this, lens) }
             }
             itemView.setOnClickListener {
                 if (isEditingGroups()) {

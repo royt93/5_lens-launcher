@@ -248,4 +248,5 @@
         <item quantity="other">%1$d लेंस</item>
     </plurals>
     <string name="lens_group_save_failed">समूह अपडेट नहीं हो सका</string>
+    <string name="lens_group_lens_options">लेंस विकल्प</string>
 </resources>

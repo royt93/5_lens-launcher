@@ -244,4 +244,5 @@
         <item quantity="other">%1$d 个镜头</item>
     </plurals>
     <string name="lens_group_save_failed">无法更新分组</string>
+    <string name="lens_group_lens_options">镜头选项</string>
 </resources>
