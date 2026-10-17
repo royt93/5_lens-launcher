@@ -160,12 +160,14 @@ class SearchResultAdapterWidgetTest {
                         R.id.menuItemPinStart,
                         R.id.menuItemPinEnd,
                         R.id.menuItemUnpin,
+                        R.id.menuItemHideFromLens,
                         R.id.menuItemRemoveFromLens,
                         R.id.menuItemElementUninstall,
                         R.id.menuItemRemoveFromRecent
                     ),
                     ids
                 )
+                assertFalse("Action ẩn chỉ hiện trên lens grid", menu.findItem(R.id.menuItemHideFromLens).isVisible)
                 // No favorite/folder/move items - those need a stable grid position search
                 // results don't have.
                 assertNull(menu.findItem(R.id.menuItemFavorite))

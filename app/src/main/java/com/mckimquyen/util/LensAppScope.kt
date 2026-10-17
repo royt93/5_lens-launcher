@@ -19,10 +19,11 @@ enum class LensAppScope {
 
         /** Pure and Android-free apart from [App]; always returns a fresh list. */
         @JvmStatic
-        fun filter(apps: List<App>, scope: LensAppScope, selection: Set<String>): ArrayList<App> =
-            when (scope) {
-                ALL -> ArrayList(apps)
-                SELECTED -> ArrayList(apps.filter { identifierOf(it) in selection })
-            }
+        @JvmOverloads
+        fun filter(apps: List<App>, scope: LensAppScope, selection: Set<String>, hiddenIds: Set<String> = emptySet()): ArrayList<App> =
+            ArrayList(apps.filter {
+                val id = identifierOf(it)
+                (scope == ALL || id in selection) && id !in hiddenIds
+            })
     }
 }

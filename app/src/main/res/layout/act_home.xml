@@ -20,6 +20,16 @@
         android:visibility="invisible"
         tools:visibility="visible" />
 
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/restoreHiddenLensApps"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginHorizontal="16dp"
+        android:minHeight="48dp"
+        android:text="@string/lens_restore_apps"
+        android:visibility="gone" />
+
     <!-- FISH-014: displays active lens name when multiple lenses exist. Centered above dots.
          Long-press opens the lens management menu. GONE when single lens. -->
     <TextView

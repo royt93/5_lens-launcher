@@ -35,7 +35,7 @@ object LayoutBackupSnapshotFactory {
                 require(entries.map { AppPersistent.generateIdentifier(it.packageName, it.name) }.toSet().size == entries.size) {
                     "Duplicate app identity in lens ${lens.id}"
                 }
-                LayoutBackupLens(lens.id, lens.name, lens.orderIndex, settings.scope, settings.selectedAppIds, settings.frozen, entries, lens.groupName)
+                LayoutBackupLens(lens.id, lens.name, lens.orderIndex, settings.scope, settings.selectedAppIds, settings.frozen, entries, lens.groupName, settings.temporarilyHiddenAppIds)
             }
         )
     }

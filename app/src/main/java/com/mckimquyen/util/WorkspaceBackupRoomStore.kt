@@ -88,7 +88,7 @@ class WorkspaceBackupRoomStore(context: Context) : WorkspaceBackupImportStore {
     override fun replacePreferences(plan: LayoutImportApplier.WorkspacePlan) {
         require(plan.schemaVersion == LayoutBackup.CURRENT_SCHEMA_VERSION)
         check(settings.replaceWorkspacePreferences(
-            plan.lenses.map { LensAppSettingsBackup(it.id, it.scope, it.selectedAppIds, it.frozen) },
+            plan.lenses.map { it.toAppSettingsBackup() },
             plan.activeLensId,
             plan.collapsedGroupNames
         )) { "Unable to commit workspace preferences" }

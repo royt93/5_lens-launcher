@@ -20,6 +20,25 @@ class LensAppScopeTest {
     private val apps = listOf(mail, chat)
 
     @Test
+    fun `temporary hiding filters ALL without changing input or global visibility`() {
+        val hidden = setOf(LensAppScope.identifierOf(mail), "missing-Activity")
+        val result = LensAppScope.filter(apps, LensAppScope.ALL, emptySet(), hidden)
+        assertEquals(listOf(chat), result)
+        assertEquals(listOf(mail, chat), apps)
+        assertEquals(true, mail.isVisible)
+        assertEquals(2, hidden.size)
+    }
+
+    @Test
+    fun `temporary hiding preserves selection and can hide the last selected app`() {
+        val selected = setOf(LensAppScope.identifierOf(mail))
+        val hidden = setOf(LensAppScope.identifierOf(mail))
+        assertEquals(emptyList<App>(), LensAppScope.filter(apps, LensAppScope.SELECTED, selected, hidden))
+        assertEquals(setOf(LensAppScope.identifierOf(mail)), selected)
+        assertEquals(listOf(mail), LensAppScope.filter(apps, LensAppScope.SELECTED, selected, emptySet()))
+    }
+
+    @Test
     fun `ALL returns every app as a new list`() {
         val result = LensAppScope.filter(apps, LensAppScope.ALL, emptySet())
         assertEquals(apps, result)

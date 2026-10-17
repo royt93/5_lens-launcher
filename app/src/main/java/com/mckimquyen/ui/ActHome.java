@@ -114,6 +114,7 @@ public class ActHome extends ActBase {
     public static final int MENU_ID_FREEZE_LENS = 10;
     @androidx.annotation.VisibleForTesting
     static final int MENU_ID_MANAGE_CURRENT_LENS_GROUP = 11;
+    static final int MENU_ID_HIDDEN_LENS_APPS = 12;
 
     // UI-021: predictive-back shrink/fade preview bounds for the search overlay, matching
     // Android's own predictive-back design guidance (subtle scale-down + slight fade, not a
@@ -588,6 +589,7 @@ public class ActHome extends ActBase {
      * and the active lens name label) in lockstep across all lifecycle, swipe, search, and mode states.
      */
     void updateLensNavigationChrome() {
+        updateHiddenRecoveryButton();
         if (lensPageIndicator == null) return;
         boolean isCleanMode = utilSettings != null && utilSettings.getBoolean(UtilSettings.KEY_CLEAN_LENS_MODE);
         boolean isList = utilSettings != null && utilSettings.isListMode();
@@ -923,6 +925,8 @@ public class ActHome extends ActBase {
                 R.drawable.ic_lock_24dp, true);
         addLensMenuItem(menu, themed, MENU_ID_MANAGE_CURRENT_LENS_GROUP, R.string.lens_group_manage,
                 R.drawable.ic_group_24dp, true);
+        addLensMenuItem(menu, themed, MENU_ID_HIDDEN_LENS_APPS, R.string.lens_hidden_apps,
+                R.drawable.ic_visibility_24dp, true);
         menu.setOnMenuItemClickListener(item -> onLensMenuItemSelected(item.getItemId(), position));
         menu.setForceShowIcon(true);
         menu.setOnDismissListener(dismissed -> {
@@ -997,6 +1001,9 @@ public class ActHome extends ActBase {
             return true;
         } else if (itemId == MENU_ID_FREEZE_LENS) {
             toggleFreezeForLens(current);
+            return true;
+        } else if (itemId == MENU_ID_HIDDEN_LENS_APPS) {
+            showHiddenLensAppsDialog(current.getId());
             return true;
         } else if (itemId == MENU_ID_MANAGE_CURRENT_LENS_GROUP) {
             openLensManagement(current.getId());
@@ -1258,6 +1265,44 @@ public class ActHome extends ActBase {
                 .setOnClickListener(v -> lensDialog.dismiss());
     }
 
+    private void showHiddenLensAppsDialog(String lensId) {
+        if (utilSettings == null) return;
+        java.util.Set<String> hidden = utilSettings.getLensHiddenAppIds(lensId);
+        java.util.ArrayList<App> apps = new java.util.ArrayList<>();
+        java.util.List<App> installed = RAppsSingleton.getInstance().getApps();
+        if (installed != null) {
+            for (App app : installed) {
+                if (hidden.contains(LensAppScope.identifierOf(app))) apps.add(app);
+            }
+        }
+        if (lensDialog != null) lensDialog.dismiss();
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this, R.style.MaterialYouDialogTheme)
+                .setTitle(R.string.lens_hidden_apps)
+                .setNegativeButton(android.R.string.cancel, null);
+        if (apps.isEmpty()) {
+            lensDialog = builder.setMessage(R.string.lens_hidden_apps_empty).create();
+            lensDialog.show();
+            return;
+        }
+        java.util.Set<String> restored = new java.util.HashSet<>();
+        lensDialog = builder.setAdapter(new com.mckimquyen.adt.LensAppChoiceAdapter(this, apps), null)
+                .setPositiveButton(R.string.lens_restore_apps, null).create();
+        lensDialog.show();
+        android.widget.ListView choices = lensDialog.getListView();
+        choices.setChoiceMode(android.widget.ListView.CHOICE_MODE_MULTIPLE);
+        choices.setOnItemClickListener((parent, row, position, id) -> {
+            String appId = LensAppScope.identifierOf(apps.get(position));
+            if (choices.isItemChecked(position)) restored.add(appId); else restored.remove(appId);
+        });
+        lensDialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE).setOnClickListener(v -> {
+            java.util.Set<String> remaining = new java.util.HashSet<>(utilSettings.getLensHiddenAppIds(lensId));
+            remaining.removeAll(restored);
+            utilSettings.saveLensHiddenAppIds(lensId, remaining);
+            lensDialog.dismiss();
+            AppEventManager.INSTANCE.notifyLensScopeChanged(lensId);
+        });
+    }
+
     private void showLensNameDialog(int titleRes, String initialText, LensNameCallback onDone) {
         EditText input = new EditText(this);
         // A programmatic View with no id is skipped by onSaveInstanceState, so the typed name would
@@ -1363,6 +1408,12 @@ public class ActHome extends ActBase {
         });
         // SearchBar->SearchView expand/collapse is a Material3 morph animation, not an instant
         // focus change; refresh results once the panel is fully SHOWN and ready for input.
+        findViewById(R.id.restoreHiddenLensApps).setOnClickListener(v -> {
+            int position = lensPager.getCurrentItem();
+            if (position >= 0 && position < currentLenses.size()) {
+                showHiddenLensAppsDialog(currentLenses.get(position).getId());
+            }
+        });
         searchView.addTransitionListener((view, previousState, newState) -> {
             if (newState == SearchView.TransitionState.SHOWN) {
                 updateSearchResults(appSearch.getText());
@@ -1390,6 +1441,7 @@ public class ActHome extends ActBase {
             // SearchView.isShowing() semantics, same reasoning as the old blur toggle it replaces.
             if (newState == SearchView.TransitionState.SHOWING) {
                 lensPager.setVisibility(View.INVISIBLE);
+                updateHiddenRecoveryButton();
                 lensPageIndicator.setVisibility(View.GONE);
                 if (tvLensName != null) tvLensName.setVisibility(View.GONE);
                 if (rvHomeAppList != null) {
@@ -2023,7 +2075,27 @@ public class ActHome extends ActBase {
     private ArrayList<App> scopedApps(String lensId) {
         if (listApp == null || utilSettings == null) return listApp;
         return LensAppScope.filter(listApp,
-                utilSettings.getLensAppScope(lensId), utilSettings.getLensAppSelection(lensId));
+                utilSettings.getLensAppScope(lensId), utilSettings.getLensAppSelection(lensId),
+                utilSettings.getLensHiddenAppIds(lensId));
+    }
+
+    /** FEAT-011: only a lens emptied by temporary hiding gets the recovery button. */
+    private void updateHiddenRecoveryButton() {
+        View button = findViewById(R.id.restoreHiddenLensApps);
+        if (button == null) return;
+        boolean show = false;
+        if (utilSettings != null && listApp != null && lensPager != null
+                && lensPager.getVisibility() == View.VISIBLE && searchView != null && !searchView.isShowing()
+                && !utilSettings.isListMode()) {
+            int position = lensPager.getCurrentItem();
+            if (position >= 0 && position < currentLenses.size()) {
+                String lensId = currentLenses.get(position).getId();
+                show = !LensAppScope.filter(listApp, utilSettings.getLensAppScope(lensId),
+                        utilSettings.getLensAppSelection(lensId)).isEmpty()
+                        && scopedApps(lensId).isEmpty();
+            }
+        }
+        button.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
     /** FISH-021: re-applies each bound page's scope after a selection change. */
@@ -2036,6 +2108,7 @@ public class ActHome extends ActBase {
                 page.setApps(scopedApps(page.getLensId()));
             }
         }
+        updateHiddenRecoveryButton();
     }
 
     private void assignApps(ArrayList<App> lApp) {

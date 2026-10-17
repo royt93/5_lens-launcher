@@ -56,6 +56,57 @@ class WorkspaceBackupImportIntegrationTest {
     }
 
     @Test
+    fun hiddenIdsRoundTripThroughFileAndRestoreAfterPreferenceFailure() {
+        val originalHidden = setOf("com.example.home-com.example.home.Main", "com.gone-com.gone.Main")
+        runBlocking { seedTwoLensWorkspace() }
+        settings.saveLensHiddenAppIds("default", originalHidden)
+        settings.saveLensHiddenAppIds("work", setOf("work-orphan"))
+        val target = File(context.cacheDir, "hidden-ids-${System.nanoTime()}.json")
+        val done = CountDownLatch(1)
+        var exported = false
+        try {
+            LayoutBackupIo.exportAsync(context, Uri.fromFile(target)) { exported = it; done.countDown() }
+            assertTrue("export must finish", done.await(5, TimeUnit.SECONDS))
+            assertTrue("hidden app state must export", exported)
+            val parsed = LayoutBackup.parse(target.readText()) as LayoutBackupParseResult.Success
+            assertEquals(originalHidden, parsed.backup.lenses.single { it.id == "default" }.temporarilyHiddenAppIds)
+            assertEquals(setOf("work-orphan"), parsed.backup.lenses.single { it.id == "work" }.temporarilyHiddenAppIds)
+            settings.saveLensHiddenAppIds("default", setOf("local-orphan"))
+            settings.saveLensHiddenAppIds("work", emptySet())
+            val real = WorkspaceBackupRoomStore(context)
+            val failingPrefs = object : WorkspaceBackupImportStore by real {
+                override fun replacePreferences(plan: LayoutImportApplier.WorkspacePlan) {
+                    real.replacePreferences(plan)
+                    error("injected failure after preferences changed")
+                }
+            }
+            val failed = runBlocking { WorkspaceBackupImportCoordinator(failingPrefs).apply(parsed.backup) }
+            assertTrue(failed is WorkspaceBackupImportResult.Failed)
+            assertEquals(setOf("local-orphan"), settings.getLensHiddenAppIds("default"))
+            assertEquals(emptySet<String>(), settings.getLensHiddenAppIds("work"))
+            val applied = runBlocking { WorkspaceBackupImportCoordinator(real).apply(parsed.backup) }
+            assertEquals(WorkspaceBackupImportResult.Applied, applied)
+            assertEquals(originalHidden, settings.getLensHiddenAppIds("default"))
+            assertEquals(setOf("work-orphan"), settings.getLensHiddenAppIds("work"))
+            assertEquals(LensAppScope.SELECTED, settings.getLensAppScope("work"))
+            assertEquals(setOf("com.example.work-com.example.work.Main"), settings.getLensAppSelection("work"))
+        } finally {
+            target.delete()
+        }
+    }
+
+    @Test
+    fun legacyV2WithoutHiddenIdsReplacesStaleHiddenIdsWithEmptySet() = runBlocking {
+        val root = org.json.JSONObject(v2Backup().toJson())
+        root.getJSONArray("lenses").getJSONObject(0).remove("temporarilyHiddenAppIds")
+        settings.saveLensHiddenAppIds("default", setOf("stale-orphan"))
+        val parsed = LayoutBackup.parse(root.toString()) as LayoutBackupParseResult.Success
+        val result = WorkspaceBackupImportCoordinator(WorkspaceBackupRoomStore(context)).apply(parsed.backup)
+        assertEquals(WorkspaceBackupImportResult.Applied, result)
+        assertEquals(emptySet<String>(), settings.getLensHiddenAppIds("default"))
+    }
+
+    @Test
     fun exportMutateImportRestoresWorkspaceAndKeepsNonLayoutStats() = runBlocking {
         val workspaceDao = database.lensWorkspaceDao()
         val appDao = database.appPersistentDao()
@@ -341,6 +392,8 @@ class WorkspaceBackupImportIntegrationTest {
     @Test
     fun v1ImportOnlyChangesDefaultLens() = runBlocking {
         seedTwoLensWorkspace()
+        settings.saveLensHiddenAppIds("default", setOf("default-orphan"))
+        settings.saveLensHiddenAppIds("work", setOf("work-orphan"))
         RAppsSingleton.instance.apps = arrayListOf(
             App(packageName = "com.example.home", name = "com.example.home.Main")
         )
@@ -361,6 +414,8 @@ class WorkspaceBackupImportIntegrationTest {
         assertEquals("work", settings.getString(UtilSettings.KEY_ACTIVE_LENS_ID))
         assertEquals(LensAppScope.SELECTED, settings.getLensAppScope("work"))
         assertTrue(settings.isLensFrozen("work"))
+        assertEquals(setOf("default-orphan"), settings.getLensHiddenAppIds("default"))
+        assertEquals(setOf("work-orphan"), settings.getLensHiddenAppIds("work"))
     }
 
     @Test

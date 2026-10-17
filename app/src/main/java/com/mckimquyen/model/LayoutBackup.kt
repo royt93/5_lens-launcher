@@ -125,7 +125,8 @@ data class LayoutBackupLens(
     val selectedAppIds: Set<String>,
     val frozen: Boolean,
     val entries: List<LayoutBackupEntry>,
-    val groupName: String? = null
+    val groupName: String? = null,
+    val temporarilyHiddenAppIds: Set<String> = emptySet()
 ) {
     fun toJson(): JSONObject = JSONObject().apply {
         put(KEY_ID, id)
@@ -136,6 +137,7 @@ data class LayoutBackupLens(
         put(KEY_FROZEN, frozen)
         put(KEY_ENTRIES, JSONArray(entries.map { it.toJson() }))
         put(KEY_GROUP_NAME, groupName ?: JSONObject.NULL)
+        put(KEY_TEMPORARILY_HIDDEN_APP_IDS, JSONArray(temporarilyHiddenAppIds.toList()))
     }
 
     companion object {
@@ -147,6 +149,7 @@ data class LayoutBackupLens(
         private const val KEY_FROZEN = "frozen"
         private const val KEY_ENTRIES = "entries"
         private const val KEY_GROUP_NAME = "groupName"
+        private const val KEY_TEMPORARILY_HIDDEN_APP_IDS = "temporarilyHiddenAppIds"
 
         private fun JSONObject.stringField(key: String): String? =
             if (opt(key) is String) optString(key) else null
@@ -186,6 +189,15 @@ data class LayoutBackupLens(
             if (selectedIds.toSet().size != selectedIds.size) return null
             if (scope == LensAppScope.SELECTED && selectedIds.isEmpty()) return null
 
+            val hiddenIds = mutableSetOf<String>()
+            if (json.has(KEY_TEMPORARILY_HIDDEN_APP_IDS)) {
+                val hiddenJson = json.optJSONArray(KEY_TEMPORARILY_HIDDEN_APP_IDS) ?: return null
+                for (i in 0 until hiddenJson.length()) {
+                    val hiddenId = hiddenJson.opt(i) as? String ?: return null
+                    if (hiddenId.isBlank() || !hiddenIds.add(hiddenId)) return null
+                }
+            }
+
             val groupName = when (val value = json.opt(KEY_GROUP_NAME)) {
                 null, JSONObject.NULL -> null
                 is String -> value.takeIf(String::isNotBlank)?.trim() ?: return null
@@ -206,7 +218,8 @@ data class LayoutBackupLens(
                 selectedAppIds = selectedIds.toSet(),
                 frozen = json.booleanField(KEY_FROZEN) ?: return null,
                 entries = entries,
-                groupName = groupName
+                groupName = groupName,
+                temporarilyHiddenAppIds = hiddenIds
             )
         }
     }

@@ -342,8 +342,8 @@ class ActHomeLensManagementWidgetTest {
                     .onEmptySpaceLongPressListener!!.onEmptySpaceLongPress(0f, 0f)
 
                 assertEquals(
-                    "The menu must offer all eleven actions including current-lens group management",
-                    11,
+                    "Menu phải có 12 action, gồm quản lý nhóm và khôi phục app ẩn",
+                    12,
                     activity.lensManagementMenu!!.menu.size()
                 )
                 assertEquals(
@@ -449,7 +449,7 @@ class ActHomeLensManagementWidgetTest {
                 val addIcon = requireNotNull(menu.findItem(itemAdd).icon)
                 val deleteIcon = requireNotNull(menu.findItem(itemDelete).icon)
                 assertFalse(menu.findItem(itemDelete).isEnabled)
-                assertEquals("Disabled Delete keeps normal icon tint", 255, deleteIcon.alpha)
+                assertTrue("Delete disabled phải mờ hơn Add theo theme", deleteIcon.alpha < addIcon.alpha)
                 assertEquals("Icon tint matches enabled menu items", addIcon.colorFilter, deleteIcon.colorFilter)
             }
         }

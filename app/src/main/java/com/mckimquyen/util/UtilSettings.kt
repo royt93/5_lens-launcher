@@ -22,7 +22,8 @@ data class LensAppSettingsBackup(
     val lensId: String,
     val scope: LensAppScope,
     val selectedAppIds: Set<String>,
-    val frozen: Boolean
+    val frozen: Boolean,
+    val temporarilyHiddenAppIds: Set<String> = emptySet()
 )
 
 data class WorkspacePreferencesSnapshot(
@@ -185,6 +186,7 @@ class UtilSettings(context: Context) {
         /** FISH-021: per-lens app scope, selection and frozen flag (suffixed `_<lensId>`, never inherited). */
         const val KEY_LENS_APP_SCOPE = "lens_app_scope"
         const val KEY_LENS_APP_SELECTION = "lens_app_selection"
+        const val KEY_LENS_HIDDEN_APP_IDS = "lens_hidden_app_ids"
         const val KEY_LENS_FROZEN = "lens_frozen"
         const val KEY_COLLAPSED_LENS_GROUPS = "collapsed_lens_groups"
     }
@@ -442,6 +444,15 @@ class UtilSettings(context: Context) {
         prefs.edit { putStringSet(lensKey(KEY_LENS_APP_SELECTION, lensId), HashSet(ids)) }
     }
 
+    fun getLensHiddenAppIds(lensId: String?): Set<String> =
+        runCatching { prefs.getStringSet(lensKey(KEY_LENS_HIDDEN_APP_IDS, lensId), null)?.toSet() }
+            .getOrNull().orEmpty()
+
+    fun saveLensHiddenAppIds(lensId: String?, ids: Set<String>) {
+        require(ids.all(String::isNotBlank)) { "Hidden app identifiers must not be blank" }
+        prefs.edit { putStringSet(lensKey(KEY_LENS_HIDDEN_APP_IDS, lensId), HashSet(ids)) }
+    }
+
     fun isLensFrozen(lensId: String?): Boolean =
         runCatching { prefs.getBoolean(lensKey(KEY_LENS_FROZEN, lensId), false) }.getOrDefault(false)
 
@@ -478,6 +489,7 @@ class UtilSettings(context: Context) {
         lensSettings.forEach { lens ->
             editor.putString(lensKey(KEY_LENS_APP_SCOPE, lens.lensId), lens.scope.name)
             editor.putStringSet(lensKey(KEY_LENS_APP_SELECTION, lens.lensId), HashSet(lens.selectedAppIds))
+            editor.putStringSet(lensKey(KEY_LENS_HIDDEN_APP_IDS, lens.lensId), HashSet(lens.temporarilyHiddenAppIds))
             editor.putBoolean(lensKey(KEY_LENS_FROZEN, lens.lensId), lens.frozen)
         }
         editor.putString(KEY_ACTIVE_LENS_ID, activeLensId.takeIf(lensIds::contains) ?: LensWorkspace.DEFAULT_LENS_ID)
@@ -516,6 +528,7 @@ class UtilSettings(context: Context) {
     private fun isWorkspacePreferenceKey(key: String): Boolean =
         key == KEY_LENS_APP_SCOPE || key.startsWith("${KEY_LENS_APP_SCOPE}_") ||
             key == KEY_LENS_APP_SELECTION || key.startsWith("${KEY_LENS_APP_SELECTION}_") ||
+            key == KEY_LENS_HIDDEN_APP_IDS || key.startsWith("${KEY_LENS_HIDDEN_APP_IDS}_") ||
             key == KEY_LENS_FROZEN || key.startsWith("${KEY_LENS_FROZEN}_") ||
             key == KEY_COLLAPSED_LENS_GROUPS
 
@@ -571,6 +584,7 @@ class UtilSettings(context: Context) {
         saveIconSize(toLensId, getIconSize(fromLensId))
         saveLensAppScope(toLensId, getLensAppScope(fromLensId))
         saveLensAppSelection(toLensId, getLensAppSelection(fromLensId))
+        saveLensHiddenAppIds(toLensId, getLensHiddenAppIds(fromLensId))
         saveLensFrozen(toLensId, isLensFrozen(fromLensId))
         // FISH-015: only carry the Custom distortion forward once a real Custom preset already
         // exists somewhere - otherwise getCustomDistortionFactor() is merely falling back to the
@@ -583,6 +597,7 @@ class UtilSettings(context: Context) {
     }
 
     fun deleteLensSettings(lensId: String) {
+        if (lensId.isNotEmpty()) prefs.edit { remove(lensKey(KEY_LENS_HIDDEN_APP_IDS, lensId)) }
         if (lensId.isNotEmpty() && lensId != LensWorkspace.DEFAULT_LENS_ID) {
             prefs.edit {
                 remove("${KEY_DISTORTION_FACTOR}_$lensId")

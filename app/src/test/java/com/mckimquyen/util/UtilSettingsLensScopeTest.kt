@@ -107,6 +107,50 @@ class UtilSettingsLensScopeTest {
     }
 
     @Test
+    fun `hidden ids are isolated copied and survive scope changes`() {
+        val ids = mutableSetOf("com.mail-Main", "missing-Activity")
+        settings.saveLensHiddenAppIds(work, ids)
+        ids.clear()
+        settings.saveLensAppScope(work, LensAppScope.SELECTED)
+        settings.saveLensAppSelection(work, setOf("com.mail-Main"))
+        assertEquals(setOf("com.mail-Main", "missing-Activity"), UtilSettings(context).getLensHiddenAppIds(work))
+        assertEquals(emptySet<String>(), settings.getLensHiddenAppIds(personal))
+        settings.duplicateLensSettings(work, personal)
+        assertEquals(settings.getLensHiddenAppIds(work), settings.getLensHiddenAppIds(personal))
+        settings.deleteLensSettings(personal)
+        assertEquals(emptySet<String>(), settings.getLensHiddenAppIds(personal))
+        assertEquals(2, settings.getLensHiddenAppIds(work).size)
+    }
+
+    @Test
+    fun `deleting default lens settings clears its hidden ids`() {
+        settings.saveLensHiddenAppIds(default, setOf("old-App"))
+        settings.deleteLensSettings(default)
+        assertEquals(emptySet<String>(), settings.getLensHiddenAppIds(default))
+    }
+
+    @Test
+    fun `hidden ids join workspace replacement and rollback including orphans`() {
+        settings.saveLensHiddenAppIds(work, setOf("orphan-Activity"))
+        val before = settings.snapshotWorkspacePreferences()
+        assertTrue(settings.replaceWorkspacePreferences(
+            listOf(LensAppSettingsBackup(default, LensAppScope.ALL, emptySet(), false, setOf("imported-App"))),
+            default
+        ))
+        assertEquals(emptySet<String>(), settings.getLensHiddenAppIds(work))
+        assertEquals(setOf("imported-App"), settings.getLensHiddenAppIds(default))
+        assertTrue(settings.restoreWorkspacePreferences(before))
+        assertEquals(setOf("orphan-Activity"), settings.getLensHiddenAppIds(work))
+        assertEquals(emptySet<String>(), settings.getLensHiddenAppIds(default))
+    }
+
+    @Test
+    fun `wrong typed hidden ids fall back to empty`() {
+        rawPrefs().edit().putString("lens_hidden_app_ids_$work", "bad").commit()
+        assertEquals(emptySet<String>(), settings.getLensHiddenAppIds(work))
+    }
+
+    @Test
     fun `keys are stable`() {
         assertEquals("lens_app_scope", UtilSettings.KEY_LENS_APP_SCOPE)
         assertEquals("lens_app_selection", UtilSettings.KEY_LENS_APP_SELECTION)

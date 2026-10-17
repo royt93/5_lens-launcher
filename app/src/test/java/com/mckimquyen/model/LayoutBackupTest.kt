@@ -42,6 +42,24 @@ class LayoutBackupTest {
         groupName: String? = null
     ) = LayoutBackupLens(id, name, orderIndex, scope, selectedAppIds, frozen, entries, groupName)
 
+    @Test
+    fun `hidden ids round trip including orphans and legacy defaults empty`() {
+        val lens = sampleLens().copy(temporarilyHiddenAppIds = setOf("missing-Activity", "com.mail-Main"))
+        assertEquals(lens, LayoutBackupLens.fromJson(lens.toJson()))
+        val legacy = lens.toJson().apply { remove("temporarilyHiddenAppIds") }
+        assertEquals(emptySet<String>(), LayoutBackupLens.fromJson(legacy)?.temporarilyHiddenAppIds)
+    }
+
+    @Test
+    fun `hidden ids reject wrong type blank duplicate and null`() {
+        val invalid = listOf<Any>("bad", org.json.JSONObject.NULL,
+            org.json.JSONArray().put(" "), org.json.JSONArray().put(7),
+            org.json.JSONArray().put("same-App").put("same-App"))
+        invalid.forEach { value ->
+            assertNull(LayoutBackupLens.fromJson(sampleLens().toJson().put("temporarilyHiddenAppIds", value)))
+        }
+    }
+
     // --- entry-level (schema-neutral) ---
 
     @Test

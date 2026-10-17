@@ -38,7 +38,8 @@ object LayoutBackupIo {
                         lens.id,
                         settings.getLensAppScope(lens.id),
                         settings.getLensAppSelection(lens.id),
-                        settings.isLensFrozen(lens.id)
+                        settings.isLensFrozen(lens.id),
+                        settings.getLensHiddenAppIds(lens.id)
                     )
                 }
                 val activeLensId = settings.getString(UtilSettings.KEY_ACTIVE_LENS_ID)

@@ -159,6 +159,8 @@
 
 ## 🟡 In progress
 
+- FEAT-011 — Tạm ẩn app riêng theo lens (owner duyệt 2026-10-16, thực thi 2026-10-17): hidden IDs độc lập scope/global visibility, grid-only, multi-select restore + empty-state recovery và backup v2 additive/rollback. Target duy nhất hiện tại: TECNO BG6 `118743744X002560`. Source/tests đang kiểm chứng, chưa commit/push; xem `inprogress/p2-feat-feat-011-temporary-per-lens-app-hiding.md`.
+
 - SEC-001 — Local signing remediation is complete. Play Console rotation/revocation, CI secret replacement, non-production upload validation and coordinated Git-history cleanup require publisher-owner access.
 - ADS-001 — Consent-driven advertising state machine handed to the Ad SDK team (2026-09-06); excluded from this repo's code-loop until they deliver. VIP-001 stays blocked on this dependency.
 

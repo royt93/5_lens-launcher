@@ -24,7 +24,8 @@ class LensAccessibilityHelper(
     private val onAppLongClicked: ((index: Int) -> Boolean)? = null,
     // UI-024: defaults to "off" so existing tests that don't pass this still get the pre-badge
     // announcement behavior rather than silently depending on a real SharedPreferences read.
-    private val showBadgesSettingProvider: () -> Boolean = { false }
+    private val showBadgesSettingProvider: () -> Boolean = { false },
+    private val onAppHidden: ((index: Int) -> Unit)? = null
 ) : ExploreByTouchHelper(host) {
 
     override fun getVirtualViewAt(x: Float, y: Float): Int {
@@ -80,6 +81,12 @@ class LensAccessibilityHelper(
             node.addAction(AccessibilityNodeInfoCompat.ACTION_LONG_CLICK)
         }
 
+        if (onAppHidden != null) {
+            node.addAction(AccessibilityNodeInfoCompat.AccessibilityActionCompat(
+                R.id.menuItemHideFromLens, host.context.getString(R.string.lens_hide_app)
+            ))
+        }
+
         val bounds = Rect()
         if (rectProvider(virtualViewId, bounds) && !bounds.isEmpty) {
             node.setBoundsInParent(bounds)
@@ -103,6 +110,11 @@ class LensAccessibilityHelper(
             }
             AccessibilityNodeInfoCompat.ACTION_LONG_CLICK -> {
                 onAppLongClicked?.invoke(virtualViewId) ?: false
+            }
+            R.id.menuItemHideFromLens -> {
+                val hide = onAppHidden ?: return false
+                hide(virtualViewId)
+                true
             }
             else -> false
         }

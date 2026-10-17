@@ -655,6 +655,7 @@ class LensView : View {
             )
             popupMenu.inflate(R.menu.menu_search_result)
             popupMenu.menu.findItem(R.id.menuItemUnpin).isVisible = app.pinnedZone != PinnedZone.NONE
+            popupMenu.menu.findItem(R.id.menuItemHideFromLens).isVisible = true
             popupMenu.menu.findItem(R.id.menuItemRemoveFromLens).isVisible =
                 shouldOfferRemoveFromLens(mUtilSettings?.getLensAppScope(lensId))
             popupMenu.setForceShowIcon(true)
@@ -682,6 +683,10 @@ class LensView : View {
                     }
                     R.id.menuItemRemoveFromLens -> {
                         removeFromLens(app)
+                        true
+                    }
+                    R.id.menuItemHideFromLens -> {
+                        hideFromLens(app)
                         true
                     }
                     else -> false
@@ -715,6 +720,12 @@ class LensView : View {
     private fun removeFromLens(app: App) {
         val settings = mUtilSettings ?: return
         LensAppScopeEditor(settings).remove(lensId, setOf(LensAppScope.identifierOf(app)), emptySet())
+    }
+
+    private fun hideFromLens(app: App) {
+        val settings = mUtilSettings ?: return
+        settings.saveLensHiddenAppIds(lensId, settings.getLensHiddenAppIds(lensId) + LensAppScope.identifierOf(app))
+        com.mckimquyen.services.AppEventManager.notifyLensScopeChanged(lensId)
     }
 
     private fun pinQuickAction(app: App, zone: PinnedZone) {
@@ -769,6 +780,7 @@ class LensView : View {
             rectProvider = { index, outRect -> getAppBounds(index, outRect) },
             onAppClicked = { index -> launchAppAtIndex(index) },
             onAppLongClicked = { index -> showAppOptionsAtIndex(index) },
+            onAppHidden = { index -> mApps?.getOrNull(index)?.let(::hideFromLens) },
             // UI-024: TalkBack must honor the same toggle the visual badge paths do.
             showBadgesSettingProvider = {
                 mUtilSettings?.let {

@@ -211,6 +211,10 @@
     <string name="menu_bulk_add_to_lens">렌즈에 추가…</string>
     <string name="menu_bulk_remove_from_lens">렌즈에서 제거…</string>
     <string name="menu_remove_from_lens">이 렌즈에서 제거</string>
+    <string name="lens_hide_app">이 렌즈에서 숨기기</string>
+    <string name="lens_hidden_apps">이 렌즈에서 숨긴 앱</string>
+    <string name="lens_restore_apps">앱 복원</string>
+    <string name="lens_hidden_apps_empty">이 렌즈에서 숨긴 앱도 검색에서 계속 사용할 수 있습니다.</string>
     <string name="lens_freeze_positions">앱 위치 고정</string>
     <string name="lens_unfreeze_positions">앱 위치 고정 해제</string>
     <string name="lens_unfreeze_title">위치 고정을 해제할까요?</string>

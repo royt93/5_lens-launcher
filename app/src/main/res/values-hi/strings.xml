@@ -215,6 +215,10 @@
     <string name="menu_bulk_add_to_lens">लेंस में जोड़ें…</string>
     <string name="menu_bulk_remove_from_lens">लेंस से हटाएं…</string>
     <string name="menu_remove_from_lens">इस लेंस से हटाएं</string>
+    <string name="lens_hide_app">इस लेंस से छिपाएं</string>
+    <string name="lens_hidden_apps">इस लेंस में छिपे ऐप</string>
+    <string name="lens_restore_apps">ऐप वापस दिखाएं</string>
+    <string name="lens_hidden_apps_empty">इस लेंस से छिपे ऐप खोज में उपलब्ध रहते हैं।</string>
     <string name="lens_freeze_positions">ऐप की स्थिति फ़िक्स करें</string>
     <string name="lens_unfreeze_positions">ऐप की स्थिति अनफ़िक्स करें</string>
     <string name="lens_unfreeze_title">स्थिति अनफ़िक्स करें?</string>

@@ -8,6 +8,25 @@ import org.junit.Test
 
 class LayoutBackupExportSnapshotTest {
     @Test
+    fun `snapshot keeps hidden ids per lens including uninstalled orphans`() {
+        val snapshot = LayoutBackupSnapshotFactory.create(
+            listOf(
+                LensWorkspace("default", "Home", 0, 1L),
+                LensWorkspace("work", "Work", 1, 2L)
+            ),
+            listOf(AppPersistent(packageName = "com.a", name = "com.a.Main", identifier = "com.a-com.a.Main", lensId = "default")),
+            listOf(
+                LensAppSettingsBackup("default", LensAppScope.ALL, emptySet(), false, setOf("com.a-com.a.Main", "gone-Main")),
+                LensAppSettingsBackup("work", LensAppScope.ALL, emptySet(), false)
+            ),
+            7L
+        )
+        assertEquals(setOf("com.a-com.a.Main", "gone-Main"), snapshot.lenses[0].temporarilyHiddenAppIds)
+        assertEquals(emptySet<String>(), snapshot.lenses[1].temporarilyHiddenAppIds)
+        assertEquals(1, snapshot.lenses[0].entries.size)
+    }
+
+    @Test
     fun `builds v2 snapshot with all lens layouts and preferences`() {
         val snapshot = LayoutBackupSnapshotFactory.create(
             listOf(

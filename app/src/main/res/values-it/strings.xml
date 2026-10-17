@@ -219,6 +219,10 @@
     <string name="menu_bulk_add_to_lens">Aggiungi a una lente…</string>
     <string name="menu_bulk_remove_from_lens">Rimuovi da una lente…</string>
     <string name="menu_remove_from_lens">Rimuovi da questa lente</string>
+    <string name="lens_hide_app">Nascondi da questa lente</string>
+    <string name="lens_hidden_apps">App nascoste in questa lente</string>
+    <string name="lens_restore_apps">Ripristina app</string>
+    <string name="lens_hidden_apps_empty">Le app nascoste da questa lente restano disponibili nella ricerca.</string>
     <string name="lens_freeze_positions">Blocca posizioni delle app</string>
     <string name="lens_unfreeze_positions">Sblocca posizioni delle app</string>
     <string name="lens_unfreeze_title">Sbloccare le posizioni?</string>

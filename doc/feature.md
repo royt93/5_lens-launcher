@@ -40,6 +40,8 @@ Source of truth for implementation choices in this session. Detailed acceptance 
 
 ## 🟡 In progress
 
+- **FEAT-011 — Tạm ẩn app riêng theo lens (scope duyệt 2026-10-16, kiểm thử 2026-10-17)**: Hidden IDs độc lập theo lens và `ALL`/`SELECTED`; chỉ lọc lưới, giữ search/Apps/favorites/layout. Menu app + TalkBack hỗ trợ ẩn; lens menu mở multi-select khôi phục (Hủy không lưu); CTA khi ẩn hết vẫn dùng trong Clean mode, ẩn khi search/list-mode. Backup v2 thêm `temporarilyHiddenAppIds` tùy chọn, strict validation, giữ orphan IDs và rollback; duplicate copy, delete dọn cả default-lens key. TECNO BG6 `118743744X002560` là thiết bị duy nhất từ khi owner đổi target: 113/113 instrumentation liên quan pass; full instrumentation 613 test không failure; 67 test liên quan sau bổ sung coverage pass; JVM 876/876, lint 0 lỗi / 27 cảnh báo. Smoke tay toàn bộ 6 flow đạt trên BG6. Audit 9.60/10, đạt gate push >9.0. Chưa commit/push. Smoke thật ẩn Chrome, mở danh sách có icon + checkbox, khôi phục Chrome trở lại grid; không thấy ad. Chưa commit/push. Story: `doc/task/inprogress/p2-feat-feat-011-temporary-per-lens-app-hiding.md`.
+
 - **FISH-022 — Nhóm lens (2026-10-15)**: Room group metadata + backup v2, `LensManagementActivity` Material You (active lens, count, edit theo ngữ cảnh), bulk assign/create/ungroup, popup action, đủ locale. Audit sửa 3 lỗi (manage-id lạ, mất edit state khi recreate, `createLens` không copy group). TECNO KJ7: manager 28/28, Home 26/26, quick-switch 12/12, multi-lens 4/4, backup 11/11, migration 4/4; full unit 866/866; secret scan + diff check xanh. Backup export/import smoke tay pass group + collapsed state; file picker export lỗi orphan-row đã sửa và commit `2ba4f58d`.
 
 
@@ -52,7 +54,6 @@ Source of truth for implementation choices in this session. Detailed acceptance 
 ## 📋 Picked
 
 1. **FISH-022 — Nhóm lens (2026-10-14, owner-approved design)**: Add nullable `groupName` to `LensWorkspace` (Room v13 + migration); group sections are derived from lens labels, trimmed and compared case-insensitively, with empty groups removed. Replace lens-switch dialog with a dedicated management Activity: browse/collapse group sections and tap a lens to switch; edit mode supports bulk assign-to-existing-group, create-group-from-selection, and ungroup. Keep a quick current-lens group action and manager entry in the existing lens popup. Export/import optional `groupName` and root `collapsedGroupNames` additively in backup schema v2; old v2 files default collapsed state to empty. Import replaces collapsed state and includes it in existing prefs snapshot/rollback. No change to paging order, active-lens semantics, app scope, ads/VIP, or store-assets. Spec: `docs/superpowers/specs/2026-10-14-lens-groups-design.md`; plan: `docs/superpowers/plans/2026-10-14-fish-022-lens-groups.md`.
-2. **FEAT-011 — Tạm ẩn app riêng theo lens (idea, 2026-10-14)**: Distinguish per-lens exclusion from global `appVisible` and `LensAppScope.SELECTED`; exact interaction/data semantics not designed.
 3. **SEARCH-009 — Bộ lọc tìm kiếm lưu sẵn (idea, 2026-10-14)**: Save local search filters such as active-lens, favorites, and app subsets; exact filter set and UI not designed.
 
 ## ⏸️ Deferred

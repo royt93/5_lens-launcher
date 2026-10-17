@@ -36,6 +36,26 @@ class LayoutWorkspaceImportPlanTest {
     ) = LayoutBackupLens(id, "Lens $id", orderIndex, scope, selectedAppIds, frozen, entries)
 
     @Test
+    fun `planV2 preserves hidden ids without requiring installed apps or selection membership`() {
+        val hidden = setOf("com.gone-com.gone.Main", "com.other-com.other.Main")
+        val backup = LayoutBackup(
+            LayoutBackup.CURRENT_SCHEMA_VERSION, 0L,
+            lenses = listOf(lens("default", 0).copy(temporarilyHiddenAppIds = hidden)),
+            activeLensId = "default"
+        )
+        val plan = LayoutImportApplier.planV2(backup)
+        assertEquals(hidden, plan.lenses.single().temporarilyHiddenAppIds)
+        assertEquals(emptySet<String>(), plan.lenses.single().selectedAppIds)
+        assertEquals(emptyList<LayoutBackupEntry>(), plan.lenses.single().entries)
+        val prefs = plan.lenses.single().toAppSettingsBackup()
+        assertEquals(hidden, prefs.temporarilyHiddenAppIds)
+        assertEquals("default", prefs.lensId)
+        assertEquals(emptySet<String>(), LayoutImportApplier.planV1(
+            LayoutBackup(LayoutBackup.SCHEMA_VERSION_V1, 0L)
+        ).lenses.single().temporarilyHiddenAppIds)
+    }
+
+    @Test
     fun `planV1 targets only the default lens id and carries entries`() {
         val entries = listOf(entry("com.a"))
         val plan = LayoutImportApplier.planV1(LayoutBackup(LayoutBackup.SCHEMA_VERSION_V1, 0L, entries))

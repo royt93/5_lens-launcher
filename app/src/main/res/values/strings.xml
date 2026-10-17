@@ -262,6 +262,10 @@
     <string name="menu_bulk_add_to_lens">Add to lens…</string>
     <string name="menu_bulk_remove_from_lens">Remove from lens…</string>
     <string name="menu_remove_from_lens">Remove from this lens</string>
+    <string name="lens_hide_app">Hide from this lens</string>
+    <string name="lens_hidden_apps">Hidden apps in this lens</string>
+    <string name="lens_restore_apps">Restore apps</string>
+    <string name="lens_hidden_apps_empty">Apps hidden from this lens remain available in search.</string>
     <string name="lens_freeze_positions">Freeze app positions</string>
     <string name="lens_unfreeze_positions">Unfreeze app positions</string>
     <string name="lens_unfreeze_title">Unfreeze positions?</string>

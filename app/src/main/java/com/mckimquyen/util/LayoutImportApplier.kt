@@ -76,8 +76,11 @@ object LayoutImportApplier {
         val selectedAppIds: Set<String>,
         val frozen: Boolean,
         val entries: List<LayoutBackupEntry>,
-        val groupName: String? = null
-    )
+        val groupName: String? = null,
+        val temporarilyHiddenAppIds: Set<String> = emptySet()
+    ) {
+        fun toAppSettingsBackup() = LensAppSettingsBackup(id, scope, selectedAppIds, frozen, temporarilyHiddenAppIds)
+    }
 
     /** Pure plan for a full workspace restore - no Context/PackageManager/Room/prefs/IO. */
     data class WorkspacePlan(
@@ -130,7 +133,7 @@ object LayoutImportApplier {
         activeLensId = backup.activeLensId ?: LensWorkspace.DEFAULT_LENS_ID,
         collapsedGroupNames = backup.collapsedGroupNames,
         lenses = backup.lenses.map {
-            WorkspaceLensPlan(it.id, it.name, it.orderIndex, it.scope, it.selectedAppIds, it.frozen, it.entries, it.groupName)
+            WorkspaceLensPlan(it.id, it.name, it.orderIndex, it.scope, it.selectedAppIds, it.frozen, it.entries, it.groupName, it.temporarilyHiddenAppIds)
         }
         )
     }

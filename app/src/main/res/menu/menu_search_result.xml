@@ -28,6 +28,13 @@
         android:title="@string/organization_unpin"
         app:iconTint="@color/popup_menu_icon_tint" />
 
+    <item
+        android:id="@+id/menuItemHideFromLens"
+        android:icon="@drawable/ic_visibility_off_24dp"
+        android:title="@string/lens_hide_app"
+        android:visible="false"
+        app:iconTint="@color/popup_menu_icon_tint" />
+
     <!-- FISH-021: only offered by the lens grid, and only for a lens whose scope is SELECTED. -->
     <item
         android:id="@+id/menuItemRemoveFromLens"
