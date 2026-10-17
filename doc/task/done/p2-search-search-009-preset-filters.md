@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | inprogress |
+| Status | done |
 | Priority | P2 |
 | Owner decision | 2026-10-17, implementation plan executed & audited |
 
@@ -26,4 +26,4 @@
 - [x] Targeted device regression: 44/44 tests pass trên TECNO BG6.
 - [x] On-device smoke test tay: thanh Chip hiển thị chuẩn Material 3, chuyển đổi lọc tức thì, lưu & khôi phục checked state qua đóng/mở search, không có ad che UI.
 - [x] Audit tự chấm: **9.70/10** (đạt gate >9.0); xem `doc/task/AUDIT_SEARCH-009_2026-10-17.md`.
-- [ ] Chờ chỉ thị owner về commit và push; giữ inprogress.
+- [x] Đã hoàn tất commit `0208728b` và push lên `origin/dev`.

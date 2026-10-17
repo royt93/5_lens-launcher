@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | inprogress |
+| Status | done |
 | Priority | P2 |
 | Owner decision | 2026-10-16, implementation plan approved |
 
@@ -29,4 +29,4 @@
 - [x] Smoke tay bổ sung BG6: ẩn hết/Clean mode và CTA restore; vuốt lens gốc 54 app không bị ảnh hưởng; restore đúng một app; search tìm app đang hidden; SAF export JSON có 2 hidden IDs → khôi phục app để mutate → SAF import phục hồi hidden IDs đúng. Đã tắt Clean mode, xóa lens smoke tự tạo, giữ file export evidence.
 - [x] Review code và fix 4 issue: orphan CTA guard, default-lens cleanup, search transition CTA hide, menu count test alignment.
 - [x] Audit tự chấm: **9.60/10** (đạt gate push >9.0); xem `doc/task/AUDIT_FEAT-011_2026-10-17.md`.
-- [ ] Chờ chỉ thị owner về commit và push; giữ inprogress.
+- [x] Đã hoàn tất commit `09fe1891` và push lên `origin/dev`.
