@@ -260,4 +260,5 @@
     <string name="search_filter_this_lens">Thấu kính này</string>
     <string name="search_filter_favorites">Yêu thích</string>
     <string name="search_filter_hidden">Đã ẩn</string>
+    <string name="setting_show_focus_halo">Vòng sáng tiêu điểm</string>
 </resources>

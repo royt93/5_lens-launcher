@@ -135,6 +135,8 @@ class UtilSettings(context: Context) {
         // Clean the Lens minimalist mode
         const val DEFAULT_CLEAN_LENS_MODE = false
         const val KEY_CLEAN_LENS_MODE = "clean_lens_mode"
+        const val DEFAULT_SHOW_FOCUS_HALO = true
+        const val KEY_SHOW_FOCUS_HALO = "show_focus_halo"
         // FEAT-009: SearchBar recent-apps-panel icon toggle (the lens-menu entry stays untoggleable)
         const val KEY_RECENT_APPS_QUICK_PANEL_ENABLED = "recent_apps_quick_panel_enabled"
         const val DEFAULT_RECENT_APPS_QUICK_PANEL_ENABLED = true
@@ -286,6 +288,7 @@ class UtilSettings(context: Context) {
         KEY_DEPTH_OF_FIELD -> prefs.getBoolean(name, DEFAULT_DEPTH_OF_FIELD)
         KEY_SMART_FOCUS_BIAS -> prefs.getBoolean(name, DEFAULT_SMART_FOCUS_BIAS)
         KEY_CLEAN_LENS_MODE -> prefs.getBoolean(name, DEFAULT_CLEAN_LENS_MODE)
+        KEY_SHOW_FOCUS_HALO -> prefs.getBoolean(name, DEFAULT_SHOW_FOCUS_HALO)
         KEY_RECENT_APPS_QUICK_PANEL_ENABLED -> prefs.getBoolean(name, DEFAULT_RECENT_APPS_QUICK_PANEL_ENABLED)
         KEY_QUICK_ACTION_CALCULATOR, KEY_QUICK_ACTION_UNIT, KEY_QUICK_ACTION_TIMER,
         KEY_QUICK_ACTION_BATTERY, KEY_QUICK_ACTION_SETTINGS,

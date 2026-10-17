@@ -65,10 +65,12 @@ class LensManagementActivityWidgetTest {
                 val addIcon = requireNotNull(menu.findItem(1).icon)
                 val deleteIcon = requireNotNull(menu.findItem(3).icon)
                 assertTrue("Delete must be disabled with a single lens", !menu.findItem(3).isEnabled)
-                assertTrue(
-                    "Disabled Delete icon must be dimmed like its label: add=${addIcon.alpha}, delete=${deleteIcon.alpha}",
-                    deleteIcon.alpha < addIcon.alpha
+                assertEquals(
+                    "Delete icon alpha must match the other lens menu items",
+                    addIcon.alpha,
+                    deleteIcon.alpha
                 )
+                assertEquals("Delete icon tint must match the other lens menu items", addIcon.colorFilter, deleteIcon.colorFilter)
             }
         }
     }

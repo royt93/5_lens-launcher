@@ -261,4 +261,5 @@
     <string name="search_filter_this_lens">Esta lente</string>
     <string name="search_filter_favorites">Favoritos</string>
     <string name="search_filter_hidden">Ocultos</string>
+    <string name="setting_show_focus_halo">Anel de foco</string>
 </resources>

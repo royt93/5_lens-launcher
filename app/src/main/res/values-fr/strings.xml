@@ -261,4 +261,5 @@
     <string name="search_filter_this_lens">Cette lentille</string>
     <string name="search_filter_favorites">Favoris</string>
     <string name="search_filter_hidden">Masqués</string>
+    <string name="setting_show_focus_halo">Anneau de mise au point</string>
 </resources>

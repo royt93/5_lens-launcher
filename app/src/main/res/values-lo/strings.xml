@@ -253,4 +253,5 @@
     <string name="search_filter_this_lens">ເລນນີ້</string>
     <string name="search_filter_favorites">ທີ່ມັກ</string>
     <string name="search_filter_hidden">ເຊື່ອງໄວ້</string>
+    <string name="setting_show_focus_halo">ວົງແຫວນຈຸດໂຟກັສ</string>
 </resources>

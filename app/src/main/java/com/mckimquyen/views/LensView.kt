@@ -206,6 +206,11 @@ class LensView : View {
         internal fun shouldDrawNewAppTag(showTagSetting: Boolean, cleanMode: Boolean): Boolean =
             showTagSetting && !cleanMode
 
+        /** FISH-024: Focus accent halo gate. Suppressed when disabled or when Clean Mode is on. */
+        @JvmStatic
+        fun shouldDrawFocusHalo(enabled: Boolean, cleanMode: Boolean): Boolean =
+            enabled && !cleanMode
+
         // FISH-009: Pure state-machine transition and calculation functions
 
         /**
@@ -270,6 +275,12 @@ class LensView : View {
     private var mPaintNewAppTag: Paint? = null
     private var mPaintBadgeBackground: Paint? = null
     private var mPaintBadgeText: Paint? = null
+    private var mPaintFocusHalo: Paint? = null
+
+    /** Test hook only - counts frames in which the FISH-024 focus halo was actually drawn. */
+    @androidx.annotation.VisibleForTesting
+    var focusHaloDrawCallCount: Int = 0
+        private set
 
     /** Test hook only - mirrors LensGridCache.recomputeCount's production-counter convention. */
     @androidx.annotation.VisibleForTesting
@@ -882,6 +893,15 @@ class LensView : View {
             strokeWidth = resources.getDimension(R.dimen.stroke_width_touch_selection)
         }
 
+        mPaintFocusHalo = Paint().apply {
+            isAntiAlias = true
+            style = Paint.Style.STROKE
+            strokeWidth = resources.getDimension(R.dimen.stroke_width_focus_halo)
+            mUtilSettings?.let {
+                color = it.getString(UtilSettings.KEY_HIGHLIGHT_COLOR)?.toColorInt() ?: 0
+            }
+        }
+
         mPaintText = Paint()
         mPaintText?.apply {
             isAntiAlias = true
@@ -1186,6 +1206,15 @@ class LensView : View {
         }
     }
 
+    /** Keeps the halo colour in sync with the highlight setting and fades it with the lens animation. */
+    private fun updateFocusHaloPaint(alpha: Int) {
+        val paint = mPaintFocusHalo ?: return
+        mUtilSettings?.let { us ->
+            paint.color = us.getString(UtilSettings.KEY_HIGHLIGHT_COLOR)?.toColorInt() ?: 0
+        }
+        paint.alpha = alpha
+    }
+
     private fun drawTouchSelection(canvas: Canvas) {
         mPaintTouchSelection?.let {
             canvas.drawCircle(
@@ -1340,8 +1369,24 @@ class LensView : View {
             performHoverVibration()
         }
         if (mRectToSelect != null && mDrawType == DrawType.APPS && mApps != null && mSelectIndex >= 0) {
+            drawFocusHalo(canvas, mRectToSelect)
             drawAppName(canvas, mRectToSelect)
         }
+    }
+
+    /** FISH-024: thin accent ring around the magnified icon; reuses one Paint, no per-frame allocation. */
+    private fun drawFocusHalo(canvas: Canvas, rect: RectF?) {
+        val us = mUtilSettings ?: return
+        if (!shouldDrawFocusHalo(
+                us.getBoolean(UtilSettings.KEY_SHOW_FOCUS_HALO),
+                us.getBoolean(UtilSettings.KEY_CLEAN_LENS_MODE)
+            )
+        ) return
+        val r = rect ?: return
+        val paint = mPaintFocusHalo ?: return
+        focusHaloDrawCallCount++
+        val radius = r.width() / 2f + resources.getDimension(R.dimen.padding_focus_halo)
+        canvas.drawCircle(r.centerX(), r.centerY(), radius, paint)
     }
 
     private fun drawAppIcon(
@@ -1603,6 +1648,7 @@ class LensView : View {
                         us.getString(UtilSettings.KEY_HIGHLIGHT_COLOR)?.toColorInt() ?: 0
                 }
                 mPaintTouchSelection?.alpha = (255.0f * interpolatedTime).toInt()
+                updateFocusHaloPaint((255.0f * interpolatedTime).toInt())
                 mPaintText?.alpha = (255.0f * interpolatedTime).toInt()
             } else {
                 mAnimationMultiplier = 1.0f - interpolatedTime
@@ -1611,6 +1657,7 @@ class LensView : View {
                         us.getString(UtilSettings.KEY_HIGHLIGHT_COLOR)?.toColorInt() ?: 0
                 }
                 mPaintTouchSelection?.alpha = (255.0f * (1.0f - interpolatedTime)).toInt()
+                updateFocusHaloPaint((255.0f * (1.0f - interpolatedTime)).toInt())
                 mPaintText?.alpha = (255.0f * (1.0f - interpolatedTime)).toInt()
             }
             postInvalidate()

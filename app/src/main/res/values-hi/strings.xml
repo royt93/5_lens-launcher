@@ -257,4 +257,5 @@
     <string name="search_filter_this_lens">यह लेंस</string>
     <string name="search_filter_favorites">पसंदीदा</string>
     <string name="search_filter_hidden">छिपा हुआ</string>
+    <string name="setting_show_focus_halo">फ़ोकस रिंग संकेतक</string>
 </resources>

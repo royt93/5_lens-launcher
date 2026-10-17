@@ -48,6 +48,7 @@ class FrmSettings : Fragment(), SettingsInterface {
     private var swShowNewAppTag: SwitchCompat? = null
     private var swShowNotificationBadges: SwitchCompat? = null
     private var swShowTouchSelection: SwitchCompat? = null
+    private var swShowFocusHalo: SwitchCompat? = null
     private var swShowSearchBar: SwitchCompat? = null
     private var swRecentAppsPanel: SwitchCompat? = null
     private var swKeepScreenOn: SwitchCompat? = null
@@ -113,6 +114,7 @@ class FrmSettings : Fragment(), SettingsInterface {
         swShowNewAppTag = view.findViewById(R.id.swShowNewAppTag)
         swShowNotificationBadges = view.findViewById(R.id.swShowNotificationBadges)
         swShowTouchSelection = view.findViewById(R.id.swShowTouchSelection)
+        swShowFocusHalo = view.findViewById(R.id.swShowFocusHalo)
         swShowSearchBar = view.findViewById(R.id.swShowSearchBar)
         swRecentAppsPanel = view.findViewById(R.id.swRecentAppsPanel)
         swKeepScreenOn = view.findViewById(R.id.swKeepScreenOn)
@@ -215,6 +217,9 @@ class FrmSettings : Fragment(), SettingsInterface {
         }
         swShowTouchSelection?.setOnCheckedChangeListener { _, isChecked ->
             utilSettings?.save(UtilSettings.KEY_SHOW_TOUCH_SELECTION, isChecked)
+        }
+        swShowFocusHalo?.setOnCheckedChangeListener { _, isChecked ->
+            utilSettings?.save(UtilSettings.KEY_SHOW_FOCUS_HALO, isChecked)
         }
         swShowSearchBar?.setOnCheckedChangeListener { _, isChecked ->
             utilSettings?.save(UtilSettings.KEY_SHOW_SEARCH_BAR, isChecked)
@@ -337,6 +342,7 @@ class FrmSettings : Fragment(), SettingsInterface {
             swShowNewAppTag?.isChecked = us.getBoolean(UtilSettings.KEY_SHOW_NEW_APP_TAG)
             swShowNotificationBadges?.isChecked = us.getBoolean(UtilSettings.KEY_SHOW_NOTIFICATION_BADGES)
             swShowTouchSelection?.isChecked = us.getBoolean(UtilSettings.KEY_SHOW_TOUCH_SELECTION)
+            swShowFocusHalo?.isChecked = us.getBoolean(UtilSettings.KEY_SHOW_FOCUS_HALO)
             swShowSearchBar?.isChecked = us.getBoolean(UtilSettings.KEY_SHOW_SEARCH_BAR)
             swRecentAppsPanel?.isChecked = us.getBoolean(UtilSettings.KEY_RECENT_APPS_QUICK_PANEL_ENABLED)
             swKeepScreenOn?.isChecked = us.getBoolean(UtilSettings.KEY_KEEP_SCREEN_ON)
@@ -470,6 +476,7 @@ class FrmSettings : Fragment(), SettingsInterface {
             us.saveHapticIntensity(HapticIntensity.DEFAULT)
             us.save(UtilSettings.KEY_SHOW_NAME_APP_HOVER, true)
             us.save(UtilSettings.KEY_SHOW_TOUCH_SELECTION, false)
+            us.save(UtilSettings.KEY_SHOW_FOCUS_HALO, UtilSettings.DEFAULT_SHOW_FOCUS_HALO)
             us.save(UtilSettings.KEY_SHOW_SEARCH_BAR, UtilSettings.DEFAULT_SHOW_SEARCH_BAR)
             us.save(UtilSettings.KEY_RECENT_APPS_QUICK_PANEL_ENABLED, UtilSettings.DEFAULT_RECENT_APPS_QUICK_PANEL_ENABLED)
             us.save(UtilSettings.KEY_KEEP_SCREEN_ON, UtilSettings.DEFAULT_KEEP_SCREEN_ON)
@@ -520,6 +527,7 @@ class FrmSettings : Fragment(), SettingsInterface {
         swShowNewAppTag = null
         swShowNotificationBadges = null
         swShowTouchSelection = null
+        swShowFocusHalo = null
         swShowSearchBar = null
         swRecentAppsPanel = null
         swKeepScreenOn = null

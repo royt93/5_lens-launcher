@@ -299,4 +299,5 @@
     <string name="search_filter_this_lens">This lens</string>
     <string name="search_filter_favorites">Favorites</string>
     <string name="search_filter_hidden">Hidden</string>
+    <string name="setting_show_focus_halo">Focus ring indicator</string>
 </resources>

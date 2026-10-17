@@ -253,4 +253,5 @@
     <string name="search_filter_this_lens">Lensa ini</string>
     <string name="search_filter_favorites">Favorit</string>
     <string name="search_filter_hidden">Tersembunyi</string>
+    <string name="setting_show_focus_halo">Cincin sorotan fokus</string>
 </resources>

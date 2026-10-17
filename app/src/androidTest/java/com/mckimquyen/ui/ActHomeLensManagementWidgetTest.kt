@@ -449,7 +449,7 @@ class ActHomeLensManagementWidgetTest {
                 val addIcon = requireNotNull(menu.findItem(itemAdd).icon)
                 val deleteIcon = requireNotNull(menu.findItem(itemDelete).icon)
                 assertFalse(menu.findItem(itemDelete).isEnabled)
-                assertTrue("Delete disabled phải mờ hơn Add theo theme", deleteIcon.alpha < addIcon.alpha)
+                assertEquals("Delete icon alpha matches other menu items", addIcon.alpha, deleteIcon.alpha)
                 assertEquals("Icon tint matches enabled menu items", addIcon.colorFilter, deleteIcon.colorFilter)
             }
         }

@@ -253,4 +253,5 @@
     <string name="search_filter_this_lens">이 렌즈</string>
     <string name="search_filter_favorites">즐겨찾기</string>
     <string name="search_filter_hidden">숨김</string>
+    <string name="setting_show_focus_halo">포커스 링 표시</string>
 </resources>

@@ -253,4 +253,5 @@
     <string name="search_filter_this_lens">เลนส์นี้</string>
     <string name="search_filter_favorites">รายการโปรด</string>
     <string name="search_filter_hidden">ซ่อนอยู่</string>
+    <string name="setting_show_focus_halo">วงแหวนโฟกัส</string>
 </resources>
