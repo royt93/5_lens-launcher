@@ -249,4 +249,8 @@
     </plurals>
     <string name="lens_group_save_failed">グループを更新できませんでした</string>
     <string name="lens_group_lens_options">レンズのオプション</string>
+    <string name="search_filter_all">すべて</string>
+    <string name="search_filter_this_lens">このレンズ</string>
+    <string name="search_filter_favorites">お気に入り</string>
+    <string name="search_filter_hidden">非表示</string>
 </resources>

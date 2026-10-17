@@ -122,6 +122,64 @@
                 android:layout_marginTop="8dp"
                 android:orientation="vertical">
 
+                <!-- SEARCH-009: horizontal preset filter chips -->
+                <HorizontalScrollView
+                    android:id="@+id/hsvSearchFilterChips"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:scrollbars="none"
+                    android:overScrollMode="never"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:paddingBottom="4dp">
+
+                    <com.google.android.material.chip.ChipGroup
+                        android:id="@+id/chipGroupSearchFilters"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:singleLine="true"
+                        app:singleSelection="true"
+                        app:selectionRequired="true">
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chipFilterAll"
+                            style="@style/Widget.Material3.Chip.Filter"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/search_filter_all"
+                            app:chipIcon="@drawable/ic_apps_24dp"
+                            app:chipIconVisible="true" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chipFilterThisLens"
+                            style="@style/Widget.Material3.Chip.Filter"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/search_filter_this_lens"
+                            app:chipIcon="@drawable/ic_color_lens_24dp"
+                            app:chipIconVisible="true" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chipFilterFavorites"
+                            style="@style/Widget.Material3.Chip.Filter"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/search_filter_favorites"
+                            app:chipIcon="@drawable/ic_star_24dp"
+                            app:chipIconVisible="true" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chipFilterHidden"
+                            style="@style/Widget.Material3.Chip.Filter"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/search_filter_hidden"
+                            app:chipIcon="@drawable/ic_visibility_off_24dp"
+                            app:chipIconVisible="true" />
+
+                    </com.google.android.material.chip.ChipGroup>
+                </HorizontalScrollView>
+
                 <!-- SEARCH-002: calculator / unit conversion / timer / battery % / settings
                      deep-link quick action, shown above normal app results when the typed
                      query matches one of those patterns. -->

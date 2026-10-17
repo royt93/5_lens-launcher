@@ -249,4 +249,8 @@
     </plurals>
     <string name="lens_group_save_failed">ບໍ່ສາມາດອັບເດດກຸ່ມໄດ້</string>
     <string name="lens_group_lens_options">ຕົວເລືອກເລນ</string>
+    <string name="search_filter_all">ທັງໝົດ</string>
+    <string name="search_filter_this_lens">ເລນນີ້</string>
+    <string name="search_filter_favorites">ທີ່ມັກ</string>
+    <string name="search_filter_hidden">ເຊື່ອງໄວ້</string>
 </resources>

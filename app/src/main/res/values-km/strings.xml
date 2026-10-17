@@ -249,4 +249,8 @@
     </plurals>
     <string name="lens_group_save_failed">មិនអាចធ្វើបច្ចុប្បន្នក្រុមបានទេ</string>
     <string name="lens_group_lens_options">ជម្រើសកែវឡេន</string>
+    <string name="search_filter_all">ទាំងអស់</string>
+    <string name="search_filter_this_lens">កែវភ្នែកនេះ</string>
+    <string name="search_filter_favorites">ចំណូលចិត្ត</string>
+    <string name="search_filter_hidden">បានលាក់</string>
 </resources>

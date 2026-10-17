@@ -279,4 +279,8 @@
     </plurals>
     <string name="lens_group_save_failed">تعذر تحديث المجموعة</string>
     <string name="lens_group_lens_options">خيارات العدسة</string>
+    <string name="search_filter_all">الكل</string>
+    <string name="search_filter_this_lens">هذه العدسة</string>
+    <string name="search_filter_favorites">المفضلة</string>
+    <string name="search_filter_hidden">مخفي</string>
 </resources>

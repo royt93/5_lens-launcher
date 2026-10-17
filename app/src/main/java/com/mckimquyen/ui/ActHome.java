@@ -66,11 +66,13 @@ import com.mckimquyen.model.App;
 import com.mckimquyen.model.AppPersistent;
 import com.mckimquyen.model.LensWorkspace;
 import com.mckimquyen.search.AppSearchEngine;
+import com.mckimquyen.model.SearchFilterPreset;
 import com.mckimquyen.search.ContactSearchEngine;
 import com.mckimquyen.search.ContactSearchResult;
 import com.mckimquyen.search.QuickAction;
 import com.mckimquyen.search.QuickActionEngine;
 import com.mckimquyen.search.SearchEnterKeyPolicy;
+import com.mckimquyen.search.SearchFilterEngine;
 import com.mckimquyen.search.SearchHistoryStore;
 import com.mckimquyen.search.SearchResultAdapter;
 import com.mckimquyen.util.ApertureRevealHelper;
@@ -273,9 +275,15 @@ public class ActHome extends ActBase {
     private Button btContactCall;
     private Button btContactMessage;
     private SearchResultAdapter searchResultAdapter;
+    private com.google.android.material.chip.ChipGroup chipGroupSearchFilters;
     private SearchHistoryStore searchHistoryStore;
     private boolean searchEnterDownHandled;
     private int searchLaunchCount;
+
+    @androidx.annotation.VisibleForTesting(otherwise = androidx.annotation.VisibleForTesting.NONE)
+    public SearchResultAdapter getSearchResultAdapterForTest() {
+        return searchResultAdapter;
+    }
 
     @androidx.annotation.VisibleForTesting(otherwise = androidx.annotation.VisibleForTesting.NONE)
     public boolean isSearchEnterDownHandledForTest() {
@@ -1399,6 +1407,27 @@ public class ActHome extends ActBase {
         // Pixel Launcher's search list and keeping layout nesting shallow (see LINT-008).
         searchResults.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
 
+        chipGroupSearchFilters = findViewById(R.id.chipGroupSearchFilters);
+        if (chipGroupSearchFilters != null && utilSettings != null) {
+            updateSearchFilterChipChecked(utilSettings.getSearchFilterPreset());
+            chipGroupSearchFilters.setOnCheckedStateChangeListener((group, checkedIds) -> {
+                if (checkedIds == null || checkedIds.isEmpty()) return;
+                int checkedId = checkedIds.get(0);
+                SearchFilterPreset preset = SearchFilterPreset.ALL;
+                if (checkedId == R.id.chipFilterThisLens) {
+                    preset = SearchFilterPreset.THIS_LENS;
+                } else if (checkedId == R.id.chipFilterFavorites) {
+                    preset = SearchFilterPreset.FAVORITES;
+                } else if (checkedId == R.id.chipFilterHidden) {
+                    preset = SearchFilterPreset.HIDDEN;
+                }
+                if (utilSettings != null) {
+                    utilSettings.saveSearchFilterPreset(preset);
+                }
+                updateSearchResults(appSearch.getText());
+            });
+        }
+
         appSearch.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
@@ -1519,10 +1548,24 @@ public class ActHome extends ActBase {
         });
     }
 
+    private void updateSearchFilterChipChecked(SearchFilterPreset preset) {
+        if (chipGroupSearchFilters == null) return;
+        int targetChipId = R.id.chipFilterAll;
+        if (preset == SearchFilterPreset.THIS_LENS) {
+            targetChipId = R.id.chipFilterThisLens;
+        } else if (preset == SearchFilterPreset.FAVORITES) {
+            targetChipId = R.id.chipFilterFavorites;
+        } else if (preset == SearchFilterPreset.HIDDEN) {
+            targetChipId = R.id.chipFilterHidden;
+        }
+        chipGroupSearchFilters.check(targetChipId);
+    }
+
     /** UI-012: re-read on every resume (matches updateSearchBarVisibility's pattern) so toggling
      *  a quick action off/on in Settings, or changing the custom hint, applies immediately. */
     private void updateSearchCustomization() {
         UtilSettings settings = new UtilSettings(this);
+        updateSearchFilterChipChecked(settings.getSearchFilterPreset());
         String customHint = settings.getString(UtilSettings.KEY_SEARCH_HINT_TEXT);
         String hint = (customHint == null || customHint.isEmpty())
                 ? getString(R.string.search_apps_hint)
@@ -1551,13 +1594,26 @@ public class ActHome extends ActBase {
         updateContactAction(query);
 
         ArrayList<App> apps = listApp == null ? new ArrayList<>() : listApp;
-        java.util.List<App> engineResults = AppSearchEngine.search(apps, query, searchHistoryStore.recentKeys());
+        SearchFilterPreset preset = utilSettings != null
+                ? utilSettings.getSearchFilterPreset()
+                : SearchFilterPreset.ALL;
+        int currentPos = lensPager != null ? lensPager.getCurrentItem() : 0;
+        String currentLensId = currentLenses != null && currentPos >= 0 && currentPos < currentLenses.size()
+                ? currentLenses.get(currentPos).getId()
+                : LensWorkspace.DEFAULT_LENS_ID;
+        List<App> lensApps = scopedApps(currentLensId);
+        java.util.Set<String> hiddenIds = utilSettings != null
+                ? utilSettings.getLensHiddenAppIds(currentLensId)
+                : java.util.Collections.emptySet();
+        List<App> candidates = SearchFilterEngine.filterCandidates(apps, preset, lensApps, hiddenIds);
+
+        java.util.List<App> engineResults = AppSearchEngine.search(candidates, query, searchHistoryStore.recentKeys());
         boolean isEmptyQuery = AppSearchEngine.normalize(query).isEmpty();
         // UI-011: a blank query with no recent/favorite apps used to show a bare empty state.
         // Falling back to the full (alphabetical) app list instead means the panel is only ever
         // truly empty if the device has zero visible apps at all.
-        boolean showAllAppsFallback = isEmptyQuery && engineResults.isEmpty() && !apps.isEmpty();
-        java.util.List<App> results = showAllAppsFallback ? sortedByLabel(apps) : engineResults;
+        boolean showAllAppsFallback = isEmptyQuery && engineResults.isEmpty() && !candidates.isEmpty();
+        java.util.List<App> results = showAllAppsFallback ? sortedByLabel(candidates) : engineResults;
         boolean hasResults = !results.isEmpty();
 
         // UI-009 note: a TransitionManager.beginDelayedTransition crossfade was tried here for

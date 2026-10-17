@@ -256,4 +256,8 @@
     <string name="layout_import_workspace_recovery_required">Khôi phục không gian làm việc thất bại và tự phục hồi chưa hoàn tất. Hãy mở lại ứng dụng và kiểm tra các thấu kính.</string>
     <string name="layout_import_v1_default_lens_note">Bản sao lưu cũ này chỉ cập nhật bố cục thấu kính mặc định; các thấu kính khác giữ nguyên.</string>
     <string name="lens_group_lens_options">Tùy chọn thấu kính</string>
+    <string name="search_filter_all">Tất cả</string>
+    <string name="search_filter_this_lens">Thấu kính này</string>
+    <string name="search_filter_favorites">Yêu thích</string>
+    <string name="search_filter_hidden">Đã ẩn</string>
 </resources>

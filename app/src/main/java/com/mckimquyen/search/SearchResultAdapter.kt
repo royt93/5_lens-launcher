@@ -65,6 +65,9 @@ class SearchResultAdapter @JvmOverloads constructor(
 
     fun firstOrNull(): App? = apps.firstOrNull()
 
+    @androidx.annotation.VisibleForTesting
+    fun currentListForTest(): List<App> = apps.toList()
+
     override fun getItemCount(): Int = apps.size
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ResultViewHolder {

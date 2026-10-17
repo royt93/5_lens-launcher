@@ -253,4 +253,8 @@
     </plurals>
     <string name="lens_group_save_failed">समूह अपडेट नहीं हो सका</string>
     <string name="lens_group_lens_options">लेंस विकल्प</string>
+    <string name="search_filter_all">सभी</string>
+    <string name="search_filter_this_lens">यह लेंस</string>
+    <string name="search_filter_favorites">पसंदीदा</string>
+    <string name="search_filter_hidden">छिपा हुआ</string>
 </resources>

@@ -249,4 +249,8 @@
     </plurals>
     <string name="lens_group_save_failed">อัปเดตกลุ่มไม่สำเร็จ</string>
     <string name="lens_group_lens_options">ตัวเลือกเลนส์</string>
+    <string name="search_filter_all">ทั้งหมด</string>
+    <string name="search_filter_this_lens">เลนส์นี้</string>
+    <string name="search_filter_favorites">รายการโปรด</string>
+    <string name="search_filter_hidden">ซ่อนอยู่</string>
 </resources>

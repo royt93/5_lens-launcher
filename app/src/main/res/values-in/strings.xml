@@ -249,4 +249,8 @@
     </plurals>
     <string name="lens_group_save_failed">Grup gagal diperbarui</string>
     <string name="lens_group_lens_options">Opsi lensa</string>
+    <string name="search_filter_all">Semua</string>
+    <string name="search_filter_this_lens">Lensa ini</string>
+    <string name="search_filter_favorites">Favorit</string>
+    <string name="search_filter_hidden">Tersembunyi</string>
 </resources>

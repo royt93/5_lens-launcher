@@ -253,4 +253,8 @@
     </plurals>
     <string name="lens_group_save_failed">Gruppe konnte nicht aktualisiert werden</string>
     <string name="lens_group_lens_options">Linsenoptionen</string>
+    <string name="search_filter_all">Alle</string>
+    <string name="search_filter_this_lens">Diese Linse</string>
+    <string name="search_filter_favorites">Favoriten</string>
+    <string name="search_filter_hidden">Ausgeblendet</string>
 </resources>

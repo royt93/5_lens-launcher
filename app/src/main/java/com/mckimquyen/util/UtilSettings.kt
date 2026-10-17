@@ -189,6 +189,7 @@ class UtilSettings(context: Context) {
         const val KEY_LENS_HIDDEN_APP_IDS = "lens_hidden_app_ids"
         const val KEY_LENS_FROZEN = "lens_frozen"
         const val KEY_COLLAPSED_LENS_GROUPS = "collapsed_lens_groups"
+        const val KEY_SEARCH_FILTER_PRESET = "search_filter_preset"
     }
 
     fun save(name: String?, value: Int) {
@@ -560,6 +561,16 @@ class UtilSettings(context: Context) {
 
     fun clearPendingAutoExportLens() {
         prefs.edit { remove(KEY_PENDING_AUTO_EXPORT_LENS) }
+    }
+
+    /** SEARCH-009: persistent search filter preset for SearchView filter chips. */
+    fun getSearchFilterPreset(): com.mckimquyen.model.SearchFilterPreset =
+        runCatching { prefs.getString(KEY_SEARCH_FILTER_PRESET, null) }
+            .getOrNull()
+            .let(com.mckimquyen.model.SearchFilterPreset::fromStored)
+
+    fun saveSearchFilterPreset(preset: com.mckimquyen.model.SearchFilterPreset) {
+        save(KEY_SEARCH_FILTER_PRESET, preset.name)
     }
 
     fun isSmartFocusBias(lensId: String?): Boolean {

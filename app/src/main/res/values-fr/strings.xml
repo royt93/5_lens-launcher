@@ -257,4 +257,8 @@
     </plurals>
     <string name="lens_group_save_failed">Impossible de mettre à jour le groupe</string>
     <string name="lens_group_lens_options">Options de lentille</string>
+    <string name="search_filter_all">Tout</string>
+    <string name="search_filter_this_lens">Cette lentille</string>
+    <string name="search_filter_favorites">Favoris</string>
+    <string name="search_filter_hidden">Masqués</string>
 </resources>
