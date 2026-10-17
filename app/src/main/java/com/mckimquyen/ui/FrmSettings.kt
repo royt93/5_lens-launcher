@@ -20,6 +20,7 @@ import com.mckimquyen.enums.LauncherMode
 import com.mckimquyen.ext.searchIconPack
 import com.mckimquyen.itf.SettingsInterface
 import com.mckimquyen.model.LensWorkspace
+import com.mckimquyen.model.EdgeSwipeMode
 import com.mckimquyen.util.HapticIntensity
 import com.mckimquyen.util.LensPhysicsPolicy
 import com.mckimquyen.util.UtilLauncher
@@ -68,6 +69,11 @@ class FrmSettings : Fragment(), SettingsInterface {
     private var tvVipStatusSummary: TextView? = null
     private var tvSelectedLanguage: TextView? = null
     private var tvSelectedLauncherMode: TextView? = null
+    private var tvSelectedEdgeSwipeMode: TextView? = null
+
+    /** Test seam so a widget test can reach the shown dialog - same pattern as ActHome.lensDialog. */
+    @VisibleForTesting
+    internal var edgeSwipeDialogForTest: androidx.appcompat.app.AlertDialog? = null
 
     /** Test seam so a widget test can reach the shown dialog - same pattern as
      *  AppAdapter.folderDialog / ActHome.lensDialog. */
@@ -148,8 +154,12 @@ class FrmSettings : Fragment(), SettingsInterface {
             activity?.searchIconPack()
         }
         tvSelectedLauncherMode = view.findViewById(R.id.tvSelectedLauncherMode)
+        tvSelectedEdgeSwipeMode = view.findViewById(R.id.tvSelectedEdgeSwipeMode)
         view.findViewById<View>(R.id.llLauncherMode).setOnClickListener {
             showLauncherModeDialog()
+        }
+        view.findViewById<View>(R.id.llEdgeSwipeMode).setOnClickListener {
+            showEdgeSwipeModeDialog()
         }
         view.findViewById<View>(R.id.llNightMode).setOnClickListener {
             showNightModeChooser()
@@ -365,6 +375,7 @@ class FrmSettings : Fragment(), SettingsInterface {
             // Launcher Mode (FEAT-003)
             val currentMode = us.getLauncherMode()
             tvSelectedLauncherMode?.setText(currentMode.displayNameResId)
+            tvSelectedEdgeSwipeMode?.setText(edgeSwipeModeLabel(us.getEdgeSwipeMode()))
 
             // Language
             val currentLang = com.mckimquyen.util.LocaleHelper.getLanguage(requireContext())
@@ -375,6 +386,36 @@ class FrmSettings : Fragment(), SettingsInterface {
                 tvSelectedLanguage?.text = currentLang
             }
         }
+    }
+
+    private fun edgeSwipeModeLabel(mode: EdgeSwipeMode): String = getString(
+        when (mode) {
+            EdgeSwipeMode.OFF -> R.string.edge_swipe_mode_off
+            EdgeSwipeMode.BOTH -> R.string.edge_swipe_mode_both
+            EdgeSwipeMode.RIGHT_ONLY -> R.string.edge_swipe_mode_right
+            EdgeSwipeMode.LEFT_ONLY -> R.string.edge_swipe_mode_left
+        }
+    )
+
+    private fun showEdgeSwipeModeDialog() {
+        val modes = EdgeSwipeMode.entries.toTypedArray()
+        val labels = modes.map(::edgeSwipeModeLabel).toTypedArray()
+        val currentMode = utilSettings?.getEdgeSwipeMode() ?: EdgeSwipeMode.BOTH
+        val checkedIndex = modes.indexOf(currentMode).coerceAtLeast(0)
+
+        edgeSwipeDialogForTest = com.google.android.material.dialog.MaterialAlertDialogBuilder(
+            requireContext(), R.style.MaterialYouDialogTheme
+        )
+            .setTitle(R.string.setting_edge_swipe_lens_switch)
+            .setSingleChoiceItems(labels, checkedIndex) { dialog, which ->
+                val selectedMode = modes.getOrNull(which) ?: return@setSingleChoiceItems
+                utilSettings?.saveEdgeSwipeMode(selectedMode)
+                tvSelectedEdgeSwipeMode?.text = edgeSwipeModeLabel(selectedMode)
+                dialog.dismiss()
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .create()
+        edgeSwipeDialogForTest?.show()
     }
 
     private fun showLauncherModeDialog() {
@@ -543,6 +584,9 @@ class FrmSettings : Fragment(), SettingsInterface {
         tvVipStatusSummary = null
         tvSelectedLanguage = null
         tvSelectedLauncherMode = null
+        tvSelectedEdgeSwipeMode = null
+        edgeSwipeDialogForTest?.dismiss()
+        edgeSwipeDialogForTest = null
         utilSettings = null
         super.onDestroyView()
     }

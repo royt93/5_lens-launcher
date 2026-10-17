@@ -268,4 +268,9 @@
     <string name="search_filter_favorites">Избранное</string>
     <string name="search_filter_hidden">Скрытые</string>
     <string name="setting_show_focus_halo">Кольцо фокуса</string>
+    <string name="setting_edge_swipe_lens_switch">Свайп от края для переключения линз</string>
+    <string name="edge_swipe_mode_off">Выключено</string>
+    <string name="edge_swipe_mode_both">Оба края</string>
+    <string name="edge_swipe_mode_right">Только правый край</string>
+    <string name="edge_swipe_mode_left">Только левый край</string>
 </resources>

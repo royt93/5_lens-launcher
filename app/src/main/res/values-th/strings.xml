@@ -254,4 +254,9 @@
     <string name="search_filter_favorites">รายการโปรด</string>
     <string name="search_filter_hidden">ซ่อนอยู่</string>
     <string name="setting_show_focus_halo">วงแหวนโฟกัส</string>
+    <string name="setting_edge_swipe_lens_switch">ปัดจากขอบเพื่อสลับเลนส์</string>
+    <string name="edge_swipe_mode_off">ปิด</string>
+    <string name="edge_swipe_mode_both">ทั้งสองขอบ</string>
+    <string name="edge_swipe_mode_right">ขอบขวาเท่านั้น</string>
+    <string name="edge_swipe_mode_left">ขอบซ้ายเท่านั้น</string>
 </resources>

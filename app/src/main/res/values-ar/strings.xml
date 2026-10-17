@@ -284,4 +284,9 @@
     <string name="search_filter_favorites">المفضلة</string>
     <string name="search_filter_hidden">مخفي</string>
     <string name="setting_show_focus_halo">حلقة تركيز التطبيق</string>
+    <string name="setting_edge_swipe_lens_switch">السحب من الحافة لتبديل العدسات</string>
+    <string name="edge_swipe_mode_off">إيقاف</string>
+    <string name="edge_swipe_mode_both">كلتا الحافتين</string>
+    <string name="edge_swipe_mode_right">الحافة اليمنى فقط</string>
+    <string name="edge_swipe_mode_left">الحافة اليسرى فقط</string>
 </resources>

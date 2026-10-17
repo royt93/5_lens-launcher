@@ -261,4 +261,9 @@
     <string name="search_filter_favorites">Yêu thích</string>
     <string name="search_filter_hidden">Đã ẩn</string>
     <string name="setting_show_focus_halo">Vòng sáng tiêu điểm</string>
+    <string name="setting_edge_swipe_lens_switch">Vuốt cạnh chuyển Lens</string>
+    <string name="edge_swipe_mode_off">Tắt</string>
+    <string name="edge_swipe_mode_both">Cả hai mép</string>
+    <string name="edge_swipe_mode_right">Chỉ mép phải</string>
+    <string name="edge_swipe_mode_left">Chỉ mép trái</string>
 </resources>

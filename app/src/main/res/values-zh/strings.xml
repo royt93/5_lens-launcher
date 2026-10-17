@@ -254,4 +254,9 @@
     <string name="search_filter_favorites">收藏</string>
     <string name="search_filter_hidden">已隐藏</string>
     <string name="setting_show_focus_halo">焦点高亮圆环</string>
+    <string name="setting_edge_swipe_lens_switch">从屏幕边缘滑动切换镜头</string>
+    <string name="edge_swipe_mode_off">关闭</string>
+    <string name="edge_swipe_mode_both">两侧边缘</string>
+    <string name="edge_swipe_mode_right">仅右侧边缘</string>
+    <string name="edge_swipe_mode_left">仅左侧边缘</string>
 </resources>

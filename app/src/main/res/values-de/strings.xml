@@ -258,4 +258,9 @@
     <string name="search_filter_favorites">Favoriten</string>
     <string name="search_filter_hidden">Ausgeblendet</string>
     <string name="setting_show_focus_halo">Fokusring-Anzeige</string>
+    <string name="setting_edge_swipe_lens_switch">Zum Wechseln der Linsen am Rand wischen</string>
+    <string name="edge_swipe_mode_off">Aus</string>
+    <string name="edge_swipe_mode_both">Beide Ränder</string>
+    <string name="edge_swipe_mode_right">Nur rechter Rand</string>
+    <string name="edge_swipe_mode_left">Nur linker Rand</string>
 </resources>

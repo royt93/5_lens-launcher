@@ -262,4 +262,9 @@
     <string name="search_filter_favorites">Favoritos</string>
     <string name="search_filter_hidden">Ocultos</string>
     <string name="setting_show_focus_halo">Anillo de enfoque</string>
+    <string name="setting_edge_swipe_lens_switch">Deslizar desde el borde para cambiar lentes</string>
+    <string name="edge_swipe_mode_off">Desactivado</string>
+    <string name="edge_swipe_mode_both">Ambos bordes</string>
+    <string name="edge_swipe_mode_right">Solo borde derecho</string>
+    <string name="edge_swipe_mode_left">Solo borde izquierdo</string>
 </resources>

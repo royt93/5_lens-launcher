@@ -254,4 +254,9 @@
     <string name="search_filter_favorites">お気に入り</string>
     <string name="search_filter_hidden">非表示</string>
     <string name="setting_show_focus_halo">フォーカスリング表示</string>
+    <string name="setting_edge_swipe_lens_switch">端からスワイプしてレンズを切り替え</string>
+    <string name="edge_swipe_mode_off">オフ</string>
+    <string name="edge_swipe_mode_both">両方の端</string>
+    <string name="edge_swipe_mode_right">右端のみ</string>
+    <string name="edge_swipe_mode_left">左端のみ</string>
 </resources>

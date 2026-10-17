@@ -254,4 +254,9 @@
     <string name="search_filter_favorites">즐겨찾기</string>
     <string name="search_filter_hidden">숨김</string>
     <string name="setting_show_focus_halo">포커스 링 표시</string>
+    <string name="setting_edge_swipe_lens_switch">가장자리 스와이프로 렌즈 전환</string>
+    <string name="edge_swipe_mode_off">사용 안 함</string>
+    <string name="edge_swipe_mode_both">양쪽 가장자리</string>
+    <string name="edge_swipe_mode_right">오른쪽 가장자리만</string>
+    <string name="edge_swipe_mode_left">왼쪽 가장자리만</string>
 </resources>

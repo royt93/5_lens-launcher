@@ -262,4 +262,9 @@
     <string name="search_filter_favorites">Favoris</string>
     <string name="search_filter_hidden">Masqués</string>
     <string name="setting_show_focus_halo">Anneau de mise au point</string>
+    <string name="setting_edge_swipe_lens_switch">Balayer le bord pour changer de lentille</string>
+    <string name="edge_swipe_mode_off">Désactivé</string>
+    <string name="edge_swipe_mode_both">Les deux bords</string>
+    <string name="edge_swipe_mode_right">Bord droit uniquement</string>
+    <string name="edge_swipe_mode_left">Bord gauche uniquement</string>
 </resources>

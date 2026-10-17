@@ -262,4 +262,9 @@
     <string name="search_filter_favorites">Preferiti</string>
     <string name="search_filter_hidden">Nascosti</string>
     <string name="setting_show_focus_halo">Anello di messa a fuoco</string>
+    <string name="setting_edge_swipe_lens_switch">Scorri dal bordo per cambiare lente</string>
+    <string name="edge_swipe_mode_off">Disattivato</string>
+    <string name="edge_swipe_mode_both">Entrambi i bordi</string>
+    <string name="edge_swipe_mode_right">Solo bordo destro</string>
+    <string name="edge_swipe_mode_left">Solo bordo sinistro</string>
 </resources>

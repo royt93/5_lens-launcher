@@ -254,4 +254,9 @@
     <string name="search_filter_favorites">ທີ່ມັກ</string>
     <string name="search_filter_hidden">ເຊື່ອງໄວ້</string>
     <string name="setting_show_focus_halo">ວົງແຫວນຈຸດໂຟກັສ</string>
+    <string name="setting_edge_swipe_lens_switch">ປັດຈາກຂອບເພື່ອປ່ຽນເລນ</string>
+    <string name="edge_swipe_mode_off">ປິດ</string>
+    <string name="edge_swipe_mode_both">ຂອບທັງສອງດ້ານ</string>
+    <string name="edge_swipe_mode_right">ຂອບຂວາເທົ່ານັ້ນ</string>
+    <string name="edge_swipe_mode_left">ຂອບຊ້າຍເທົ່ານັ້ນ</string>
 </resources>

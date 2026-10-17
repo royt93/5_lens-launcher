@@ -254,4 +254,9 @@
     <string name="search_filter_favorites">Favorit</string>
     <string name="search_filter_hidden">Tersembunyi</string>
     <string name="setting_show_focus_halo">Cincin sorotan fokus</string>
+    <string name="setting_edge_swipe_lens_switch">Geser tepi untuk mengganti lensa</string>
+    <string name="edge_swipe_mode_off">Nonaktif</string>
+    <string name="edge_swipe_mode_both">Kedua tepi</string>
+    <string name="edge_swipe_mode_right">Tepi kanan saja</string>
+    <string name="edge_swipe_mode_left">Tepi kiri saja</string>
 </resources>

@@ -722,6 +722,23 @@ public class ActHome extends ActBase {
         });
         // FISH-016: pull-down from the lens top opens full search, in Clean mode too.
         view.setOnSearchSwipeDownListener(this::openSearchFromHome);
+        // FISH-025: confirmed edge swipe switches pages; do not wrap past first/last lens.
+        view.setOnEdgeSwipeListener(direction -> {
+            if (lensPager == null || lensPager.getAdapter() == null) return;
+            int count = lensPager.getAdapter().getItemCount();
+            if (count <= 1) return;
+            int current = lensPager.getCurrentItem();
+            int target = current;
+            if (direction == com.mckimquyen.gesture.EdgeSwipeDirection.PREVIOUS && current > 0) {
+                target = current - 1;
+            } else if (direction == com.mckimquyen.gesture.EdgeSwipeDirection.NEXT && current < count - 1) {
+                target = current + 1;
+            }
+            if (target != current) {
+                lensPager.setCurrentItem(target, true);
+                view.performHapticFeedback(android.view.HapticFeedbackConstants.VIRTUAL_KEY);
+            }
+        });
         // FISH-012: a pinch adjustment that was never resolved (Save/dismiss) before the process
         // died is restored here silently, on every bind - not just the active page - so it's
         // ready the instant the user swipes to whichever lens it belonged to. The confirmation

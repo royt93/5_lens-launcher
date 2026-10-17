@@ -254,4 +254,9 @@
     <string name="search_filter_favorites">ចំណូលចិត្ត</string>
     <string name="search_filter_hidden">បានលាក់</string>
     <string name="setting_show_focus_halo">កងរង្វង់ផ្ដោតលើកម្មវិធី</string>
+    <string name="setting_edge_swipe_lens_switch">អូសពីគែមដើម្បីប្ដូរកែវ</string>
+    <string name="edge_swipe_mode_off">បិទ</string>
+    <string name="edge_swipe_mode_both">គែមទាំងពីរ</string>
+    <string name="edge_swipe_mode_right">តែគែមស្ដាំ</string>
+    <string name="edge_swipe_mode_left">តែគែមឆ្វេង</string>
 </resources>

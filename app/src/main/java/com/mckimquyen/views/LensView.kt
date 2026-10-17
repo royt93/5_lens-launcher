@@ -34,8 +34,11 @@ import androidx.core.view.ViewCompat
 import com.mckimquyen.R
 import com.mckimquyen.enums.BackgroundMode
 import com.mckimquyen.enums.DrawType
+import com.mckimquyen.gesture.EdgeSwipeDirection
+import com.mckimquyen.gesture.EdgeSwipePolicy
 import com.mckimquyen.model.App
 import com.mckimquyen.model.AppPersistent
+import com.mckimquyen.model.EdgeSwipeMode
 import com.mckimquyen.model.LensWorkspace
 import com.mckimquyen.model.PinnedZone
 import com.mckimquyen.services.BroadcastReceivers
@@ -76,6 +79,11 @@ fun interface OnEmptySpaceLongPressListener {
 /** FISH-016: fired once when the user pulls down from the top slice of the lens. */
 fun interface OnSearchSwipeDownListener {
     fun onSearchSwipeDown()
+}
+
+/** FISH-025: fired once when a horizontal swipe from a configured screen edge is accepted. */
+fun interface OnEdgeSwipeListener {
+    fun onEdgeSwipe(direction: EdgeSwipeDirection)
 }
 
 /**
@@ -455,14 +463,18 @@ class LensView : View {
     // mTouchX/Y, which tracks the finger), and deliberately never reads Clean mode, so the
     // gesture cannot behave differently between modes.
     var onSearchSwipeDownListener: OnSearchSwipeDownListener? = null
+    /** FISH-025: edge-swipe listener invoked when a side edge gesture triggers lens switching. */
+    var onEdgeSwipeListener: OnEdgeSwipeListener? = null
     private var mTouchDownX = 0f
     private var mTouchDownY = 0f
     private var mSearchSwipeStartedInActivationZone = false
     private var mSearchSwipeTriggered = false
+    private var mEdgeSwipeTriggered = false
 
     private fun resetSearchSwipeState() {
         mSearchSwipeStartedInActivationZone = false
         mSearchSwipeTriggered = false
+        mEdgeSwipeTriggered = false
     }
     private var mUtilSettings: UtilSettings? = null
     private var mWorkspaceBackgroundDrawable: NinePatchDrawable? = null
@@ -1026,6 +1038,7 @@ class LensView : View {
                 mTouchDownY = event.y
                 mSearchSwipeStartedInActivationZone = isInSearchSwipeActivationZone(event.y, height)
                 mSearchSwipeTriggered = false
+                mEdgeSwipeTriggered = false
                 mSelectIndex = -1
                 mMoving = false
                 mLongPressTriggered = false
@@ -1070,6 +1083,36 @@ class LensView : View {
                 if (mLongPressTriggered) return true
                 val searchDx = event.x - mTouchDownX
                 val searchDy = event.y - mTouchDownY
+                if (!mEdgeSwipeTriggered) {
+                    val edgeMode = mUtilSettings?.getEdgeSwipeMode() ?: EdgeSwipeMode.BOTH
+                    val edgeThresholdPx = 32f * resources.displayMetrics.density
+                    val direction = EdgeSwipePolicy.resolveIntent(
+                        downX = mTouchDownX,
+                        downY = mTouchDownY,
+                        currentX = event.x,
+                        currentY = event.y,
+                        viewWidth = width.toFloat(),
+                        viewHeight = height.toFloat(),
+                        edgeThresholdPx = edgeThresholdPx,
+                        touchSlopPx = mTouchSlop,
+                        mode = edgeMode,
+                        isSearchActivationZone = mSearchSwipeStartedInActivationZone
+                    )
+                    if (direction != EdgeSwipeDirection.NONE) {
+                        mEdgeSwipeTriggered = true
+                        parent?.requestDisallowInterceptTouchEvent(true)
+                        mLongPressArmed = false
+                        mLongPressHandler.removeCallbacks(mLongPressRunnable)
+                        mSelectIndex = -1
+                        mRectToSelect = null
+                        if (mMoving) {
+                            startAnimation(LensAnimation(false))
+                            mMoving = false
+                        }
+                        onEdgeSwipeListener?.onEdgeSwipe(direction)
+                        return true
+                    }
+                }
                 if (shouldOpenSearchSwipe(
                         mSearchSwipeStartedInActivationZone, searchDx, searchDy,
                         mTouchSlop, mSearchSwipeTriggered
@@ -1135,8 +1178,9 @@ class LensView : View {
                 mLongPressArmed = false
                 mLongPressHandler.removeCallbacks(mLongPressRunnable)
                 val searchTriggered = mSearchSwipeTriggered
+                val edgeTriggered = mEdgeSwipeTriggered
                 resetSearchSwipeState()
-                if (searchTriggered) {
+                if (searchTriggered || edgeTriggered) {
                     gestureState = LensGestureState.IDLE
                     mSelectIndex = -1
                     mTouchX = -Float.MAX_VALUE
@@ -1690,6 +1734,7 @@ class LensView : View {
             setAccessibilityDelegate(null)
             // Null toàn bộ references để GC thu hồi
             onHapticPerformed = null
+            onEdgeSwipeListener = null
             vibratorProvider = null  // FISH-020: null the test seam
             mApps = null
             mUtilSettings = null

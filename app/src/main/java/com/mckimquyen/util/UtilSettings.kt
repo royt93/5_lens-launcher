@@ -11,6 +11,7 @@ import com.mckimquyen.enums.BackgroundMode
 import com.mckimquyen.enums.LauncherMode
 import com.mckimquyen.enums.SortType
 import com.mckimquyen.model.LensWorkspace
+import com.mckimquyen.model.EdgeSwipeMode
 import kotlin.math.roundToInt
 
 /**
@@ -137,6 +138,8 @@ class UtilSettings(context: Context) {
         const val KEY_CLEAN_LENS_MODE = "clean_lens_mode"
         const val DEFAULT_SHOW_FOCUS_HALO = true
         const val KEY_SHOW_FOCUS_HALO = "show_focus_halo"
+        const val KEY_EDGE_SWIPE_LENS_SWITCH = "edge_swipe_lens_switch"
+        val DEFAULT_EDGE_SWIPE_LENS_SWITCH = EdgeSwipeMode.BOTH
         // FEAT-009: SearchBar recent-apps-panel icon toggle (the lens-menu entry stays untoggleable)
         const val KEY_RECENT_APPS_QUICK_PANEL_ENABLED = "recent_apps_quick_panel_enabled"
         const val DEFAULT_RECENT_APPS_QUICK_PANEL_ENABLED = true
@@ -346,6 +349,15 @@ class UtilSettings(context: Context) {
     fun getLauncherMode(): LauncherMode {
         val storedName = prefs.getString(KEY_LAUNCHER_MODE, null)
         return LauncherMode.fromPrefValue(storedName)
+    }
+
+    fun getEdgeSwipeMode(): EdgeSwipeMode {
+        val stored = runCatching { prefs.getString(KEY_EDGE_SWIPE_LENS_SWITCH, null) }.getOrNull()
+        return EdgeSwipeMode.fromStored(stored)
+    }
+
+    fun saveEdgeSwipeMode(mode: EdgeSwipeMode) {
+        save(KEY_EDGE_SWIPE_LENS_SWITCH, mode.name)
     }
 
     fun setLauncherMode(mode: LauncherMode) {

@@ -258,4 +258,9 @@
     <string name="search_filter_favorites">पसंदीदा</string>
     <string name="search_filter_hidden">छिपा हुआ</string>
     <string name="setting_show_focus_halo">फ़ोकस रिंग संकेतक</string>
+    <string name="setting_edge_swipe_lens_switch">लेंस बदलने के लिए किनारे से स्वाइप करें</string>
+    <string name="edge_swipe_mode_off">बंद</string>
+    <string name="edge_swipe_mode_both">दोनों किनारे</string>
+    <string name="edge_swipe_mode_right">केवल दायाँ किनारा</string>
+    <string name="edge_swipe_mode_left">केवल बायाँ किनारा</string>
 </resources>
