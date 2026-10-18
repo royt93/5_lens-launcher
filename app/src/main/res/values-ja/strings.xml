@@ -259,4 +259,7 @@
     <string name="edge_swipe_mode_both">両方の端</string>
     <string name="edge_swipe_mode_right">右端のみ</string>
     <string name="edge_swipe_mode_left">左端のみ</string>
+    <string name="setting_enable_t9_search_keypad">検索内のT9ダイヤルパッド</string>
+    <string name="setting_enable_t9_search_keypad_desc">片手入力のために検索の下部にテンキーを表示します</string>
+    <string name="t9_key_clear">クリア</string>
 </resources>

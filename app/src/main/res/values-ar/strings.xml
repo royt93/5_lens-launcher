@@ -289,4 +289,7 @@
     <string name="edge_swipe_mode_both">كلتا الحافتين</string>
     <string name="edge_swipe_mode_right">الحافة اليمنى فقط</string>
     <string name="edge_swipe_mode_left">الحافة اليسرى فقط</string>
+    <string name="setting_enable_t9_search_keypad">لوحة أرقام T9 في البحث</string>
+    <string name="setting_enable_t9_search_keypad_desc">إظهار لوحة أرقام أسفل البحث للكتابة السريعة بيد واحدة</string>
+    <string name="t9_key_clear">مسح</string>
 </resources>

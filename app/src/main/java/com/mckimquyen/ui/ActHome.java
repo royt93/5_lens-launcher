@@ -66,6 +66,7 @@ import com.mckimquyen.model.App;
 import com.mckimquyen.model.AppPersistent;
 import com.mckimquyen.model.LensWorkspace;
 import com.mckimquyen.search.AppSearchEngine;
+import com.mckimquyen.search.T9SearchEngine;
 import com.mckimquyen.model.SearchFilterPreset;
 import com.mckimquyen.search.ContactSearchEngine;
 import com.mckimquyen.search.ContactSearchResult;
@@ -264,6 +265,7 @@ public class ActHome extends ActBase {
     private TextView noSearchResults;
     private TextView webSearchFallback;
     private RecyclerView searchResults;
+    private View t9Keypad;
     private View quickActionRow;
     private View quickActionDivider;
     private TextView tvQuickActionLabel;
@@ -1547,6 +1549,60 @@ public class ActHome extends ActBase {
                 Toast.makeText(this, R.string.error_app_not_found, Toast.LENGTH_SHORT).show();
             }
         });
+        // SEARCH-010: T9 dialpad buttons wiring
+        setupT9Keypad();
+    }
+
+    private void setupT9Keypad() {
+        t9Keypad = findViewById(R.id.layoutT9Keypad);
+        int[] digitButtons = new int[]{
+                R.id.btnT9_0, R.id.btnT9_1, R.id.btnT9_2, R.id.btnT9_3, R.id.btnT9_4,
+                R.id.btnT9_5, R.id.btnT9_6, R.id.btnT9_7, R.id.btnT9_8, R.id.btnT9_9
+        };
+        char[] digits = new char[]{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
+        for (int i = 0; i < digitButtons.length; i++) {
+            char d = digits[i];
+            View btn = findViewById(digitButtons[i]);
+            if (btn != null) {
+                btn.setOnClickListener(v -> {
+                    v.performHapticFeedback(android.view.HapticFeedbackConstants.VIRTUAL_KEY);
+                    if (appSearch != null) {
+                        appSearch.append(String.valueOf(d));
+                    }
+                });
+            }
+        }
+
+        View btnClear = findViewById(R.id.btnT9_Clear);
+        if (btnClear != null) {
+            btnClear.setOnClickListener(v -> {
+                v.performHapticFeedback(android.view.HapticFeedbackConstants.VIRTUAL_KEY);
+                if (appSearch != null) {
+                    appSearch.setText("");
+                }
+            });
+        }
+
+        View btnBackspace = findViewById(R.id.btnT9_Backspace);
+        if (btnBackspace != null) {
+            btnBackspace.setOnClickListener(v -> {
+                v.performHapticFeedback(android.view.HapticFeedbackConstants.VIRTUAL_KEY);
+                if (appSearch != null) {
+                    CharSequence current = appSearch.getText();
+                    if (current != null && current.length() > 0) {
+                        appSearch.setText(current.subSequence(0, current.length() - 1));
+                        appSearch.setSelection(appSearch.getText().length());
+                    }
+                }
+            });
+            btnBackspace.setOnLongClickListener(v -> {
+                v.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS);
+                if (appSearch != null) {
+                    appSearch.setText("");
+                }
+                return true;
+            });
+        }
     }
 
     private void prefillOnTap(int tileViewId, String exampleQuery) {
@@ -1581,6 +1637,14 @@ public class ActHome extends ActBase {
         searchBar.setHint(hint);
         searchView.setHint(hint);
 
+        boolean t9Enabled = settings.getEnableT9SearchKeypad();
+        if (t9Keypad != null) {
+            t9Keypad.setVisibility(t9Enabled ? View.VISIBLE : View.GONE);
+        }
+        if (appSearch != null) {
+            appSearch.setShowSoftInputOnFocus(!t9Enabled);
+        }
+
         findViewById(R.id.tileCalculator).setVisibility(
                 settings.getBoolean(UtilSettings.KEY_QUICK_ACTION_CALCULATOR) ? View.VISIBLE : View.GONE);
         findViewById(R.id.tileUnitConvert).setVisibility(
@@ -1591,6 +1655,20 @@ public class ActHome extends ActBase {
                 settings.getBoolean(UtilSettings.KEY_QUICK_ACTION_BATTERY) ? View.VISIBLE : View.GONE);
         findViewById(R.id.tileWifi).setVisibility(
                 settings.getBoolean(UtilSettings.KEY_QUICK_ACTION_SETTINGS) ? View.VISIBLE : View.GONE);
+    }
+
+    private boolean isT9NumericQuery(CharSequence query) {
+        if (query == null || query.length() == 0) return false;
+        boolean hasDigit = false;
+        for (int i = 0; i < query.length(); i++) {
+            char c = query.charAt(i);
+            if (Character.isDigit(c)) {
+                hasDigit = true;
+            } else if (!Character.isWhitespace(c)) {
+                return false;
+            }
+        }
+        return hasDigit;
     }
 
     private void updateSearchResults(CharSequence query) {
@@ -1615,7 +1693,12 @@ public class ActHome extends ActBase {
                 : java.util.Collections.emptySet();
         List<App> candidates = SearchFilterEngine.filterCandidates(apps, preset, lensApps, hiddenIds);
 
-        java.util.List<App> engineResults = AppSearchEngine.search(candidates, query, searchHistoryStore.recentKeys());
+        // SEARCH-010: if T9 dialpad is active and query is all digits, use T9SearchEngine instead.
+        boolean useT9 = utilSettings != null && utilSettings.getEnableT9SearchKeypad()
+                && isT9NumericQuery(query);
+        java.util.List<App> engineResults = useT9
+                ? T9SearchEngine.search(candidates, query)
+                : AppSearchEngine.search(candidates, query, searchHistoryStore.recentKeys());
         boolean isEmptyQuery = AppSearchEngine.normalize(query).isEmpty();
         // UI-011: a blank query with no recent/favorite apps used to show a bare empty state.
         // Falling back to the full (alphabetical) app list instead means the panel is only ever

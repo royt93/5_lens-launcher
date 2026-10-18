@@ -273,4 +273,7 @@
     <string name="edge_swipe_mode_both">Оба края</string>
     <string name="edge_swipe_mode_right">Только правый край</string>
     <string name="edge_swipe_mode_left">Только левый край</string>
+    <string name="setting_enable_t9_search_keypad">Клавиатура T9 в поиске</string>
+    <string name="setting_enable_t9_search_keypad_desc">Показывать цифровую панель внизу поиска для ввода одной рукой</string>
+    <string name="t9_key_clear">Очистить</string>
 </resources>

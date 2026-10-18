@@ -259,4 +259,7 @@
     <string name="edge_swipe_mode_both">양쪽 가장자리</string>
     <string name="edge_swipe_mode_right">오른쪽 가장자리만</string>
     <string name="edge_swipe_mode_left">왼쪽 가장자리만</string>
+    <string name="setting_enable_t9_search_keypad">검색 내 T9 다이얼패드</string>
+    <string name="setting_enable_t9_search_keypad_desc">한 손 타이핑을 위해 검색창 하단에 숫자 패드를 표시합니다</string>
+    <string name="t9_key_clear">지우기</string>
 </resources>

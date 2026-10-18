@@ -263,4 +263,7 @@
     <string name="edge_swipe_mode_both">Beide Ränder</string>
     <string name="edge_swipe_mode_right">Nur rechter Rand</string>
     <string name="edge_swipe_mode_left">Nur linker Rand</string>
+    <string name="setting_enable_t9_search_keypad">T9-Ziffernblock in der Suche</string>
+    <string name="setting_enable_t9_search_keypad_desc">Ziffernblock unten in der Suche für einhändiges Tippen anzeigen</string>
+    <string name="t9_key_clear">Löschen</string>
 </resources>

@@ -46,9 +46,8 @@ Source of truth for implementation choices in this session. Detailed acceptance 
 
 ## 🟡 In progress
 
-- None.
-
-- **FISH-024 — Vòng sáng tiêu điểm thấu kính (2026-10-17)**: Vòng tròn viền mảnh quanh icon app đang phóng to tại tiêu điểm lens, màu theo `KEY_HIGHLIGHT_COLOR`, alpha theo animation lens, công tắc Bật/Tắt trong Settings (`KEY_SHOW_FOCUS_HALO`, mặc định bật, reset-to-defaults về bật), tự ẩn khi Clean mode, 17 locale. Code + test đã xong: JVM 894/894, lint 0 lỗi / 27 cảnh báo, secret scan và diff check sạch; 2 widget test instrumentation đã viết và compile OK. **Chưa xác minh trên thiết bị**: TECNO BG6 `118743744X002560` đang ngắt kết nối (chỉ còn `emulator-5554`, bị cấm), nên chưa chạy instrumentation, smoke tay, audit. Chưa commit/push. Spec: `docs/superpowers/specs/2026-10-17-focus-accent-halo-design.md`, plan: `docs/superpowers/plans/2026-10-17-focus-accent-halo.md`. Story: `doc/task/inprogress/p2-fish-fish-024-focus-accent-halo.md`.
+- **SEARCH-010 — Bàn phím số T9 trong SearchView (2026-10-18)**: Thêm bàn phím T9 12 nút (4x3) cố định dưới SearchView; mapping ITU E.161, chuẩn hóa dấu tiếng Việt, xếp hạng Prefix > Word Prefix > Substring, hòa với Search Filter Chips. Cài đặt trong FrmSettings qua `UtilSettings.KEY_ENABLE_T9_SEARCH_KEYPAD`, mặc định tắt; khi bật thì T9 pad hiện và IME hệ thống ẩn. 17 locale đầy đủ cho 3 chuỗi mới. Xác minh Samsung S24 Ultra `R5CX613VZBR`: 912/912 unit, lint 0 lỗi / 27 warnings, 8 targeted instrumentation pass, smoke SearchView không có ad. Audit 9.75/10 (>9.0). Chưa commit/push. Spec: `docs/superpowers/specs/2026-10-17-t9-search-keypad-design.md`; plan: `docs/superpowers/plans/2026-10-17-t9-search-keypad.md`; story: `doc/task/inprogress/p2-search-search-010-t9-dialpad-search.md`.
+- **SEARCH-010 — Bàn phím số T9 trong SearchView (2026-10-18)**: Bàn phím T9 12 nút (4x3) docked dưới SearchView; T9 mapping ITU E.161 (2-9, 0 space, 1 punctuation), bỏ dấu tiếng Việt, match/rank prefix > word-prefix > substring, bật/tắt trong Settings bằng `UtilSettings.KEY_ENABLE_T9_SEARCH_KEYPAD` (mặc định tắt). Hòa vào Search Filter Chips hiện có. Unit mới: `T9SearchEngineTest` 3, `UtilSettingsT9Test` 2, `T9SearchStringsTest` 1; toàn bộ unit suite 912/912 pass, `AllStringsTranslationTest` pass đủ 17 locales; lint 0 lỗi/27 cảnh báo. Samsung S24 Ultra `R5CX613VZBR`: 2 widget test T9 và 11 targeted regression tests pass; smoke screenshot SearchView không thấy ad. Audit tự chấm 9.75/10 (>9.0). Chưa commit/push. Spec: `docs/superpowers/specs/2026-10-17-t9-search-keypad-design.md`; plan: `docs/superpowers/plans/2026-10-17-t9-search-keypad.md`; story: `doc/task/inprogress/p2-search-search-010-t9-dialpad-search.md`.
 
 - **FISH-022 — Nhóm lens (2026-10-15)**: Room group metadata + backup v2, `LensManagementActivity` Material You (active lens, count, edit theo ngữ cảnh), bulk assign/create/ungroup, popup action, đủ locale. Audit sửa 3 lỗi (manage-id lạ, mất edit state khi recreate, `createLens` không copy group). TECNO KJ7: manager 28/28, Home 26/26, quick-switch 12/12, multi-lens 4/4, backup 11/11, migration 4/4; full unit 866/866; secret scan + diff check xanh. Backup export/import smoke tay pass group + collapsed state; file picker export lỗi orphan-row đã sửa và commit `2ba4f58d`.
 
@@ -67,7 +66,7 @@ Source of truth for implementation choices in this session. Detailed acceptance 
 
 ## ❌ Skipped
 
-- None.
+- **SEARCH-010 — Bàn phím số T9 trong SearchView (2026-10-18)**: Thêm bàn phím T9 12 nút (4x3) docked dưới SearchView; mapping ITU E.161, chuẩn hóa dấu tiếng Việt, xếp hạng Prefix > Word Prefix > Substring, hòa với Search Filter Chips. Cài đặt trong Settings qua `UtilSettings.KEY_ENABLE_T9_SEARCH_KEYPAD`, mặc định tắt; khi bật, T9 pad hiện và IME hệ thống ẩn. 17 locales đầy đủ cho 3 chuỗi mới. Xác minh trên Samsung S24 Ultra `R5CX613VZBR`: 912/912 unit, lint 0 lỗi / 27 warnings, 8 targeted instrumentation pass, smoke SearchView không có ad. Audit 9.75/10 (>9.0). Đã commit và push lên `origin/dev`. Story: `doc/task/done/p2-search-search-010-t9-dialpad-search.md`.
 
 ## 💭 Ideas
 

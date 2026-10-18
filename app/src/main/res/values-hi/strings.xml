@@ -263,4 +263,7 @@
     <string name="edge_swipe_mode_both">दोनों किनारे</string>
     <string name="edge_swipe_mode_right">केवल दायाँ किनारा</string>
     <string name="edge_swipe_mode_left">केवल बायाँ किनारा</string>
+    <string name="setting_enable_t9_search_keypad">खोज में T9 डायलपैड</string>
+    <string name="setting_enable_t9_search_keypad_desc">एक हाथ से टाइपिंग के लिए खोज के नीचे नंबर पैड दिखाएं</string>
+    <string name="t9_key_clear">साफ़ करें</string>
 </resources>

@@ -267,4 +267,7 @@
     <string name="edge_swipe_mode_both">Ambas as bordas</string>
     <string name="edge_swipe_mode_right">Somente borda direita</string>
     <string name="edge_swipe_mode_left">Somente borda esquerda</string>
+    <string name="setting_enable_t9_search_keypad">Teclado numérico T9 na pesquisa</string>
+    <string name="setting_enable_t9_search_keypad_desc">Mostrar teclado numérico na parte inferior para digitação com uma mão</string>
+    <string name="t9_key_clear">Limpar</string>
 </resources>

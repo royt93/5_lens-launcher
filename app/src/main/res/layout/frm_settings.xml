@@ -1262,6 +1262,60 @@
                     android:layout_marginStart="52dp"
                     app:dividerColor="?attr/colorOutlineVariant" />
 
+                <!-- SEARCH-010: opt-in T9 keypad in SearchView -->
+                <RelativeLayout
+                    android:id="@+id/rlSwitchT9SearchKeypadParent"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingVertical="8dp">
+
+                    <ImageView
+                        android:id="@+id/iconT9SearchKeypad"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_alignParentStart="true"
+                        android:layout_centerVertical="true"
+                        android:contentDescription="@string/setting_enable_t9_search_keypad"
+                        android:padding="8dp"
+                        android:src="@drawable/ic_apps_24dp" />
+
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/swEnableT9SearchKeypad"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:layout_toEndOf="@id/iconT9SearchKeypad"
+                        android:paddingTop="12dp"
+                        android:paddingBottom="12dp"
+                        android:text="@string/setting_enable_t9_search_keypad"
+                        android:textColor="?android:attr/textColorSecondary"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:thumb="@drawable/sw_thumb_ios"
+                        app:switchPadding="16dp"
+                        app:track="@drawable/sw_track_ios" />
+
+                    <TextView
+                        android:id="@+id/tvEnableT9SearchKeypadHint"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/swEnableT9SearchKeypad"
+                        android:layout_marginStart="12dp"
+                        android:layout_marginEnd="16dp"
+                        android:layout_toEndOf="@id/iconT9SearchKeypad"
+                        android:paddingBottom="8dp"
+                        android:text="@string/setting_enable_t9_search_keypad_desc"
+                        android:textColor="?android:attr/textColorTertiary"
+                        android:textSize="12sp" />
+
+                </RelativeLayout>
+
+                <com.google.android.material.divider.MaterialDivider
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="52dp"
+                    app:dividerColor="?attr/colorOutlineVariant" />
+
                 <RelativeLayout
                     android:id="@+id/rlSwitchQuickActionCalculatorParent"
                     android:layout_width="match_parent"

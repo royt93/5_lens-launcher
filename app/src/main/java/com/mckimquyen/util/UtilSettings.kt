@@ -138,6 +138,8 @@ class UtilSettings(context: Context) {
         const val KEY_CLEAN_LENS_MODE = "clean_lens_mode"
         const val DEFAULT_SHOW_FOCUS_HALO = true
         const val KEY_SHOW_FOCUS_HALO = "show_focus_halo"
+        const val KEY_ENABLE_T9_SEARCH_KEYPAD = "enable_t9_search_keypad"
+        const val DEFAULT_ENABLE_T9_SEARCH_KEYPAD = false
         const val KEY_EDGE_SWIPE_LENS_SWITCH = "edge_swipe_lens_switch"
         val DEFAULT_EDGE_SWIPE_LENS_SWITCH = EdgeSwipeMode.BOTH
         // FEAT-009: SearchBar recent-apps-panel icon toggle (the lens-menu entry stays untoggleable)
@@ -292,6 +294,7 @@ class UtilSettings(context: Context) {
         KEY_SMART_FOCUS_BIAS -> prefs.getBoolean(name, DEFAULT_SMART_FOCUS_BIAS)
         KEY_CLEAN_LENS_MODE -> prefs.getBoolean(name, DEFAULT_CLEAN_LENS_MODE)
         KEY_SHOW_FOCUS_HALO -> prefs.getBoolean(name, DEFAULT_SHOW_FOCUS_HALO)
+        KEY_ENABLE_T9_SEARCH_KEYPAD -> prefs.getBoolean(name, DEFAULT_ENABLE_T9_SEARCH_KEYPAD)
         KEY_RECENT_APPS_QUICK_PANEL_ENABLED -> prefs.getBoolean(name, DEFAULT_RECENT_APPS_QUICK_PANEL_ENABLED)
         KEY_QUICK_ACTION_CALCULATOR, KEY_QUICK_ACTION_UNIT, KEY_QUICK_ACTION_TIMER,
         KEY_QUICK_ACTION_BATTERY, KEY_QUICK_ACTION_SETTINGS,
@@ -358,6 +361,13 @@ class UtilSettings(context: Context) {
 
     fun saveEdgeSwipeMode(mode: EdgeSwipeMode) {
         save(KEY_EDGE_SWIPE_LENS_SWITCH, mode.name)
+    }
+
+    fun getEnableT9SearchKeypad(): Boolean =
+        getBoolean(KEY_ENABLE_T9_SEARCH_KEYPAD)
+
+    fun saveEnableT9SearchKeypad(value: Boolean) {
+        save(KEY_ENABLE_T9_SEARCH_KEYPAD, value)
     }
 
     fun setLauncherMode(mode: LauncherMode) {

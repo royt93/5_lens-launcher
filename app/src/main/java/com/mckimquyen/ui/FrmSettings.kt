@@ -57,6 +57,7 @@ class FrmSettings : Fragment(), SettingsInterface {
     private var swDepthOfField: SwitchCompat? = null
     private var swSmartFocus: SwitchCompat? = null
     private var tvSelectedSearchHint: TextView? = null
+    private var swEnableT9SearchKeypad: SwitchCompat? = null
     private var swQuickActionCalculator: SwitchCompat? = null
     private var swQuickActionUnit: SwitchCompat? = null
     private var swQuickActionTimer: SwitchCompat? = null
@@ -128,6 +129,7 @@ class FrmSettings : Fragment(), SettingsInterface {
         swDepthOfField = view.findViewById(R.id.swDepthOfField)
         swSmartFocus = view.findViewById(R.id.swSmartFocus)
         tvSelectedSearchHint = view.findViewById(R.id.tvSelectedSearchHint)
+        swEnableT9SearchKeypad = view.findViewById(R.id.swEnableT9SearchKeypad)
         swQuickActionCalculator = view.findViewById(R.id.swQuickActionCalculator)
         swQuickActionUnit = view.findViewById(R.id.swQuickActionUnit)
         swQuickActionTimer = view.findViewById(R.id.swQuickActionTimer)
@@ -211,6 +213,9 @@ class FrmSettings : Fragment(), SettingsInterface {
             val level = hapticLevelForButton(checkedId)
             utilSettings?.saveHapticIntensity(level)
             previewHaptic(group, level)
+        }
+        swEnableT9SearchKeypad?.setOnCheckedChangeListener { _, isChecked ->
+            utilSettings?.saveEnableT9SearchKeypad(isChecked)
         }
         swShowNameAppHover?.setOnCheckedChangeListener { _, isChecked ->
             utilSettings?.save(UtilSettings.KEY_SHOW_NAME_APP_HOVER, isChecked)
@@ -371,6 +376,7 @@ class FrmSettings : Fragment(), SettingsInterface {
             } else {
                 customHint
             }
+            swEnableT9SearchKeypad?.isChecked = us.getEnableT9SearchKeypad()
 
             // Launcher Mode (FEAT-003)
             val currentMode = us.getLauncherMode()
@@ -576,6 +582,7 @@ class FrmSettings : Fragment(), SettingsInterface {
         swDepthOfField = null
         swSmartFocus = null
         tvSelectedSearchHint = null
+        swEnableT9SearchKeypad = null
         swQuickActionCalculator = null
         swQuickActionUnit = null
         swQuickActionTimer = null

@@ -259,4 +259,7 @@
     <string name="edge_swipe_mode_both">គែមទាំងពីរ</string>
     <string name="edge_swipe_mode_right">តែគែមស្ដាំ</string>
     <string name="edge_swipe_mode_left">តែគែមឆ្វេង</string>
+    <string name="setting_enable_t9_search_keypad">ក្ដារចុចលេខ T9 ក្នុងការស្វែងរក</string>
+    <string name="setting_enable_t9_search_keypad_desc">បង្ហាញក្ដារចុចលេខនៅខាងក្រោមនៃការស្វែងរកសម្រាប់ការវាយអក្សរដោយដៃម្ខាង</string>
+    <string name="t9_key_clear">លុប</string>
 </resources>

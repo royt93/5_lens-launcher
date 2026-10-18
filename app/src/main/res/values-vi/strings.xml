@@ -266,4 +266,7 @@
     <string name="edge_swipe_mode_both">Cả hai mép</string>
     <string name="edge_swipe_mode_right">Chỉ mép phải</string>
     <string name="edge_swipe_mode_left">Chỉ mép trái</string>
+    <string name="setting_enable_t9_search_keypad">Bàn phím số T9 trong tìm kiếm</string>
+    <string name="setting_enable_t9_search_keypad_desc">Hiển thị bàn phím số ở đáy ô tìm kiếm để gõ nhanh bằng một tay</string>
+    <string name="t9_key_clear">Xóa</string>
 </resources>

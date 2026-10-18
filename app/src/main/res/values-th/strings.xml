@@ -259,4 +259,7 @@
     <string name="edge_swipe_mode_both">ทั้งสองขอบ</string>
     <string name="edge_swipe_mode_right">ขอบขวาเท่านั้น</string>
     <string name="edge_swipe_mode_left">ขอบซ้ายเท่านั้น</string>
+    <string name="setting_enable_t9_search_keypad">แป้นพิมพ์ตัวเลข T9 ในการค้นหา</string>
+    <string name="setting_enable_t9_search_keypad_desc">แสดงแป้นพิมพ์ตัวเลขที่ด้านล่างของการค้นหาสำหรับการพิมพ์ด้วยมือเดียว</string>
+    <string name="t9_key_clear">ล้าง</string>
 </resources>
