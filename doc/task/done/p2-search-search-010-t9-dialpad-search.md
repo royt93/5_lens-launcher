@@ -51,3 +51,12 @@
 - Bản cuối: 921/921 unit; lint 0 lỗi/38 warnings; T9/chip 2/2 widget pass, nằm trong 38 targeted instrumentation pass. Diff check sạch; staged secret scan chạy trước commit.
 - Audit fix search: **9.3/10**. Giới hạn: chưa smoke dark mode/landscape/font cực lớn; không có thay đổi logic ranking/filter.
 - Owner duyệt commit/push sau review; fix search tách commit khỏi FISH-026.
+
+## Follow-up cấu hình UI — 2026-10-18
+
+- Inflate thật `act_home` trên OPPO CPH1989 `FUJZIFIR7DQCNRWW` với light/dark, portrait/landscape, font 1.0/1.5/2.0. Tái hiện hai lỗi: (1) font 1.5, nhãn cần 158px nhưng phím cố định 144px; (2) landscape thật, keypad 4 hàng tràn khung và đẩy kết quả xuống 0px.
+- Sửa: phím `wrap_content` + `minHeight=48dp`, bỏ rowWeight; keypad nằm trong `BoundedHeightNestedScrollView` giới hạn 40% chiều cao cha và cuộn khi thấp. Giữ nhãn hai dòng, không giảm font; portrait vẫn hiện đủ 12 phím.
+- Test mới `ActHomeSearchConfigurationWidgetTest`: ma trận 6 cấu hình (12 phím, touch 48dp, text không bị cắt, không chồng nhau), tint chip dark mode, và Activity landscape thật: bấm `247` ra Chrome, keypad trong vùng nhìn thấy, phím cuối cuộn tới được, còn đủ một hàng kết quả 48dp. Test lưu/khôi phục T9, filter, apps; đặt orientation về giá trị gốc.
+- Red rồi green: font 1.5 fail `bottom=158 height=144`; landscape fail `rvH=0`, sau chỉnh 95px còn thiếu, giới hạn 40% đạt.
+- Smoke OPPO: portrait light bấm `247` ra Chrome; landscape thật có hàng Chrome đầy đủ; dark portrait đủ phím/chip; không thấy quảng cáo. Rotation/night mode đã khôi phục; T9 prefs hiện `false` (key không còn vắng). Giới hạn: không smoke landscape dark, font 1.5 trên thiết bị thật và không đổi font thật hệ thống.
+- Bản cuối: JVM 921/921, lint 0 lỗi/38 cảnh báo, 10 targeted widget pass (cấu hình, T9, chip, settings, pager/edge swipe).
