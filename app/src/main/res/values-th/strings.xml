@@ -244,7 +244,6 @@
     <string name="lens_group_header_description">%1$s, เลนส์ %2$d, %3$s</string>
     <string name="lens_group_lens_active_description">%1$s, เลนส์ที่ใช้งานอยู่</string>
     <plurals name="lens_group_lens_count">
-        <item quantity="one">เลนส์ %1$d</item>
         <item quantity="other">เลนส์ %1$d</item>
     </plurals>
     <string name="lens_group_save_failed">อัปเดตกลุ่มไม่สำเร็จ</string>
@@ -264,4 +263,5 @@
     <string name="setting_lens_elastic_overscroll">เลนส์ยืดหยุ่นเมื่อเลื่อนเกินขอบ</string>
     <string name="setting_lens_elastic_overscroll_desc">เพิ่มแรงต้านตามธรรมชาติเมื่อคุณลากเลนส์ไปเกินขอบตาราง</string>
     <string name="t9_key_clear">ล้าง</string>
+    <string name="t9_key_backspace_description">ลบตัวเลขสุดท้าย</string>
 </resources>

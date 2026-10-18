@@ -244,7 +244,6 @@
     <string name="lens_group_header_description">%1$s, %2$d lensa, %3$s</string>
     <string name="lens_group_lens_active_description">%1$s, lensa aktif</string>
     <plurals name="lens_group_lens_count">
-        <item quantity="one">%1$d lensa</item>
         <item quantity="other">%1$d lensa</item>
     </plurals>
     <string name="lens_group_save_failed">Grup gagal diperbarui</string>
@@ -264,4 +263,5 @@
     <string name="setting_lens_elastic_overscroll">Overscroll elastis lensa</string>
     <string name="setting_lens_elastic_overscroll_desc">Menambahkan hambatan alami saat Anda menyeret lensa melewati tepi kisi</string>
     <string name="t9_key_clear">Hapus</string>
+    <string name="t9_key_backspace_description">Hapus digit terakhir</string>
 </resources>

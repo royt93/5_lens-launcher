@@ -268,4 +268,5 @@
     <string name="setting_lens_elastic_overscroll">लेंस इलास्टिक ओवरस्क्रॉल</string>
     <string name="setting_lens_elastic_overscroll_desc">लेंस को ग्रिड के किनारे से आगे खींचने पर स्वाभाविक प्रतिरोध जोड़ता है</string>
     <string name="t9_key_clear">साफ़ करें</string>
+    <string name="t9_key_backspace_description">अंतिम अंक हटाएँ</string>
 </resources>

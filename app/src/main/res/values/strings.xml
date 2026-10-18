@@ -310,4 +310,5 @@
     <string name="edge_swipe_mode_right">Right edge only</string>
     <string name="edge_swipe_mode_left">Left edge only</string>
     <string name="t9_key_clear">Clear</string>
+    <string name="t9_key_backspace_description">Delete last digit</string>
 </resources>

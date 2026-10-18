@@ -244,7 +244,6 @@
     <string name="lens_group_header_description">%1$s, កែវ %2$d, %3$s</string>
     <string name="lens_group_lens_active_description">%1$s, កែវសកម្ម</string>
     <plurals name="lens_group_lens_count">
-        <item quantity="one">កែវ %1$d</item>
         <item quantity="other">កែវ %1$d</item>
     </plurals>
     <string name="lens_group_save_failed">មិនអាចធ្វើបច្ចុប្បន្នក្រុមបានទេ</string>
@@ -264,4 +263,5 @@
     <string name="setting_lens_elastic_overscroll">ឥទ្ធិពលយឺតនៃកែវពង្រីក</string>
     <string name="setting_lens_elastic_overscroll_desc">បន្ថែមភាពទប់ទល់ធម្មជាតិ នៅពេលអ្នកអូសកែវពង្រីកហួសគែមក្រឡា</string>
     <string name="t9_key_clear">លុប</string>
+    <string name="t9_key_backspace_description">លុបខ្ទង់ចុងក្រោយ</string>
 </resources>

@@ -479,8 +479,11 @@
                     android:visibility="gone"
                     tools:visibility="visible">
 
+                <!-- Key labels are digits plus ITU E.161 letter groups: language-neutral symbols,
+                     not prose, so they are intentionally not string resources. -->
                 <GridLayout
                     android:id="@+id/layoutT9Keypad"
+                    tools:ignore="HardcodedText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:columnCount="3"
@@ -681,6 +684,7 @@
                         android:minHeight="48dp"
                         android:layout_columnWeight="1"
                         android:layout_margin="4dp"
+                        android:contentDescription="@string/t9_key_backspace_description"
                         android:text="⌫"
                         android:textSize="20sp"
                         android:gravity="center" />

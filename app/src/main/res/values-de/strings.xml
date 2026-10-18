@@ -268,4 +268,5 @@
     <string name="setting_lens_elastic_overscroll">Elastisches Linsen-Overscroll</string>
     <string name="setting_lens_elastic_overscroll_desc">Fügt natürlichen Widerstand hinzu, wenn du die Linse über den Rand des Rasters ziehst</string>
     <string name="t9_key_clear">Löschen</string>
+    <string name="t9_key_backspace_description">Letzte Ziffer löschen</string>
 </resources>

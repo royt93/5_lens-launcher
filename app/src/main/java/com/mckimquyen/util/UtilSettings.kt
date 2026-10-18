@@ -521,6 +521,9 @@ class UtilSettings(context: Context) {
         val lensIds = lensSettings.map { it.lensId }
         require(lensIds.toSet().size == lensIds.size) { "Duplicate lens settings IDs" }
         require(LensWorkspace.DEFAULT_LENS_ID in lensIds) { "Default lens settings are required" }
+        // ponytail: explicit commit() on purpose - backup import/rollback needs the synchronous
+        // result, which KTX prefs.edit { } (apply()) cannot return. Do not "fix" UseKtx here.
+        @Suppress("UseKtx")
         val editor = prefs.edit()
         prefs.all.keys.filter(::isWorkspacePreferenceKey).forEach(editor::remove)
         lensSettings.forEach { lens ->
@@ -543,10 +546,12 @@ class UtilSettings(context: Context) {
     fun reconcileActiveLens(validLensIds: Set<String>): Boolean {
         val activeLensId = prefs.getString(KEY_ACTIVE_LENS_ID, LensWorkspace.DEFAULT_LENS_ID)
         if (activeLensId in validLensIds) return true
+        @Suppress("UseKtx") // commit() result is the contract; KTX apply() returns nothing
         return prefs.edit().putString(KEY_ACTIVE_LENS_ID, LensWorkspace.DEFAULT_LENS_ID).commit()
     }
 
     fun restoreWorkspacePreferences(snapshot: WorkspacePreferencesSnapshot): Boolean {
+        @Suppress("UseKtx") // rollback must report whether the synchronous commit succeeded
         val editor = prefs.edit()
         prefs.all.keys.filter(::isWorkspacePreferenceKey).forEach(editor::remove)
         snapshot.values.forEach { (key, value) ->

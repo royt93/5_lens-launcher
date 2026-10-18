@@ -294,4 +294,5 @@
     <string name="setting_lens_elastic_overscroll">تمدد العدسة المرن</string>
     <string name="setting_lens_elastic_overscroll_desc">يضيف مقاومة مرنة طبيعية عند سحب العدسة إلى ما بعد حافة الشبكة</string>
     <string name="t9_key_clear">مسح</string>
+    <string name="t9_key_backspace_description">حذف آخر رقم</string>
 </resources>

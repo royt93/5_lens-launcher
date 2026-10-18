@@ -253,6 +253,7 @@
     <string name="lens_group_lens_active_description">%1$s, lente ativa</string>
     <plurals name="lens_group_lens_count">
         <item quantity="one">%1$d lente</item>
+        <item quantity="many">%1$d de lentes</item>
         <item quantity="other">%1$d lentes</item>
     </plurals>
     <string name="lens_group_save_failed">Não foi possível atualizar o grupo</string>
@@ -272,4 +273,5 @@
     <string name="setting_lens_elastic_overscroll">Overscroll elástico da lente</string>
     <string name="setting_lens_elastic_overscroll_desc">Adiciona resistência natural ao arrastar a lente além da borda da grade</string>
     <string name="t9_key_clear">Limpar</string>
+    <string name="t9_key_backspace_description">Excluir o último dígito</string>
 </resources>

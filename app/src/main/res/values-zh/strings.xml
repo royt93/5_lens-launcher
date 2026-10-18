@@ -244,7 +244,6 @@
     <string name="lens_group_header_description">%1$s，%2$d 个镜头，%3$s</string>
     <string name="lens_group_lens_active_description">%1$s，当前镜头</string>
     <plurals name="lens_group_lens_count">
-        <item quantity="one">%1$d 个镜头</item>
         <item quantity="other">%1$d 个镜头</item>
     </plurals>
     <string name="lens_group_save_failed">无法更新分组</string>
@@ -264,4 +263,5 @@
     <string name="setting_lens_elastic_overscroll">镜头弹性过卷</string>
     <string name="setting_lens_elastic_overscroll_desc">将镜头拖过网格边缘时增加自然的阻力</string>
     <string name="t9_key_clear">清除</string>
+    <string name="t9_key_backspace_description">删除最后一位数字</string>
 </resources>

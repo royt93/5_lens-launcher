@@ -23,12 +23,21 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class LensManagementActivityWidgetTest {
+    private companion object {
+        val LOCALE_PREF_KEYS = listOf("Locale.Helper.Selected.Language", "Locale.Helper.Language.Selected")
+    }
+
     private val context get() = InstrumentationRegistry.getInstrumentation().targetContext
     private val dao get() = AppDatabase.getInstance().lensWorkspaceDao()
+    private var originalPrefs: Map<String, Any?> = emptyMap()
 
     @Before
     fun setUp() = runBlocking {
         AppDatabase.init(context)
+        // This test forces English; snapshot the device's own language keys so tearDown can put
+        // them back (an earlier version left the owner's phone switched to English).
+        val prefs = androidx.preference.PreferenceManager.getDefaultSharedPreferences(context)
+        originalPrefs = LOCALE_PREF_KEYS.associateWith { prefs.all[it] }
         LocaleHelper.setLocale(context, "en")
         androidx.test.core.app.ApplicationProvider.getApplicationContext<android.content.Context>()
             .resources.configuration.setLocale(java.util.Locale.ENGLISH)
@@ -46,6 +55,15 @@ class LensManagementActivityWidgetTest {
 
     @After
     fun tearDown() = runBlocking {
+        val editor = androidx.preference.PreferenceManager.getDefaultSharedPreferences(context).edit()
+        originalPrefs.forEach { (key, value) ->
+            when (value) {
+                is String -> editor.putString(key, value)
+                is Boolean -> editor.putBoolean(key, value)
+                null -> editor.remove(key)
+            }
+        }
+        editor.commit()
         dao.deleteAll()
         dao.insertIfAbsent(LensWorkspace.createDefault())
         UtilSettings(context).save(UtilSettings.KEY_ACTIVE_LENS_ID, LensWorkspace.DEFAULT_LENS_ID)

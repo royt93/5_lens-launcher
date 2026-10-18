@@ -248,7 +248,6 @@
     <string name="lens_group_header_description">%1$s, %2$d thấu kính, %3$s</string>
     <string name="lens_group_lens_active_description">%1$s, thấu kính đang dùng</string>
     <plurals name="lens_group_lens_count">
-        <item quantity="one">%1$d thấu kính</item>
         <item quantity="other">%1$d thấu kính</item>
     </plurals>
     <string name="layout_import_workspace_preview_message">Thao tác này thay thế toàn bộ không gian làm việc hiện tại: %1$d thấu kính và %2$d mục bố cục ứng dụng. Ứng dụng không có trong bản sao lưu sẽ bị ẩn ở thấu kính mặc định.</string>
@@ -271,4 +270,5 @@
     <string name="setting_lens_elastic_overscroll">Hiệu ứng đàn hồi thấu kính</string>
     <string name="setting_lens_elastic_overscroll_desc">Tạo lực cản đàn hồi tự nhiên khi kéo thấu kính chạm mép viền</string>
     <string name="t9_key_clear">Xóa</string>
+    <string name="t9_key_backspace_description">Xóa chữ số cuối</string>
 </resources>
