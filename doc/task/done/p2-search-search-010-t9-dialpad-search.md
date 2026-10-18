@@ -69,3 +69,5 @@
 - Bản cuối mở T9 không cần BACK để ẩn IME. 7 cấu hình inflation, 10 targeted instrumentation pass trên Samsung; full JVM 921/921, lint 0 lỗi/38 warnings, build pass.
 - Khôi phục font=1.1, accelerometer_rotation=1, user_rotation=0, system night=no. Chỉ khôi phục ba key smoke (`night_mode`, T9, calculator) bằng run-as từ snapshot, kiểm tra trạng thái key vắng chính xác; không ghi đè prefs khác, không xóa DB, không đổi locale/default launcher.
 - Giới hạn còn lại: chưa smoke kết hợp landscape+font 2.0; test native flag chứng minh cơ chế auto-IME, screenshot mở search thật chứng minh IME không che T9.
+
+- Follow-up Samsung: lỗi T9 auto-IME + wrap 3 dòng font 2.0 tái hiện trên Galaxy A11, sửa/test RED-GREEN. Dark landscape + 2.0 portrait smoke; system settings/T9/night exact snapshot restored. 921 JVM, 10 targeted Samsung pass. Audit combined 9.4/10.
