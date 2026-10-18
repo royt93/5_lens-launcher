@@ -57,6 +57,8 @@
 
 ## ✅ Implemented
 
+- FISH-026 — Đàn hồi thấu kính: Settings → Lens mặc định bật/reset bật, reduced-motion clamp, bốn mép tối đa 28dp. JVM 921/921, lint 0 errors/38 warnings, OPPO `FUJZIFIR7DQCNRWW` 38 targeted instrumentation pass và smoke không ad. Audit 9.3/10. `done/p2-fish-fish-026-lens-elastic-overscroll.md`.
+
 - FEAT-006 follow-up — Multi-lens workspace backup v2 (2026-10-11): file schema v2 backs up complete lens list/layout, per-lens scope/selection/frozen, mandatory `activeLensId`; strict validation keeps v1 compatible through default-lens-only layout apply. V2 import uses Room transaction + synchronous SharedPreferences replacement and compensating rollback/recovery-required result, retains global stats/hidden parked rows, then refreshes UI and dynamic shortcuts. Final audit 2026-10-12 (`doc/task/AUDIT_FEAT_006_V2_2026-10-11.md`, 9.3/10): fixed v1 import installed-app filter, icon tints, missing `vi` strings; 822/822 JVM; TECNO KJ7 (`115333744A005844`, Android 14) instrumentation 10/10 + real SAF export/mutate/import/repeat/cancel smoke; lint 0 errors/12 baseline warnings; secret scan clean. Process-death gap between Room and prefs commits remains documented. Not pushed. Plan/spec: `docs/superpowers/plans/2026-10-11-workspace-backup-v2.md` and `docs/superpowers/specs/2026-10-11-workspace-backup-v2-design.md`.
 
 - REL-001 — Android lint release blockers cleared; unit, widget/UI, integration and Pixel smoke evidence recorded.
