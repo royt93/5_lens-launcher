@@ -1561,7 +1561,7 @@ public class ActHome extends ActBase {
     }
 
     private void setupT9Keypad() {
-        t9Keypad = findViewById(R.id.layoutT9Keypad);
+        t9Keypad = findViewById(R.id.scrollT9Keypad);
         int[] digitButtons = new int[]{
                 R.id.btnT9_0, R.id.btnT9_1, R.id.btnT9_2, R.id.btnT9_3, R.id.btnT9_4,
                 R.id.btnT9_5, R.id.btnT9_6, R.id.btnT9_7, R.id.btnT9_8, R.id.btnT9_9

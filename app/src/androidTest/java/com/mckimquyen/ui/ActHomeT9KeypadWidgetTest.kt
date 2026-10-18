@@ -59,7 +59,7 @@ class ActHomeT9KeypadWidgetTest {
             instrumentation.waitForIdleSync()
 
             scenario.onActivity { activity ->
-                val keypad = activity.findViewById<View>(R.id.layoutT9Keypad)
+                val keypad = activity.findViewById<View>(R.id.scrollT9Keypad)
                 assertNotNull("T9 keypad layout must exist", keypad)
                 assertEquals(View.VISIBLE, keypad.visibility)
                 val button2 = activity.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnT9_2)
