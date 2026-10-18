@@ -41,3 +41,13 @@
 - [x] Diff check: `git diff --check` sạch.
 - [x] Audit tự chấm: **9.75/10** (>9.0); xem `doc/task/AUDIT_SEARCH-010_2026-10-18.md`.
 - [x] Đã hoàn tất commit và push theo owner approval.
+
+## Follow-up OPPO — 2026-10-18
+
+- Sửa padding/inset MaterialButton và cỡ nhãn hai dòng; dành navigation-bar inset cho SearchView content để hàng cuối không bị che.
+- Chip dùng selector tint theo checked state, tắt checked icon trùng. Không sửa drawable dùng chung ở nơi khác.
+- Test chip lưu/khôi phục workspace và filter; hash các prefs liên quan trước/sau test giống nhau. Không thể suy ra hay khôi phục các giá trị thiết bị đã bị test cũ ghi đè trước khi có snapshot.
+- OPPO CPH1989 `FUJZIFIR7DQCNRWW`: keypad đầy đủ, `247` cho Chrome thật; screenshot không có quảng cáo. T9 hiện OFF (key vắng ở lần kiểm cuối).
+- Bản cuối: 921/921 unit; lint 0 lỗi/38 warnings; T9/chip 2/2 widget pass, nằm trong 38 targeted instrumentation pass. Diff check sạch; staged secret scan chạy trước commit.
+- Audit fix search: **9.3/10**. Giới hạn: chưa smoke dark mode/landscape/font cực lớn; không có thay đổi logic ranking/filter.
+- Owner duyệt commit/push sau review; fix search tách commit khỏi FISH-026.

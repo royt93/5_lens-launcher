@@ -32,10 +32,16 @@ class ActHomeSearchFilterWidgetTest {
     private val appHidden = App(label = "HiddenApp", packageName = "com.test.hidden", name = "Main", isFavorite = false, isVisible = true)
 
     private var originalApps: ArrayList<App>? = null
+    private var originalWorkspace: com.mckimquyen.util.WorkspacePreferencesSnapshot? = null
+    private var originalFilter: String? = null
+
 
     @Before
     fun setup() {
         (context.applicationContext as RApplication).appRefreshPipeline.cancel()
+        originalWorkspace = settings.snapshotWorkspacePreferences()
+        originalFilter = androidx.preference.PreferenceManager.getDefaultSharedPreferences(context)
+            .getString(UtilSettings.KEY_SEARCH_FILTER_PRESET, null)
         originalApps = RAppsSingleton.instance.apps
         RAppsSingleton.instance.apps = arrayListOf(appFav, appNormal, appHidden)
 
@@ -48,7 +54,11 @@ class ActHomeSearchFilterWidgetTest {
 
     @After
     fun cleanup() {
-        settings.saveSearchFilterPreset(SearchFilterPreset.ALL)
+        originalWorkspace?.let { assertTrue(settings.restoreWorkspacePreferences(it)) }
+        val editor = androidx.preference.PreferenceManager.getDefaultSharedPreferences(context).edit()
+        if (originalFilter == null) editor.remove(UtilSettings.KEY_SEARCH_FILTER_PRESET)
+        else editor.putString(UtilSettings.KEY_SEARCH_FILTER_PRESET, originalFilter)
+        assertTrue(editor.commit())
         RAppsSingleton.instance.apps = originalApps
     }
 
@@ -66,6 +76,27 @@ class ActHomeSearchFilterWidgetTest {
                 val chipFav = activity.findViewById<Chip>(R.id.chipFilterFavorites)
 
                 assertTrue("Mặc định All chip được chọn", chipAll.isChecked)
+
+                val chips = listOf(
+                    chipAll,
+                    activity.findViewById(R.id.chipFilterThisLens),
+                    chipFav,
+                    activity.findViewById(R.id.chipFilterHidden)
+                )
+                val expectedCheckedTint = com.google.android.material.color.MaterialColors.getColor(
+                    chipAll,
+                    com.google.android.material.R.attr.colorOnSecondaryContainer
+                )
+                val expectedUncheckedTint = com.google.android.material.color.MaterialColors.getColor(
+                    chipAll,
+                    com.google.android.material.R.attr.colorOnSurfaceVariant
+                )
+                chips.forEach { chip ->
+                    assertFalse("Filter chips must not duplicate the built-in check icon", chip.isCheckedIconVisible)
+                    val iconTint = requireNotNull(chip.chipIconTint)
+                    assertEquals(expectedCheckedTint, iconTint.getColorForState(intArrayOf(android.R.attr.state_checked), 0))
+                    assertEquals(expectedUncheckedTint, iconTint.getColorForState(intArrayOf(-android.R.attr.state_checked), 0))
+                }
 
                 // Chuyển sang Favorites
                 chipFav.performClick()

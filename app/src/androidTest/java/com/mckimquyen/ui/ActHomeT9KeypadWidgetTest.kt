@@ -12,6 +12,7 @@ import com.mckimquyen.util.UtilSettings
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -61,8 +62,25 @@ class ActHomeT9KeypadWidgetTest {
                 val keypad = activity.findViewById<View>(R.id.layoutT9Keypad)
                 assertNotNull("T9 keypad layout must exist", keypad)
                 assertEquals(View.VISIBLE, keypad.visibility)
+                val button2 = activity.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnT9_2)
+                val textLayout = requireNotNull(button2.layout)
+                assertEquals("Digit and letter hint must render on separate lines", 2, textLayout.lineCount)
+                assertTrue(
+                    "Second line must fit inside the visible key: bottom=${textLayout.getLineBottom(1)}, height=${button2.height}, paddingBottom=${button2.paddingBottom}",
+                    textLayout.getLineBottom(1) <= button2.height - button2.paddingBottom
+                )
 
-                activity.findViewById<View>(R.id.btnT9_2).performClick()
+                // Every key, incl. the last row, must sit above the system navigation bar.
+                val visibleFrame = android.graphics.Rect().also { activity.window.decorView.getWindowVisibleDisplayFrame(it) }
+                val backspace = activity.findViewById<View>(R.id.btnT9_Backspace)
+                val location = IntArray(2).also { backspace.getLocationOnScreen(it) }
+                val backspaceBottom = location[1] + backspace.height
+                assertTrue(
+                    "Last key row must not be clipped by system bars: bottom=$backspaceBottom, visibleBottom=${visibleFrame.bottom}",
+                    backspaceBottom <= visibleFrame.bottom
+                )
+
+                button2.performClick()
                 activity.findViewById<View>(R.id.btnT9_4).performClick()
                 activity.findViewById<View>(R.id.btnT9_7).performClick()
             }

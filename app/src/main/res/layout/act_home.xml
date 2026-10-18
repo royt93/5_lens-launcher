@@ -117,6 +117,7 @@
                  the old cap (64dp/row, capped at 384dp = 6 rows) left most of the screen as dead
                  scrim space once UI-011's all-apps fallback could show dozens of apps. -->
             <LinearLayout
+                android:id="@+id/searchContent"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginTop="8dp"
@@ -148,7 +149,9 @@
                             android:layout_height="wrap_content"
                             android:text="@string/search_filter_all"
                             app:chipIcon="@drawable/ic_apps_24dp"
-                            app:chipIconVisible="true" />
+                            app:chipIconVisible="true"
+                            app:chipIconTint="@color/search_filter_chip_icon_tint"
+                            app:checkedIconVisible="false" />
 
                         <com.google.android.material.chip.Chip
                             android:id="@+id/chipFilterThisLens"
@@ -157,7 +160,9 @@
                             android:layout_height="wrap_content"
                             android:text="@string/search_filter_this_lens"
                             app:chipIcon="@drawable/ic_color_lens_24dp"
-                            app:chipIconVisible="true" />
+                            app:chipIconVisible="true"
+                            app:chipIconTint="@color/search_filter_chip_icon_tint"
+                            app:checkedIconVisible="false" />
 
                         <com.google.android.material.chip.Chip
                             android:id="@+id/chipFilterFavorites"
@@ -166,7 +171,9 @@
                             android:layout_height="wrap_content"
                             android:text="@string/search_filter_favorites"
                             app:chipIcon="@drawable/ic_star_24dp"
-                            app:chipIconVisible="true" />
+                            app:chipIconVisible="true"
+                            app:chipIconTint="@color/search_filter_chip_icon_tint"
+                            app:checkedIconVisible="false" />
 
                         <com.google.android.material.chip.Chip
                             android:id="@+id/chipFilterHidden"
@@ -175,7 +182,9 @@
                             android:layout_height="wrap_content"
                             android:text="@string/search_filter_hidden"
                             app:chipIcon="@drawable/ic_visibility_off_24dp"
-                            app:chipIconVisible="true" />
+                            app:chipIconVisible="true"
+                            app:chipIconTint="@color/search_filter_chip_icon_tint"
+                            app:checkedIconVisible="false" />
 
                     </com.google.android.material.chip.ChipGroup>
                 </HorizontalScrollView>
@@ -477,36 +486,48 @@
                         android:id="@+id/btnT9_1"
                         style="@style/Widget.Material3.Button.TonalButton"
                         android:layout_width="0dp"
-                        android:layout_height="64dp"
+                        android:layout_height="48dp"
                         android:layout_columnWeight="1"
                         android:layout_rowWeight="1"
                         android:layout_margin="4dp"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
+                        android:paddingTop="0dp"
+                        android:paddingBottom="0dp"
                         android:text="1\n.,-"
-                        android:textSize="18sp"
+                        android:textSize="14sp"
                         android:gravity="center" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnT9_2"
                         style="@style/Widget.Material3.Button.TonalButton"
                         android:layout_width="0dp"
-                        android:layout_height="64dp"
+                        android:layout_height="48dp"
                         android:layout_columnWeight="1"
                         android:layout_rowWeight="1"
                         android:layout_margin="4dp"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
+                        android:paddingTop="0dp"
+                        android:paddingBottom="0dp"
                         android:text="2\nABC"
-                        android:textSize="18sp"
+                        android:textSize="14sp"
                         android:gravity="center" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnT9_3"
                         style="@style/Widget.Material3.Button.TonalButton"
                         android:layout_width="0dp"
-                        android:layout_height="64dp"
+                        android:layout_height="48dp"
                         android:layout_columnWeight="1"
                         android:layout_rowWeight="1"
                         android:layout_margin="4dp"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
+                        android:paddingTop="0dp"
+                        android:paddingBottom="0dp"
                         android:text="3\nDEF"
-                        android:textSize="18sp"
+                        android:textSize="14sp"
                         android:gravity="center" />
 
                     <!-- Row 2 -->
@@ -514,36 +535,48 @@
                         android:id="@+id/btnT9_4"
                         style="@style/Widget.Material3.Button.TonalButton"
                         android:layout_width="0dp"
-                        android:layout_height="64dp"
+                        android:layout_height="48dp"
                         android:layout_columnWeight="1"
                         android:layout_rowWeight="1"
                         android:layout_margin="4dp"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
+                        android:paddingTop="0dp"
+                        android:paddingBottom="0dp"
                         android:text="4\nGHI"
-                        android:textSize="18sp"
+                        android:textSize="14sp"
                         android:gravity="center" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnT9_5"
                         style="@style/Widget.Material3.Button.TonalButton"
                         android:layout_width="0dp"
-                        android:layout_height="64dp"
+                        android:layout_height="48dp"
                         android:layout_columnWeight="1"
                         android:layout_rowWeight="1"
                         android:layout_margin="4dp"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
+                        android:paddingTop="0dp"
+                        android:paddingBottom="0dp"
                         android:text="5\nJKL"
-                        android:textSize="18sp"
+                        android:textSize="14sp"
                         android:gravity="center" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnT9_6"
                         style="@style/Widget.Material3.Button.TonalButton"
                         android:layout_width="0dp"
-                        android:layout_height="64dp"
+                        android:layout_height="48dp"
                         android:layout_columnWeight="1"
                         android:layout_rowWeight="1"
                         android:layout_margin="4dp"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
+                        android:paddingTop="0dp"
+                        android:paddingBottom="0dp"
                         android:text="6\nMNO"
-                        android:textSize="18sp"
+                        android:textSize="14sp"
                         android:gravity="center" />
 
                     <!-- Row 3 -->
@@ -551,36 +584,48 @@
                         android:id="@+id/btnT9_7"
                         style="@style/Widget.Material3.Button.TonalButton"
                         android:layout_width="0dp"
-                        android:layout_height="64dp"
+                        android:layout_height="48dp"
                         android:layout_columnWeight="1"
                         android:layout_rowWeight="1"
                         android:layout_margin="4dp"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
+                        android:paddingTop="0dp"
+                        android:paddingBottom="0dp"
                         android:text="7\nPQRS"
-                        android:textSize="18sp"
+                        android:textSize="14sp"
                         android:gravity="center" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnT9_8"
                         style="@style/Widget.Material3.Button.TonalButton"
                         android:layout_width="0dp"
-                        android:layout_height="64dp"
+                        android:layout_height="48dp"
                         android:layout_columnWeight="1"
                         android:layout_rowWeight="1"
                         android:layout_margin="4dp"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
+                        android:paddingTop="0dp"
+                        android:paddingBottom="0dp"
                         android:text="8\nTUV"
-                        android:textSize="18sp"
+                        android:textSize="14sp"
                         android:gravity="center" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnT9_9"
                         style="@style/Widget.Material3.Button.TonalButton"
                         android:layout_width="0dp"
-                        android:layout_height="64dp"
+                        android:layout_height="48dp"
                         android:layout_columnWeight="1"
                         android:layout_rowWeight="1"
                         android:layout_margin="4dp"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
+                        android:paddingTop="0dp"
+                        android:paddingBottom="0dp"
                         android:text="9\nWXYZ"
-                        android:textSize="18sp"
+                        android:textSize="14sp"
                         android:gravity="center" />
 
                     <!-- Row 4 -->
@@ -588,7 +633,7 @@
                         android:id="@+id/btnT9_Clear"
                         style="@style/Widget.Material3.Button.TextButton"
                         android:layout_width="0dp"
-                        android:layout_height="64dp"
+                        android:layout_height="48dp"
                         android:layout_columnWeight="1"
                         android:layout_rowWeight="1"
                         android:layout_margin="4dp"
@@ -600,19 +645,23 @@
                         android:id="@+id/btnT9_0"
                         style="@style/Widget.Material3.Button.TonalButton"
                         android:layout_width="0dp"
-                        android:layout_height="64dp"
+                        android:layout_height="48dp"
                         android:layout_columnWeight="1"
                         android:layout_rowWeight="1"
                         android:layout_margin="4dp"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
+                        android:paddingTop="0dp"
+                        android:paddingBottom="0dp"
                         android:text="0\n␣"
-                        android:textSize="18sp"
+                        android:textSize="14sp"
                         android:gravity="center" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnT9_Backspace"
                         style="@style/Widget.Material3.Button.TextButton"
                         android:layout_width="0dp"
-                        android:layout_height="64dp"
+                        android:layout_height="48dp"
                         android:layout_columnWeight="1"
                         android:layout_rowWeight="1"
                         android:layout_margin="4dp"
