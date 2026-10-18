@@ -1645,6 +1645,7 @@ public class ActHome extends ActBase {
         searchView.setHint(hint);
 
         boolean t9Enabled = settings.getEnableT9SearchKeypad();
+        searchView.setAutoShowKeyboard(!t9Enabled);
         if (t9Keypad != null) {
             t9Keypad.setVisibility(t9Enabled ? View.VISIBLE : View.GONE);
         }

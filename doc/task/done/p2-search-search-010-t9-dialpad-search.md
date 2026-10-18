@@ -60,3 +60,12 @@
 - Red rồi green: font 1.5 fail `bottom=158 height=144`; landscape fail `rvH=0`, sau chỉnh 95px còn thiếu, giới hạn 40% đạt.
 - Smoke OPPO: portrait light bấm `247` ra Chrome; landscape thật có hàng Chrome đầy đủ; dark portrait đủ phím/chip; không thấy quảng cáo. Rotation/night mode đã khôi phục; T9 prefs hiện `false` (key không còn vắng). Giới hạn: không smoke landscape dark, font 1.5 trên thiết bị thật và không đổi font thật hệ thống.
 - Bản cuối: JVM 921/921, lint 0 lỗi/38 cảnh báo, 10 targeted widget pass (cấu hình, T9, chip, settings, pager/edge swipe).
+
+## Smoke bổ sung Samsung Galaxy A11 — 2026-10-18
+
+- Owner đổi target tường minh: OPPO ngắt kết nối, BG6 dừng khi screenshot có Test Ad, sau đó khóa Samsung SM_A115F `R9JN61LDLFJ`, Android 12, 720×1560, density override 320. Không thao tác lại device cũ.
+- Smoke thật với app Dark, font hệ thống 1.5 và 2.0: `247` trả Chrome, keypad cuộn tới Clear/0/Backspace. Dark + landscape tại font gốc 1.1 vẫn có Chrome và các chip đọc được. Không thấy quảng cáo trên screenshot Samsung.
+- Phát hiện/sửa RED→GREEN hai lỗi: font 2.0 ở portrait hẹp làm MNO xuống 3 dòng (test trước chỉ có 2.0 landscape); Material SearchView tự mở IME dù EditText.showSoftInputOnFocus=false. Giảm padding ngang 10 phím số về 0, không giảm font; gọi `searchView.setAutoShowKeyboard(!t9Enabled)` theo API native.
+- Bản cuối mở T9 không cần BACK để ẩn IME. 7 cấu hình inflation, 10 targeted instrumentation pass trên Samsung; full JVM 921/921, lint 0 lỗi/38 warnings, build pass.
+- Khôi phục font=1.1, accelerometer_rotation=1, user_rotation=0, system night=no. Chỉ khôi phục ba key smoke (`night_mode`, T9, calculator) bằng run-as từ snapshot, kiểm tra trạng thái key vắng chính xác; không ghi đè prefs khác, không xóa DB, không đổi locale/default launcher.
+- Giới hạn còn lại: chưa smoke kết hợp landscape+font 2.0; test native flag chứng minh cơ chế auto-IME, screenshot mở search thật chứng minh IME không che T9.

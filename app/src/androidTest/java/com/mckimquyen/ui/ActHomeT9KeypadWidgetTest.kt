@@ -59,6 +59,8 @@ class ActHomeT9KeypadWidgetTest {
             instrumentation.waitForIdleSync()
 
             scenario.onActivity { activity ->
+                val search = activity.findViewById<com.google.android.material.search.SearchView>(R.id.searchView)
+                assertEquals("T9 phải tắt cả tự mở IME của Material SearchView", false, search.isAutoShowKeyboard)
                 val keypad = activity.findViewById<View>(R.id.scrollT9Keypad)
                 assertNotNull("T9 keypad layout must exist", keypad)
                 assertEquals(View.VISIBLE, keypad.visibility)

@@ -80,6 +80,7 @@ class ActHomeSearchConfigurationWidgetTest {
             Triple(true, Configuration.ORIENTATION_PORTRAIT, 1.0f),
             Triple(true, Configuration.ORIENTATION_LANDSCAPE, 1.0f),
             Triple(false, Configuration.ORIENTATION_PORTRAIT, LARGE_FONT_SCALE),
+            Triple(true, Configuration.ORIENTATION_PORTRAIT, STRESS_FONT_SCALE),
             Triple(true, Configuration.ORIENTATION_LANDSCAPE, STRESS_FONT_SCALE)
         )
         for ((dark, orientation, fontScale) in scenarios) {
@@ -91,6 +92,9 @@ class ActHomeSearchConfigurationWidgetTest {
             ).map { root.findViewById<MaterialButton>(it) }
 
             buttons.forEach { button ->
+                val textLayout = requireNotNull(button.layout)
+                val expectedLines = button.text.count { it == '\n' } + 1
+                assertEquals("Không được tự xuống dòng nhãn ${button.text} ở font=$fontScale", expectedLines, textLayout.lineCount)
                 assertTrue("key ${button.text} needs 48dp touch height", button.measuredHeight >= 48 * button.resources.displayMetrics.density)
                 assertTrue("key ${button.text} text must fit: bottom=${button.layout?.getLineBottom(button.layout.lineCount - 1)} height=${button.height} pad=${button.paddingBottom} in dark=$dark orientation=$orientation font=$fontScale", button.layout == null ||
                     button.layout.getLineBottom(button.layout.lineCount - 1) <= button.height - button.paddingBottom)
