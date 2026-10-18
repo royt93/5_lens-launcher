@@ -265,5 +265,7 @@
     <string name="edge_swipe_mode_left">Nur linker Rand</string>
     <string name="setting_enable_t9_search_keypad">T9-Ziffernblock in der Suche</string>
     <string name="setting_enable_t9_search_keypad_desc">Ziffernblock unten in der Suche für einhändiges Tippen anzeigen</string>
+    <string name="setting_lens_elastic_overscroll">Elastisches Linsen-Overscroll</string>
+    <string name="setting_lens_elastic_overscroll_desc">Fügt natürlichen Widerstand hinzu, wenn du die Linse über den Rand des Rasters ziehst</string>
     <string name="t9_key_clear">Löschen</string>
 </resources>

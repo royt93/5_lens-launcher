@@ -96,7 +96,8 @@ public class UtilCalculator {
      * Graphical Fisheye Lens algorithm for shifting item position
      */
     public static float shiftPoint(float lensPosition, float itemPosition, float boundary, float multiplier, float distortionFactor) {
-        if (lensPosition < 0) return itemPosition;
+        // FISH-026: live overscroll may be negative; only the idle sentinel means no lens.
+        if (lensPosition == -Float.MAX_VALUE) return itemPosition;
 
         float a = Math.abs(lensPosition - itemPosition);
         float b = Math.max(lensPosition, boundary - lensPosition);
@@ -114,7 +115,7 @@ public class UtilCalculator {
      * Graphical Fisheye Lens algorithm for scaling
      */
     public static float scalePoint(float lensPosition, float itemPosition, float itemSize, float boundary, float multiplier, float scaleFactor, float distortionFactor) {
-        if (lensPosition < 0) return itemSize;
+        if (lensPosition == -Float.MAX_VALUE) return itemSize;
 
         float scaleDifference = scaleFactor - UtilSettings.MIN_SCALE_FACTOR;
         float d = UtilSettings.MIN_SCALE_FACTOR + scaleDifference * multiplier;

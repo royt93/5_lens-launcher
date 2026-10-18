@@ -269,5 +269,7 @@
     <string name="edge_swipe_mode_left">Solo borde izquierdo</string>
     <string name="setting_enable_t9_search_keypad">Teclado numérico T9 en búsqueda</string>
     <string name="setting_enable_t9_search_keypad_desc">Mostrar teclado numérico en la parte inferior para escribir con una mano</string>
+    <string name="setting_lens_elastic_overscroll">Rebote elástico de la lente</string>
+    <string name="setting_lens_elastic_overscroll_desc">Añade una resistencia natural al arrastrar la lente más allá del borde de la cuadrícula</string>
     <string name="t9_key_clear">Borrar</string>
 </resources>

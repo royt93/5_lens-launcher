@@ -154,7 +154,7 @@ class UtilCalculatorTest {
     @Test
     fun testShiftPointInvalidLensPosition() {
         // Given
-        val lensPosition = -1f
+        val lensPosition = -Float.MAX_VALUE
         val itemPosition = 300f
         val boundary = 1000f
         val multiplier = 1.0f
@@ -165,6 +165,23 @@ class UtilCalculatorTest {
 
         // Then: should return original position
         assertEquals(itemPosition, shifted, 0.01f)
+    }
+
+    @Test
+    fun testScalePointNegativeLensPosition_preservesBoundedBaseScaleForOverscroll() {
+        val itemSize = 100f
+        val position = 450f
+        val shifted = UtilCalculator.shiftPoint(-12f, position, 1000f, 1f, 2.5f)
+        val scaled = UtilCalculator.scalePoint(-12f, position, itemSize, 1000f, 1f, 2f, 2.5f)
+        val renderedSize = 2f * kotlin.math.abs(scaled - shifted)
+        assertTrue("Live negative touch must still warp the grid", shifted != position)
+        assertTrue("Overscroll inflated cell to $renderedSize", renderedSize < itemSize * 3.5f)
+        assertEquals(
+            "Release at zero warp must return base cell geometry",
+            position + itemSize / 2f,
+            UtilCalculator.scalePoint(-12f, position, itemSize, 1000f, 0f, 2f, 2.5f),
+            0.001f
+        )
     }
 
     // UI-020: home_content_max_width clamp - a phone screen never engages it (0 extra margin),

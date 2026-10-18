@@ -269,5 +269,7 @@
     <string name="edge_swipe_mode_left">Somente borda esquerda</string>
     <string name="setting_enable_t9_search_keypad">Teclado numérico T9 na pesquisa</string>
     <string name="setting_enable_t9_search_keypad_desc">Mostrar teclado numérico na parte inferior para digitação com uma mão</string>
+    <string name="setting_lens_elastic_overscroll">Overscroll elástico da lente</string>
+    <string name="setting_lens_elastic_overscroll_desc">Adiciona resistência natural ao arrastar a lente além da borda da grade</string>
     <string name="t9_key_clear">Limpar</string>
 </resources>

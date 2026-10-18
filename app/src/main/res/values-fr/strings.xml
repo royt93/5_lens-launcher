@@ -269,5 +269,7 @@
     <string name="edge_swipe_mode_left">Bord gauche uniquement</string>
     <string name="setting_enable_t9_search_keypad">Clavier T9 dans la recherche</string>
     <string name="setting_enable_t9_search_keypad_desc">Afficher un pavé numérique en bas de la recherche pour taper d\'une main</string>
+    <string name="setting_lens_elastic_overscroll">Effet élastique de la loupe</string>
+    <string name="setting_lens_elastic_overscroll_desc">Ajoute une résistance naturelle lorsque vous faites glisser la loupe au-delà du bord de la grille</string>
     <string name="t9_key_clear">Effacer</string>
 </resources>

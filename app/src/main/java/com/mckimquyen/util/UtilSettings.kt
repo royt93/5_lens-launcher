@@ -73,6 +73,8 @@ class UtilSettings(context: Context) {
         const val DEFAULT_KEEP_SCREEN_ON = false
         // FISH-007: depth-of-field blur is opt-in (owner decision), off by default.
         const val DEFAULT_DEPTH_OF_FIELD = false
+        // FISH-026: damped lens overscroll is enabled by default.
+        const val DEFAULT_LENS_ELASTIC_OVERSCROLL = true
         // FISH-006: Smart Focus Lite is opt-in, off by default.
         const val DEFAULT_SMART_FOCUS_BIAS = false
         // UI-012: each SEARCH-002 quick-action type can be individually toggled off; all on by
@@ -131,6 +133,7 @@ class UtilSettings(context: Context) {
         const val KEY_SHOW_SEARCH_BAR = "show_search_bar"
         const val KEY_KEEP_SCREEN_ON = "keep_screen_on"
         const val KEY_DEPTH_OF_FIELD = "depth_of_field_blur"
+        const val KEY_LENS_ELASTIC_OVERSCROLL = "lens_elastic_overscroll"
         // FISH-006: Smart Focus Lite toggle
         const val KEY_SMART_FOCUS_BIAS = "smart_focus_bias"
         // Clean the Lens minimalist mode
@@ -291,6 +294,7 @@ class UtilSettings(context: Context) {
         KEY_SHOW_SEARCH_BAR -> prefs.getBoolean(name, DEFAULT_SHOW_SEARCH_BAR)
         KEY_KEEP_SCREEN_ON -> prefs.getBoolean(name, DEFAULT_KEEP_SCREEN_ON)
         KEY_DEPTH_OF_FIELD -> prefs.getBoolean(name, DEFAULT_DEPTH_OF_FIELD)
+        KEY_LENS_ELASTIC_OVERSCROLL -> prefs.getBoolean(name, DEFAULT_LENS_ELASTIC_OVERSCROLL)
         KEY_SMART_FOCUS_BIAS -> prefs.getBoolean(name, DEFAULT_SMART_FOCUS_BIAS)
         KEY_CLEAN_LENS_MODE -> prefs.getBoolean(name, DEFAULT_CLEAN_LENS_MODE)
         KEY_SHOW_FOCUS_HALO -> prefs.getBoolean(name, DEFAULT_SHOW_FOCUS_HALO)
@@ -368,6 +372,13 @@ class UtilSettings(context: Context) {
 
     fun saveEnableT9SearchKeypad(value: Boolean) {
         save(KEY_ENABLE_T9_SEARCH_KEYPAD, value)
+    }
+
+    fun getLensElasticOverscroll(): Boolean =
+        getBoolean(KEY_LENS_ELASTIC_OVERSCROLL)
+
+    fun saveLensElasticOverscroll(value: Boolean) {
+        save(KEY_LENS_ELASTIC_OVERSCROLL, value)
     }
 
     fun setLauncherMode(mode: LauncherMode) {

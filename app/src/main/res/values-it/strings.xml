@@ -269,5 +269,7 @@
     <string name="edge_swipe_mode_left">Solo bordo sinistro</string>
     <string name="setting_enable_t9_search_keypad">Tastierino T9 nella ricerca</string>
     <string name="setting_enable_t9_search_keypad_desc">Mostra un tastierino numerico in basso nella ricerca per digitare con una mano</string>
+    <string name="setting_lens_elastic_overscroll">Overscroll elastico della lente</string>
+    <string name="setting_lens_elastic_overscroll_desc">Aggiunge una resistenza naturale quando trascini la lente oltre il bordo della griglia</string>
     <string name="t9_key_clear">Cancella</string>
 </resources>

@@ -43,6 +43,7 @@ import com.mckimquyen.model.LensWorkspace
 import com.mckimquyen.model.PinnedZone
 import com.mckimquyen.services.BroadcastReceivers
 import com.mckimquyen.util.HapticIntensity
+import com.mckimquyen.util.LensOverscrollPhysics
 import com.mckimquyen.util.LensPhysicsPolicy
 import com.mckimquyen.util.SmartFocusArranger
 import com.mckimquyen.util.UtilApp
@@ -143,6 +144,7 @@ class LensView : View {
         private const val SEARCH_SWIPE_ACTIVATION_ZONE_RATIO = 0.20f
         private const val SEARCH_SWIPE_DISTANCE_MULTIPLIER = 4f
         private const val SEARCH_SWIPE_VERTICAL_DOMINANCE_RATIO = 2f
+        private const val MAX_ELASTIC_OVERSCROLL_DP = 28f
 
         /** Did the touch land in the top slice of the view that is reserved for pull-down search? */
         @androidx.annotation.VisibleForTesting
@@ -551,6 +553,9 @@ class LensView : View {
 
     @androidx.annotation.VisibleForTesting
     internal fun selectedRectForTest(): RectF? = mRectToSelect?.let { RectF(it) }
+
+    @androidx.annotation.VisibleForTesting
+    internal fun touchCoordinatesForTest(): Pair<Float, Float> = Pair(mTouchX, mTouchY)
 
     private var mDrawType: DrawType? = null
     fun setDrawType(drawType: DrawType?) {
@@ -1160,8 +1165,25 @@ class LensView : View {
                 if (!mMoving) {
                     return true
                 }
-                mTouchX = event.x.coerceAtLeast(0.0f)
-                mTouchY = event.y.coerceAtLeast(0.0f)
+                val maxOverscrollPx = MAX_ELASTIC_OVERSCROLL_DP * resources.displayMetrics.density
+                val elasticEnabled = LensOverscrollPhysics.isEnabled(
+                    mUtilSettings?.getLensElasticOverscroll() ?: UtilSettings.DEFAULT_LENS_ELASTIC_OVERSCROLL,
+                    reduceMotion
+                )
+                mTouchX = LensOverscrollPhysics.calculateEffectiveCoordinate(
+                    event.x,
+                    0f,
+                    width.toFloat(),
+                    maxOverscrollPx,
+                    elasticEnabled
+                )
+                mTouchY = LensOverscrollPhysics.calculateEffectiveCoordinate(
+                    event.y,
+                    0f,
+                    height.toFloat(),
+                    maxOverscrollPx,
+                    elasticEnabled
+                )
                 invalidate()
                 true
             }
@@ -1304,9 +1326,10 @@ class LensView : View {
         }
         // FISH-007: one mode/transition decision per frame; per-cell work below is arithmetic only.
         val dofTransition = DepthOfField.transition(animationMultiplier, mReduceMotion)
+        val hasActiveTouch = mTouchX != -Float.MAX_VALUE && mTouchY != -Float.MAX_VALUE
         val dofMode = DepthOfField.renderMode(
             depthOfFieldEnabled,
-            mDrawType == DrawType.APPS && mTouchX >= 0 && mTouchY >= 0 && dofTransition > 0f,
+            mDrawType == DrawType.APPS && hasActiveTouch && dofTransition > 0f,
             android.os.Build.VERSION.SDK_INT,
             canvas.isHardwareAccelerated
         )
@@ -1322,7 +1345,7 @@ class LensView : View {
             val baseRect = baseRects[currentIndex]
             mScratchRect.set(baseRect)
             val rect = mScratchRect
-            if (mTouchX >= 0 && mTouchY >= 0) {
+            if (hasActiveTouch) {
                 val shiftedCenterX = UtilCalculator.shiftPoint(
                     mTouchX,
                     baseRect.centerX(),

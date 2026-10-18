@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.materialswitch.MaterialSwitch
 import com.google.android.material.slider.Slider
 import com.mckimquyen.R
 import com.mckimquyen.enums.DrawType
@@ -39,6 +40,7 @@ class FrmLens : Fragment(), LensInterface {
     private var btnPresetSnappy: MaterialButton? = null
     private var btnPresetCustom: MaterialButton? = null
     private var btnSaveCustomPreset: MaterialButton? = null
+    private var swLensElasticOverscroll: MaterialSwitch? = null
     private var btnShareLens: MaterialButton? = null
     private var utilSettings: UtilSettings? = null
     private var activeLensId: String = LensWorkspace.DEFAULT_LENS_ID
@@ -98,6 +100,7 @@ class FrmLens : Fragment(), LensInterface {
         btnPresetSnappy = view.findViewById(R.id.btnPresetSnappy)
         btnPresetCustom = view.findViewById(R.id.btnPresetCustom)
         btnSaveCustomPreset = view.findViewById(R.id.btnSaveCustomPreset)
+        swLensElasticOverscroll = view.findViewById(R.id.swLensElasticOverscroll)
 
         // Empty click listeners to prevent parent click events
         view.findViewById<View>(R.id.sbMinIconSizeParent).setOnClickListener(null)
@@ -169,6 +172,9 @@ class FrmLens : Fragment(), LensInterface {
             }
         }
         btnSaveCustomPreset?.setOnClickListener { saveCurrentAsCustomPreset() }
+        swLensElasticOverscroll?.setOnCheckedChangeListener { _, checked ->
+            utilSettings?.saveLensElasticOverscroll(checked)
+        }
         btnShareLens = view.findViewById(R.id.btnShareLens)
         btnShareLens?.setOnClickListener { shareLensImage() }
     }
@@ -247,6 +253,7 @@ class FrmLens : Fragment(), LensInterface {
             val validAnim = animTime.coerceIn(100.0f, 400.0f)
             sbAnimationTime?.value = validAnim
             tvValueAnimationTime?.text = getString(R.string.unit_ms_format, validAnim.toLong())
+            swLensElasticOverscroll?.isChecked = us.getLensElasticOverscroll()
         }
         refreshCustomPresetButtonState()
     }
@@ -263,6 +270,7 @@ class FrmLens : Fragment(), LensInterface {
             us.saveDistortionFactor(activeLensId, UtilSettings.DEFAULT_DISTORTION_FACTOR)
             us.save(UtilSettings.KEY_SCALE_FACTOR, UtilSettings.DEFAULT_SCALE_FACTOR)
             us.save(UtilSettings.KEY_ANIMATION_TIME, UtilSettings.DEFAULT_ANIMATION_TIME)
+            us.saveLensElasticOverscroll(UtilSettings.DEFAULT_LENS_ELASTIC_OVERSCROLL)
         }
     }
 
@@ -286,6 +294,7 @@ class FrmLens : Fragment(), LensInterface {
         btnPresetSnappy = null
         btnPresetCustom = null
         btnSaveCustomPreset = null
+        swLensElasticOverscroll = null
         utilSettings = null
         super.onDestroyView()
     }

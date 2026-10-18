@@ -19,6 +19,8 @@
     <string name="setting_show_touch_selection">Show Touch Selection</string>
     <string name="setting_enable_t9_search_keypad">T9 dialpad in search</string>
     <string name="setting_enable_t9_search_keypad_desc">Show a number pad at the bottom of search for one-handed typing</string>
+    <string name="setting_lens_elastic_overscroll">Elastic lens overscroll</string>
+    <string name="setting_lens_elastic_overscroll_desc">Adds natural resistance when you drag the lens past the edge of the grid</string>
     <!-- UI-001 ships in the app's maintained English/Vietnamese locales first. -->
     <string name="setting_show_search_bar">Show Search Bar</string>
     <string name="setting_show_recent_apps_icon">Show recent apps icon</string>

@@ -261,5 +261,7 @@
     <string name="edge_swipe_mode_left">ຂອບຊ້າຍເທົ່ານັ້ນ</string>
     <string name="setting_enable_t9_search_keypad">ແປ້ນພິມຕົວເລກ T9 ໃນການຊອກຫາ</string>
     <string name="setting_enable_t9_search_keypad_desc">ສະແດງແປ້ນພິມຕົວເລກຢູ່ລຸ່ມສຸດຂອງການຊອກຫາເພື່ອພິມດ້ວຍມືດຽວ</string>
+    <string name="setting_lens_elastic_overscroll">ຜົນຢືດຫຍຸ່ນຂອງເລນ</string>
+    <string name="setting_lens_elastic_overscroll_desc">ເພີ່ມແຮງຕ້ານທຳມະຊາດເມື່ອທ່ານລາກເລນເກີນຂອບຕາຂ່າຍ</string>
     <string name="t9_key_clear">ລຶບ</string>
 </resources>

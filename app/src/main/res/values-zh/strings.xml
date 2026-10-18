@@ -261,5 +261,7 @@
     <string name="edge_swipe_mode_left">仅左侧边缘</string>
     <string name="setting_enable_t9_search_keypad">搜索中的T9数字键盘</string>
     <string name="setting_enable_t9_search_keypad_desc">在搜索底部显示数字键盘以便单手快速输入</string>
+    <string name="setting_lens_elastic_overscroll">镜头弹性过卷</string>
+    <string name="setting_lens_elastic_overscroll_desc">将镜头拖过网格边缘时增加自然的阻力</string>
     <string name="t9_key_clear">清除</string>
 </resources>

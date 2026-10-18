@@ -261,5 +261,7 @@
     <string name="edge_swipe_mode_left">Tepi kiri saja</string>
     <string name="setting_enable_t9_search_keypad">Papan tombol T9 dalam pencarian</string>
     <string name="setting_enable_t9_search_keypad_desc">Tampilkan papan angka di bagian bawah pencarian untuk mengetik satu tangan</string>
+    <string name="setting_lens_elastic_overscroll">Overscroll elastis lensa</string>
+    <string name="setting_lens_elastic_overscroll_desc">Menambahkan hambatan alami saat Anda menyeret lensa melewati tepi kisi</string>
     <string name="t9_key_clear">Hapus</string>
 </resources>
