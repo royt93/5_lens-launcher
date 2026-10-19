@@ -98,6 +98,66 @@ class LensWorkspaceDaoTest {
     }
 
     @Test
+    fun `creating a lens after deleting a middle one never reuses an orderIndex`() = runBlocking {
+        dao.insertOrUpdate(LensWorkspace.createDefault())
+        val a = LensWorkspace.createLensNow("A", LensWorkspace.DEFAULT_LENS_ID)
+        val b = LensWorkspace.createLensNow("B", LensWorkspace.DEFAULT_LENS_ID)
+        assertEquals(listOf(0, 1, 2), dao.getAll().map { it.orderIndex })
+
+        assertEquals(true, dao.deleteLensIfMoreThanOne(a.id))
+        val c = LensWorkspace.createLensNow("C", LensWorkspace.DEFAULT_LENS_ID)
+
+        val indices = dao.getAll().map { it.orderIndex }
+        assertEquals("orderIndex must be unique: $indices", indices.toSet().size, indices.size)
+        assertEquals("new lens goes last", c.id, dao.getAll().last().id)
+        assertEquals(listOf(LensWorkspace.DEFAULT_LENS_ID, b.id, c.id), dao.getAll().map { it.id })
+    }
+
+    @Test
+    fun `export after create and delete churn parses back as a valid backup`() = runBlocking {
+        dao.insertOrUpdate(LensWorkspace.createDefault())
+        val ids = (1..4).map { LensWorkspace.createLensNow("L$it", LensWorkspace.DEFAULT_LENS_ID).id }
+        dao.deleteLensIfMoreThanOne(ids[1])
+        dao.deleteLensIfMoreThanOne(ids[0])
+        LensWorkspace.createLensNow("Late", LensWorkspace.DEFAULT_LENS_ID)
+
+        val lenses = dao.getAll()
+        val backup = com.mckimquyen.util.LayoutBackupSnapshotFactory.create(
+            lenses, apps.getAllRows(),
+            lenses.map { com.mckimquyen.util.LensAppSettingsBackup(it.id, com.mckimquyen.util.LensAppScope.ALL, emptySet(), false) },
+            1L
+        )
+        val parsed = LayoutBackup.parse(backup.toJson())
+
+        assertEquals("churned workspace must export a file that imports", true, parsed is LayoutBackupParseResult.Success)
+    }
+
+    @Test
+    fun `legacy duplicate orderIndex rows are normalized to a strict order`() = runBlocking {
+        dao.insertOrUpdate(LensWorkspace.createDefault())
+        dao.insertOrUpdate(LensWorkspace(id = "x", name = "X", orderIndex = 2, createdAt = 10L))
+        dao.insertOrUpdate(LensWorkspace(id = "y", name = "Y", orderIndex = 2, createdAt = 20L))
+
+        dao.normalizeOrderIndices()
+
+        assertEquals(listOf(0, 1, 2), dao.getAll().map { it.orderIndex })
+        assertEquals(listOf(LensWorkspace.DEFAULT_LENS_ID, "x", "y"), dao.getAll().map { it.id })
+    }
+
+    @Test
+    fun `normalizeOrderIndices leaves a healthy non-contiguous order untouched in relative order`() = runBlocking {
+        dao.insertOrUpdate(LensWorkspace.createDefault())
+        dao.insertOrUpdate(LensWorkspace(id = "p", name = "P", orderIndex = 5, createdAt = 1L, groupName = "G"))
+        dao.insertOrUpdate(LensWorkspace(id = "q", name = "Q", orderIndex = 9, createdAt = 2L))
+
+        dao.normalizeOrderIndices()
+
+        assertEquals(listOf(LensWorkspace.DEFAULT_LENS_ID, "p", "q"), dao.getAll().map { it.id })
+        assertEquals(listOf(0, 1, 2), dao.getAll().map { it.orderIndex })
+        assertEquals("other columns must survive the renumber", "G", dao.findById("p")?.groupName)
+    }
+
+    @Test
     fun `assignGroup updates selected lens labels without changing lens order`() = runBlocking {
         dao.insertOrUpdate(LensWorkspace.createDefault())
         dao.insertOrUpdate(LensWorkspace("work", "Work", orderIndex = 1, createdAt = 20L))

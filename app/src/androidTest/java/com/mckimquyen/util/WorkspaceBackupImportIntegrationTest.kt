@@ -185,6 +185,32 @@ class WorkspaceBackupImportIntegrationTest {
         assertEquals(listOf(LensWorkspace.DEFAULT_LENS_ID), workspaceDao.getAll().map { it.id })
     }
 
+    /** DB-004: a legacy workspace with a duplicate orderIndex is repaired, and then exports a re-importable file. */
+    @Test
+    fun legacyDuplicateOrderIndexIsRepairedAndThenRoundTrips() = runBlocking {
+        val workspaceDao = database.lensWorkspaceDao()
+        workspaceDao.replaceWorkspace(listOf(LensWorkspace.createDefault()), emptyList())
+        workspaceDao.insertOrUpdate(LensWorkspace("a", "A", 2, 10L))
+        workspaceDao.insertOrUpdate(LensWorkspace("b", "B", 2, 20L))
+
+        workspaceDao.normalizeOrderIndices()
+
+        val lenses = workspaceDao.getAll()
+        assertEquals(listOf(0, 1, 2), lenses.map { it.orderIndex })
+        val backup = LayoutBackupSnapshotFactory.create(
+            lenses, database.appPersistentDao().getAllRows(),
+            lenses.map { LensAppSettingsBackup(it.id, LensAppScope.ALL, emptySet(), false) },
+            10L
+        )
+        val parsed = LayoutBackup.parse(backup.toJson())
+        assertTrue("repaired workspace must export an importable file", parsed is LayoutBackupParseResult.Success)
+        assertEquals(
+            WorkspaceBackupImportResult.Applied,
+            WorkspaceBackupImportCoordinator(WorkspaceBackupRoomStore(context)).apply((parsed as LayoutBackupParseResult.Success).backup)
+        )
+        assertEquals(listOf(LensWorkspace.DEFAULT_LENS_ID, "a", "b"), workspaceDao.getAll().map { it.id })
+    }
+
     private fun seedTwoLensWorkspace() = runBlocking {
         database.lensWorkspaceDao().replaceWorkspace(
             listOf(LensWorkspace.createDefault(), LensWorkspace("work", "Work", 1, 2L)),

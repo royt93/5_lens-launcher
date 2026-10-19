@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | fix |
-| Status | todo |
+| Status | done |
 | Priority | P1 |
 | Evidence | confirmed |
 | Epic | Workspace backup |
@@ -21,10 +21,10 @@ Là người dùng, tôi muốn file backup tôi export luôn import lại đư�
 
 ## Acceptance criteria
 
-- [ ] Lens mới có `orderIndex = max(existing)+1` (hoặc reindex liên tục).
-- [ ] Xóa lens giữa rồi tạo mới không sinh trùng `orderIndex`.
-- [ ] Export rồi import vòng khứ hồi thành công sau chuỗi tạo/xóa ngẫu nhiên (property-style test).
-- [ ] Bản cài cũ đã có dữ liệu trùng được tự sửa khi mở app (migration dữ liệu, không đổi version nếu không cần).
+- [x] Lens mới có `orderIndex = max(existing)+1` (hoặc reindex liên tục).
+- [x] Xóa lens giữa rồi tạo mới không sinh trùng `orderIndex`.
+- [x] Export rồi import vòng khứ hồi thành công sau chuỗi tạo/xóa ngẫu nhiên (property-style test).
+- [x] Bản cài cũ đã có dữ liệu trùng được tự sửa khi mở app (migration dữ liệu, không đổi version nếu không cần).
 
 ## Implementation notes
 
@@ -32,15 +32,19 @@ Phụ thuộc DB-003 vì cùng vùng DAO/validation. Không bump schema nếu ch
 
 ## Verification and Definition of Done
 
-- [ ] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
-- [ ] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
-- [ ] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
-- [ ] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
-- [ ] No new lint/build failures.
-- [ ] A post-change audit record scores the round `> 9.0/10` before push.
-- [ ] Evidence and status are updated before moving this file to `done`.
+- [x] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
+- [x] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
+- [x] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
+- [x] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
+- [x] No new lint/build failures.
+- [x] A post-change audit record scores the round `> 9.0/10` before push.
+- [x] Evidence and status are updated before moving this file to `done`.
 
 If a test layer is not applicable, replace its checkbox with a reviewed rationale; do not silently omit it.
+
+## Kết quả (2026-10-19)
+
+Hoàn tất. Audit **9.1/10**: `doc/task/AUDIT_DB-004_2026-10-19.md`. Unit 934/934, lint 0 lỗi/7 warning, 87 instrumentation + smoke tay trên Pixel 7 Pro (owner chọn). Giới hạn: không đọc trực tiếp `orderIndex` trên máy thật; tạo lens đồng thời chưa được bảo vệ ở tầng DAO.
 
 ## Prompt để chạy loop
 

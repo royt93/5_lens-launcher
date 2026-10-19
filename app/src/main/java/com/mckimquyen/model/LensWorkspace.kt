@@ -49,7 +49,10 @@ data class LensWorkspace(
         @JvmStatic
         fun seedDefaultIfAbsent() {
             ApplicationScope.scope.launch(Dispatchers.IO) {
-                AppDatabase.getInstance().lensWorkspaceDao().insertIfAbsent(createDefault())
+                val dao = AppDatabase.getInstance().lensWorkspaceDao()
+                dao.insertIfAbsent(createDefault())
+                // DB-004: repair duplicate orderIndex left behind by older builds.
+                dao.normalizeOrderIndices()
             }
         }
 
@@ -75,21 +78,25 @@ data class LensWorkspace(
         @JvmStatic
         fun createLens(name: String, copyFromLensId: String, onDone: (List<LensWorkspace>) -> Unit) {
             ApplicationScope.scope.launch(Dispatchers.Main.immediate) {
-                withContext(Dispatchers.IO) {
-                    val existing = dao().getAll()
-                    val newLens = LensWorkspace(
-                        id = java.util.UUID.randomUUID().toString(),
-                        name = name,
-                        orderIndex = existing.size,
-                        // FISH-022: a copy joins its source's group (spec: duplicate copies group).
-                        groupName = existing.firstOrNull { it.id == copyFromLensId }?.groupName
-                    )
-                    dao().insertOrUpdate(newLens)
-                    AppDatabase.getInstance().appPersistentDao()
-                        .duplicateLensLayout(copyFromLensId, newLens.id)
-                }
+                withContext(Dispatchers.IO) { createLensNow(name, copyFromLensId) }
                 notifyLensesChanged(onDone)
             }
+        }
+
+        /** The DB work of [createLens], split out so it can be tested without Main/Application scopes. */
+        internal suspend fun createLensNow(name: String, copyFromLensId: String): LensWorkspace {
+            val existing = dao().getAll()
+            val newLens = LensWorkspace(
+                id = java.util.UUID.randomUUID().toString(),
+                name = name,
+                orderIndex = (existing.maxOfOrNull { it.orderIndex } ?: -1) + 1,
+                // FISH-022: a copy joins its source's group (spec: duplicate copies group).
+                groupName = existing.firstOrNull { it.id == copyFromLensId }?.groupName
+            )
+            dao().insertOrUpdate(newLens)
+            AppDatabase.getInstance().appPersistentDao()
+                .duplicateLensLayout(copyFromLensId, newLens.id)
+            return newLens
         }
 
         @JvmStatic

@@ -49,6 +49,18 @@ interface LensWorkspaceDao {
         return true
     }
 
+    /**
+     * DB-004: older builds created lenses with `orderIndex = count`, which collides after a middle
+     * lens is deleted, and a colliding workspace exports a file the importer rejects. Renumbers to
+     * 0..n-1 keeping the displayed order (orderIndex, then createdAt, then id as a stable tiebreak).
+     * Rewrites only rows whose index actually changes, so a healthy workspace is untouched.
+     */
+    @Transaction
+    suspend fun normalizeOrderIndices() {
+        val ordered = getAll().sortedWith(compareBy<LensWorkspace> { it.orderIndex }.thenBy { it.createdAt }.thenBy { it.id })
+        ordered.forEachIndexed { index, lens -> if (lens.orderIndex != index) update(lens.copy(orderIndex = index)) }
+    }
+
     @Query("DELETE FROM LENS_WORKSPACE")
     suspend fun deleteAll(): Int
 
