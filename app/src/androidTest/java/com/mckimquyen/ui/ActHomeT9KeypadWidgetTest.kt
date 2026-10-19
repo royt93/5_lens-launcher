@@ -72,15 +72,23 @@ class ActHomeT9KeypadWidgetTest {
                     textLayout.getLineBottom(1) <= button2.height - button2.paddingBottom
                 )
 
-                // Every key, incl. the last row, must sit above the system navigation bar.
+                // The keypad viewport must sit above the system navigation bar. Large fonts can make the
+                // grid taller than the 40% bound, so the last row is reached by scrolling, not by fitting.
                 val visibleFrame = android.graphics.Rect().also { activity.window.decorView.getWindowVisibleDisplayFrame(it) }
-                val backspace = activity.findViewById<View>(R.id.btnT9_Backspace)
-                val location = IntArray(2).also { backspace.getLocationOnScreen(it) }
-                val backspaceBottom = location[1] + backspace.height
+                val scroll = activity.findViewById<androidx.core.widget.NestedScrollView>(R.id.scrollT9Keypad)
+                val viewportBottom = IntArray(2).also { scroll.getLocationOnScreen(it) }[1] + scroll.height
                 assertTrue(
-                    "Last key row must not be clipped by system bars: bottom=$backspaceBottom, visibleBottom=${visibleFrame.bottom}",
-                    backspaceBottom <= visibleFrame.bottom
+                    "Keypad viewport must not be clipped by system bars: bottom=$viewportBottom, visibleBottom=${visibleFrame.bottom}",
+                    viewportBottom <= visibleFrame.bottom
                 )
+                scroll.scrollTo(0, scroll.getChildAt(0).height)
+                val backspace = activity.findViewById<View>(R.id.btnT9_Backspace)
+                val backspaceBottom = IntArray(2).also { backspace.getLocationOnScreen(it) }[1] + backspace.height
+                assertTrue(
+                    "Last key must be reachable by scrolling: bottom=$backspaceBottom, viewportBottom=$viewportBottom",
+                    backspaceBottom <= viewportBottom + 1
+                )
+                scroll.scrollTo(0, 0)
 
                 button2.performClick()
                 activity.findViewById<View>(R.id.btnT9_4).performClick()
