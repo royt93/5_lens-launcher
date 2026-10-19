@@ -70,6 +70,8 @@ Source of truth for implementation choices in this session. Detailed acceptance 
 
 ## 💭 Ideas
 
+- **Wave 2026-10-19 (Scrum breakdown)**: 58 story mới trong `doc/task/todo/` (9 fix P1 mất dữ liệu/race, 11 fix P2/P3, 14 enhance, 7 new, 10 idea, 7 exclusive). Danh sách và vùng bị loại: `doc/task/README.md` mục Wave 2026-10-19. Chưa chọn story nào để làm; chờ owner pick.
+
 - See `doc/task/todo/` for the remaining product backlog.
 - Idea "lau lens" bằng vuốt 2 ngón đã được audit lại và **không chọn**: xung đột trực tiếp với pinch chỉnh độ cong FISH-009, không giống thói quen iOS như owner muốn. Thay bằng FISH-016 trong 📋 Picked: vuốt 1 ngón xuống từ vùng trên cùng của lens để mở search, cộng menu dự phòng.
 - ✅ Đã xác minh lại (02/10/2026, TECNO KJ7): ghi chú cũ nói 2 test `DndQuickActionIntegrationTest` fail trên Pixel do thiếu Notification policy access không còn là issue trên device policy hiện tại. Cả 3 DND tests pass riêng; full instrumented run thứ hai pass 431/431 trên device khóa KJ7. Không thay code test dựa trên trạng thái Pixel đã bị cấm dùng.

@@ -236,3 +236,97 @@ Score each round from evidence, never from task completion claims:
 | Maintainability and documentation truth | 1.0 |
 
 Required push predicate: score `> 9.0/10`, zero failed code-controlled checks, a clean secret scan of the proposed diff, and a reviewed audit record. A score of exactly `9.0` does not qualify. External P0/P1 actions require named ownership and must remain visible under `inprogress`; pre-existing repository-wide secrets remain release blockers under SEC-001 and may not be copied, modified or newly exposed by another wave.
+
+## Wave 2026-10-19 — Scrum breakdown từ audit toàn source
+
+Nguồn: 5 audit chỉ-đọc song song (lens/views, ui, model/services, search/manifest, build/test/i18n), mọi mục FIX đã kiểm chứng lại bằng grep/đọc code trước khi ghi. 58 story, tổng 190 SP, mỗi story một file trong `todo/` kèm prompt loop và tín hiệu kết thúc loop (audit >9/10 + unit/widget/integration + smoke device, rồi push).
+
+Thứ tự: nhóm mất dữ liệu/race = P1 (owner chọn 2026-10-19); hot path perf, a11y, search = P2; test determinism, kiến trúc, ý tưởng = P3. Story SP 8 (`ARCH-002`, `FEAT-012`, `SEARCH-018`, `FISH-038`) phải tách thành story con khi thực hiện.
+
+Không đưa vào backlog (trùng vùng owner đã từ chối/hoãn, theo lựa chọn owner 2026-10-19): thống kê lens cục bộ (nhánh `INSIGHT-001`), đổi physics theo khung giờ (gần `FEAT-010` hoãn 11/2026), trùng `VIP_SECRET_B64`/`VIP_30D_B64` (phạm vi `VIP-001`, ADS-001 chain), CI gates, `store-assets`. `ADMOB_REWARDED_ID` test và 3 permission nhạy cảm đã được owner quyết giữ.
+
+Giới hạn: agent audit ui chưa đọc hết `LensView.kt`, `ActAbout.java`, `SettingsDialogCoordinator.kt` (nửa sau), `SearchResultAdapter.kt` (ngoài popup), `LanguageBottomSheetDialogFragment`, `SplashAct`; các mục IDEA/EXCLUSIVE là giả thuyết, chưa đo giá trị.
+
+
+### FIX (lỗi thật, có bằng chứng code)
+
+| ID | P | SP | Story |
+|---|---|---|---|
+| `CORE-003` | P1 | 2 | [App không tải được icon biến mất im lặng khỏi launcher](todo/p1-core-core-003-apps-without-icon-vanish.md) |
+| `CORE-004` | P1 | 3 | [TaskSortApps và TaskUpdateApps không chung generation guard, dữ liệu cũ ghi đè snapshot mới](todo/p1-core-core-004-sort-update-share-generation-guard.md) |
+| `DB-002` | P1 | 3 | [Import backup v1 ghi nhầm vào lens đang mở](todo/p1-db-db-002-import-v1-targets-wrong-lens.md) |
+| `DB-003` | P1 | 2 | [Lens default xóa được làm hỏng export/import và tự hồi sinh rỗng](todo/p1-db-db-003-default-lens-not-deletable.md) |
+| `DB-004` | P1 | 2 | [orderIndex trùng sau khi xóa lens giữa làm backup không import lại được](todo/p1-db-db-004-lens-order-index-collision.md) |
+| `DB-005` | P1 | 3 | [openCount đọc lại từ lens default ghi đè số của lens đang mở](todo/p1-db-db-005-open-count-wrong-lens.md) |
+| `DB-006` | P1 | 2 | [AppPersistent.persist nuốt CancellationException và lỗi DB sau khi đã ghi optimistic](todo/p1-db-db-006-persist-swallows-errors.md) |
+| `SEARCH-011` | P1 | 1 | [Panel Recent apps hiện app người dùng đã ẩn](todo/p1-search-search-011-recent-panel-shows-hidden-apps.md) |
+| `UI-026` | P1 | 2 | [updateColor và FrmSettings crash khi màu nền lưu trong prefs hỏng](todo/p1-ui-ui-026-update-color-crash-bad-hex.md) |
+| `A11Y-002` | P2 | 2 | [30 icon trang trí mang contentDescription app_name, TalkBack đọc sai](todo/p2-a11y-a11y-002-decorative-icons-app-name-label.md) |
+| `LEAK-002` | P2 | 3 | [LensView: IndexOutOfBounds ở launchApp và 3 listener không null hóa khi detach](todo/p2-leak-leak-002-lensview-select-index-and-listeners.md) |
+| `PERF-005` | P2 | 3 | [LensView cấp phát Rect mỗi icon mỗi frame và gọi binder mỗi MotionEvent](todo/p2-perf-perf-005-lens-draw-alloc-and-binder-per-event.md) |
+| `SEARCH-012` | P2 | 3 | [T9 vô dụng với nhãn app không phải chữ Latin](todo/p2-search-search-012-t9-non-latin-locales.md) |
+| `SEARCH-013` | P2 | 3 | [Query toàn bảng Contacts đồng bộ trên main thread mỗi ký tự gõ](todo/p2-search-search-013-contacts-query-main-thread.md) |
+| `SEARCH-014` | P2 | 2 | [shortcutsByPackage giữ Drawable không giải phóng](todo/p2-search-search-014-shortcut-drawable-cache-unbounded.md) |
+| `UI-027` | P2 | 1 | [Overlay quảng cáo dùng colorWhite cứng, tương phản 1.69:1 ở dark/dynamic color](todo/p2-ui-ui-027-ad-overlay-contrast-night.md) |
+| `UI-028` | P2 | 3 | [ActHome dùng một field lensDialog cho 5 dialog; vài dialog không dismiss khi destroy](todo/p2-ui-ui-028-dialog-leaks-and-lifecycle.md) |
+| `UI-029` | P2 | 2 | [Search bar bị Clean mode đè mà Settings vẫn hiện bật; chevron quick action cứng không RTL](todo/p2-ui-ui-029-settings-conflict-and-rtl-chevron.md) |
+| `BUILD-003` | P3 | 2 | [Dọn repo: local.properties bị track, Jetifier thừa, permission thừa, rác JVM](todo/p3-build-build-003-repo-hygiene-quick-wins.md) |
+| `TEST-005` | P3 | 5 | [Test suite rò trạng thái thiết bị và Robolectric không pin SDK](todo/p3-test-test-005-test-state-leak-and-flaky-guards.md) |
+
+### ENHANCE (cải thiện cái đã có)
+
+| ID | P | SP | Story |
+|---|---|---|---|
+| `A11Y-003` | P2 | 3 | [TalkBack không với được cử chỉ lens ngoài tap/long-press icon](todo/p2-a11y-a11y-003-lens-gesture-accessibility-actions.md) |
+| `CORE-005` | P2 | 3 | [Icon pack nhận diện bằng nhãn hiển thị thay vì package](todo/p2-core-core-005-icon-pack-identity-by-package.md) |
+| `DB-007` | P2 | 3 | [Backup v2 không chứa physics từng lens](todo/p2-db-db-007-backup-v2-include-lens-physics.md) |
+| `PERF-006` | P2 | 3 | [Reload một icon quét lại toàn bộ icon pack và parse appfilter mỗi lần](todo/p2-perf-perf-006-icon-reload-reuses-icon-pack-cache.md) |
+| `PERF-007` | P2 | 2 | [Scan PackageManager gây N+1 truy vấn Room và ghi từng app](todo/p2-perf-perf-007-scan-n-plus-one-room.md) |
+| `UI-030` | P2 | 3 | [Ẩn/khóa app ở list mode trên Home không phát broadcast, lưới không đồng bộ](todo/p2-ui-ui-030-home-list-mode-broadcast-sync.md) |
+| `UI-032` | P2 | 2 | [LensManagementActivity mất state dialog sau process death và đọc prefs trên main thread](todo/p2-ui-ui-032-lens-manager-process-death.md) |
+| `ARCH-002` | P3 | 8 | [Tách ActHome (2358 dòng) thành các bộ điều khiển nhỏ](todo/p3-arch-arch-002-split-act-home-god-class.md) |
+| `BUILD-004` | P3 | 3 | [Baseline/startup profile lệch mục tiêu và comment R8 sai](todo/p3-build-build-004-r8-and-baseline-profile-accuracy.md) |
+| `CORE-006` | P3 | 1 | [Đổi ngôn ngữ không làm mới nhãn app và thứ tự A-Z](todo/p3-core-core-006-refresh-on-locale-change.md) |
+| `DB-008` | P3 | 3 | [Không có migration dưới v7 và không có fallback, schema 7/8 thiếu snapshot](todo/p3-db-db-008-legacy-db-migration-fallback.md) |
+| `I18N-001` | P3 | 3 | [Thiếu android:localeConfig nên Android 13+ không hiện 'Ngôn ngữ ứng dụng'](todo/p3-i18n-i18n-001-locale-config-and-settings-app-language.md) |
+| `PERF-008` | P3 | 2 | [FrmSettings.assignValues đọc 35 prefs và resolve launcher hệ thống mỗi lần resume](todo/p3-perf-perf-008-settings-tab-resume-cost.md) |
+| `UI-031` | P3 | 2 | [Hàng app ở font 2.0 bị cắt nhãn do ba icon chen vào](todo/p3-ui-ui-031-app-row-font-scale-clipping.md) |
+
+### NEW (năng lực mới)
+
+| ID | P | SP | Story |
+|---|---|---|---|
+| `FEAT-012` | P2 | 8 | [Hỗ trợ app work profile / multi-user](todo/p2-feat-feat-012-work-profile-apps.md) |
+| `DB-009` | P3 | 5 | [Tự sao lưu layout vào bộ nhớ app, giữ N bản gần nhất](todo/p3-db-db-009-auto-backup-local-rotation.md) |
+| `SEARCH-015` | P3 | 2 | [Hàng 'Hỏi lại các quyền quick action' và sửa cờ đã hỏi một chiều](todo/p3-search-search-015-reset-permission-asked-flags.md) |
+| `SEARCH-016` | P3 | 2 | [Search history có thời hạn lưu](todo/p3-search-search-016-search-history-ttl.md) |
+| `UI-033` | P3 | 5 | [Trang gom mọi cài đặt theo từng lens](todo/p3-ui-ui-033-per-lens-settings-page.md) |
+| `UI-034` | P3 | 3 | [Xem trước và hoàn tác khi reset về mặc định](todo/p3-ui-ui-034-reset-undo-preview.md) |
+| `UI-035` | P3 | 5 | [Khóa một lens (chế độ khách)](todo/p3-ui-ui-035-lens-guest-lock.md) |
+
+### IDEA (giả thuyết cần owner chọn)
+
+| ID | P | SP | Story |
+|---|---|---|---|
+| `BUILD-005` | P3 | 5 | [Icon launcher vector và dọn density lệch (5 IconLauncherShape, IconLocation, IconMissingDensityFolder)](todo/p3-build-build-005-vector-launcher-icon-and-density-assets.md) |
+| `FEAT-013` | P3 | 2 | [Quick action 'app vừa cài' dựa trên installDate](todo/p3-feat-feat-013-recent-install-quick-action.md) |
+| `FISH-027` | P3 | 5 | [Profile độ cong lens (fisheye / anamorphic / cylindrical)](todo/p3-fish-fish-027-lens-profiles-curve-shapes.md) |
+| `FISH-028` | P3 | 3 | [Bán kính ảnh hưởng của lens (lens hood)](todo/p3-fish-fish-028-lens-hood-bounded-radius.md) |
+| `FISH-029` | P3 | 3 | [Khóa tiêu điểm (macro mode) bằng double-tap](todo/p3-fish-fish-029-focus-lock-macro-mode.md) |
+| `FISH-030` | P3 | 3 | [Chế độ ống kính đảo (pincushion)](todo/p3-fish-fish-030-negative-distortion-pincushion.md) |
+| `FISH-038` | P3 | 8 | [Kéo thả app giữa các lens](todo/p3-fish-fish-038-drag-apps-between-lenses.md) |
+| `FISH-039` | P3 | 2 | [Focus peaking cho người thị lực kém](todo/p3-fish-fish-039-focus-peaking-low-vision.md) |
+| `SEARCH-017` | P3 | 2 | [T9 đồng bộ hạn mức, lịch sử và alias với tìm kiếm chữ](todo/p3-search-search-017-t9-parity-with-text-search.md) |
+| `SEARCH-018` | P3 | 8 | [Fuzzy Levenshtein tạo match rác ở CJK; thêm khớp chữ cái đầu pinyin/romaji](todo/p3-search-search-018-cjk-fuzzy-and-pinyin-initials.md) |
+
+### EXCLUSIVE (đặc trưng launcher fisheye)
+
+| ID | P | SP | Story |
+|---|---|---|---|
+| `FISH-031` | P3 | 5 | [Vòng tiêu điểm đa lớp: giữ lâu mở shortcut ngay trong vòng](todo/p3-fish-fish-031-focus-ring-quick-shortcuts.md) |
+| `FISH-032` | P3 | 3 | [Khẩu độ tự động: độ cong mặc định theo số app của lens](todo/p3-fish-fish-032-auto-aperture-by-app-count.md) |
+| `FISH-033` | P3 | 5 | [Thấu kính nghiêng theo cảm biến (tilt parallax)](todo/p3-fish-fish-033-gyro-tilt-parallax.md) |
+| `FISH-034` | P3 | 3 | [Vignette và sai sắc ở mép lens theo độ méo](todo/p3-fish-fish-034-chromatic-vignette-rim.md) |
+| `FISH-035` | P3 | 5 | [Vòng lấy nét: xoay một ngón quanh tâm để quay vòng thứ tự app](todo/p3-fish-fish-035-rotate-ring-reorder.md) |
+| `FISH-036` | P3 | 5 | [Chia sẻ 'lens profile' (cấu hình quang học) qua file](todo/p3-fish-fish-036-lens-profile-share-file.md) |
+| `FISH-037` | P3 | 3 | [Polaroid export có chú thích quang học và contact-sheet nhiều lens](todo/p3-fish-fish-037-polaroid-optical-caption.md) |
