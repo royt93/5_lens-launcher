@@ -257,7 +257,7 @@ Giới hạn: agent audit ui chưa đọc hết `LensView.kt`, `ActAbout.java`, 
 | `DB-002` ✅ done 2026-10-19 | P1 | 3 | [Import backup v1 ghi nhầm vào lens đang mở](done/p1-db-db-002-import-v1-targets-wrong-lens.md) |
 | `DB-003` ✅ done 2026-10-19 | P1 | 2 | [Lens default xóa được làm hỏng export/import và tự hồi sinh rỗng](done/p1-db-db-003-default-lens-not-deletable.md) |
 | `DB-004` ✅ done 2026-10-19 | P1 | 2 | [orderIndex trùng sau khi xóa lens giữa làm backup không import lại được](done/p1-db-db-004-lens-order-index-collision.md) |
-| `DB-005` | P1 | 3 | [openCount đọc lại từ lens default ghi đè số của lens đang mở](todo/p1-db-db-005-open-count-wrong-lens.md) |
+| `DB-005` ✅ done 2026-10-19 | P1 | 3 | [openCount đọc lại từ lens default ghi đè số của lens đang mở](done/p1-db-db-005-open-count-wrong-lens.md) |
 | `DB-006` | P1 | 2 | [AppPersistent.persist nuốt CancellationException và lỗi DB sau khi đã ghi optimistic](todo/p1-db-db-006-persist-swallows-errors.md) |
 | `SEARCH-011` | P1 | 1 | [Panel Recent apps hiện app người dùng đã ẩn](todo/p1-search-search-011-recent-panel-shows-hidden-apps.md) |
 | `UI-026` | P1 | 2 | [updateColor và FrmSettings crash khi màu nền lưu trong prefs hỏng](todo/p1-ui-ui-026-update-color-crash-bad-hex.md) |

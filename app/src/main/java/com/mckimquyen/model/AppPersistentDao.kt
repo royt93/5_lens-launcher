@@ -44,6 +44,17 @@ interface AppPersistentDao {
     @Query("SELECT OPEN_COUNT FROM APP_PERSISTENT WHERE LENS_ID = 'default' AND IDENTIFIER = :identifier LIMIT 1")
     suspend fun getOpenCount(identifier: String): Long?
 
+    /** DB-005: open count is global, so the truth is the highest value any lens row holds. */
+    @Query("SELECT MAX(OPEN_COUNT) FROM APP_PERSISTENT WHERE IDENTIFIER = :identifier")
+    suspend fun getMaxOpenCount(identifier: String): Long?
+
+    @Query("UPDATE APP_PERSISTENT SET OPEN_COUNT = :count WHERE IDENTIFIER = :identifier")
+    suspend fun setOpenCountForAllLenses(identifier: String, count: Long): Int
+
+    /** One global open count per identifier, for overlaying onto any lens's list. */
+    @Query("SELECT IDENTIFIER AS identifier, MAX(OPEN_COUNT) AS openCount FROM APP_PERSISTENT GROUP BY IDENTIFIER")
+    suspend fun getGlobalOpenCounts(): List<GlobalOpenCount>
+
     @Query("UPDATE APP_PERSISTENT SET ORDER_NUMBER = :orderNumber WHERE LENS_ID = :lensId AND IDENTIFIER = :identifier")
     suspend fun updateOrder(lensId: String, identifier: String, orderNumber: Int)
 
@@ -113,13 +124,20 @@ interface AppPersistentDao {
         }
     }
 
+    /**
+     * DB-005: open count is global across lenses. Rows are per (lens, identifier), so they can start
+     * out different (a lens row created later, or older builds that bumped each row by one). Bump
+     * from the highest value and write it to every row, so the count never moves backwards or
+     * differs by which lens is read.
+     */
     @Transaction
     suspend fun incrementAtomic(defaults: AppPersistent): Long {
         insertIfAbsent(defaults.copy(openCount = 0L))
-        check(incrementExisting(defaults.identifier) >= 1) {
+        val next = (getMaxOpenCount(defaults.identifier) ?: 0L) + 1L
+        check(setOpenCountForAllLenses(defaults.identifier, next) >= 1) {
             "Unable to increment ${defaults.identifier}"
         }
-        return getOpenCount(defaults.identifier) ?: 0L
+        return next
     }
 
     @Transaction
@@ -171,3 +189,6 @@ interface AppPersistentDao {
         updateOrganization(defaults.lensId, defaults.identifier, favorite, folderName, pinnedZone)
     }
 }
+
+/** Projection for [AppPersistentDao.getGlobalOpenCounts]. */
+data class GlobalOpenCount(val identifier: String, val openCount: Long)

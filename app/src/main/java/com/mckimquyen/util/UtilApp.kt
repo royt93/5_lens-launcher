@@ -157,9 +157,11 @@ object UtilApp {
         lensId: String,
         sortType: SortType?
     ): ArrayList<App> {
-        val persistentMap = AppDatabase.getInstance().appPersistentDao()
-            .getAllForLens(lensId)
-            .associateBy { it.identifier }
+        val dao = AppDatabase.getInstance().appPersistentDao()
+        val persistentMap = dao.getAllForLens(lensId).associateBy { it.identifier }
+        // DB-005: open count is global across lenses; a lens that has no row of its own for an app,
+        // or an older row that lags behind, must still show the same count as every other lens.
+        val globalOpenCounts = dao.getGlobalOpenCounts().associate { it.identifier to it.openCount }
 
         val apps = ArrayList<App>(shells.size)
         shells.forEach { shell ->
@@ -169,7 +171,7 @@ object UtilApp {
                 shell.copy(
                     isOpened = persistent?.appOpened ?: true,
                     isVisible = persistent?.appVisible ?: true,
-                    openCount = persistent?.openCount ?: 0L,
+                    openCount = globalOpenCounts[identifier] ?: persistent?.openCount ?: 0L,
                     orderNumber = persistent?.orderNumber ?: -1,
                     isFavorite = persistent?.isFavorite ?: false,
                     folderName = persistent?.folderName,

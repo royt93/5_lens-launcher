@@ -267,6 +267,50 @@ class AppPersistentRoomTest {
         assertEquals(8, merged.single().notificationCount)
     }
 
+    /** DB-005: open count is global across lenses, so the value read back must not depend on the lens. */
+    @Test
+    fun `incrementAtomic on a non-default lens never jumps back to the default lens count`() = runBlocking {
+        val onDefault = persistent("com.example.global", "MainActivity", openCount = 3)
+        val onWork = onDefault.copy(lensId = "work", openCount = 50)
+        dao.insert(onDefault)
+        dao.insert(onWork)
+
+        val committed = dao.incrementAtomic(onWork)
+
+        assertEquals("must continue from the highest count, not drop to the default lens row", 51L, committed)
+        assertEquals(51L, dao.getOpenCount(onDefault.identifier))
+    }
+
+    @Test
+    fun `mergeLensPersistence gives the same open count for the same app on every lens`() = runBlocking {
+        val onDefault = persistent("com.example.same", "MainActivity", openCount = 3)
+        dao.insert(onDefault)
+        dao.insert(onDefault.copy(lensId = "work", openCount = 50))
+        val shell = App(label = "Same", packageName = "com.example.same", name = "MainActivity")
+
+        val forDefault = com.mckimquyen.util.UtilApp.mergeLensPersistence(
+            listOf(shell), LensWorkspace.DEFAULT_LENS_ID, com.mckimquyen.enums.SortType.LABEL_ASCENDING
+        ).single().openCount
+        val forWork = com.mckimquyen.util.UtilApp.mergeLensPersistence(
+            listOf(shell), "work", com.mckimquyen.enums.SortType.LABEL_ASCENDING
+        ).single().openCount
+
+        assertEquals(50L, forWork)
+        assertEquals("the default lens must see the same global count", forWork, forDefault)
+    }
+
+    @Test
+    fun `a lens row created later starts from the global count instead of zero`() = runBlocking {
+        val onDefault = persistent("com.example.late", "MainActivity", openCount = 9)
+        dao.insert(onDefault)
+        val newLensRow = onDefault.copy(id = null, lensId = "late", openCount = 0)
+
+        val committed = dao.incrementAtomic(newLensRow)
+
+        assertEquals(10L, committed)
+        assertEquals(10L, dao.findByIdentifier("late", onDefault.identifier)?.openCount)
+    }
+
     private fun persistent(packageName: String, name: String, openCount: Long) = AppPersistent(
         packageName = packageName,
         name = name,

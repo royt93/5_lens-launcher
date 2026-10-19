@@ -211,6 +211,53 @@ class WorkspaceBackupImportIntegrationTest {
         assertEquals(listOf(LensWorkspace.DEFAULT_LENS_ID, "a", "b"), workspaceDao.getAll().map { it.id })
     }
 
+    /** DB-005: opening an app while a non-default lens is active must not move the count backwards. */
+    @Test
+    fun openCountIsGlobalAcrossLensesAfterIncrementAppCount() = runBlocking {
+        seedTwoLensWorkspace()
+        val dao = database.appPersistentDao()
+        val identifier = "com.example.home-com.example.home.Main"
+        dao.insert(AppPersistent(packageName = "com.example.home", name = "com.example.home.Main", identifier = identifier, openCount = 50, lensId = "work"))
+        RAppsSingleton.instance.apps = arrayListOf(
+            App(packageName = "com.example.home", name = "com.example.home.Main", openCount = 50, lensId = "work")
+        )
+
+        val committed = dao.incrementAtomic(AppPersistent(packageName = "com.example.home", name = "com.example.home.Main", identifier = identifier, lensId = "work"))
+
+        assertEquals(51L, committed)
+        assertEquals(51L, dao.findByIdentifier("default", identifier)?.openCount)
+        assertEquals(51L, dao.findByIdentifier("work", identifier)?.openCount)
+        val shell = App(packageName = "com.example.home", name = "com.example.home.Main")
+        val onDefault = UtilApp.mergeLensPersistence(listOf(shell), "default", com.mckimquyen.enums.SortType.LABEL_ASCENDING).single().openCount
+        val onWork = UtilApp.mergeLensPersistence(listOf(shell), "work", com.mckimquyen.enums.SortType.LABEL_ASCENDING).single().openCount
+        assertEquals(onWork, onDefault)
+        assertEquals(51L, onDefault)
+    }
+
+    /** DB-005: the extra GROUP BY in mergeLensPersistence must stay cheap for a large app list. */
+    @Test
+    fun mergeLensPersistenceStaysFastForAThousandApps() = runBlocking {
+        val dao = database.appPersistentDao()
+        val shells = (1..1000).map { App(label = "App$it", packageName = "bulk.p$it", name = "bulk.p$it.Main") }
+        dao.insertAll(shells.map {
+            AppPersistent(packageName = it.packageName.toString(), name = it.name.toString(),
+                identifier = AppPersistent.generateIdentifier(it.packageName.toString(), it.name.toString()), openCount = 3, lensId = "default")
+        })
+        UtilApp.mergeLensPersistence(shells, "default", com.mckimquyen.enums.SortType.LABEL_ASCENDING) // warm up
+        val start = System.nanoTime()
+        repeat(5) { UtilApp.mergeLensPersistence(shells, "default", com.mckimquyen.enums.SortType.LABEL_ASCENDING) }
+        val averageMs = (System.nanoTime() - start) / 5 / 1_000_000
+        dao.getGlobalOpenCounts() // warm up
+        val groupStart = System.nanoTime()
+        repeat(5) { dao.getGlobalOpenCounts() }
+        val groupMs = (System.nanoTime() - groupStart) / 5 / 1_000_000.0
+        val lensStart = System.nanoTime()
+        repeat(5) { dao.getAllForLens("default") }
+        val lensMs = (System.nanoTime() - lensStart) / 5 / 1_000_000.0
+        android.util.Log.i("DB005PERF", "merge=${averageMs}ms groupBy=${groupMs}ms getAllForLens=${lensMs}ms")
+        assertTrue("merge of 1000 apps took ${averageMs}ms", averageMs < 500)
+    }
+
     private fun seedTwoLensWorkspace() = runBlocking {
         database.lensWorkspaceDao().replaceWorkspace(
             listOf(LensWorkspace.createDefault(), LensWorkspace("work", "Work", 1, 2L)),
