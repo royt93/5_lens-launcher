@@ -704,18 +704,58 @@ class ActHomeLensManagementWidgetTest {
 
         ActivityScenario.launch(ActHome::class.java).use { scenario ->
             idle()
+            pageToSecondLens(scenario)
 
-            openMenuAndSelect(scenario, itemDelete, position = 0)
+            openMenuAndSelect(scenario, itemDelete, position = 1)
             confirmDialog(scenario)
 
             val lenses = runBlocking { dao.getAll() }
             assertEquals("Exactly one lens must remain", 1, lenses.size)
-            // Page 0 is the default lens, so that is the one deleted here.
-            assertNull(
-                "The active (default) lens must be gone",
-                lenses.find { it.id == LensWorkspace.DEFAULT_LENS_ID }
-            )
-            assertNotNull("The non-active lens must survive", lenses.find { it.id == "second" })
+            assertNull("The deleted lens must be gone", lenses.find { it.id == "second" })
+            assertNotNull("The default lens must survive", lenses.find { it.id == LensWorkspace.DEFAULT_LENS_ID })
+        }
+    }
+
+    /** DB-003: backup export/import need exactly one default lens, so it can never be deleted. */
+    @Test
+    fun deleteMenu_isDisabledForTheDefaultLens_evenWhenOtherLensesExist() {
+        seedSecondLens()
+
+        ActivityScenario.launch(ActHome::class.java).use { scenario ->
+            idle()
+            scenario.onActivity { activity ->
+                activity.findViewById<View>(R.id.lensPageIndicator).performLongClick()
+                assertFalse(
+                    "Delete must be disabled on the default lens",
+                    activity.lensManagementMenu!!.menu.findItem(itemDelete).isEnabled
+                )
+            }
+            // Even if a stale callback fires, the data layer must refuse.
+            openMenuAndSelect(scenario, itemDelete, position = 0)
+            scenario.onActivity { activity -> activity.lensDialog?.getButton(DialogInterface.BUTTON_POSITIVE)?.performClick() }
+            idle()
+            SystemClock.sleep(300)
+
+            val ids = runBlocking { dao.getAll() }.map { it.id }
+            assertTrue("default lens must still exist: $ids", LensWorkspace.DEFAULT_LENS_ID in ids)
+            assertEquals(2, ids.size)
+        }
+    }
+
+    @Test
+    fun deleteMenu_isEnabledForANonDefaultLens() {
+        seedSecondLens()
+
+        ActivityScenario.launch(ActHome::class.java).use { scenario ->
+            idle()
+            pageToSecondLens(scenario)
+            scenario.onActivity { activity ->
+                activity.findViewById<View>(R.id.lensPageIndicator).performLongClick()
+                assertTrue(
+                    "Delete must be enabled on a non-default lens when more than one exists",
+                    activity.lensManagementMenu!!.menu.findItem(itemDelete).isEnabled
+                )
+            }
         }
     }
 
@@ -774,7 +814,8 @@ class ActHomeLensManagementWidgetTest {
         ActivityScenario.launch(ActHome::class.java).use { scenario ->
             idle()
 
-            openMenuAndSelect(scenario, itemDelete, position = 0)
+            pageToSecondLens(scenario)
+            openMenuAndSelect(scenario, itemDelete, position = 1)
             scenario.onActivity { activity ->
                 val dialog = activity.lensDialog
                 assertNotNull("The confirm dialog must be showing", dialog)
@@ -786,10 +827,7 @@ class ActHomeLensManagementWidgetTest {
 
             val lenses = runBlocking { dao.getAll() }
             assertEquals("The delete must be applied even with no reveal animation", 1, lenses.size)
-            assertNull(
-                "The active (default) lens must be gone",
-                lenses.find { it.id == LensWorkspace.DEFAULT_LENS_ID }
-            )
+            assertNull("The deleted lens must be gone", lenses.find { it.id == "second" })
         }
     }
 

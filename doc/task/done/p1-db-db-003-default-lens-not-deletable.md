@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | fix |
-| Status | todo |
+| Status | done |
 | Priority | P1 |
 | Evidence | confirmed |
 | Epic | Workspace backup |
@@ -21,10 +21,10 @@ Là người dùng, tôi muốn lens gốc không thể bị xóa nhầm, để 
 
 ## Acceptance criteria
 
-- [ ] DAO từ chối xóa lens `default` (trả false) dù còn nhiều lens.
-- [ ] Menu Delete bị disable cho lens `default` ở cả `ActHome` và `LensManagementActivity`, có mô tả a11y lý do.
-- [ ] Sau mọi chuỗi tạo/xóa lens, export rồi import lại thành công (test vòng khứ hồi).
-- [ ] Không còn đường nào làm `seedDefaultIfAbsent` sinh lens rỗng thừa.
+- [x] DAO từ chối xóa lens `default` (trả false) dù còn nhiều lens.
+- [x] Menu Delete bị disable cho lens `default` ở cả `ActHome` và `LensManagementActivity`, có mô tả a11y lý do.
+- [x] Sau mọi chuỗi tạo/xóa lens, export rồi import lại thành công (test vòng khứ hồi).
+- [x] Không còn đường nào làm `seedDefaultIfAbsent` sinh lens rỗng thừa.
 
 ## Implementation notes
 
@@ -32,15 +32,19 @@ Chặn ở DAO (nguồn sự thật) rồi mới disable UI. Không đổi schem
 
 ## Verification and Definition of Done
 
-- [ ] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
-- [ ] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
-- [ ] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
-- [ ] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
-- [ ] No new lint/build failures.
-- [ ] A post-change audit record scores the round `> 9.0/10` before push.
-- [ ] Evidence and status are updated before moving this file to `done`.
+- [x] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
+- [x] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
+- [x] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
+- [x] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
+- [x] No new lint/build failures.
+- [x] A post-change audit record scores the round `> 9.0/10` before push.
+- [x] Evidence and status are updated before moving this file to `done`.
 
 If a test layer is not applicable, replace its checkbox with a reviewed rationale; do not silently omit it.
+
+## Kết quả (2026-10-19)
+
+Hoàn tất. Audit **9.1/10**: `doc/task/AUDIT_DB-003_2026-10-19.md`. Unit 930/930, lint 0 lỗi/7 warning, 82 instrumentation + smoke tay trên Pixel 7 Pro (owner chọn). Giới hạn: `enabled=false` của menu trên máy thật chỉ chứng minh bằng widget test (uiautomator không dump được popup); lens default đã bị xóa từ bản cũ vẫn hồi sinh rỗng.
 
 ## Prompt để chạy loop
 

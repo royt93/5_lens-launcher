@@ -33,9 +33,14 @@ interface LensWorkspaceDao {
     @Delete
     suspend fun delete(workspace: LensWorkspace)
 
-    /** Refuses to delete the final lens; deleting its workspace and layout rows is atomic. */
+    /**
+     * Refuses to delete the final lens or the default lens (DB-003: backup export/import require
+     * exactly one `default` lens, and startup would resurrect it empty anyway); deleting a
+     * workspace and its layout rows is atomic.
+     */
     @Transaction
     suspend fun deleteLensIfMoreThanOne(id: String): Boolean {
+        if (id == LensWorkspace.DEFAULT_LENS_ID) return false
         val lenses = getAll()
         if (lenses.size <= 1) return false
         val lens = findById(id) ?: return false

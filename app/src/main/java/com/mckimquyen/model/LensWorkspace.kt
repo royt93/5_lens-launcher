@@ -55,6 +55,11 @@ data class LensWorkspace(
 
         private fun dao() = AppDatabase.getInstance().lensWorkspaceDao()
 
+        /** DB-003: the single rule the Delete menus use; the DAO enforces the same one. */
+        @JvmStatic
+        fun canDelete(lensId: String, lensCount: Int): Boolean =
+            lensCount > 1 && lensId != DEFAULT_LENS_ID
+
         /** Java-callable (see [com.mckimquyen.ext.Biometric.toggleLockApp] for the same block-
          *  lambda-from-Java pattern already used elsewhere in this codebase). Delivers on main. */
         @JvmStatic

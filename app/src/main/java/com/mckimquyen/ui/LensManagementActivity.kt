@@ -209,7 +209,7 @@ class LensManagementActivity : ActBase() {
         val themed = androidx.appcompat.view.ContextThemeWrapper(this, R.style.PopupMenuTheme)
         val menu = androidx.appcompat.widget.PopupMenu(themed, anchor)
         menu.menuInflater.inflate(R.menu.menu_lens_row, menu.menu)
-        menu.menu.findItem(R.id.menuLensDelete).isEnabled = adapter.lensCount() > 1
+        menu.menu.findItem(R.id.menuLensDelete).isEnabled = LensWorkspace.canDelete(lens.id, adapter.lensCount())
         val onSurface = com.google.android.material.color.MaterialColors.getColor(
             themed, com.google.android.material.R.attr.colorOnSurface, android.graphics.Color.BLACK
         )

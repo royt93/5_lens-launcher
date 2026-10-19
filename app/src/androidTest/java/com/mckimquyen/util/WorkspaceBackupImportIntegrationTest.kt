@@ -155,6 +155,36 @@ class WorkspaceBackupImportIntegrationTest {
         assertEquals(setOf("lens_default", "lens_work"), shortcutIds.toSet())
     }
 
+    /** DB-003: after any create/delete attempt (incl. the refused default delete), export still works and re-imports. */
+    @Test
+    fun exportAndImportStillRoundTripAfterRefusedDefaultDeleteAndLastLensDelete() = runBlocking {
+        val workspaceDao = database.lensWorkspaceDao()
+        workspaceDao.replaceWorkspace(
+            listOf(LensWorkspace.createDefault(), LensWorkspace("temp", "Temp", 1, 2L)),
+            emptyList()
+        )
+
+        assertFalse("default lens must not be deletable", workspaceDao.deleteLensIfMoreThanOne(LensWorkspace.DEFAULT_LENS_ID))
+        assertTrue(workspaceDao.deleteLensIfMoreThanOne("temp"))
+        assertFalse("the last lens must not be deletable", workspaceDao.deleteLensIfMoreThanOne(LensWorkspace.DEFAULT_LENS_ID))
+
+        val lenses = workspaceDao.getAll()
+        assertEquals(listOf(LensWorkspace.DEFAULT_LENS_ID), lenses.map { it.id })
+        val backup = LayoutBackupSnapshotFactory.create(
+            lenses, database.appPersistentDao().getAllRows(),
+            listOf(LensAppSettingsBackup(LensWorkspace.DEFAULT_LENS_ID, LensAppScope.ALL, emptySet(), false)),
+            10L
+        )
+        val reparsed = LayoutBackup.parse(backup.toJson())
+        assertTrue("exported file must parse", reparsed is LayoutBackupParseResult.Success)
+
+        val result = WorkspaceBackupImportCoordinator(WorkspaceBackupRoomStore(context))
+            .apply((reparsed as LayoutBackupParseResult.Success).backup)
+
+        assertEquals(WorkspaceBackupImportResult.Applied, result)
+        assertEquals(listOf(LensWorkspace.DEFAULT_LENS_ID), workspaceDao.getAll().map { it.id })
+    }
+
     private fun seedTwoLensWorkspace() = runBlocking {
         database.lensWorkspaceDao().replaceWorkspace(
             listOf(LensWorkspace.createDefault(), LensWorkspace("work", "Work", 1, 2L)),

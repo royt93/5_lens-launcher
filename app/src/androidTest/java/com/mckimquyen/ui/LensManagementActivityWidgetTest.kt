@@ -312,14 +312,27 @@ class LensManagementActivityWidgetTest {
     }
 
     @Test
-    fun multipleLensOverflowMenuAllowsDelete() {
+    fun multipleLensOverflowMenuAllowsDeleteForNonDefaultLensOnly() {
         ActivityScenario.launch(LensManagementActivity::class.java).use { scenario ->
             InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+            // Row 5 is "Work" (non-default): deletable while several lenses exist.
             scenario.onActivity { activity ->
-                val row = requireNotNull(activity.findViewById<RecyclerView>(R.id.rvLensGroups)
-                    .findViewHolderForAdapterPosition(1)).itemView
-                row.findViewById<View>(R.id.btLensGroupMore).performClick()
+                activity.findViewById<RecyclerView>(R.id.rvLensGroups)
+                    .findViewHolderForAdapterPosition(5)!!.itemView.findViewById<View>(R.id.btLensGroupMore).performClick()
                 assertTrue(requireNotNull(activity.lensRowMenuForTest).menu.findItem(R.id.menuLensDelete).isEnabled)
+                activity.lensRowMenuForTest?.dismiss()
+            }
+            // DB-003: the default lens is never deletable, even with several lenses.
+            scenario.onActivity { activity ->
+                val list = activity.findViewById<RecyclerView>(R.id.rvLensGroups)
+                val defaultPosition = (0 until requireNotNull(list.adapter).itemCount)
+                    .first { rowText(list, it) == LensWorkspace.DEFAULT_LENS_NAME }
+                list.findViewHolderForAdapterPosition(defaultPosition)!!.itemView
+                    .findViewById<View>(R.id.btLensGroupMore).performClick()
+                assertTrue(
+                    "Delete must be disabled for the default lens",
+                    !requireNotNull(activity.lensRowMenuForTest).menu.findItem(R.id.menuLensDelete).isEnabled
+                )
             }
         }
     }

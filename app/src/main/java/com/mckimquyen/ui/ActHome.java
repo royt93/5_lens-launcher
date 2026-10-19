@@ -930,7 +930,8 @@ public class ActHome extends ActBase {
         addLensMenuItem(menu, themed, 1, R.string.lens_add, R.drawable.ic_add_24dp, true);
         addLensMenuItem(menu, themed, 2, R.string.lens_rename, R.drawable.ic_edit_24dp, true);
         addLensMenuItem(menu, themed, 3, R.string.lens_delete, R.drawable.ic_delete_outline_24dp,
-                currentLenses.size() > 1);
+                position >= 0 && position < currentLenses.size()
+                        && LensWorkspace.canDelete(currentLenses.get(position).getId(), currentLenses.size()));
         // FISH-008 Phase 3: Smart Focus is per-lens, so it gets a quick toggle right here on the
         // lens it applies to (FrmSettings' own switch covers the same lens from Settings). The
         // label states the action rather than using a checkable item.

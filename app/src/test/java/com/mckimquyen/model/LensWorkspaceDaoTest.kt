@@ -86,6 +86,18 @@ class LensWorkspaceDaoTest {
     }
 
     @Test
+    fun `deleteLensIfMoreThanOne refuses the default lens even when other lenses exist`() = runBlocking {
+        dao.insertOrUpdate(LensWorkspace.createDefault())
+        dao.insertOrUpdate(LensWorkspace(id = "work", name = "Work", orderIndex = 1))
+        apps.insert(AppPersistent(packageName = "p", name = "n", identifier = "p-n", lensId = LensWorkspace.DEFAULT_LENS_ID))
+
+        assertEquals(false, dao.deleteLensIfMoreThanOne(LensWorkspace.DEFAULT_LENS_ID))
+
+        assertEquals(listOf(LensWorkspace.DEFAULT_LENS_ID, "work"), dao.getAll().map { it.id })
+        assertEquals("default lens layout rows must survive", 1, apps.getAllForLens(LensWorkspace.DEFAULT_LENS_ID).size)
+    }
+
+    @Test
     fun `assignGroup updates selected lens labels without changing lens order`() = runBlocking {
         dao.insertOrUpdate(LensWorkspace.createDefault())
         dao.insertOrUpdate(LensWorkspace("work", "Work", orderIndex = 1, createdAt = 20L))
