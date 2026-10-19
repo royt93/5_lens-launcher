@@ -478,6 +478,26 @@ public class ActSettings extends ActBase implements SettingsMenuHost {
         LayoutImportApplier.PreviewCounts counts = LayoutImportApplier.INSTANCE.previewCounts(plan);
         String message = getString(R.string.layout_import_workspace_preview_message,
                 counts.getLensCount(), counts.getTotalEntryCount());
+        showImportConfirmDialog(message, backup);
+    }
+
+    private void showLegacyLayoutImportPreview(LayoutBackup backup) {
+        // DB-002: a v1 file only ever targets the default lens. The preview counts come from the
+        // active lens's list (that is all the app has in memory), but the write goes through the
+        // same transactional coordinator as v2 so it can never touch the lens being viewed.
+        List<App> installedApps = RAppsSingleton.getInstance().getApps();
+        LayoutImportApplier.Plan plan = LayoutImportApplier.INSTANCE.plan(
+                backup, installedApps != null ? installedApps : Collections.emptyList());
+        if (plan.getMatched().isEmpty()) {
+            Toast.makeText(this, R.string.layout_import_nothing_to_import, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        String message = getString(R.string.layout_import_preview_message, plan.getMatched().size(), plan.getSkippedCount())
+                + "\n" + getString(R.string.layout_import_v1_default_lens_note);
+        showImportConfirmDialog(message, backup);
+    }
+
+    private void showImportConfirmDialog(String message, LayoutBackup backup) {
         layoutImportDialog = new MaterialAlertDialogBuilder(this, R.style.MaterialYouDialogTheme)
                 .setTitle(R.string.layout_import_preview_title)
                 .setMessage(message)
@@ -489,17 +509,7 @@ public class ActSettings extends ActBase implements SettingsMenuHost {
                 .setOnClickListener(view -> {
                     layoutImportDialog = null;
                     previewDialog.dismiss();
-                    LayoutBackupIo.applyWorkspaceAsync(this, backup, result -> {
-                        if (isFinishing() || isDestroyed()) return Unit.INSTANCE;
-                        if (result instanceof WorkspaceBackupImportResult.Applied) {
-                            Toast.makeText(this, R.string.layout_import_success, Toast.LENGTH_SHORT).show();
-                        } else if (result instanceof WorkspaceBackupImportResult.RecoveryRequired) {
-                            Toast.makeText(this, R.string.layout_import_workspace_recovery_required, Toast.LENGTH_LONG).show();
-                        } else {
-                            Toast.makeText(this, R.string.layout_import_workspace_failed, Toast.LENGTH_LONG).show();
-                        }
-                        return Unit.INSTANCE;
-                    });
+                    LayoutBackupIo.applyWorkspaceAsync(this, backup, this::onWorkspaceImportResult);
                 }));
         previewDialog.setOnDismissListener(dialog -> {
             if (layoutImportDialog == previewDialog) layoutImportDialog = null;
@@ -507,25 +517,16 @@ public class ActSettings extends ActBase implements SettingsMenuHost {
         previewDialog.show();
     }
 
-    private void showLegacyLayoutImportPreview(LayoutBackup backup) {
-        List<App> installedApps = RAppsSingleton.getInstance().getApps();
-        LayoutImportApplier.Plan plan = LayoutImportApplier.INSTANCE.plan(
-                backup, installedApps != null ? installedApps : Collections.emptyList());
-        if (plan.getMatched().isEmpty()) {
-            Toast.makeText(this, R.string.layout_import_nothing_to_import, Toast.LENGTH_SHORT).show();
-            return;
+    private Unit onWorkspaceImportResult(WorkspaceBackupImportResult result) {
+        if (isFinishing() || isDestroyed()) return Unit.INSTANCE;
+        if (result instanceof WorkspaceBackupImportResult.Applied) {
+            Toast.makeText(this, R.string.layout_import_success, Toast.LENGTH_SHORT).show();
+        } else if (result instanceof WorkspaceBackupImportResult.RecoveryRequired) {
+            Toast.makeText(this, R.string.layout_import_workspace_recovery_required, Toast.LENGTH_LONG).show();
+        } else {
+            Toast.makeText(this, R.string.layout_import_workspace_failed, Toast.LENGTH_LONG).show();
         }
-        String message = getString(R.string.layout_import_preview_message, plan.getMatched().size(), plan.getSkippedCount())
-                + "\n" + getString(R.string.layout_import_v1_default_lens_note);
-        new MaterialAlertDialogBuilder(this, R.style.MaterialYouDialogTheme)
-                .setTitle(R.string.layout_import_preview_title)
-                .setMessage(message)
-                .setPositiveButton(android.R.string.ok, (dialog, which) -> {
-                    LayoutImportApplier.INSTANCE.apply(plan);
-                    Toast.makeText(this, R.string.layout_import_success, Toast.LENGTH_SHORT).show();
-                })
-                .setNegativeButton(android.R.string.cancel, null)
-                .show();
+        return Unit.INSTANCE;
     }
 
     public void showNightModeChooser() {

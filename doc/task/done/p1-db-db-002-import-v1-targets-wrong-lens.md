@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | fix |
-| Status | todo |
+| Status | done |
 | Priority | P1 |
 | Evidence | confirmed |
 | Epic | Workspace backup |
@@ -21,10 +21,10 @@ Là người dùng nhiều lens, tôi muốn import backup v1 chỉ ảnh hưở
 
 ## Acceptance criteria
 
-- [ ] Import v1 khi đang đứng ở lens không-default không thay đổi bất kỳ row nào của lens đó.
-- [ ] Layout v1 được áp vào lens `default` và `RAppsSingleton` phản ánh đúng sau import.
-- [ ] Đường production v1 đi qua `applyLegacyV1` (một đường duy nhất, có rollback), đường `LayoutImportApplier.apply` cũ bị xóa hoặc chỉ còn là phần tính plan.
-- [ ] Import lỗi giữa chừng không để lại trạng thái nửa vời (có test rollback).
+- [x] Import v1 khi đang đứng ở lens không-default không thay đổi bất kỳ row nào của lens đó.
+- [x] Layout v1 được áp vào lens `default` và `RAppsSingleton` phản ánh đúng sau import.
+- [x] Đường production v1 đi qua `applyLegacyV1` (một đường duy nhất, có rollback), đường `LayoutImportApplier.apply` cũ bị xóa hoặc chỉ còn là phần tính plan.
+- [x] Import lỗi giữa chừng không để lại trạng thái nửa vời (có test rollback).
 
 ## Implementation notes
 
@@ -32,15 +32,19 @@ Gộp FIX-1 và FIX-2 của audit model: dùng `WorkspaceBackupImportCoordinator
 
 ## Verification and Definition of Done
 
-- [ ] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
-- [ ] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
-- [ ] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
-- [ ] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
-- [ ] No new lint/build failures.
-- [ ] A post-change audit record scores the round `> 9.0/10` before push.
-- [ ] Evidence and status are updated before moving this file to `done`.
+- [x] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
+- [x] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
+- [x] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
+- [x] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
+- [x] No new lint/build failures.
+- [x] A post-change audit record scores the round `> 9.0/10` before push.
+- [x] Evidence and status are updated before moving this file to `done`.
 
 If a test layer is not applicable, replace its checkbox with a reviewed rationale; do not silently omit it.
+
+## Kết quả (2026-10-19)
+
+Hoàn tất. Audit **9.2/10**: `doc/task/AUDIT_DB-002_2026-10-19.md`. Unit 929/929, lint 0 lỗi/7 warning, 18 instrumentation pass + smoke trên Pixel 7 Pro (owner chọn). Giới hạn: preview v1 đếm theo lens đang mở; chưa smoke chọn file qua SAF.
 
 ## Prompt để chạy loop
 

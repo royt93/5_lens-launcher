@@ -5,7 +5,6 @@ import com.mckimquyen.model.AppPersistent
 import com.mckimquyen.model.LayoutBackup
 import com.mckimquyen.model.LayoutBackupEntry
 import com.mckimquyen.model.LensWorkspace
-import com.mckimquyen.model.PinnedZone
 
 /**
  * FEAT-006: matches an imported [LayoutBackup] against currently-installed apps by the same
@@ -31,35 +30,6 @@ object LayoutImportApplier {
             if (app != null) matched.add(MatchedEntry(entry, app)) else skipped++
         }
         return Plan(matched, skipped)
-    }
-
-    /**
-     * Reuses [AppPersistent]'s existing single-app persistence functions in a loop - the same
-     * codepath a user flipping each switch by hand would trigger (including the
-     * RAppsSingleton sync + AppEventManager notify each one already does) - rather than a new
-     * bulk-write query that would need its own side-effect wiring duplicated.
-     */
-    fun apply(plan: Plan) {
-        val orderedApps = plan.matched.sortedBy { it.entry.orderNumber }.map { it.app }
-        if (orderedApps.isNotEmpty()) {
-            // FISH-008 Phase 2: installedApps passed into plan() already came from one active
-            // lens's merged list, so every matched app shares the same lensId.
-            AppPersistent.setAppOrderBatch(orderedApps, orderedApps.first().lensId)
-        }
-        plan.matched.forEach { (entry, app) ->
-            val packageName = app.packageName.toString()
-            val name = app.name.toString()
-            AppPersistent.setAppVisibility(packageName, name, entry.appVisible, app.lensId)
-            AppPersistent.setAppOpened(packageName, name, entry.appOpened, app.lensId)
-            AppPersistent.setOrganization(
-                packageName,
-                name,
-                entry.isFavorite,
-                entry.folderName,
-                PinnedZone.fromStored(entry.pinnedZone),
-                app.lensId
-            )
-        }
     }
 
     /**

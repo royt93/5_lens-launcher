@@ -254,7 +254,7 @@ Giới hạn: agent audit ui chưa đọc hết `LensView.kt`, `ActAbout.java`, 
 |---|---|---|---|
 | `CORE-003` | P1 | 2 | [App không tải được icon biến mất im lặng khỏi launcher](todo/p1-core-core-003-apps-without-icon-vanish.md) |
 | `CORE-004` ✅ done 2026-10-19 | P1 | 3 | [TaskSortApps và TaskUpdateApps không chung generation guard, dữ liệu cũ ghi đè snapshot mới](done/p1-core-core-004-sort-update-share-generation-guard.md) |
-| `DB-002` | P1 | 3 | [Import backup v1 ghi nhầm vào lens đang mở](todo/p1-db-db-002-import-v1-targets-wrong-lens.md) |
+| `DB-002` ✅ done 2026-10-19 | P1 | 3 | [Import backup v1 ghi nhầm vào lens đang mở](done/p1-db-db-002-import-v1-targets-wrong-lens.md) |
 | `DB-003` | P1 | 2 | [Lens default xóa được làm hỏng export/import và tự hồi sinh rỗng](todo/p1-db-db-003-default-lens-not-deletable.md) |
 | `DB-004` | P1 | 2 | [orderIndex trùng sau khi xóa lens giữa làm backup không import lại được](todo/p1-db-db-004-lens-order-index-collision.md) |
 | `DB-005` | P1 | 3 | [openCount đọc lại từ lens default ghi đè số của lens đang mở](todo/p1-db-db-005-open-count-wrong-lens.md) |

@@ -110,21 +110,22 @@ class LayoutBackupIoIntegrationTest {
         waitForRow { it?.folderName == "Old" }
 
         RAppsSingleton.instance.apps = arrayListOf(App(packageName = packageName, name = componentName))
-        val plan = LayoutImportApplier.plan(
-            com.mckimquyen.model.LayoutBackup(
-                1, 0L,
-                listOf(
-                    com.mckimquyen.model.LayoutBackupEntry(
-                        packageName, componentName, orderNumber = 0,
-                        appVisible = true, appOpened = true,
-                        isFavorite = false, folderName = "New", pinnedZone = PinnedZone.END.name
-                    )
+        val legacy = com.mckimquyen.model.LayoutBackup(
+            1, 0L,
+            listOf(
+                com.mckimquyen.model.LayoutBackupEntry(
+                    packageName, componentName, orderNumber = 0,
+                    appVisible = true, appOpened = true,
+                    isFavorite = false, folderName = "New", pinnedZone = PinnedZone.END.name
                 )
-            ),
-            RAppsSingleton.instance.apps.orEmpty()
+            )
         )
 
-        LayoutImportApplier.apply(plan)
+        // DB-002: the production v1 path is the transactional coordinator, not a per-app loop.
+        val result = kotlinx.coroutines.runBlocking {
+            WorkspaceBackupImportCoordinator(WorkspaceBackupRoomStore(context)).apply(legacy)
+        }
+        assertEquals(WorkspaceBackupImportResult.Applied, result)
 
         val stored = waitForRow { it?.folderName == "New" }
         assertEquals(false, stored?.isFavorite)
