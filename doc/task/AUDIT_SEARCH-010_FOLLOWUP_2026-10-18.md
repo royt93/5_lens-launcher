@@ -81,3 +81,9 @@ Source of truth for implementation choices in this session. Detailed acceptance 
 - Test mới: `T9KeypadAccessibilityTest`, `LensGroupPluralQuantitiesTest`. Bug test-isolation: `LensManagementActivityWidgetTest` đổi ngôn ngữ thiết bị, đã snapshot/restore.
 - Verify: unit 925/925, build + androidTest APK pass, 34 test thiết bị pass trên TECNO KJ7 `115333744A005844` (S24 mất kết nối giữa chừng, owner chọn đổi); prefs trước/sau 0 diff.
 - Giới hạn: landscape + font 2.0 máy thật chưa xác minh; điểm audit 9.2/10.
+
+## Lint batch 2 (2026-10-19)
+
+- Lint 12 → 8. Xóa `lens_switch_title`; `lens_group_header_description` dùng `%2$s` với plural `lens_group_lens_count` ở 17 locale; `tools:ignore="PluralsCandidate"` có lý do cho `lens_group_selected_count`, `layout_import_workspace_preview_message`.
+- Sửa 2 test giòn: `WorkspaceBackupStringsTest` (regex nhận thuộc tính), `LensStringTranslationTest` (chuỗi chỉ còn placeholder). Thêm test khóa `%2$s` mọi locale.
+- Verify: unit 926/926; TECNO KJ7 31 test pass. Giới hạn: không còn snapshot prefs gốc để so diff.

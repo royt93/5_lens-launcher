@@ -245,7 +245,6 @@
     <string name="lens_unfreeze_positions">إلغاء تثبيت مواضع التطبيقات</string>
     <string name="lens_unfreeze_title">إلغاء التثبيت؟</string>
     <string name="lens_unfreeze_message">سيؤدي هذا أيضًا إلى تجاهل أي ترتيب ضبطته بالسحب.</string>
-    <string name="lens_switch_title">تبديل العدسة</string>
     <string name="layout_import_workspace_preview_message">يستبدل هذا مساحة العمل الحالية: %1$d عدسات و%2$d إدخال تخطيط تطبيقات. التطبيقات غير الموجودة في هذه النسخة تبقى مخفية في العدسة الافتراضية.</string>
     <string name="layout_import_workspace_failed">فشل استيراد مساحة العمل. تمت استعادة مساحة العمل السابقة.</string>
     <string name="layout_import_workspace_recovery_required">فشلت استعادة مساحة العمل ولم تكتمل الاستعادة التلقائية. أعد فتح التطبيق وتحقق من العدسات.</string>
@@ -267,7 +266,7 @@
 
     <string name="lens_group_active">نشطة</string>
     <string name="lens_group_selected_count">تم تحديد %1$d</string>
-    <string name="lens_group_header_description">%1$s، %2$d عدسات، %3$s</string>
+    <string name="lens_group_header_description">%1$s، %2$s، %3$s</string>
     <string name="lens_group_lens_active_description">%1$s، العدسة النشطة</string>
     <plurals name="lens_group_lens_count">
         <item quantity="zero">لا توجد عدسات</item>

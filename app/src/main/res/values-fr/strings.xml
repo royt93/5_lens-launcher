@@ -227,7 +227,6 @@
     <string name="lens_unfreeze_positions">Libérer la position des applis</string>
     <string name="lens_unfreeze_title">Libérer les positions ?</string>
     <string name="lens_unfreeze_message">Cela supprime aussi l\u2019ordre défini par glisser-déposer.</string>
-    <string name="lens_switch_title">Changer de lentille</string>
     <string name="layout_import_workspace_preview_message">Cela remplace votre espace de travail actuel : %1$d lentilles et %2$d entrées de disposition d’apps. Les apps absentes de cette sauvegarde restent masquées sur la lentille par défaut.</string>
     <string name="layout_import_workspace_failed">Échec de l’importation de l’espace de travail. Votre espace précédent a été restauré.</string>
     <string name="layout_import_workspace_recovery_required">Échec de la restauration de l’espace de travail et la récupération automatique est incomplète. Rouvrez l’app et vérifiez vos lentilles.</string>
@@ -249,7 +248,7 @@
 
     <string name="lens_group_active">En cours</string>
     <string name="lens_group_selected_count">%1$d sélectionnées</string>
-    <string name="lens_group_header_description">%1$s, %2$d lentilles, %3$s</string>
+    <string name="lens_group_header_description">%1$s, %2$s, %3$s</string>
     <string name="lens_group_lens_active_description">%1$s, lentille active</string>
     <plurals name="lens_group_lens_count">
         <item quantity="one">%1$d lentille</item>

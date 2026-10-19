@@ -231,7 +231,6 @@
     <string name="lens_unfreeze_positions">Открепить позиции приложений</string>
     <string name="lens_unfreeze_title">Открепить позиции?</string>
     <string name="lens_unfreeze_message">Также будет сброшен порядок, заданный перетаскиванием.</string>
-    <string name="lens_switch_title">Сменить линзу</string>
     <string name="layout_import_workspace_preview_message">Это заменит ваше текущее рабочее пространство: линз — %1$d, записей раскладки приложений — %2$d. Приложения, которых нет в этой копии, останутся скрытыми в линзе по умолчанию.</string>
     <string name="layout_import_workspace_failed">Не удалось импортировать рабочее пространство. Предыдущее пространство восстановлено.</string>
     <string name="layout_import_workspace_recovery_required">Не удалось восстановить рабочее пространство, автоматическое восстановление не завершено. Откройте приложение снова и проверьте свои линзы.</string>
@@ -253,7 +252,7 @@
 
     <string name="lens_group_active">Активна</string>
     <string name="lens_group_selected_count">Выбрано: %1$d</string>
-    <string name="lens_group_header_description">%1$s, линз: %2$d, %3$s</string>
+    <string name="lens_group_header_description">%1$s, %2$s, %3$s</string>
     <string name="lens_group_lens_active_description">%1$s, активная линза</string>
     <plurals name="lens_group_lens_count">
         <item quantity="one">Линза: %1$d</item>

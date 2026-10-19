@@ -219,7 +219,6 @@
     <string name="lens_unfreeze_positions">ដោះសោទីតាំងកម្មវិធី</string>
     <string name="lens_unfreeze_title">ដោះសោទីតាំង?</string>
     <string name="lens_unfreeze_message">វាក៏លុបចោលលំដាប់ដែលអ្នកកំណត់ដោយអូសផងដែរ។</string>
-    <string name="lens_switch_title">ប្តូរកញ្ចក់</string>
     <string name="layout_import_workspace_preview_message">វាជំនួសកន្លែងធ្វើការបច្ចុប្បន្នរបស់អ្នក៖ ឡេន %1$d និងធាតុប្លង់កម្មវិធី %2$d។ កម្មវិធីដែលមិនមានក្នុងការបម្រុងទុកនេះនៅតែលាក់នៅឡេនលំនាំដើម។</string>
     <string name="layout_import_workspace_failed">ការនាំចូលកន្លែងធ្វើការបរាជ័យ។ កន្លែងធ្វើការមុនត្រូវបានស្ដារឡើងវិញ។</string>
     <string name="layout_import_workspace_recovery_required">ការស្ដារកន្លែងធ្វើការបរាជ័យ ហើយការស្ដារដោយស្វ័យប្រវត្តិមិនពេញលេញ។ សូមបើកកម្មវិធីម្ដងទៀត ហើយពិនិត្យឡេនរបស់អ្នក។</string>
@@ -241,7 +240,7 @@
 
     <string name="lens_group_active">សកម្ម</string>
     <string name="lens_group_selected_count">បានជ្រើស %1$d</string>
-    <string name="lens_group_header_description">%1$s, កែវ %2$d, %3$s</string>
+    <string name="lens_group_header_description">%1$s, %2$s, %3$s</string>
     <string name="lens_group_lens_active_description">%1$s, កែវសកម្ម</string>
     <plurals name="lens_group_lens_count">
         <item quantity="other">កែវ %1$d</item>

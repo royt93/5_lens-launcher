@@ -227,7 +227,6 @@
     <string name="lens_unfreeze_positions">Sblocca posizioni delle app</string>
     <string name="lens_unfreeze_title">Sbloccare le posizioni?</string>
     <string name="lens_unfreeze_message">Verrà scartato anche l\u2019ordine impostato trascinando.</string>
-    <string name="lens_switch_title">Cambia lente</string>
     <string name="layout_import_workspace_preview_message">Questo sostituisce il tuo spazio di lavoro attuale: %1$d lenti e %2$d voci di layout delle app. Le app assenti da questo backup restano nascoste nella lente predefinita.</string>
     <string name="layout_import_workspace_failed">Importazione dello spazio di lavoro non riuscita. Lo spazio precedente è stato ripristinato.</string>
     <string name="layout_import_workspace_recovery_required">Ripristino dello spazio di lavoro non riuscito e il recupero automatico è incompleto. Riapri l’app e controlla le tue lenti.</string>
@@ -249,7 +248,7 @@
 
     <string name="lens_group_active">Attiva</string>
     <string name="lens_group_selected_count">%1$d selezionate</string>
-    <string name="lens_group_header_description">%1$s, %2$d lenti, %3$s</string>
+    <string name="lens_group_header_description">%1$s, %2$s, %3$s</string>
     <string name="lens_group_lens_active_description">%1$s, lente attiva</string>
     <plurals name="lens_group_lens_count">
         <item quantity="one">%1$d lente</item>

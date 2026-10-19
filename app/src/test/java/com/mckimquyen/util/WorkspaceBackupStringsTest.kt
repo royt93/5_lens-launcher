@@ -22,7 +22,7 @@ class WorkspaceBackupStringsTest {
     }
 
     private fun value(file: File, key: String): String? =
-        Regex("<string name=\"$key\">(.*?)</string>", RegexOption.DOT_MATCHES_ALL)
+        Regex("<string name=\"$key\"[^>]*>(.*?)</string>", RegexOption.DOT_MATCHES_ALL)
             .find(file.readText())?.groupValues?.get(1)
 
     @Test

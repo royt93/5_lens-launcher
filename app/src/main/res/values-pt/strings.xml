@@ -227,7 +227,6 @@
     <string name="lens_unfreeze_positions">Soltar posições dos apps</string>
     <string name="lens_unfreeze_title">Soltar posições?</string>
     <string name="lens_unfreeze_message">Isso também descarta a ordem definida ao arrastar.</string>
-    <string name="lens_switch_title">Trocar de lente</string>
     <string name="layout_import_workspace_preview_message">Isto substitui seu espaço de trabalho atual: %1$d lentes e %2$d entradas de layout de apps. Apps ausentes deste backup permanecem ocultos na lente padrão.</string>
     <string name="layout_import_workspace_failed">Falha ao importar o espaço de trabalho. Seu espaço anterior foi restaurado.</string>
     <string name="layout_import_workspace_recovery_required">Falha ao restaurar o espaço de trabalho e a recuperação automática ficou incompleta. Reabra o app e verifique suas lentes.</string>
@@ -249,7 +248,7 @@
 
     <string name="lens_group_active">Ativa</string>
     <string name="lens_group_selected_count">%1$d selecionadas</string>
-    <string name="lens_group_header_description">%1$s, %2$d lentes, %3$s</string>
+    <string name="lens_group_header_description">%1$s, %2$s, %3$s</string>
     <string name="lens_group_lens_active_description">%1$s, lente ativa</string>
     <plurals name="lens_group_lens_count">
         <item quantity="one">%1$d lente</item>

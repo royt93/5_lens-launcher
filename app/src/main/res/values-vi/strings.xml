@@ -227,7 +227,6 @@
     <string name="lens_unfreeze_positions">Bỏ cố định vị trí ứng dụng</string>
     <string name="lens_unfreeze_title">Bỏ cố định vị trí?</string>
     <string name="lens_unfreeze_message">Thao tác này cũng xóa thứ tự bạn đã kéo thả.</string>
-    <string name="lens_switch_title">Chuyển thấu kính</string>
     <string name="lens_management_title">Quản lý thấu kính</string>
     <string name="lens_group_ungrouped">Chưa phân nhóm</string>
     <string name="lens_group_expand">Mở rộng nhóm</string>
@@ -245,7 +244,7 @@
     <string name="lens_group_edit_action">Chỉnh sửa nhóm</string>
     <string name="lens_group_active">Đang dùng</string>
     <string name="lens_group_selected_count">Đã chọn %1$d</string>
-    <string name="lens_group_header_description">%1$s, %2$d thấu kính, %3$s</string>
+    <string name="lens_group_header_description">%1$s, %2$s, %3$s</string>
     <string name="lens_group_lens_active_description">%1$s, thấu kính đang dùng</string>
     <plurals name="lens_group_lens_count">
         <item quantity="other">%1$d thấu kính</item>

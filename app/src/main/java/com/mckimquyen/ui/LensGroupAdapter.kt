@@ -178,12 +178,13 @@ internal class LensGroupAdapter(
         fun bind(row: LensGroupRow.Header) {
             val displayName = row.groupName ?: itemView.context.getString(R.string.lens_group_ungrouped)
             title.text = displayName
-            count.text = itemView.resources.getQuantityString(R.plurals.lens_group_lens_count, row.lensCount, row.lensCount)
+            val countText = itemView.resources.getQuantityString(R.plurals.lens_group_lens_count, row.lensCount, row.lensCount)
+            count.text = countText
             val action = itemView.context.getString(
                 if (row.expanded) R.string.lens_group_collapse else R.string.lens_group_expand
             )
             itemView.contentDescription = itemView.context.getString(
-                R.string.lens_group_header_description, displayName, row.lensCount, action
+                R.string.lens_group_header_description, displayName, countText, action
             )
             val targetRotation = if (row.expanded) EXPANDED_ROTATION else COLLAPSED_ROTATION
             state.animate().cancel()

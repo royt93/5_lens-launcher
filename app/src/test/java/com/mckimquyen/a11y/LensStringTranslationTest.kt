@@ -86,7 +86,9 @@ class LensStringTranslationTest {
         // "Lens %1$d" is a proper noun plus an index; some locales legitimately keep the word.
         // "via %1$s" (lens_share_caption_via) is a real, correct word in French and Portuguese
         // too, not a copy-paste - both intentionally match the English source.
-        val allowedToMatch = setOf("lens_new_name_template", "lens_share_caption_via")
+        // "lens_group_header_description" is only placeholders ("%1$s, %2$s, %3$s"); the translated
+        // lens count now arrives pre-formatted from the lens_group_lens_count plural.
+        val allowedToMatch = setOf("lens_new_name_template", "lens_share_caption_via", "lens_group_header_description")
 
         val untranslated = localeDirectories().flatMap { directory ->
             lensStrings(File(directory, "strings.xml"))

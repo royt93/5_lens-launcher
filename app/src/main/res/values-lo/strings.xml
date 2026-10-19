@@ -219,7 +219,6 @@
     <string name="lens_unfreeze_positions">ປົດລັອກຕຳແໜ່ງແອັບ</string>
     <string name="lens_unfreeze_title">ປົດລັອກຕຳແໜ່ງບໍ?</string>
     <string name="lens_unfreeze_message">ນີ້ຈະລຶບລຳດັບທີ່ທ່ານຕັ້ງດ້ວຍການລາກນຳ.</string>
-    <string name="lens_switch_title">ປ່ຽນເລນ</string>
     <string name="layout_import_workspace_preview_message">ນີ້ຈະແທນທີ່ພື້ນທີ່ເຮັດວຽກປັດຈຸບັນຂອງທ່ານ: ເລນ %1$d ແລະ ລາຍການຮູບແບບແອັບ %2$d. ແອັບທີ່ບໍ່ມີໃນການສຳຮອງນີ້ຈະຍັງຖືກເຊື່ອງຢູ່ໃນເລນເລີ່ມຕົ້ນ.</string>
     <string name="layout_import_workspace_failed">ການນຳເຂົ້າພື້ນທີ່ເຮັດວຽກລົ້ມເຫຼວ. ພື້ນທີ່ເຮັດວຽກກ່ອນໜ້າຖືກກູ້ຄືນແລ້ວ.</string>
     <string name="layout_import_workspace_recovery_required">ການກູ້ຄືນພື້ນທີ່ເຮັດວຽກລົ້ມເຫຼວ ແລະ ການກູ້ຄືນອັດຕະໂນມັດບໍ່ສົມບູນ. ກະລຸນາເປີດແອັບອີກຄັ້ງ ແລ້ວກວດເບິ່ງເລນຂອງທ່ານ.</string>
@@ -241,7 +240,7 @@
 
     <string name="lens_group_active">ໃຊ້ງານ</string>
     <string name="lens_group_selected_count">ເລືອກ %1$d ລາຍການ</string>
-    <string name="lens_group_header_description">%1$s, %2$d ເລນ, %3$s</string>
+    <string name="lens_group_header_description">%1$s, %2$s, %3$s</string>
     <string name="lens_group_lens_active_description">%1$s, ເລນທີ່ໃຊ້ງານ</string>
     <plurals name="lens_group_lens_count">
         <item quantity="other">%1$d ເລນ</item>

@@ -60,7 +60,8 @@
     <string name="layout_export_failed">Export failed</string>
     <string name="layout_import_preview_title">Import layout?</string>
     <string name="layout_import_preview_message">Apps updated: %1$d. Apps skipped (not installed): %2$d.</string>
-    <string name="layout_import_workspace_preview_message">This replaces your current workspace: %1$d lenses and %2$d app layout entries. Apps absent from this backup stay hidden on the default lens.</string>
+    <!-- Two independent counts in one sentence: a single plurals resource cannot express both. -->
+    <string name="layout_import_workspace_preview_message" tools:ignore="PluralsCandidate">This replaces your current workspace: %1$d lenses and %2$d app layout entries. Apps absent from this backup stay hidden on the default lens.</string>
     <string name="layout_import_workspace_failed">Workspace import failed. Your previous workspace was restored.</string>
     <string name="layout_import_workspace_recovery_required">Workspace restore failed and automatic recovery was incomplete. Reopen the app and verify your lenses.</string>
     <string name="layout_import_v1_default_lens_note">This older backup updates the default lens layout only; other lenses stay unchanged.</string>
@@ -274,7 +275,6 @@
     <string name="lens_unfreeze_positions">Unfreeze app positions</string>
     <string name="lens_unfreeze_title">Unfreeze positions?</string>
     <string name="lens_unfreeze_message">This also discards any order you set by dragging.</string>
-    <string name="lens_switch_title">Switch lens</string>
     <string name="lens_management_title">Manage lenses</string>
     <string name="lens_group_ungrouped">No group</string>
     <string name="lens_group_expand">Expand group</string>
@@ -291,8 +291,9 @@
     <string name="lens_group_edit_title">Choose lens group</string>
     <string name="lens_group_edit_action">Edit group</string>
     <string name="lens_group_active">Active</string>
-    <string name="lens_group_selected_count">%1$d selected</string>
-    <string name="lens_group_header_description">%1$s, %2$d lenses, %3$s</string>
+    <!-- The word follows the number and does not inflect with it, so a plural adds nothing. -->
+    <string name="lens_group_selected_count" tools:ignore="PluralsCandidate">%1$d selected</string>
+    <string name="lens_group_header_description">%1$s, %2$s, %3$s</string>
     <string name="lens_group_lens_active_description">%1$s, active lens</string>
     <plurals name="lens_group_lens_count">
         <item quantity="one">%1$d lens</item>

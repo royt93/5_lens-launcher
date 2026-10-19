@@ -219,7 +219,6 @@
     <string name="lens_unfreeze_positions">取消固定应用位置</string>
     <string name="lens_unfreeze_title">取消固定位置？</string>
     <string name="lens_unfreeze_message">这也会丢弃你通过拖动设置的顺序。</string>
-    <string name="lens_switch_title">切换镜头</string>
     <string name="layout_import_workspace_preview_message">这将替换您当前的工作区：%1$d 个镜头和 %2$d 条应用布局记录。此备份中不存在的应用将继续在默认镜头中隐藏。</string>
     <string name="layout_import_workspace_failed">工作区导入失败。已恢复您之前的工作区。</string>
     <string name="layout_import_workspace_recovery_required">工作区恢复失败，自动恢复未完成。请重新打开应用并检查您的镜头。</string>
@@ -241,7 +240,7 @@
 
     <string name="lens_group_active">当前</string>
     <string name="lens_group_selected_count">已选择 %1$d 项</string>
-    <string name="lens_group_header_description">%1$s，%2$d 个镜头，%3$s</string>
+    <string name="lens_group_header_description">%1$s，%2$s，%3$s</string>
     <string name="lens_group_lens_active_description">%1$s，当前镜头</string>
     <plurals name="lens_group_lens_count">
         <item quantity="other">%1$d 个镜头</item>

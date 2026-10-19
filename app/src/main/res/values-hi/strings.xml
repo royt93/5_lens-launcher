@@ -223,7 +223,6 @@
     <string name="lens_unfreeze_positions">ऐप की स्थिति अनफ़िक्स करें</string>
     <string name="lens_unfreeze_title">स्थिति अनफ़िक्स करें?</string>
     <string name="lens_unfreeze_message">इससे खींचकर तय किया गया क्रम भी हट जाएगा।</string>
-    <string name="lens_switch_title">लेंस बदलें</string>
     <string name="layout_import_workspace_preview_message">यह आपके मौजूदा वर्कस्पेस को बदल देगा: %1$d लेंस और %2$d ऐप लेआउट प्रविष्टियाँ। इस बैकअप में न मौजूद ऐप डिफ़ॉल्ट लेंस में छिपे रहेंगे।</string>
     <string name="layout_import_workspace_failed">वर्कस्पेस आयात विफल रहा। आपका पिछला वर्कस्पेस वापस बहाल कर दिया गया।</string>
     <string name="layout_import_workspace_recovery_required">वर्कस्पेस बहाली विफल रही और स्वचालित रिकवरी अधूरी रही। ऐप फिर से खोलें और अपने लेंस जाँचें।</string>
@@ -245,7 +244,7 @@
 
     <string name="lens_group_active">सक्रिय</string>
     <string name="lens_group_selected_count">%1$d चुने गए</string>
-    <string name="lens_group_header_description">%1$s, %2$d लेंस, %3$s</string>
+    <string name="lens_group_header_description">%1$s, %2$s, %3$s</string>
     <string name="lens_group_lens_active_description">%1$s, सक्रिय लेंस</string>
     <plurals name="lens_group_lens_count">
         <item quantity="one">%1$d लेंस</item>

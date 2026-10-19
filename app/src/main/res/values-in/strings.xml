@@ -219,7 +219,6 @@
     <string name="lens_unfreeze_positions">Lepas kunci posisi aplikasi</string>
     <string name="lens_unfreeze_title">Lepas kunci posisi?</string>
     <string name="lens_unfreeze_message">Ini juga menghapus urutan yang Anda atur dengan menyeret.</string>
-    <string name="lens_switch_title">Ganti lensa</string>
     <string name="layout_import_workspace_preview_message">Ini akan mengganti ruang kerja Anda saat ini: %1$d lensa dan %2$d entri tata letak aplikasi. Aplikasi yang tidak ada di cadangan ini tetap disembunyikan di lensa default.</string>
     <string name="layout_import_workspace_failed">Impor ruang kerja gagal. Ruang kerja sebelumnya telah dipulihkan.</string>
     <string name="layout_import_workspace_recovery_required">Pemulihan ruang kerja gagal dan pemulihan otomatis tidak lengkap. Buka ulang aplikasi dan periksa lensa Anda.</string>
@@ -241,7 +240,7 @@
 
     <string name="lens_group_active">Aktif</string>
     <string name="lens_group_selected_count">%1$d dipilih</string>
-    <string name="lens_group_header_description">%1$s, %2$d lensa, %3$s</string>
+    <string name="lens_group_header_description">%1$s, %2$s, %3$s</string>
     <string name="lens_group_lens_active_description">%1$s, lensa aktif</string>
     <plurals name="lens_group_lens_count">
         <item quantity="other">%1$d lensa</item>
