@@ -102,6 +102,16 @@ class RAppsSingleton private constructor() {
      */
     private var mApps: ArrayList<App>? = null
 
+    /**
+     * CORE-004: bumped on every whole-list replacement. A pipeline that derived its result from an
+     * earlier read (the sorter) commits through [replaceAppsIfUnchanged] so it cannot overwrite a
+     * newer snapshot that another pipeline (the PackageManager refresh) committed meanwhile.
+     */
+    private var mSnapshotVersion: Long = 0L
+
+    val snapshotVersion: Long
+        @Synchronized get() = mSnapshotVersion
+
     // NOT storing mAppIcons anymore to save memory (Fix 5.1)
     // Icons are now managed by BitmapCache (LruCache)
 
@@ -117,6 +127,7 @@ class RAppsSingleton private constructor() {
         set(apps) {
             synchronized(this) {
                 mApps = apps?.let(::ArrayList)
+                mSnapshotVersion++
             }
         }
 
@@ -136,7 +147,16 @@ class RAppsSingleton private constructor() {
                 com.mckimquyen.util.BitmapCache.retainKeys(apps.map { it.iconCacheKey }.toSet())
             }
             mApps = ArrayList(apps)
+            mSnapshotVersion++
         }
+    }
+
+    /** Compare-and-set: replaces the list only if no other whole-list write happened since [expectedVersion]. */
+    fun replaceAppsIfUnchanged(expectedVersion: Long, apps: List<App>): Boolean = synchronized(this) {
+        if (mSnapshotVersion != expectedVersion) return false
+        mApps = ArrayList(apps)
+        mSnapshotVersion++
+        true
     }
 
     /**
@@ -228,6 +248,7 @@ class RAppsSingleton private constructor() {
     fun clearAllData() {
         synchronized(this) {
             mApps = null
+            mSnapshotVersion++
             com.mckimquyen.util.BitmapCache.clear()
         }
     }

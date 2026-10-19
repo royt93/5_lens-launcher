@@ -41,12 +41,23 @@ class TaskSortApps @JvmOverloads constructor(
             sortJob?.cancel()
             scope.launch {
                 try {
-                    val snapshot = withContext(ioDispatcher) {
-                        snapshotLoader?.invoke() ?: loadSortedSnapshot()
+                    var attempt = 0
+                    var committed = false
+                    while (!committed && attempt < MAX_STALE_RETRIES) {
+                        // CORE-004: the refresh pipeline has its own generation counter, so also
+                        // guard on the singleton's snapshot version and re-sort if it moved.
+                        val baseVersion = RAppsSingleton.instance.snapshotVersion
+                        val snapshot = withContext(ioDispatcher) {
+                            snapshotLoader?.invoke() ?: loadSortedSnapshot()
+                        }
+                        ensureActive()
+                        committed = withContext(mainDispatcher) {
+                            requestedGeneration.get() != generation || commit(baseVersion, snapshot)
+                        }
+                        attempt++
                     }
-                    ensureActive()
-                    withContext(mainDispatcher) {
-                        if (requestedGeneration.get() == generation) commit(snapshot)
+                    if (!committed) {
+                        Logger.w("TaskSortApps: gave up after $attempt stale snapshots (generation $generation)")
                     }
                 } catch (cancelled: CancellationException) {
                     throw cancelled
@@ -74,10 +85,15 @@ class TaskSortApps @JvmOverloads constructor(
         }
     }
 
-    private fun commit(snapshot: List<App>) {
-        RAppsSingleton.instance.apps = ArrayList(snapshot)
+    private fun commit(baseVersion: Long, snapshot: List<App>): Boolean {
+        if (!RAppsSingleton.instance.replaceAppsIfUnchanged(baseVersion, snapshot)) return false
         application.sendBroadcast(
             Intent(application, BroadcastReceivers.AppsLoadedReceiver::class.java)
         )
+        return true
+    }
+
+    private companion object {
+        const val MAX_STALE_RETRIES = 3
     }
 }

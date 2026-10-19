@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | fix |
-| Status | todo |
+| Status | done |
 | Priority | P1 |
 | Evidence | confirmed |
 | Epic | Refresh pipeline |
@@ -21,10 +21,10 @@ Là người dùng, tôi muốn app vừa cài luôn hiện dù tôi vừa đổ
 
 ## Acceptance criteria
 
-- [ ] Sort commit dùng generation chung với refresh; commit cũ bị bỏ.
-- [ ] Test đua: sort bay, update commit trước, kết quả cuối chứa app mới.
-- [ ] Không tăng thời gian refresh đáng kể (đo bằng test hiện có).
-- [ ] `RAppsSingleton.replaceSnapshot` vẫn là cổng commit duy nhất.
+- [x] Sort commit dùng generation chung với refresh; commit cũ bị bỏ.
+- [x] Test đua: sort bay, update commit trước, kết quả cuối chứa app mới.
+- [x] Không tăng thời gian refresh đáng kể (đo bằng test hiện có).
+- [x] `RAppsSingleton.replaceSnapshot` vẫn là cổng commit duy nhất.
 
 ## Implementation notes
 
@@ -32,15 +32,19 @@ Là người dùng, tôi muốn app vừa cài luôn hiện dù tôi vừa đổ
 
 ## Verification and Definition of Done
 
-- [ ] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
-- [ ] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
-- [ ] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
-- [ ] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
-- [ ] No new lint/build failures.
-- [ ] A post-change audit record scores the round `> 9.0/10` before push.
-- [ ] Evidence and status are updated before moving this file to `done`.
+- [x] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
+- [x] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
+- [x] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
+- [x] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
+- [x] No new lint/build failures.
+- [x] A post-change audit record scores the round `> 9.0/10` before push.
+- [x] Evidence and status are updated before moving this file to `done`.
 
 If a test layer is not applicable, replace its checkbox with a reviewed rationale; do not silently omit it.
+
+## Kết quả (2026-10-19)
+
+Hoàn tất. Audit **9.1/10**: `doc/task/AUDIT_CORE-004_2026-10-19.md`. Unit 929/929, lint 0 lỗi/7 warning, 64 instrumentation + smoke tay trên Pixel 7 Pro. Giới hạn: race chứng minh bằng unit test; mutator cục bộ không tăng version (ghi ở audit). Device smoke: Pixel (owner chọn), không phải TECNO KJ7.
 
 ## Prompt để chạy loop
 

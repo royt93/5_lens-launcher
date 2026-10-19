@@ -85,6 +85,64 @@ class TaskSortAppsTest {
         assertTrue(RAppsSingleton.instance.apps!!.isEmpty())
     }
 
+    @Test
+    fun `sort never overwrites a snapshot committed by a refresh while it was loading`() = runTest {
+        val dispatcher = StandardTestDispatcher(testScheduler)
+        RAppsSingleton.instance.apps = arrayListOf(app("old"))
+        var calls = 0
+        val task = task(dispatcher) {
+            calls += 1
+            if (calls == 1) {
+                // A package refresh commits a newer generation while this sort is still loading.
+                RAppsSingleton.instance.replaceSnapshot(listOf(app("old"), app("installed-meanwhile")), emptyMap())
+                listOf(app("old"))
+            } else {
+                RAppsSingleton.instance.apps!!.sortedBy { it.packageName.toString() }
+            }
+        }
+
+        task.execute()
+        advanceUntilIdle()
+
+        assertEquals(
+            listOf("installed-meanwhile", "old"),
+            RAppsSingleton.instance.apps!!.map { it.packageName.toString() }
+        )
+        assertEquals("stale sort result must be discarded and recomputed once", 2, calls)
+    }
+
+    @Test
+    fun `sort gives up after bounded retries when snapshot keeps moving and keeps the newest list`() = runTest {
+        val dispatcher = StandardTestDispatcher(testScheduler)
+        RAppsSingleton.instance.apps = arrayListOf(app("seed"))
+        var calls = 0
+        val task = task(dispatcher) {
+            calls += 1
+            RAppsSingleton.instance.replaceSnapshot(listOf(app("newer-$calls")), emptyMap())
+            listOf(app("stale"))
+        }
+
+        task.execute()
+        advanceUntilIdle()
+
+        assertEquals("retries must be bounded", 3, calls)
+        assertEquals(listOf("newer-3"), RAppsSingleton.instance.apps!!.map { it.packageName.toString() })
+    }
+
+    @Test
+    fun `replaceAppsIfUnchanged rejects a stale version and accepts the current one`() {
+        val singleton = RAppsSingleton.instance
+        singleton.apps = arrayListOf(app("a"))
+        val version = singleton.snapshotVersion
+
+        singleton.replaceSnapshot(listOf(app("b")), emptyMap())
+        assertEquals(false, singleton.replaceAppsIfUnchanged(version, listOf(app("stale"))))
+        assertEquals(listOf("b"), singleton.apps!!.map { it.packageName.toString() })
+
+        assertEquals(true, singleton.replaceAppsIfUnchanged(singleton.snapshotVersion, listOf(app("c"))))
+        assertEquals(listOf("c"), singleton.apps!!.map { it.packageName.toString() })
+    }
+
     private fun task(
         dispatcher: TestDispatcher,
         loader: suspend () -> List<App>
