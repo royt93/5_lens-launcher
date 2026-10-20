@@ -29,7 +29,6 @@ import android.widget.Toast
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.ContextCompat
-import androidx.core.graphics.toColorInt
 import androidx.core.view.ViewCompat
 import com.mckimquyen.R
 import com.mckimquyen.enums.BackgroundMode
@@ -905,7 +904,7 @@ class LensView : View {
             isAntiAlias = true
             style = Paint.Style.STROKE
             mUtilSettings?.let {
-                color = it.getString(UtilSettings.KEY_HIGHLIGHT_COLOR)?.toColorInt() ?: 0
+                color = it.highlightColorInt()
             }
             strokeWidth = resources.getDimension(R.dimen.stroke_width_touch_selection)
         }
@@ -915,7 +914,7 @@ class LensView : View {
             style = Paint.Style.STROKE
             strokeWidth = resources.getDimension(R.dimen.stroke_width_focus_halo)
             mUtilSettings?.let {
-                color = it.getString(UtilSettings.KEY_HIGHLIGHT_COLOR)?.toColorInt() ?: 0
+                color = it.highlightColorInt()
             }
         }
 
@@ -933,7 +932,7 @@ class LensView : View {
             isAntiAlias = true
             style = Paint.Style.FILL
             mUtilSettings?.let {
-                color = it.getString(UtilSettings.KEY_HIGHLIGHT_COLOR)?.toColorInt() ?: 0
+                color = it.highlightColorInt()
             }
             isDither = true
             setShadowLayer(
@@ -980,10 +979,10 @@ class LensView : View {
         if (mDrawType == DrawType.APPS) {
             mUtilSettings?.let { us ->
                 if (us.backgroundMode == BackgroundMode.COLOR) {
-                    canvas.drawColor(us.getString(UtilSettings.KEY_BACKGROUND_COLOR)?.toColorInt() ?: 0)
+                    canvas.drawColor(us.backgroundColorInt())
                 }
                 mPaintNewAppTag?.color =
-                    us.getString(UtilSettings.KEY_HIGHLIGHT_COLOR)?.toColorInt() ?: 0
+                    us.highlightColorInt()
                 drawWorkspaceBackground(canvas)
                 mApps?.let {
                     drawGrid(canvas, it.size)
@@ -1276,7 +1275,7 @@ class LensView : View {
     private fun updateFocusHaloPaint(alpha: Int) {
         val paint = mPaintFocusHalo ?: return
         mUtilSettings?.let { us ->
-            paint.color = us.getString(UtilSettings.KEY_HIGHLIGHT_COLOR)?.toColorInt() ?: 0
+            paint.color = us.highlightColorInt()
         }
         paint.alpha = alpha
     }
@@ -1712,7 +1711,7 @@ class LensView : View {
                 mAnimationMultiplier = interpolatedTime
                 mUtilSettings?.let { us ->
                     mPaintTouchSelection?.color =
-                        us.getString(UtilSettings.KEY_HIGHLIGHT_COLOR)?.toColorInt() ?: 0
+                        us.highlightColorInt()
                 }
                 mPaintTouchSelection?.alpha = (255.0f * interpolatedTime).toInt()
                 updateFocusHaloPaint((255.0f * interpolatedTime).toInt())
@@ -1721,7 +1720,7 @@ class LensView : View {
                 mAnimationMultiplier = 1.0f - interpolatedTime
                 mUtilSettings?.let { us ->
                     mPaintTouchSelection?.color =
-                        us.getString(UtilSettings.KEY_HIGHLIGHT_COLOR)?.toColorInt() ?: 0
+                        us.highlightColorInt()
                 }
                 mPaintTouchSelection?.alpha = (255.0f * (1.0f - interpolatedTime)).toInt()
                 updateFocusHaloPaint((255.0f * (1.0f - interpolatedTime)).toInt())

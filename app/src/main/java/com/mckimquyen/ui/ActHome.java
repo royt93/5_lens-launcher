@@ -304,9 +304,8 @@ public class ActHome extends ActBase {
         Log.d("roy93~", "kBackground " + kBackground);
         if (kBackground == BackgroundMode.COLOR) {
             Log.d("roy93~", "setBackgroundColor");
-            var kBackgroundColor = mUtilSettings.getString(UtilSettings.KEY_BACKGROUND_COLOR);
-            Log.d("roy93~", "kBackgroundColor " + kBackgroundColor);
-            findViewById(R.id.rootLayout).setBackgroundColor(Color.parseColor(kBackgroundColor));
+            // UI-026: a malformed stored color must never crash onResume.
+            findViewById(R.id.rootLayout).setBackgroundColor(mUtilSettings.backgroundColorInt());
         } else {
             findViewById(R.id.rootLayout).setBackgroundColor(Color.TRANSPARENT);
         }

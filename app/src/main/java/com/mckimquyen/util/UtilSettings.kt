@@ -83,6 +83,8 @@ class UtilSettings(context: Context) {
         const val DEFAULT_BACKGROUND = "Wallpaper"
         const val DEFAULT_BACKGROUND_COLOR = "#FFF8BBD0"
         const val DEFAULT_HIGHLIGHT_COLOR = "#FFF50057"
+        const val DEFAULT_HIGHLIGHT_COLOR_INT = 0xFFF50057.toInt()
+        const val DEFAULT_BACKGROUND_COLOR_INT = 0xFFF8BBD0.toInt()
         // PREF-001: a stable, never-displayed sentinel - not the translated "Default Icon Pack"
         // label - so switching device/app language can never desync it from what's persisted.
         const val DEFAULT_ICON_PACK_LABEL_NAME = "__default_icon_pack__"
@@ -274,6 +276,14 @@ class UtilSettings(context: Context) {
         }
         else -> prefs.getLong(name, DEFAULT_LONG)
     }
+
+    /** UI-026: highlight color as an Int; a missing or malformed pref yields the default highlight. */
+    fun highlightColorInt(): Int =
+        SafeColor.parse(prefs.getString(KEY_HIGHLIGHT_COLOR, DEFAULT_HIGHLIGHT_COLOR), DEFAULT_HIGHLIGHT_COLOR_INT)
+
+    /** UI-026: background color as an Int; a missing or malformed pref yields the default background. */
+    fun backgroundColorInt(): Int =
+        SafeColor.parse(prefs.getString(KEY_BACKGROUND_COLOR, DEFAULT_BACKGROUND_COLOR), DEFAULT_BACKGROUND_COLOR_INT)
 
     fun getString(name: String?): String? = when (name) {
         KEY_BACKGROUND -> prefs.getString(name, DEFAULT_BACKGROUND)

@@ -10,7 +10,6 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.widget.SwitchCompat
-import androidx.core.graphics.toColorInt
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import com.google.android.material.button.MaterialButtonToggleGroup
@@ -23,6 +22,7 @@ import com.mckimquyen.model.LensWorkspace
 import com.mckimquyen.model.EdgeSwipeMode
 import com.mckimquyen.util.HapticIntensity
 import com.mckimquyen.util.LensPhysicsPolicy
+import com.mckimquyen.util.SafeColor
 import com.mckimquyen.util.UtilLauncher
 import com.mckimquyen.util.UtilNightModeUtil
 import com.mckimquyen.util.UtilSettings
@@ -30,6 +30,10 @@ import com.mckimquyen.util.UtilSettings
 class FrmSettings : Fragment(), SettingsInterface {
     companion object {
         fun newInstance() = FrmSettings()
+
+        // UI-026: text shown when a stored color is unusable; matches UtilSettings' defaults.
+        private const val DEFAULT_HIGHLIGHT_DISPLAY_HEX = "#F50057"
+        private const val DEFAULT_BACKGROUND_DISPLAY_HEX = "#F8BBD0"
     }
 
     private var tvSelectedHomeLauncher: TextView? = null
@@ -312,9 +316,10 @@ class FrmSettings : Fragment(), SettingsInterface {
                 storedIconPack
             }
 
-            val highlightColorFull = us.getString(UtilSettings.KEY_HIGHLIGHT_COLOR) ?: ""
-            val highlightColor = "#${highlightColorFull.substring(3)}"
-            tvSelectedHighlightColor?.text = highlightColor
+            // UI-026: stored colors can be empty or malformed (imported backup, edited prefs).
+            val highlightColorFull = us.getString(UtilSettings.KEY_HIGHLIGHT_COLOR)
+            tvSelectedHighlightColor?.text =
+                SafeColor.displayHex(highlightColorFull, DEFAULT_HIGHLIGHT_DISPLAY_HEX)
 
             val homeLauncher = activity?.let { UtilLauncher.getNameHomeLauncher(it.application) } ?: ""
             tvSelectedHomeLauncher?.text = homeLauncher
@@ -323,13 +328,13 @@ class FrmSettings : Fragment(), SettingsInterface {
 
             // Background setup
             if (us.backgroundMode == BackgroundMode.COLOR) {
-                val backgroundColorFull = us.getString(UtilSettings.KEY_BACKGROUND_COLOR) ?: ""
-                val backgroundColor = "#${backgroundColorFull.substring(3)}"
-                tvSelectedBackground?.text = backgroundColor
+                val backgroundColorFull = us.getString(UtilSettings.KEY_BACKGROUND_COLOR)
+                tvSelectedBackground?.text =
+                    SafeColor.displayHex(backgroundColorFull, DEFAULT_BACKGROUND_DISPLAY_HEX)
                 ivSelectedBackgroundColor?.isVisible = true
 
                 val backgroundColorDrawable = GradientDrawable().apply {
-                    setColor(backgroundColorFull.toColorInt())
+                    setColor(us.backgroundColorInt())
                     cornerRadius = resources.getDimension(R.dimen.radius_highlight_color_switch)
                 }
                 ivSelectedBackgroundColor?.setImageDrawable(backgroundColorDrawable)
@@ -341,7 +346,7 @@ class FrmSettings : Fragment(), SettingsInterface {
 
             // Highlight color drawable
             val highlightColorDrawable = GradientDrawable().apply {
-                setColor(highlightColorFull.toColorInt())
+                setColor(us.highlightColorInt())
                 cornerRadius = resources.getDimension(R.dimen.radius_highlight_color_switch)
             }
             ivSelectedHighlightColor?.setImageDrawable(highlightColorDrawable)

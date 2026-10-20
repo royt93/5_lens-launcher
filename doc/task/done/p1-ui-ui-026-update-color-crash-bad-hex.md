@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | fix |
-| Status | todo |
+| Status | done |
 | Priority | P1 |
 | Evidence | confirmed |
 | Epic | Stability |
@@ -21,10 +21,10 @@ Là người dùng, tôi muốn app không crash mỗi lần mở dù dữ liệ
 
 ## Acceptance criteria
 
-- [ ] Giá trị màu sai/rỗng rơi về màu mặc định, không crash, có log warning.
-- [ ] Hàm parse màu dùng chung một chỗ (không còn `parseColor` trần).
-- [ ] Test đỏ: prefs `""`, `"zzz"`, `"#12"` không làm `onResume` ném.
-- [ ] Widget test mở `ActHome` với prefs hỏng.
+- [x] Giá trị màu sai/rỗng rơi về màu mặc định, không crash, có log warning.
+- [x] Hàm parse màu dùng chung một chỗ (không còn `parseColor` trần).
+- [x] Test đỏ: prefs `""`, `"zzz"`, `"#12"` không làm `onResume` ném.
+- [x] Widget test mở `ActHome` với prefs hỏng.
 
 ## Implementation notes
 
@@ -32,15 +32,19 @@ Một helper `parseColorOrDefault` trong `util/`; dùng ở cả `ActHome` và `
 
 ## Verification and Definition of Done
 
-- [ ] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
-- [ ] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
-- [ ] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
-- [ ] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
-- [ ] No new lint/build failures.
-- [ ] A post-change audit record scores the round `> 9.0/10` before push.
-- [ ] Evidence and status are updated before moving this file to `done`.
+- [x] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
+- [x] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
+- [x] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
+- [x] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
+- [x] No new lint/build failures.
+- [x] A post-change audit record scores the round `> 9.0/10` before push.
+- [x] Evidence and status are updated before moving this file to `done`.
 
 If a test layer is not applicable, replace its checkbox with a reviewed rationale; do not silently omit it.
+
+## Kết quả (2026-10-20)
+
+Hoàn tất. Audit **9.1/10**: `doc/task/AUDIT_UI-026_2026-10-20.md`. Unit 961/961, lint 0 lỗi/7 warning, 17 instrumentation + smoke tay trên TECNO KJ7 (máy owner chọn). RED thật trên máy (`IllegalArgumentException: Unknown color`). Giới hạn: không có đường nhập màu tùy ý trong UI nên prefs hỏng chỉ tái hiện bằng test/backup; một lần treo instrumentation chưa rõ nguyên nhân; trong lúc làm đã để lại state máy lệch (đã khôi phục về 0 diff, ghi chi tiết trong audit).
 
 ## Prompt để chạy loop
 
