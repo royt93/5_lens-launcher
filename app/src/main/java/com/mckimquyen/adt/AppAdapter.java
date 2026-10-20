@@ -506,7 +506,13 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
             // not packageName, so same-package activities and stale versions never collide.
             android.graphics.Bitmap cachedIcon = com.mckimquyen.app.RAppsSingleton.getInstance()
                     .getAppIcon(mApp.getIconCacheKey());
-            ivAppIcon.setImageBitmap(cachedIcon);
+            // CORE-003: an app kept without a loaded icon shows the launcher mark, never a blank cell
+            // (same fallback SearchResultAdapter already uses).
+            if (cachedIcon != null) {
+                ivAppIcon.setImageBitmap(cachedIcon);
+            } else {
+                ivAppIcon.setImageResource(com.mckimquyen.R.mipmap.ic_launcher);
+            }
 
             boolean showBadges = mAdapter.mUtilSettings.getBoolean(com.mckimquyen.util.UtilSettings.KEY_SHOW_NOTIFICATION_BADGES);
             if (showBadges && app.getNotificationCount() > 0) {

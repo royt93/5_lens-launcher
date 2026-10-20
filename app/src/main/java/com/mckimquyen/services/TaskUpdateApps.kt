@@ -30,7 +30,30 @@ import kotlinx.coroutines.withContext
 data class AppRefreshSnapshot(
     val apps: List<App>,
     val icons: Map<String, Bitmap> = emptyMap()
-)
+) {
+    companion object {
+        /**
+         * Splits loaded apps into a bitmap-free app list plus the bitmaps for [BitmapCache].
+         * CORE-003: an app whose icon failed to load (NameNotFoundException, missing resource,
+         * OOM) is still kept - it has no cached bitmap, so the UI's existing cache-miss path
+         * reloads or shows a placeholder, and the app stays launchable instead of vanishing.
+         */
+        fun fromLoaded(loadedApps: List<App>): AppRefreshSnapshot {
+            val apps = ArrayList<App>(loadedApps.size)
+            val icons = LinkedHashMap<String, Bitmap>(loadedApps.size)
+            loadedApps.forEach { app ->
+                apps.add(app.copy(icon = null))
+                val icon = app.icon
+                if (icon != null) {
+                    icons[app.iconCacheKey] = icon
+                } else {
+                    Logger.w("TaskUpdateApps: no icon for ${app.packageName}; kept without bitmap")
+                }
+            }
+            return AppRefreshSnapshot(apps.toList(), icons.toMap())
+        }
+    }
+}
 
 /** Application-owned refresh state; Activities can re-observe it after recreation. */
 sealed interface AppRefreshState {
@@ -153,17 +176,7 @@ class TaskUpdateApps @JvmOverloads constructor(
         return stripIcons(loadedApps)
     }
 
-    private fun stripIcons(loadedApps: List<App>): AppRefreshSnapshot {
-        val apps = ArrayList<App>(loadedApps.size)
-        val icons = LinkedHashMap<String, Bitmap>(loadedApps.size)
-        loadedApps.forEach { app ->
-            app.icon?.let { icon ->
-                apps.add(app.copy(icon = null))
-                icons[app.iconCacheKey] = icon
-            }
-        }
-        return AppRefreshSnapshot(apps.toList(), icons.toMap())
-    }
+    private fun stripIcons(loadedApps: List<App>): AppRefreshSnapshot = AppRefreshSnapshot.fromLoaded(loadedApps)
 
     private fun commit(generation: Long, snapshot: AppRefreshSnapshot) {
         RAppsSingleton.instance.replaceSnapshot(snapshot.apps, snapshot.icons)

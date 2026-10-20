@@ -96,6 +96,30 @@ class AppAdapterWidgetTest {
         scenario.close()
     }
 
+    /** CORE-003: an app kept without a loaded icon shows a placeholder instead of a blank cell. */
+    @Test
+    fun appWithoutACachedIcon_showsThePlaceholderNotABlankCell() {
+        val scenario = ActivityScenario.launch(ActSettings::class.java)
+
+        scenario.onActivity { activity ->
+            val recyclerView = RecyclerView(activity)
+            recyclerView.layoutManager = LinearLayoutManager(activity)
+            val noIcon = app("no.icon.cache").copy(iconCacheKey = "core003-missing-key")
+            val adapter = AppAdapter(activity, mutableListOf(noIcon))
+            recyclerView.adapter = adapter
+            recyclerView.measure(0, 0)
+            recyclerView.layout(0, 0, 1080, 2000)
+
+            val holder = adapter.createViewHolder(recyclerView, adapter.getItemViewType(0))
+            adapter.bindViewHolder(holder, 0)
+
+            val drawable = holder.itemView.findViewById<ImageView>(R.id.ivAppIcon).drawable
+            assertTrue("a missing icon must render the launcher placeholder, not nothing", drawable != null)
+        }
+
+        scenario.close()
+    }
+
     /**
      * UI-006: the lock control is now an icon (was a text Button) — this device has no
      * enrolled biometric in CI/most test runs, in which case the row hides the control

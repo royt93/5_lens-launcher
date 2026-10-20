@@ -252,7 +252,7 @@ Giới hạn: agent audit ui chưa đọc hết `LensView.kt`, `ActAbout.java`, 
 
 | ID | P | SP | Story |
 |---|---|---|---|
-| `CORE-003` | P1 | 2 | [App không tải được icon biến mất im lặng khỏi launcher](todo/p1-core-core-003-apps-without-icon-vanish.md) |
+| `CORE-003` ✅ done 2026-10-20 | P1 | 2 | [App không tải được icon biến mất im lặng khỏi launcher](done/p1-core-core-003-apps-without-icon-vanish.md) |
 | `CORE-004` ✅ done 2026-10-19 | P1 | 3 | [TaskSortApps và TaskUpdateApps không chung generation guard, dữ liệu cũ ghi đè snapshot mới](done/p1-core-core-004-sort-update-share-generation-guard.md) |
 | `DB-002` ✅ done 2026-10-19 | P1 | 3 | [Import backup v1 ghi nhầm vào lens đang mở](done/p1-db-db-002-import-v1-targets-wrong-lens.md) |
 | `DB-003` ✅ done 2026-10-19 | P1 | 2 | [Lens default xóa được làm hỏng export/import và tự hồi sinh rỗng](done/p1-db-db-003-default-lens-not-deletable.md) |

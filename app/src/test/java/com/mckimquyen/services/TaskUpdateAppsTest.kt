@@ -154,6 +154,39 @@ class TaskUpdateAppsTest {
         assertEquals(2L, (task.state.value as AppRefreshState.Ready).generation)
     }
 
+    /** CORE-003: an app whose icon failed to load must still be launchable, so it is never dropped. */
+    @Test
+    fun `fromLoaded keeps every app even when some have no icon`() {
+        val icon = android.graphics.Bitmap.createBitmap(2, 2, android.graphics.Bitmap.Config.ARGB_8888)
+        val withIcon = app("has.icon").copy(icon = icon, iconCacheKey = "key-has")
+        val broken = app("no.icon").copy(icon = null, iconCacheKey = "key-broken")
+
+        val snapshot = AppRefreshSnapshot.fromLoaded(listOf(withIcon, broken))
+
+        assertEquals("number of apps in must equal number out", 2, snapshot.apps.size)
+        assertEquals(listOf("has.icon", "no.icon"), snapshot.apps.map { it.packageName })
+        assertTrue("snapshot apps never hold a bitmap (it lives in BitmapCache)", snapshot.apps.all { it.icon == null })
+    }
+
+    @Test
+    fun `fromLoaded caches the bitmap only for apps that have one`() {
+        val icon = android.graphics.Bitmap.createBitmap(2, 2, android.graphics.Bitmap.Config.ARGB_8888)
+        val withIcon = app("has.icon").copy(icon = icon, iconCacheKey = "key-has")
+        val broken = app("no.icon").copy(icon = null, iconCacheKey = "key-broken")
+
+        val snapshot = AppRefreshSnapshot.fromLoaded(listOf(withIcon, broken))
+
+        assertEquals(setOf(withIcon.iconCacheKey), snapshot.icons.keys)
+        assertEquals(false, snapshot.icons.containsKey(broken.iconCacheKey))
+    }
+
+    @Test
+    fun `fromLoaded on an empty list is empty not a crash`() {
+        val snapshot = AppRefreshSnapshot.fromLoaded(emptyList())
+        assertTrue(snapshot.apps.isEmpty())
+        assertTrue(snapshot.icons.isEmpty())
+    }
+
     private fun task(
         dispatcher: TestDispatcher,
         debounceMillis: Long = 0,

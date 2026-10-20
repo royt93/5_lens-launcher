@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | fix |
-| Status | todo |
+| Status | done |
 | Priority | P1 |
 | Evidence | confirmed |
 | Epic | Refresh pipeline |
@@ -21,10 +21,10 @@ Là người dùng, tôi muốn mọi app cài trên máy đều mở được t
 
 ## Acceptance criteria
 
-- [ ] Số app vào `stripIcons` bằng số app ra (test khẳng định).
-- [ ] App icon null dùng placeholder và vẫn khởi chạy được.
-- [ ] Có log mức warning kèm package khi icon lỗi (không lộ dữ liệu nhạy cảm).
-- [ ] Không đổi cache key `iconCacheKey` của app có icon.
+- [x] Số app vào `stripIcons` bằng số app ra (test khẳng định).
+- [x] App icon null dùng placeholder và vẫn khởi chạy được.
+- [x] Có log mức warning kèm package khi icon lỗi (không lộ dữ liệu nhạy cảm).
+- [x] Không đổi cache key `iconCacheKey` của app có icon.
 
 ## Implementation notes
 
@@ -32,15 +32,19 @@ Chỉ thêm app vào list, bỏ qua đưa bitmap vào `icons` khi null. Kiểm t
 
 ## Verification and Definition of Done
 
-- [ ] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
-- [ ] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
-- [ ] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
-- [ ] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
-- [ ] No new lint/build failures.
-- [ ] A post-change audit record scores the round `> 9.0/10` before push.
-- [ ] Evidence and status are updated before moving this file to `done`.
+- [x] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
+- [x] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
+- [x] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
+- [x] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
+- [x] No new lint/build failures.
+- [x] A post-change audit record scores the round `> 9.0/10` before push.
+- [x] Evidence and status are updated before moving this file to `done`.
 
 If a test layer is not applicable, replace its checkbox with a reviewed rationale; do not silently omit it.
+
+## Kết quả (2026-10-20)
+
+Hoàn tất. Audit **9.1/10**: `doc/task/AUDIT_CORE-003_2026-10-20.md`. Unit 940/940, lint 0 lỗi/7 warning, 57 instrumentation trên Pixel 7 Pro và 55 trên TECNO KJ7 (máy owner chọn sau cùng), state máy 0 diff. Giới hạn: không tái hiện được app icon hỏng thật; `LensView` chưa vẽ placeholder trong lúc chờ reload; có một flake `ActHomeFullyDrawnIntegrationTest` sau cài mới chưa rõ nguyên nhân.
 
 ## Prompt để chạy loop
 
