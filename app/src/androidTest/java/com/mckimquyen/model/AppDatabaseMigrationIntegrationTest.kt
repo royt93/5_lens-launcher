@@ -20,6 +20,8 @@ import org.junit.runner.RunWith
  */
 @RunWith(AndroidJUnit4::class)
 class AppDatabaseMigrationIntegrationTest {
+    @get:org.junit.Rule val deviceStateGuard = com.mckimquyen.testing.DeviceStateGuard()
+
 
     companion object {
         private const val TEST_DB = "fish-008-migration-test.db"

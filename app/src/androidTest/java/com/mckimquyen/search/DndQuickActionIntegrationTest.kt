@@ -24,6 +24,8 @@ import java.io.InputStreamReader
  */
 @RunWith(AndroidJUnit4::class)
 class DndQuickActionIntegrationTest {
+    @get:org.junit.Rule val deviceStateGuard = com.mckimquyen.testing.DeviceStateGuard()
+
 
     private val context get() = InstrumentationRegistry.getInstrumentation().targetContext
     private val packageName get() = context.packageName

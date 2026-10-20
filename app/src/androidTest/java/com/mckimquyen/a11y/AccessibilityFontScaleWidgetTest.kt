@@ -10,9 +10,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.mckimquyen.R
 import com.mckimquyen.feature.vip.ActVipManagement
 import com.mckimquyen.ui.ActSettings
-import org.junit.AfterClass
 import org.junit.Assert.*
-import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.BufferedReader
@@ -25,31 +23,30 @@ import java.io.InputStreamReader
 @RunWith(AndroidJUnit4::class)
 class AccessibilityFontScaleWidgetTest {
 
-    companion object {
-        private var initialFontScale: String = "1.0"
+    @get:org.junit.Rule
+    val deviceStateGuard = com.mckimquyen.testing.DeviceStateGuard()
 
-        @BeforeClass
-        @JvmStatic
-        fun setUpClass() {
-            val uiAutomation = InstrumentationRegistry.getInstrumentation().uiAutomation
-            try {
-                val pfd = uiAutomation.executeShellCommand("settings get system font_scale")
-                ParcelFileDescriptor.AutoCloseInputStream(pfd).use { stream ->
-                    initialFontScale = BufferedReader(InputStreamReader(stream)).readLine()?.trim() ?: "1.0"
-                }
-            } catch (_: Throwable) {
-                initialFontScale = "1.0"
-            }
-            uiAutomation.executeShellCommand("settings put system font_scale 2.0")
-            Thread.sleep(500)
+    @org.junit.Before
+    fun setUp() {
+        // TEST-005: guard chụp font gốc trước @Before và khôi phục sau mỗi test, kể cả assertion fail.
+        // Giữ Activity thật để kiểm reflow; process bị kill vẫn cần baseline từ bộ chạy bên ngoài.
+        val automation = InstrumentationRegistry.getInstrumentation().uiAutomation
+        ParcelFileDescriptor.AutoCloseInputStream(
+            automation.executeShellCommand("settings put system font_scale $STRESS_FONT_SCALE")
+        ).use { it.readBytes() }
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val deadline = android.os.SystemClock.uptimeMillis() + CONFIG_TIMEOUT_MS
+        while (context.resources.configuration.fontScale != STRESS_FONT_SCALE &&
+            android.os.SystemClock.uptimeMillis() < deadline) {
+            android.os.SystemClock.sleep(CONFIG_POLL_MS)
         }
+        assertEquals(STRESS_FONT_SCALE, context.resources.configuration.fontScale, 0.05f)
+    }
 
-        @AfterClass
-        @JvmStatic
-        fun tearDownClass() {
-            val uiAutomation = InstrumentationRegistry.getInstrumentation().uiAutomation
-            uiAutomation.executeShellCommand("settings put system font_scale $initialFontScale")
-        }
+    private companion object {
+        const val STRESS_FONT_SCALE = 2.0f
+        const val CONFIG_TIMEOUT_MS = 5_000L
+        const val CONFIG_POLL_MS = 50L
     }
 
     @Test

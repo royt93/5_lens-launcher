@@ -32,6 +32,8 @@ import java.util.concurrent.atomic.AtomicInteger
  */
 @RunWith(AndroidJUnit4::class)
 class ActHomeAutoExportPersistenceIntegrationTest {
+    @get:org.junit.Rule val deviceStateGuard = com.mckimquyen.testing.DeviceStateGuard()
+
 
     private val dao get() = AppDatabase.getInstance().lensWorkspaceDao()
     private val context get() = InstrumentationRegistry.getInstrumentation().targetContext

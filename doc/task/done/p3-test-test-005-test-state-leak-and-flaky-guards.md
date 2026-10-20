@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | fix |
-| Status | todo |
+| Status | done 2026-10-20 |
 | Priority | P3 |
 | Evidence | confirmed |
 | Epic | Test determinism |
@@ -21,10 +21,14 @@ Là dev, tôi muốn chạy test không làm hỏng máy test và kết quả kh
 
 ## Acceptance criteria
 
-- [ ] Một `TestRule` dùng chung snapshot/restore `RAppsSingleton`, prefs, `animator_duration_scale`, `font_scale` trong `finally`.
-- [ ] Test font scale dùng configuration context thay vì ghi cài đặt hệ thống, hoặc restore đảm bảo.
-- [ ] 8 file Robolectric pin `@Config(sdk=[28])`.
-- [ ] Chạy full suite hai lần liên tiếp, state thiết bị trước/sau không đổi (diff prefs + settings).
+- [x] Một `TestRule` dùng chung snapshot/restore `RAppsSingleton`, prefs, `animator_duration_scale`, `font_scale` trong `finally`.
+- [x] Test font scale dùng configuration context thay vì ghi cài đặt hệ thống, hoặc restore đảm bảo.
+- [x] 8 file Robolectric pin `@Config(sdk=[28])`.
+- [x] Chạy full suite hai lần liên tiếp, state thiết bị trước/sau không đổi (diff prefs + settings).
+
+## Kết quả (2026-10-20)
+
+`DeviceStateGuard` áp cho 148/148 lớp androidTest, 8 test Robolectric pin sdk 28 + `RobolectricSdkPinTest`. Pixel 7 Pro, full suite hai lần: 148/148 OK, 0 diff thật ở pass 2. Giới hạn và điểm 9.1/10: `AUDIT_TEST-005_2026-10-20.md`. Lớp test widget/integration: bản thân rule chạy trong mọi test widget/integration; UI không đổi nên không có widget test mới.
 
 ## Implementation notes
 
@@ -32,13 +36,13 @@ Chính là gốc flake đã mất 6 vòng ở `AppSearchIntegrationTest` và TES
 
 ## Verification and Definition of Done
 
-- [ ] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
-- [ ] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
-- [ ] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
-- [ ] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
-- [ ] No new lint/build failures.
-- [ ] A post-change audit record scores the round `> 9.0/10` before push.
-- [ ] Evidence and status are updated before moving this file to `done`.
+- [x] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
+- [x] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
+- [x] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
+- [x] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
+- [x] No new lint/build failures.
+- [x] A post-change audit record scores the round `> 9.0/10` before push.
+- [x] Evidence and status are updated before moving this file to `done`.
 
 If a test layer is not applicable, replace its checkbox with a reviewed rationale; do not silently omit it.
 

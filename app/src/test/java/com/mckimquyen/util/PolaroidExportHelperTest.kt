@@ -14,7 +14,7 @@ import org.robolectric.annotation.Config
 // JVM unit test - but nothing here needs the real app manifest/resources/Application, so skip
 // all three entirely rather than pulling in RApplication.onCreate()'s side effects.
 @RunWith(RobolectricTestRunner::class)
-@Config(manifest = Config.NONE)
+@Config(manifest = Config.NONE, sdk = [28])
 class PolaroidExportHelperTest {
 
     @Test

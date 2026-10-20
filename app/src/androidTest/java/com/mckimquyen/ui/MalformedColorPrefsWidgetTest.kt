@@ -21,6 +21,8 @@ import org.junit.runner.RunWith
  */
 @RunWith(AndroidJUnit4::class)
 class MalformedColorPrefsWidgetTest {
+    @get:org.junit.Rule val deviceStateGuard = com.mckimquyen.testing.DeviceStateGuard()
+
     private val context get() = InstrumentationRegistry.getInstrumentation().targetContext
     private val prefs get() = PreferenceManager.getDefaultSharedPreferences(context)
     private var saved: Map<String, Any?> = emptyMap()

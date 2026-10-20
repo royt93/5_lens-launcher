@@ -28,6 +28,8 @@ import org.junit.runner.RunWith
  */
 @RunWith(AndroidJUnit4::class)
 class LensViewDepthOfFieldIntegrationTest {
+    @get:org.junit.Rule val deviceStateGuard = com.mckimquyen.testing.DeviceStateGuard()
+
 
     private companion object {
         const val APP_COUNT = 30

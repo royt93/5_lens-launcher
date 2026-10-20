@@ -20,6 +20,8 @@ import org.junit.runner.RunWith
  */
 @RunWith(AndroidJUnit4::class)
 class BaseActivityRefreshRateWidgetTest {
+    @get:org.junit.Rule val deviceStateGuard = com.mckimquyen.testing.DeviceStateGuard()
+
 
     private fun wantsHighRefreshRate(activity: BaseActivity): Boolean {
         val method = BaseActivity::class.java.getDeclaredMethod("wantsHighRefreshRate")

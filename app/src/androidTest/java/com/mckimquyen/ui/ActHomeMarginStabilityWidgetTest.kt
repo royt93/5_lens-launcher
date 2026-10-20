@@ -23,6 +23,8 @@ import org.junit.runner.RunWith
  */
 @RunWith(AndroidJUnit4::class)
 class ActHomeMarginStabilityWidgetTest {
+    @get:org.junit.Rule val deviceStateGuard = com.mckimquyen.testing.DeviceStateGuard()
+
 
     private fun currentTopMargin(activity: ActHome): Int {
         val searchBar = activity.findViewById<SearchBar>(R.id.searchBar)

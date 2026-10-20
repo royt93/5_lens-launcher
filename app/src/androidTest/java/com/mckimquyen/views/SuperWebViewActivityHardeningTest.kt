@@ -16,6 +16,8 @@ import org.junit.runner.RunWith
  */
 @RunWith(AndroidJUnit4::class)
 class SuperWebViewActivityHardeningTest {
+    @get:org.junit.Rule val deviceStateGuard = com.mckimquyen.testing.DeviceStateGuard()
+
 
     private fun intentWithUrl(url: String): Intent {
         val context = ApplicationProvider.getApplicationContext<android.content.Context>()

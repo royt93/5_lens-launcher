@@ -27,6 +27,8 @@ import org.junit.runner.RunWith
  */
 @RunWith(AndroidJUnit4::class)
 class RemainingScreensMaterialYouTest {
+    @get:org.junit.Rule val deviceStateGuard = com.mckimquyen.testing.DeviceStateGuard()
+
 
     @Test
     fun testActVipManagement_launchesWithMaterial3Components() {

@@ -28,6 +28,8 @@ import java.util.concurrent.TimeUnit
 
 @RunWith(AndroidJUnit4::class)
 class WorkspaceBackupImportIntegrationTest {
+    @get:org.junit.Rule val deviceStateGuard = com.mckimquyen.testing.DeviceStateGuard()
+
     private val context get() = InstrumentationRegistry.getInstrumentation().targetContext
     private val database get() = AppDatabase.getInstance()
     private val settings get() = UtilSettings(context)

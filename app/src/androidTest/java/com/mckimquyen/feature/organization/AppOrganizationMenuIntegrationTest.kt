@@ -14,6 +14,8 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class AppOrganizationMenuIntegrationTest {
+    @get:org.junit.Rule val deviceStateGuard = com.mckimquyen.testing.DeviceStateGuard()
+
     @Test
     fun longPressMenuHandlersEditFavoriteAndEveryPinState() {
         ActivityScenario.launch(OrganizationHarnessActivity::class.java).use { scenario ->

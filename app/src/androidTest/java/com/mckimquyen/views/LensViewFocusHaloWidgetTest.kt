@@ -26,6 +26,8 @@ import org.junit.runner.RunWith
  */
 @RunWith(AndroidJUnit4::class)
 class LensViewFocusHaloWidgetTest {
+    @get:org.junit.Rule val deviceStateGuard = com.mckimquyen.testing.DeviceStateGuard()
+
 
     private companion object {
         const val WIDTH_PX = 1080

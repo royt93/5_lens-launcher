@@ -23,6 +23,8 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class LensManagementActivityWidgetTest {
+    @get:org.junit.Rule val deviceStateGuard = com.mckimquyen.testing.DeviceStateGuard()
+
     private companion object {
         val LOCALE_PREF_KEYS = listOf("Locale.Helper.Selected.Language", "Locale.Helper.Language.Selected")
     }

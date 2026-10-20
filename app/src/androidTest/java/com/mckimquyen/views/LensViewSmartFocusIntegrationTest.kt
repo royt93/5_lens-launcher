@@ -18,6 +18,8 @@ import org.junit.runner.RunWith
 /** FISH-006 integration coverage for LensView ordering, geometry, and cache invariance. */
 @RunWith(AndroidJUnit4::class)
 class LensViewSmartFocusIntegrationTest {
+    @get:org.junit.Rule val deviceStateGuard = com.mckimquyen.testing.DeviceStateGuard()
+
 
     private lateinit var lensView: LensView
     private lateinit var settings: UtilSettings

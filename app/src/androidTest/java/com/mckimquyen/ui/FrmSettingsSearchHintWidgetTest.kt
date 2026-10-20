@@ -18,6 +18,8 @@ import org.junit.runner.RunWith
  */
 @RunWith(AndroidJUnit4::class)
 class FrmSettingsSearchHintWidgetTest {
+    @get:org.junit.Rule val deviceStateGuard = com.mckimquyen.testing.DeviceStateGuard()
+
 
     private fun findEditText(dialog: AlertDialog): EditText {
         var found: EditText? = null

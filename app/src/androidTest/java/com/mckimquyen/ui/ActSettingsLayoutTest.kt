@@ -20,6 +20,8 @@ import org.junit.runner.RunWith
  */
 @RunWith(AndroidJUnit4::class)
 class ActSettingsLayoutTest {
+    @get:org.junit.Rule val deviceStateGuard = com.mckimquyen.testing.DeviceStateGuard()
+
 
     /**
      * Inflates `act_settings.xml` under a fontScale=1.0 configuration override so assertions

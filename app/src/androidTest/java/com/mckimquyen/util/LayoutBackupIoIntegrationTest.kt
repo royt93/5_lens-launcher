@@ -29,6 +29,8 @@ import java.util.concurrent.TimeUnit
  */
 @RunWith(AndroidJUnit4::class)
 class LayoutBackupIoIntegrationTest {
+    @get:org.junit.Rule val deviceStateGuard = com.mckimquyen.testing.DeviceStateGuard()
+
 
     private val context get() = InstrumentationRegistry.getInstrumentation().targetContext
     private val packageName = "com.example.layoutbackup"

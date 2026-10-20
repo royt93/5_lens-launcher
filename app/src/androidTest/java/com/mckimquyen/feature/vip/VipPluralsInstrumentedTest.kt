@@ -23,6 +23,8 @@ import java.util.Locale
  */
 @RunWith(AndroidJUnit4::class)
 class VipPluralsInstrumentedTest {
+    @get:org.junit.Rule val deviceStateGuard = com.mckimquyen.testing.DeviceStateGuard()
+
 
     private val resources = run {
         val targetContext = InstrumentationRegistry.getInstrumentation().targetContext

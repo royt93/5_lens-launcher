@@ -31,6 +31,8 @@ import org.junit.runner.RunWith
  */
 @RunWith(AndroidJUnit4::class)
 class AdaptiveOrientationWidgetTest {
+    @get:org.junit.Rule val deviceStateGuard = com.mckimquyen.testing.DeviceStateGuard()
+
 
     private lateinit var utilSettings: UtilSettings
     private var originalApps: ArrayList<App>? = null

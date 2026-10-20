@@ -9,6 +9,8 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class ActHomeLensMediatorLeakTest {
+    @get:org.junit.Rule val deviceStateGuard = com.mckimquyen.testing.DeviceStateGuard()
+
 
     private fun mediatorField() = ActHome::class.java.getDeclaredField("lensTabMediator")
         .apply { isAccessible = true }

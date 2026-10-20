@@ -15,6 +15,8 @@ import java.util.concurrent.atomic.AtomicBoolean
  */
 @RunWith(AndroidJUnit4::class)
 class MaterialYouDialogWidgetTest {
+    @get:org.junit.Rule val deviceStateGuard = com.mckimquyen.testing.DeviceStateGuard()
+
 
     @Test
     fun testShowDialog2BuildsValidMaterialDialog() {

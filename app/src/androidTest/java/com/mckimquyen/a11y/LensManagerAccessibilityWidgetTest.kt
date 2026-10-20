@@ -27,6 +27,8 @@ import java.util.Locale
 /** FISH-023: manager rows and header must mirror in RTL, reflow at large font, and keep 48dp targets. */
 @RunWith(AndroidJUnit4::class)
 class LensManagerAccessibilityWidgetTest {
+    @get:org.junit.Rule val deviceStateGuard = com.mckimquyen.testing.DeviceStateGuard()
+
     private val context get() = InstrumentationRegistry.getInstrumentation().targetContext
     private val dao get() = AppDatabase.getInstance().lensWorkspaceDao()
 

@@ -7,8 +7,10 @@ import org.junit.Assert.assertNotNull
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
+@Config(manifest = Config.NONE, sdk = [28])
 class SettingsDialogCoordinatorTest {
 
     private val context: Context get() = ApplicationProvider.getApplicationContext()

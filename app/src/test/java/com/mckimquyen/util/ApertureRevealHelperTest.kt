@@ -6,12 +6,14 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 import kotlin.math.hypot
 
 /**
  * Unit tests for [ApertureRevealHelper] calculations and edge cases.
  */
 @RunWith(RobolectricTestRunner::class)
+@Config(manifest = Config.NONE, sdk = [28])
 class ApertureRevealHelperTest {
 
     @Test

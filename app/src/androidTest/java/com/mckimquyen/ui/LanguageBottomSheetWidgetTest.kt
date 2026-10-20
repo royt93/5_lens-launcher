@@ -19,6 +19,8 @@ import org.junit.runner.RunWith
  */
 @RunWith(AndroidJUnit4::class)
 class LanguageBottomSheetWidgetTest {
+    @get:org.junit.Rule val deviceStateGuard = com.mckimquyen.testing.DeviceStateGuard()
+
 
     @Test
     fun testLanguageBottomSheet_inflatesSuccessfully() {

@@ -17,6 +17,8 @@ import org.junit.runner.RunWith
 /** FISH-006 widget proof for default, persistence, and reset behavior. */
 @RunWith(AndroidJUnit4::class)
 class FrmSettingsSmartFocusWidgetTest {
+    @get:org.junit.Rule val deviceStateGuard = com.mckimquyen.testing.DeviceStateGuard()
+
 
     private val context get() = ApplicationProvider.getApplicationContext<android.content.Context>()
     private fun rawPrefs() = PreferenceManager.getDefaultSharedPreferences(context)

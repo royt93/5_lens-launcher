@@ -271,7 +271,7 @@ Giới hạn: agent audit ui chưa đọc hết `LensView.kt`, `ActAbout.java`, 
 | `UI-028` | P2 | 3 | [ActHome dùng một field lensDialog cho 5 dialog; vài dialog không dismiss khi destroy](todo/p2-ui-ui-028-dialog-leaks-and-lifecycle.md) |
 | `UI-029` | P2 | 2 | [Search bar bị Clean mode đè mà Settings vẫn hiện bật; chevron quick action cứng không RTL](todo/p2-ui-ui-029-settings-conflict-and-rtl-chevron.md) |
 | `BUILD-003` | P3 | 2 | [Dọn repo: local.properties bị track, Jetifier thừa, permission thừa, rác JVM](todo/p3-build-build-003-repo-hygiene-quick-wins.md) |
-| `TEST-005` | P3 | 5 | [Test suite rò trạng thái thiết bị và Robolectric không pin SDK](todo/p3-test-test-005-test-state-leak-and-flaky-guards.md) |
+| `TEST-005` ✅ done 2026-10-20 | P3 | 5 | [Test suite rò trạng thái thiết bị và Robolectric không pin SDK](done/p3-test-test-005-test-state-leak-and-flaky-guards.md) |
 
 ### ENHANCE (cải thiện cái đã có)
 

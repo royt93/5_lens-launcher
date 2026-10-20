@@ -21,6 +21,8 @@ import org.junit.runner.RunWith
 /** FISH-017 widget proof for the haptic intensity row in the Settings tab. */
 @RunWith(AndroidJUnit4::class)
 class FrmSettingsHapticIntensityWidgetTest {
+    @get:org.junit.Rule val deviceStateGuard = com.mckimquyen.testing.DeviceStateGuard()
+
 
     private val context get() = ApplicationProvider.getApplicationContext<android.content.Context>()
     private fun rawPrefs() = PreferenceManager.getDefaultSharedPreferences(context)

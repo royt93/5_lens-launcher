@@ -18,6 +18,8 @@ import java.io.FileOutputStream
 
 @RunWith(AndroidJUnit4::class)
 class LensViewFocusHaloLiveVisualSmokeTest {
+    @get:org.junit.Rule val deviceStateGuard = com.mckimquyen.testing.DeviceStateGuard()
+
 
     @Test
     fun captureLiveHoverWithHalo() {

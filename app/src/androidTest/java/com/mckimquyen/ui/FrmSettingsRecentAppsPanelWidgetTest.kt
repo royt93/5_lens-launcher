@@ -23,6 +23,8 @@ import org.junit.runner.RunWith
  */
 @RunWith(AndroidJUnit4::class)
 class FrmSettingsRecentAppsPanelWidgetTest {
+    @get:org.junit.Rule val deviceStateGuard = com.mckimquyen.testing.DeviceStateGuard()
+
 
     private val context get() = ApplicationProvider.getApplicationContext<android.content.Context>()
     private fun rawPrefs() = PreferenceManager.getDefaultSharedPreferences(context)

@@ -29,6 +29,8 @@ import org.junit.runner.RunWith
  */
 @RunWith(AndroidJUnit4::class)
 class AppAdapterFolderDialogWidgetTest {
+    @get:org.junit.Rule val deviceStateGuard = com.mckimquyen.testing.DeviceStateGuard()
+
 
     private fun idle() {
         InstrumentationRegistry.getInstrumentation().waitForIdleSync()

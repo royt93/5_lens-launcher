@@ -17,6 +17,8 @@ import java.io.InputStreamReader
  */
 @RunWith(AndroidJUnit4::class)
 class LensPhysicsPolicyIntegrationTest {
+    @get:org.junit.Rule val deviceStateGuard = com.mckimquyen.testing.DeviceStateGuard()
+
 
     private fun runShell(command: String): String {
         val instrumentation = InstrumentationRegistry.getInstrumentation()

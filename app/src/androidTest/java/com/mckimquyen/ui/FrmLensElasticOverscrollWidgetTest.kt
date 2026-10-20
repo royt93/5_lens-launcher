@@ -16,6 +16,8 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class FrmLensElasticOverscrollWidgetTest {
+    @get:org.junit.Rule val deviceStateGuard = com.mckimquyen.testing.DeviceStateGuard()
+
 
     private val context get() = ApplicationProvider.getApplicationContext<android.content.Context>()
     private val settings get() = UtilSettings(context)

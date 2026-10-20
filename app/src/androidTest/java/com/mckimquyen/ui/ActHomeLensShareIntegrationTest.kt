@@ -22,6 +22,8 @@ import java.util.concurrent.TimeUnit
 /** FISH-EXPORT: sharing must export the ACTIVE lens after paging, not the first/default one. */
 @RunWith(AndroidJUnit4::class)
 class ActHomeLensShareIntegrationTest {
+    @get:org.junit.Rule val deviceStateGuard = com.mckimquyen.testing.DeviceStateGuard()
+
 
     private val dao get() = AppDatabase.getInstance().lensWorkspaceDao()
     private val context get() = InstrumentationRegistry.getInstrumentation().targetContext

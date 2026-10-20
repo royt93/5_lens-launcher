@@ -16,6 +16,8 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class AppAdapterNotificationBadgeWidgetTest {
+    @get:org.junit.Rule val deviceStateGuard = com.mckimquyen.testing.DeviceStateGuard()
+
 
     private fun app(pkg: String, count: Int) =
         App(packageName = pkg, name = pkg, label = pkg, notificationCount = count)

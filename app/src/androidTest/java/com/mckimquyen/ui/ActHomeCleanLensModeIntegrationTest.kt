@@ -26,6 +26,8 @@ import org.junit.runner.RunWith
  */
 @RunWith(AndroidJUnit4::class)
 class ActHomeCleanLensModeIntegrationTest {
+    @get:org.junit.Rule val deviceStateGuard = com.mckimquyen.testing.DeviceStateGuard()
+
 
     private companion object {
         const val SECOND_LENS_ID = "clean-lens-second"

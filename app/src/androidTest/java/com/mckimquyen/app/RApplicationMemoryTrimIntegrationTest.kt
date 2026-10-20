@@ -22,6 +22,8 @@ import org.junit.runner.RunWith
  */
 @RunWith(AndroidJUnit4::class)
 class RApplicationMemoryTrimIntegrationTest {
+    @get:org.junit.Rule val deviceStateGuard = com.mckimquyen.testing.DeviceStateGuard()
+
 
     private val application: Application
         get() = InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as Application

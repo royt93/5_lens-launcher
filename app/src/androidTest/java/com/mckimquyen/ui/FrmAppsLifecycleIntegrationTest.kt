@@ -33,10 +33,16 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class FrmAppsLifecycleIntegrationTest {
 
+    @get:org.junit.Rule
+    val deviceStateGuard = com.mckimquyen.testing.DeviceStateGuard()
+
     private var originalApps: ArrayList<App>? = null
 
     @Before
     fun setup() {
+        val application = InstrumentationRegistry.getInstrumentation().targetContext.applicationContext
+            as com.mckimquyen.app.RApplication
+        application.appRefreshPipeline.cancel()
         originalApps = RAppsSingleton.instance.apps
         BitmapCache.clear()
         val apps = ArrayList<App>().apply {

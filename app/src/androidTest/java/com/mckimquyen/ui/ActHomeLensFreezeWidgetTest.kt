@@ -26,6 +26,8 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class ActHomeLensFreezeWidgetTest {
+    @get:org.junit.Rule val deviceStateGuard = com.mckimquyen.testing.DeviceStateGuard()
+
 
     private val context get() = InstrumentationRegistry.getInstrumentation().targetContext
     private val lensId = LensWorkspace.DEFAULT_LENS_ID

@@ -17,6 +17,8 @@ import org.junit.runner.RunWith
 /** DB-006: a persist failure event reaches a live Activity and shows the rollback message. */
 @RunWith(AndroidJUnit4::class)
 class ActHomePersistFailureWidgetTest {
+    @get:org.junit.Rule val deviceStateGuard = com.mckimquyen.testing.DeviceStateGuard()
+
     private val instrumentation get() = InstrumentationRegistry.getInstrumentation()
     private var originalApps: ArrayList<App>? = null
 

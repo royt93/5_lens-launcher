@@ -19,6 +19,8 @@ import org.junit.runner.RunWith
  */
 @RunWith(AndroidJUnit4::class)
 class FrmAppsWidgetTest {
+    @get:org.junit.Rule val deviceStateGuard = com.mckimquyen.testing.DeviceStateGuard()
+
 
     private fun <T> privateField(target: Any, name: String): T? {
         val field = target.javaClass.getDeclaredField(name)

@@ -19,6 +19,8 @@ import org.junit.runner.RunWith
  */
 @RunWith(AndroidJUnit4::class)
 class RApplicationSeamWidgetTest {
+    @get:org.junit.Rule val deviceStateGuard = com.mckimquyen.testing.DeviceStateGuard()
+
 
     private var originalApps: ArrayList<App>? = null
     private var originalDisableScan: Boolean = true

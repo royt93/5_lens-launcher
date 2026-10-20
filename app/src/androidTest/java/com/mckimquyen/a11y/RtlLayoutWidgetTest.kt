@@ -19,6 +19,8 @@ import java.util.Locale
  */
 @RunWith(AndroidJUnit4::class)
 class RtlLayoutWidgetTest {
+    @get:org.junit.Rule val deviceStateGuard = com.mckimquyen.testing.DeviceStateGuard()
+
 
     @Test
     fun testViewItemApp_underRtlLocale_respectsRtlLayoutDirection() {

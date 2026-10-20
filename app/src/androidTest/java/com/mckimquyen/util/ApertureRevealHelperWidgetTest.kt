@@ -27,6 +27,8 @@ import java.util.concurrent.atomic.AtomicInteger
  */
 @RunWith(AndroidJUnit4::class)
 class ApertureRevealHelperWidgetTest {
+    @get:org.junit.Rule val deviceStateGuard = com.mckimquyen.testing.DeviceStateGuard()
+
 
     private fun runShell(command: String): String {
         val instrumentation = InstrumentationRegistry.getInstrumentation()
