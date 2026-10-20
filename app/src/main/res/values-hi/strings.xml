@@ -116,6 +116,7 @@
     <string name="error_title">ओह!</string>
     <string name="button_retry">पुनः प्रयास करें</string>
     <string name="error_message">कुछ गड़बड़ हो गई।</string>
+    <string name="error_save_failed">आपका बदलाव सहेजा नहीं जा सका। उसे वापस कर दिया गया है।</string>
     <string name="changelog">बदलावों का विवरण (चेन्जलॉग)</string>
     <string name="share_app_message">यह ऐप बहुत उपयोगी है, कृपया इसे डाउनलोड और इंस्टॉल करके अनुभव करें।</string>
     <string name="share_via">कृपया चुनें</string>

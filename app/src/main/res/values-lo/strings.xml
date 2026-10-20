@@ -116,6 +116,7 @@
     <string name="error_title">ອຸ້ຍ!</string>
     <string name="button_retry">ລອງໃໝ່</string>
     <string name="error_message">ມີບາງຢ່າງຜິດພາດ.</string>
+    <string name="error_save_failed">ບໍ່ສາມາດບັນທຶກການປ່ຽນແປງຂອງທ່ານໄດ້. ໄດ້ຍົກເລີກການປ່ຽນແປງແລ້ວ.</string>
     <string name="changelog">ບັນທຶກການປ່ຽນແປງ</string>
     <string name="share_app_message">ແອັບພລິເຄຊັນນີ້ມີປະໂຫຍດຫຼາຍ, ຂໍເຊີນທ່ານດາວໂຫຼດ ແລະ ຕິດຕັ້ງເພື່ອທົດລອງໃຊ້ງານ.</string>
     <string name="share_via">ກະລຸນາເລືອກ</string>

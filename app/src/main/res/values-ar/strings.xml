@@ -116,6 +116,7 @@
     <string name="error_title">عذراً!</string>
     <string name="button_retry">إعادة المحاولة</string>
     <string name="error_message">حدث خطأ ما.</string>
+    <string name="error_save_failed">تعذّر حفظ تغييرك. تم التراجع عنه.</string>
     <string name="changelog">سجل التغييرات</string>
     <string name="share_app_message">هذا التطبيق مفيد للغاية، أدعوك لتنزيله وتثبيته لتجربته.</string>
     <string name="share_via">يرجى الاختيار</string>

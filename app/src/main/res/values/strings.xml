@@ -144,6 +144,7 @@
     <string name="error_title">Oops!</string>
     <string name="button_retry">Try again</string>
     <string name="error_message">Something went wrong.</string>
+    <string name="error_save_failed">Couldn\'t save your change. It was undone.</string>
     <string name="changelog">Changelog</string>
 
     <!-- Support Emails -->

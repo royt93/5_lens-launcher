@@ -4,11 +4,13 @@ import android.app.ActivityManager.TaskDescription
 import android.graphics.BitmapFactory
 import android.os.Build
 import android.os.Bundle
+import android.widget.Toast
 import androidx.annotation.LayoutRes
 import androidx.core.content.ContextCompat
 import androidx.appcompat.R as AppCompatR
 import com.google.android.material.color.MaterialColors
 import com.mckimquyen.R
+import com.mckimquyen.services.AppEventManager
 import com.mckimquyen.util.UtilSettings
 
 open class ActBase : BaseActivity() {
@@ -21,6 +23,28 @@ open class ActBase : BaseActivity() {
             updateNightMode()
         }
         super.onCreate(savedInstanceState)
+        observePersistFailures()
+    }
+
+    /**
+     * DB-006: a failed Room write has already been rolled back in memory; tell the user their
+     * change did not stick. LiveData replays its last value to a new observer, so the count at
+     * subscription time is the baseline and only later increments are shown.
+     */
+    private fun observePersistFailures() {
+        var lastSeen = AppEventManager.persistFailureCount.value ?: 0L
+        AppEventManager.persistFailureCount.observe(this) { count ->
+            if (shouldShowSaveFailure(lastSeen, count)) {
+                lastSeen = count
+                Toast.makeText(this, R.string.error_save_failed, Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    companion object {
+        /** True only for a failure newer than the last one this screen has already shown. */
+        @androidx.annotation.VisibleForTesting
+        internal fun shouldShowSaveFailure(lastSeen: Long, current: Long): Boolean = current > lastSeen
     }
 
 

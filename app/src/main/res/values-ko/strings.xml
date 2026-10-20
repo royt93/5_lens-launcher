@@ -116,6 +116,7 @@
     <string name="error_title">오류!</string>
     <string name="button_retry">다시 시도</string>
     <string name="error_message">문제가 발생했습니다.</string>
+    <string name="error_save_failed">변경 사항을 저장하지 못했습니다. 되돌렸습니다.</string>
     <string name="changelog">변경 로그</string>
     <string name="share_app_message">이 앱은 매우 유용합니다. 다운로드하여 설치하고 사용해 보세요!</string>
     <string name="share_via">선택해 주세요</string>

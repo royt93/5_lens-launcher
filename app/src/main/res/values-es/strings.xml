@@ -116,6 +116,7 @@
     <string name="error_title">¡Oops!</string>
     <string name="button_retry">Reintentar</string>
     <string name="error_message">Algo salió mal.</string>
+    <string name="error_save_failed">No se pudo guardar tu cambio. Se ha deshecho.</string>
     <string name="changelog">Registro de cambios</string>
     <string name="share_app_message">Esta aplicación es muy útil, te invito a descargarla e instalarla para probarla.</string>
     <string name="share_via">Por favor seleccione</string>

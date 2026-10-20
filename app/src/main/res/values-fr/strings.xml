@@ -116,6 +116,7 @@
     <string name="error_title">Oups !</string>
     <string name="button_retry">Réessayer</string>
     <string name="error_message">Une erreur est survenue.</string>
+    <string name="error_save_failed">Impossible d’enregistrer votre modification. Elle a été annulée.</string>
     <string name="changelog">Journal des modifications</string>
     <string name="share_app_message">Cette application est très utile, je vous invite à la télécharger et à l\'installer pour l\'essayer.</string>
     <string name="share_via">Veuillez choisir</string>

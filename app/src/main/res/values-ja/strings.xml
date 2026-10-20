@@ -116,6 +116,7 @@
     <string name="error_title">エラー</string>
     <string name="button_retry">再試行</string>
     <string name="error_message">問題が発生しました。</string>
+    <string name="error_save_failed">変更を保存できませんでした。元に戻しました。</string>
     <string name="changelog">変更履歴</string>
     <string name="share_app_message">このアプリは非常に便利です。ぜひダウンロードして体験してみてください。</string>
     <string name="share_via">選択してください</string>

@@ -6,7 +6,9 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.mckimquyen.app.ApplicationScope
 import com.mckimquyen.app.RAppsSingleton
+import com.mckimquyen.services.AppEventManager
 import com.mckimquyen.util.Logger
+import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -79,26 +81,53 @@ data class AppPersistent(
             lensId = lensId
         )
 
-        private fun persist(operation: suspend AppPersistentDao.() -> Unit): Job =
-            ApplicationScope.scope.launch(Dispatchers.IO) {
-                try {
-                    dao().operation()
-                } catch (error: Throwable) {
-                    Logger.e("AppPersistent: asynchronous database operation failed", error)
-                }
+        /**
+         * Runs a database [operation]. A cancelled coroutine must stay cancelled, so
+         * [CancellationException] is always rethrown (swallowing it would break structured
+         * cancellation of [ApplicationScope]); any other failure is logged and handed to
+         * [onFailure] so the caller can undo its optimistic in-memory change.
+         */
+        internal suspend fun runGuarded(
+            onFailure: (Throwable) -> Unit = {},
+            operation: suspend () -> Unit
+        ) {
+            try {
+                operation()
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (error: Throwable) {
+                Logger.e("AppPersistent: asynchronous database operation failed", error)
+                onFailure(error)
             }
+        }
+
+        /** @param onFailure runs after a real (non-cancellation) failure, before the UI is told. */
+        private fun persist(
+            onFailure: (Throwable) -> Unit = {},
+            operation: suspend AppPersistentDao.() -> Unit
+        ): Job = ApplicationScope.scope.launch(Dispatchers.IO) {
+            runGuarded(onFailure = { error ->
+                onFailure(error)
+                AppEventManager.notifyPersistFailed()
+            }) { dao().operation() }
+        }
 
         private fun persistLatest(
             channel: String,
             identifier: String,
             lensId: String = DEFAULT_LENS_ID,
+            onFailure: (Throwable) -> Unit = {},
             operation: suspend AppPersistentDao.() -> Unit
         ): Job {
             val key = "$channel:$lensId:$identifier"
             val revisionCounter = latestWriteRevisions.computeIfAbsent(key) { AtomicLong(0L) }
             val revision = revisionCounter.incrementAndGet()
             val mutex = latestWriteMutexes.computeIfAbsent(key) { Mutex() }
-            return persist {
+            return persist(
+                // Only the newest write for this key may undo itself: an older failed write must
+                // not clobber the value a newer, successful one has already applied.
+                onFailure = { error -> if (revision == revisionCounter.get()) onFailure(error) }
+            ) {
                 mutex.withLock {
                     if (revision == revisionCounter.get()) operation()
                 }
@@ -139,17 +168,28 @@ data class AppPersistent(
             val revisionCounter = orderWriteRevisions.computeIfAbsent(lensId) { AtomicLong(0L) }
             val revision = revisionCounter.incrementAndGet()
             val mutex = orderWriteMutexes.computeIfAbsent(lensId) { Mutex() }
+            // DB-006: remember each app's previous in-memory order so a failed write can undo it.
+            val previousOrders = mutableListOf<Triple<String, String, Int>>()
             val rows = apps.mapIndexedNotNull { index, app ->
                 val packageName = app.packageName?.toString()
                 val name = app.name?.toString()
                 if (packageName.isNullOrBlank() || name.isNullOrBlank()) {
                     null
                 } else {
+                    RAppsSingleton.instance.findApp(packageName, name)
+                        ?.let { previousOrders += Triple(packageName, name, it.orderNumber) }
                     RAppsSingleton.instance.updateAppOrder(packageName, name, index)
                     defaults(packageName, name, lensId).copy(orderNumber = index)
                 }
             }
-            persist {
+            persist(
+                // Only the newest order write of this lens may undo itself (see persistLatest).
+                onFailure = {
+                    if (revision == revisionCounter.get()) {
+                        previousOrders.forEach { (pkg, n, order) -> RAppsSingleton.instance.updateAppOrder(pkg, n, order) }
+                    }
+                }
+            ) {
                 mutex.withLock {
                     if (revision == revisionCounter.get()) setOrders(rows)
                 }
@@ -171,9 +211,12 @@ data class AppPersistent(
             lensId: String = DEFAULT_LENS_ID
         ) {
             if (packageName.isNullOrBlank() || name.isNullOrBlank()) return
+            val previous = RAppsSingleton.instance.findApp(packageName, name)?.isOpened
             RAppsSingleton.instance.updateAppState(packageName, name, isOpened = appOpened)
             val defaults = defaults(packageName, name, lensId)
-            persistLatest("opened", defaults.identifier, lensId) { setOpened(defaults, appOpened) }
+            persistLatest("opened", defaults.identifier, lensId,
+                onFailure = { previous?.let { RAppsSingleton.instance.updateAppState(packageName, name, isOpened = it) } }
+            ) { setOpened(defaults, appOpened) }
         }
 
         @JvmStatic
@@ -186,9 +229,12 @@ data class AppPersistent(
         @JvmStatic
         fun setAppVisibility(packageName: String?, name: String?, visible: Boolean, lensId: String = DEFAULT_LENS_ID) {
             if (packageName.isNullOrBlank() || name.isNullOrBlank()) return
+            val previous = RAppsSingleton.instance.findApp(packageName, name)?.isVisible
             RAppsSingleton.instance.updateAppState(packageName, name, isVisible = visible)
             val defaults = defaults(packageName, name, lensId)
-            persistLatest("visibility", defaults.identifier, lensId) { setVisibility(defaults, visible) }
+            persistLatest("visibility", defaults.identifier, lensId,
+                onFailure = { previous?.let { RAppsSingleton.instance.updateAppState(packageName, name, isVisible = it) } }
+            ) { setVisibility(defaults, visible) }
         }
 
         @JvmStatic
@@ -206,9 +252,12 @@ data class AppPersistent(
         @JvmStatic
         fun setAppPaletteColor(packageName: String?, name: String?, color: Int) {
             if (packageName.isNullOrBlank() || name.isNullOrBlank()) return
+            val previous = RAppsSingleton.instance.findApp(packageName, name)?.paletteColor
             RAppsSingleton.instance.updateAppState(packageName, name, paletteColor = color)
             val defaults = defaults(packageName, name)
-            persistLatest("palette", defaults.identifier) { setPaletteColor(defaults, color) }
+            persistLatest("palette", defaults.identifier,
+                onFailure = { previous?.let { RAppsSingleton.instance.updateAppState(packageName, name, paletteColor = it) } }
+            ) { setPaletteColor(defaults, color) }
         }
 
         suspend fun setAppPaletteColorAndAwait(packageName: String, name: String, color: Int) {
@@ -227,6 +276,7 @@ data class AppPersistent(
         ) {
             if (packageName.isNullOrBlank() || name.isNullOrBlank()) return
             val normalizedFolder = AppOrganizationRules.normalizeFolder(folderName)
+            val previous = RAppsSingleton.instance.findApp(packageName, name)
             RAppsSingleton.instance.updateOrganization(
                 packageName,
                 name,
@@ -235,7 +285,11 @@ data class AppPersistent(
                 pinnedZone
             )
             val defaults = defaults(packageName, name, lensId)
-            persistLatest("organization", defaults.identifier, lensId) {
+            persistLatest("organization", defaults.identifier, lensId, onFailure = {
+                previous?.let {
+                    RAppsSingleton.instance.updateOrganization(packageName, name, it.isFavorite, it.folderName, it.pinnedZone)
+                }
+            }) {
                 setOrganization(
                     defaults,
                     favorite,

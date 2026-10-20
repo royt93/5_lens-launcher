@@ -116,6 +116,7 @@
     <string name="error_title">Ups!</string>
     <string name="button_retry">Coba Lagi</string>
     <string name="error_message">Terjadi kesalahan.</string>
+    <string name="error_save_failed">Perubahan tidak dapat disimpan. Perubahan dibatalkan.</string>
     <string name="changelog">Catatan Perubahan</string>
     <string name="share_app_message">Aplikasi ini sangat bermanfaat, silakan unduh dan pasang untuk mencobanya.</string>
     <string name="share_via">Silakan Pilih</string>

@@ -58,6 +58,18 @@ object AppEventManager {
     private val _notificationBadgeSettingChanged = MutableLiveData<Any?>()
     val notificationBadgeSettingChanged: LiveData<Any?> = _notificationBadgeSettingChanged
 
+    // DB-006: a Room write failed and memory was rolled back; the UI shows a one-shot message.
+    // A counter (not a flag) so every failure is a distinct observable change. The atomic is the
+    // source of truth: postValue() only delivers the latest value on the main thread, so reading
+    // the LiveData to compute the next number could lose a count when failures arrive back to back.
+    private val persistFailures = java.util.concurrent.atomic.AtomicLong(0L)
+    private val _persistFailureCount = MutableLiveData(0L)
+    val persistFailureCount: LiveData<Long> = _persistFailureCount
+
+    fun notifyPersistFailed() {
+        _persistFailureCount.postValue(persistFailures.incrementAndGet())
+    }
+
     /**
      * Thông báo sự kiện apps đã được load
      */

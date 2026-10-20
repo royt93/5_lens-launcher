@@ -116,6 +116,7 @@
     <string name="error_title">Oops!</string>
     <string name="button_retry">Tentar novamente</string>
     <string name="error_message">Ocorreu um erro.</string>
+    <string name="error_save_failed">Não foi possível salvar sua alteração. Ela foi desfeita.</string>
     <string name="changelog">Registro de alterações</string>
     <string name="share_app_message">Este aplicativo é muito útil, convido você a baixá-lo e instalá-lo para testar.</string>
     <string name="share_via">Por favor selecione</string>

@@ -116,6 +116,7 @@
     <string name="error_title">糟糕！</string>
     <string name="button_retry">重试</string>
     <string name="error_message">发生了一些错误。</string>
+    <string name="error_save_failed">无法保存您的更改，已撤销。</string>
     <string name="changelog">更新日志</string>
     <string name="share_app_message">这款应用非常实用，推荐您下载安装体验！</string>
     <string name="share_via">请选择</string>

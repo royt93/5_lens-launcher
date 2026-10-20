@@ -116,6 +116,7 @@
     <string name="error_title">Ой!</string>
     <string name="button_retry">Повторить</string>
     <string name="error_message">Что-то пошло не так.</string>
+    <string name="error_save_failed">Не удалось сохранить изменение. Оно отменено.</string>
     <string name="changelog">Список изменений</string>
     <string name="share_app_message">Это приложение очень полезно, рекомендую вам его скачать и установить для ознакомления.</string>
     <string name="share_via">Пожалуйста, выберите</string>

@@ -116,6 +116,7 @@
     <string name="error_title">Huch!</string>
     <string name="button_retry">Wiederholen</string>
     <string name="error_message">Etwas ist schiefgelaufen.</string>
+    <string name="error_save_failed">Deine Änderung konnte nicht gespeichert werden. Sie wurde rückgängig gemacht.</string>
     <string name="changelog">Änderungsprotokoll</string>
     <string name="share_app_message">Diese App ist sehr nützlich, probieren Sie sie gerne aus und installieren Sie sie.</string>
     <string name="share_via">Bitte auswählen</string>

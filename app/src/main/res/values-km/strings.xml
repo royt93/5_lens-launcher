@@ -116,6 +116,7 @@
     <string name="error_title">អូសេ!</string>
     <string name="button_retry">ព្យាយាមម្តងទៀត</string>
     <string name="error_message">មានបញ្ហាអ្វីមួយខុសប្រក្រតី។</string>
+    <string name="error_save_failed">មិនអាចរក្សាទុកការផ្លាស់ប្ដូររបស់អ្នកបានទេ។ ការផ្លាស់ប្ដូរត្រូវបានលុបចោល។</string>
     <string name="changelog">ប្រវត្តិនៃការផ្លាស់ប្តូរ</string>
     <string name="share_app_message">កម្មវិធីនេះមានប្រយោជន៍ខ្លាំងណាស់ សូមទាញយក និងដំឡើងវាដើម្បីសាកល្បងបទពិសោធន៍។</string>
     <string name="share_via">សូមជ្រើសរើស</string>

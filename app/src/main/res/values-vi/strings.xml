@@ -115,6 +115,7 @@
     <string name="error_title">Rất tiếc!</string>
     <string name="button_retry">Thử lại</string>
     <string name="error_message">Đã xảy ra lỗi.</string>
+    <string name="error_save_failed">Không thể lưu thay đổi của bạn. Thay đổi đã được hoàn tác.</string>
     <string name="changelog">Nhật ký thay đổi</string>
     <string name="share_app_message">Ứng dụng này rất bổ ích, thân mời bạn tải về cài đặt để trải nghiệm</string>
     <string name="share_via">Vui lòng chọn</string>

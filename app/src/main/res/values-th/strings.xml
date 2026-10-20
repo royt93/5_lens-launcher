@@ -116,6 +116,7 @@
     <string name="error_title">อุ๊ย!</string>
     <string name="button_retry">ลองอีกครั้ง</string>
     <string name="error_message">มีบางอย่างผิดพลาด</string>
+    <string name="error_save_failed">บันทึกการเปลี่ยนแปลงไม่สำเร็จ ระบบได้ย้อนกลับแล้ว</string>
     <string name="changelog">บันทึกการเปลี่ยนแปลง</string>
     <string name="share_app_message">แอปพลิเคชันนี้มีประโยชน์มาก ขอเชิญคุณดาวน์โหลดและติดตั้งเพื่อทดลองใช้งาน</string>
     <string name="share_via">กรุณาเลือก</string>

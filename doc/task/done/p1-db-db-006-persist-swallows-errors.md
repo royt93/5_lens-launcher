@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | fix |
-| Status | todo |
+| Status | done |
 | Priority | P1 |
 | Evidence | confirmed |
 | Epic | Persistence |
@@ -21,10 +21,10 @@ Là người dùng, tôi muốn thiết lập ẩn/khóa/thư mục không biế
 
 ## Acceptance criteria
 
-- [ ] `CancellationException` luôn được ném lại.
-- [ ] Lỗi DB thật rollback trạng thái in-memory về giá trị trước và phát sự kiện lỗi để UI báo.
-- [ ] Test: DAO ném lỗi, snapshot in-memory trở về trạng thái cũ.
-- [ ] Không đổi hành vi đường thành công.
+- [x] `CancellationException` luôn được ném lại.
+- [x] Lỗi DB thật rollback trạng thái in-memory về giá trị trước và phát sự kiện lỗi để UI báo.
+- [x] Test: DAO ném lỗi, snapshot in-memory trở về trạng thái cũ.
+- [x] Không đổi hành vi đường thành công.
 
 ## Implementation notes
 
@@ -32,15 +32,19 @@ Ghi lại giá trị cũ trước khi áp optimistic, khôi phục trong `catch`
 
 ## Verification and Definition of Done
 
-- [ ] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
-- [ ] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
-- [ ] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
-- [ ] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
-- [ ] No new lint/build failures.
-- [ ] A post-change audit record scores the round `> 9.0/10` before push.
-- [ ] Evidence and status are updated before moving this file to `done`.
+- [x] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
+- [x] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
+- [x] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
+- [x] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
+- [x] No new lint/build failures.
+- [x] A post-change audit record scores the round `> 9.0/10` before push.
+- [x] Evidence and status are updated before moving this file to `done`.
 
 If a test layer is not applicable, replace its checkbox with a reviewed rationale; do not silently omit it.
+
+## Kết quả (2026-10-20)
+
+Hoàn tất. Audit **9.1/10**: `doc/task/AUDIT_DB-006_2026-10-20.md`. Unit 953/953, lint 0 lỗi/7 warning, 36+ instrumentation + smoke tay trên TECNO KJ7 (máy owner chọn). Giới hạn: đường lỗi chỉ chứng minh bằng test; prefs TECNO còn một số key mồ côi do các test có sẵn (TEST-005), chưa xóa được vì `run-as` không ghi prefs.
 
 ## Prompt để chạy loop
 

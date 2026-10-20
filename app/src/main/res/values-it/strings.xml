@@ -116,6 +116,7 @@
     <string name="error_title">Ops!</string>
     <string name="button_retry">Riprova</string>
     <string name="error_message">Si è verificato un errore.</string>
+    <string name="error_save_failed">Impossibile salvare la modifica. È stata annullata.</string>
     <string name="changelog">Registro delle modifiche</string>
     <string name="share_app_message">Questa applicazione è molto utile, ti invito a scaricarla e installarla per provarla.</string>
     <string name="share_via">Seleziona</string>
