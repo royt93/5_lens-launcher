@@ -16,6 +16,7 @@ import com.mckimquyen.search.AppSearchEngine
 import com.mckimquyen.search.RecentAppsPanelResolver
 import com.mckimquyen.search.SearchHistoryStore
 import com.mckimquyen.search.SearchResultAdapter
+import com.mckimquyen.services.AppEventManager
 import com.mckimquyen.util.UtilApp
 
 /**
@@ -61,6 +62,13 @@ class RecentAppsPanelFragment : BottomSheetDialogFragment() {
         rv.adapter = newAdapter
 
         refreshList()
+
+        // SEARCH-011: an app hidden or unhidden while the sheet is open must update it in place.
+        // viewLifecycleOwner ties the observers to this view, so they are removed in onDestroyView
+        // and cannot leak the fragment or fire against a torn-down adapter. LiveData replays its last
+        // value on subscription; that first replay only repeats the refresh already done above.
+        AppEventManager.visibilityChanged.observe(viewLifecycleOwner) { refreshList() }
+        AppEventManager.appsLoaded.observe(viewLifecycleOwner) { refreshList() }
     }
 
     private fun launchAndDismiss(app: App, source: View, store: SearchHistoryStore) {

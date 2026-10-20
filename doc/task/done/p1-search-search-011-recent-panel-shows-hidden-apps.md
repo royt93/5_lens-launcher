@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | fix |
-| Status | todo |
+| Status | done |
 | Priority | P1 |
 | Evidence | confirmed |
 | Epic | Privacy |
@@ -21,9 +21,9 @@ Là người dùng ẩn app riêng tư, tôi muốn app đó không lộ ở b�
 
 ## Acceptance criteria
 
-- [ ] `resolve` loại app `isVisible=false`.
-- [ ] Test đỏ trong `RecentAppsPanelResolverTest`: key trỏ app ẩn không xuất hiện.
-- [ ] Ẩn app xong, panel cập nhật đúng khi mở lại.
+- [x] `resolve` loại app `isVisible=false`.
+- [x] Test đỏ trong `RecentAppsPanelResolverTest`: key trỏ app ẩn không xuất hiện.
+- [x] Ẩn app xong, panel cập nhật đúng khi mở lại.
 
 ## Implementation notes
 
@@ -31,15 +31,19 @@ Sửa một dòng `filter`. Giữ hành vi bỏ key mồ côi.
 
 ## Verification and Definition of Done
 
-- [ ] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
-- [ ] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
-- [ ] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
-- [ ] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
-- [ ] No new lint/build failures.
-- [ ] A post-change audit record scores the round `> 9.0/10` before push.
-- [ ] Evidence and status are updated before moving this file to `done`.
+- [x] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
+- [x] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
+- [x] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
+- [x] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
+- [x] No new lint/build failures.
+- [x] A post-change audit record scores the round `> 9.0/10` before push.
+- [x] Evidence and status are updated before moving this file to `done`.
 
 If a test layer is not applicable, replace its checkbox with a reviewed rationale; do not silently omit it.
+
+## Kết quả (2026-10-20)
+
+Hoàn tất. Audit **9.1/10**: `doc/task/AUDIT_SEARCH-011_2026-10-20.md`. Phạm vi theo owner: chỉ `isVisible=false`; test unit + widget + integration, thêm interruption (recreate, dismiss-reopen), memory leak (có kiểm đột biến) và đo thời gian refresh. Không làm: golden, network (không áp dụng), IAP/ad mediation (không áp dụng). Unit 966/966, lint 0 lỗi/7 warning, 58 instrumentation + smoke trên TECNO KJ7. Phát hiện thêm lỗi thứ hai ngoài story: panel không cập nhật khi app bị ẩn lúc đang mở; đã sửa.
 
 ## Prompt để chạy loop
 

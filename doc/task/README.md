@@ -259,7 +259,7 @@ Giới hạn: agent audit ui chưa đọc hết `LensView.kt`, `ActAbout.java`, 
 | `DB-004` ✅ done 2026-10-19 | P1 | 2 | [orderIndex trùng sau khi xóa lens giữa làm backup không import lại được](done/p1-db-db-004-lens-order-index-collision.md) |
 | `DB-005` ✅ done 2026-10-19 | P1 | 3 | [openCount đọc lại từ lens default ghi đè số của lens đang mở](done/p1-db-db-005-open-count-wrong-lens.md) |
 | `DB-006` ✅ done 2026-10-20 | P1 | 2 | [AppPersistent.persist nuốt CancellationException và lỗi DB sau khi đã ghi optimistic](done/p1-db-db-006-persist-swallows-errors.md) |
-| `SEARCH-011` | P1 | 1 | [Panel Recent apps hiện app người dùng đã ẩn](todo/p1-search-search-011-recent-panel-shows-hidden-apps.md) |
+| `SEARCH-011` ✅ done 2026-10-20 | P1 | 1 | [Panel Recent apps hiện app người dùng đã ẩn](done/p1-search-search-011-recent-panel-shows-hidden-apps.md) |
 | `UI-026` ✅ done 2026-10-20 | P1 | 2 | [updateColor và FrmSettings crash khi màu nền lưu trong prefs hỏng](done/p1-ui-ui-026-update-color-crash-bad-hex.md) |
 | `A11Y-002` | P2 | 2 | [30 icon trang trí mang contentDescription app_name, TalkBack đọc sai](todo/p2-a11y-a11y-002-decorative-icons-app-name-label.md) |
 | `LEAK-002` | P2 | 3 | [LensView: IndexOutOfBounds ở launchApp và 3 listener không null hóa khi detach](todo/p2-leak-leak-002-lensview-select-index-and-listeners.md) |
