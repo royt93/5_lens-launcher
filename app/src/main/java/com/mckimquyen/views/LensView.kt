@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.*
-import android.graphics.drawable.NinePatchDrawable
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
@@ -442,7 +441,7 @@ class LensView : View {
     private val mLongPressRunnable = Runnable {
         if (shouldTriggerLongPress(mLongPressArmed, mMoving, mSelectIndex)) {
             mLongPressTriggered = true
-            if (!LensPhysicsPolicy.shouldReduceLensMotion(context)) {
+            if (mGestureReduceMotion != true) {
                 performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
             }
             showAppOptionsAtIndex(mSelectIndex)
@@ -450,7 +449,7 @@ class LensView : View {
             && shouldTriggerEmptySpaceLongPress(mLongPressArmed, mMoving, mSelectIndex)
         ) {
             mLongPressTriggered = true
-            if (!LensPhysicsPolicy.shouldReduceLensMotion(context)) {
+            if (mGestureReduceMotion != true) {
                 performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
             }
             onEmptySpaceLongPressListener?.onEmptySpaceLongPress(mTouchDownX, mTouchDownY)
@@ -468,6 +467,8 @@ class LensView : View {
     var onEdgeSwipeListener: OnEdgeSwipeListener? = null
     private var mTouchDownX = 0f
     private var mTouchDownY = 0f
+    // PERF-005: lấy mẫu reduced-motion ở ACTION_DOWN, không đọc lại mỗi MotionEvent.
+    private var mGestureReduceMotion: Boolean? = null
     private var mSearchSwipeStartedInActivationZone = false
     private var mSearchSwipeTriggered = false
     private var mEdgeSwipeTriggered = false
@@ -478,7 +479,6 @@ class LensView : View {
         mEdgeSwipeTriggered = false
     }
     private var mUtilSettings: UtilSettings? = null
-    private var mWorkspaceBackgroundDrawable: NinePatchDrawable? = null
     // UI-019: system-bar avoidance is now owned by ActHome.applyHomeColumnInsets (margins on this
     // view's own layout params), not here - this used to also carve out systemBars/displayCutout
     // internally via its own OnApplyWindowInsetsListener, double-reserving the same space and
@@ -495,6 +495,7 @@ class LensView : View {
     // cell per frame either.
     private val mGridCache = LensGridCache()
     private val mScratchRect = RectF()
+    private val mScratchIconSourceRect = Rect()
 
     // FISH-007: depth-of-field. The user toggle (UtilSettings.KEY_DEPTH_OF_FIELD, off by default)
     // and reduced-motion are sampled once per lens show/hide (LensAnimation), never per frame.
@@ -545,6 +546,7 @@ class LensView : View {
         mMoving = false
         mLongPressArmed = false
         mMustVibrate = true
+        mGestureReduceMotion = null
     }
 
     @androidx.annotation.VisibleForTesting
@@ -983,7 +985,6 @@ class LensView : View {
                 }
                 mPaintNewAppTag?.color =
                     us.highlightColorInt()
-                drawWorkspaceBackground(canvas)
                 mApps?.let {
                     drawGrid(canvas, it.size)
                 }
@@ -1023,7 +1024,21 @@ class LensView : View {
     override fun onTouchEvent(event: MotionEvent): Boolean {
         if (mDrawType != DrawType.APPS) return super.onTouchEvent(event)
 
-        val reduceMotion = LensPhysicsPolicy.shouldReduceLensMotion(context)
+        val reduceMotion = if (event.actionMasked == MotionEvent.ACTION_DOWN) {
+            LensPhysicsPolicy.shouldReduceLensMotion(context).also { mGestureReduceMotion = it }
+        } else {
+            mGestureReduceMotion ?: false
+        }
+        try {
+            return handleAppTouch(event, reduceMotion)
+        } finally {
+            if (event.actionMasked == MotionEvent.ACTION_UP || event.actionMasked == MotionEvent.ACTION_CANCEL) {
+                mGestureReduceMotion = null
+            }
+        }
+    }
+
+    private fun handleAppTouch(event: MotionEvent, reduceMotion: Boolean): Boolean {
         if (!reduceMotion && mScaleGestureDetector != null) {
             mScaleGestureDetector?.onTouchEvent(event)
         }
@@ -1263,14 +1278,6 @@ class LensView : View {
         }
     }
 
-    private fun drawWorkspaceBackground(canvas: Canvas) {
-        val rect = Rect(0, 0, width, height)
-        mWorkspaceBackgroundDrawable?.apply {
-            bounds = rect
-            draw(canvas)
-        }
-    }
-
     /** Keeps the halo colour in sync with the highlight setting and fades it with the lens animation. */
     private fun updateFocusHaloPaint(alpha: Int) {
         val paint = mPaintFocusHalo ?: return
@@ -1468,8 +1475,8 @@ class LensView : View {
                 val appIcon = com.mckimquyen.app.RAppsSingleton.instance.getAppIcon(app.iconCacheKey)
                 
                 if (appIcon != null && !appIcon.isRecycled) {
-                    val src = Rect(0, 0, appIcon.width, appIcon.height)
-                    canvas.drawBitmap(appIcon, src, rect, mPaintIcons)
+                    mScratchIconSourceRect.set(0, 0, appIcon.width, appIcon.height)
+                    canvas.drawBitmap(appIcon, mScratchIconSourceRect, rect, mPaintIcons)
                 } else {
                     requestIconReload(app)
                 }
@@ -1622,7 +1629,7 @@ class LensView : View {
                 mUtilSettings?.let { us ->
                     if (us.getBoolean(UtilSettings.KEY_VIBRATE_APP_HOVER)
                         && !mAnimationHiding
-                        && !LensPhysicsPolicy.shouldReduceLensMotion(context)
+                        && !(mGestureReduceMotion ?: LensPhysicsPolicy.shouldReduceLensMotion(context))
                     ) {
                         performIntensityHaptic()
                     }
@@ -1637,7 +1644,7 @@ class LensView : View {
     private fun performLaunchVibration() {
         if (mInsideRect) {
             if (mUtilSettings?.getBoolean(UtilSettings.KEY_VIBRATE_APP_LAUNCH) == true
-                && !LensPhysicsPolicy.shouldReduceLensMotion(context)
+                && mGestureReduceMotion != true
             ) {
                 performIntensityHaptic()
             }
@@ -1665,7 +1672,7 @@ class LensView : View {
     private inner class LensAnimation(private val mShow: Boolean) : Animation() {
         init {
             interpolator = AccelerateDecelerateInterpolator()
-            mReduceMotion = LensPhysicsPolicy.shouldReduceLensMotion(context)
+            mReduceMotion = mGestureReduceMotion ?: LensPhysicsPolicy.shouldReduceLensMotion(context)
             depthOfFieldEnabled = mUtilSettings?.getBoolean(UtilSettings.KEY_DEPTH_OF_FIELD)
                 ?: UtilSettings.DEFAULT_DEPTH_OF_FIELD
             mUtilSettings?.let {
@@ -1761,7 +1768,6 @@ class LensView : View {
             mApps = null
             mUtilSettings = null
             mPackageManager = null
-            mWorkspaceBackgroundDrawable = null
             mAccessibilityHelper = null
             // PERF-001: drop the cached grid/base-rects too, they're only valid for this view instance.
             mGridCache.clear()

@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | fix |
-| Status | todo |
+| Status | done 2026-10-21 |
 | Priority | P2 |
 | Evidence | confirmed |
 | Epic | Lens rendering |
@@ -21,11 +21,15 @@ Là người dùng máy yếu, tôi muốn kéo lens mượt, không giật do G
 
 ## Acceptance criteria
 
-- [ ] Rect nguồn dùng một scratch field tái sử dụng.
-- [ ] Field/hàm nền workspace chết bị xóa.
-- [ ] `shouldReduceLensMotion` lấy mẫu một lần ở ACTION_DOWN, giữ tới UP/CANCEL.
-- [ ] Test hành vi không đổi (geometry, gate reduced-motion).
-- [ ] Đo `gfxinfo` trước/sau trên thiết bị khóa.
+- [x] Rect nguồn dùng một scratch field tái sử dụng.
+- [x] Field/hàm nền workspace chết bị xóa.
+- [x] `shouldReduceLensMotion` lấy mẫu một lần ở ACTION_DOWN, giữ tới UP/CANCEL.
+- [x] Test hành vi không đổi (geometry, gate reduced-motion).
+- [x] Đo `gfxinfo` trước/sau trên thiết bị khóa.
+
+## Kết quả và giới hạn (2026-10-21)
+
+Hoàn tất theo audit `doc/task/AUDIT_PERF-005_2026-10-21.md` (9.1/10). Full unit 972/972, lint 0 lỗi/7 warning, build APK app + androidTest xanh; Pixel 7 Pro `2B051FDH3006MU`: 65 test máy pass. `gfxinfo` cùng harness 300 icon: baseline 464 frame / 2 jank, candidate cuối 465 / 0; percentile chồng lấp, không kết luận giảm jank. Proven: loại Rect per-icon và giảm policy reads theo MOVE. Settings máy khôi phục; 3 key AdMob/AppLovin tự đổi, ghi trong audit.
 
 ## Implementation notes
 
@@ -33,13 +37,13 @@ Gộp F1, F2, F3 của audit lens. Không đổi geometry nên `LensGridCache` b
 
 ## Verification and Definition of Done
 
-- [ ] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
-- [ ] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
-- [ ] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
-- [ ] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
-- [ ] No new lint/build failures.
-- [ ] A post-change audit record scores the round `> 9.0/10` before push.
-- [ ] Evidence and status are updated before moving this file to `done`.
+- [x] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
+- [x] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
+- [x] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
+- [x] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
+- [x] No new lint/build failures.
+- [x] A post-change audit record scores the round `> 9.0/10` before push.
+- [x] Evidence and status are updated before moving this file to `done`.
 
 If a test layer is not applicable, replace its checkbox with a reviewed rationale; do not silently omit it.
 
