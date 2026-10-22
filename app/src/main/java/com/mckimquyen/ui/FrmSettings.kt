@@ -318,6 +318,8 @@ class FrmSettings : Fragment(), SettingsInterface {
                     getString(R.string.setting_default_icon_pack)
                 selectedPack != null -> selectedPack.mName
                 else -> us.getString(UtilSettings.KEY_ICON_PACK_LABEL_NAME)
+                    ?.takeIf { it != UtilSettings.DEFAULT_ICON_PACK_LABEL_NAME }
+                    ?: getString(R.string.setting_default_icon_pack)
             }
 
             // UI-026: stored colors can be empty or malformed (imported backup, edited prefs).

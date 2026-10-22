@@ -28,7 +28,7 @@ Là người dùng icon pack, tôi muốn lựa chọn của tôi không tự m�
 
 ## Kết quả và giới hạn (2026-10-22)
 
-Package identity, migration, app loader/reload, settings dialog/summary và locale-stable cache token đã hoàn tất. Full unit **979/979**, lint **0 lỗi/7 warnings**, build thành công; Pixel 7 Pro target `2B051FDH3006MU`: settings/dialog **7 tests** và `LensViewIconReloadWidgetTest` **1 test** pass. Audit: `doc/task/AUDIT_CORE-005_2026-10-22.md` (**9.1/10**). Chưa có third-party icon-pack fixture thật để đổi locale/package display name trên máy; coverage làm bằng injected catalog và package-only key tests.
+Package identity, migration, app loader/reload, settings dialog/summary, `TaskUpdateApps` full loader, và locale-stable cache token đã hoàn tất. Full unit **979/979**, lint **0 lỗi/7 warnings**, build thành công; Pixel 7 Pro target `2B051FDH3006MU`: settings/dialog **7 tests** và `LensViewIconReloadWidgetTest` **1 test** pass. Audit: `doc/task/AUDIT_CORE-005_2026-10-22.md` (**9.1/10**). Chưa có third-party icon-pack fixture thật để đổi locale/package display name trên máy; coverage làm bằng injected catalog và package-only key tests.
 
 ## Implementation notes
 

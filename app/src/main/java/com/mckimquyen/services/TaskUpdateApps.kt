@@ -11,6 +11,7 @@ import com.mckimquyen.model.App
 import com.mckimquyen.model.LensWorkspace
 import com.mckimquyen.util.Logger
 import com.mckimquyen.util.UtilApp
+import com.mckimquyen.util.UtilIconPackManager
 import com.mckimquyen.util.UtilSettings
 import java.util.concurrent.atomic.AtomicLong
 import kotlinx.coroutines.CancellationException
@@ -156,11 +157,13 @@ class TaskUpdateApps @JvmOverloads constructor(
     private suspend fun loadSnapshot(): AppRefreshSnapshot {
         Logger.d("TaskUpdateApps: loading installed apps")
         val utilSettings = UtilSettings(appContext)
+        val iconPacks = UtilIconPackManager().getAvailableIconPacksWithIcons(true, application)
+        val selectedIconPackPackageName = utilSettings.iconPackPackageName(iconPacks)
         val shells = UtilApp.getAppShells(
             packageManager,
             appContext,
             application,
-            utilSettings.getString(UtilSettings.KEY_ICON_PACK_LABEL_NAME) ?: ""
+            selectedIconPackPackageName
         )
         lastShells = shells
         val lensId = utilSettings.getString(UtilSettings.KEY_ACTIVE_LENS_ID) ?: LensWorkspace.DEFAULT_LENS_ID
