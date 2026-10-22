@@ -552,7 +552,8 @@ class FrmSettings : Fragment(), SettingsInterface {
             us.save(UtilSettings.DEFAULT_BACKGROUND_MODE)
             us.save(UtilSettings.KEY_BACKGROUND_COLOR, UtilSettings.DEFAULT_BACKGROUND_COLOR)
             us.save(UtilSettings.KEY_HIGHLIGHT_COLOR, UtilSettings.DEFAULT_HIGHLIGHT_COLOR)
-            us.save(UtilSettings.KEY_ICON_PACK_LABEL_NAME, UtilSettings.DEFAULT_ICON_PACK_LABEL_NAME)
+            us.saveIconPackPackageName(UtilSettings.DEFAULT_ICON_PACK_PACKAGE_NAME)
+            us.saveLegacyIconPackLabel(UtilSettings.DEFAULT_ICON_PACK_LABEL_NAME)
             us.save(UtilSettings.KEY_NIGHT_MODE, UtilSettings.DEFAULT_NIGHT_MODE)
         }
         (activity as? ActSettings)?.sendNightModeBroadcast()

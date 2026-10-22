@@ -125,6 +125,26 @@ class FrmSettingsBackgroundWidgetTest {
     }
 
     @Test
+    fun iconPack_resetToDefaultsClearsStoredPackageIdentity() {
+        val settings = UtilSettings(context)
+        settings.saveIconPackPackageName(TEST_PACK_PACKAGE)
+        settings.saveLegacyIconPackLabel(LEGACY_PACK_LABEL)
+
+        launchFragmentInContainer<FrmSettings>(themeResId = R.style.AppTheme_NoActionBar).use { scenario ->
+            scenario.onFragment { fragment ->
+                (fragment as com.mckimquyen.itf.SettingsInterface).onDefaultsReset()
+                val summary = fragment.requireView().findViewById<TextView>(R.id.tvSelectedIconPack)
+                assertEquals(fragment.getString(R.string.setting_default_icon_pack), summary.text.toString())
+            }
+        }
+        assertEquals(
+            "reset phải xóa identity package để loader dùng icon hệ thống",
+            UtilSettings.DEFAULT_ICON_PACK_PACKAGE_NAME,
+            UtilSettings(context).getString(UtilSettings.KEY_ICON_PACK_PACKAGE_NAME)
+        )
+    }
+
+    @Test
     fun iconPack_showsSystemDefaultWhenPackageIdentityIsEmpty() {
         val settings = UtilSettings(context)
         settings.saveIconPackPackageName(UtilSettings.DEFAULT_ICON_PACK_PACKAGE_NAME)
