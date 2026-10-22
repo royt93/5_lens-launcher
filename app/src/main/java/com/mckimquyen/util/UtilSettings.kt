@@ -88,6 +88,8 @@ class UtilSettings(context: Context) {
         // PREF-001: a stable, never-displayed sentinel - not the translated "Default Icon Pack"
         // label - so switching device/app language can never desync it from what's persisted.
         const val DEFAULT_ICON_PACK_LABEL_NAME = "__default_icon_pack__"
+        const val KEY_ICON_PACK_PACKAGE_NAME = "icon_pack_package_name"
+        const val DEFAULT_ICON_PACK_PACKAGE_NAME = ""
         const val DEFAULT_SORT_TYPE = 0
         val DEFAULT_SORT_TYPE_ENUM: SortType = SortType.entries[DEFAULT_SORT_TYPE]
         val DEFAULT_BACKGROUND_MODE = BackgroundMode.WALLPAPER
@@ -220,6 +222,14 @@ class UtilSettings(context: Context) {
         prefs.edit { putString(name, value) }
     }
 
+    fun saveIconPackPackageName(packageName: String) {
+        save(KEY_ICON_PACK_PACKAGE_NAME, packageName)
+    }
+
+    fun saveLegacyIconPackLabel(label: String) {
+        save(KEY_ICON_PACK_LABEL_NAME, label)
+    }
+
     fun save(name: String?, value: Boolean) {
         prefs.edit { putBoolean(name, value) }
     }
@@ -284,6 +294,25 @@ class UtilSettings(context: Context) {
     /** UI-026: background color as an Int; a missing or malformed pref yields the default background. */
     fun backgroundColorInt(): Int =
         SafeColor.parse(prefs.getString(KEY_BACKGROUND_COLOR, DEFAULT_BACKGROUND_COLOR), DEFAULT_BACKGROUND_COLOR_INT)
+
+    /** Resolves stable icon-pack identity, migrating a uniquely matched legacy label once. */
+    fun iconPackPackageName(iconPacks: List<UtilIconPackManager.IconPack>): String {
+        val storedPackageName = prefs.getString(KEY_ICON_PACK_PACKAGE_NAME, null)
+        if (storedPackageName != null) return storedPackageName
+
+        val legacyLabel = prefs.getString(KEY_ICON_PACK_LABEL_NAME, DEFAULT_ICON_PACK_LABEL_NAME)
+        if (legacyLabel == DEFAULT_ICON_PACK_LABEL_NAME) {
+            saveIconPackPackageName(DEFAULT_ICON_PACK_PACKAGE_NAME)
+            return DEFAULT_ICON_PACK_PACKAGE_NAME
+        }
+
+        val matchingPacks = iconPacks.filter { it.mName == legacyLabel }
+        if (matchingPacks.size != 1) return DEFAULT_ICON_PACK_PACKAGE_NAME
+
+        return matchingPacks.single().mPackageName.orEmpty().also { packageName ->
+            if (packageName.isNotEmpty()) saveIconPackPackageName(packageName)
+        }
+    }
 
     fun getString(name: String?): String? = when (name) {
         KEY_BACKGROUND -> prefs.getString(name, DEFAULT_BACKGROUND)

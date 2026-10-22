@@ -25,6 +25,8 @@ import java.util.EnumSet
  */
 class SettingsDialogCoordinator {
 
+    data class IconPackOption(val displayName: String, val packageName: String)
+
     var dlgSortType: AlertDialog? = null
         internal set
     var dlgIconPack: AlertDialog? = null
@@ -39,6 +41,13 @@ class SettingsDialogCoordinator {
         internal set
 
     companion object {
+        fun buildIconPackOptions(defaultLabel: String, packs: List<UtilIconPackManager.IconPack>): List<IconPackOption> =
+            listOf(IconPackOption(defaultLabel, UtilSettings.DEFAULT_ICON_PACK_PACKAGE_NAME)) +
+                packs.map { IconPackOption(it.mName, it.mPackageName) }
+
+        fun selectedIconPackIndex(options: List<IconPackOption>, packageName: String): Int =
+            options.indexOfFirst { it.packageName == packageName }.takeIf { it >= 0 } ?: 0
+
         @JvmField
         val COLOR_HEXES = arrayOf(
             "#FFF50057",
@@ -141,29 +150,22 @@ class SettingsDialogCoordinator {
     ) {
         dismissIconPackDialog()
         val availableIconPacks = UtilIconPackManager().getAvailableIconPacksWithIcons(true, activity.application)
-        val displayNames = ArrayList<String>()
-        val values = ArrayList<String>()
-
-        displayNames.add(activity.getString(R.string.setting_default_icon_pack))
-        values.add(UtilSettings.DEFAULT_ICON_PACK_LABEL_NAME)
-
-        for (pack in availableIconPacks) {
-            val name = pack.mName
-            if (!values.contains(name)) {
-                displayNames.add(name)
-                values.add(name)
-            }
-        }
-
-        val selectedValue = utilSettings.getString(UtilSettings.KEY_ICON_PACK_LABEL_NAME)
-        val selectedIndex = values.indexOf(selectedValue)
+        val options = buildIconPackOptions(activity.getString(R.string.setting_default_icon_pack), availableIconPacks)
+        val selectedPackageName = utilSettings.iconPackPackageName(availableIconPacks)
+        val selectedIndex = selectedIconPackIndex(options, selectedPackageName)
 
         dlgIconPack = MaterialAlertDialogBuilder(activity, R.style.MaterialYouDialogTheme)
             .setTitle(R.string.setting_icon_pack)
-            .setSingleChoiceItems(displayNames.toTypedArray(), selectedIndex) { dialog, which ->
-                val chosenValue = values[which]
-                utilSettings.save(UtilSettings.KEY_ICON_PACK_LABEL_NAME, chosenValue)
-                onIconPackSelected(chosenValue)
+            .setSingleChoiceItems(options.map { it.displayName }.toTypedArray(), selectedIndex) { dialog, which ->
+                val chosenOption = options[which]
+                utilSettings.saveIconPackPackageName(chosenOption.packageName)
+                val chosenLabel = if (chosenOption.packageName == UtilSettings.DEFAULT_ICON_PACK_PACKAGE_NAME) {
+                    UtilSettings.DEFAULT_ICON_PACK_LABEL_NAME
+                } else {
+                    chosenOption.displayName
+                }
+                utilSettings.saveLegacyIconPackLabel(chosenLabel)
+                onIconPackSelected(chosenLabel)
                 dialog.dismiss()
             }
             .setNegativeButton(android.R.string.cancel, null)

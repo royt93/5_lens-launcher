@@ -55,6 +55,16 @@ object UtilApp {
         sortType
     )
 
+    @JvmStatic
+    internal fun findIconPackByPackage(
+        iconPacks: List<UtilIconPackManager.IconPack>,
+        packageName: String
+    ): UtilIconPackManager.IconPack? = iconPacks.find { it.mPackageName == packageName }
+
+    @JvmStatic
+    internal fun iconPackTokenFor(packageName: String, versionToken: String): String =
+        if (packageName.isEmpty()) "system" else "$packageName@$versionToken"
+
     /**
      * The expensive half of app loading: PackageManager scan, icon-pack resolution, icon
      * decode, and the (lens-independent) palette-color lookup/seed. Callers switching between
@@ -84,12 +94,13 @@ object UtilApp {
 
         // Find selected icon pack
         val iconPacks = UtilIconPackManager().getAvailableIconPacksWithIcons(true, application)
-        val selectedIconPack = iconPacks.find { it.mName == iconPackLabelName }
-        // CORE-002: icon-pack identity/version folded into every icon cache key below,
-        // computed once since it is the same for every app in this refresh.
+        val selectedPackageName = UtilSettings(application ?: context ?: throw IllegalArgumentException("Application context required"))
+            .iconPackPackageName(iconPacks)
+        val selectedIconPack = findIconPackByPackage(iconPacks, selectedPackageName)
+        // CORE-002: stable package identity plus package version keeps locale changes out of the key.
         val iconPackToken = selectedIconPack?.let { pack ->
-            "${pack.mPackageName}@${versionTokenOf(packageManager, pack.mPackageName)}"
-        } ?: "system"
+            iconPackTokenFor(pack.mPackageName, versionTokenOf(packageManager, pack.mPackageName))
+        } ?: iconPackTokenFor(UtilSettings.DEFAULT_ICON_PACK_PACKAGE_NAME, "")
 
         for ((index, resolveInfo) in availableActivities.withIndex()) {
             // Extract install date and package version/update token
@@ -219,10 +230,10 @@ object UtilApp {
         val packageManager = application.packageManager
         val defaultBitmap = UtilBitmap.packageNameToBitmap(packageManager, packageName, iconResId)
             ?: return@withContext null
-        val iconPackLabelName = UtilSettings(application).getString(UtilSettings.KEY_ICON_PACK_LABEL_NAME)
-            ?: UtilSettings.DEFAULT_ICON_PACK_LABEL_NAME
-        val selectedIconPack = UtilIconPackManager().getAvailableIconPacksWithIcons(true, application)
-            .find { it.mName == iconPackLabelName }
+        val settings = UtilSettings(application)
+        val iconPacks = UtilIconPackManager().getAvailableIconPacksWithIcons(true, application)
+        val selectedPackageName = settings.iconPackPackageName(iconPacks)
+        val selectedIconPack = findIconPackByPackage(iconPacks, selectedPackageName)
         selectedIconPack?.getIconForPackage(packageName, defaultBitmap) ?: defaultBitmap
     }
 

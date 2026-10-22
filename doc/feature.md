@@ -4,6 +4,8 @@ Source of truth for implementation choices in this session. Detailed acceptance 
 
 ## ✅ Implemented
 
+- **CORE-005 — Icon-pack identity theo package (22/10/2026)**: lưu `packageName`, migrate unique legacy label, giữ pending khi pack vắng/ambiguous; loader và cache token không phụ thuộc nhãn/locale. Full unit 979, lint 0 lỗi/7 warnings, S24 settings integration theo target hiện khóa Pixel: 7 test + icon reload 1 test. Audit/giới hạn: `doc/task/AUDIT_CORE-005_2026-10-22.md`.
+
 - **LEAK-002 — LensView stale index và listener cleanup (22/10/2026)**: `launchApp`/`drawAppName` dùng bounds-safe lookup; detach xóa đủ sáu callback; bỏ launch guard dư sau khi pinch branch return. 971 unit test, 42 targeted device test pass trên S24 Ultra. Audit 9.1/10; giới hạn test hide animation end-to-end ghi tại `doc/task/AUDIT_LEAK-002_2026-10-22.md`.
 
 - **PERF-005 — LensView hot path (21/10/2026)**: dùng lại source `Rect` cho bitmap icon, xóa workspace background path không dùng, sample reduced-motion một lần mỗi gesture. Pixel 7 Pro: 65 test instrumented pass; full unit 972/972; lint 0 lỗi/7 warning. `gfxinfo` baseline/candidate biến thiên, không kết luận giảm jank; xem `doc/task/AUDIT_PERF-005_2026-10-21.md`.
@@ -54,6 +56,7 @@ Source of truth for implementation choices in this session. Detailed acceptance 
 
 
 ## 🟡 In progress
+
 
 
 

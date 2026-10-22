@@ -25,6 +25,7 @@ import com.mckimquyen.util.LensPhysicsPolicy
 import com.mckimquyen.util.SafeColor
 import com.mckimquyen.util.UtilLauncher
 import com.mckimquyen.util.UtilNightModeUtil
+import com.mckimquyen.util.UtilIconPackManager
 import com.mckimquyen.util.UtilSettings
 
 class FrmSettings : Fragment(), SettingsInterface {
@@ -309,11 +310,14 @@ class FrmSettings : Fragment(), SettingsInterface {
             val isVip = com.roy.sdkadbmob.AdManager.isVIPMember()
             tvVipStatusSummary?.text = if (isVip) getString(R.string.vip_active) else getString(R.string.vip_free_user)
 
-            val storedIconPack = us.getString(UtilSettings.KEY_ICON_PACK_LABEL_NAME)
-            tvSelectedIconPack?.text = if (storedIconPack == UtilSettings.DEFAULT_ICON_PACK_LABEL_NAME) {
-                getString(R.string.setting_default_icon_pack)
-            } else {
-                storedIconPack
+            val iconPacks = UtilIconPackManager().getAvailableIconPacksWithIcons(false, activity?.application)
+            val selectedPackageName = us.iconPackPackageName(iconPacks)
+            val selectedPack = iconPacks.firstOrNull { it.mPackageName == selectedPackageName }
+            tvSelectedIconPack?.text = when {
+                selectedPackageName == UtilSettings.DEFAULT_ICON_PACK_PACKAGE_NAME ->
+                    getString(R.string.setting_default_icon_pack)
+                selectedPack != null -> selectedPack.mName
+                else -> us.getString(UtilSettings.KEY_ICON_PACK_LABEL_NAME)
             }
 
             // UI-026: stored colors can be empty or malformed (imported backup, edited prefs).

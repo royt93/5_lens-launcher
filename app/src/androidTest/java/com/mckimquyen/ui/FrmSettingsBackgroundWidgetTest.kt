@@ -32,6 +32,11 @@ class FrmSettingsBackgroundWidgetTest {
     private val context get() = ApplicationProvider.getApplicationContext<android.content.Context>()
     private fun rawPrefs() = PreferenceManager.getDefaultSharedPreferences(context)
 
+    private companion object {
+        const val TEST_PACK_PACKAGE = "com.example.nova"
+        const val LEGACY_PACK_LABEL = "Nova Icon Pack"
+    }
+
     @Before
     fun clearPrefs() {
         rawPrefs().edit().clear().commit()
@@ -106,14 +111,32 @@ class FrmSettingsBackgroundWidgetTest {
     }
 
     @Test
-    fun iconPack_showsRealPackNameUnchanged_whenAThirdPartyPackIsStored() {
+    fun iconPack_showsCurrentCatalogLabelForStoredPackageIdentity() {
         val settings = UtilSettings(context)
-        settings.save(UtilSettings.KEY_ICON_PACK_LABEL_NAME, "Nova Icon Pack")
+        settings.saveIconPackPackageName(TEST_PACK_PACKAGE)
+        settings.saveLegacyIconPackLabel(LEGACY_PACK_LABEL)
 
         launchFragmentInContainer<FrmSettings>(themeResId = R.style.AppTheme_NoActionBar).use { scenario ->
             scenario.onFragment { fragment ->
                 val tvSelectedIconPack = fragment.requireView().findViewById<TextView>(R.id.tvSelectedIconPack)
-                assertEquals("Nova Icon Pack", tvSelectedIconPack.text.toString())
+                assertEquals("fallback label displays while selected package is unavailable", LEGACY_PACK_LABEL, tvSelectedIconPack.text.toString())
+            }
+        }
+    }
+
+    @Test
+    fun iconPack_showsSystemDefaultWhenPackageIdentityIsEmpty() {
+        val settings = UtilSettings(context)
+        settings.saveIconPackPackageName(UtilSettings.DEFAULT_ICON_PACK_PACKAGE_NAME)
+        settings.saveLegacyIconPackLabel("Nova Icon Pack")
+
+        launchFragmentInContainer<FrmSettings>(themeResId = R.style.AppTheme_NoActionBar).use { scenario ->
+            scenario.onFragment { fragment ->
+                val tvSelectedIconPack = fragment.requireView().findViewById<TextView>(R.id.tvSelectedIconPack)
+                assertEquals(
+                    fragment.getString(R.string.setting_default_icon_pack),
+                    tvSelectedIconPack.text.toString()
+                )
             }
         }
     }

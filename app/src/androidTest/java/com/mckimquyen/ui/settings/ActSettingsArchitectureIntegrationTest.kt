@@ -7,6 +7,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.mckimquyen.R
 import com.mckimquyen.ui.ActSettings
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
@@ -49,6 +50,29 @@ class ActSettingsArchitectureIntegrationTest {
             assertFalse("New activity must not be destroyed", newActivity.isDestroyed)
         }
 
+        scenario.close()
+    }
+
+    @Test
+    fun iconPackDialogPersistsPackageIdentityForChosenRow() {
+        val scenario = ActivityScenario.launch(ActSettings::class.java)
+        scenario.onActivity { activity ->
+            val settingsField = com.mckimquyen.ui.ActBase::class.java.getDeclaredField("utilSettings").apply { isAccessible = true }
+            val settings = settingsField.get(activity) as com.mckimquyen.util.UtilSettings
+            settings.saveIconPackPackageName("com.example.core005")
+            settings.saveLegacyIconPackLabel("Core 005 Pack")
+            activity.showIconPackDialog()
+        }
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+        scenario.onActivity { activity ->
+            val field = ActSettings::class.java.getDeclaredField("dlgIconPack").apply { isAccessible = true }
+            val dialog = field.get(activity) as AlertDialog
+            dialog.listView.performItemClick(dialog.listView, 0, dialog.listView.adapter.getItemId(0))
+            val settingsField = com.mckimquyen.ui.ActBase::class.java.getDeclaredField("utilSettings").apply { isAccessible = true }
+            val settings = settingsField.get(activity) as com.mckimquyen.util.UtilSettings
+            assertEquals("system option stores default legacy sentinel", "__default_icon_pack__", settings.getString(com.mckimquyen.util.UtilSettings.KEY_ICON_PACK_LABEL_NAME))
+            assertEquals("system option clears package identity", "", settings.getString(com.mckimquyen.util.UtilSettings.KEY_ICON_PACK_PACKAGE_NAME))
+        }
         scenario.close()
     }
 

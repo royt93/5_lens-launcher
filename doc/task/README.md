@@ -278,7 +278,7 @@ Giới hạn: agent audit ui chưa đọc hết `LensView.kt`, `ActAbout.java`, 
 | ID | P | SP | Story |
 |---|---|---|---|
 | `A11Y-003` | P2 | 3 | [TalkBack không với được cử chỉ lens ngoài tap/long-press icon](todo/p2-a11y-a11y-003-lens-gesture-accessibility-actions.md) |
-| `CORE-005` | P2 | 3 | [Icon pack nhận diện bằng nhãn hiển thị thay vì package](todo/p2-core-core-005-icon-pack-identity-by-package.md) |
+| `CORE-005` ✅ done 2026-10-22 | P2 | 3 | [Icon pack nhận diện bằng nhãn hiển thị thay vì package](done/p2-core-core-005-icon-pack-identity-by-package.md) |
 | `DB-007` | P2 | 3 | [Backup v2 không chứa physics từng lens](todo/p2-db-db-007-backup-v2-include-lens-physics.md) |
 | `PERF-006` | P2 | 3 | [Reload một icon quét lại toàn bộ icon pack và parse appfilter mỗi lần](todo/p2-perf-perf-006-icon-reload-reuses-icon-pack-cache.md) |
 | `PERF-007` | P2 | 2 | [Scan PackageManager gây N+1 truy vấn Room và ghi từng app](todo/p2-perf-perf-007-scan-n-plus-one-room.md) |
