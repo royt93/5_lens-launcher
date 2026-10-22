@@ -262,7 +262,7 @@ Giới hạn: agent audit ui chưa đọc hết `LensView.kt`, `ActAbout.java`, 
 | `SEARCH-011` ✅ done 2026-10-20 | P1 | 1 | [Panel Recent apps hiện app người dùng đã ẩn](done/p1-search-search-011-recent-panel-shows-hidden-apps.md) |
 | `UI-026` ✅ done 2026-10-20 | P1 | 2 | [updateColor và FrmSettings crash khi màu nền lưu trong prefs hỏng](done/p1-ui-ui-026-update-color-crash-bad-hex.md) |
 | `A11Y-002` | P2 | 2 | [30 icon trang trí mang contentDescription app_name, TalkBack đọc sai](todo/p2-a11y-a11y-002-decorative-icons-app-name-label.md) |
-| `LEAK-002` | P2 | 3 | [LensView: IndexOutOfBounds ở launchApp và 3 listener không null hóa khi detach](todo/p2-leak-leak-002-lensview-select-index-and-listeners.md) |
+| `LEAK-002` ✅ done 2026-10-22 | P2 | 3 | [LensView: IndexOutOfBounds ở launchApp và 3 listener không null hóa khi detach](done/p2-leak-leak-002-lensview-select-index-and-listeners.md) |
 | `PERF-005` ✅ done 2026-10-21 | P2 | 3 | [LensView cấp phát Rect mỗi icon mỗi frame và gọi binder mỗi MotionEvent](done/p2-perf-perf-005-lens-draw-alloc-and-binder-per-event.md) |
 | `SEARCH-012` | P2 | 3 | [T9 vô dụng với nhãn app không phải chữ Latin](todo/p2-search-search-012-t9-non-latin-locales.md) |
 | `SEARCH-013` | P2 | 3 | [Query toàn bảng Contacts đồng bộ trên main thread mỗi ký tự gõ](todo/p2-search-search-013-contacts-query-main-thread.md) |

@@ -4,6 +4,8 @@ Source of truth for implementation choices in this session. Detailed acceptance 
 
 ## ✅ Implemented
 
+- **LEAK-002 — LensView stale index và listener cleanup (22/10/2026)**: `launchApp`/`drawAppName` dùng bounds-safe lookup; detach xóa đủ sáu callback; bỏ launch guard dư sau khi pinch branch return. 971 unit test, 42 targeted device test pass trên S24 Ultra. Audit 9.1/10; giới hạn test hide animation end-to-end ghi tại `doc/task/AUDIT_LEAK-002_2026-10-22.md`.
+
 - **PERF-005 — LensView hot path (21/10/2026)**: dùng lại source `Rect` cho bitmap icon, xóa workspace background path không dùng, sample reduced-motion một lần mỗi gesture. Pixel 7 Pro: 65 test instrumented pass; full unit 972/972; lint 0 lỗi/7 warning. `gfxinfo` baseline/candidate biến thiên, không kết luận giảm jank; xem `doc/task/AUDIT_PERF-005_2026-10-21.md`.
 
 - **FISH-026 — Đàn hồi thấu kính (2026-10-18)**: hãm hữu tỉ bão hòa tối đa 28dp, toggle Settings → Lens mặc định bật/reset bật; reduced-motion gate clamp cứng; 17 locale. Review sửa geometry tọa độ âm và test isolation. JVM 921/921; lint 0 lỗi/38 cảnh báo; OPPO `FUJZIFIR7DQCNRWW` 38 instrumentation pass, smoke Settings/drag/release không ad. Audit 9.3/10. Owner duyệt commit/push. Story: `doc/task/done/p2-fish-fish-026-lens-elastic-overscroll.md`.
@@ -52,6 +54,7 @@ Source of truth for implementation choices in this session. Detailed acceptance 
 
 
 ## 🟡 In progress
+
 
 
 - **FISH-022 — Nhóm lens (2026-10-15)**: Room group metadata + backup v2, `LensManagementActivity` Material You (active lens, count, edit theo ngữ cảnh), bulk assign/create/ungroup, popup action, đủ locale. Audit sửa 3 lỗi (manage-id lạ, mất edit state khi recreate, `createLens` không copy group). TECNO KJ7: manager 28/28, Home 26/26, quick-switch 12/12, multi-lens 4/4, backup 11/11, migration 4/4; full unit 866/866; secret scan + diff check xanh. Backup export/import smoke tay pass group + collapsed state; file picker export lỗi orphan-row đã sửa và commit `2ba4f58d`.

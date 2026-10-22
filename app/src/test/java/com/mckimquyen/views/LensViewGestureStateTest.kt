@@ -223,15 +223,8 @@ class LensViewGestureStateTest {
         assertEquals(2.5f, LensView.calculatePinchDistortion(current = 2.5f, scaleFactor = 0.0f), 0.001f)
     }
 
-    // ==================================================================== FISH-009: App Launch Guard
-
-    @Test
-    fun `shouldAllowAppLaunch permits IDLE and PANNING, blocks PINCHING and PINCH_RELEASE`() {
-        assertTrue(LensView.shouldAllowAppLaunch(LensGestureState.IDLE))
-        assertTrue(LensView.shouldAllowAppLaunch(LensGestureState.PANNING))
-        assertFalse(LensView.shouldAllowAppLaunch(LensGestureState.PINCHING))
-        assertFalse(LensView.shouldAllowAppLaunch(LensGestureState.PINCH_RELEASE))
-    }
+    // Pinch release must return early in ACTION_UP before normal app-launch handling.
+    // Integration coverage lives in LensViewPinchIntegrationTest.
 
     // ============================================= FISH-008 Phase 2: pager vs. pan disambiguation
 

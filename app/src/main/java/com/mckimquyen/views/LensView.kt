@@ -268,13 +268,6 @@ class LensView : View {
             return (current * scaleFactor).coerceIn(min, max)
         }
 
-        /**
-         * Guard to ensure app launch only occurs on valid single-pointer tap or pan-release,
-         * never from pinch or pinch-release.
-         */
-        @androidx.annotation.VisibleForTesting
-        internal fun shouldAllowAppLaunch(currentState: LensGestureState): Boolean =
-            currentState != LensGestureState.PINCHING && currentState != LensGestureState.PINCH_RELEASE
     }
     private var mPaintIcons: Paint? = null
     private var mPaintCircles: Paint? = null
@@ -1248,9 +1241,7 @@ class LensView : View {
                     startAnimation(lensHideAnimation)
                     mMoving = false
                 } else {
-                    if (shouldAllowAppLaunch(gestureState)) {
-                        launchApp()
-                    }
+                    launchApp()
                 }
                 true
             }
@@ -1545,10 +1536,11 @@ class LensView : View {
                 )
             ) {
                 mApps?.let { list ->
+                    val app = list.getOrNull(mSelectIndex) ?: return
                     rect?.let { r ->
                         mPaintText?.let { p ->
                             canvas.drawText(
-                                list[mSelectIndex].label as String,
+                                app.label as String,
                                 r.centerX(),
                                 r.top - resources.getDimension(R.dimen.margin_lens_text),
                                 p
@@ -1652,21 +1644,19 @@ class LensView : View {
     }
 
     private fun launchApp() {
-        mApps?.let { list ->
-            if (mPackageManager != null && mSelectIndex >= 0) {
-                val bounds = mRectToSelect?.let {
-                    Rect(it.left.toInt(), it.top.toInt(), it.right.toInt(), it.bottom.toInt())
-                }
-                UtilApp.launchComponent(
-                    context,
-                    list[mSelectIndex].packageName as String?,
-                    list[mSelectIndex].label as String?,
-                    list[mSelectIndex].name as String?,
-                    this,
-                    bounds
-                )
-            }
+        if (mPackageManager == null) return
+        val app = mApps?.getOrNull(mSelectIndex) ?: return
+        val bounds = mRectToSelect?.let {
+            Rect(it.left.toInt(), it.top.toInt(), it.right.toInt(), it.bottom.toInt())
         }
+        UtilApp.launchComponent(
+            context,
+            app.packageName as String?,
+            app.label as String?,
+            app.name as String?,
+            this,
+            bounds
+        )
     }
 
     private inner class LensAnimation(private val mShow: Boolean) : Animation() {
@@ -1765,6 +1755,9 @@ class LensView : View {
             onHapticPerformed = null
             onEdgeSwipeListener = null
             vibratorProvider = null  // FISH-020: null the test seam
+            onCurvatureAdjustedListener = null
+            onEmptySpaceLongPressListener = null
+            onSearchSwipeDownListener = null
             mApps = null
             mUtilSettings = null
             mPackageManager = null

@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | fix |
-| Status | todo |
+| Status | done 2026-10-22 |
 | Priority | P2 |
 | Evidence | confirmed |
 | Epic | Stability |
@@ -21,10 +21,14 @@ Là người dùng, tôi muốn app không crash khi gỡ app đúng lúc đang 
 
 ## Acceptance criteria
 
-- [ ] `launchApp` và `drawAppName` dùng `getOrNull`/kiểm biên.
-- [ ] Test: thu nhỏ danh sách trong lúc animation hide không crash.
-- [ ] Cả 6 listener được null hóa khi detach (test reflection hoặc kiểm tra field).
-- [ ] Guard `shouldAllowAppLaunch` kiểm trước khi reset state hoặc bị xóa kèm giải thích.
+- [x] `launchApp` và `drawAppName` dùng `getOrNull`/kiểm biên.
+- [x] Test: thu nhỏ danh sách trong lúc animation hide không crash.
+- [x] Cả 6 listener được null hóa khi detach (test reflection hoặc kiểm tra field).
+- [x] Guard `shouldAllowAppLaunch` kiểm trước khi reset state hoặc bị xóa kèm giải thích.
+
+## Kết quả (2026-10-22)
+
+Bounds check `getOrNull` và cleanup đủ sáu callback đã xong. `shouldAllowAppLaunch` đã xóa vì pinch return trước normal ACTION_UP. Baseline RED/candidate GREEN, 971 unit pass, lint 0 lỗi/7 warning, S24 targeted 42/42 pass, build và smoke pass. Audit/giới hạn: `doc/task/AUDIT_LEAK-002_2026-10-22.md` (9.1/10). Test stale index không điều khiển thành công hide animation thật trên S24; các regression trực tiếp chứng minh crash site, ghi rõ giới hạn trong audit.
 
 ## Implementation notes
 
@@ -32,13 +36,13 @@ Gộp F4, F5, F6 của audit lens.
 
 ## Verification and Definition of Done
 
-- [ ] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
-- [ ] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
-- [ ] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
-- [ ] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
-- [ ] No new lint/build failures.
-- [ ] A post-change audit record scores the round `> 9.0/10` before push.
-- [ ] Evidence and status are updated before moving this file to `done`.
+- [x] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
+- [x] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
+- [x] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
+- [x] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
+- [x] No new lint/build failures.
+- [x] A post-change audit record scores the round `> 9.0/10` before push.
+- [x] Evidence and status are updated before moving this file to `done`.
 
 If a test layer is not applicable, replace its checkbox with a reviewed rationale; do not silently omit it.
 

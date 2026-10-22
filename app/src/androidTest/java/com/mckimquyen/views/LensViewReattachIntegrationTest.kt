@@ -17,6 +17,7 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -251,4 +252,37 @@ class LensViewReattachIntegrationTest {
             )
         }
     }
+
+    @Test
+    fun detachingClearsAllCallbacksThatCouldRetainTheActivity() {
+        withAttachedContainer { host, newView ->
+            val view = newView()
+            attach(host, view)
+            drawWithApps(view)
+            view.onCurvatureAdjustedListener = OnCurvatureAdjustedListener { _, _ -> }
+            view.onEmptySpaceLongPressListener = OnEmptySpaceLongPressListener { _, _ -> }
+            view.onSearchSwipeDownListener = OnSearchSwipeDownListener { }
+            view.onEdgeSwipeListener = OnEdgeSwipeListener { }
+            view.onHapticPerformed = { }
+            view.vibratorProvider = { null }
+
+            try {
+                host.removeView(view)
+                assertNull("curvature callback must not retain Activity after detach", view.onCurvatureAdjustedListener)
+                assertNull("empty-space callback must not retain Activity after detach", view.onEmptySpaceLongPressListener)
+                assertNull("search callback must not retain Activity after detach", view.onSearchSwipeDownListener)
+                assertNull("edge callback cleanup remains intact", view.onEdgeSwipeListener)
+                assertNull("haptic test callback cleanup remains intact", view.onHapticPerformed)
+                assertNull("vibrator provider cleanup remains intact", view.vibratorProvider)
+
+                attach(host, view)
+                assertNull("reattach waits for owner to rebind curvature callback", view.onCurvatureAdjustedListener)
+                assertNull("reattach waits for owner to rebind empty-space callback", view.onEmptySpaceLongPressListener)
+                assertNull("reattach waits for owner to rebind search callback", view.onSearchSwipeDownListener)
+            } finally {
+                if (view.parent === host) host.removeView(view)
+            }
+        }
+    }
+
 }
