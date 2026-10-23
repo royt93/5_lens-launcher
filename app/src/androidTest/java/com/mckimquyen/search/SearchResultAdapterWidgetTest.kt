@@ -124,6 +124,52 @@ class SearchResultAdapterWidgetTest {
         }
     }
 
+    /**
+     * SEARCH-014: shortcut lists are cached per package. Binding more packages than the cache holds
+     * must not grow it past its bound, and a memory trim must release entries.
+     */
+    @Test
+    fun shortcutCacheStaysBoundedAndReleasesEntriesOnTrim() {
+        val total = ShortcutCache.DEFAULT_MAX_PACKAGES + EXTRA_PACKAGES
+        ActivityScenario.launch(ActHome::class.java).use { scenario ->
+            val adapter = SearchResultAdapter(onAppClick = { _, _ -> })
+            scenario.onActivity { activity ->
+                val apps = (0 until total).map {
+                    App(label = "App $it", packageName = "pkg.cache.$it", name = "Main$it")
+                }
+                adapter.submitList(apps)
+                val parent = FrameLayout(activity)
+                apps.indices.forEach { index ->
+                    val holder = adapter.onCreateViewHolder(parent, 0)
+                    adapter.onBindViewHolder(holder, index)
+                }
+            }
+            // Shortcut queries finish on a worker thread, then post back to the main thread.
+            val deadline = System.currentTimeMillis() + WAIT_MS
+            var cached = 0
+            while (System.currentTimeMillis() < deadline) {
+                androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+                scenario.onActivity { cached = adapter.cachedShortcutPackageCountForTest() }
+                if (cached >= ShortcutCache.DEFAULT_MAX_PACKAGES) break
+                Thread.sleep(POLL_MS)
+            }
+            assertEquals("cache must fill to, and never exceed, its bound", ShortcutCache.DEFAULT_MAX_PACKAGES, cached)
+
+            scenario.onActivity {
+                adapter.trimShortcutCache(0.5f)
+                assertEquals(ShortcutCache.DEFAULT_MAX_PACKAGES / 2, adapter.cachedShortcutPackageCountForTest())
+                adapter.trimShortcutCache(0f)
+                assertEquals(0, adapter.cachedShortcutPackageCountForTest())
+            }
+        }
+    }
+
+    private companion object {
+        const val EXTRA_PACKAGES = 20
+        const val WAIT_MS = 8_000L
+        const val POLL_MS = 100L
+    }
+
     /** SEARCH-003: long-press must show the row action menu without crashing. */
     @Test
     fun longPressShowsActionMenuWithoutCrashing() {

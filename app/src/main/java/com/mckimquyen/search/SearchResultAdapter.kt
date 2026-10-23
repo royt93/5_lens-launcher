@@ -51,7 +51,8 @@ class SearchResultAdapter @JvmOverloads constructor(
     /** Whether the scope can still run work; see [onAttachedToRecyclerView]. */
     @androidx.annotation.VisibleForTesting
     fun isScopeActiveForTest(): Boolean = adapterScope.isActive
-    private val shortcutsByPackage = mutableMapOf<String, List<QuickShortcut>>()
+    // SEARCH-014: bounded (LRU) - an unbounded map kept up to 3 Drawables per package ever searched.
+    private val shortcutCache = ShortcutCache()
     private val loadingIconKeys = mutableSetOf<String>()
     private val loadingShortcutPackages = mutableSetOf<String>()
 
@@ -64,6 +65,12 @@ class SearchResultAdapter @JvmOverloads constructor(
     }
 
     fun firstOrNull(): App? = apps.firstOrNull()
+
+    /** SEARCH-014: drop cached shortcut icons under memory pressure; they reload lazily on next bind. */
+    fun trimShortcutCache(fraction: Float) = shortcutCache.trimToFraction(fraction)
+
+    @androidx.annotation.VisibleForTesting
+    fun cachedShortcutPackageCountForTest(): Int = shortcutCache.size()
 
     @androidx.annotation.VisibleForTesting
     fun currentListForTest(): List<App> = apps.toList()
@@ -164,7 +171,7 @@ class SearchResultAdapter @JvmOverloads constructor(
 
         private fun bindShortcuts(app: App) {
             val packageName = app.packageName.toString()
-            val cachedShortcuts = shortcutsByPackage[packageName]
+            val cachedShortcuts = shortcutCache.get(packageName)
             if (cachedShortcuts != null) {
                 renderShortcuts(cachedShortcuts)
                 return
@@ -179,7 +186,7 @@ class SearchResultAdapter @JvmOverloads constructor(
                 val shortcuts = withContext(Dispatchers.IO) {
                     AppShortcutsProvider.shortcutsFor(appContext, packageName)
                 }
-                shortcutsByPackage[packageName] = shortcuts
+                shortcutCache.put(packageName, shortcuts)
                 loadingShortcutPackages.remove(packageName)
                 val position = bindingAdapterPosition
                 if (position != RecyclerView.NO_POSITION

@@ -2364,6 +2364,23 @@ public class ActHome extends ActBase {
         }
     }
 
+    /**
+     * SEARCH-014: this Activity's search adapter caches shortcut Drawables for its whole lifetime, so it
+     * must follow the same memory-pressure tiers RApplication already applies to BitmapCache.
+     */
+    @Override
+    public void onTrimMemory(int level) {
+        super.onTrimMemory(level);
+        if (searchResultAdapter == null) return;
+        if (level >= TRIM_MEMORY_BACKGROUND) {
+            searchResultAdapter.trimShortcutCache(0f);
+        } else if (level >= TRIM_MEMORY_RUNNING_CRITICAL) {
+            searchResultAdapter.trimShortcutCache(0.5f);
+        } else if (level >= TRIM_MEMORY_RUNNING_LOW) {
+            searchResultAdapter.trimShortcutCache(0.75f);
+        }
+    }
+
     @Override
     protected void onDestroy() {
         if (lensTabMediator != null) {

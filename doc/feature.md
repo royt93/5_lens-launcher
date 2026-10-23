@@ -4,6 +4,8 @@ Source of truth for implementation choices in this session. Detailed acceptance 
 
 ## ✅ Implemented
 
+- **SEARCH-014 — Giới hạn cache shortcut Drawable của SearchResultAdapter (23/10/2026)**: `ShortcutCache` (LruCache, trần 30 package) thay map không giới hạn; `ActHome.onTrimMemory` hạ cache theo mức `TRIM_MEMORY_*`. `ShortcutCacheTest` 7/7 + mutation check, 21 test search trên Pixel, 1039 unit, audit 9.1/10. Giới hạn: chưa đo heap, nhánh `ActHome.onTrimMemory` chưa có test riêng, trần đếm theo package không theo byte. Audit: `doc/task/AUDIT_SEARCH-014_2026-10-23.md`.
+
 - **UI-028 — Dismiss dialog khi thay thế và khi destroy (23/10/2026)**: `ActHome.dismissLensDialog()` dùng ở cả 5 vị trí gán `lensDialog` và `onDestroy`; `AppAdapter.onViewRecycled` dismiss folder dialog; `FrmSettings`/`FrmApps.onDestroyView` dismiss `searchHintDialog`/`pendingUninstallDialog`. RED/GREEN trên Pixel 7 Pro, mutation check, 80/80 test thiết bị, 1027 unit, audit 9.3/10. Giới hạn: test uninstall-dialog gán dialog bằng reflection, không qua luồng multi-select. Audit: `doc/task/AUDIT_UI-028_2026-10-23.md`.
 
 - **UI-030 — Home list visibility/lock event (23/10/2026)**: `AppRowActions` tách persistence/event khỏi `AppViewHolder`; Home list hide phát `AppEventManager.visibilityChanged`, cập nhật Home và LensView; lock chỉ ghi/phát sau biometric success. Unit 1027/1027, 40 test thiết bị Pixel, smoke sạch, audit 9.2/10. Giới hạn: không thử fingerprint phần cứng; Pixel SDK telemetry thay đổi tự sinh, app prefs/DB/system settings không đổi. Audit: `doc/task/AUDIT_UI-030_2026-10-23.md`.
@@ -67,6 +69,7 @@ Source of truth for implementation choices in this session. Detailed acceptance 
 
 
 ## 🟡 In progress
+
 
 
 

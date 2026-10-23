@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | fix |
-| Status | todo |
+| Status | done 2026-10-23 — audit 9.1/10, `doc/task/AUDIT_SEARCH-014_2026-10-23.md` |
 | Priority | P2 |
 | Evidence | confirmed |
 | Epic | Memory |
@@ -21,9 +21,9 @@ Là người dùng, tôi muốn app không phình RAM khi dùng search lâu.
 
 ## Acceptance criteria
 
-- [ ] Cache có giới hạn (LRU) hoặc được clear khi detach/trim memory.
-- [ ] Test: vượt giới hạn thì entry cũ bị loại.
-- [ ] Không làm chậm lần hiển thị shortcut đầu tiên.
+- [x] `ShortcutCache` (LruCache, trần 30 package) + `ActHome.onTrimMemory` hạ cache theo mức `TRIM_MEMORY_*`.
+- [x] `ShortcutCacheTest` 7/7 (có mutation check) và widget test cache bị chặn trần trên Pixel.
+- [x] Luồng nạp lần đầu không đổi (vẫn query nền rồi render); chỉ thay cấu trúc lưu cache. Chưa đo thời gian riêng.
 
 ## Implementation notes
 
@@ -31,13 +31,13 @@ Dùng `LruCache` kích thước cố định (hằng số có tên), clear trong
 
 ## Verification and Definition of Done
 
-- [ ] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
-- [ ] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
-- [ ] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
-- [ ] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
-- [ ] No new lint/build failures.
-- [ ] A post-change audit record scores the round `> 9.0/10` before push.
-- [ ] Evidence and status are updated before moving this file to `done`.
+- [x] `ShortcutCacheTest` 7/7, RED trước (thiếu class), mutation bắt 4/7 test.
+- [x] `SearchResultAdapterWidgetTest` thêm 1 test; 21 test search trên Pixel pass.
+- [x] Not applicable (reviewed) — không đổi persistence/SDK; `AppSearchIntegrationTest` 6/6 vẫn pass.
+- [x] Pixel 7 Pro `2B051FDH3006MU`, Android 17, 2026-10-23: 21 test thiết bị liên quan search pass, APK baseline và Google Play foreground khôi phục. Không chụp ảnh smoke riêng (ghi trong audit).
+- [x] Full gate xanh: 1039 unit, lint, assemble app + androidTest (chưa so số warning lint với baseline).
+- [x] `doc/task/AUDIT_SEARCH-014_2026-10-23.md`, 9.1/10.
+- [x] Evidence/status cập nhật.
 
 If a test layer is not applicable, replace its checkbox with a reviewed rationale; do not silently omit it.
 
