@@ -84,6 +84,19 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
     // (RecyclerView re-binds continuously while scrolling).
     private final com.mckimquyen.util.UtilSettings mUtilSettings;
 
+    /**
+     * UI-028: a row's Set-folder dialog belongs to its ViewHolder; once the holder is recycled (or
+     * the RecyclerView drops its adapter) nothing else would ever dismiss that window.
+     */
+    @Override
+    public void onViewRecycled(@NonNull AppViewHolder holder) {
+        if (holder.folderDialog != null) {
+            holder.folderDialog.dismiss();
+            holder.folderDialog = null;
+        }
+        super.onViewRecycled(holder);
+    }
+
     // ========================================================================
     // FEAT-007: MULTI-SELECT STATE
     // ========================================================================

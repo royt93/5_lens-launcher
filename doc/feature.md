@@ -4,6 +4,8 @@ Source of truth for implementation choices in this session. Detailed acceptance 
 
 ## ✅ Implemented
 
+- **UI-028 — Dismiss dialog khi thay thế và khi destroy (23/10/2026)**: `ActHome.dismissLensDialog()` dùng ở cả 5 vị trí gán `lensDialog` và `onDestroy`; `AppAdapter.onViewRecycled` dismiss folder dialog; `FrmSettings`/`FrmApps.onDestroyView` dismiss `searchHintDialog`/`pendingUninstallDialog`. RED/GREEN trên Pixel 7 Pro, mutation check, 80/80 test thiết bị, 1027 unit, audit 9.3/10. Giới hạn: test uninstall-dialog gán dialog bằng reflection, không qua luồng multi-select. Audit: `doc/task/AUDIT_UI-028_2026-10-23.md`.
+
 - **UI-030 — Home list visibility/lock event (23/10/2026)**: `AppRowActions` tách persistence/event khỏi `AppViewHolder`; Home list hide phát `AppEventManager.visibilityChanged`, cập nhật Home và LensView; lock chỉ ghi/phát sau biometric success. Unit 1027/1027, 40 test thiết bị Pixel, smoke sạch, audit 9.2/10. Giới hạn: không thử fingerprint phần cứng; Pixel SDK telemetry thay đổi tự sinh, app prefs/DB/system settings không đổi. Audit: `doc/task/AUDIT_UI-030_2026-10-23.md`.
 
 - **DB-007 — Backup v2 mang physics từng lens (23/10/2026)**: backup v2 giờ mang tùy chọn `physics` (4 key per-lens), additive, không tăng schema. Lens phụ thiếu trường = xóa override để kế thừa; lens default thiếu trường = giữ key chung; file cũ không đụng physics; giá trị sai/ngoài khoảng = file malformed; rollback gồm physics. Audit 9.1/10 (`doc/task/AUDIT_DB-007_2026-10-23.md`). Kiểm thử máy thật trên S24 Ultra do Pixel mất kết nối (owner đồng ý).
@@ -73,6 +75,7 @@ Source of truth for implementation choices in this session. Detailed acceptance 
 
 
 
+
 - **FISH-022 — Nhóm lens (2026-10-15)**: Room group metadata + backup v2, `LensManagementActivity` Material You (active lens, count, edit theo ngữ cảnh), bulk assign/create/ungroup, popup action, đủ locale. Audit sửa 3 lỗi (manage-id lạ, mất edit state khi recreate, `createLens` không copy group). TECNO KJ7: manager 28/28, Home 26/26, quick-switch 12/12, multi-lens 4/4, backup 11/11, migration 4/4; full unit 866/866; secret scan + diff check xanh. Backup export/import smoke tay pass group + collapsed state; file picker export lỗi orphan-row đã sửa và commit `2ba4f58d`.
 
 - **FISH-021 follow-up — Icon trong danh sách chọn app (09/10/2026)**: owner duyệt mỗi dòng gồm icon launcher 40dp + tên + checkbox. Tái dùng iconCacheKey/cache và ListView multi-choice; Set vẫn là nguồn lựa chọn để cuộn không mất tick. Thiết bị khóa hiện tại: Pixel 7 Pro `2B051FDH3006MU`. Chưa kiểm chứng và chưa push; plan `docs/superpowers/plans/2026-10-09-lens-picker-icons.md`.
@@ -80,6 +83,8 @@ Source of truth for implementation choices in this session. Detailed acceptance 
 - **REL-2026.10.07 — Chuẩn bị release store (07/10/2026)**: audit tĩnh xong; code-side đã bump version, thêm backup rules (`BackupRulesTest` 3/3), R8 release build + 16 KB zipalign OK, unit 725/725. Owner quyết (07/10): giữ rewarded ID test, skip consent ADS-001, giữ 3 permission nhạy cảm, dùng key hiện tại (SEC-001 để sau). Còn lại: smoke TECNO + audit >9. Xem `doc/task/RELEASE_OWNER_CHECKLIST.md`.
 
 ## 📋 Picked
+
+- **UI-028 — Dialog của ActHome/Fragments không được dismiss khi destroy (23/10/2026)**: xác minh evidence: `ActHome` có 5 dialog dùng chung `lensDialog`, destroy chỉ dismiss tham chiếu cuối; `AppAdapter.AppViewHolder.folderDialog`, `FrmSettings.searchHintDialog`, `FrmApps.pendingUninstallDialog` chưa dismiss ở lifecycle teardown. Đang triển khai đúng story backlog (không phải menu actions). Plan đã duyệt, RED/GREEN sẽ phủ single-dialog replacement/dismiss, Activity/Fragment cleanup và widget recreate test, giữ state UI-023.
 
 1. **FISH-022 — Nhóm lens (2026-10-14, owner-approved design)**: Add nullable `groupName` to `LensWorkspace` (Room v13 + migration); group sections are derived from lens labels, trimmed and compared case-insensitively, with empty groups removed. Replace lens-switch dialog with a dedicated management Activity: browse/collapse group sections and tap a lens to switch; edit mode supports bulk assign-to-existing-group, create-group-from-selection, and ungroup. Keep a quick current-lens group action and manager entry in the existing lens popup. Export/import optional `groupName` and root `collapsedGroupNames` additively in backup schema v2; old v2 files default collapsed state to empty. Import replaces collapsed state and includes it in existing prefs snapshot/rollback. No change to paging order, active-lens semantics, app scope, ads/VIP, or store-assets. Spec: `docs/superpowers/specs/2026-10-14-lens-groups-design.md`; plan: `docs/superpowers/plans/2026-10-14-fish-022-lens-groups.md`.
 

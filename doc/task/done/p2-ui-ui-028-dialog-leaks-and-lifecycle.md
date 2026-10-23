@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | fix |
-| Status | todo |
+| Status | done 2026-10-23 — audit 9.3/10, `doc/task/AUDIT_UI-028_2026-10-23.md` |
 | Priority | P2 |
 | Evidence | confirmed |
 | Epic | Stability |
@@ -21,10 +21,10 @@ Là người dùng, tôi muốn xoay màn hình hay đóng app không rò cửa 
 
 ## Acceptance criteria
 
-- [ ] Mỗi lần mở dialog mới dismiss cái cũ (một hàm dùng chung).
-- [ ] `onDestroy`/`onDestroyView` dismiss mọi dialog đang giữ.
-- [ ] Widget test: mở dialog, `recreate()`, không còn window leak (kiểm `WindowManager`/log StrictMode).
-- [ ] Giữ nguyên bảo toàn state UI-023.
+- [x] Mỗi lần mở dialog mới dismiss cái cũ: `ActHome.dismissLensDialog()` gọi ở cả 5 vị trí gán `lensDialog`.
+- [x] `ActHome.onDestroy`, `FrmSettings.onDestroyView`, `FrmApps.onDestroyView` và `AppAdapter.onViewRecycled` dismiss dialog đang giữ.
+- [x] Widget test: recreate fragment/destroy Activity/recycle holder kiểm `isShowing` và field null; chạy RED trước, GREEN sau, có mutation check.
+- [x] UI-023 hierarchy-state tests vẫn pass (`AppAdapterFolderDialogWidgetTest` 7/7, `FrmSettingsSearchHintWidgetTest` 1/1).
 
 ## Implementation notes
 
@@ -32,13 +32,13 @@ Gộp FIX-3 và test-gap #3 của audit ui. Đề xuất helper `showSingleDialo
 
 ## Verification and Definition of Done
 
-- [ ] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
-- [ ] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
-- [ ] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
-- [ ] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
-- [ ] No new lint/build failures.
-- [ ] A post-change audit record scores the round `> 9.0/10` before push.
-- [ ] Evidence and status are updated before moving this file to `done`.
+- [x] Unit tests: Not applicable (reviewed) — vòng đời cửa sổ Dialog thuộc framework Android; phủ bằng instrumentation RED/GREEN. Full unit 1027/1027 vẫn xanh.
+- [x] 5 widget test mới + 75 regression, 80/80 pass trên Pixel 7 Pro.
+- [x] Integration: Not applicable (reviewed) — không đổi persistence/SDK; `FrmAppsSelectionIntegrationTest` 10/10 vẫn pass.
+- [x] Smoke Pixel 7 Pro `2B051FDH3006MU`, Android 17, 2026-10-23 18:50; ActHome foreground, lưới đầy đủ, không quảng cáo; APK baseline và Google Play foreground đã khôi phục.
+- [x] Full gate xanh: 1027 unit, lint, assemble app + androidTest (chưa so số warning lint với baseline).
+- [x] `doc/task/AUDIT_UI-028_2026-10-23.md`, 9.3/10.
+- [x] Evidence/status cập nhật.
 
 If a test layer is not applicable, replace its checkbox with a reviewed rationale; do not silently omit it.
 

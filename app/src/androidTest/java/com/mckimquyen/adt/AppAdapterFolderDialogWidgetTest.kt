@@ -154,6 +154,32 @@ class AppAdapterFolderDialogWidgetTest {
     }
 
     @Test
+    fun recyclingHolderDismissesItsFolderDialogAndReleasesTheReference() {
+        val scenario = ActivityScenario.launch(ActSettings::class.java)
+        scenario.onActivity { activity ->
+            // Real RecyclerView path: detaching the adapter makes the RecyclerView itself recycle
+            // the bound holder, which is the only thing that can ever dismiss a row's dialog.
+            val recyclerView = RecyclerView(activity).apply { layoutManager = LinearLayoutManager(activity) }
+            val adapter = AppAdapter(activity, mutableListOf(app("pkg.folder.recycle", "Work")))
+            recyclerView.adapter = adapter
+            recyclerView.measure(0, 0)
+            recyclerView.layout(0, 0, 1080, 400)
+            val holder = recyclerView.findViewHolderForAdapterPosition(0) as AppAdapter.AppViewHolder
+            val menu = PopupMenu(activity, recyclerView).menu
+            activity.menuInflater.inflate(R.menu.menu_app, menu)
+            holder.onMenuItemClick(menu.findItem(R.id.menuItemFolder))
+            val dialog = requireNotNull(holder.folderDialog)
+            assertTrue(dialog.isShowing)
+
+            recyclerView.adapter = null
+
+            assertFalse("recycling the holder must dismiss its window", dialog.isShowing)
+            assertNull("recycled holder must release the dialog reference", holder.folderDialog)
+        }
+        scenario.close()
+    }
+
+    @Test
     fun folderDialog_underReducedMotion_stillAppliesInstantly() {
         val instrumentation = InstrumentationRegistry.getInstrumentation()
         fun runShell(command: String): String {

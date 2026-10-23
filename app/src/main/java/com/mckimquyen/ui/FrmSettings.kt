@@ -607,6 +607,9 @@ class FrmSettings : Fragment(), SettingsInterface {
         tvSelectedEdgeSwipeMode = null
         edgeSwipeDialogForTest?.dismiss()
         edgeSwipeDialogForTest = null
+        // UI-028: a still-showing dialog would keep the destroyed Activity's decor view alive.
+        searchHintDialog?.dismiss()
+        searchHintDialog = null
         utilSettings = null
         super.onDestroyView()
     }

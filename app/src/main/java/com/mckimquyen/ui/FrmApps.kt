@@ -208,6 +208,9 @@ class FrmApps : Fragment(), AppsInterface, AppAdapter.SelectionListener, ActionM
         progressBarApps = null
         lensPickerDialog?.dismiss()
         lensPickerDialog = null
+        // UI-028: dismiss the bulk-uninstall confirmation so its window does not outlive the view.
+        pendingUninstallDialog?.dismiss()
+        pendingUninstallDialog = null
         utilSettings = null
         super.onDestroyView()
     }

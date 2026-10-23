@@ -1103,6 +1103,7 @@ public class ActHome extends ActBase {
     private void toggleFreezeForLens(LensWorkspace lens) {
         if (utilSettings == null) return;
         if (utilSettings.isLensFrozen(lens.getId())) {
+            dismissLensDialog();
             lensDialog = new MaterialAlertDialogBuilder(this, R.style.MaterialYouDialogTheme)
                     .setTitle(R.string.lens_unfreeze_title)
                     .setMessage(R.string.lens_unfreeze_message)
@@ -1246,6 +1247,16 @@ public class ActHome extends ActBase {
         void onNameEntered(String name);
     }
 
+    /** Dismisses the current lens dialog before replacing it or releasing the Activity. */
+    private void dismissLensDialog() {
+        if (lensDialog != null) {
+            if (lensDialog.isShowing()) {
+                lensDialog.dismiss();
+            }
+            lensDialog = null;
+        }
+    }
+
     /**
      * The lens dialog currently on screen, exposed so tests can drive its real buttons. Espresso
      * cannot be used for this on API 37 (its event injector needs the removed
@@ -1276,6 +1287,7 @@ public class ActHome extends ActBase {
             ids[i] = com.mckimquyen.util.LensAppScope.identifierOf(apps.get(i));
         }
 
+        dismissLensDialog();
         lensDialog = new com.google.android.material.dialog.MaterialAlertDialogBuilder(this, com.mckimquyen.R.style.MaterialYouDialogTheme)
                 .setTitle(com.mckimquyen.R.string.lens_choose_apps)
                 .setAdapter(new com.mckimquyen.adt.LensAppChoiceAdapter(this, apps), null)
@@ -1307,7 +1319,7 @@ public class ActHome extends ActBase {
                 if (hidden.contains(LensAppScope.identifierOf(app))) apps.add(app);
             }
         }
-        if (lensDialog != null) lensDialog.dismiss();
+        dismissLensDialog();
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this, R.style.MaterialYouDialogTheme)
                 .setTitle(R.string.lens_hidden_apps)
                 .setNegativeButton(android.R.string.cancel, null);
@@ -1350,6 +1362,7 @@ public class ActHome extends ActBase {
         container.setPadding(paddingH, paddingV, paddingH, 0);
         container.addView(input);
 
+        dismissLensDialog();
         lensDialog = new MaterialAlertDialogBuilder(this, R.style.MaterialYouDialogTheme)
                 .setTitle(titleRes)
                 .setView(container)
@@ -1378,6 +1391,7 @@ public class ActHome extends ActBase {
 
     private void confirmDeleteLensDialog(LensWorkspace lens) {
         String message = getString(R.string.lens_delete_confirm_message, lens.getName());
+        dismissLensDialog();
         lensDialog = new MaterialAlertDialogBuilder(this, R.style.MaterialYouDialogTheme)
                 .setTitle(R.string.lens_delete)
                 .setMessage(message)
@@ -2362,12 +2376,7 @@ public class ActHome extends ActBase {
         // FISH-008 Phase 3: both hold a View (a dialog's decor, a popup's anchor) belonging to
         // this Activity. Dismiss a dialog still showing during a rotation - it would leak its
         // window - and drop both references so the destroyed Activity is not retained.
-        if (lensDialog != null) {
-            if (lensDialog.isShowing()) {
-                lensDialog.dismiss();
-            }
-            lensDialog = null;
-        }
+        dismissLensDialog();
         if (lensManagementMenu != null) {
             lensManagementMenu.dismiss();
             lensManagementMenu = null;

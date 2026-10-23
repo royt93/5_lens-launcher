@@ -268,7 +268,7 @@ Giới hạn: agent audit ui chưa đọc hết `LensView.kt`, `ActAbout.java`, 
 | `SEARCH-013` ✅ done 2026-10-23 | P2 | 3 | [Query toàn bảng Contacts đồng bộ trên main thread mỗi ký tự gõ](done/p2-search-search-013-contacts-query-main-thread.md) |
 | `SEARCH-014` | P2 | 2 | [shortcutsByPackage giữ Drawable không giải phóng](todo/p2-search-search-014-shortcut-drawable-cache-unbounded.md) |
 | `UI-027` | P2 | 1 | [Overlay quảng cáo dùng colorWhite cứng, tương phản 1.69:1 ở dark/dynamic color](todo/p2-ui-ui-027-ad-overlay-contrast-night.md) |
-| `UI-028` | P2 | 3 | [ActHome dùng một field lensDialog cho 5 dialog; vài dialog không dismiss khi destroy](todo/p2-ui-ui-028-dialog-leaks-and-lifecycle.md) |
+| `UI-028` ✅ done 2026-10-23 | P2 | 3 | [ActHome dùng một field lensDialog cho 5 dialog; vài dialog không dismiss khi destroy](done/p2-ui-ui-028-dialog-leaks-and-lifecycle.md) |
 | `UI-029` | P2 | 2 | [Search bar bị Clean mode đè mà Settings vẫn hiện bật; chevron quick action cứng không RTL](todo/p2-ui-ui-029-settings-conflict-and-rtl-chevron.md) |
 | `BUILD-003` | P3 | 2 | [Dọn repo: local.properties bị track, Jetifier thừa, permission thừa, rác JVM](todo/p3-build-build-003-repo-hygiene-quick-wins.md) |
 | `TEST-005` ✅ done 2026-10-20 | P3 | 5 | [Test suite rò trạng thái thiết bị và Robolectric không pin SDK](done/p3-test-test-005-test-state-leak-and-flaky-guards.md) |
