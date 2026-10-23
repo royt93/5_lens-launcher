@@ -4,6 +4,8 @@ Source of truth for implementation choices in this session. Detailed acceptance 
 
 ## ✅ Implemented
 
+- **UI-030 — Home list visibility/lock event (23/10/2026)**: `AppRowActions` tách persistence/event khỏi `AppViewHolder`; Home list hide phát `AppEventManager.visibilityChanged`, cập nhật Home và LensView; lock chỉ ghi/phát sau biometric success. Unit 1027/1027, 40 test thiết bị Pixel, smoke sạch, audit 9.2/10. Giới hạn: không thử fingerprint phần cứng; Pixel SDK telemetry thay đổi tự sinh, app prefs/DB/system settings không đổi. Audit: `doc/task/AUDIT_UI-030_2026-10-23.md`.
+
 - **DB-007 — Backup v2 mang physics từng lens (23/10/2026)**: backup v2 giờ mang tùy chọn `physics` (4 key per-lens), additive, không tăng schema. Lens phụ thiếu trường = xóa override để kế thừa; lens default thiếu trường = giữ key chung; file cũ không đụng physics; giá trị sai/ngoài khoảng = file malformed; rollback gồm physics. Audit 9.1/10 (`doc/task/AUDIT_DB-007_2026-10-23.md`). Kiểm thử máy thật trên S24 Ultra do Pixel mất kết nối (owner đồng ý).
 - **SEARCH-013 — Contacts query bất đồng bộ với debounce (23/10/2026)**: `ContactSearchController` đưa query sang `Dispatchers.IO`, debounce 150ms, generation guard hủy query cũ. 1004 unit pass, lint 0 lỗi/7 warnings. Pixel 7 Pro: 34 integration/widget/timing pass, benchmark 1000 contacts burst 9 phím chỉ 1 query trên worker (baseline cũ 9 query chặn main 431ms; một lượt đo). Home smoke 103 app. Audit 9.2/10; thêm test recreate Activity khi query pending: `doc/task/AUDIT_SEARCH-013_2026-10-23.md`.
 

@@ -282,7 +282,7 @@ Giới hạn: agent audit ui chưa đọc hết `LensView.kt`, `ActAbout.java`, 
 | `DB-007` ✅ done 2026-10-23 | P2 | 3 | [Backup v2 không chứa physics từng lens](done/p2-db-db-007-backup-v2-include-lens-physics.md) |
 | `PERF-006` ✅ done 2026-10-23 | P2 | 3 | [Reload một icon quét lại toàn bộ icon pack và parse appfilter mỗi lần](done/p2-perf-perf-006-icon-reload-reuses-icon-pack-cache.md) |
 | `PERF-007` ✅ done 2026-10-23 | P2 | 2 | [Scan PackageManager gây N+1 truy vấn Room và ghi từng app](done/p2-perf-perf-007-scan-n-plus-one-room.md) |
-| `UI-030` | P2 | 3 | [Ẩn/khóa app ở list mode trên Home không phát broadcast, lưới không đồng bộ](todo/p2-ui-ui-030-home-list-mode-broadcast-sync.md) |
+| `UI-030` ✅ done 2026-10-23 | P2 | 3 | [Ẩn/khóa app ở list mode trên Home không phát broadcast, lưới không đồng bộ](done/p2-ui-ui-030-home-list-mode-broadcast-sync.md) |
 | `UI-032` | P2 | 2 | [LensManagementActivity mất state dialog sau process death và đọc prefs trên main thread](todo/p2-ui-ui-032-lens-manager-process-death.md) |
 | `ARCH-002` | P3 | 8 | [Tách ActHome (2358 dòng) thành các bộ điều khiển nhỏ](todo/p3-arch-arch-002-split-act-home-god-class.md) |
 | `BUILD-004` | P3 | 3 | [Baseline/startup profile lệch mục tiêu và comment R8 sai](todo/p3-build-build-004-r8-and-baseline-profile-accuracy.md) |

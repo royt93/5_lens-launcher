@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | enhance |
-| Status | todo |
+| Status | done 2026-10-23 — audit 9.2/10, `doc/task/AUDIT_UI-030_2026-10-23.md` |
 | Priority | P2 |
 | Evidence | confirmed |
 | Epic | Home list mode |
@@ -15,16 +15,22 @@
 
 `adt/AppAdapter.java:809-833` `sendChangeAppsVisibilityBroadcast`/`sendChangeAppsLockBroadcast` chỉ gửi khi `mActivityContext instanceof ActSettings`. Nhưng `ui/ActHome.java:552` `homeAppAdapter = new AppAdapter(this, ...)` cũng dùng adapter này nên ở list mode trên Home, toggle ẩn/khóa không phát broadcast. `AppViewHolder` (`:436-971`) còn tự gọi `AppPersistent`, `Biometric`, `sendBroadcast`. Cả 3 widget test của adapter dựng trong ngữ cảnh `ActSettings`, không phủ nhánh này.
 
+## Implemented evidence
+
+- RED trước sửa: Home list bấm hide không phát visibility event. Sau sửa: Home widget pass và lens grid test qua Fisheye.
+- Callback biometric được mock ở prompt boundary; production `Biometric.toggleLockApp` callback chạy thật trong JVM unit test. Không có hardware fingerprint test.
+- Audit chi tiết: `doc/task/AUDIT_UI-030_2026-10-23.md`.
+
 ## User story
 
 Là người dùng list mode, tôi muốn ẩn/khóa app có hiệu lực ngay ở mọi màn hình.
 
 ## Acceptance criteria
 
-- [ ] Ẩn/khóa ở Home phát đúng broadcast/sự kiện và lưới cập nhật.
-- [ ] Rút persistence/broadcast khỏi `AppViewHolder` sang một lớp độc lập kiểu Activity (`AppRowActions`).
-- [ ] Widget test dựng adapter trong `ActHome`.
-- [ ] Không đổi hành vi ở `ActSettings`.
+- [x] Visibility ở Home phát `AppEventManager.visibilityChanged`; list cập nhật và chuyển fisheye xác nhận lens grid không hiện lại app đã ẩn. Lock phát sau biometric success; callback được kiểm bằng JVM test production với mock `BiometricPrompt`.
+- [x] Rút persistence/event của visibility, lock, organization sang `AppRowActions`; không còn persistence/broadcast trong các handler hàng này.
+- [x] Widget test thật trong `ActHome` list mode và `ActSettings`; xác nhận lưới Fisheye sau toggle.
+- [x] `ActSettings` visibility event có test riêng; adapter regressions pass.
 
 ## Implementation notes
 
@@ -32,13 +38,13 @@ Gộp ENH-2 của audit ui. Có thể tách thành hai PR nhỏ: sửa lỗi tr�
 
 ## Verification and Definition of Done
 
-- [ ] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
-- [ ] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
-- [ ] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
-- [ ] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
-- [ ] No new lint/build failures.
-- [ ] A post-change audit record scores the round `> 9.0/10` before push.
-- [ ] Evidence and status are updated before moving this file to `done`.
+- [x] `AppRowActionsTest` 4/4, `AppAdapterAuthenticationTest` 1/1; mutation checks bắt notify trước persist/auth.
+- [x] Widget tests Home/Settings + 40 device tests; accessibility labels/resources không đổi.
+- [x] Room in-memory test xác nhận đúng lens persistence, biometric callback production; thiết bị kiểm Room/LiveData/Activity wiring.
+- [x] Smoke Pixel 7 Pro `2B051FDH3006MU`, Android 17, 2026-10-23 17:51; Home foreground, app grid đầy đủ, không quảng cáo; APK baseline khôi phục và Google Play foreground trở lại.
+- [x] Full gate pass: 1027 unit tests, lint, assemble app và androidTest; 0 failure.
+- [x] `doc/task/AUDIT_UI-030_2026-10-23.md`, 9.2/10.
+- [x] Evidence/status/docs cập nhật; `git diff --check` + `scripts/check-secrets.sh` cần chạy lần cuối trước commit.
 
 If a test layer is not applicable, replace its checkbox with a reviewed rationale; do not silently omit it.
 

@@ -31,11 +31,9 @@ import com.google.android.material.snackbar.Snackbar;
 import com.mckimquyen.R;
 import com.mckimquyen.ext.Biometric;
 import com.mckimquyen.model.App;
-import com.mckimquyen.model.AppOrganizationRules;
 import com.mckimquyen.model.AppPersistent;
 import com.mckimquyen.model.PinnedZone;
 import com.mckimquyen.services.BroadcastReceivers;
-import com.mckimquyen.ui.ActSettings;
 import com.mckimquyen.util.ApertureRevealHelper;
 import com.mckimquyen.util.UtilApp;
 
@@ -93,6 +91,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
     public static final Object PAYLOAD_SELECTION = new Object();
     private final Set<String> mSelectedIdentifiers = new LinkedHashSet<>();
     private SelectionListener mSelectionListener;
+    private final AppRowActions mRowActions = new AppRowActions();
 
     public interface SelectionListener {
         void onSelectionChanged(int selectedCount);
@@ -623,18 +622,12 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
         }
 
         private void applyOrganization(boolean favorite, String folder, PinnedZone zone) {
-            String packageName = Objects.requireNonNull(mApp.getPackageName()).toString();
-            String componentName = Objects.requireNonNull(mApp.getName()).toString();
-            String normalizedFolder = AppOrganizationRules.normalizeFolder(folder);
-            AppPersistent.setOrganization(packageName, componentName, favorite, normalizedFolder, zone, mApp.getLensId());
-            mApp = mApp.copyWithOrganization(favorite, normalizedFolder, zone);
+            mApp = mAdapter.mRowActions.setOrganization(mApp, favorite, folder, zone);
             int position = getBindingAdapterPosition();
             if (position != RecyclerView.NO_POSITION) {
                 mAdapter.mApps.set(position, mApp);
                 mAdapter.notifyItemChanged(position);
             }
-            mActivityContext.sendBroadcast(
-                    new Intent(mActivityContext, BroadcastReceivers.AppsEditedReceiver.class));
             Snackbar.make(cvAppContainer, R.string.organization_saved, Snackbar.LENGTH_SHORT).show();
         }
 
@@ -714,14 +707,8 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
          */
         public void toggleAppVisibility(App app) {
             this.mApp = app;
-            String pkgName = Objects.requireNonNull(mApp.getPackageName()).toString();
-            String name = Objects.requireNonNull(mApp.getName()).toString();
-
-            // Lấy trạng thái hiện tại từ mApp property thay vì DB query
             boolean isAppVisible = mApp.isVisible();
-
-            // Toggle trạng thái
-            AppPersistent.setAppVisibility(pkgName, name, !isAppVisible, mApp.getLensId());
+            App updatedApp = mAdapter.mRowActions.toggleVisibility(app);
 
             // Update UI
             if (isAppVisible) {
@@ -741,10 +728,10 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
             // Đồng bộ trạng thái vào Adapter list
             int position = getBindingAdapterPosition();
             if (position != RecyclerView.NO_POSITION) {
-                App updatedApp = mApp.copyWithLockAndVisibility(mApp.isOpened(), !isAppVisible, mApp.getOpenCount());
                 mAdapter.mApps.set(position, updatedApp);
                 mAdapter.notifyItemChanged(position);
             }
+            mApp = updatedApp;
         }
 
         // ====================================================================
@@ -758,26 +745,21 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
          */
         public void toggleAppLock(App app) {
             this.mApp = app;
-            String pkgName = Objects.requireNonNull(mApp.getPackageName()).toString();
-            String name = Objects.requireNonNull(mApp.getName()).toString();
-            String label = Objects.requireNonNull(mApp.getLabel()).toString();
+            String label = app.getLabel().toString();
 
             // Lấy trạng thái lock hiện tại từ mApp property thay vì DB query
             boolean isAppOpened = mApp.isOpened();
 
             // Yêu cầu biometric authentication
             if (mActivityContext instanceof AppCompatActivity) {
-                Biometric.INSTANCE.toggleLockApp(
-                        (AppCompatActivity) mActivityContext,
-                        label,
-                        pkgName,
-                        isAppOpened,
-                        (s, aBoolean) -> {
-                            // Callback sau khi authentication thành công
-                            AppPersistent.setAppOpened(pkgName, name, !isAppOpened, mApp.getLensId());
-
-                            // Update UI
-                            boolean isNowOpened = !isAppOpened;
+                mAdapter.mRowActions.toggleLock((AppCompatActivity) mActivityContext, app, updatedApp -> {
+                            // Prompt có thể hoàn tất sau khi holder đã được bind sang hàng khác.
+                            if (mApp == null || !identifierFor(mApp).equals(identifierFor(app))
+                                    || !mApp.getLensId().equals(app.getLensId())) {
+                                return Unit.INSTANCE;
+                            }
+                            mApp = updatedApp;
+                            boolean isNowOpened = updatedApp.isOpened();
                             if (isAppOpened) {
                                 // Đang unlocked -> chuyển sang locked
                                 Snackbar.make(cvAppContainer, label + " is now locked", Snackbar.LENGTH_LONG).show();
@@ -792,7 +774,6 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
                             // Đồng bộ trạng thái vào Adapter list
                             int position = getBindingAdapterPosition();
                             if (position != RecyclerView.NO_POSITION) {
-                                App updatedApp = mApp.copyWithLockAndVisibility(!isAppOpened, mApp.isVisible(), mApp.getOpenCount());
                                 mAdapter.mApps.set(position, updatedApp);
                                 mAdapter.notifyItemChanged(position);
                             }
@@ -801,40 +782,6 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
                             return Unit.INSTANCE;
                         }
                 );
-            }
-        }
-
-        // ====================================================================
-        // BROADCAST SENDERS
-        // ====================================================================
-
-        /**
-         * Gửi broadcast khi visibility thay đổi
-         * Home screen sẽ nhận broadcast này để refresh danh sách apps
-         */
-        private void sendChangeAppsVisibilityBroadcast() {
-            if (mActivityContext == null) {
-                return;
-            }
-            // Pattern variable matching (Java 16+)
-            if (mActivityContext instanceof ActSettings activitySettings) {
-                Intent changeAppsVisibilityIntent = new Intent(activitySettings, BroadcastReceivers.AppsVisibilityChangedReceiver.class);
-                activitySettings.sendBroadcast(changeAppsVisibilityIntent);
-            }
-        }
-
-        /**
-         * Gửi broadcast khi lock status thay đổi
-         * Home screen sẽ nhận broadcast này để update lock icons
-         */
-        private void sendChangeAppsLockBroadcast() {
-            if (mActivityContext == null) {
-                return;
-            }
-            // Pattern variable matching (Java 16+)
-            if (mActivityContext instanceof ActSettings activitySettings) {
-                Intent intent = new Intent(activitySettings, BroadcastReceivers.AppsLockChangedReceiver.class);
-                activitySettings.sendBroadcast(intent);
             }
         }
 
@@ -884,7 +831,6 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
             // ================================================================
             ivAppHide.setOnClickListener(v -> {
                 if (mApp != null) {
-                    sendChangeAppsVisibilityBroadcast();
                     toggleAppVisibility(mApp);
                 } else {
                     Snackbar.make(cvAppContainer, mContext.getString(R.string.error_app_not_found), Snackbar.LENGTH_LONG).show();
@@ -896,7 +842,6 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
             // ================================================================
             btAppLock.setOnClickListener(v -> {
                 if (mApp != null) {
-                    sendChangeAppsLockBroadcast();
                     toggleAppLock(mApp);
                 } else {
                     Snackbar.make(cvAppContainer, mContext.getString(R.string.error_app_not_found), Snackbar.LENGTH_LONG).show();
