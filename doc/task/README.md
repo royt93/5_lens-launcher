@@ -265,7 +265,7 @@ Giới hạn: agent audit ui chưa đọc hết `LensView.kt`, `ActAbout.java`, 
 | `LEAK-002` ✅ done 2026-10-22 | P2 | 3 | [LensView: IndexOutOfBounds ở launchApp và 3 listener không null hóa khi detach](done/p2-leak-leak-002-lensview-select-index-and-listeners.md) |
 | `PERF-005` ✅ done 2026-10-21 | P2 | 3 | [LensView cấp phát Rect mỗi icon mỗi frame và gọi binder mỗi MotionEvent](done/p2-perf-perf-005-lens-draw-alloc-and-binder-per-event.md) |
 | `SEARCH-012` | P2 | 3 | [T9 vô dụng với nhãn app không phải chữ Latin](todo/p2-search-search-012-t9-non-latin-locales.md) |
-| `SEARCH-013` | P2 | 3 | [Query toàn bảng Contacts đồng bộ trên main thread mỗi ký tự gõ](todo/p2-search-search-013-contacts-query-main-thread.md) |
+| `SEARCH-013` ✅ done 2026-10-23 | P2 | 3 | [Query toàn bảng Contacts đồng bộ trên main thread mỗi ký tự gõ](done/p2-search-search-013-contacts-query-main-thread.md) |
 | `SEARCH-014` | P2 | 2 | [shortcutsByPackage giữ Drawable không giải phóng](todo/p2-search-search-014-shortcut-drawable-cache-unbounded.md) |
 | `UI-027` | P2 | 1 | [Overlay quảng cáo dùng colorWhite cứng, tương phản 1.69:1 ở dark/dynamic color](todo/p2-ui-ui-027-ad-overlay-contrast-night.md) |
 | `UI-028` | P2 | 3 | [ActHome dùng một field lensDialog cho 5 dialog; vài dialog không dismiss khi destroy](todo/p2-ui-ui-028-dialog-leaks-and-lifecycle.md) |

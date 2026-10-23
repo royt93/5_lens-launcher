@@ -336,6 +336,8 @@ class AppSearchWidgetTest {
                 waitUntilShowing(searchView!!, true)
 
                 scenario.onActivity { searchView!!.editText.setText("call jane") }
+                val row = searchView!!.findViewById<View>(R.id.contactActionRow)
+                waitUntilVisibility(row, View.VISIBLE, timeoutMs = 3_000)
                 scenario.onActivity { activity ->
                     assertEquals(View.VISIBLE, activity.findViewById<View>(R.id.contactActionRow).visibility)
                     assertEquals(
@@ -349,6 +351,99 @@ class AppSearchWidgetTest {
                     assertEquals(View.VISIBLE, activity.findViewById<View>(R.id.btContactCall).visibility)
                     assertEquals(View.VISIBLE, activity.findViewById<View>(R.id.btContactMessage).visibility)
                     assertEquals(View.GONE, activity.findViewById<View>(R.id.tvWebSearchFallback).visibility)
+                }
+            }
+        } finally {
+            ContactSearchEngine.setContactsForTesting(null)
+            ContactSearchEngine.setPermissionGrantedForTesting(null)
+        }
+    }
+
+    /**
+     * SEARCH-013: the contact lookup must not run inside the keystroke's own main-thread task.
+     * Within one onActivity block (a single main-thread task) the debounced worker cannot have
+     * delivered anything yet, so the row is still hidden right after setText; it appears later.
+     */
+    @Test
+    fun contactSearchResultArrivesAsynchronouslyAfterTheKeystrokeTask() {
+        ContactSearchEngine.setPermissionGrantedForTesting(true)
+        ContactSearchEngine.setContactsForTesting(
+            listOf(ContactSearchResult("Jane Async", "+84 988 777 666"))
+        )
+
+        try {
+            ActivityScenario.launch(ActHome::class.java).use { scenario ->
+                var searchView: SearchView? = null
+                var row: View? = null
+                scenario.onActivity { activity ->
+                    searchView = activity.findViewById(R.id.searchView)
+                    row = activity.findViewById(R.id.contactActionRow)
+                    searchView!!.show()
+                }
+                waitUntilShowing(searchView!!, true)
+
+                scenario.onActivity {
+                    searchView!!.editText.setText("call jane")
+                    assertEquals(
+                        "kết quả danh bạ không được tính đồng bộ trong tác vụ gõ phím",
+                        View.GONE,
+                        row!!.visibility
+                    )
+                }
+
+                waitUntilVisibility(row!!, View.VISIBLE, timeoutMs = 3_000)
+                scenario.onActivity { activity ->
+                    assertEquals(View.VISIBLE, row!!.visibility)
+                    assertEquals(
+                        "Jane Async",
+                        activity.findViewById<TextView>(R.id.tvContactResultName).text.toString()
+                    )
+                }
+            }
+        } finally {
+            ContactSearchEngine.setContactsForTesting(null)
+            ContactSearchEngine.setPermissionGrantedForTesting(null)
+        }
+    }
+
+    /**
+     * SEARCH-013: recreating the Activity while a debounced contact lookup is pending must not
+     * crash, and the new Activity's contact row must always agree with the query text it actually
+     * holds. SearchView restores its text across recreation, so the new instance legitimately
+     * re-runs that query itself; what must never happen is a stale result for different text.
+     */
+    @Test
+    fun recreatingActivityWhileContactLookupIsPendingKeepsRowConsistentWithQuery() {
+        ContactSearchEngine.setPermissionGrantedForTesting(true)
+        ContactSearchEngine.setContactsForTesting(
+            listOf(ContactSearchResult("Jane Pending", "+84 911 222 333"))
+        )
+
+        try {
+            ActivityScenario.launch(ActHome::class.java).use { scenario ->
+                var searchView: SearchView? = null
+                scenario.onActivity { activity ->
+                    searchView = activity.findViewById(R.id.searchView)
+                    searchView!!.show()
+                }
+                waitUntilShowing(searchView!!, true)
+
+                scenario.onActivity { searchView!!.editText.setText("call jane") }
+                scenario.recreate()
+
+                var recreatedRow: View? = null
+                scenario.onActivity { activity ->
+                    recreatedRow = activity.findViewById(R.id.contactActionRow)
+                    // Đổi sang truy vấn không phải liên hệ: row phải ẩn dù lần tìm cũ còn bay.
+                    activity.findViewById<SearchView>(R.id.searchView).editText.setText("calculator")
+                }
+                Thread.sleep(400)
+                scenario.onActivity {
+                    assertEquals(
+                        "kết quả của query cũ không được hiện sau khi query đã đổi",
+                        View.GONE,
+                        recreatedRow!!.visibility
+                    )
                 }
             }
         } finally {

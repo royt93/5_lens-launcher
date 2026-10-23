@@ -271,6 +271,7 @@ public class ActHome extends ActBase {
     private TextView tvQuickActionLabel;
     private TextView tvQuickActionValue;
     private View contactActionRow;
+    private com.mckimquyen.search.ContactSearchController contactSearchController;
     private View contactActionDivider;
     private TextView tvContactResultName;
     private TextView tvContactResultPhone;
@@ -588,6 +589,12 @@ public class ActHome extends ActBase {
         tvContactResultPhone = findViewById(R.id.tvContactResultPhone);
         btContactCall = findViewById(R.id.btContactCall);
         btContactMessage = findViewById(R.id.btContactMessage);
+        contactSearchController = com.mckimquyen.search.ContactSearchController.create(
+                this,
+                state -> {
+                    renderContactSearchState(state);
+                    return kotlin.Unit.INSTANCE;
+                });
 
         // Hide progress bar in test environments to prevent indeterminate animation loops from hanging tests
         boolean isTestEnv = false;
@@ -1738,15 +1745,24 @@ public class ActHome extends ActBase {
         noSearchResults.setText(isEmptyQuery ? R.string.search_empty_state : R.string.no_apps_found);
         noSearchResults.setVisibility(hasResults ? View.GONE : View.VISIBLE);
 
-        // SEARCH-006: only once every local result set (apps, shortcuts, quick actions) is empty -
-        // never alongside real local results.
+        updateWebSearchFallback(query, isEmptyQuery, hasResults);
+    }
+
+    private void updateWebSearchFallback(CharSequence query, boolean isEmptyQuery, boolean hasResults) {
         boolean showWebFallback = !isEmptyQuery && !hasResults
                 && quickActionRow.getVisibility() != View.VISIBLE
                 && contactActionRow.getVisibility() != View.VISIBLE;
         webSearchFallback.setVisibility(showWebFallback ? View.VISIBLE : View.GONE);
-        if (showWebFallback) {
+        if (showWebFallback && query != null) {
             webSearchFallback.setText(getString(R.string.web_search_fallback, query.toString()));
         }
+    }
+
+    private void updateWebSearchFallback() {
+        CharSequence query = appSearch.getText();
+        boolean isEmptyQuery = query == null || query.length() == 0;
+        boolean hasResults = searchResultAdapter.getItemCount() > 0;
+        updateWebSearchFallback(query, isEmptyQuery, hasResults);
     }
 
     /** UI-011: all-apps fallback list, sorted alphabetically regardless of the lens grid's own
@@ -1930,21 +1946,28 @@ public class ActHome extends ActBase {
     }
 
     private void updateContactAction(CharSequence query) {
-        boolean showPermissionRequest = ContactSearchEngine.shouldShowPermissionRequest(this, query);
-        ContactSearchResult contact = showPermissionRequest
-                ? null
-                : ContactSearchEngine.firstContactForQuery(this, query);
-        boolean show = showPermissionRequest || contact != null;
-        contactActionRow.setVisibility(show ? View.VISIBLE : View.GONE);
-        contactActionDivider.setVisibility(show ? View.VISIBLE : View.GONE);
-        if (!show) {
-            contactActionRow.setOnClickListener(null);
-            btContactCall.setOnClickListener(null);
-            btContactMessage.setOnClickListener(null);
-            return;
+        if (contactSearchController != null) {
+            contactSearchController.onQueryChanged(query);
         }
+    }
 
-        if (showPermissionRequest) {
+    private void renderContactSearchState(com.mckimquyen.search.ContactSearchUiState state) {
+        if (isFinishing() || isDestroyed()) return;
+        if (state instanceof com.mckimquyen.search.ContactSearchUiState.Result) {
+            ContactSearchResult contact = ((com.mckimquyen.search.ContactSearchUiState.Result) state).getContact();
+            contactActionRow.setVisibility(View.VISIBLE);
+            contactActionDivider.setVisibility(View.VISIBLE);
+            btContactCall.setText(R.string.contact_search_call);
+            btContactMessage.setVisibility(View.VISIBLE);
+            tvContactResultName.setText(contact.getDisplayName());
+            tvContactResultPhone.setText(contact.getPhoneNumber());
+            contactActionRow.setContentDescription(getString(R.string.search_open_contact, contact.getDisplayName()));
+            contactActionRow.setOnClickListener(v -> startContactIntent(contact.dialIntent()));
+            btContactCall.setOnClickListener(v -> startContactIntent(contact.dialIntent()));
+            btContactMessage.setOnClickListener(v -> startContactIntent(contact.messageIntent()));
+        } else if (state instanceof com.mckimquyen.search.ContactSearchUiState.PermissionRequest) {
+            contactActionRow.setVisibility(View.VISIBLE);
+            contactActionDivider.setVisibility(View.VISIBLE);
             tvContactResultName.setText(R.string.contact_search_permission_label);
             tvContactResultPhone.setText(R.string.contact_search_permission_rationale);
             contactActionRow.setContentDescription(getString(R.string.contact_search_permission_rationale));
@@ -1952,17 +1975,14 @@ public class ActHome extends ActBase {
             btContactMessage.setVisibility(View.GONE);
             contactActionRow.setOnClickListener(v -> requestContactsPermission());
             btContactCall.setOnClickListener(v -> requestContactsPermission());
-            return;
+        } else {
+            contactActionRow.setVisibility(View.GONE);
+            contactActionDivider.setVisibility(View.GONE);
+            contactActionRow.setOnClickListener(null);
+            btContactCall.setOnClickListener(null);
+            btContactMessage.setOnClickListener(null);
         }
-
-        btContactCall.setText(R.string.contact_search_call);
-        btContactMessage.setVisibility(View.VISIBLE);
-        tvContactResultName.setText(contact.getDisplayName());
-        tvContactResultPhone.setText(contact.getPhoneNumber());
-        contactActionRow.setContentDescription(getString(R.string.search_open_contact, contact.getDisplayName()));
-        contactActionRow.setOnClickListener(v -> startContactIntent(contact.dialIntent()));
-        btContactCall.setOnClickListener(v -> startContactIntent(contact.dialIntent()));
-        btContactMessage.setOnClickListener(v -> startContactIntent(contact.messageIntent()));
+        updateWebSearchFallback();
     }
 
     private void requestContactsPermission() {
@@ -2353,6 +2373,10 @@ public class ActHome extends ActBase {
             lensManagementMenu = null;
         }
         removeLensMenuPressAnchor();
+        if (contactSearchController != null) {
+            contactSearchController.close();
+            contactSearchController = null;
+        }
         super.onDestroy();
     }
 }
