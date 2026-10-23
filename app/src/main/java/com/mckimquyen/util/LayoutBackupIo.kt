@@ -39,7 +39,9 @@ object LayoutBackupIo {
                         settings.getLensAppScope(lens.id),
                         settings.getLensAppSelection(lens.id),
                         settings.isLensFrozen(lens.id),
-                        settings.getLensHiddenAppIds(lens.id)
+                        settings.getLensHiddenAppIds(lens.id),
+                        // Always written ({} when no keys) so import can tell "no override" from a legacy file.
+                        settings.getLensPhysicsBackup(lens.id)
                     )
                 }
                 val activeLensId = settings.getString(UtilSettings.KEY_ACTIVE_LENS_ID)

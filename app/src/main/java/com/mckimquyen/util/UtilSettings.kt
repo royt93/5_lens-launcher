@@ -10,6 +10,7 @@ import com.mckimquyen.BuildConfig
 import com.mckimquyen.enums.BackgroundMode
 import com.mckimquyen.enums.LauncherMode
 import com.mckimquyen.enums.SortType
+import com.mckimquyen.model.LensPhysicsBackup
 import com.mckimquyen.model.LensWorkspace
 import com.mckimquyen.model.EdgeSwipeMode
 import kotlin.math.roundToInt
@@ -24,7 +25,9 @@ data class LensAppSettingsBackup(
     val scope: LensAppScope,
     val selectedAppIds: Set<String>,
     val frozen: Boolean,
-    val temporarilyHiddenAppIds: Set<String> = emptySet()
+    val temporarilyHiddenAppIds: Set<String> = emptySet(),
+    /** DB-007: null = legacy backup, leave device physics untouched. */
+    val physics: LensPhysicsBackup? = null
 )
 
 data class WorkspacePreferencesSnapshot(
@@ -539,7 +542,7 @@ class UtilSettings(context: Context) {
     }
 
     fun snapshotWorkspacePreferences(): WorkspacePreferencesSnapshot {
-        val appState = prefs.all.filterKeys(::isWorkspacePreferenceKey).mapNotNull { (key, value) -> value?.let { key to it } }.toMap()
+        val appState = prefs.all.filterKeys { isWorkspacePreferenceKey(it) || isLensPhysicsKey(it) }.mapNotNull { (key, value) -> value?.let { key to it } }.toMap()
         return WorkspacePreferencesSnapshot(
             appState,
             prefs.getString(KEY_ACTIVE_LENS_ID, null),
@@ -572,6 +575,7 @@ class UtilSettings(context: Context) {
             editor.putStringSet(lensKey(KEY_LENS_APP_SELECTION, lens.lensId), HashSet(lens.selectedAppIds))
             editor.putStringSet(lensKey(KEY_LENS_HIDDEN_APP_IDS, lens.lensId), HashSet(lens.temporarilyHiddenAppIds))
             editor.putBoolean(lensKey(KEY_LENS_FROZEN, lens.lensId), lens.frozen)
+            lens.physics?.let { applyPhysicsBackup(editor, lens.lensId, it) }
         }
         editor.putString(KEY_ACTIVE_LENS_ID, activeLensId.takeIf(lensIds::contains) ?: LensWorkspace.DEFAULT_LENS_ID)
         editor.putStringSet(KEY_COLLAPSED_LENS_GROUPS, HashSet(collapsedGroupNames))
@@ -594,10 +598,11 @@ class UtilSettings(context: Context) {
     fun restoreWorkspacePreferences(snapshot: WorkspacePreferencesSnapshot): Boolean {
         @Suppress("UseKtx") // rollback must report whether the synchronous commit succeeded
         val editor = prefs.edit()
-        prefs.all.keys.filter(::isWorkspacePreferenceKey).forEach(editor::remove)
+        prefs.all.keys.filter { isWorkspacePreferenceKey(it) || isLensPhysicsKey(it) }.forEach(editor::remove)
         snapshot.values.forEach { (key, value) ->
             when (value) {
                 is String -> editor.putString(key, value)
+                is Float -> editor.putFloat(key, value)
                 is Boolean -> editor.putBoolean(key, value)
                 is Set<*> -> editor.putStringSet(key, value.filterIsInstance<String>().toSet())
             }
@@ -607,6 +612,42 @@ class UtilSettings(context: Context) {
         editor.putStringSet(KEY_COLLAPSED_LENS_GROUPS, HashSet(snapshot.collapsedGroupNames))
         return editor.commit()
     }
+
+    /** DB-007: raw per-lens physics, only keys that exist (never the clamped/inherited getter value). */
+    fun getLensPhysicsBackup(lensId: String): LensPhysicsBackup {
+        fun rawFloat(baseKey: String): Float? =
+            lensKey(baseKey, lensId).takeIf(prefs::contains)?.let { prefs.getFloat(it, 0f) }
+        return LensPhysicsBackup(
+            distortionFactor = rawFloat(KEY_DISTORTION_FACTOR),
+            iconSize = rawFloat(KEY_ICON_SIZE),
+            customDistortionFactor = rawFloat(KEY_CUSTOM_DISTORTION_FACTOR),
+            smartFocusBias = lensKey(KEY_SMART_FOCUS_BIAS, lensId).takeIf(prefs::contains)
+                ?.let { prefs.getBoolean(it, false) }
+        )
+    }
+
+    /**
+     * Missing field on a secondary lens removes its override (inherits the shared key again); on the
+     * default lens the key IS the shared value every inheriting lens reads, so it is left alone.
+     */
+    private fun applyPhysicsBackup(editor: SharedPreferences.Editor, lensId: String, physics: LensPhysicsBackup) {
+        val isDefault = lensId == LensWorkspace.DEFAULT_LENS_ID
+        fun float(baseKey: String, value: Float?) {
+            val key = lensKey(baseKey, lensId)
+            if (value != null) editor.putFloat(key, value) else if (!isDefault) editor.remove(key)
+        }
+        float(KEY_DISTORTION_FACTOR, physics.distortionFactor)
+        float(KEY_ICON_SIZE, physics.iconSize)
+        float(KEY_CUSTOM_DISTORTION_FACTOR, physics.customDistortionFactor)
+        val biasKey = lensKey(KEY_SMART_FOCUS_BIAS, lensId)
+        if (physics.smartFocusBias != null) editor.putBoolean(biasKey, physics.smartFocusBias)
+        else if (!isDefault) editor.remove(biasKey)
+    }
+
+    // Deliberately separate from isWorkspacePreferenceKey: a legacy import must not wipe physics.
+    private fun isLensPhysicsKey(key: String): Boolean =
+        listOf(KEY_DISTORTION_FACTOR, KEY_ICON_SIZE, KEY_CUSTOM_DISTORTION_FACTOR, KEY_SMART_FOCUS_BIAS)
+            .any { key == it || key.startsWith("${it}_") }
 
     private fun isWorkspacePreferenceKey(key: String): Boolean =
         key == KEY_LENS_APP_SCOPE || key.startsWith("${KEY_LENS_APP_SCOPE}_") ||

@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | enhance |
-| Status | todo |
+| Status | done 2026-10-23 — audit 9.1/10, `doc/task/AUDIT_DB-007_2026-10-23.md` |
 | Priority | P2 |
 | Evidence | confirmed |
 | Epic | Workspace backup |
@@ -21,10 +21,14 @@ Là người dùng, tôi muốn khôi phục backup ra đúng cảm giác lens n
 
 ## Acceptance criteria
 
-- [ ] Thêm trường tùy chọn (additive), file v2 cũ vẫn đọc được.
-- [ ] Export/import khứ hồi giữ đúng 4 giá trị per-lens.
-- [ ] Import file cũ không xóa giá trị hiện có của máy.
-- [ ] Test tương thích ngược với fixture v2 hiện tại.
+- [x] Thêm trường tùy chọn (additive), file v2 cũ vẫn đọc được.
+- [x] Export/import khứ hồi giữ đúng 4 giá trị per-lens.
+- [x] Import file cũ không xóa giá trị hiện có của máy.
+- [x] Test tương thích ngược với fixture v2 hiện tại.
+
+## Evidence recheck (2026-10-23)
+
+DB-003/004 đã done. Đã kiểm lại trên `dev`: `LayoutBackupIo.exportAsync` chỉ mang scope/selection/frozen/hidden (`LensAppSettingsBackup`); `replaceWorkspacePreferences` xóa mọi key `isWorkspacePreferenceKey` rồi ghi lại 4 loại này. Bốn key physics: `distortion_factor_<id>` (Float), `min_icon_size_<id>` (Float), `custom_distortion_factor_<id>` (Float), `smart_focus_bias_<id>` (Boolean). Lens không có override kế thừa key chung không hậu tố, nên backup phải phân biệt "không override" với "override = giá trị".
 
 ## Implementation notes
 
@@ -32,13 +36,13 @@ Làm sau DB-003/004 để schema ổn định trước.
 
 ## Verification and Definition of Done
 
-- [ ] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
-- [ ] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
-- [ ] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
-- [ ] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
-- [ ] No new lint/build failures.
-- [ ] A post-change audit record scores the round `> 9.0/10` before push.
-- [ ] Evidence and status are updated before moving this file to `done`.
+- [x] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
+- [x] Widget/UI tests: không đổi UI; `FrmSettingsLayoutBackupWidgetTest` hiện có vẫn xanh trên máy thật (không thêm widget test mới, lý do: chỉ đổi dữ liệu backup).
+- [x] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
+- [x] Smoke: Samsung S24 Ultra `R5CX613VZBR`, Android 17, 2026-10-23 16:17 (owner đồng ý đổi từ Pixel vì Pixel mất kết nối adb); ActHome mở, lưới đủ, không quảng cáo; đã gỡ app và khôi phục launcher hệ thống.
+- [x] No new lint/build failures.
+- [x] A post-change audit record scores the round `> 9.0/10` before push.
+- [x] Evidence and status are updated before moving this file to `done`.
 
 If a test layer is not applicable, replace its checkbox with a reviewed rationale; do not silently omit it.
 

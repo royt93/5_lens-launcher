@@ -1,6 +1,7 @@
 package com.mckimquyen.model
 
 import com.mckimquyen.util.LensAppScope
+import com.mckimquyen.util.UtilSettings
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -117,6 +118,64 @@ data class LayoutBackupEntry(
  * scope/selection/frozen settings and that lens's own [LayoutBackupEntry] list. Only meaningful
  * under schema v2; v1 files have no concept of multiple lenses.
  */
+/**
+ * DB-007: per-lens physics overrides. A null field means "this lens has no such preference key"
+ * (a secondary lens then inherits the shared value), never "use the default value".
+ */
+data class LensPhysicsBackup(
+    val distortionFactor: Float? = null,
+    val iconSize: Float? = null,
+    val customDistortionFactor: Float? = null,
+    val smartFocusBias: Boolean? = null
+) {
+    fun toJson(): JSONObject = JSONObject().apply {
+        distortionFactor?.let { put(KEY_DISTORTION_FACTOR, it.toDouble()) }
+        iconSize?.let { put(KEY_ICON_SIZE, it.toDouble()) }
+        customDistortionFactor?.let { put(KEY_CUSTOM_DISTORTION_FACTOR, it.toDouble()) }
+        smartFocusBias?.let { put(KEY_SMART_FOCUS_BIAS, it) }
+    }
+
+    companion object {
+        private const val KEY_DISTORTION_FACTOR = "distortionFactor"
+        private const val KEY_ICON_SIZE = "iconSize"
+        private const val KEY_CUSTOM_DISTORTION_FACTOR = "customDistortionFactor"
+        private const val KEY_SMART_FOCUS_BIAS = "smartFocusBias"
+
+        private const val DISTORTION_MIN = UtilSettings.MIN_DISTORTION_FACTOR
+        private const val DISTORTION_MAX = UtilSettings.MAX_DISTORTION_FACTOR / 2f + UtilSettings.MIN_DISTORTION_FACTOR
+        private const val ICON_SIZE_MIN = UtilSettings.MIN_ICON_SIZE
+        private const val ICON_SIZE_MAX = UtilSettings.MAX_ICON_SIZE.toFloat() + UtilSettings.MIN_ICON_SIZE
+
+        /** Null = malformed (wrong type, non-finite or out of range); never clamps silently. */
+        fun fromJson(json: JSONObject): LensPhysicsBackup? {
+            var invalid = false
+            fun JSONObject.boundedFloat(key: String, min: Float, max: Float): Float? {
+                val raw = opt(key)
+                if (raw == null || raw == JSONObject.NULL) return null
+                val value = (raw as? Number)?.toDouble()
+                if (value == null || !value.isFinite() || value < min || value > max) {
+                    invalid = true
+                    return null
+                }
+                return value.toFloat()
+            }
+            fun JSONObject.optionalBoolean(key: String): Boolean? {
+                val raw = opt(key)
+                if (raw == null || raw == JSONObject.NULL) return null
+                if (raw !is Boolean) invalid = true
+                return raw as? Boolean
+            }
+            val result = LensPhysicsBackup(
+                distortionFactor = json.boundedFloat(KEY_DISTORTION_FACTOR, DISTORTION_MIN, DISTORTION_MAX),
+                iconSize = json.boundedFloat(KEY_ICON_SIZE, ICON_SIZE_MIN, ICON_SIZE_MAX),
+                customDistortionFactor = json.boundedFloat(KEY_CUSTOM_DISTORTION_FACTOR, DISTORTION_MIN, DISTORTION_MAX),
+                smartFocusBias = json.optionalBoolean(KEY_SMART_FOCUS_BIAS)
+            )
+            return result.takeUnless { invalid }
+        }
+    }
+}
+
 data class LayoutBackupLens(
     val id: String,
     val name: String,
@@ -126,7 +185,8 @@ data class LayoutBackupLens(
     val frozen: Boolean,
     val entries: List<LayoutBackupEntry>,
     val groupName: String? = null,
-    val temporarilyHiddenAppIds: Set<String> = emptySet()
+    val temporarilyHiddenAppIds: Set<String> = emptySet(),
+    val physics: LensPhysicsBackup? = null
 ) {
     fun toJson(): JSONObject = JSONObject().apply {
         put(KEY_ID, id)
@@ -138,6 +198,7 @@ data class LayoutBackupLens(
         put(KEY_ENTRIES, JSONArray(entries.map { it.toJson() }))
         put(KEY_GROUP_NAME, groupName ?: JSONObject.NULL)
         put(KEY_TEMPORARILY_HIDDEN_APP_IDS, JSONArray(temporarilyHiddenAppIds.toList()))
+        physics?.let { put(KEY_PHYSICS, it.toJson()) }
     }
 
     companion object {
@@ -150,6 +211,7 @@ data class LayoutBackupLens(
         private const val KEY_ENTRIES = "entries"
         private const val KEY_GROUP_NAME = "groupName"
         private const val KEY_TEMPORARILY_HIDDEN_APP_IDS = "temporarilyHiddenAppIds"
+        private const val KEY_PHYSICS = "physics"
 
         private fun JSONObject.stringField(key: String): String? =
             if (opt(key) is String) optString(key) else null
@@ -203,6 +265,11 @@ data class LayoutBackupLens(
                 is String -> value.takeIf(String::isNotBlank)?.trim() ?: return null
                 else -> return null
             }
+            // Absent = legacy file (import leaves device physics alone); present must be a valid object.
+            val physics = if (json.has(KEY_PHYSICS)) {
+                val physicsJson = json.opt(KEY_PHYSICS) as? JSONObject ?: return null
+                LensPhysicsBackup.fromJson(physicsJson) ?: return null
+            } else null
             val entriesJson = json.optJSONArray(KEY_ENTRIES) ?: return null
             val entries = mutableListOf<LayoutBackupEntry>()
             for (i in 0 until entriesJson.length()) {
@@ -219,7 +286,8 @@ data class LayoutBackupLens(
                 frozen = json.booleanField(KEY_FROZEN) ?: return null,
                 entries = entries,
                 groupName = groupName,
-                temporarilyHiddenAppIds = hiddenIds
+                temporarilyHiddenAppIds = hiddenIds,
+                physics = physics
             )
         }
     }

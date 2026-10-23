@@ -40,6 +40,9 @@ class UtilAppPaletteScanTest {
     private var database: AppDatabase? = null
     private val db get() = requireNotNull(database)
     private val statements = Collections.synchronizedList(mutableListOf<String>())
+
+    // synchronizedList does not guard iteration; Room's callback can append from another thread.
+    private fun statementsSnapshot(): List<String> = synchronized(statements) { statements.toList() }
     private var dummyBitmap: Bitmap? = null
 
     @Before
@@ -115,7 +118,7 @@ class UtilAppPaletteScanTest {
         assertEquals("palette từ lens phụ phải được giữ", COLOR_B, shells.single { it.packageName == PKG_B }.paletteColor)
         assertEquals(COLOR_C, shells.single { it.packageName == PKG_C }.paletteColor)
 
-        val persistentReads = statements.filter { sql ->
+        val persistentReads = statementsSnapshot().filter { sql ->
             sql.trimStart().startsWith("SELECT", ignoreCase = true) &&
                 sql.contains("APP_PERSISTENT", ignoreCase = true)
         }
@@ -165,7 +168,7 @@ class UtilAppPaletteScanTest {
         // Cold scan: đúng 1 SELECT bảng chính; mỗi app mới 1 INSERT OR IGNORE + 1 UPDATE palette.
         // Room còn phát câu phụ (SELECT CHANGES/LAST_INSERT_ROWID) và log BEGIN lồng nhau, nên
         // không dùng số BEGIN làm bằng chứng transaction; rollback thật đã kiểm ở Room test.
-        val scanStatements = statements.map { it.trimStart().uppercase() }
+        val scanStatements = statementsSnapshot().map { it.trimStart().uppercase() }
         assertEquals(1, scanStatements.count { it.startsWith("SELECT * FROM APP_PERSISTENT") })
         assertEquals(shells.size, scanStatements.count { it.startsWith("INSERT OR IGNORE INTO `APP_PERSISTENT`") })
         assertEquals(shells.size, scanStatements.count { it.startsWith("UPDATE APP_PERSISTENT SET PALETTE_COLOR") })

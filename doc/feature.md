@@ -4,6 +4,7 @@ Source of truth for implementation choices in this session. Detailed acceptance 
 
 ## ✅ Implemented
 
+- **DB-007 — Backup v2 mang physics từng lens (23/10/2026)**: backup v2 giờ mang tùy chọn `physics` (4 key per-lens), additive, không tăng schema. Lens phụ thiếu trường = xóa override để kế thừa; lens default thiếu trường = giữ key chung; file cũ không đụng physics; giá trị sai/ngoài khoảng = file malformed; rollback gồm physics. Audit 9.1/10 (`doc/task/AUDIT_DB-007_2026-10-23.md`). Kiểm thử máy thật trên S24 Ultra do Pixel mất kết nối (owner đồng ý).
 - **SEARCH-013 — Contacts query bất đồng bộ với debounce (23/10/2026)**: `ContactSearchController` đưa query sang `Dispatchers.IO`, debounce 150ms, generation guard hủy query cũ. 1004 unit pass, lint 0 lỗi/7 warnings. Pixel 7 Pro: 34 integration/widget/timing pass, benchmark 1000 contacts burst 9 phím chỉ 1 query trên worker (baseline cũ 9 query chặn main 431ms; một lượt đo). Home smoke 103 app. Audit 9.2/10; thêm test recreate Activity khi query pending: `doc/task/AUDIT_SEARCH-013_2026-10-23.md`.
 
 - **PERF-007 — Scan Room N+1 (23/10/2026)**: `getAppShells` đọc palette một lần (`getAllRows`, row đầu theo identifier) và ghi palette mới trong một `@Transaction` cuối scan; SQL ghi vẫn tỷ lệ số app mới. 996 unit pass, lint 0 lỗi/7 warnings. Pixel: 10 test thiết bị; fixture 100 app warm 126→12 ms, cold persist 605→149 ms; full refresh 5 lượt 1937→1611 ms (dải chồng). Audit 9.2/10; thêm test recreate Activity khi query pending: `doc/task/AUDIT_PERF-007_2026-10-23.md`.
@@ -62,6 +63,7 @@ Source of truth for implementation choices in this session. Detailed acceptance 
 
 
 ## 🟡 In progress
+
 
 
 
