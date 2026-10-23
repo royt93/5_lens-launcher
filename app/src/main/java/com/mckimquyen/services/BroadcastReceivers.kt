@@ -21,6 +21,19 @@ class BroadcastReceivers {
     class AppsUpdatedReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             Logger.d("BroadcastReceivers: AppsUpdatedReceiver onReceive! Action: ${intent.action}")
+            val application = context.applicationContext as? com.mckimquyen.app.RApplication
+            val changedPackage = intent.data?.schemeSpecificPart
+            val selectedPackage = com.mckimquyen.util.UtilSettings(context)
+                .getString(com.mckimquyen.util.UtilSettings.KEY_ICON_PACK_PACKAGE_NAME)
+            val packageChanged = when (intent.action) {
+                Intent.ACTION_PACKAGE_REMOVED, Intent.ACTION_PACKAGE_ADDED ->
+                    !intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)
+                Intent.ACTION_PACKAGE_REPLACED, Intent.ACTION_PACKAGE_CHANGED -> true
+                else -> false
+            }
+            if (packageChanged && !changedPackage.isNullOrEmpty() && changedPackage == selectedPackage) {
+                application?.iconPackManager?.invalidate()
+            }
             AppEventManager.notifyAppsUpdated()
         }
     }

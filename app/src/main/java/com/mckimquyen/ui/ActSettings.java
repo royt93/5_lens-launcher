@@ -388,9 +388,12 @@ public class ActSettings extends ActBase implements SettingsMenuHost {
         sendEmail();
     }
 
+    /**
+     * AppsUpdatedReceiver chỉ được đăng ký động theo action package, không có trong manifest;
+     * broadcast tường minh tới nó không bao giờ được giao. Phát thẳng qua AppEventManager.
+     */
     private void sendUpdateAppsBroadcast() {
-        Intent refreshAppsIntent = new Intent(ActSettings.this, BroadcastReceivers.AppsUpdatedReceiver.class);
-        sendBroadcast(refreshAppsIntent);
+        com.mckimquyen.services.AppEventManager.INSTANCE.notifyAppsUpdated(null);
     }
 
     private void sendEditAppsBroadcast() {

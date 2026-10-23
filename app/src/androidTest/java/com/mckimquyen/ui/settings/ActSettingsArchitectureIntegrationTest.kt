@@ -77,6 +77,40 @@ class ActSettingsArchitectureIntegrationTest {
     }
 
     @Test
+    fun choosingIconPackRequestsAppRefreshDirectly() {
+        val refreshRequests = java.util.concurrent.atomic.AtomicInteger()
+        val observer = androidx.lifecycle.Observer<Any?> { refreshRequests.incrementAndGet() }
+        val scenario = ActivityScenario.launch(ActSettings::class.java)
+        try {
+            InstrumentationRegistry.getInstrumentation().runOnMainSync {
+                com.mckimquyen.services.AppEventManager.appsUpdated.observeForever(observer)
+            }
+            // LiveData phát lại giá trị gần nhất khi observer mới gắn; đo phần tăng thêm.
+            InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+            val baseline = refreshRequests.get()
+
+            scenario.onActivity { activity -> activity.showIconPackDialog() }
+            InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+            scenario.onActivity { activity ->
+                val field = ActSettings::class.java.getDeclaredField("dlgIconPack").apply { isAccessible = true }
+                val dialog = field.get(activity) as AlertDialog
+                dialog.listView.performItemClick(dialog.listView, 0, dialog.listView.adapter.getItemId(0))
+            }
+            InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+
+            assertTrue(
+                "chọn icon pack phải phát appsUpdated trực tiếp, không qua receiver tường minh",
+                refreshRequests.get() > baseline
+            )
+        } finally {
+            InstrumentationRegistry.getInstrumentation().runOnMainSync {
+                com.mckimquyen.services.AppEventManager.appsUpdated.removeObserver(observer)
+            }
+            scenario.close()
+        }
+    }
+
+    @Test
     fun testOptionsItemSelectedDispatchesHandledMenuActions() {
         val scenario = ActivityScenario.launch(ActSettings::class.java)
         scenario.onActivity { activity ->

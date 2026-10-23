@@ -57,6 +57,12 @@ public class UtilIconPackManager {
 
     private Application mApplication;
     private ArrayList<IconPack> mIconPacks;
+    private final java.util.concurrent.atomic.AtomicLong cacheGeneration = new java.util.concurrent.atomic.AtomicLong();
+    private long loadedGeneration = -1L;
+
+    public void invalidate() {
+        cacheGeneration.incrementAndGet();
+    }
 
     /**
      * Represents an icon pack with its resources and metadata
@@ -86,7 +92,7 @@ public class UtilIconPackManager {
         /**
          * Load icon pack resources from appfilter.xml
          */
-        public void load() {
+        public synchronized void load() {
             // Clean up old bitmaps before loading new ones
             cleanup();
 
@@ -111,26 +117,15 @@ public class UtilIconPackManager {
         /**
          * Clean up bitmap resources to prevent memory leaks
          */
-        public void cleanup() {
-            // Recycle back images
-            for (Bitmap bitmap : mBackImages) {
-                if (bitmap != null && !bitmap.isRecycled()) {
-                    bitmap.recycle();
-                }
-            }
+        public synchronized void cleanup() {
+            // Bitmap thuộc Resources có thể còn được nơi khác dùng; chỉ bỏ references.
             mBackImages.clear();
-
-            // Recycle mask image
-            if (mMaskImage != null && !mMaskImage.isRecycled()) {
-                mMaskImage.recycle();
-                mMaskImage = null;
-            }
-
-            // Recycle front image
-            if (mFrontImage != null && !mFrontImage.isRecycled()) {
-                mFrontImage.recycle();
-                mFrontImage = null;
-            }
+            mMaskImage = null;
+            mFrontImage = null;
+            mPackagesDrawables.clear();
+            mIconPackRes = null;
+            mFactor = 1.0f;
+            mLoaded = false;
         }
 
         @SuppressLint("DiscouragedApi")
@@ -241,7 +236,7 @@ public class UtilIconPackManager {
         /**
          * Get custom icon for a package, or generate one from default bitmap
          */
-        public Bitmap getIconForPackage(String appPackageName, Bitmap defaultBitmap) {
+        public synchronized Bitmap getIconForPackage(String appPackageName, Bitmap defaultBitmap) {
             if (!mLoaded) {
                 load();
             }
@@ -409,11 +404,13 @@ public class UtilIconPackManager {
      * @param application Application context
      * @return List of available icon packs
      */
-    public ArrayList<IconPack> getAvailableIconPacksWithIcons(boolean forceReload, Application application) {
+    public synchronized ArrayList<IconPack> getAvailableIconPacksWithIcons(boolean forceReload, Application application) {
         mApplication = application;
 
-        if (mIconPacks == null || forceReload) {
+        long generation = cacheGeneration.get();
+        if (mIconPacks == null || forceReload || loadedGeneration != generation) {
             mIconPacks = loadIconPacks();
+            loadedGeneration = generation;
         }
         return mIconPacks;
     }

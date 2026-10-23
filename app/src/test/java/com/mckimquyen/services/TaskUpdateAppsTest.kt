@@ -187,6 +187,57 @@ class TaskUpdateAppsTest {
         assertTrue(snapshot.icons.isEmpty())
     }
 
+    @Test
+    fun `execute drops cached shells immediately so a racing switchLens cannot recommit stale ones`() = runTest {
+        val dispatcher = StandardTestDispatcher(testScheduler)
+        val task = task(dispatcher, debounceMillis = REFRESH_DEBOUNCE_MS) {
+            AppRefreshSnapshot(listOf(app("rescanned")))
+        }
+        val cachedShells = TaskUpdateApps::class.java.getDeclaredField("lastShells").apply { isAccessible = true }
+        cachedShells.set(task, listOf(app("stale-pack-shell")))
+
+        task.execute()
+
+        assertEquals(
+            "execute() phải bỏ shells cũ ngay lúc gọi, trước cả debounce/scan",
+            null,
+            cachedShells.get(task)
+        )
+        advanceUntilIdle()
+    }
+
+    @Test
+    fun `cancelled scan cannot publish shells while replacement scan waits`() = runTest {
+        val dispatcher = StandardTestDispatcher(testScheduler)
+        val releaseOldScan = CompletableDeferred<Unit>()
+        val releaseNewScan = CompletableDeferred<Unit>()
+        var scans = 0
+        val task = task(dispatcher) {
+            val isOld = ++scans == 1
+            kotlinx.coroutines.withContext(kotlinx.coroutines.NonCancellable) {
+                if (isOld) releaseOldScan.await() else releaseNewScan.await()
+            }
+            val shells = listOf(app(if (isOld) "old-pack" else "new-pack"))
+            AppRefreshSnapshot(shells, shells = shells)
+        }
+        val cache = TaskUpdateApps::class.java.getDeclaredField("lastShells").apply { isAccessible = true }
+        task.execute()
+        runCurrent()
+        task.execute()
+        runCurrent()
+        releaseOldScan.complete(Unit)
+        runCurrent()
+        assertEquals("scan cũ không được ghi shells sau invalidation", null, cache.get(task))
+        releaseNewScan.complete(Unit)
+        advanceUntilIdle()
+        assertEquals(listOf(app("new-pack")), cache.get(task))
+        assertEquals(listOf("new-pack"), RAppsSingleton.instance.apps.orEmpty().map { it.packageName })
+    }
+
+    private companion object {
+        const val REFRESH_DEBOUNCE_MS = 200L
+    }
+
     private fun task(
         dispatcher: TestDispatcher,
         debounceMillis: Long = 0,

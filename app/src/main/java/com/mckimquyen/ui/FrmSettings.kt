@@ -556,6 +556,7 @@ class FrmSettings : Fragment(), SettingsInterface {
             us.saveLegacyIconPackLabel(UtilSettings.DEFAULT_ICON_PACK_LABEL_NAME)
             us.save(UtilSettings.KEY_NIGHT_MODE, UtilSettings.DEFAULT_NIGHT_MODE)
         }
+        com.mckimquyen.services.AppEventManager.notifyAppsUpdated()
         (activity as? ActSettings)?.sendNightModeBroadcast()
     }
 

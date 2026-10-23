@@ -30,7 +30,8 @@ import kotlinx.coroutines.withContext
 /** Immutable result produced by one PackageManager scan. */
 data class AppRefreshSnapshot(
     val apps: List<App>,
-    val icons: Map<String, Bitmap> = emptyMap()
+    val icons: Map<String, Bitmap> = emptyMap(),
+    val shells: List<App>? = null
 ) {
     companion object {
         /**
@@ -95,9 +96,14 @@ class TaskUpdateApps @JvmOverloads constructor(
     val state: StateFlow<AppRefreshState> = _state.asStateFlow()
 
     /** Non-blocking Java-compatible entry point. Full PackageManager rescan. */
-    fun execute(): Job = launchGuarded {
-        if (debounceMillis > 0) delay(debounceMillis)
-        loader?.invoke() ?: loadSnapshot()
+    fun execute(): Job {
+        // Rescan có thể đổi icon pack/key; bỏ shells cũ ngay để switchLens chen vào giữa
+        // debounce/scan không merge và commit lại icon của pack trước đó.
+        lastShells = null
+        return launchGuarded {
+            if (debounceMillis > 0) delay(debounceMillis)
+            loader?.invoke() ?: loadSnapshot()
+        }
     }
 
     /**
@@ -165,10 +171,9 @@ class TaskUpdateApps @JvmOverloads constructor(
             application,
             selectedIconPackPackageName
         )
-        lastShells = shells
         val lensId = utilSettings.getString(UtilSettings.KEY_ACTIVE_LENS_ID) ?: LensWorkspace.DEFAULT_LENS_ID
         val loadedApps = UtilApp.mergeLensPersistence(shells, lensId, utilSettings.sortType)
-        return stripIcons(loadedApps)
+        return stripIcons(loadedApps).copy(shells = shells)
     }
 
     /** Re-runs only the cheap per-lens merge over [lastShells]; null if nothing is cached yet. */
@@ -182,6 +187,8 @@ class TaskUpdateApps @JvmOverloads constructor(
     private fun stripIcons(loadedApps: List<App>): AppRefreshSnapshot = AppRefreshSnapshot.fromLoaded(loadedApps)
 
     private fun commit(generation: Long, snapshot: AppRefreshSnapshot) {
+        // Chỉ generation được chấp nhận mới được publish cache dùng cho lần đổi lens sau.
+        snapshot.shells?.let { lastShells = it }
         RAppsSingleton.instance.replaceSnapshot(snapshot.apps, snapshot.icons)
         _state.value = AppRefreshState.Ready(generation, snapshot.apps.toList())
         Logger.d("TaskUpdateApps: committed generation $generation (${snapshot.apps.size} apps)")

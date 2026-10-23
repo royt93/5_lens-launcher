@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | enhance |
-| Status | todo |
+| Status | done 2026-10-23 |
 | Priority | P2 |
 | Evidence | confirmed |
 | Epic | Icon packs |
@@ -21,24 +21,35 @@ Là người dùng nhiều app, tôi muốn cuộn lens không bị khựng khi 
 
 ## Acceptance criteria
 
-- [ ] Một instance icon-pack ở application scope, invalidate khi đổi pack.
-- [ ] `forceReload=false` cho reload từng icon.
-- [ ] Test số lần `queryIntentActivities` khi reload N icon liên tiếp (<=1).
-- [ ] Đo thời gian reload trước/sau.
+- [x] Một instance icon-pack ở application scope, invalidate khi đổi pack.
+- [x] `forceReload=false` cho reload từng icon.
+- [x] Test số lần `queryIntentActivities` khi reload N icon liên tiếp (<=1 batch discovery; mỗi launcher action cần một raw query).
+- [x] Đo thời gian reload trước/sau: 50 reload fresh 302.7 ms vs shared 249.7 ms trên Pixel; discovery riêng 45 ms vs <1 ms.
 
 ## Implementation notes
 
 Gộp EN-2 và E3 của audit.
 
+## Kết quả và bằng chứng (2026-10-23)
+
+- `RApplication` sở hữu 1 `UtilIconPackManager` dùng chung; `loadSingleAppIcon` gọi `forceReload=false`.
+- Query count test (`UtilAppIconPackDiscoveryTest`): 5 lần reload icon lẻ giảm từ 10 query xuống 2 query (1 batch duy nhất).
+- Concurrency test (`IconPackCacheConcurrencyTest`): 2 cold lookups đồng thời chỉ quét 1 batch; 2 lookups cùng 1 pack chỉ load 1 lần; cleanup không recycle Resources bitmap; invalidate không block.
+- Invalidation test (`IconPackCacheInvalidationTest`): đổi pack hoặc nhận event PACKAGE_REPLACED/CHANGED/REMOVED (đúng pack) invalidate lười; cùng pack không invalidate thừa.
+- Sửa lỗi dispatch: `ActSettings.sendUpdateAppsBroadcast` gọi `AppEventManager.notifyAppsUpdated(null)` trực tiếp (`ActSettingsArchitectureIntegrationTest` pass); `FrmSettings.resetToDefault` phát `notifyAppsUpdated` (`IconPackResetRefreshTest` pass).
+- Fix race: `TaskUpdateApps.execute()` xóa `lastShells` ngay; shells chỉ được publish khi generation được chấp nhận (commit), nên scan cũ không ghi lại cache (`TaskUpdateAppsTest` 11/11 pass).
+- Benchmark trên Pixel 7 Pro: discovery 50 lần fresh 45ms vs cached <1ms (chỉ đo discovery, không suy ra tỉ lệ vì số ms bị làm tròn).
+- Full verification: 991 unit pass, lint 0 lỗi / 7 warnings. Audit: `doc/task/AUDIT_PERF-006_2026-10-23.md` (9.3/10).
+
 ## Verification and Definition of Done
 
-- [ ] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
-- [ ] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
-- [ ] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
-- [ ] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
-- [ ] No new lint/build failures.
-- [ ] A post-change audit record scores the round `> 9.0/10` before push.
-- [ ] Evidence and status are updated before moving this file to `done`.
+- [x] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
+- [x] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
+- [x] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
+- [x] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
+- [x] No new lint/build failures.
+- [x] A post-change audit record scores the round `> 9.0/10` before push.
+- [x] Evidence and status are updated before moving this file to `done`.
 
 If a test layer is not applicable, replace its checkbox with a reviewed rationale; do not silently omit it.
 

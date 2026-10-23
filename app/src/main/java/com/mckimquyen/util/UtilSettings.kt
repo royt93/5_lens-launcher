@@ -223,7 +223,9 @@ class UtilSettings(context: Context) {
     }
 
     fun saveIconPackPackageName(packageName: String) {
+        if (prefs.getString(KEY_ICON_PACK_PACKAGE_NAME, null) == packageName) return
         save(KEY_ICON_PACK_PACKAGE_NAME, packageName)
+        (appContext as? com.mckimquyen.app.RApplication)?.iconPackManager?.invalidate()
     }
 
     fun saveLegacyIconPackLabel(label: String) {

@@ -231,7 +231,9 @@ object UtilApp {
         val defaultBitmap = UtilBitmap.packageNameToBitmap(packageManager, packageName, iconResId)
             ?: return@withContext null
         val settings = UtilSettings(application)
-        val iconPacks = UtilIconPackManager().getAvailableIconPacksWithIcons(true, application)
+        val manager = (application as? com.mckimquyen.app.RApplication)?.iconPackManager
+            ?: UtilIconPackManager()
+        val iconPacks = manager.getAvailableIconPacksWithIcons(false, application)
         val selectedPackageName = settings.iconPackPackageName(iconPacks)
         val selectedIconPack = findIconPackByPackage(iconPacks, selectedPackageName)
         selectedIconPack?.getIconForPackage(packageName, defaultBitmap) ?: defaultBitmap

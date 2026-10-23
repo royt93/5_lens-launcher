@@ -66,6 +66,12 @@ public class RApplication extends android.app.Application {
     private BroadcastReceiver packageReceiver;
     private TaskUpdateApps appRefreshPipeline;
     private TaskSortApps appSortPipeline;
+    private final com.mckimquyen.util.UtilIconPackManager iconPackManager =
+            new com.mckimquyen.util.UtilIconPackManager();
+
+    public com.mckimquyen.util.UtilIconPackManager getIconPackManager() {
+        return iconPackManager;
+    }
 
     /** FISH-008 Phase 2: lets ActHome call switchLens() directly on a lens-page change, instead
      *  of broadcasting a full refresh (which would re-scan PackageManager on every swipe). */
