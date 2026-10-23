@@ -237,6 +237,16 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
     // FEAT-007: MULTI-SELECT — pure, Context-free helpers (unit-testable)
     // ========================================================================
 
+    /**
+     * UI-030: true when [current] is still the same component in the same lens as [original]. A
+     * biometric prompt can complete after RecyclerView rebound the holder to another row.
+     */
+    static boolean isSameRow(App current, App original) {
+        return current != null
+                && identifierFor(current).equals(identifierFor(original))
+                && Objects.equals(current.getLensId(), original.getLensId());
+    }
+
     static String identifierFor(App app) {
         return AppPersistent.generateIdentifier(
                 app.getPackageName() != null ? app.getPackageName().toString() : null,
@@ -720,11 +730,10 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
          */
         public void toggleAppVisibility(App app) {
             this.mApp = app;
-            boolean isAppVisible = mApp.isVisible();
             App updatedApp = mAdapter.mRowActions.toggleVisibility(app);
 
-            // Update UI
-            if (isAppVisible) {
+            // Update UI from the result, not from the pre-toggle value, so the row cannot drift from state.
+            if (!updatedApp.isVisible()) {
                 // Đang visible -> chuyển sang hidden
                 Snackbar.make(cvAppContainer, mApp.getLabel() + " is now hidden", Snackbar.LENGTH_LONG).show();
                 ivAppHide.setImageResource(R.drawable.ic_visibility_off_24dp);
@@ -767,8 +776,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
             if (mActivityContext instanceof AppCompatActivity) {
                 mAdapter.mRowActions.toggleLock((AppCompatActivity) mActivityContext, app, updatedApp -> {
                             // Prompt có thể hoàn tất sau khi holder đã được bind sang hàng khác.
-                            if (mApp == null || !identifierFor(mApp).equals(identifierFor(app))
-                                    || !mApp.getLensId().equals(app.getLensId())) {
+                            if (!isSameRow(mApp, app)) {
                                 return Unit.INSTANCE;
                             }
                             mApp = updatedApp;
