@@ -102,6 +102,15 @@ object UtilApp {
             iconPackTokenFor(pack.mPackageName, versionTokenOf(packageManager, pack.mPackageName))
         } ?: iconPackTokenFor(UtilSettings.DEFAULT_ICON_PACK_PACKAGE_NAME, "")
 
+        // PERF-007: one palette read for the whole scan. First row per identifier wins, matching
+        // the old findAnyByIdentifier LIMIT 1 contract (which has no ORDER BY).
+        val persistentDao = AppDatabase.getInstance().appPersistentDao()
+        val paletteColors = HashMap<String, Int>()
+        persistentDao.getAllRows().forEach { row ->
+            if (!paletteColors.containsKey(row.identifier)) paletteColors[row.identifier] = row.paletteColor
+        }
+        val pendingPalettes = ArrayList<AppPersistent>()
+
         for ((index, resolveInfo) in availableActivities.withIndex()) {
             // Extract install date and package version/update token
             val packageInfo = try {
@@ -131,12 +140,12 @@ object UtilApp {
             // Palette color is global by design (not lens-scoped, see AppPersistentDao's
             // updatePaletteColor) - look it up regardless of which lens's row holds it.
             val identifier = AppPersistent.generateIdentifier(packageName, name)
-            val existingPersistent = AppDatabase.getInstance().appPersistentDao().findAnyByIdentifier(identifier)
-            var paletteColor = existingPersistent?.paletteColor ?: 0
+            var paletteColor = paletteColors[identifier] ?: 0
             if (paletteColor == 0 && icon != null) {
                 paletteColor = UtilColor.getPaletteColorFromBitmap(icon)
                 if (paletteColor != 0) {
-                    AppPersistent.setAppPaletteColorAndAwait(packageName, name, paletteColor)
+                    paletteColors[identifier] = paletteColor
+                    pendingPalettes.add(AppPersistent.defaults(packageName, name).copy(paletteColor = paletteColor))
                 }
             }
 
@@ -154,6 +163,7 @@ object UtilApp {
                 )
             )
         }
+        if (pendingPalettes.isNotEmpty()) persistentDao.setPaletteColors(pendingPalettes)
         return shells
     }
 

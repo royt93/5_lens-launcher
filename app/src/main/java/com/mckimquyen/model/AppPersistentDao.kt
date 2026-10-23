@@ -167,6 +167,14 @@ interface AppPersistentDao {
     }
 
     @Transaction
+    suspend fun setPaletteColors(rows: List<AppPersistent>) {
+        rows.forEach { row ->
+            insertIfAbsent(row)
+            updatePaletteColor(row.identifier, row.paletteColor)
+        }
+    }
+
+    @Transaction
     suspend fun setNotificationCount(defaults: AppPersistent, count: Int) {
         insertIfAbsent(defaults.copy(notificationCount = count))
         updateNotificationCount(defaults.identifier, count)

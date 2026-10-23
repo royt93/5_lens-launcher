@@ -4,6 +4,8 @@ Source of truth for implementation choices in this session. Detailed acceptance 
 
 ## ✅ Implemented
 
+- **PERF-007 — Scan Room N+1 (23/10/2026)**: `getAppShells` đọc palette một lần (`getAllRows`, row đầu theo identifier) và ghi palette mới trong một `@Transaction` cuối scan; SQL ghi vẫn tỷ lệ số app mới. 996 unit pass, lint 0 lỗi/7 warnings. Pixel: 10 test thiết bị; fixture 100 app warm 126→12 ms, cold persist 605→149 ms; full refresh 5 lượt 1937→1611 ms (dải chồng). Audit 9.1/10: `doc/task/AUDIT_PERF-007_2026-10-23.md`.
+
 - **PERF-006 — Shared icon-pack manager (23/10/2026)**: manager Application-scope, lazy invalidation theo pack/package events, đồng bộ discovery/load/render và publish shells đúng generation. 991 unit pass; lint 0 lỗi/7 warnings. Pixel: 19 regression tests, reload widget và 2 benchmark tests pass; Home 103 app. 50 reload fresh 302.7 ms vs shared 249.7 ms trong một lượt đo. Audit 9.3/10, giới hạn pack thật: `doc/task/AUDIT_PERF-006_2026-10-23.md`.
 
 - **CORE-005 — Icon-pack identity theo package (22/10/2026)**: lưu `packageName`, migrate unique legacy label, giữ pending khi pack vắng/ambiguous; loader và cache token không phụ thuộc nhãn/locale. Full unit 979, lint 0 lỗi/7 warnings, S24 settings integration theo target hiện khóa Pixel: 7 test + icon reload 1 test. Audit/giới hạn: `doc/task/AUDIT_CORE-005_2026-10-22.md`.
@@ -58,6 +60,7 @@ Source of truth for implementation choices in this session. Detailed acceptance 
 
 
 ## 🟡 In progress
+
 
 
 

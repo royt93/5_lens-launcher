@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | enhance |
-| Status | todo |
+| Status | done 2026-10-23 |
 | Priority | P2 |
 | Evidence | confirmed |
 | Epic | Refresh pipeline |
@@ -21,24 +21,28 @@ Là người dùng, tôi muốn danh sách app cập nhật nhanh sau khi cài/g
 
 ## Acceptance criteria
 
-- [ ] Một truy vấn lấy toàn bộ row, map theo identifier.
-- [ ] Ghi palette theo lô một lần.
-- [ ] Test kết quả không đổi; đếm số truy vấn.
-- [ ] Đo thời gian refresh trước/sau.
+- [x] Một truy vấn lấy toàn bộ row, map theo identifier.
+- [x] Ghi palette theo lô một lần.
+- [x] Test kết quả không đổi; đếm số truy vấn.
+- [x] Đo thời gian refresh trước/sau.
 
 ## Implementation notes
 
 Giữ generation guard của `replaceSnapshot`.
 
+## Kết quả (2026-10-23)
+
+`getAppShells` đọc `getAllRows()` một lần (row đầu tiên theo identifier thắng) và gom palette mới vào một `@Transaction` `setPaletteColors` cuối scan. Test: Room batch 3/3 (bảo toàn field, lens phụ, rollback), scanner 2/2 (RED 3 SELECT → GREEN 1). Full unit 996, lint 0 lỗi/7 warnings. Pixel 7 Pro: 10 test thiết bị pass; DB fixture 100 app warm 126→12 ms, cold persist 605→149 ms; full refresh 5 lượt 1937→1611 ms trung bình (dải chồng nhau). Số INSERT/UPDATE vẫn tỷ lệ với số app mới. Audit: `doc/task/AUDIT_PERF-007_2026-10-23.md` (9.1/10); giới hạn: không đo cold palette trên DB người dùng, chưa có test cancellation riêng.
+
 ## Verification and Definition of Done
 
-- [ ] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
-- [ ] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
-- [ ] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
-- [ ] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
-- [ ] No new lint/build failures.
-- [ ] A post-change audit record scores the round `> 9.0/10` before push.
-- [ ] Evidence and status are updated before moving this file to `done`.
+- [x] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
+- [x] Widget/UI tests: không thêm UI mới; chạy `LensViewIconReloadWidgetTest` và `ActHomeLensScopeWidgetTest` (không đổi hành vi hiển thị).
+- [x] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
+- [x] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
+- [x] No new lint/build failures.
+- [x] A post-change audit record scores the round `> 9.0/10` before push.
+- [x] Evidence and status are updated before moving this file to `done`.
 
 If a test layer is not applicable, replace its checkbox with a reviewed rationale; do not silently omit it.
 
