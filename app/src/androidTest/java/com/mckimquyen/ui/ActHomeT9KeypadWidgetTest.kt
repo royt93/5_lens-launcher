@@ -6,6 +6,7 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.mckimquyen.R
+import com.mckimquyen.app.RApplication
 import com.mckimquyen.app.RAppsSingleton
 import com.mckimquyen.model.App
 import com.mckimquyen.util.UtilSettings
@@ -19,6 +20,11 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class ActHomeT9KeypadWidgetTest {
+    private companion object {
+        const val SEARCH_WAIT_MS = 6_000L
+        const val SEARCH_POLL_MS = 50L
+    }
+
     @get:org.junit.Rule val deviceStateGuard = com.mckimquyen.testing.DeviceStateGuard()
 
 
@@ -34,6 +40,7 @@ class ActHomeT9KeypadWidgetTest {
 
     @Before
     fun setup() {
+        (context.applicationContext as RApplication).appRefreshPipeline.cancel()
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
         hadStoredSetting = prefs.contains(UtilSettings.KEY_ENABLE_T9_SEARCH_KEYPAD)
         originalSetting = settings.getEnableT9SearchKeypad()
@@ -54,11 +61,25 @@ class ActHomeT9KeypadWidgetTest {
         RAppsSingleton.instance.apps = originalApps
     }
 
+    private fun awaitSearchShown(scenario: ActivityScenario<ActHome>) {
+        val deadline = android.os.SystemClock.uptimeMillis() + SEARCH_WAIT_MS
+            var shown = false
+            while (!shown && android.os.SystemClock.uptimeMillis() < deadline) {
+                instrumentation.waitForIdleSync()
+                scenario.onActivity { activity ->
+                    shown = activity.findViewById<com.google.android.material.search.SearchView>(R.id.searchView)
+                        .currentTransitionState == com.google.android.material.search.SearchView.TransitionState.SHOWN
+                }
+                if (!shown) Thread.sleep(SEARCH_POLL_MS)
+            }
+            assertTrue("SearchView phải mở xong trước khi bấm T9", shown)
+    }
+
     @Test
     fun t9KeypadTyping247_filtersToChrome() {
         ActivityScenario.launch(ActHome::class.java).use { scenario ->
             scenario.onActivity { it.openSearchFromHome() }
-            instrumentation.waitForIdleSync()
+            awaitSearchShown(scenario)
 
             scenario.onActivity { activity ->
                 val search = activity.findViewById<com.google.android.material.search.SearchView>(R.id.searchView)
@@ -92,6 +113,7 @@ class ActHomeT9KeypadWidgetTest {
                 )
                 scroll.scrollTo(0, 0)
 
+                activity.findViewById<View>(R.id.btnT9_Clear).performClick()
                 button2.performClick()
                 activity.findViewById<View>(R.id.btnT9_4).performClick()
                 activity.findViewById<View>(R.id.btnT9_7).performClick()
@@ -102,6 +124,47 @@ class ActHomeT9KeypadWidgetTest {
                 val list = activity.searchResultAdapterForTest?.currentListForTest().orEmpty()
                 assertEquals(1, list.size)
                 assertEquals("Chrome", list[0].label)
+            }
+        }
+    }
+
+    /**
+     * SEARCH-012: tapping keypad digits for a non-Latin app matches through Latin package aliases,
+     * while tapping digit 1 no longer matches every non-Latin app.
+     */
+    @Test
+    fun tappingKeypadMatchesNonLatinAppViaPackageAliasAndDoesNotMatchOnDigitOne() {
+        val nonLatinApp = App(label = "微信", packageName = "com.tencent.mm", name = "Main", isVisible = true)
+        RAppsSingleton.instance.apps = arrayListOf(nonLatinApp, appChrome)
+
+        ActivityScenario.launch(ActHome::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                activity.openSearchFromHome()
+            }
+            awaitSearchShown(scenario)
+            scenario.onActivity { activity ->
+                activity.findViewById<View>(R.id.btnT9_Clear).performClick()
+                activity.findViewById<View>(R.id.btnT9_1).performClick()
+            }
+            instrumentation.waitForIdleSync()
+
+            scenario.onActivity { activity ->
+                val list = activity.searchResultAdapterForTest?.currentListForTest().orEmpty()
+                assertTrue("Digit 1 must not match WeChat", list.none { it.packageName == "com.tencent.mm" })
+
+                // Clear
+                activity.findViewById<View>(R.id.btnT9_Backspace).performClick()
+                // Tap "8" "3" "6" (ten -> tencent alias)
+                activity.findViewById<View>(R.id.btnT9_8).performClick()
+                activity.findViewById<View>(R.id.btnT9_3).performClick()
+                activity.findViewById<View>(R.id.btnT9_6).performClick()
+            }
+            instrumentation.waitForIdleSync()
+
+            scenario.onActivity { activity ->
+                val list = activity.searchResultAdapterForTest?.currentListForTest().orEmpty()
+                assertEquals("WeChat must be matched via tencent package alias", 1, list.size)
+                assertEquals("com.tencent.mm", list[0].packageName)
             }
         }
     }

@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | fix |
-| Status | todo |
+| Status | done 2026-10-24 — audit 9.1/10, `doc/task/AUDIT_SEARCH-012_2026-10-23.md` |
 | Priority | P2 |
 | Evidence | confirmed |
 | Epic | SEARCH-010 |
@@ -21,10 +21,10 @@ Là người dùng ngôn ngữ không-Latin, tôi muốn bàn T9 tìm được a
 
 ## Acceptance criteria
 
-- [ ] Nhãn không-Latin không còn sinh chuỗi toàn `1` vô nghĩa.
-- [ ] Có hướng xử lý rõ: dùng nhãn Latin của gói/`packageAliases` khi nhãn chính không map được, hoặc ẩn bàn T9 ở locale không hỗ trợ (chọn 1, ghi quyết định).
-- [ ] Test cho CJK, Cyrillic, Thai, Ả Rập, hỗn hợp.
-- [ ] Giữ nguyên kết quả cho locale Latin hiện có.
+- [x] Nhãn CJK/Cyrillic/Thai/Ả Rập không còn map thành chuỗi `1`; ký tự không hỗ trợ bị bỏ qua.
+- [x] Owner chọn fallback sang package name aliases Latin khi nhãn chính không match; label match có priority cao hơn alias.
+- [x] Unit tests cho CJK, Cyrillic, Thai, Ả Rập, label hỗn hợp; widget keypad test WeChat thật trên OPPO.
+- [x] Latin và Vietnamese mapping/ranking tests giữ nguyên.
 
 ## Implementation notes
 
@@ -32,13 +32,13 @@ Chốt phương án với owner trong story (alias fallback là rẻ nhất). Kh
 
 ## Verification and Definition of Done
 
-- [ ] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
-- [ ] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
-- [ ] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
-- [ ] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
-- [ ] No new lint/build failures.
-- [ ] A post-change audit record scores the round `> 9.0/10` before push.
-- [ ] Evidence and status are updated before moving this file to `done`.
+- [x] TDD `T9SearchEngineTest` RED/GREEN 7/7; `AppSearchEngineTest` 19/19.
+- [x] `ActHomeT9KeypadWidgetTest` test phím thật 1/836 trên OPPO CPH1989 Android 11.
+- [x] `AppSearchIntegrationTest` 6/6; không đổi persistence/SDK.
+- [x] OPPO CPH1989 `FUJZIFIR7DQCNRWW`, Android 11; bộ 57 test thiết bị pass. APK OPPO baseline, preference XML, system settings và foreground launcher khôi phục; Room lens rows giữ theo owner choice và được ghi rõ trong UI-032 audit.
+- [x] Full gate BUILD SUCCESSFUL: 1043 unit, lint, assemble app/androidTest (chưa so warning lint baseline).
+- [x] Audit `doc/task/AUDIT_SEARCH-012_2026-10-23.md`, 9.1/10.
+- [x] Evidence/status cập nhật.
 
 If a test layer is not applicable, replace its checkbox with a reviewed rationale; do not silently omit it.
 

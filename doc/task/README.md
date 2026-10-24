@@ -264,7 +264,7 @@ Giới hạn: agent audit ui chưa đọc hết `LensView.kt`, `ActAbout.java`, 
 | `A11Y-002` | P2 | 2 | [30 icon trang trí mang contentDescription app_name, TalkBack đọc sai](todo/p2-a11y-a11y-002-decorative-icons-app-name-label.md) |
 | `LEAK-002` ✅ done 2026-10-22 | P2 | 3 | [LensView: IndexOutOfBounds ở launchApp và 3 listener không null hóa khi detach](done/p2-leak-leak-002-lensview-select-index-and-listeners.md) |
 | `PERF-005` ✅ done 2026-10-21 | P2 | 3 | [LensView cấp phát Rect mỗi icon mỗi frame và gọi binder mỗi MotionEvent](done/p2-perf-perf-005-lens-draw-alloc-and-binder-per-event.md) |
-| `SEARCH-012` | P2 | 3 | [T9 vô dụng với nhãn app không phải chữ Latin](todo/p2-search-search-012-t9-non-latin-locales.md) |
+| `SEARCH-012` ✅ done 2026-10-24 | P2 | 3 | [T9 vô dụng với nhãn app không phải chữ Latin](done/p2-search-search-012-t9-non-latin-locales.md) |
 | `SEARCH-013` ✅ done 2026-10-23 | P2 | 3 | [Query toàn bảng Contacts đồng bộ trên main thread mỗi ký tự gõ](done/p2-search-search-013-contacts-query-main-thread.md) |
 | `SEARCH-014` ✅ done 2026-10-23 | P2 | 2 | [shortcutsByPackage giữ Drawable không giải phóng](done/p2-search-search-014-shortcut-drawable-cache-unbounded.md) |
 | `UI-027` | P2 | 1 | [Overlay quảng cáo dùng colorWhite cứng, tương phản 1.69:1 ở dark/dynamic color](todo/p2-ui-ui-027-ad-overlay-contrast-night.md) |
@@ -283,7 +283,7 @@ Giới hạn: agent audit ui chưa đọc hết `LensView.kt`, `ActAbout.java`, 
 | `PERF-006` ✅ done 2026-10-23 | P2 | 3 | [Reload một icon quét lại toàn bộ icon pack và parse appfilter mỗi lần](done/p2-perf-perf-006-icon-reload-reuses-icon-pack-cache.md) |
 | `PERF-007` ✅ done 2026-10-23 | P2 | 2 | [Scan PackageManager gây N+1 truy vấn Room và ghi từng app](done/p2-perf-perf-007-scan-n-plus-one-room.md) |
 | `UI-030` ✅ done 2026-10-23 | P2 | 3 | [Ẩn/khóa app ở list mode trên Home không phát broadcast, lưới không đồng bộ](done/p2-ui-ui-030-home-list-mode-broadcast-sync.md) |
-| `UI-032` | P2 | 2 | [LensManagementActivity mất state dialog sau process death và đọc prefs trên main thread](todo/p2-ui-ui-032-lens-manager-process-death.md) |
+| `UI-032` 🟡 in progress | P2 | 2 | [LensManagementActivity mất state dialog sau process death và đọc prefs trên main thread](inprogress/p2-ui-ui-032-lens-manager-process-death.md) |
 | `ARCH-002` | P3 | 8 | [Tách ActHome (2358 dòng) thành các bộ điều khiển nhỏ](todo/p3-arch-arch-002-split-act-home-god-class.md) |
 | `BUILD-004` | P3 | 3 | [Baseline/startup profile lệch mục tiêu và comment R8 sai](todo/p3-build-build-004-r8-and-baseline-profile-accuracy.md) |
 | `CORE-006` | P3 | 1 | [Đổi ngôn ngữ không làm mới nhãn app và thứ tự A-Z](todo/p3-core-core-006-refresh-on-locale-change.md) |

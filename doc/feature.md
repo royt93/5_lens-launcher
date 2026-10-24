@@ -4,6 +4,8 @@ Source of truth for implementation choices in this session. Detailed acceptance 
 
 ## ✅ Implemented
 
+- **SEARCH-012 — T9 fallback alias Latin cho nhãn non-Latin (24/10/2026)**: nhãn CJK/Cyrillic/Thai/Ả Rập không còn sinh `1`; T9 fallback sang package aliases Latin, giữ ưu tiên label. Unit 1043/1043, 57 test thiết bị trên OPPO CPH1989 Android 11, audit 9.1/10. Giới hạn: chưa hỗ trợ Pinyin/transliteration. Room OPPO được giữ theo owner choice sau instrumentation. Audit: `doc/task/AUDIT_SEARCH-012_2026-10-23.md`.
+
 - **SEARCH-014 — Giới hạn cache shortcut Drawable của SearchResultAdapter (23/10/2026)**: `ShortcutCache` (LruCache, trần 30 package) thay map không giới hạn; `ActHome.onTrimMemory` hạ cache theo mức `TRIM_MEMORY_*`. `ShortcutCacheTest` 7/7 + mutation check, 21 test search trên Pixel, 1039 unit, audit 9.1/10. Giới hạn: chưa đo heap, nhánh `ActHome.onTrimMemory` chưa có test riêng, trần đếm theo package không theo byte. Audit: `doc/task/AUDIT_SEARCH-014_2026-10-23.md`.
 
 - **UI-028 — Dismiss dialog khi thay thế và khi destroy (23/10/2026)**: `ActHome.dismissLensDialog()` dùng ở cả 5 vị trí gán `lensDialog` và `onDestroy`; `AppAdapter.onViewRecycled` dismiss folder dialog; `FrmSettings`/`FrmApps.onDestroyView` dismiss `searchHintDialog`/`pendingUninstallDialog`. RED/GREEN trên Pixel 7 Pro, mutation check, 80/80 test thiết bị, 1027 unit, audit 9.3/10. Giới hạn: test uninstall-dialog gán dialog bằng reflection, không qua luồng multi-select. Audit: `doc/task/AUDIT_UI-028_2026-10-23.md`.
@@ -69,6 +71,9 @@ Source of truth for implementation choices in this session. Detailed acceptance 
 
 
 ## 🟡 In progress
+
+
+- **UI-032 — LensManagementActivity mất dialog nhập tên khi Activity bị tạo lại (23/10/2026)**: owner chọn thứ tự SEARCH-014 > UI-032 > SEARCH-012. Đã làm code local: khôi phục dialog + draft, cache collapsedGroups, insets edge-to-edge. Full gate local pass 1043 unit; Pixel bị cấm dùng, instrumentation/smoke chạy OPPO nhưng test fixtures đổi Room. Audit 7.8/10; story giữ inprogress, không commit/push cho đến khi owner quyết định về Room baseline. Chi tiết: `doc/task/AUDIT_UI-032_2026-10-24.md`.
 
 
 
