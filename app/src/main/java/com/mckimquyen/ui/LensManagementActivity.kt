@@ -26,6 +26,14 @@ class LensManagementActivity : ActBase() {
         const val EXTRA_MANAGE_LENS_ID = "com.mckimquyen.lenslauncher.EXTRA_MANAGE_LENS_ID"
         private const val STATE_EDITING = "state_editing_groups"
         private const val STATE_SELECTED = "state_selected_lens_ids"
+        // UI-032: preserve draft dialog state across process death / recreation
+        private const val STATE_DIALOG_KIND = "state_dialog_kind"
+        private const val STATE_DIALOG_TEXT = "state_dialog_text"
+        private const val STATE_DIALOG_TARGET_LENS_ID = "state_dialog_target_lens_id"
+        private const val DIALOG_KIND_RENAME = "rename"
+        private const val DIALOG_KIND_CREATE_GROUP = "create_group"
+        private const val DIALOG_KIND_ASSIGN_GROUP = "assign_group"
+        private const val DIALOG_KIND_DELETE = "delete"
         private const val ACTION_BAR_DURATION_MS = 220L
         private const val LIST_ADD_DURATION_MS = 180L
         private const val LIST_REMOVE_DURATION_MS = 160L
@@ -41,6 +49,11 @@ class LensManagementActivity : ActBase() {
     private val selectedLensIds = mutableSetOf<String>()
     private var editingGroups = false
     private var lensGroupDialog: AlertDialog? = null
+    // UI-032: track open dialog kind and target so onSaveInstanceState can preserve drafts
+    private var activeDialogKind: String? = null
+    private var activeDialogLensId: String? = null
+    // UI-032: cache collapsed groups for the Activity's lifetime instead of re-reading prefs on main
+    private var cachedCollapsedGroups: Set<String>? = null
     private var groupOperationInProgress = false
     private var groupLoadVersion = 0
     private var lastGroupOperationError: Throwable? = null
@@ -77,6 +90,13 @@ class LensManagementActivity : ActBase() {
 
     @androidx.annotation.VisibleForTesting
     fun selectLensForTest(lensId: String) = selectLens(lensId)
+    @androidx.annotation.VisibleForTesting
+    fun showCreateGroupDialogForTest(selectedIds: Set<String>, draftText: String? = null) =
+        showCreateGroupDialog(selectedIds, draftText)
+
+    @androidx.annotation.VisibleForTesting
+    fun showRenameLensDialogForTest(lens: LensWorkspace, draftText: String? = null) =
+        showRenameLensDialog(lens, draftText)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -87,6 +107,7 @@ class LensManagementActivity : ActBase() {
         originalLightNavigationBars = originalBars.isAppearanceLightNavigationBars
         setContentView(R.layout.act_lens_management)
         settings = UtilSettings(this)
+        cachedCollapsedGroups = settings.getCollapsedLensGroups()
         activeLensId = settings.getString(UtilSettings.KEY_ACTIVE_LENS_ID)
         list = findViewById(R.id.rvLensGroups)
         managementToolbar = findViewById(R.id.tbLensManagement)
@@ -115,7 +136,7 @@ class LensManagementActivity : ActBase() {
         managementToolbar.menu.findItem(R.id.menuLensGroupEditToggle).icon?.setTint(onSurface)
         managementToolbar.menu.findItem(R.id.menuLensGroupEditToggle).isVisible = true
         managementToolbar.menu.findItem(R.id.menuLensGroupEditDone).isVisible = false
-        androidx.core.view.ViewCompat.requestApplyInsets(findViewById(R.id.lensManagementRoot))
+        applyEdgeToEdgeInsets()
         managementToolbar.setOnMenuItemClickListener { item ->
             if (item.itemId == R.id.menuLensGroupEditToggle || item.itemId == R.id.menuLensGroupEditDone) {
                 toggleEditMode()
@@ -127,7 +148,10 @@ class LensManagementActivity : ActBase() {
         val restoredSelection = savedInstanceState?.getStringArrayList(STATE_SELECTED).orEmpty()
         adapter = LensGroupAdapter(
             onLensSelected = ::selectLens,
-            onCollapsedGroupsChanged = settings::saveCollapsedLensGroups,
+            onCollapsedGroupsChanged = { groups ->
+                cachedCollapsedGroups = groups
+                settings.saveCollapsedLensGroups(groups)
+            },
             onGroupEditSelectionChanged = { ids ->
                 selectedLensIds.clear()
                 selectedLensIds.addAll(ids)
@@ -146,7 +170,7 @@ class LensManagementActivity : ActBase() {
         updateItemAnimator()
         LensWorkspace.loadAll { lenses ->
             if (!isFinishing && !isDestroyed) {
-                adapter.submit(lenses, settings.getCollapsedLensGroups(), activeLensId)
+                adapter.submit(lenses, effectiveCollapsedGroups(), activeLensId)
                 findViewById<android.view.View>(R.id.lensManagerSingleLensHint).visibility =
                     if (lenses.size == 1) android.view.View.VISIBLE else android.view.View.GONE
                 // Selection is only trusted once checked against live Room rows: a stale or
@@ -159,6 +183,28 @@ class LensManagementActivity : ActBase() {
                     onGroupSelectionChanged(selectedLensIds)
                 } else if (!manageLensId.isNullOrBlank() && manageLensId in knownIds) {
                     beginManagingLens(manageLensId)
+                }
+                // UI-032: restore draft dialog after Activity recreation
+                val dialogKind = savedInstanceState?.getString(STATE_DIALOG_KIND)
+                if (dialogKind != null) {
+                    val draftText = savedInstanceState.getString(STATE_DIALOG_TEXT)
+                    val targetId = savedInstanceState.getString(STATE_DIALOG_TARGET_LENS_ID)
+                    when (dialogKind) {
+                        DIALOG_KIND_RENAME -> {
+                            val lens = lenses.firstOrNull { it.id == targetId }
+                            if (lens != null) showRenameLensDialog(lens, draftText)
+                        }
+                        DIALOG_KIND_CREATE_GROUP -> {
+                            showCreateGroupDialog(selectedLensIds.toSet(), draftText)
+                        }
+                        DIALOG_KIND_ASSIGN_GROUP -> {
+                            showAssignGroupDialog(selectedLensIds.toSet())
+                        }
+                        DIALOG_KIND_DELETE -> {
+                            val lens = lenses.firstOrNull { it.id == targetId }
+                            if (lens != null) showDeleteLensDialog(lens)
+                        }
+                    }
                 }
             }
         }
@@ -227,13 +273,15 @@ class LensManagementActivity : ActBase() {
         menu.show()
     }
 
-    private fun showRenameLensDialog(lens: LensWorkspace) {
+    private fun showRenameLensDialog(lens: LensWorkspace, draftText: String? = null) {
+        activeDialogKind = DIALOG_KIND_RENAME
+        activeDialogLensId = lens.id
         val input = EditText(this).apply {
             id = android.R.id.edit
-            setText(lens.name)
+            setText(draftText ?: lens.name)
             setHint(R.string.lens_name_hint)
             setSingleLine(true)
-            setSelectAllOnFocus(true)
+            if (draftText != null) setSelection(text.length) else setSelectAllOnFocus(true)
         }
         val container = android.widget.FrameLayout(this).apply {
             val horizontal = (24 * resources.displayMetrics.density).toInt()
@@ -247,7 +295,11 @@ class LensManagementActivity : ActBase() {
             .setPositiveButton(android.R.string.ok, null)
             .setNegativeButton(android.R.string.cancel, null)
             .create()
-        lensGroupDialog?.setOnDismissListener { lensGroupDialog = null }
+        lensGroupDialog?.setOnDismissListener {
+            lensGroupDialog = null
+            activeDialogKind = null
+            activeDialogLensId = null
+        }
         lensGroupDialog?.setOnShowListener {
             lensGroupDialog?.getButton(AlertDialog.BUTTON_POSITIVE)?.setOnClickListener {
                 val name = input.text?.toString()?.trim().orEmpty()
@@ -269,6 +321,8 @@ class LensManagementActivity : ActBase() {
     }
 
     private fun showDeleteLensDialog(lens: LensWorkspace) {
+        activeDialogKind = DIALOG_KIND_DELETE
+        activeDialogLensId = lens.id
         lensGroupDialog = com.google.android.material.dialog.MaterialAlertDialogBuilder(this, R.style.MaterialYouDialogTheme)
             .setTitle(R.string.lens_delete)
             .setMessage(getString(R.string.lens_delete_confirm_message, lens.name))
@@ -281,7 +335,11 @@ class LensManagementActivity : ActBase() {
             }
             .setNegativeButton(android.R.string.cancel, null)
             .create()
-        lensGroupDialog?.setOnDismissListener { lensGroupDialog = null }
+        lensGroupDialog?.setOnDismissListener {
+            lensGroupDialog = null
+            activeDialogKind = null
+            activeDialogLensId = null
+        }
         lensGroupDialog?.show()
     }
 
@@ -300,7 +358,7 @@ class LensManagementActivity : ActBase() {
     }
 
     private fun refreshAfterLensChange(lenses: List<LensWorkspace>) {
-        adapter.submit(lenses, settings.getCollapsedLensGroups(), activeLensId)
+        adapter.submit(lenses, effectiveCollapsedGroups(), activeLensId)
         findViewById<android.view.View>(R.id.lensManagerSingleLensHint).visibility =
             if (lenses.size == 1) android.view.View.VISIBLE else android.view.View.GONE
         onGroupSelectionChanged(selectedLensIds)
@@ -310,6 +368,13 @@ class LensManagementActivity : ActBase() {
         super.onSaveInstanceState(outState)
         outState.putBoolean(STATE_EDITING, editingGroups)
         outState.putStringArrayList(STATE_SELECTED, ArrayList(selectedLensIds))
+        // UI-032: save open dialog state and uncommitted draft text across recreation
+        if (lensGroupDialog?.isShowing == true && activeDialogKind != null) {
+            outState.putString(STATE_DIALOG_KIND, activeDialogKind)
+            activeDialogLensId?.let { outState.putString(STATE_DIALOG_TARGET_LENS_ID, it) }
+            val input = lensGroupDialog?.findViewById<EditText>(android.R.id.edit)
+            input?.text?.toString()?.let { outState.putString(STATE_DIALOG_TEXT, it) }
+        }
     }
 
     override fun onDestroy() {
@@ -320,7 +385,6 @@ class LensManagementActivity : ActBase() {
         androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.lensManagementRoot), null)
         window.statusBarColor = originalStatusBarColor
         window.navigationBarColor = originalNavigationBarColor
-        androidx.core.view.WindowCompat.setDecorFitsSystemWindows(window, true)
         androidx.core.view.WindowCompat.getInsetsController(window, window.decorView).apply {
             isAppearanceLightStatusBars = originalLightStatusBars
             isAppearanceLightNavigationBars = originalLightNavigationBars
@@ -331,9 +395,42 @@ class LensManagementActivity : ActBase() {
     @androidx.annotation.VisibleForTesting
     fun reloadGroupsForTest() {
         LensWorkspace.loadAll { lenses ->
-            if (!isFinishing && !isDestroyed) adapter.submit(lenses, settings.getCollapsedLensGroups(), activeLensId)
+            if (!isFinishing && !isDestroyed) adapter.submit(lenses, effectiveCollapsedGroups(), activeLensId)
         }
     }
+
+    /**
+     * Targets SDK 37, where the system draws edge-to-edge: without consuming insets the toolbar sat
+     * under the status bar / cutout and the list's last rows and the group action bar under the
+     * gesture bar. Each pass sets "padding from layout + inset" from values captured once, so
+     * repeated dispatches (rotation, IME, requestApplyInsets) never accumulate.
+     */
+    private fun applyEdgeToEdgeInsets() {
+        androidx.core.view.WindowCompat.setDecorFitsSystemWindows(window, false)
+        val root = findViewById<android.view.View>(R.id.lensManagementRoot)
+        val appBar = findViewById<android.view.View>(R.id.lensManagerAppBar)
+        val basePaddingTop = appBar.paddingTop
+        val baseListBottom = list.paddingBottom
+        val baseActionsBottom = groupActions.paddingBottom
+        androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(root) { _, insets ->
+            val bars = insets.getInsets(
+                androidx.core.view.WindowInsetsCompat.Type.systemBars() or
+                    androidx.core.view.WindowInsetsCompat.Type.displayCutout()
+            )
+            root.setPadding(bars.left, root.paddingTop, bars.right, root.paddingBottom)
+            appBar.setPadding(appBar.paddingLeft, basePaddingTop + bars.top, appBar.paddingRight, appBar.paddingBottom)
+            list.setPadding(list.paddingLeft, list.paddingTop, list.paddingRight, baseListBottom + bars.bottom)
+            groupActions.setPadding(
+                groupActions.paddingLeft, groupActions.paddingTop, groupActions.paddingRight,
+                baseActionsBottom + bars.bottom
+            )
+            insets
+        }
+        androidx.core.view.ViewCompat.requestApplyInsets(root)
+    }
+
+    private fun effectiveCollapsedGroups(): Set<String> =
+        cachedCollapsedGroups ?: settings.getCollapsedLensGroups().also { cachedCollapsedGroups = it }
 
     private fun reloadGroups() = reloadGroupsForTest()
 
@@ -413,10 +510,18 @@ class LensManagementActivity : ActBase() {
         androidx.core.view.ViewCompat.requestApplyInsets(groupActions)
     }
 
-    private fun showAssignGroupDialog() {
+    private fun showAssignGroupDialog(restoredSelectedIds: Set<String>? = null) {
+        restoredSelectedIds?.let { ids ->
+            selectedLensIds.clear()
+            selectedLensIds.addAll(ids)
+            adapter.setGroupEditSelection(selectedLensIds.toSet())
+            editingGroups = true
+            onGroupSelectionChanged(selectedLensIds)
+        }
         val selectedIds = selectedLensIds.toSet()
         if (!editingGroups || selectedIds.isEmpty() || groupOperationInProgress) return
         groupOperationInProgress = true
+        activeDialogKind = DIALOG_KIND_ASSIGN_GROUP
         onGroupSelectionChanged(selectedLensIds)
         val version = ++groupLoadVersion
         LensWorkspace.loadAll { lenses ->
@@ -429,6 +534,7 @@ class LensManagementActivity : ActBase() {
                     .setItems(options.toTypedArray()) { dialog, which ->
                         dialog.dismiss()
                         lensGroupDialog = null
+                        activeDialogKind = null
                         setGroupOperationIdle()
                         if (which < groupNames.size) assignGroup(selectedIds, groupNames[which])
                         else showCreateGroupDialog(selectedIds)
@@ -436,6 +542,7 @@ class LensManagementActivity : ActBase() {
                     .setNegativeButton(android.R.string.cancel, null)
                     .setOnCancelListener {
                         lensGroupDialog = null
+                        activeDialogKind = null
                         if (version == groupLoadVersion) setGroupOperationIdle()
                     }
                     .show()
@@ -448,13 +555,18 @@ class LensManagementActivity : ActBase() {
         }
     }
 
-    private fun showCreateGroupDialog(selectedIds: Set<String>) {
+    private fun showCreateGroupDialog(selectedIds: Set<String>, draftText: String? = null) {
         groupOperationInProgress = false
         lensGroupDialog = null
+        activeDialogKind = DIALOG_KIND_CREATE_GROUP
         onGroupSelectionChanged(selectedLensIds)
         val input = EditText(this).apply {
             id = android.R.id.edit
             setHint(R.string.lens_group_name_hint)
+            draftText?.let {
+                setText(it)
+                setSelection(it.length)
+            }
         }
         lensGroupDialog = AlertDialog.Builder(this)
             .setTitle(R.string.lens_group_create)
@@ -464,7 +576,12 @@ class LensManagementActivity : ActBase() {
             .create()
         lensGroupDialog?.setOnCancelListener {
             lensGroupDialog = null
+            activeDialogKind = null
             setGroupOperationIdle()
+        }
+        lensGroupDialog?.setOnDismissListener {
+            lensGroupDialog = null
+            activeDialogKind = null
         }
         lensGroupDialog?.setOnShowListener {
             lensGroupDialog?.getButton(AlertDialog.BUTTON_POSITIVE)?.setOnClickListener {
@@ -476,6 +593,7 @@ class LensManagementActivity : ActBase() {
                 }
                 lensGroupDialog?.dismiss()
                 lensGroupDialog = null
+                activeDialogKind = null
                 assignGroup(selectedIds, name)
             }
         }

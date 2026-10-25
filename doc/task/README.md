@@ -269,7 +269,7 @@ Giới hạn: agent audit ui chưa đọc hết `LensView.kt`, `ActAbout.java`, 
 | `SEARCH-014` ✅ done 2026-10-23 | P2 | 2 | [shortcutsByPackage giữ Drawable không giải phóng](done/p2-search-search-014-shortcut-drawable-cache-unbounded.md) |
 | `UI-027` | P2 | 1 | [Overlay quảng cáo dùng colorWhite cứng, tương phản 1.69:1 ở dark/dynamic color](todo/p2-ui-ui-027-ad-overlay-contrast-night.md) |
 | `UI-028` ✅ done 2026-10-23 | P2 | 3 | [ActHome dùng một field lensDialog cho 5 dialog; vài dialog không dismiss khi destroy](done/p2-ui-ui-028-dialog-leaks-and-lifecycle.md) |
-| `UI-029` | P2 | 2 | [Search bar bị Clean mode đè mà Settings vẫn hiện bật; chevron quick action cứng không RTL](todo/p2-ui-ui-029-settings-conflict-and-rtl-chevron.md) |
+| `UI-029` 🟡 in progress | P2 | 2 | [Search bar bị Clean mode đè mà Settings vẫn hiện bật; chevron quick action cứng không RTL](inprogress/p2-ui-ui-029-settings-conflict-and-rtl-chevron.md) |
 | `BUILD-003` | P3 | 2 | [Dọn repo: local.properties bị track, Jetifier thừa, permission thừa, rác JVM](todo/p3-build-build-003-repo-hygiene-quick-wins.md) |
 | `TEST-005` ✅ done 2026-10-20 | P3 | 5 | [Test suite rò trạng thái thiết bị và Robolectric không pin SDK](done/p3-test-test-005-test-state-leak-and-flaky-guards.md) |
 
@@ -283,7 +283,7 @@ Giới hạn: agent audit ui chưa đọc hết `LensView.kt`, `ActAbout.java`, 
 | `PERF-006` ✅ done 2026-10-23 | P2 | 3 | [Reload một icon quét lại toàn bộ icon pack và parse appfilter mỗi lần](done/p2-perf-perf-006-icon-reload-reuses-icon-pack-cache.md) |
 | `PERF-007` ✅ done 2026-10-23 | P2 | 2 | [Scan PackageManager gây N+1 truy vấn Room và ghi từng app](done/p2-perf-perf-007-scan-n-plus-one-room.md) |
 | `UI-030` ✅ done 2026-10-23 | P2 | 3 | [Ẩn/khóa app ở list mode trên Home không phát broadcast, lưới không đồng bộ](done/p2-ui-ui-030-home-list-mode-broadcast-sync.md) |
-| `UI-032` 🟡 in progress | P2 | 2 | [LensManagementActivity mất state dialog sau process death và đọc prefs trên main thread](inprogress/p2-ui-ui-032-lens-manager-process-death.md) |
+| `UI-032` ✅ done 2026-10-25 | P2 | 2 | [LensManagementActivity mất state dialog sau process death và đọc prefs trên main thread](done/p2-ui-ui-032-lens-manager-process-death.md) |
 | `ARCH-002` | P3 | 8 | [Tách ActHome (2358 dòng) thành các bộ điều khiển nhỏ](todo/p3-arch-arch-002-split-act-home-god-class.md) |
 | `BUILD-004` | P3 | 3 | [Baseline/startup profile lệch mục tiêu và comment R8 sai](todo/p3-build-build-004-r8-and-baseline-profile-accuracy.md) |
 | `CORE-006` | P3 | 1 | [Đổi ngôn ngữ không làm mới nhãn app và thứ tự A-Z](todo/p3-core-core-006-refresh-on-locale-change.md) |

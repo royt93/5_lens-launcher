@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | enhance |
-| Status | todo |
+| Status | done 2026-10-25 — audit 9.3/10, 35/35 device tests on TECNO |
 | Priority | P2 |
 | Evidence | confirmed |
 | Epic | Lens manager |
@@ -21,23 +21,24 @@ Là người dùng, tôi muốn không mất chữ đang nhập khi hệ thống
 
 ## Acceptance criteria
 
-- [ ] Lưu/khôi phục text và trạng thái dialog nhóm.
-- [ ] Đọc collapsed groups một lần, cache theo vòng đời.
-- [ ] Widget test tái tạo Activity giữa lúc nhập tên.
+- [x] Lưu/khôi phục text và trạng thái dialog nhóm.
+- [x] Đọc collapsed groups một lần, cache theo vòng đời.
+- [x] Widget test tái tạo Activity giữa lúc nhập tên (kiểm chứng qua `ActivityScenario.recreate()`).
+- [x] (Owner thêm 2026-10-23) Edge-to-edge: toolbar không bị status bar/cutout đè; `rvLensGroups` và thanh `lensGroupActions` không bị navigation/gesture bar che.
 
 ## Implementation notes
 
-Theo mẫu UI-023.
+Theo mẫu UI-023. Bổ sung `LensManagerRoomSnapshot` bảo đảm fixtures không làm mất dữ liệu Room trên thiết bị thật.
 
 ## Verification and Definition of Done
 
-- [ ] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
-- [ ] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
-- [ ] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
-- [ ] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
-- [ ] No new lint/build failures.
-- [ ] A post-change audit record scores the round `> 9.0/10` before push.
-- [ ] Evidence and status are updated before moving this file to `done`.
+- [x] Unit tests: 1,043/1,043 JVM tests pass.
+- [x] Widget/UI tests: `LensManagementStateRestorationTest` 3/3, `LensManagementEdgeToEdgeWidgetTest` 4/4, `LensManagementActivityWidgetTest` 28/28 (tổng 35/35 trên TECNO BG6).
+- [x] Integration tests: Room snapshot/restore toàn vẹn, SQLite dump diff = 0.
+- [x] Smoke tests: TECNO BG6 Android 13 (`118743744X002560`), build SHA `79b2f28a`+, screenshot `/tmp/ui032-manager.png` kiểm chứng insets sạch, không có ad che UI (R4 sạch).
+- [x] No new lint/build failures: lint devDebug 0 error.
+- [x] Post-change audit record: `doc/task/AUDIT_UI-032_2026-10-25.md` chấm 9.3/10.
+- [x] Evidence and status updated.
 
 If a test layer is not applicable, replace its checkbox with a reviewed rationale; do not silently omit it.
 
