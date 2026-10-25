@@ -977,6 +977,18 @@
 
                 </RelativeLayout>
 
+                <TextView
+                    android:id="@+id/tvShowSearchBarDependencyHint"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="60dp"
+                    android:layout_marginEnd="16dp"
+                    android:paddingBottom="8dp"
+                    android:text="@string/setting_clean_lens_mode_hint"
+                    android:textColor="?android:attr/textColorTertiary"
+                    android:textSize="12sp"
+                    android:visibility="gone" />
+
                 <com.google.android.material.divider.MaterialDivider
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

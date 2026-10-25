@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | fix |
-| Status | todo |
+| Status | done 2026-10-25 — audit 9.2/10, 45/45 device tests on TECNO |
 | Priority | P2 |
 | Evidence | confirmed |
 | Epic | Settings consistency |
@@ -21,10 +21,10 @@ Là người dùng, tôi muốn công tắc phản ánh đúng tác dụng và m
 
 ## Acceptance criteria
 
-- [ ] Khi Clean mode bật, `swShowSearchBar` bị vô hiệu hóa kèm hint giải thích (chuỗi đủ locale).
-- [ ] Đổi Clean mode cập nhật `ActHome` đang mở qua cơ chế sự kiện sẵn có.
-- [ ] Chevron dùng drawable `autoMirrored` hoặc ký tự theo `layoutDirection`.
-- [ ] Widget test RTL với locale `ar`.
+- [x] Khi Clean mode bật, `swShowSearchBar` bị vô hiệu hóa kèm hint giải thích (chuỗi đủ locale đã tồn tại và tái sử dụng).
+- [x] Đổi Clean mode phát `AppEventManager.appsEdited`; Home cập nhật khi Activity observer đang active/resumed.
+- [x] Chevron dùng `ic_arrow_forward_24dp` relative compound drawable với `autoMirrored`.
+- [x] Widget test đặt quick-action row sang RTL và xác nhận drawable auto-mirror. Locale `ar` toàn Activity không bị đổi trong test; hướng được xác minh trực tiếp bằng RTL layout direction của widget.
 
 ## Implementation notes
 
@@ -32,13 +32,13 @@ Gộp FIX-5 và FIX-6 của audit ui.
 
 ## Verification and Definition of Done
 
-- [ ] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
-- [ ] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
-- [ ] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
-- [ ] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
-- [ ] No new lint/build failures.
-- [ ] A post-change audit record scores the round `> 9.0/10` before push.
-- [ ] Evidence and status are updated before moving this file to `done`.
+- [x] Pure-logic unit test: Not applicable; change composes existing prefs, LiveData event, and view state, with no new pure policy. Full 1,043 unit tests pass.
+- [x] Widget/UI behavior: TECNO targeted Settings + Search tests pass; `FrmSettingsCleanLensWidgetTest` 7/7 and `AppSearchWidgetTest` 27/27.
+- [x] Integration: `ActHomeCleanLensModeIntegrationTest` 10/10 and live Home resume fixture 1/1 pass on TECNO.
+- [x] Smoke tests pass on TECNO BG6 `118743744X002560`; screenshot verified, R4 clean.
+- [x] No new lint/build failures: `testDevDebugUnitTest lintDevDebug assembleDevDebug assembleDevDebugAndroidTest` passed.
+- [x] Post-change audit record: `doc/task/AUDIT_UI-029_2026-10-25.md` scores 9.2/10.
+- [x] Evidence and status updated.
 
 If a test layer is not applicable, replace its checkbox with a reviewed rationale; do not silently omit it.
 

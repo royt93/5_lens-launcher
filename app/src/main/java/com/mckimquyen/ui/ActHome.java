@@ -335,8 +335,10 @@ public class ActHome extends ActBase {
         AppEventManager.INSTANCE.getAppsUpdated().observe(this,
                 data -> assignApps(Objects.requireNonNull(RAppsSingleton.getInstance().getApps())));
 
-        AppEventManager.INSTANCE.getAppsEdited().observe(this,
-                data -> assignApps(Objects.requireNonNull(RAppsSingleton.getInstance().getApps())));
+        AppEventManager.INSTANCE.getAppsEdited().observe(this, data -> {
+            updateSearchBarVisibility();
+            assignApps(Objects.requireNonNull(RAppsSingleton.getInstance().getApps()));
+        });
 
         AppEventManager.INSTANCE.getVisibilityChanged().observe(this,
                 data -> assignApps(Objects.requireNonNull(RAppsSingleton.getInstance().getApps())));
@@ -1834,6 +1836,7 @@ public class ActHome extends ActBase {
 
         if (action instanceof QuickAction.Info info) {
             tvQuickActionLabel.setText(info.getLabel());
+            tvQuickActionValue.setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0, 0, 0);
             tvQuickActionValue.setText(info.getValue());
             quickActionRow.setOnClickListener(v -> {
                 ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
@@ -1846,7 +1849,9 @@ public class ActHome extends ActBase {
             // compounding why this row read as "not working" (it did; it was just too
             // understated to notice). A trailing chevron signals "this opens something" the
             // same way a tappable list row conventionally does.
-            tvQuickActionValue.setText("›");
+            tvQuickActionValue.setText("");
+            tvQuickActionValue.setCompoundDrawablesRelativeWithIntrinsicBounds(
+                    0, 0, R.drawable.ic_arrow_forward_24dp, 0);
             quickActionRow.setOnClickListener(v -> {
                 try {
                     startActivity(quickAction.getIntent());
@@ -1857,20 +1862,24 @@ public class ActHome extends ActBase {
             });
         } else if (action instanceof QuickAction.FlashlightToggle toggle) {
             tvQuickActionLabel.setText(toggle.getLabel());
+            tvQuickActionValue.setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0, 0, 0);
             tvQuickActionValue.setText(flashlightOn ? R.string.quick_action_flashlight_on : R.string.quick_action_flashlight_off);
             quickActionRow.setOnClickListener(v -> toggleFlashlight());
         } else if (action instanceof QuickAction.WifiSsidPermissionRequest permissionRequest) {
             tvQuickActionLabel.setText(permissionRequest.getLabel());
+            tvQuickActionValue.setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0, 0, 0);
             tvQuickActionValue.setText(R.string.quick_action_tap_to_allow);
             quickActionRow.setOnClickListener(v -> requestWifiSsidPermission());
         } else if (action instanceof QuickAction.DndAccessRequest dndRequest) {
             tvQuickActionLabel.setText(dndRequest.getLabel());
+            tvQuickActionValue.setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0, 0, 0);
             tvQuickActionValue.setText(dndRequest.getPreviouslyRequested()
                     ? R.string.quick_action_dnd_denied
                     : R.string.quick_action_tap_to_allow);
             quickActionRow.setOnClickListener(v -> openDndAccessSettings());
         } else if (action instanceof QuickAction.DndToggle dndToggle) {
             tvQuickActionLabel.setText(dndToggle.getLabel());
+            tvQuickActionValue.setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0, 0, 0);
             tvQuickActionValue.setText(dndToggle.isOn() ? R.string.quick_action_flashlight_on : R.string.quick_action_flashlight_off);
             quickActionRow.setOnClickListener(v -> performDndToggle(dndToggle.isOn()));
         }

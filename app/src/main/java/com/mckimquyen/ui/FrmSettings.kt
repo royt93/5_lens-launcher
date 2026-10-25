@@ -59,6 +59,7 @@ class FrmSettings : Fragment(), SettingsInterface {
     private var swRecentAppsPanel: SwitchCompat? = null
     private var swKeepScreenOn: SwitchCompat? = null
     private var swCleanLensMode: SwitchCompat? = null
+    private var tvShowSearchBarDependencyHint: TextView? = null
     private var swDepthOfField: SwitchCompat? = null
     private var swSmartFocus: SwitchCompat? = null
     private var tvSelectedSearchHint: TextView? = null
@@ -131,6 +132,7 @@ class FrmSettings : Fragment(), SettingsInterface {
         swRecentAppsPanel = view.findViewById(R.id.swRecentAppsPanel)
         swKeepScreenOn = view.findViewById(R.id.swKeepScreenOn)
         swCleanLensMode = view.findViewById(R.id.swCleanLensMode)
+        tvShowSearchBarDependencyHint = view.findViewById(R.id.tvShowSearchBarDependencyHint)
         swDepthOfField = view.findViewById(R.id.swDepthOfField)
         swSmartFocus = view.findViewById(R.id.swSmartFocus)
         tvSelectedSearchHint = view.findViewById(R.id.tvSelectedSearchHint)
@@ -252,6 +254,9 @@ class FrmSettings : Fragment(), SettingsInterface {
         }
         swCleanLensMode?.setOnCheckedChangeListener { _, isChecked ->
             utilSettings?.save(UtilSettings.KEY_CLEAN_LENS_MODE, isChecked)
+            updateSearchBarDependencyUi(isChecked)
+            // ActHome observes appsEdited and refreshes search-bar/lens chrome immediately.
+            com.mckimquyen.services.AppEventManager.notifyAppsEdited()
         }
         swDepthOfField?.setOnCheckedChangeListener { _, isChecked ->
             utilSettings?.save(UtilSettings.KEY_DEPTH_OF_FIELD, isChecked)
@@ -303,6 +308,12 @@ class FrmSettings : Fragment(), SettingsInterface {
             }
             .setNegativeButton(R.string.cancel, null)
             .show()
+    }
+
+    /** Clean mode already suppresses the search bar, so disable its redundant user preference. */
+    private fun updateSearchBarDependencyUi(cleanMode: Boolean) {
+        swShowSearchBar?.isEnabled = !cleanMode
+        tvShowSearchBarDependencyHint?.visibility = if (cleanMode) View.VISIBLE else View.GONE
     }
 
     private fun assignValues() {
@@ -373,6 +384,7 @@ class FrmSettings : Fragment(), SettingsInterface {
             swRecentAppsPanel?.isChecked = us.getBoolean(UtilSettings.KEY_RECENT_APPS_QUICK_PANEL_ENABLED)
             swKeepScreenOn?.isChecked = us.getBoolean(UtilSettings.KEY_KEEP_SCREEN_ON)
             swCleanLensMode?.isChecked = us.getBoolean(UtilSettings.KEY_CLEAN_LENS_MODE)
+            updateSearchBarDependencyUi(us.getBoolean(UtilSettings.KEY_CLEAN_LENS_MODE))
             swDepthOfField?.isChecked = us.getBoolean(UtilSettings.KEY_DEPTH_OF_FIELD)
             activeLensId = us.getString(UtilSettings.KEY_ACTIVE_LENS_ID) ?: LensWorkspace.DEFAULT_LENS_ID
             swSmartFocus?.isChecked = us.isSmartFocusBias(activeLensId)
@@ -592,6 +604,7 @@ class FrmSettings : Fragment(), SettingsInterface {
         swRecentAppsPanel = null
         swKeepScreenOn = null
         swCleanLensMode = null
+        tvShowSearchBarDependencyHint = null
         swDepthOfField = null
         swSmartFocus = null
         tvSelectedSearchHint = null

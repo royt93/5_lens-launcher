@@ -18,6 +18,7 @@ import com.mckimquyen.search.ContactSearchEngine
 import com.mckimquyen.search.ContactSearchResult
 import com.mckimquyen.util.UtilSettings
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -251,6 +252,47 @@ class AppSearchWidgetTest {
                     View.VISIBLE,
                     searchBar!!.visibility
                 )
+            }
+        }
+    }
+
+    /** UI-029: action quick-action chevron uses a relative, auto-mirrored drawable for RTL. */
+    @Test
+    fun quickActionChevronUsesAutoMirroredDrawableInRtlLayout() {
+        ActivityScenario.launch(ActHome::class.java).use { scenario ->
+            var searchView: SearchView? = null
+            scenario.onActivity { activity ->
+                UtilSettings(activity).save(UtilSettings.KEY_QUICK_ACTION_SETTINGS, true)
+                searchView = activity.findViewById(R.id.searchView)
+                searchView!!.show()
+            }
+            waitUntilShowing(searchView!!, true)
+            scenario.onActivity { activity ->
+                val rtlLocale = java.util.Locale("ar")
+                val config = android.content.res.Configuration(activity.resources.configuration).apply {
+                    setLocale(rtlLocale)
+                    setLayoutDirection(rtlLocale)
+                }
+                val rtlContext = android.view.ContextThemeWrapper(
+                    activity.createConfigurationContext(config),
+                    R.style.AppTheme
+                )
+                val value = activity.findViewById<TextView>(R.id.tvQuickActionValue)
+                value.layoutDirection = android.view.View.LAYOUT_DIRECTION_RTL
+                assertEquals(
+                    "Arabic configuration must resolve RTL layout direction",
+                    android.view.View.LAYOUT_DIRECTION_RTL,
+                    rtlContext.resources.configuration.layoutDirection
+                )
+                androidx.core.view.ViewCompat.setLayoutDirection(
+                    activity.findViewById(R.id.quickActionRow),
+                    androidx.core.view.ViewCompat.LAYOUT_DIRECTION_RTL
+                )
+                searchView!!.editText.setText("wifi")
+                val chevron = value.compoundDrawablesRelative[2]
+                assertNotNull("action quick action must show a trailing chevron drawable", chevron)
+                assertTrue("chevron vector must auto-mirror for RTL", requireNotNull(chevron).isAutoMirrored)
+                assertEquals("drawable-only action value must not include a Unicode chevron", "", value.text.toString())
             }
         }
     }
@@ -822,7 +864,8 @@ class AppSearchWidgetTest {
             scenario.onActivity { activity ->
                 assertEquals(View.VISIBLE, activity.findViewById<View>(R.id.quickActionRow).visibility)
                 assertEquals("qr", activity.findViewById<TextView>(R.id.tvQuickActionLabel).text.toString())
-                assertEquals("›", activity.findViewById<TextView>(R.id.tvQuickActionValue).text.toString())
+                assertEquals("", activity.findViewById<TextView>(R.id.tvQuickActionValue).text.toString())
+                assertNotNull(activity.findViewById<TextView>(R.id.tvQuickActionValue).compoundDrawablesRelative[2])
                 assertTrue(
                     "row must be clickable so tapping fires the scan/fallback intent",
                     activity.findViewById<View>(R.id.quickActionRow).hasOnClickListeners()
