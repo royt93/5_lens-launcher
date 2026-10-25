@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -484,6 +485,9 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
         @androidx.annotation.VisibleForTesting
         androidx.appcompat.app.AlertDialog folderDialog;
 
+        @androidx.annotation.VisibleForTesting
+        PopupMenu appMenuForTest;
+
         // ====================================================================
         // CONSTRUCTOR
         // ====================================================================
@@ -585,7 +589,12 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
             // SPECIAL CASE: App launcher của mình (self-reference)
             // ================================================================
             // Không cho phép ẩn hoặc lock app launcher chính
-            if (mApp.getPackageName().toString().equals(PKG_NAME)) {
+            boolean isSelfApp = mApp.getPackageName().toString().equals(PKG_NAME);
+            Context configContext = mActivityContext != null ? mActivityContext : mContext;
+            float fontScale = configContext.getResources().getConfiguration().fontScale;
+            boolean isCollapsed = AppRowFontScalePolicy.shouldCollapseRowActions(fontScale);
+
+            if (isSelfApp || isCollapsed) {
                 ivAppHide.setVisibility(View.GONE);
                 btAppLock.setVisibility(View.GONE);
             } else {
@@ -597,6 +606,17 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
                     btAppLock.setVisibility(View.GONE);
                 }
             }
+
+            int endAnchor = AppRowFontScalePolicy.rowLabelEndAnchor(isCollapsed || isSelfApp);
+            RelativeLayout.LayoutParams labelParams = (RelativeLayout.LayoutParams) tvAppLabel.getLayoutParams();
+            labelParams.addRule(RelativeLayout.START_OF, endAnchor);
+            labelParams.addRule(RelativeLayout.LEFT_OF, endAnchor);
+            tvAppLabel.setLayoutParams(labelParams);
+
+            RelativeLayout.LayoutParams orgParams = (RelativeLayout.LayoutParams) tvAppOrganization.getLayoutParams();
+            orgParams.addRule(RelativeLayout.START_OF, endAnchor);
+            orgParams.addRule(RelativeLayout.LEFT_OF, endAnchor);
+            tvAppOrganization.setLayoutParams(orgParams);
         }
 
         /**
@@ -701,8 +721,36 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
         private void showAppMenu(View anchor) {
             Context wrapper = new ContextThemeWrapper(mActivityContext, R.style.PopupMenuTheme);
             PopupMenu popupMenu = new PopupMenu(wrapper, anchor, Gravity.END);
+            appMenuForTest = popupMenu;
             popupMenu.setOnMenuItemClickListener(AppViewHolder.this);
             popupMenu.inflate(R.menu.menu_app);
+
+            boolean isSelfApp = mApp.getPackageName().toString().equals(PKG_NAME);
+            Context configContext = mActivityContext != null ? mActivityContext : mContext;
+            float fontScale = configContext.getResources().getConfiguration().fontScale;
+            boolean isCollapsed = AppRowFontScalePolicy.shouldCollapseRowActions(fontScale);
+
+            MenuItem hideItem = popupMenu.getMenu().findItem(R.id.menuItemHide);
+            MenuItem lockItem = popupMenu.getMenu().findItem(R.id.menuItemLock);
+
+            if (isCollapsed && !isSelfApp) {
+                if (hideItem != null) {
+                    hideItem.setVisible(true);
+                    hideItem.setTitle(mApp.isVisible() ? R.string.menu_bulk_hide : R.string.menu_bulk_unhide);
+                    hideItem.setIcon(mApp.isVisible() ? R.drawable.ic_visibility_off_24dp : R.drawable.ic_visibility_24dp);
+                }
+                if (lockItem != null && mIsHaveBiometric) {
+                    lockItem.setVisible(true);
+                    lockItem.setTitle(mApp.isOpened() ? R.string.lock : R.string.unlock);
+                    lockItem.setIcon(lockIconResFor(mApp.isOpened()));
+                } else if (lockItem != null) {
+                    lockItem.setVisible(false);
+                }
+            } else {
+                if (hideItem != null) hideItem.setVisible(false);
+                if (lockItem != null) lockItem.setVisible(false);
+            }
+
             popupMenu.getMenu().findItem(R.id.menuItemFavorite).setTitle(
                     mApp.isFavorite()
                             ? R.string.organization_remove_favorite
@@ -891,7 +939,13 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
         public boolean onMenuItemClick(MenuItem item) {
             int id = item.getItemId();
 
-            if (id == R.id.menuItemFavorite) {
+            if (id == R.id.menuItemHide) {
+                toggleAppVisibility(mApp);
+                return true;
+            } else if (id == R.id.menuItemLock) {
+                toggleAppLock(mApp);
+                return true;
+            } else if (id == R.id.menuItemFavorite) {
                 applyOrganization(!mApp.isFavorite(), mApp.getFolderName(), mApp.getPinnedZone());
                 return true;
             } else if (id == R.id.menuItemFolder) {

@@ -17,6 +17,20 @@
         app:iconTint="@color/popup_menu_icon_tint" />
 
     <item
+        android:id="@+id/menuItemHide"
+        android:icon="@drawable/ic_visibility_24dp"
+        android:title="@string/menu_bulk_hide"
+        android:visible="false"
+        app:iconTint="@color/popup_menu_icon_tint" />
+
+    <item
+        android:id="@+id/menuItemLock"
+        android:icon="@drawable/ic_lock_24dp"
+        android:title="@string/lock"
+        android:visible="false"
+        app:iconTint="@color/popup_menu_icon_tint" />
+
+    <item
         android:id="@+id/menuItemFavorite"
         android:icon="@drawable/ic_star_border_24dp"
         android:title="@string/organization_add_favorite"

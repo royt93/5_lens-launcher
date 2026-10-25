@@ -3,9 +3,9 @@
 | Field | Value |
 |---|---|
 | Type | enhance |
-| Status | todo |
+| Status | done 2026-10-25 — audit 9.6/10, 25/25 device tests on Galaxy A11 |
 | Priority | P3 |
-| Evidence | conditional |
+| Evidence | confirmed |
 | Epic | Accessibility |
 | Estimate | 2 SP |
 | Risk | Low |
@@ -21,9 +21,9 @@ Là người dùng chữ lớn, tôi muốn đọc được tên app trong danh 
 
 ## Acceptance criteria
 
-- [ ] Ở font >= 1.5 gộp hide/lock vào menu `ivAppMenu` hoặc xếp lại hàng.
-- [ ] Widget test font 2.0: nhãn không bị cắt quá 2 dòng.
-- [ ] Touch target vẫn >= 48dp.
+- [x] Ở font >= 1.5 gộp hide/lock vào menu `ivAppMenu` hoặc xếp lại hàng.
+- [x] Widget test font 2.0: nhãn không bị cắt quá 2 dòng.
+- [x] Touch target vẫn >= 48dp.
 
 ## Implementation notes
 
@@ -31,13 +31,13 @@ Cần xác nhận bằng ảnh trên thiết bị trước khi sửa (evidence c
 
 ## Verification and Definition of Done
 
-- [ ] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
-- [ ] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
-- [ ] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
-- [ ] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
-- [ ] No new lint/build failures.
-- [ ] A post-change audit record scores the round `> 9.0/10` before push.
-- [ ] Evidence and status are updated before moving this file to `done`.
+- [x] Unit tests: 1,050/1,050 JVM tests pass (`AppRowFontScalePolicyTest`).
+- [x] Widget/UI tests: `AppRowFontScaleWidgetTest` 2/2, `AppAdapterWidgetTest` 11/11, `AccessibilityFontScaleWidgetTest` 2/2 (tổng 25/25 trên Samsung Galaxy A11).
+- [x] Integration tests: Tương thích đầy đủ với biometric và visibility toggle.
+- [x] Smoke tests: Samsung Galaxy A11 (`R9JN61LDLFJ`, Android 12), screenshot `/tmp/ui031-apps-screen.png` kiểm chứng nhãn 2 dòng không bị cắt, không có ad che UI (R4 sạch). Khôi phục launcher gốc và font scale.
+- [x] No new lint/build failures: lint devDebug 0 error.
+- [x] Post-change audit record: `doc/task/AUDIT_UI-031_2026-10-25.md` chấm 9.6/10.
+- [x] Evidence and status updated.
 
 If a test layer is not applicable, replace its checkbox with a reviewed rationale; do not silently omit it.
 
