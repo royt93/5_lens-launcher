@@ -434,6 +434,9 @@ public class ActSettings extends ActBase implements SettingsMenuHost {
     }
 
     public void showHomeLauncherChooser() {
+        if (settingsInterface != null) {
+            settingsInterface.onHomeLauncherChooserStarted();
+        }
         UtilLauncher.resetPreferredLauncherAndOpenChooser(getApplicationContext());
     }
 

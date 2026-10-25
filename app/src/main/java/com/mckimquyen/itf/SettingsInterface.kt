@@ -4,4 +4,6 @@ interface SettingsInterface {
     fun onDefaultsReset()
 
     fun onValuesUpdated()
+
+    fun onHomeLauncherChooserStarted()
 }

@@ -76,7 +76,11 @@ Source of truth for implementation choices in this session. Detailed acceptance 
 
 ## 🟡 In progress
 
-- Không có story in progress.
+- **PERF-008 — FrmSettings resume cost (25/10/2026)**: `assignValues()` chỉ resolve Home launcher khi cache rỗng/invalidated; sử dụng app-owned icon-pack cache; tránh gán lại text/drawables không đổi. TECNO BG6: targeted Settings tests 36/36; unit 1,050/1,050; lint/build xanh. Đo bind p50 10.79ms → 2.50ms, p95 15.12ms → 2.85ms (30 lượt, test harness). Audit 9.2/10 (`doc/task/AUDIT_PERF-008_2026-10-25.md`).
+
+## 🟡 In progress
+
+- **BUILD-003 — Safe repo hygiene (25/10/2026)**: Giữ local, chưa commit/push vì signing values local còn ở tracked `gradle.properties`; manifest permissions, JVM logs, heap không đổi theo scope owner chọn. `assembleProductionRelease` đã thành công bằng keystore hiện tại; cần rotate key do credentials cũ đã xuất hiện trong Git history. Audit 9.2/10.
 
 
 

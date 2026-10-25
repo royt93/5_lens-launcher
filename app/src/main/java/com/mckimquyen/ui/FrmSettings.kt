@@ -70,6 +70,11 @@ class FrmSettings : Fragment(), SettingsInterface {
     private var swQuickActionBattery: SwitchCompat? = null
     private var swQuickActionSettings: SwitchCompat? = null
     private var utilSettings: UtilSettings? = null
+    private var cachedHomeLauncherLabel: String? = null
+    private var homeLauncherLabelDirty = true
+    @androidx.annotation.VisibleForTesting
+    internal var launcherResolveCountForTest = 0
+        private set
     // FISH-008 Phase 3: Smart Focus is per-lens; this switch always targets the lens the home
     // screen is currently on (re-read in assignValues, which onResume already calls).
     private var activeLensId: String = LensWorkspace.DEFAULT_LENS_ID
@@ -105,6 +110,11 @@ class FrmSettings : Fragment(), SettingsInterface {
     override fun onResume() {
         super.onResume()
         assignValues()
+    }
+
+    override fun onStop() {
+        homeLauncherLabelDirty = true
+        super.onStop()
     }
 
     override fun onAttach(context: Context) {
@@ -316,57 +326,75 @@ class FrmSettings : Fragment(), SettingsInterface {
         tvShowSearchBarDependencyHint?.visibility = if (cleanMode) View.VISIBLE else View.GONE
     }
 
+    private fun TextView?.setTextIfChanged(value: CharSequence?) {
+        if (this != null && text.toString() != value?.toString().orEmpty()) text = value
+    }
+
+    private fun ImageView?.setColorIfChanged(color: Int) {
+        if (this == null) return
+        val current = drawable as? GradientDrawable
+        if (current?.color?.defaultColor == color) return
+        setImageDrawable(GradientDrawable().apply {
+            setColor(color)
+            cornerRadius = resources.getDimension(R.dimen.radius_highlight_color_switch)
+        })
+    }
+
     private fun assignValues() {
         utilSettings?.let { us ->
             val isVip = com.roy.sdkadbmob.AdManager.isVIPMember()
             tvVipStatusSummary?.text = if (isVip) getString(R.string.vip_active) else getString(R.string.vip_free_user)
 
-            val iconPacks = UtilIconPackManager().getAvailableIconPacksWithIcons(false, activity?.application)
+            val iconPacks = activity?.application?.let { app ->
+                (app as? com.mckimquyen.app.RApplication)?.iconPackManager
+                    ?.getAvailableIconPacksWithIcons(false, app)
+            } ?: UtilIconPackManager().getAvailableIconPacksWithIcons(false, activity?.application)
             val selectedPackageName = us.iconPackPackageName(iconPacks)
             val selectedPack = iconPacks.firstOrNull { it.mPackageName == selectedPackageName }
-            tvSelectedIconPack?.text = when {
+            tvSelectedIconPack.setTextIfChanged(when {
                 selectedPackageName == UtilSettings.DEFAULT_ICON_PACK_PACKAGE_NAME ->
                     getString(R.string.setting_default_icon_pack)
                 selectedPack != null -> selectedPack.mName
                 else -> us.getString(UtilSettings.KEY_ICON_PACK_LABEL_NAME)
                     ?.takeIf { it != UtilSettings.DEFAULT_ICON_PACK_LABEL_NAME }
                     ?: getString(R.string.setting_default_icon_pack)
-            }
+            })
 
             // UI-026: stored colors can be empty or malformed (imported backup, edited prefs).
             val highlightColorFull = us.getString(UtilSettings.KEY_HIGHLIGHT_COLOR)
-            tvSelectedHighlightColor?.text =
+            tvSelectedHighlightColor.setTextIfChanged(
                 SafeColor.displayHex(highlightColorFull, DEFAULT_HIGHLIGHT_DISPLAY_HEX)
+            )
 
-            val homeLauncher = activity?.let { UtilLauncher.getNameHomeLauncher(it.application) } ?: ""
-            tvSelectedHomeLauncher?.text = homeLauncher
-
-            tvSelectedNightMode?.text = UtilNightModeUtil.getNightModeDisplayName(us.nightMode)
+            val homeLauncher = if (homeLauncherLabelDirty || cachedHomeLauncherLabel == null) {
+                val currentActivity = activity
+                val resolved = currentActivity?.let {
+                    launcherResolveCountForTest++
+                    UtilLauncher.getNameHomeLauncher(it.application)
+                }.orEmpty()
+                cachedHomeLauncherLabel = resolved
+                homeLauncherLabelDirty = false
+                resolved
+            } else {
+                cachedHomeLauncherLabel.orEmpty()
+            }
+            tvSelectedHomeLauncher.setTextIfChanged(homeLauncher)
+            tvSelectedNightMode.setTextIfChanged(UtilNightModeUtil.getNightModeDisplayName(us.nightMode))
 
             // Background setup
             if (us.backgroundMode == BackgroundMode.COLOR) {
                 val backgroundColorFull = us.getString(UtilSettings.KEY_BACKGROUND_COLOR)
-                tvSelectedBackground?.text =
+                tvSelectedBackground.setTextIfChanged(
                     SafeColor.displayHex(backgroundColorFull, DEFAULT_BACKGROUND_DISPLAY_HEX)
+                )
                 ivSelectedBackgroundColor?.isVisible = true
-
-                val backgroundColorDrawable = GradientDrawable().apply {
-                    setColor(us.backgroundColorInt())
-                    cornerRadius = resources.getDimension(R.dimen.radius_highlight_color_switch)
-                }
-                ivSelectedBackgroundColor?.setImageDrawable(backgroundColorDrawable)
+                ivSelectedBackgroundColor.setColorIfChanged(us.backgroundColorInt())
             } else {
-                tvSelectedBackground?.text = resources.getStringArray(R.array.backgrounds)
-                    .getOrNull(BackgroundMode.WALLPAPER.ordinal)
+                tvSelectedBackground.setTextIfChanged(resources.getStringArray(R.array.backgrounds)
+                    .getOrNull(BackgroundMode.WALLPAPER.ordinal))
                 ivSelectedBackgroundColor?.isVisible = false
             }
-
-            // Highlight color drawable
-            val highlightColorDrawable = GradientDrawable().apply {
-                setColor(us.highlightColorInt())
-                cornerRadius = resources.getDimension(R.dimen.radius_highlight_color_switch)
-            }
-            ivSelectedHighlightColor?.setImageDrawable(highlightColorDrawable)
+            ivSelectedHighlightColor.setColorIfChanged(us.highlightColorInt())
 
             // Switches
             swVibrateAppHover?.isChecked = us.getBoolean(UtilSettings.KEY_VIBRATE_APP_HOVER)
@@ -383,8 +411,9 @@ class FrmSettings : Fragment(), SettingsInterface {
             swShowSearchBar?.isChecked = us.getBoolean(UtilSettings.KEY_SHOW_SEARCH_BAR)
             swRecentAppsPanel?.isChecked = us.getBoolean(UtilSettings.KEY_RECENT_APPS_QUICK_PANEL_ENABLED)
             swKeepScreenOn?.isChecked = us.getBoolean(UtilSettings.KEY_KEEP_SCREEN_ON)
-            swCleanLensMode?.isChecked = us.getBoolean(UtilSettings.KEY_CLEAN_LENS_MODE)
-            updateSearchBarDependencyUi(us.getBoolean(UtilSettings.KEY_CLEAN_LENS_MODE))
+            val cleanMode = us.getBoolean(UtilSettings.KEY_CLEAN_LENS_MODE)
+            swCleanLensMode?.isChecked = cleanMode
+            updateSearchBarDependencyUi(cleanMode)
             swDepthOfField?.isChecked = us.getBoolean(UtilSettings.KEY_DEPTH_OF_FIELD)
             activeLensId = us.getString(UtilSettings.KEY_ACTIVE_LENS_ID) ?: LensWorkspace.DEFAULT_LENS_ID
             swSmartFocus?.isChecked = us.isSmartFocusBias(activeLensId)
@@ -394,25 +423,25 @@ class FrmSettings : Fragment(), SettingsInterface {
             swQuickActionBattery?.isChecked = us.getBoolean(UtilSettings.KEY_QUICK_ACTION_BATTERY)
             swQuickActionSettings?.isChecked = us.getBoolean(UtilSettings.KEY_QUICK_ACTION_SETTINGS)
             val customHint = us.getString(UtilSettings.KEY_SEARCH_HINT_TEXT)
-            tvSelectedSearchHint?.text = if (customHint.isNullOrEmpty()) {
+            tvSelectedSearchHint.setTextIfChanged(if (customHint.isNullOrEmpty()) {
                 getString(R.string.setting_search_hint_default)
             } else {
                 customHint
-            }
+            })
             swEnableT9SearchKeypad?.isChecked = us.getEnableT9SearchKeypad()
 
             // Launcher Mode (FEAT-003)
             val currentMode = us.getLauncherMode()
-            tvSelectedLauncherMode?.setText(currentMode.displayNameResId)
-            tvSelectedEdgeSwipeMode?.setText(edgeSwipeModeLabel(us.getEdgeSwipeMode()))
+            tvSelectedLauncherMode.setTextIfChanged(getString(currentMode.displayNameResId))
+            tvSelectedEdgeSwipeMode.setTextIfChanged(edgeSwipeModeLabel(us.getEdgeSwipeMode()))
 
             // Language
             val currentLang = com.mckimquyen.util.LocaleHelper.getLanguage(requireContext())
             val matchingLang = com.mckimquyen.util.LocaleHelper.supportedLanguages.firstOrNull { it.code == currentLang }
             if (matchingLang != null) {
-                tvSelectedLanguage?.text = getString(R.string.language_display_format, matchingLang.flag, matchingLang.nativeName)
+                tvSelectedLanguage.setTextIfChanged(getString(R.string.language_display_format, matchingLang.flag, matchingLang.nativeName))
             } else {
-                tvSelectedLanguage?.text = currentLang
+                tvSelectedLanguage.setTextIfChanged(currentLang)
             }
         }
     }
@@ -537,6 +566,10 @@ class FrmSettings : Fragment(), SettingsInterface {
 
     override fun onValuesUpdated() {
         assignValues()
+    }
+
+    override fun onHomeLauncherChooserStarted() {
+        homeLauncherLabelDirty = true
     }
 
     private fun resetToDefault() {

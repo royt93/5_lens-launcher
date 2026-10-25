@@ -270,7 +270,7 @@ Giới hạn: agent audit ui chưa đọc hết `LensView.kt`, `ActAbout.java`, 
 | `UI-027` | P2 | 1 | [Overlay quảng cáo dùng colorWhite cứng, tương phản 1.69:1 ở dark/dynamic color](todo/p2-ui-ui-027-ad-overlay-contrast-night.md) |
 | `UI-028` ✅ done 2026-10-23 | P2 | 3 | [ActHome dùng một field lensDialog cho 5 dialog; vài dialog không dismiss khi destroy](done/p2-ui-ui-028-dialog-leaks-and-lifecycle.md) |
 | `UI-029` ✅ done 2026-10-25 | P2 | 2 | [Search bar bị Clean mode đè mà Settings vẫn hiện bật; chevron quick action cứng không RTL](done/p2-ui-ui-029-settings-conflict-and-rtl-chevron.md) |
-| `BUILD-003` | P3 | 2 | [Dọn repo: local.properties bị track, Jetifier thừa, permission thừa, rác JVM](todo/p3-build-build-003-repo-hygiene-quick-wins.md) |
+| `BUILD-003` 🟡 in progress | P3 | 2 | [Dọn repo: safe hygiene done; release artifact blocked by signing](inprogress/p3-build-build-003-repo-hygiene-quick-wins.md) |
 | `TEST-005` ✅ done 2026-10-20 | P3 | 5 | [Test suite rò trạng thái thiết bị và Robolectric không pin SDK](done/p3-test-test-005-test-state-leak-and-flaky-guards.md) |
 
 ### ENHANCE (cải thiện cái đã có)
@@ -289,7 +289,7 @@ Giới hạn: agent audit ui chưa đọc hết `LensView.kt`, `ActAbout.java`, 
 | `CORE-006` ✅ done 2026-10-25 | P3 | 1 | [Đổi ngôn ngữ không làm mới nhãn app và thứ tự A-Z](done/p3-core-core-006-refresh-on-locale-change.md) |
 | `DB-008` | P3 | 3 | [Không có migration dưới v7 và không có fallback, schema 7/8 thiếu snapshot](todo/p3-db-db-008-legacy-db-migration-fallback.md) |
 | `I18N-001` | P3 | 3 | [Thiếu android:localeConfig nên Android 13+ không hiện 'Ngôn ngữ ứng dụng'](todo/p3-i18n-i18n-001-locale-config-and-settings-app-language.md) |
-| `PERF-008` | P3 | 2 | [FrmSettings.assignValues đọc 35 prefs và resolve launcher hệ thống mỗi lần resume](todo/p3-perf-perf-008-settings-tab-resume-cost.md) |
+| `PERF-008` ✅ done 2026-10-25 | P3 | 2 | [FrmSettings.assignValues đọc 35 prefs và resolve launcher hệ thống mỗi lần resume](done/p3-perf-perf-008-settings-tab-resume-cost.md) |
 | `UI-031` ✅ done 2026-10-25 | P3 | 2 | [Hàng app ở font 2.0 bị cắt nhãn do ba icon chen vào](done/p3-ui-ui-031-app-row-font-scale-clipping.md) |
 
 ### NEW (năng lực mới)

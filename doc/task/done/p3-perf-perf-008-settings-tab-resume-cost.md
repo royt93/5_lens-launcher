@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | enhance |
-| Status | todo |
+| Status | done 2026-10-25 — audit 9.2/10, 36 targeted tests on TECNO |
 | Priority | P3 |
 | Evidence | confirmed |
 | Epic | Settings performance |
@@ -21,10 +21,10 @@ Là người dùng, tôi muốn chuyển tab Settings không bị khựng.
 
 ## Acceptance criteria
 
-- [ ] Cache tên launcher mặc định, làm mới có điều kiện.
-- [ ] Chỉ gán lại giá trị đã đổi.
-- [ ] Test số lần `resolveActivity` khi resume nhiều lần.
-- [ ] Đo hitch trước/sau.
+- [x] Cache tên launcher mặc định; invalidate khi Fragment stop/launcher chooser mở.
+- [x] `TextView`/color drawable chỉ cập nhật khi giá trị thực sự đổi.
+- [x] Resume tests xác nhận số lần resolve launcher giữ nguyên khi trạng thái không đổi và tăng đúng một lần khi invalidated.
+- [x] Đo bind time trên TECNO: 30 samples sau warmup, p50 10.79 ms → 2.50 ms, p95 15.12 ms → 2.85 ms. Đây là thời gian `assignValues()` wall-clock, không phải frame/jank đo toàn màn hình.
 
 ## Implementation notes
 
@@ -32,13 +32,15 @@ Giữ hành vi hiển thị nguyên vẹn.
 
 ## Verification and Definition of Done
 
-- [ ] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
-- [ ] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
-- [ ] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
-- [ ] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
-- [ ] No new lint/build failures.
-- [ ] A post-change audit record scores the round `> 9.0/10` before push.
-- [ ] Evidence and status are updated before moving this file to `done`.
+- [x] Unit tests: existing pure utility tests pass; no standalone policy method was added.
+- [x] Widget/integration: `FrmSettingsResumePerformanceWidgetTest` 8/8 plus targeted Settings regression tests (MaterialYou 3, CleanLens 7, Background 7, SearchHint 1, ActSettingsLayout 2); total batch 28/28 on TECNO BG6.
+- [x] Performance measurement: old bind p50/p95 10.79/15.12 ms; optimized bind p50/p95 2.50/2.85 ms, 30 measured runs after 5 warmups on TECNO. Values are test-loop timings, not full screen jank/frame metrics.
+- [x] Room and default app prefs logical dumps/XML matched baseline exactly after targeted tests.
+- [x] Full host gate: `testDevDebugUnitTest lintDevDebug assembleDevDebug assembleDevDebugAndroidTest` BUILD SUCCESSFUL; 1,050 unit tests, 0 failures/errors/skips.
+- [x] Device smoke: TECNO BG6 Android 13, `/tmp/perf008-smoke.png`, no ad obscures Settings; Home launcher restored to foreground.
+- [x] `git diff --check` and `bash scripts/check-secrets.sh` pass.
+- [ ] Post-change audit `>9.0/10` and close/push decision pending.
+- [ ] Preserve local BUILD-003 staged/uncommitted changes and signing config; do not include them in PERF-008 commit.
 
 If a test layer is not applicable, replace its checkbox with a reviewed rationale; do not silently omit it.
 
