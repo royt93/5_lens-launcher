@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | enhance |
-| Status | todo |
+| Status | done 2026-10-25 — audit 9.5/10, 18/18 device tests on S24 Ultra |
 | Priority | P3 |
 | Evidence | confirmed |
 | Epic | Refresh pipeline |
@@ -21,9 +21,9 @@ Là người dùng đổi ngôn ngữ, tôi muốn tên app và thứ tự cập
 
 ## Acceptance criteria
 
-- [ ] Đăng ký `ACTION_LOCALE_CHANGED` và đổi locale trong app đều kích hoạt refresh.
-- [ ] Test: đổi locale làm snapshot được tính lại.
-- [ ] Hủy đăng ký đúng chỗ (không rò receiver).
+- [x] Đăng ký `ACTION_LOCALE_CHANGED` và đổi locale trong app đều kích hoạt refresh.
+- [x] Test: đổi locale làm snapshot được tính lại.
+- [x] Hủy đăng ký đúng chỗ (không rò receiver).
 
 ## Implementation notes
 
@@ -31,13 +31,13 @@ Receiver đăng ký động như các receiver hiện có.
 
 ## Verification and Definition of Done
 
-- [ ] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
-- [ ] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
-- [ ] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
-- [ ] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
-- [ ] No new lint/build failures.
-- [ ] A post-change audit record scores the round `> 9.0/10` before push.
-- [ ] Evidence and status are updated before moving this file to `done`.
+- [x] Unit tests: 1,048/1,048 JVM tests pass (5 tests mới: `BroadcastReceiversDirectDispatchTest`, `LocaleHelperTest`, `RApplicationSeamUnitTest`).
+- [x] Widget/UI tests: `LanguageBottomSheetWidgetTest` 4/4, `MultiLanguageIntegrationTest` 3/3 trên S24 Ultra.
+- [x] Integration tests: `LocaleChangeIntegrationTest` 3/3 trên S24 Ultra kiểm chứng cả system intent và in-app helper.
+- [x] Smoke tests: Samsung Galaxy S24 Ultra (`R5CX613VZBR`, Android 17), screenshot `/tmp/core006-smoke.png` kiểm chứng giao diện tiếng Việt sạch, không có ad che UI (R4 sạch). Khôi phục launcher gốc.
+- [x] No new lint/build failures: lint devDebug 0 error.
+- [x] Post-change audit record: `doc/task/AUDIT_CORE-006_2026-10-25.md` chấm 9.5/10.
+- [x] Evidence and status updated.
 
 If a test layer is not applicable, replace its checkbox with a reviewed rationale; do not silently omit it.
 

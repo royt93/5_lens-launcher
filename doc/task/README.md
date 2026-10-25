@@ -286,7 +286,7 @@ Giới hạn: agent audit ui chưa đọc hết `LensView.kt`, `ActAbout.java`, 
 | `UI-032` ✅ done 2026-10-25 | P2 | 2 | [LensManagementActivity mất state dialog sau process death và đọc prefs trên main thread](done/p2-ui-ui-032-lens-manager-process-death.md) |
 | `ARCH-002` | P3 | 8 | [Tách ActHome (2358 dòng) thành các bộ điều khiển nhỏ](todo/p3-arch-arch-002-split-act-home-god-class.md) |
 | `BUILD-004` | P3 | 3 | [Baseline/startup profile lệch mục tiêu và comment R8 sai](todo/p3-build-build-004-r8-and-baseline-profile-accuracy.md) |
-| `CORE-006` | P3 | 1 | [Đổi ngôn ngữ không làm mới nhãn app và thứ tự A-Z](todo/p3-core-core-006-refresh-on-locale-change.md) |
+| `CORE-006` ✅ done 2026-10-25 | P3 | 1 | [Đổi ngôn ngữ không làm mới nhãn app và thứ tự A-Z](done/p3-core-core-006-refresh-on-locale-change.md) |
 | `DB-008` | P3 | 3 | [Không có migration dưới v7 và không có fallback, schema 7/8 thiếu snapshot](todo/p3-db-db-008-legacy-db-migration-fallback.md) |
 | `I18N-001` | P3 | 3 | [Thiếu android:localeConfig nên Android 13+ không hiện 'Ngôn ngữ ứng dụng'](todo/p3-i18n-i18n-001-locale-config-and-settings-app-language.md) |
 | `PERF-008` | P3 | 2 | [FrmSettings.assignValues đọc 35 prefs và resolve launcher hệ thống mỗi lần resume](todo/p3-perf-perf-008-settings-tab-resume-cost.md) |

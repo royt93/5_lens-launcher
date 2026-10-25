@@ -64,6 +64,7 @@ public class RApplication extends android.app.Application {
      * 4. updateApps() - Load danh sách apps lần đầu
      */
     private BroadcastReceiver packageReceiver;
+    private BroadcastReceiver localeReceiver;
     private TaskUpdateApps appRefreshPipeline;
     private TaskSortApps appSortPipeline;
     private final com.mckimquyen.util.UtilIconPackManager iconPackManager =
@@ -170,6 +171,7 @@ public class RApplication extends android.app.Application {
         // Fix BUG: Không nhận được PACKAGE_ADDED trên Android 8+
         // Đăng ký dynamic BroadcastReceiver thay vì dùng Manifest
         registerPackageChangeReceiver();
+        registerLocaleChangeReceiver();
 
         // CORE-002: evict icon cache under memory pressure (onTrimMemory/onLowMemory)
         registerComponentCallbacks(iconCacheMemoryCallbacks);
@@ -193,6 +195,21 @@ public class RApplication extends android.app.Application {
         filter.addAction(Intent.ACTION_PACKAGE_REPLACED);
         filter.addDataScheme("package");
         registerReceiver(packageReceiver, filter);
+    }
+
+    /**
+     * CORE-006: Đăng ký receiver lắng nghe khi ngôn ngữ hệ thống thay đổi để làm mới nhãn app.
+     */
+    private void registerLocaleChangeReceiver() {
+        Logger.d("RApplication: Registering dynamic locale receiver for ACTION_LOCALE_CHANGED");
+        localeReceiver = new BroadcastReceivers.LocaleChangedReceiver();
+        IntentFilter filter = new IntentFilter(Intent.ACTION_LOCALE_CHANGED);
+        registerReceiver(localeReceiver, filter);
+    }
+
+    @androidx.annotation.VisibleForTesting
+    public BroadcastReceiver getLocaleReceiverForTest() {
+        return localeReceiver;
     }
 
     // ========================================================================
@@ -384,6 +401,15 @@ public class RApplication extends android.app.Application {
                 Logger.d("RApplication: packageReceiver unregistered in onTerminate()");
             } catch (IllegalArgumentException e) {
                 Logger.w("RApplication: packageReceiver was already unregistered");
+            }
+        }
+        if (localeReceiver != null) {
+            try {
+                unregisterReceiver(localeReceiver);
+                localeReceiver = null;
+                Logger.d("RApplication: localeReceiver unregistered in onTerminate()");
+            } catch (IllegalArgumentException e) {
+                Logger.w("RApplication: localeReceiver was already unregistered");
             }
         }
         super.onTerminate();

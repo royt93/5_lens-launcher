@@ -30,4 +30,10 @@ class RApplicationSeamUnitTest {
         // Result is either true (if instrumentation registry present) or false
         assertTrue(isTest || !isTest)
     }
+
+    @Test
+    fun localeReceiver_getterIsExposed() {
+        val app = RApplication()
+        org.junit.Assert.assertNull(app.localeReceiverForTest)
+    }
 }

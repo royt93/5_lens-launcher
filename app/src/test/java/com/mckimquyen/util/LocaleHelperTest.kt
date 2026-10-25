@@ -7,7 +7,15 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
+import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import org.junit.Rule
 import org.robolectric.annotation.Config
+import com.mckimquyen.services.AppEventManager
+import org.mockito.kotlin.any
+import org.mockito.kotlin.atLeastOnce
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.verify
 import java.io.File
 import java.util.Locale
 import javax.xml.parsers.DocumentBuilderFactory
@@ -15,6 +23,9 @@ import javax.xml.parsers.DocumentBuilderFactory
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE, sdk = [28])
 class LocaleHelperTest {
+
+    @get:Rule
+    val instantTaskExecutorRule = InstantTaskExecutorRule()
 
     private lateinit var context: Context
 
@@ -117,5 +128,32 @@ class LocaleHelperTest {
         LocaleHelper.setLanguageSelected(context)
 
         assertTrue(LocaleHelper.isLanguageSelected(context))
+    }
+
+    @Test
+    fun testSetLocaleWithNewLanguageNotifiesAppsUpdated() {
+        LocaleHelper.setLocale(context, "en")
+        val observer = mock<androidx.lifecycle.Observer<Any?>>()
+        AppEventManager.appsUpdated.observeForever(observer)
+        try {
+            LocaleHelper.setLocale(context, "vi")
+            verify(observer, atLeastOnce()).onChanged(org.mockito.kotlin.isNull())
+        } finally {
+            AppEventManager.appsUpdated.removeObserver(observer)
+            LocaleHelper.setLocale(context, "en")
+        }
+    }
+
+    @Test
+    fun testSetLocaleWithSameLanguageDoesNotNotifyAppsUpdated() {
+        LocaleHelper.setLocale(context, "en")
+        val observer = mock<androidx.lifecycle.Observer<Any?>>()
+        AppEventManager.appsUpdated.observeForever(observer)
+        try {
+            LocaleHelper.setLocale(context, "en")
+            verify(observer, never()).onChanged(any())
+        } finally {
+            AppEventManager.appsUpdated.removeObserver(observer)
+        }
     }
 }

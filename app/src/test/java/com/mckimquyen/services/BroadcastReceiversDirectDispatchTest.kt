@@ -7,6 +7,7 @@ import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.never
@@ -241,5 +242,35 @@ class BroadcastReceiversDirectDispatchTest {
         // Step 2: TaskUpdateApps completes → notifyAppsLoaded
         AppEventManager.notifyAppsLoaded()
         verify(appsLoadedObserver, atLeastOnce()).onChanged(isNull())
+    }
+
+    // ========================================================================
+    // CORE-006: LocaleChangedReceiver dispatches to appsUpdated on ACTION_LOCALE_CHANGED
+    // ========================================================================
+
+    @Test
+    fun `LocaleChangedReceiver onReceive dispatches to appsUpdated on ACTION_LOCALE_CHANGED`() {
+        val receiver = BroadcastReceivers.LocaleChangedReceiver()
+        val context = mock<android.content.Context>()
+        val intent = mock<android.content.Intent>()
+        org.mockito.kotlin.whenever(intent.action).thenReturn(android.content.Intent.ACTION_LOCALE_CHANGED)
+
+        AppEventManager.appsUpdated.observeForever(appsUpdatedObserver)
+        receiver.onReceive(context, intent)
+
+        verify(appsUpdatedObserver, atLeastOnce()).onChanged(isNull())
+    }
+
+    @Test
+    fun `LocaleChangedReceiver onReceive ignores unrelated actions`() {
+        val receiver = BroadcastReceivers.LocaleChangedReceiver()
+        val context = mock<android.content.Context>()
+        val intent = mock<android.content.Intent>()
+        org.mockito.kotlin.whenever(intent.action).thenReturn(android.content.Intent.ACTION_TIME_CHANGED)
+
+        AppEventManager.appsUpdated.observeForever(appsUpdatedObserver)
+        receiver.onReceive(context, intent)
+
+        verify(appsUpdatedObserver, never()).onChanged(any())
     }
 }

@@ -70,11 +70,13 @@ Source of truth for implementation choices in this session. Detailed acceptance 
 - **TEST-005 — Test thiết bị không rò state (20/10/2026)**: `DeviceStateGuard` (rule dùng chung, 148/148 lớp androidTest) khôi phục prefs, `RAppsSingleton`, font/animation scale và app row mồ côi kể cả khi test fail; 8 test Robolectric pin sdk 28 kèm `RobolectricSdkPinTest`. Pixel 7 Pro full suite 2 lần: 148/148, 0 diff thật. Giới hạn (không chống được kill, scan `TaskUpdateApps.switchLens` bỏ qua seam) ghi ở `doc/task/AUDIT_TEST-005_2026-10-20.md`.
 - **UI-032 — LensManagementActivity mất dialog nhập tên khi Activity bị tạo lại (25/10/2026)**: Đã hoàn tất: khôi phục dialog rename/create/assign/delete + draft text, cache `cachedCollapsedGroups` tránh đọc main-thread, xử lý edge-to-edge insets cho toolbar/list/bottom action bar. Bổ sung `LensManagerRoomSnapshot` bảo vệ Room không bị rò rỉ hay mất dữ liệu. TECNO BG6: targeted 35/35 (3 restoration, 4 insets, 28 regression); unit 1,043/1,043; smoke screenshot sạch. Audit 9.3/10 (`doc/task/AUDIT_UI-032_2026-10-25.md`).
 - **UI-029 — Settings conflict + RTL chevron (25/10/2026)**: Clean Lens disable `swShowSearchBar` kèm hint, phát `AppEventManager.appsEdited`; Home refresh theo lifecycle khi resumed. Action quick-action dùng `ic_arrow_forward_24dp` autoMirrored ở relative-end. TECNO BG6 Android 13: UI-029 targeted instrumentation 45/45 (Home 10+1, Settings 7, Search 27), Arabic RTL widget 1/1; full unit 1,043/1,043, lint/build xanh. Smoke screenshot sạch. Audit 9.2/10 (`doc/task/AUDIT_UI-029_2026-10-25.md`).
+- **CORE-006 — Đổi ngôn ngữ không làm mới nhãn app và thứ tự A-Z (25/10/2026)**: Đăng ký dynamic `LocaleChangedReceiver` lắng nghe `Intent.ACTION_LOCALE_CHANGED` và gọi `AppEventManager.notifyAppsUpdated()`; unregister an toàn trong `onTerminate()`. `LocaleHelper.setLocale` kiểm tra thay đổi ngôn ngữ thực sự trước khi phát `notifyAppsUpdated()`. Đạt 1,048/1,048 unit tests; targeted instrumentation trên Samsung Galaxy S24 Ultra (Android 17) đạt 18/18 tests pass; smoke screenshot sạch. Audit 9.5/10 (`doc/task/AUDIT_CORE-006_2026-10-25.md`).
 
 
 ## 🟡 In progress
 
 - Không có story in progress.
+
 
 
 

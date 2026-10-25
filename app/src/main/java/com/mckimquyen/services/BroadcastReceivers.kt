@@ -73,4 +73,12 @@ class BroadcastReceivers {
             AppEventManager.notifyNightModeChanged()
         }
     }
+
+    class LocaleChangedReceiver : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            if (intent.action == Intent.ACTION_LOCALE_CHANGED) {
+                AppEventManager.notifyAppsUpdated()
+            }
+        }
+    }
 }

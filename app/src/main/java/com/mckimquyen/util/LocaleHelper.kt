@@ -55,13 +55,19 @@ object LocaleHelper {
     }
 
     fun setLocale(context: Context, language: String): Context {
+        val currentLang = getLanguage(context)
+        val changed = currentLang != language
         persist(context, language)
 
         val locale = Locale.forLanguageTag(language)
         Locale.setDefault(locale)
 
         // minSdk is 25, so SDK_INT is always >= N (API 24) — the pre-N legacy path can't run.
-        return updateResources(context, locale)
+        val newContext = updateResources(context, locale)
+        if (changed) {
+            com.mckimquyen.services.AppEventManager.notifyAppsUpdated()
+        }
+        return newContext
     }
 
     private fun persist(context: Context, language: String) {
