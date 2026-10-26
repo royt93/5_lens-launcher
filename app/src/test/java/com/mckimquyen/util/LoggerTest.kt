@@ -14,8 +14,8 @@ import org.robolectric.shadows.ShadowLog
  *
  * Chứng minh:
  * 1. Logger.d() tồn tại và có thể gọi được — thay thế cho android.util.Log.d
- * 2. Logger.e(), Logger.w(), Logger.i() hoạt động đúng
- * 3. Logger.i/w/e không bị guard → luôn emit trong mọi build type
+ * 2. Logger.e() luôn emit; Logger.i()/w() chỉ emit trong debug builds
+ * 3. Logger.i/w/e có đúng build-type gating
  * 4. Tag chuẩn "roy93~" được dùng nhất quán
  * 5. API contract đúng với tất cả callers (BroadcastReceivers, TaskUpdateApps,
  *    UtilLauncher, ActHome, ActSettings, RApplication)
@@ -99,26 +99,25 @@ class LoggerTest {
     }
 
     // ========================================================================
-    // INFO / WARN / ERROR — Không có debug guard, luôn emit
+    // INFO / WARN — chỉ emit khi DEBUG; ERROR luôn emit
     // ========================================================================
 
     @Test
-    fun `Logger_i always emits log regardless of build type`() {
-        // Logger.i() không có DEBUG guard → phải log ngay cả release build
+    fun `Logger_i emits in debug build`() {
         Logger.i("important info message")
 
         val logs = ShadowLog.getLogs()
         val infoLog = logs.find { it.tag == "roy93~" && it.msg.contains("important info message") }
-        assertNotNull("Logger.i() should always emit log", infoLog)
+        assertEquals(com.mckimquyen.BuildConfig.DEBUG, infoLog != null)
     }
 
     @Test
-    fun `Logger_w always emits warning log`() {
+    fun `Logger_w emits in debug build`() {
         Logger.w("warning: something went wrong")
 
         val logs = ShadowLog.getLogs()
         val warnLog = logs.find { it.tag == "roy93~" && it.msg.contains("warning: something went wrong") }
-        assertNotNull("Logger.w() should always emit log", warnLog)
+        assertEquals(com.mckimquyen.BuildConfig.DEBUG, warnLog != null)
     }
 
     @Test
@@ -135,22 +134,23 @@ class LoggerTest {
     // ========================================================================
 
     @Test
-    fun `Logger_i uses unified tag roy93~`() {
+    fun `Logger_i uses unified tag roy93~ in debug builds`() {
         Logger.i("checking tag consistency")
 
         val logs = ShadowLog.getLogs()
         val log = logs.find { it.msg.contains("checking tag consistency") }
-        assertNotNull("Log should exist", log)
-        assertEquals("Tag should be 'roy93~' — unified tag for all Logger calls", "roy93~", log?.tag)
+        assertEquals(com.mckimquyen.BuildConfig.DEBUG, log != null)
+        if (log != null) assertEquals("Tag should be 'roy93~' — unified tag for all Logger calls", "roy93~", log.tag)
     }
 
     @Test
-    fun `Logger_w uses unified tag roy93~`() {
+    fun `Logger_w uses unified tag roy93~ in debug builds`() {
         Logger.w("warning tag check")
 
         val logs = ShadowLog.getLogs()
         val log = logs.find { it.msg.contains("warning tag check") }
-        assertEquals("Tag should be 'roy93~'", "roy93~", log?.tag)
+        assertEquals(com.mckimquyen.BuildConfig.DEBUG, log != null)
+        if (log != null) assertEquals("Tag should be 'roy93~'", "roy93~", log.tag)
     }
 
     @Test

@@ -26,14 +26,18 @@ public class Logger {
         }
     }
 
-    /** Log an information message. */
+    /** Log an information message in debug builds only. */
     public static void i(String message) {
-        Log.i(TAG, message);
+        if (BuildConfig.DEBUG) {
+            Log.i(TAG, message);
+        }
     }
 
-    /** Log a warning message. */
+    /** Log a warning message in debug builds only. */
     public static void w(String message) {
-        Log.w(TAG, message);
+        if (BuildConfig.DEBUG) {
+            Log.w(TAG, message);
+        }
     }
 
     /** Log an error message. */

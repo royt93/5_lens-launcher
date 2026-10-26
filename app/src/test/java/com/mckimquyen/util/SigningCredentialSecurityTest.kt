@@ -36,10 +36,22 @@ class SigningCredentialSecurityTest {
     }
 
     @Test
-    fun `keystore properties is ignored and never committed`() {
+    fun `keystore properties is ignored and never tracked`() {
         val root = projectRoot
-        val committedKeystoreProps = File(root, "keystore.properties")
-        assertFalse("keystore.properties must not exist in tracked tree", committedKeystoreProps.exists())
+        val process = ProcessBuilder("git", "ls-files", "--error-unmatch", "keystore.properties")
+            .directory(root)
+            .redirectErrorStream(true)
+            .start()
+        process.inputStream.bufferedReader().readText()
+        val exitCode = process.waitFor()
+        assertFalse("keystore.properties must not be tracked", exitCode == 0)
+
+        val ignoreProcess = ProcessBuilder("git", "check-ignore", "--no-index", "keystore.properties")
+            .directory(root)
+            .redirectErrorStream(true)
+            .start()
+        ignoreProcess.inputStream.bufferedReader().readText()
+        assertEquals("keystore.properties must be ignored", 0, ignoreProcess.waitFor())
 
         val gitignore = File(root, ".gitignore").readText()
         assertTrue("gitignore must ignore *.jks", gitignore.contains("*.jks"))
@@ -53,6 +65,7 @@ class SigningCredentialSecurityTest {
         if (gradleProps.exists()) {
             val content = gradleProps.readText()
             assertFalse("gradle.properties must not contain KS_PW", content.contains("KS_PW="))
+            assertFalse("gradle.properties must not contain KS_ALIAS", content.contains("KS_ALIAS="))
             assertFalse("gradle.properties must not contain STORE_PASSWORD", content.contains("STORE_PASSWORD="))
             assertFalse("gradle.properties must not contain KEY_PASSWORD", content.contains("KEY_PASSWORD="))
         }

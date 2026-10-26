@@ -270,7 +270,7 @@ Giới hạn: agent audit ui chưa đọc hết `LensView.kt`, `ActAbout.java`, 
 | `UI-027` | P2 | 1 | [Overlay quảng cáo dùng colorWhite cứng, tương phản 1.69:1 ở dark/dynamic color](todo/p2-ui-ui-027-ad-overlay-contrast-night.md) |
 | `UI-028` ✅ done 2026-10-23 | P2 | 3 | [ActHome dùng một field lensDialog cho 5 dialog; vài dialog không dismiss khi destroy](done/p2-ui-ui-028-dialog-leaks-and-lifecycle.md) |
 | `UI-029` ✅ done 2026-10-25 | P2 | 2 | [Search bar bị Clean mode đè mà Settings vẫn hiện bật; chevron quick action cứng không RTL](done/p2-ui-ui-029-settings-conflict-and-rtl-chevron.md) |
-| `BUILD-003` 🟡 in progress | P3 | 2 | [Dọn repo: safe hygiene done; release artifact blocked by signing](inprogress/p3-build-build-003-repo-hygiene-quick-wins.md) |
+| `BUILD-003` ✅ done 2026-10-26 | P3 | 2 | [Dọn repo: untrack local.properties, tắt Jetifier, gate Logger.i/w; release artifact đã ký](done/p3-build-build-003-repo-hygiene-quick-wins.md) |
 | `TEST-005` ✅ done 2026-10-20 | P3 | 5 | [Test suite rò trạng thái thiết bị và Robolectric không pin SDK](done/p3-test-test-005-test-state-leak-and-flaky-guards.md) |
 
 ### ENHANCE (cải thiện cái đã có)
