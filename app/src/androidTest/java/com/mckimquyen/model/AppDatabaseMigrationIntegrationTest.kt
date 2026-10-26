@@ -26,6 +26,8 @@ class AppDatabaseMigrationIntegrationTest {
     companion object {
         private const val TEST_DB = "fish-008-migration-test.db"
         private const val V12_DB = "fish-022-v12-migration-test.db"
+        private const val LEGACY_DB = "db-008-legacy-migration-test.db"
+        private const val LEGACY_USER_VERSION = 3
         private const val TEST_WRITE_TIMEOUT_MILLIS = 5_000L
         private const val TEST_WRITE_POLL_MILLIS = 10L
     }
@@ -246,5 +248,36 @@ class AppDatabaseMigrationIntegrationTest {
 
     private fun migration12To13(): androidx.room.migration.Migration {
         return AppDatabase.MIGRATION_12_13
+    }
+
+    /** DB-008: a SugarORM-era database (user_version 3) used to crash-loop on open; it must open and keep rows. */
+    @Test
+    fun legacyVersionBelow7_opensAndKeepsRowsOnDevice() = runBlocking {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        context.deleteDatabase(LEGACY_DB)
+        val dbFile = context.getDatabasePath(LEGACY_DB)
+        dbFile.parentFile?.mkdirs()
+        SQLiteDatabase.openOrCreateDatabase(dbFile, null).use { sqlite ->
+            sqlite.execSQL(
+                "CREATE TABLE APP_PERSISTENT (ID INTEGER PRIMARY KEY AUTOINCREMENT, M_PACKAGE_NAME TEXT, M_NAME TEXT, " +
+                    "M_IDENTIFIER TEXT, M_OPEN_COUNT INTEGER, M_ORDER_NUMBER INTEGER, M_APP_VISIBLE INTEGER, M_APP_OPENED INTEGER)"
+            )
+            sqlite.execSQL(
+                "INSERT INTO APP_PERSISTENT (M_PACKAGE_NAME, M_NAME, M_IDENTIFIER, M_OPEN_COUNT, M_ORDER_NUMBER, " +
+                    "M_APP_VISIBLE, M_APP_OPENED) VALUES ('com.legacy', 'L', 'com.legacy-L', 13, 2, 1, 1)"
+            )
+            sqlite.version = LEGACY_USER_VERSION
+        }
+
+        val migrated = AppDatabase.builder(context, LEGACY_DB).build()
+        try {
+            val row = migrated.appPersistentDao().getAllForLens(LensWorkspace.DEFAULT_LENS_ID).single()
+            assertEquals("com.legacy-L", row.identifier)
+            assertEquals(13L, row.openCount)
+            assertEquals(1, migrated.lensWorkspaceDao().getAll().size)
+        } finally {
+            migrated.close()
+            context.deleteDatabase(LEGACY_DB)
+        }
     }
 }

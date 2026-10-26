@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | enhance |
-| Status | todo |
+| Status | done 2026-10-26 (audit 9.1/10, `doc/task/AUDIT_DB-008_2026-10-26.md`) |
 | Priority | P3 |
 | Evidence | confirmed |
 | Epic | Persistence |
@@ -21,24 +21,24 @@ Là người dùng nâng cấp từ bản rất cũ, tôi muốn app mở đư�
 
 ## Acceptance criteria
 
-- [ ] Có đường xử lý DB quá cũ: fallback có thông báo hoặc migration từ legacy.
-- [ ] Thêm test migration 7→8 và 8→9 (kèm trường hợp identifier rỗng).
-- [ ] Bổ sung snapshot schema nếu tái dựng được, nếu không ghi giới hạn.
-- [ ] Không phá migration hiện có.
+- [x] Có đường xử lý DB quá cũ: migration không phá hủy từ legacy (bảng không đọc được được giữ lại ở `APP_PERSISTENT_UNRECOGNISED_BACKUP`).
+- [x] Thêm test migration 7→8 và 8→9 (kèm trường hợp identifier rỗng) — `AppDatabaseLegacyMigrationTest`, 11 test.
+- [x] Snapshot schema 7/8 không tái dựng được chính xác nên không tạo; giới hạn ghi trong audit.
+- [x] Không phá migration hiện có (schema v13 không đổi; test model 118/118 + 18 test thiết bị xanh).
 
 ## Implementation notes
 
-Quyết định fallback phá hủy cần owner xác nhận vì mất dữ liệu người dùng.
+Quyết định fallback phá hủy cần owner xác nhận vì mất dữ liệu người dùng. **Đã chọn (owner giao quyền tự quyết, 2026-10-26): không phá hủy** — migrate dữ liệu, bảng lạ đổi tên thành backup.
 
 ## Verification and Definition of Done
 
-- [ ] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
-- [ ] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
-- [ ] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
-- [ ] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
-- [ ] No new lint/build failures.
-- [ ] A post-change audit record scores the round `> 9.0/10` before push.
-- [ ] Evidence and status are updated before moving this file to `done`.
+- [x] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
+- [x] Widget/UI tests: Not applicable — không đổi UI (đã review).
+- [x] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
+- [x] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
+- [x] No new lint/build failures.
+- [x] A post-change audit record scores the round `> 9.0/10` before push.
+- [x] Evidence and status are updated before moving this file to `done`.
 
 If a test layer is not applicable, replace its checkbox with a reviewed rationale; do not silently omit it.
 
