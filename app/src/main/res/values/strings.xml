@@ -313,4 +313,7 @@
     <string name="edge_swipe_mode_left">Left edge only</string>
     <string name="t9_key_clear">Clear</string>
     <string name="t9_key_backspace_description">Delete last digit</string>
+    <string name="setting_reset_permission_prompts">Ask quick action permissions again</string>
+    <string name="toast_permission_prompts_reset">Permission prompts reset</string>
+    <string name="toast_permission_prompts_nothing">No permission prompts to reset</string>
 </resources>

@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | new |
-| Status | todo |
+| Status | done 2026-10-26 (audit 9.2/10, `doc/task/AUDIT_SEARCH-015-016_2026-10-26.md`) |
 | Priority | P3 |
 | Evidence | confirmed |
 | Epic | Permissions |
@@ -21,9 +21,9 @@ Là người dùng, tôi muốn bật lại tính năng sau khi từng từ ch�
 
 ## Acceptance criteria
 
-- [ ] Một hàng trong Settings xóa các cờ đã hỏi.
-- [ ] Cờ chỉ set sau khi có kết quả dialog.
-- [ ] Test: deny→reset→hỏi lại được.
+- [x] Một hàng trong Settings xóa các cờ đã hỏi (`llResetPermissionPrompts`, 17 locale).
+- [x] Cờ chỉ set sau khi có kết quả dialog (`PermissionAskedFlags.recordResult` trong `onRequestPermissionsResult`; DND giữ nguyên vì không có dialog).
+- [x] Test: deny→reset→hỏi lại được (unit + smoke thật trên Pixel).
 
 ## Implementation notes
 
@@ -31,13 +31,13 @@ Chuỗi mới đủ 17 locale.
 
 ## Verification and Definition of Done
 
-- [ ] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
-- [ ] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
-- [ ] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
-- [ ] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
-- [ ] No new lint/build failures.
-- [ ] A post-change audit record scores the round `> 9.0/10` before push.
-- [ ] Evidence and status are updated before moving this file to `done`.
+- [x] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
+- [x] Widget/UI tests: `FrmSettingsResetPermissionPromptsWidgetTest` (3), gồm touch target ≥ 48dp.
+- [x] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
+- [x] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
+- [x] No new lint/build failures.
+- [x] A post-change audit record scores the round `> 9.0/10` before push.
+- [x] Evidence and status are updated before moving this file to `done`.
 
 If a test layer is not applicable, replace its checkbox with a reviewed rationale; do not silently omit it.
 

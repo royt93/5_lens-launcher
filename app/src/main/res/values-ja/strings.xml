@@ -264,4 +264,7 @@
     <string name="setting_lens_elastic_overscroll_desc">レンズをグリッドの端より先へドラッグすると、自然な抵抗が加わります</string>
     <string name="t9_key_clear">クリア</string>
     <string name="t9_key_backspace_description">最後の数字を削除</string>
+    <string name="setting_reset_permission_prompts">クイックアクションの権限を再度確認する</string>
+    <string name="toast_permission_prompts_reset">権限の確認をリセットしました</string>
+    <string name="toast_permission_prompts_nothing">リセットする権限の確認はありません</string>
 </resources>

@@ -274,4 +274,7 @@
     <string name="setting_lens_elastic_overscroll_desc">Aggiunge una resistenza naturale quando trascini la lente oltre il bordo della griglia</string>
     <string name="t9_key_clear">Cancella</string>
     <string name="t9_key_backspace_description">Elimina l\'ultima cifra</string>
+    <string name="setting_reset_permission_prompts">Richiedi di nuovo i permessi delle azioni rapide</string>
+    <string name="toast_permission_prompts_reset">Richieste di permessi reimpostate</string>
+    <string name="toast_permission_prompts_nothing">Nessuna richiesta di permessi da reimpostare</string>
 </resources>

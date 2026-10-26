@@ -271,4 +271,7 @@
     <string name="setting_lens_elastic_overscroll_desc">Tạo lực cản đàn hồi tự nhiên khi kéo thấu kính chạm mép viền</string>
     <string name="t9_key_clear">Xóa</string>
     <string name="t9_key_backspace_description">Xóa chữ số cuối</string>
+    <string name="setting_reset_permission_prompts">Hỏi lại các quyền hành động nhanh</string>
+    <string name="toast_permission_prompts_reset">Đã đặt lại các yêu cầu quyền</string>
+    <string name="toast_permission_prompts_nothing">Không có yêu cầu quyền nào để đặt lại</string>
 </resources>

@@ -1895,7 +1895,6 @@ public class ActHome extends ActBase {
     private void toggleFlashlight() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
                 != PackageManager.PERMISSION_GRANTED) {
-            new UtilSettings(this).save(UtilSettings.KEY_FLASHLIGHT_PERMISSION_REQUESTED, true);
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, REQUEST_CODE_CAMERA);
             return;
         }
@@ -1927,7 +1926,6 @@ public class ActHome extends ActBase {
     }
 
     private void requestWifiSsidPermission() {
-        new UtilSettings(this).save(UtilSettings.KEY_WIFI_SSID_PERMISSION_REQUESTED, true);
         // Android 12+ requires requesting ACCESS_COARSE_LOCATION alongside FINE (lint
         // CoarseFineLocation) - the user may grant only coarse, in which case
         // QuickActionEngine.resolveWifiSsid still won't read the SSID (needs FINE specifically)
@@ -2009,7 +2007,6 @@ public class ActHome extends ActBase {
     }
 
     private void requestContactsPermission() {
-        new UtilSettings(this).save(UtilSettings.KEY_CONTACTS_PERMISSION_REQUESTED, true);
         ActivityCompat.requestPermissions(
                 this,
                 new String[]{Manifest.permission.READ_CONTACTS},
@@ -2029,6 +2026,20 @@ public class ActHome extends ActBase {
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        // SEARCH-015: remember "already asked" only once the user actually answered the dialog.
+        if (requestCode == REQUEST_CODE_CAMERA) {
+            com.mckimquyen.search.PermissionAskedFlags.recordResult(this,
+                    UtilSettings.KEY_FLASHLIGHT_PERMISSION_REQUESTED, permissions, grantResults,
+                    Manifest.permission.CAMERA);
+        } else if (requestCode == REQUEST_CODE_WIFI_SSID) {
+            com.mckimquyen.search.PermissionAskedFlags.recordResult(this,
+                    UtilSettings.KEY_WIFI_SSID_PERMISSION_REQUESTED, permissions, grantResults,
+                    Manifest.permission.ACCESS_FINE_LOCATION);
+        } else if (requestCode == REQUEST_CODE_CONTACTS) {
+            com.mckimquyen.search.PermissionAskedFlags.recordResult(this,
+                    UtilSettings.KEY_CONTACTS_PERMISSION_REQUESTED, permissions, grantResults,
+                    Manifest.permission.READ_CONTACTS);
+        }
         if (requestCode == REQUEST_CODE_CAMERA) {
             boolean granted = grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED;
             if (granted) {

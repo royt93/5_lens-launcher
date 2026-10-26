@@ -274,4 +274,7 @@
     <string name="setting_lens_elastic_overscroll_desc">Añade una resistencia natural al arrastrar la lente más allá del borde de la cuadrícula</string>
     <string name="t9_key_clear">Borrar</string>
     <string name="t9_key_backspace_description">Borrar el último dígito</string>
+    <string name="setting_reset_permission_prompts">Volver a pedir permisos de acciones rápidas</string>
+    <string name="toast_permission_prompts_reset">Solicitudes de permisos restablecidas</string>
+    <string name="toast_permission_prompts_nothing">No hay solicitudes de permisos que restablecer</string>
 </resources>

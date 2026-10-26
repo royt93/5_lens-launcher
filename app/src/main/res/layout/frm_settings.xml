@@ -1522,6 +1522,44 @@
 
                 </RelativeLayout>
 
+                <com.google.android.material.divider.MaterialDivider
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="52dp"
+                    app:dividerColor="?attr/colorOutlineVariant" />
+
+                <!-- SEARCH-015: clears the "already asked" memory so a denied quick-action permission can be asked again -->
+                <LinearLayout
+                    android:id="@+id/llResetPermissionPrompts"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:gravity="center_vertical"
+                    android:minHeight="48dp"
+                    android:orientation="horizontal"
+                    android:padding="12dp">
+
+                    <ImageView
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:importantForAccessibility="no"
+                        android:padding="8dp"
+                        android:src="@drawable/ic_restore_24dp"
+                        android:tint="?attr/colorPrimary"
+                        tools:ignore="UseAppTint" />
+
+                    <TextView
+                        android:id="@+id/tvResetPermissionPrompts"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:layout_weight="1"
+                        android:text="@string/setting_reset_permission_prompts"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                </LinearLayout>
+
             </LinearLayout>
 
         </com.google.android.material.card.MaterialCardView>

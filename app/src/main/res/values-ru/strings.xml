@@ -279,4 +279,7 @@
     <string name="setting_lens_elastic_overscroll_desc">Добавляет естественное сопротивление, когда вы тянете линзу за край сетки</string>
     <string name="t9_key_clear">Очистить</string>
     <string name="t9_key_backspace_description">Удалить последнюю цифру</string>
+    <string name="setting_reset_permission_prompts">Снова запрашивать разрешения быстрых действий</string>
+    <string name="toast_permission_prompts_reset">Запросы разрешений сброшены</string>
+    <string name="toast_permission_prompts_nothing">Нет запросов разрешений для сброса</string>
 </resources>

@@ -264,4 +264,7 @@
     <string name="setting_lens_elastic_overscroll_desc">Menambahkan hambatan alami saat Anda menyeret lensa melewati tepi kisi</string>
     <string name="t9_key_clear">Hapus</string>
     <string name="t9_key_backspace_description">Hapus digit terakhir</string>
+    <string name="setting_reset_permission_prompts">Minta lagi izin aksi cepat</string>
+    <string name="toast_permission_prompts_reset">Permintaan izin direset</string>
+    <string name="toast_permission_prompts_nothing">Tidak ada permintaan izin untuk direset</string>
 </resources>

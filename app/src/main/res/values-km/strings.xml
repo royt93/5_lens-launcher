@@ -264,4 +264,7 @@
     <string name="setting_lens_elastic_overscroll_desc">បន្ថែមភាពទប់ទល់ធម្មជាតិ នៅពេលអ្នកអូសកែវពង្រីកហួសគែមក្រឡា</string>
     <string name="t9_key_clear">លុប</string>
     <string name="t9_key_backspace_description">លុបខ្ទង់ចុងក្រោយ</string>
+    <string name="setting_reset_permission_prompts">សុំការអនុញ្ញាតសកម្មភាពរហ័សម្ដងទៀត</string>
+    <string name="toast_permission_prompts_reset">បានកំណត់ការស្នើសុំការអនុញ្ញាតឡើងវិញ</string>
+    <string name="toast_permission_prompts_nothing">គ្មានការស្នើសុំការអនុញ្ញាតត្រូវកំណត់ឡើងវិញទេ</string>
 </resources>

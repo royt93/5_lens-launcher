@@ -274,4 +274,7 @@
     <string name="setting_lens_elastic_overscroll_desc">Adiciona resistência natural ao arrastar a lente além da borda da grade</string>
     <string name="t9_key_clear">Limpar</string>
     <string name="t9_key_backspace_description">Excluir o último dígito</string>
+    <string name="setting_reset_permission_prompts">Pedir novamente as permissões das ações rápidas</string>
+    <string name="toast_permission_prompts_reset">Pedidos de permissão redefinidos</string>
+    <string name="toast_permission_prompts_nothing">Nenhum pedido de permissão para redefinir</string>
 </resources>

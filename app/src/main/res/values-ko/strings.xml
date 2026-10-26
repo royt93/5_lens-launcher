@@ -264,4 +264,7 @@
     <string name="setting_lens_elastic_overscroll_desc">렌즈를 그리드 가장자리 너머로 끌 때 자연스러운 저항을 더합니다</string>
     <string name="t9_key_clear">지우기</string>
     <string name="t9_key_backspace_description">마지막 숫자 삭제</string>
+    <string name="setting_reset_permission_prompts">빠른 작업 권한 다시 요청</string>
+    <string name="toast_permission_prompts_reset">권한 요청을 초기화했습니다</string>
+    <string name="toast_permission_prompts_nothing">초기화할 권한 요청이 없습니다</string>
 </resources>

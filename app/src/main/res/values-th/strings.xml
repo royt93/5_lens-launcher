@@ -264,4 +264,7 @@
     <string name="setting_lens_elastic_overscroll_desc">เพิ่มแรงต้านตามธรรมชาติเมื่อคุณลากเลนส์ไปเกินขอบตาราง</string>
     <string name="t9_key_clear">ล้าง</string>
     <string name="t9_key_backspace_description">ลบตัวเลขสุดท้าย</string>
+    <string name="setting_reset_permission_prompts">ขอสิทธิ์การทำงานด่วนอีกครั้ง</string>
+    <string name="toast_permission_prompts_reset">รีเซ็ตการขอสิทธิ์แล้ว</string>
+    <string name="toast_permission_prompts_nothing">ไม่มีการขอสิทธิ์ที่ต้องรีเซ็ต</string>
 </resources>

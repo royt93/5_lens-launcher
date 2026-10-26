@@ -264,4 +264,7 @@
     <string name="setting_lens_elastic_overscroll_desc">ເພີ່ມແຮງຕ້ານທຳມະຊາດເມື່ອທ່ານລາກເລນເກີນຂອບຕາຂ່າຍ</string>
     <string name="t9_key_clear">ລຶບ</string>
     <string name="t9_key_backspace_description">ລຶບເລກຕົວສຸດທ້າຍ</string>
+    <string name="setting_reset_permission_prompts">ຂໍສິດການເຮັດວຽກດ່ວນອີກຄັ້ງ</string>
+    <string name="toast_permission_prompts_reset">ຣີເຊັດການຂໍສິດແລ້ວ</string>
+    <string name="toast_permission_prompts_nothing">ບໍ່ມີການຂໍສິດໃຫ້ຣີເຊັດ</string>
 </resources>

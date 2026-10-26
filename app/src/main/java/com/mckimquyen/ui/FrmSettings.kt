@@ -189,6 +189,15 @@ class FrmSettings : Fragment(), SettingsInterface {
         view.findViewById<View>(R.id.llHighlightColor).setOnClickListener {
             showHighlightColorDialog()
         }
+        view.findViewById<View>(R.id.llResetPermissionPrompts).setOnClickListener {
+            val ctx = context ?: return@setOnClickListener
+            val changed = com.mckimquyen.search.PermissionAskedFlags.resetAll(ctx)
+            android.widget.Toast.makeText(
+                ctx,
+                if (changed) R.string.toast_permission_prompts_reset else R.string.toast_permission_prompts_nothing,
+                android.widget.Toast.LENGTH_SHORT
+            ).show()
+        }
         view.findViewById<View>(R.id.llExportLayout).setOnClickListener {
             (activity as? ActSettings)?.exportLayout()
         }

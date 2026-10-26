@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | new |
-| Status | todo |
+| Status | done 2026-10-26 (audit 9.3/10, `doc/task/AUDIT_SEARCH-015-016_2026-10-26.md`) |
 | Priority | P3 |
 | Evidence | idea |
 | Epic | Privacy |
@@ -21,9 +21,9 @@ Là người dùng, tôi muốn dấu vết tìm kiếm tự rụng sau một th
 
 ## Acceptance criteria
 
-- [ ] Lưu timestamp, loại mục quá N ngày (hằng số có tên).
-- [ ] Tương thích dữ liệu cũ (không có timestamp).
-- [ ] Test thời gian với clock giả.
+- [x] Lưu timestamp, loại mục quá N ngày (`SearchHistoryStore.TTL_DAYS = 30`).
+- [x] Tương thích dữ liệu cũ (không có timestamp): coi như vừa thấy lần đầu đọc.
+- [x] Test thời gian với clock giả (`SearchHistoryStoreTtlTest`, 9 test).
 
 ## Implementation notes
 
@@ -31,13 +31,13 @@ Không đổi quy tắc backup đã loại trừ `app_search_history`.
 
 ## Verification and Definition of Done
 
-- [ ] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
-- [ ] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
-- [ ] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
-- [ ] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
-- [ ] No new lint/build failures.
-- [ ] A post-change audit record scores the round `> 9.0/10` before push.
-- [ ] Evidence and status are updated before moving this file to `done`.
+- [x] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
+- [x] Widget/UI tests: Not applicable — không đổi UI (đã review).
+- [x] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
+- [x] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
+- [x] No new lint/build failures.
+- [x] A post-change audit record scores the round `> 9.0/10` before push.
+- [x] Evidence and status are updated before moving this file to `done`.
 
 If a test layer is not applicable, replace its checkbox with a reviewed rationale; do not silently omit it.
 

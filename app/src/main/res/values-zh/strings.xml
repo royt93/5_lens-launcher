@@ -264,4 +264,7 @@
     <string name="setting_lens_elastic_overscroll_desc">将镜头拖过网格边缘时增加自然的阻力</string>
     <string name="t9_key_clear">清除</string>
     <string name="t9_key_backspace_description">删除最后一位数字</string>
+    <string name="setting_reset_permission_prompts">重新请求快捷操作权限</string>
+    <string name="toast_permission_prompts_reset">已重置权限请求</string>
+    <string name="toast_permission_prompts_nothing">没有需要重置的权限请求</string>
 </resources>

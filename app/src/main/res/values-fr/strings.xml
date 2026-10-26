@@ -274,4 +274,7 @@
     <string name="setting_lens_elastic_overscroll_desc">Ajoute une résistance naturelle lorsque vous faites glisser la loupe au-delà du bord de la grille</string>
     <string name="t9_key_clear">Effacer</string>
     <string name="t9_key_backspace_description">Supprimer le dernier chiffre</string>
+    <string name="setting_reset_permission_prompts">Redemander les autorisations des actions rapides</string>
+    <string name="toast_permission_prompts_reset">Demandes d\'autorisation réinitialisées</string>
+    <string name="toast_permission_prompts_nothing">Aucune demande d\'autorisation à réinitialiser</string>
 </resources>
