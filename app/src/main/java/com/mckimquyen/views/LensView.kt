@@ -1502,7 +1502,9 @@ class LensView : View {
         }
         com.mckimquyen.app.ApplicationScope.scope.launch {
             try {
-                val icon = UtilApp.loadSingleAppIcon(application, app.packageName.toString(), app.iconResId)
+                val icon = UtilApp.loadSingleAppIcon(
+                    application, app.packageName.toString(), app.iconResId, app.name.toString(), app.userId
+                )
                 if (icon != null) {
                     com.mckimquyen.app.RAppsSingleton.instance.setAppIcon(iconCacheKey, icon)
                     invalidate()

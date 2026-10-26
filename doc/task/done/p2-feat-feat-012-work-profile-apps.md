@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | new |
-| Status | in progress 2026-10-26 (audit 8.4/10 < 9.0, chưa push; `doc/task/AUDIT_FEAT-012_2026-10-26.md`) |
+| Status | done 2026-10-26 (audit 9.2/10, `doc/task/AUDIT_FEAT-012_2026-10-26.md`) |
 | Priority | P2 |
 | Evidence | conditional |
 | Epic | Platform coverage |
@@ -21,11 +21,11 @@ Là người dùng có work profile, tôi muốn thấy app công việc trong l
 
 ## Acceptance criteria
 
-- [x] Liệt kê app mọi profile qua `LauncherApps.getActivityList` (`LauncherAppsDirectory`, `ProfileAppSource`); chưa quan sát trên máy có work profile thật.
-- [ ] Icon có badge (`LauncherActivityInfo.getBadgedIcon`) và khởi chạy đúng `UserHandle` (`LauncherApps.startMainActivity`): đã viết, **chưa chạy thật** vì không có work profile.
-- [x] Lắng 5 action `ACTION_MANAGED_PROFILE_*` (`ProfileChangedReceiver`), test unit; chưa nhận broadcast thật.
+- [x] Liệt kê app mọi profile qua `LauncherApps.getActivityList` (`LauncherAppsDirectory`, `ProfileAppSource`); đã quan sát trên emulator có work profile thật.
+- [x] Icon có badge (`LauncherActivityInfo.getBadgedIcon`) và khởi chạy đúng `UserHandle` (`LauncherApps.startMainActivity`): chạy thật trên AVD Android 33 có work profile id 10 (ảnh `AUDIT_FEAT-012_emulator_work_badges.png`).
+- [x] Lắng 5 action `ACTION_MANAGED_PROFILE_*` (`ProfileChangedReceiver`), test unit; thêm/gỡ profile đã được kiểm khi xóa profile thật trên emulator (dòng `@u10` được dọn).
 - [x] `iconCacheKey` và khóa Room tính đến user (`AppIdentity`, hậu tố `@u<id>` chỉ cho profile phụ, không migration).
-- [x] Không có máy work profile: ghi giới hạn trong audit; smoke hồi quy trên TECNO BG6 (user chính) OK.
+- [x] TECNO BG6 không có work profile: dùng emulator Android 33 có work profile thật (owner cho phép, đã xóa sạch sau khi dùng); smoke hồi quy trên TECNO BG6 (user chính) OK.
 
 ## Implementation notes
 
@@ -38,8 +38,8 @@ SP 8 phải tách ít nhất 3 story con khi thực hiện. Tăng độ phức t
 - [x] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
 - [x] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
 - [x] No new lint/build failures.
-- [ ] A post-change audit record scores the round `> 9.0/10` before push.
-- [ ] Evidence and status are updated before moving this file to `done`.
+- [x] A post-change audit record scores the round `> 9.0/10` before push.
+- [x] Evidence and status are updated before moving this file to `done`.
 
 If a test layer is not applicable, replace its checkbox with a reviewed rationale; do not silently omit it.
 

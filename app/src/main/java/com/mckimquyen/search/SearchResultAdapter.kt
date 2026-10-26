@@ -154,7 +154,7 @@ class SearchResultAdapter @JvmOverloads constructor(
             if (iconKey.isBlank() || packageName.isBlank() || !loadingIconKeys.add(iconKey)) return
             adapterScope.launch {
                 val loadedIcon = withContext(Dispatchers.IO) {
-                    UtilApp.loadSingleAppIcon(application, packageName, iconResId)
+                    UtilApp.loadSingleAppIcon(application, packageName, iconResId, app.name.toString(), app.userId)
                 }
                 loadingIconKeys.remove(iconKey)
                 if (loadedIcon == null) return@launch

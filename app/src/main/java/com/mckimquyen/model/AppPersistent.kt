@@ -236,10 +236,11 @@ data class AppPersistent(
             ) { setOpened(defaults, appOpened) }
         }
 
+        @JvmOverloads
         @JvmStatic
-        fun getAppVisibility(packageName: String?, name: String?): Boolean {
+        fun getAppVisibility(packageName: String?, name: String?, userId: Int = AppIdentity.PRIMARY_USER_ID): Boolean {
             if (packageName.isNullOrBlank() || name.isNullOrBlank()) return true
-            return RAppsSingleton.instance.findApp(packageName, name)?.isVisible ?: true
+            return RAppsSingleton.instance.findApp(packageName, name, userId)?.isVisible ?: true
         }
 
         @JvmOverloads
@@ -260,31 +261,46 @@ data class AppPersistent(
             ) { setVisibility(defaults, visible) }
         }
 
+        @JvmOverloads
         @JvmStatic
-        fun getAppOpenCount(packageName: String?, name: String?): Long {
+        fun getAppOpenCount(packageName: String?, name: String?, userId: Int = AppIdentity.PRIMARY_USER_ID): Long {
             if (packageName.isNullOrBlank() || name.isNullOrBlank()) return 0L
-            return RAppsSingleton.instance.findApp(packageName, name)?.openCount ?: 0L
+            return RAppsSingleton.instance.findApp(packageName, name, userId)?.openCount ?: 0L
         }
 
+        @JvmOverloads
         @JvmStatic
-        fun getAppPaletteColor(packageName: String?, name: String?): Int {
+        fun getAppPaletteColor(packageName: String?, name: String?, userId: Int = AppIdentity.PRIMARY_USER_ID): Int {
             if (packageName.isNullOrBlank() || name.isNullOrBlank()) return 0
-            return RAppsSingleton.instance.findApp(packageName, name)?.paletteColor ?: 0
+            return RAppsSingleton.instance.findApp(packageName, name, userId)?.paletteColor ?: 0
         }
 
+        @JvmOverloads
         @JvmStatic
-        fun setAppPaletteColor(packageName: String?, name: String?, color: Int) {
+        fun setAppPaletteColor(
+            packageName: String?,
+            name: String?,
+            color: Int,
+            userId: Int = AppIdentity.PRIMARY_USER_ID
+        ) {
             if (packageName.isNullOrBlank() || name.isNullOrBlank()) return
-            val previous = RAppsSingleton.instance.findApp(packageName, name)?.paletteColor
-            RAppsSingleton.instance.updateAppState(packageName, name, paletteColor = color)
-            val defaults = defaults(packageName, name)
+            val previous = RAppsSingleton.instance.findApp(packageName, name, userId)?.paletteColor
+            RAppsSingleton.instance.updateAppState(packageName, name, paletteColor = color, userId = userId)
+            val defaults = defaults(packageName, name, userId = userId)
             persistLatest("palette", defaults.identifier,
-                onFailure = { previous?.let { RAppsSingleton.instance.updateAppState(packageName, name, paletteColor = it) } }
+                onFailure = {
+                    previous?.let { RAppsSingleton.instance.updateAppState(packageName, name, paletteColor = it, userId = userId) }
+                }
             ) { setPaletteColor(defaults, color) }
         }
 
-        suspend fun setAppPaletteColorAndAwait(packageName: String, name: String, color: Int) {
-            dao().setPaletteColor(defaults(packageName, name), color)
+        suspend fun setAppPaletteColorAndAwait(
+            packageName: String,
+            name: String,
+            color: Int,
+            userId: Int = AppIdentity.PRIMARY_USER_ID
+        ) {
+            dao().setPaletteColor(defaults(packageName, name, userId = userId), color)
         }
 
         @JvmOverloads

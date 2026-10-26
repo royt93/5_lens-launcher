@@ -93,4 +93,22 @@ class RAppsSingletonUserTest {
         assertFalse(legacy.isWorkProfile)
         assertEquals("p-n", legacy.identifier)
     }
+
+    @Test
+    fun `open count and palette getters read the requested users copy`() {
+        RAppsSingleton.instance.updateAppState("com.chat", "Main", userId = 10, openCount = 6L, paletteColor = 77)
+
+        assertEquals(0L, com.mckimquyen.model.AppPersistent.getAppOpenCount("com.chat", "Main"))
+        assertEquals(6L, com.mckimquyen.model.AppPersistent.getAppOpenCount("com.chat", "Main", 10))
+        assertEquals(0, com.mckimquyen.model.AppPersistent.getAppPaletteColor("com.chat", "Main"))
+        assertEquals(77, com.mckimquyen.model.AppPersistent.getAppPaletteColor("com.chat", "Main", 10))
+    }
+
+    @Test
+    fun `visibility getter reads the requested users copy`() {
+        RAppsSingleton.instance.updateAppState("com.chat", "Main", userId = 10, isVisible = false)
+
+        assertTrue(com.mckimquyen.model.AppPersistent.getAppVisibility("com.chat", "Main"))
+        assertFalse(com.mckimquyen.model.AppPersistent.getAppVisibility("com.chat", "Main", 10))
+    }
 }

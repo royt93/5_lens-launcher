@@ -306,12 +306,21 @@ object UtilApp {
      * bitmap evicted from [BitmapCache] under memory pressure can be restored on demand
      * instead of staying blank until the next full app-list refresh.
      */
+    @JvmOverloads
     @JvmStatic
     suspend fun loadSingleAppIcon(
         application: Application,
         packageName: String,
         iconResId: Int,
+        componentName: String? = null,
+        userId: Int = AppIdentity.PRIMARY_USER_ID,
     ): android.graphics.Bitmap? = withContext(Dispatchers.IO) {
+        // FEAT-012: a work app is always shown with the system's work badge (see loadProfileShells), so an evicted
+        // work icon must come back badged too, not as the plain icon of the same package in the primary user.
+        if (userId != AppIdentity.PRIMARY_USER_ID && componentName != null) {
+            LauncherAppsDirectory(application).badgedIcon(packageName, componentName, userId, ICON_DENSITY_DPI)
+                ?.let { return@withContext UtilBitmap.drawableToBitmap(it) }
+        }
         val packageManager = application.packageManager
         val defaultBitmap = UtilBitmap.packageNameToBitmap(packageManager, packageName, iconResId)
             ?: return@withContext null
@@ -372,8 +381,10 @@ object UtilApp {
                 // Skips the write entirely for an entry that was never set - avoids a Room
                 // transaction on every single app launch for the common no-badge case.
                 RAppsSingleton.instance.apps.orEmpty()
-                    .filter { it.packageName.toString() == packageName && it.notificationCount != 0 }
-                    .forEach { AppPersistent.setNotificationCount(packageName, it.name.toString(), 0) }
+                    .filter {
+                        it.packageName.toString() == packageName && it.userId == userId && it.notificationCount != 0
+                    }
+                    .forEach { AppPersistent.setNotificationCount(packageName, it.name.toString(), 0, userId) }
 
                 // Resort apps if sorting by open count
                 val utilSettings = UtilSettings(context)
