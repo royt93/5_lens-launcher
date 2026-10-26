@@ -65,6 +65,7 @@ public class RApplication extends android.app.Application {
      */
     private BroadcastReceiver packageReceiver;
     private BroadcastReceiver localeReceiver;
+    private BroadcastReceiver profileReceiver;
     private TaskUpdateApps appRefreshPipeline;
     private TaskSortApps appSortPipeline;
     private final com.mckimquyen.util.UtilIconPackManager iconPackManager =
@@ -172,6 +173,7 @@ public class RApplication extends android.app.Application {
         // Đăng ký dynamic BroadcastReceiver thay vì dùng Manifest
         registerPackageChangeReceiver();
         registerLocaleChangeReceiver();
+        registerProfileChangeReceiver();
 
         // CORE-002: evict icon cache under memory pressure (onTrimMemory/onLowMemory)
         registerComponentCallbacks(iconCacheMemoryCallbacks);
@@ -205,6 +207,24 @@ public class RApplication extends android.app.Application {
         localeReceiver = new BroadcastReceivers.LocaleChangedReceiver();
         IntentFilter filter = new IntentFilter(Intent.ACTION_LOCALE_CHANGED);
         registerReceiver(localeReceiver, filter);
+    }
+
+    /**
+     * FEAT-012: refresh the app list when a work profile is added, removed, paused, resumed or unlocked.
+     */
+    private void registerProfileChangeReceiver() {
+        Logger.d("RApplication: Registering dynamic profile receiver");
+        profileReceiver = new BroadcastReceivers.ProfileChangedReceiver();
+        IntentFilter filter = new IntentFilter();
+        for (String action : BroadcastReceivers.ProfileChangedReceiver.Companion.getACTIONS()) {
+            filter.addAction(action);
+        }
+        registerReceiver(profileReceiver, filter);
+    }
+
+    @androidx.annotation.VisibleForTesting
+    public BroadcastReceiver getProfileReceiverForTest() {
+        return profileReceiver;
     }
 
     @androidx.annotation.VisibleForTesting
@@ -410,6 +430,15 @@ public class RApplication extends android.app.Application {
                 Logger.d("RApplication: localeReceiver unregistered in onTerminate()");
             } catch (IllegalArgumentException e) {
                 Logger.w("RApplication: localeReceiver was already unregistered");
+            }
+        }
+        if (profileReceiver != null) {
+            try {
+                unregisterReceiver(profileReceiver);
+                profileReceiver = null;
+                Logger.d("RApplication: profileReceiver unregistered in onTerminate()");
+            } catch (IllegalArgumentException e) {
+                Logger.w("RApplication: profileReceiver was already unregistered");
             }
         }
         super.onTerminate();

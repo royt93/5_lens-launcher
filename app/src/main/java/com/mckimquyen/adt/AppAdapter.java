@@ -249,9 +249,10 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
     }
 
     static String identifierFor(App app) {
-        return AppPersistent.generateIdentifier(
+        return com.mckimquyen.model.AppIdentity.identifier(
                 app.getPackageName() != null ? app.getPackageName().toString() : null,
-                app.getName() != null ? app.getName().toString() : null);
+                app.getName() != null ? app.getName().toString() : null,
+                app.getUserId());
     }
 
     static Set<String> toggleIdentifier(Set<String> current, String identifier) {
@@ -360,7 +361,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
             if (!mSelectedIdentifiers.contains(identifierFor(app)) || app.isVisible() == visible) continue;
             String pkg = Objects.requireNonNull(app.getPackageName()).toString();
             String name = Objects.requireNonNull(app.getName()).toString();
-            AppPersistent.setAppVisibility(pkg, name, visible, app.getLensId());
+            AppPersistent.setAppVisibility(pkg, name, visible, app.getLensId(), app.getUserId());
             mApps.set(i, app.copyWithLockAndVisibility(app.isOpened(), visible, app.getOpenCount()));
             notifyItemChanged(i);
             changed = true;
@@ -377,7 +378,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
             if (!mSelectedIdentifiers.contains(identifierFor(app))) continue;
             String pkg = Objects.requireNonNull(app.getPackageName()).toString();
             String name = Objects.requireNonNull(app.getName()).toString();
-            AppPersistent.setOrganization(pkg, name, app.isFavorite(), app.getFolderName(), zone, app.getLensId());
+            AppPersistent.setOrganization(pkg, name, app.isFavorite(), app.getFolderName(), zone, app.getLensId(), app.getUserId());
             mApps.set(i, app.copyWithOrganization(app.isFavorite(), app.getFolderName(), zone));
             notifyItemChanged(i);
             changed = true;
@@ -882,7 +883,8 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
                                 0,
                                 itemView.getMeasuredWidth(),
                                 itemView.getMeasuredHeight()
-                        )
+                        ),
+                        mApp.getUserId()
                 );
             });
             // FEAT-007: long-press enters/extends multi-select (native ActionMode pattern).

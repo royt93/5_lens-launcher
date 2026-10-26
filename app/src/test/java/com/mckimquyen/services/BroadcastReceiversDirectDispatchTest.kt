@@ -273,4 +273,55 @@ class BroadcastReceiversDirectDispatchTest {
 
         verify(appsUpdatedObserver, never()).onChanged(any())
     }
+
+    // ========================================================================
+    // FEAT-012: work profile added/removed/availability dispatches to appsUpdated
+    // ========================================================================
+
+    private fun profileIntent(action: String): android.content.Intent {
+        val intent = mock<android.content.Intent>()
+        org.mockito.kotlin.whenever(intent.action).thenReturn(action)
+        return intent
+    }
+
+    @Test
+    fun `ProfileChangedReceiver refreshes on every profile lifecycle action`() {
+        val actions = listOf(
+            android.content.Intent.ACTION_MANAGED_PROFILE_ADDED,
+            android.content.Intent.ACTION_MANAGED_PROFILE_REMOVED,
+            android.content.Intent.ACTION_MANAGED_PROFILE_AVAILABLE,
+            android.content.Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE,
+            android.content.Intent.ACTION_MANAGED_PROFILE_UNLOCKED
+        )
+        actions.forEach { action ->
+            val observer: Observer<Any?> = mock()
+            AppEventManager.appsUpdated.observeForever(observer)
+            BroadcastReceivers.ProfileChangedReceiver().onReceive(mock(), profileIntent(action))
+            verify(observer, atLeastOnce()).onChanged(isNull())
+            AppEventManager.appsUpdated.removeObserver(observer)
+        }
+    }
+
+    @Test
+    fun `ProfileChangedReceiver ignores unrelated actions`() {
+        AppEventManager.appsUpdated.observeForever(appsUpdatedObserver)
+
+        BroadcastReceivers.ProfileChangedReceiver().onReceive(mock(), profileIntent(android.content.Intent.ACTION_TIME_CHANGED))
+
+        verify(appsUpdatedObserver, never()).onChanged(any())
+    }
+
+    @Test
+    fun `the profile actions are exactly the ones the receiver is registered for`() {
+        assertEquals(
+            setOf(
+                android.content.Intent.ACTION_MANAGED_PROFILE_ADDED,
+                android.content.Intent.ACTION_MANAGED_PROFILE_REMOVED,
+                android.content.Intent.ACTION_MANAGED_PROFILE_AVAILABLE,
+                android.content.Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE,
+                android.content.Intent.ACTION_MANAGED_PROFILE_UNLOCKED
+            ),
+            BroadcastReceivers.ProfileChangedReceiver.ACTIONS.toSet()
+        )
+    }
 }

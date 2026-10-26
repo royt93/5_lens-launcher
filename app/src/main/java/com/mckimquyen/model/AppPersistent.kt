@@ -69,11 +69,17 @@ data class AppPersistent(
 
         private fun dao(): AppPersistentDao = AppDatabase.getInstance().appPersistentDao()
 
+        @JvmOverloads
         @JvmStatic
-        fun defaults(packageName: String, name: String, lensId: String = DEFAULT_LENS_ID) = AppPersistent(
+        fun defaults(
+            packageName: String,
+            name: String,
+            lensId: String = DEFAULT_LENS_ID,
+            userId: Int = AppIdentity.PRIMARY_USER_ID
+        ) = AppPersistent(
             packageName = packageName,
             name = name,
-            identifier = generateIdentifier(packageName, name),
+            identifier = AppIdentity.identifier(packageName, name, userId),
             openCount = DEFAULT_OPEN_COUNT,
             orderNumber = DEFAULT_ORDER_NUMBER,
             appVisible = true,
@@ -134,25 +140,32 @@ data class AppPersistent(
             }
         }
 
+        @JvmOverloads
         @JvmStatic
-        fun incrementAppCount(packageName: String?, name: String?) {
+        fun incrementAppCount(packageName: String?, name: String?, userId: Int = AppIdentity.PRIMARY_USER_ID) {
             if (packageName.isNullOrBlank() || name.isNullOrBlank()) return
-            val cached = RAppsSingleton.instance.findApp(packageName, name)
+            val cached = RAppsSingleton.instance.findApp(packageName, name, userId)
             val optimisticCount = (cached?.openCount ?: DEFAULT_OPEN_COUNT) + 1L
-            RAppsSingleton.instance.updateAppState(packageName, name, openCount = optimisticCount)
+            RAppsSingleton.instance.updateAppState(packageName, name, openCount = optimisticCount, userId = userId)
             persist {
-                val committedCount = incrementAtomic(defaults(packageName, name))
-                RAppsSingleton.instance.updateAppState(packageName, name, openCount = committedCount)
+                val committedCount = incrementAtomic(defaults(packageName, name, userId = userId))
+                RAppsSingleton.instance.updateAppState(packageName, name, openCount = committedCount, userId = userId)
             }
         }
 
+        @JvmOverloads
         @JvmStatic
-        fun setNotificationCount(packageName: String?, name: String?, count: Int) {
+        fun setNotificationCount(
+            packageName: String?,
+            name: String?,
+            count: Int,
+            userId: Int = AppIdentity.PRIMARY_USER_ID
+        ) {
             if (packageName.isNullOrBlank() || name.isNullOrBlank()) return
             val clamped = count.coerceIn(0, MAX_STORED_NOTIFICATION_COUNT)
-            RAppsSingleton.instance.updateAppState(packageName, name, notificationCount = clamped)
+            RAppsSingleton.instance.updateAppState(packageName, name, notificationCount = clamped, userId = userId)
             persist {
-                setNotificationCount(defaults(packageName, name), clamped)
+                setNotificationCount(defaults(packageName, name, userId = userId), clamped)
             }
         }
 
@@ -169,24 +182,26 @@ data class AppPersistent(
             val revision = revisionCounter.incrementAndGet()
             val mutex = orderWriteMutexes.computeIfAbsent(lensId) { Mutex() }
             // DB-006: remember each app's previous in-memory order so a failed write can undo it.
-            val previousOrders = mutableListOf<Triple<String, String, Int>>()
+            val previousOrders = mutableListOf<Triple<Pair<String, Int>, String, Int>>()
             val rows = apps.mapIndexedNotNull { index, app ->
                 val packageName = app.packageName?.toString()
                 val name = app.name?.toString()
                 if (packageName.isNullOrBlank() || name.isNullOrBlank()) {
                     null
                 } else {
-                    RAppsSingleton.instance.findApp(packageName, name)
-                        ?.let { previousOrders += Triple(packageName, name, it.orderNumber) }
-                    RAppsSingleton.instance.updateAppOrder(packageName, name, index)
-                    defaults(packageName, name, lensId).copy(orderNumber = index)
+                    RAppsSingleton.instance.findApp(packageName, name, app.userId)
+                        ?.let { previousOrders += Triple(packageName to app.userId, name, it.orderNumber) }
+                    RAppsSingleton.instance.updateAppOrder(packageName, name, index, app.userId)
+                    defaults(packageName, name, lensId, app.userId).copy(orderNumber = index)
                 }
             }
             persist(
                 // Only the newest order write of this lens may undo itself (see persistLatest).
                 onFailure = {
                     if (revision == revisionCounter.get()) {
-                        previousOrders.forEach { (pkg, n, order) -> RAppsSingleton.instance.updateAppOrder(pkg, n, order) }
+                        previousOrders.forEach { (pkgUser, n, order) ->
+                            RAppsSingleton.instance.updateAppOrder(pkgUser.first, n, order, pkgUser.second)
+                        }
                     }
                 }
             ) {
@@ -196,10 +211,11 @@ data class AppPersistent(
             }
         }
 
+        @JvmOverloads
         @JvmStatic
-        fun getAppOpened(packageName: String?, name: String?): Boolean {
+        fun getAppOpened(packageName: String?, name: String?, userId: Int = AppIdentity.PRIMARY_USER_ID): Boolean {
             if (packageName.isNullOrBlank() || name.isNullOrBlank()) return true
-            return RAppsSingleton.instance.findApp(packageName, name)?.isOpened ?: true
+            return RAppsSingleton.instance.findApp(packageName, name, userId)?.isOpened ?: true
         }
 
         @JvmOverloads
@@ -208,14 +224,15 @@ data class AppPersistent(
             packageName: String?,
             name: String?,
             appOpened: Boolean,
-            lensId: String = DEFAULT_LENS_ID
+            lensId: String = DEFAULT_LENS_ID,
+            userId: Int = AppIdentity.PRIMARY_USER_ID
         ) {
             if (packageName.isNullOrBlank() || name.isNullOrBlank()) return
-            val previous = RAppsSingleton.instance.findApp(packageName, name)?.isOpened
-            RAppsSingleton.instance.updateAppState(packageName, name, isOpened = appOpened)
-            val defaults = defaults(packageName, name, lensId)
+            val previous = RAppsSingleton.instance.findApp(packageName, name, userId)?.isOpened
+            RAppsSingleton.instance.updateAppState(packageName, name, isOpened = appOpened, userId = userId)
+            val defaults = defaults(packageName, name, lensId, userId)
             persistLatest("opened", defaults.identifier, lensId,
-                onFailure = { previous?.let { RAppsSingleton.instance.updateAppState(packageName, name, isOpened = it) } }
+                onFailure = { previous?.let { RAppsSingleton.instance.updateAppState(packageName, name, isOpened = it, userId = userId) } }
             ) { setOpened(defaults, appOpened) }
         }
 
@@ -227,13 +244,19 @@ data class AppPersistent(
 
         @JvmOverloads
         @JvmStatic
-        fun setAppVisibility(packageName: String?, name: String?, visible: Boolean, lensId: String = DEFAULT_LENS_ID) {
+        fun setAppVisibility(
+            packageName: String?,
+            name: String?,
+            visible: Boolean,
+            lensId: String = DEFAULT_LENS_ID,
+            userId: Int = AppIdentity.PRIMARY_USER_ID
+        ) {
             if (packageName.isNullOrBlank() || name.isNullOrBlank()) return
-            val previous = RAppsSingleton.instance.findApp(packageName, name)?.isVisible
-            RAppsSingleton.instance.updateAppState(packageName, name, isVisible = visible)
-            val defaults = defaults(packageName, name, lensId)
+            val previous = RAppsSingleton.instance.findApp(packageName, name, userId)?.isVisible
+            RAppsSingleton.instance.updateAppState(packageName, name, isVisible = visible, userId = userId)
+            val defaults = defaults(packageName, name, lensId, userId)
             persistLatest("visibility", defaults.identifier, lensId,
-                onFailure = { previous?.let { RAppsSingleton.instance.updateAppState(packageName, name, isVisible = it) } }
+                onFailure = { previous?.let { RAppsSingleton.instance.updateAppState(packageName, name, isVisible = it, userId = userId) } }
             ) { setVisibility(defaults, visible) }
         }
 
@@ -272,22 +295,24 @@ data class AppPersistent(
             favorite: Boolean,
             folderName: String?,
             pinnedZone: PinnedZone,
-            lensId: String = DEFAULT_LENS_ID
+            lensId: String = DEFAULT_LENS_ID,
+            userId: Int = AppIdentity.PRIMARY_USER_ID
         ) {
             if (packageName.isNullOrBlank() || name.isNullOrBlank()) return
             val normalizedFolder = AppOrganizationRules.normalizeFolder(folderName)
-            val previous = RAppsSingleton.instance.findApp(packageName, name)
+            val previous = RAppsSingleton.instance.findApp(packageName, name, userId)
             RAppsSingleton.instance.updateOrganization(
                 packageName,
                 name,
                 favorite,
                 normalizedFolder,
-                pinnedZone
+                pinnedZone,
+                userId
             )
-            val defaults = defaults(packageName, name, lensId)
+            val defaults = defaults(packageName, name, lensId, userId)
             persistLatest("organization", defaults.identifier, lensId, onFailure = {
                 previous?.let {
-                    RAppsSingleton.instance.updateOrganization(packageName, name, it.isFavorite, it.folderName, it.pinnedZone)
+                    RAppsSingleton.instance.updateOrganization(packageName, name, it.isFavorite, it.folderName, it.pinnedZone, userId)
                 }
             }) {
                 setOrganization(

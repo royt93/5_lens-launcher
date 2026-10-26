@@ -296,7 +296,7 @@ Giới hạn: agent audit ui chưa đọc hết `LensView.kt`, `ActAbout.java`, 
 
 | ID | P | SP | Story |
 |---|---|---|---|
-| `FEAT-012` | P2 | 8 | [Hỗ trợ app work profile / multi-user](todo/p2-feat-feat-012-work-profile-apps.md) |
+| `FEAT-012` 🟡 in progress (audit 8.4, chưa push) | P2 | 8 | [Hỗ trợ app work profile / multi-user](inprogress/p2-feat-feat-012-work-profile-apps.md) |
 | `DB-009` ✅ done 2026-10-26 | P3 | 5 | [Tự sao lưu layout vào bộ nhớ app, giữ N bản gần nhất](done/p3-db-db-009-auto-backup-local-rotation.md) |
 | `SEARCH-015` ✅ done 2026-10-26 | P3 | 2 | [Hàng 'Hỏi lại các quyền quick action' và sửa cờ đã hỏi một chiều](done/p3-search-search-015-reset-permission-asked-flags.md) |
 | `SEARCH-016` ✅ done 2026-10-26 | P3 | 2 | [Search history có thời hạn lưu](done/p3-search-search-016-search-history-ttl.md) |

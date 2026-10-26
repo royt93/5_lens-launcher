@@ -74,6 +74,28 @@ class BroadcastReceivers {
         }
     }
 
+    /**
+     * FEAT-012: a work profile appearing, disappearing, being paused/resumed or unlocked changes which apps this
+     * launcher can list. Registered dynamically (see RApplication) because these are implicit broadcasts.
+     */
+    class ProfileChangedReceiver : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            if (intent.action in ACTIONS) {
+                AppEventManager.notifyAppsUpdated()
+            }
+        }
+
+        companion object {
+            val ACTIONS = arrayOf(
+                Intent.ACTION_MANAGED_PROFILE_ADDED,
+                Intent.ACTION_MANAGED_PROFILE_REMOVED,
+                Intent.ACTION_MANAGED_PROFILE_AVAILABLE,
+                Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE,
+                Intent.ACTION_MANAGED_PROFILE_UNLOCKED
+            )
+        }
+    }
+
     class LocaleChangedReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             if (intent.action == Intent.ACTION_LOCALE_CHANGED) {

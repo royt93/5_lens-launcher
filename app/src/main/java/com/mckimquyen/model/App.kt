@@ -53,8 +53,19 @@ data class App(
      * UI-024: unread-item count reported by this app via the de-facto BADGE_COUNT_UPDATE
      * broadcast convention. Global across lenses, matching [openCount]'s existing scope.
      */
-    val notificationCount: Int = 0
+    val notificationCount: Int = 0,
+    /**
+     * FEAT-012: Android user (profile) this app lives in. 0 is the primary user, so every existing caller that
+     * builds an [App] without it keeps meaning the same thing as before.
+     */
+    val userId: Int = AppIdentity.PRIMARY_USER_ID,
+    /** FEAT-012: true for an app of a managed (work) profile; drives the badge. */
+    val isWorkProfile: Boolean = false
 ) {
+    /** Per-user key of this app, equal to the legacy `package-component` key for the primary user. */
+    val identifier: String
+        get() = AppIdentity.identifier(packageName.toString(), name.toString(), userId)
+
     /**
      * Creates a copy of this App with the specified properties changed.
      * Useful for updating specific fields while keeping others immutable.

@@ -14,8 +14,7 @@ enum class LensAppScope {
             entries.firstOrNull { it.name == value } ?: ALL
 
         @JvmStatic
-        fun identifierOf(app: App): String =
-            AppPersistent.generateIdentifier(app.packageName.toString(), app.name.toString())
+        fun identifierOf(app: App): String = app.identifier
 
         /** Pure and Android-free apart from [App]; always returns a fresh list. */
         @JvmStatic

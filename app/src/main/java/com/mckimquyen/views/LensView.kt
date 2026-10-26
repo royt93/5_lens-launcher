@@ -634,7 +634,8 @@ class LensView : View {
                 app.label.toString(),
                 app.name.toString(),
                 this,
-                bounds
+                bounds,
+                app.userId
             )
         }
     }
@@ -757,7 +758,8 @@ class LensView : View {
             app.isFavorite,
             app.folderName,
             zone,
-            app.lensId
+            app.lensId,
+            app.userId
         )
         context.sendBroadcast(Intent(context, BroadcastReceivers.AppsEditedReceiver::class.java))
         Toast.makeText(context, R.string.organization_saved, Toast.LENGTH_SHORT).show()
@@ -1655,7 +1657,8 @@ class LensView : View {
             app.label as String?,
             app.name as String?,
             this,
-            bounds
+            bounds,
+            app.userId
         )
     }
 

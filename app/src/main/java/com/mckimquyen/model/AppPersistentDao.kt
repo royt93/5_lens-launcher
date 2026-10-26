@@ -93,6 +93,26 @@ interface AppPersistentDao {
     @Query("DELETE FROM APP_PERSISTENT")
     suspend fun deleteAllRows(): Int
 
+    /** FEAT-012: removes rows of a work profile that no longer exists (never matches a primary-user row). */
+    @Query("DELETE FROM APP_PERSISTENT WHERE IDENTIFIER IN (:identifiers)")
+    suspend fun deleteByIdentifiers(identifiers: List<String>): Int
+
+    /**
+     * FEAT-012: deletes rows that belong to a profile which no longer exists. An empty [liveUserIds] means the
+     * profile lookup itself failed, so nothing is deleted rather than guessing. Primary-user rows (no suffix) are
+     * never touched.
+     */
+    @Transaction
+    suspend fun pruneProfileRows(liveUserIds: List<Int>): Int {
+        if (liveUserIds.isEmpty()) return 0
+        val orphans = com.mckimquyen.util.ProfileAppSource.orphanedIdentifiers(
+            getAllRows().map { it.identifier }.distinct(),
+            liveUserIds
+        ).filter { AppIdentity.userIdOf(it) != AppIdentity.PRIMARY_USER_ID }
+        // SQLite caps bound variables, so delete in chunks.
+        return orphans.chunked(PRUNE_CHUNK).sumOf { deleteByIdentifiers(it) }
+    }
+
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insertAll(rows: List<AppPersistent>)
 
@@ -197,6 +217,9 @@ interface AppPersistentDao {
         updateOrganization(defaults.lensId, defaults.identifier, favorite, folderName, pinnedZone)
     }
 }
+
+/** Rows deleted per statement by [AppPersistentDao.pruneProfileRows]; SQLite limits bound variables. */
+private const val PRUNE_CHUNK = 500
 
 /** Projection for [AppPersistentDao.getGlobalOpenCounts]. */
 data class GlobalOpenCount(val identifier: String, val openCount: Long)

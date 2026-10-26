@@ -2068,7 +2068,8 @@ public class ActHome extends ActBase {
                 app.getLabel().toString(),
                 app.getName().toString(),
                 source,
-                new android.graphics.Rect(0, 0, source.getWidth(), source.getHeight())
+                new android.graphics.Rect(0, 0, source.getWidth(), source.getHeight()),
+                app.getUserId()
         );
         hideSearch();
     }

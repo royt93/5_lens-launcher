@@ -37,8 +37,10 @@ class BadgeCountReceiver : BroadcastReceiver() {
         // UI-024 fix: a package can expose more than one launcher activity (more than one App
         // entry sharing this packageName) - apply the same count to every one of them instead of
         // just the first match, so the badge doesn't land on an arbitrary/order-dependent entry.
+        // FEAT-012: the broadcast carries only a package name and is delivered inside the primary user, so it
+        // describes that user's app, never the same package's copy in a work profile.
         val matches = RAppsSingleton.instance.apps.orEmpty()
-            .filter { it.packageName.toString() == packageName }
+            .filter { it.packageName.toString() == packageName && it.userId == com.mckimquyen.model.AppIdentity.PRIMARY_USER_ID }
         if (matches.isEmpty()) return
         val count = parseBadgeCount(intent.extras)
         matches.forEach { AppPersistent.setNotificationCount(packageName, it.name.toString(), count) }

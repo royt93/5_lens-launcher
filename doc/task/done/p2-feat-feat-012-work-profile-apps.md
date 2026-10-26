@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | new |
-| Status | todo |
+| Status | in progress 2026-10-26 (audit 8.4/10 < 9.0, chưa push; `doc/task/AUDIT_FEAT-012_2026-10-26.md`) |
 | Priority | P2 |
 | Evidence | conditional |
 | Epic | Platform coverage |
@@ -21,11 +21,11 @@ Là người dùng có work profile, tôi muốn thấy app công việc trong l
 
 ## Acceptance criteria
 
-- [ ] Liệt kê app mọi profile của `UserManager` qua `LauncherApps.getActivityList`.
-- [ ] Icon có badge (`getUserBadgedIcon`), khởi chạy đúng `UserHandle`.
-- [ ] Lắng `ACTION_MANAGED_PROFILE_ADDED/REMOVED` và làm mới.
-- [ ] `iconCacheKey` và khóa Room tính đến user để không trùng app giữa profile.
-- [ ] Smoke cần máy có work profile; nếu không có, ghi giới hạn.
+- [x] Liệt kê app mọi profile qua `LauncherApps.getActivityList` (`LauncherAppsDirectory`, `ProfileAppSource`); chưa quan sát trên máy có work profile thật.
+- [ ] Icon có badge (`LauncherActivityInfo.getBadgedIcon`) và khởi chạy đúng `UserHandle` (`LauncherApps.startMainActivity`): đã viết, **chưa chạy thật** vì không có work profile.
+- [x] Lắng 5 action `ACTION_MANAGED_PROFILE_*` (`ProfileChangedReceiver`), test unit; chưa nhận broadcast thật.
+- [x] `iconCacheKey` và khóa Room tính đến user (`AppIdentity`, hậu tố `@u<id>` chỉ cho profile phụ, không migration).
+- [x] Không có máy work profile: ghi giới hạn trong audit; smoke hồi quy trên TECNO BG6 (user chính) OK.
 
 ## Implementation notes
 
@@ -33,11 +33,11 @@ SP 8 phải tách ít nhất 3 story con khi thực hiện. Tăng độ phức t
 
 ## Verification and Definition of Done
 
-- [ ] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
-- [ ] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
-- [ ] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
-- [ ] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
-- [ ] No new lint/build failures.
+- [x] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
+- [x] Widget/UI tests: Not applicable — không thêm màn hình; huy hiệu do hệ thống cấp (đã review).
+- [x] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
+- [x] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
+- [x] No new lint/build failures.
 - [ ] A post-change audit record scores the round `> 9.0/10` before push.
 - [ ] Evidence and status are updated before moving this file to `done`.
 

@@ -9,7 +9,8 @@ object AppSearchEngine {
     private const val DEFAULT_LIMIT = 24
 
     @JvmStatic
-    fun componentKey(app: App): String = "${app.packageName}/${app.name}"
+    fun componentKey(app: App): String =
+        com.mckimquyen.model.AppIdentity.componentKey(app.packageName.toString(), app.name.toString(), app.userId)
 
     @JvmStatic
     fun normalize(value: CharSequence?): String = Normalizer

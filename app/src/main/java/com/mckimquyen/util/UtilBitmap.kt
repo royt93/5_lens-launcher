@@ -16,7 +16,7 @@ object UtilBitmap {
      * Convert Drawable to Bitmap
      * Source: http://stackoverflow.com/questions/3035692/how-to-convert-a-drawable-to-a-bitmap
      */
-    private fun drawableToBitmap(drawable: Drawable): Bitmap {
+    internal fun drawableToBitmap(drawable: Drawable): Bitmap {
         if (drawable is BitmapDrawable) {
             drawable.setAntiAlias(true)
             drawable.setDither(true)

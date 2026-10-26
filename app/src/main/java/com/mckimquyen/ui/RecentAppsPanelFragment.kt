@@ -79,7 +79,8 @@ class RecentAppsPanelFragment : BottomSheetDialogFragment() {
             app.label.toString(),
             app.name.toString(),
             source,
-            Rect(0, 0, source.width, source.height)
+            Rect(0, 0, source.width, source.height),
+            app.userId
         )
         dismiss()
     }

@@ -22,6 +22,7 @@ import com.mckimquyen.app.RAppsSingleton
 import com.mckimquyen.enums.SortType
 import com.mckimquyen.ext.Biometric
 import com.mckimquyen.model.App
+import com.mckimquyen.model.AppIdentity
 import com.mckimquyen.model.AppPersistent
 import com.mckimquyen.model.AppDatabase
 import com.mckimquyen.model.LensWorkspace
@@ -32,6 +33,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 object UtilApp {
+    /** Density passed to LauncherActivityInfo.getBadgedIcon; 0 means the device default. */
+    private const val ICON_DENSITY_DPI = 0
+
 
     /**
      * Get all available apps for launcher, merged with one lens's layout state.
@@ -163,8 +167,79 @@ object UtilApp {
                 )
             )
         }
+        shells += loadProfileShells(
+            packageManager, context ?: application, firstId = shells.size,
+            iconPack = selectedIconPack, iconPackToken = iconPackToken,
+            paletteColors = paletteColors, pendingPalettes = pendingPalettes
+        )
         if (pendingPalettes.isNotEmpty()) persistentDao.setPaletteColors(pendingPalettes)
         return shells
+    }
+
+    /**
+     * FEAT-012: apps of every profile other than the user running this app, listed through [LauncherApps] and
+     * shown with the system's work badge. Failure here must never cost the user their own apps, so any problem
+     * yields an empty list.
+     */
+    private suspend fun loadProfileShells(
+        packageManager: PackageManager,
+        context: Context?,
+        firstId: Int,
+        iconPack: UtilIconPackManager.IconPack?,
+        iconPackToken: String,
+        paletteColors: MutableMap<String, Int>,
+        pendingPalettes: MutableList<AppPersistent>
+    ): List<App> {
+        if (context == null) return emptyList()
+        return try {
+            val directory = LauncherAppsDirectory(context)
+            // A profile that was removed leaves rows nothing can ever show again; drop them. The primary user's own
+            // scan already read every row once, so reuse that read instead of querying again: only rows whose
+            // identifier carries a profile suffix can be orphans.
+            val orphans = ProfileAppSource.orphanedIdentifiers(
+                paletteColors.keys.toList(), directory.profileUserIds()
+            ).filter { AppIdentity.userIdOf(it) != AppIdentity.PRIMARY_USER_ID }
+            if (directory.profileUserIds().isNotEmpty() && orphans.isNotEmpty()) {
+                AppDatabase.getInstance().appPersistentDao().deleteByIdentifiers(orphans)
+            }
+            val entries = ProfileAppSource.collect(directory)
+                .filter { it.userId != AppIdentity.PRIMARY_USER_ID }
+            ProfileAppSource.toShells(
+                entries = entries,
+                firstId = firstId,
+                iconFor = { entry ->
+                    val badged = directory.badgedIcon(entry.packageName, entry.name, entry.userId, ICON_DENSITY_DPI)
+                    badged?.let { UtilBitmap.drawableToBitmap(it) }
+                        ?: UtilBitmap.packageNameToBitmap(packageManager, entry.packageName)
+                },
+                cacheKeyFor = { entry ->
+                    BitmapCache.buildKey(
+                        packageName = entry.packageName,
+                        componentName = entry.name,
+                        versionToken = versionTokenOf(packageManager, entry.packageName),
+                        iconPackToken = iconPackToken
+                    )
+                },
+                paletteFor = { entry, icon ->
+                    val identifier = entry.identifier
+                    var color = paletteColors[identifier] ?: 0
+                    if (color == 0 && icon != null) {
+                        color = UtilColor.getPaletteColorFromBitmap(icon)
+                        if (color != 0) {
+                            paletteColors[identifier] = color
+                            pendingPalettes.add(
+                                AppPersistent.defaults(entry.packageName, entry.name, userId = entry.userId)
+                                    .copy(paletteColor = color)
+                            )
+                        }
+                    }
+                    color
+                }
+            )
+        } catch (error: Exception) {
+            Logger.e("UtilApp: work profile apps unavailable, showing the primary user's apps only", error)
+            emptyList()
+        }
     }
 
     /**
@@ -186,7 +261,7 @@ object UtilApp {
 
         val apps = ArrayList<App>(shells.size)
         shells.forEach { shell ->
-            val identifier = AppPersistent.generateIdentifier(shell.packageName.toString(), shell.name.toString())
+            val identifier = shell.identifier
             val persistent = persistentMap[identifier]
             apps.add(
                 shell.copy(
@@ -252,6 +327,7 @@ object UtilApp {
     /**
      * Launch app component with optional biometric authentication
      */
+    @JvmOverloads
     @JvmStatic
     fun launchComponent(
         context: Context,
@@ -259,11 +335,16 @@ object UtilApp {
         label: String?,
         name: String?,
         view: View?,
-        bounds: Rect?
+        bounds: Rect?,
+        userId: Int = AppIdentity.PRIMARY_USER_ID
     ) {
         fun launch() {
             if (packageName == null || name == null) {
                 Toast.makeText(context, R.string.error_app_not_found, Toast.LENGTH_SHORT).show()
+                return
+            }
+            if (userId != AppIdentity.PRIMARY_USER_ID) {
+                launchInProfile(context, packageName, name, userId, bounds)
                 return
             }
 
@@ -280,7 +361,7 @@ object UtilApp {
                 ContextCompat.startActivity(context, componentIntent, getLauncherOptionsBundle(context, view, bounds))
 
                 // Increment app open count
-                AppPersistent.incrementAppCount(packageName, name)
+                AppPersistent.incrementAppCount(packageName, name, userId)
                 // UI-024: opening an app clears its notification badge immediately (optimistic),
                 // regardless of whether the notifying app ever sends its own cleared broadcast.
                 // Clears every App entry sharing this packageName, not just the launched
@@ -306,7 +387,7 @@ object UtilApp {
         }
 
         // Check if app is locked with biometric
-        val isAppOpened = AppPersistent.getAppOpened(packageName, name)
+        val isAppOpened = AppPersistent.getAppOpened(packageName, name, userId)
         if (isAppOpened) {
             launch()
         } else {
@@ -315,6 +396,30 @@ object UtilApp {
                     Biometric.toggleLockApp(activity, label ?: "", pkg, false) { _, _ -> launch() }
                 }
             }
+        }
+    }
+
+    /**
+     * FEAT-012: starts [packageName]/[name] inside another profile. A plain intent cannot cross profiles, so this goes
+     * through [LauncherApps.startMainActivity]; if the profile has been removed nothing is launched.
+     */
+    private fun launchInProfile(context: Context, packageName: String, name: String, userId: Int, bounds: Rect?) {
+        val directory = LauncherAppsDirectory(context)
+        val route = ProfileAppSource.routeFor(userId, directory.profileUserIds())
+        val handle = directory.handleOf(userId)
+        val launcherApps = context.getSystemService(android.content.pm.LauncherApps::class.java)
+        if (route != ProfileAppSource.LaunchRoute.LAUNCHER_APPS || handle == null || launcherApps == null) {
+            Toast.makeText(context, R.string.error_app_not_found, Toast.LENGTH_SHORT).show()
+            return
+        }
+        try {
+            launcherApps.startMainActivity(ComponentName(packageName, name), handle, bounds, null)
+            AppPersistent.incrementAppCount(packageName, name, userId)
+            com.mckimquyen.services.AppEventManager.notifyAppsEdited()
+        } catch (_: SecurityException) {
+            Toast.makeText(context, R.string.error_app_not_found, Toast.LENGTH_SHORT).show()
+        } catch (_: ActivityNotFoundException) {
+            Toast.makeText(context, R.string.error_app_not_found, Toast.LENGTH_SHORT).show()
         }
     }
 

@@ -2,6 +2,7 @@ package com.mckimquyen.app
 
 import android.graphics.Bitmap
 import com.mckimquyen.model.App
+import com.mckimquyen.model.AppIdentity
 
 /**
  * ============================================================================
@@ -170,13 +171,14 @@ class RAppsSingleton private constructor() {
         isVisible: Boolean? = null,
         openCount: Long? = null,
         paletteColor: Int? = null,
-        notificationCount: Int? = null
+        notificationCount: Int? = null,
+        userId: Int = AppIdentity.PRIMARY_USER_ID
     ) {
         synchronized(this) {
             val list = mApps ?: return
             for (i in list.indices) {
                 val app = list[i]
-                if (app.packageName.toString() == packageName && app.name.toString() == name) {
+                if (app.matches(packageName, name, userId)) {
                     list[i] = app.copyWithLockAndVisibility(
                         newOpened = isOpened ?: app.isOpened,
                         newVisible = isVisible ?: app.isVisible,
@@ -189,36 +191,34 @@ class RAppsSingleton private constructor() {
         }
     }
 
-    fun findApp(packageName: String, name: String): App? = synchronized(this) {
-        mApps?.firstOrNull {
-            it.packageName.toString() == packageName && it.name.toString() == name
-        }
+    fun findApp(packageName: String, name: String, userId: Int = AppIdentity.PRIMARY_USER_ID): App? = synchronized(this) {
+        mApps?.firstOrNull { it.matches(packageName, name, userId) }
     }
+
+    private fun App.matches(packageName: String, name: String, userId: Int): Boolean =
+        this.packageName.toString() == packageName && this.name.toString() == name && this.userId == userId
 
     fun updateOrganization(
         packageName: String,
         name: String,
         favorite: Boolean,
         folder: String?,
-        zone: com.mckimquyen.model.PinnedZone
+        zone: com.mckimquyen.model.PinnedZone,
+        userId: Int = AppIdentity.PRIMARY_USER_ID
     ) {
         synchronized(this) {
             val list = mApps ?: return
-            val index = list.indexOfFirst {
-                it.packageName.toString() == packageName && it.name.toString() == name
-            }
+            val index = list.indexOfFirst { it.matches(packageName, name, userId) }
             if (index >= 0) {
                 list[index] = list[index].copyWithOrganization(favorite, folder, zone)
             }
         }
     }
 
-    fun updateAppOrder(packageName: String, name: String, order: Int) {
+    fun updateAppOrder(packageName: String, name: String, order: Int, userId: Int = AppIdentity.PRIMARY_USER_ID) {
         synchronized(this) {
             val list = mApps ?: return
-            val index = list.indexOfFirst {
-                it.packageName.toString() == packageName && it.name.toString() == name
-            }
+            val index = list.indexOfFirst { it.matches(packageName, name, userId) }
             if (index >= 0) list[index] = list[index].copyWithOrder(order)
         }
     }

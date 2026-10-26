@@ -17,7 +17,7 @@ class AppRowActions @JvmOverloads constructor(
     fun toggleVisibility(app: App): App {
         requireIdentity(app)
         val updated = app.copy(isVisible = !app.isVisible)
-        AppPersistent.setAppVisibility(app.packageName.toString(), app.name.toString(), updated.isVisible, app.lensId)
+        AppPersistent.setAppVisibility(app.packageName.toString(), app.name.toString(), updated.isVisible, app.lensId, app.userId)
         AppEventManager.notifyVisibilityChanged()
         return updated
     }
@@ -26,7 +26,7 @@ class AppRowActions @JvmOverloads constructor(
         requireIdentity(app)
         authenticate(activity, app) {
             val updated = app.copy(isOpened = !app.isOpened)
-            AppPersistent.setAppOpened(app.packageName.toString(), app.name.toString(), updated.isOpened, app.lensId)
+            AppPersistent.setAppOpened(app.packageName.toString(), app.name.toString(), updated.isOpened, app.lensId, app.userId)
             onUpdated(updated)
             AppEventManager.notifyLockChanged()
         }
@@ -35,7 +35,7 @@ class AppRowActions @JvmOverloads constructor(
     fun setOrganization(app: App, favorite: Boolean, folder: String?, zone: PinnedZone): App {
         requireIdentity(app)
         val normalized = AppOrganizationRules.normalizeFolder(folder)
-        AppPersistent.setOrganization(app.packageName.toString(), app.name.toString(), favorite, normalized, zone, app.lensId)
+        AppPersistent.setOrganization(app.packageName.toString(), app.name.toString(), favorite, normalized, zone, app.lensId, app.userId)
         AppEventManager.notifyAppsEdited()
         return app.copyWithOrganization(favorite, normalized, zone)
     }

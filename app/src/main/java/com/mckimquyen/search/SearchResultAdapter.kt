@@ -298,7 +298,8 @@ class SearchResultAdapter @JvmOverloads constructor(
                 app.isFavorite,
                 app.folderName,
                 zone,
-                app.lensId
+                app.lensId,
+                app.userId
             )
             anchor.context.sendBroadcast(Intent(anchor.context, AppsEditedReceiver::class.java))
             Toast.makeText(anchor.context, R.string.organization_saved, Toast.LENGTH_SHORT).show()

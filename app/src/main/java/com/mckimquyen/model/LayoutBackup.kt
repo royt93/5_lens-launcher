@@ -44,6 +44,10 @@ data class LayoutBackupEntry(
         private const val KEY_PINNED_ZONE = "pinnedZone"
 
         fun fromPersistent(row: AppPersistent): LayoutBackupEntry? {
+            // FEAT-012: a backup describes the primary user's workspace only. A work-profile row has no user field
+            // here, so exporting it would collide with the personal copy of the same app and its profile id may
+            // differ after a restore.
+            if (AppIdentity.userIdOf(row.identifier) != AppIdentity.PRIMARY_USER_ID) return null
             val packageName = row.packageName?.takeIf(String::isNotBlank) ?: return null
             val name = row.name?.takeIf(String::isNotBlank) ?: return null
             return LayoutBackupEntry(
