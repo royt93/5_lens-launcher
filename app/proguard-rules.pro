@@ -1,23 +1,25 @@
 # ============================================================================
 # PROGUARD RULES - Fisheye Launcher
 # ============================================================================
-# Optimized rules for maximum code shrinking while maintaining functionality
-# R8 full mode enabled with aggressive optimization
+# Shrunk and optimized by R8 (minifyEnabled + shrinkResources in app/build.gradle). Full mode is
+# the AGP default, so no flag is needed; the legacy ProGuard-only flags (-optimizationpasses,
+# -dontpreverify, -dontusemixedcaseclassnames, -verbose) are ignored by R8 and were removed.
 
 # ============================================================================
 # OPTIMIZATION FLAGS
 # ============================================================================
--optimizationpasses 5
 -allowaccessmodification
 -repackageclasses ''
--dontpreverify
--dontusemixedcaseclassnames
--verbose
 
 # ============================================================================
 # ROOM & DATA MODELS
 # ============================================================================
--keep class com.mckimquyen.model.** { *; }
+# Room finds its generated *_Impl classes and maps columns by name, so only the annotated
+# types are kept. The rest of com.mckimquyen.model (App, LayoutBackup*, ...) is plain Kotlin
+# with hand-written org.json (de)serialisation and can be shrunk/renamed like any other code.
+-keep @androidx.room.Entity class * { *; }
+-keep @androidx.room.Dao class * { *; }
+-keep @androidx.room.Database class * { *; }
 -keepattributes *Annotation*
 
 # ============================================================================

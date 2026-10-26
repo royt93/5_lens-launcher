@@ -303,7 +303,9 @@ android {
     // BUNDLE (AAB) CONFIGURATION
     // ========================================================================
     bundle {
-        // Ngôn ngữ: AAB sẽ tự động split theo ngôn ngữ
+        // BUILD-004: KHÔNG split theo ngôn ngữ. LocaleHelper đổi ngôn ngữ ngay trong app và app không có
+        // Play Feature Delivery để tải thêm ngôn ngữ, nên bản split sẽ rơi về tiếng Anh với ngôn ngữ chưa
+        // được cài. Tài nguyên của cả 16 ngôn ngữ phụ chỉ ~0.5 MB nguồn (resources.arsc nén 1.9 MB toàn app).
         language {
             enableSplit = false
         }

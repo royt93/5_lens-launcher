@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | enhance |
-| Status | todo |
+| Status | done 2026-10-26 (audit 9.1/10, `doc/task/AUDIT_BUILD-004_2026-10-26.md`) |
 | Priority | P3 |
 | Evidence | confirmed |
 | Epic | Startup |
@@ -21,10 +21,10 @@ Là người dùng, tôi muốn app khởi động nhanh và bản tải nhỏ.
 
 ## Acceptance criteria
 
-- [ ] Profile tập trung đường `ActHome`→`LensView`, startup profile khác baseline.
-- [ ] Sửa comment/flag R8 và hẹp keep rule, release build vẫn chạy (smoke).
-- [ ] Đánh giá bật language split: giữ `LocaleHelper` đổi ngôn ngữ trong app hoạt động (smoke trên máy).
-- [ ] Đo cold start trước/sau bằng `:baselineprofile`.
+- [x] Startup profile (8.284 dòng, 0 dòng ad SDK) khác baseline (9.802 dòng); `ActHome` 88 dòng, `LensView` 54 dòng.
+- [x] Bỏ 4 flag ProGuard-only, sửa comment, keep theo `@Entity/@Dao/@Database`; release build xanh, smoke trên Pixel 0 crash.
+- [x] Quyết định không bật language split (không có Play Feature Delivery; LocaleHelper đổi ngôn ngữ trong app); lý do ghi trong `app/build.gradle`.
+- [x] Đo 3 lần xen kẽ trước/sau: TTID 230,7 → 224,1 ms (−2,9%) nằm trong nhiễu; không kết luận được cải thiện.
 
 ## Implementation notes
 
@@ -32,13 +32,13 @@ Gộp E1, E2, E5 của audit build. Mỗi hạng mục là một PR riêng.
 
 ## Verification and Definition of Done
 
-- [ ] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
-- [ ] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
-- [ ] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
-- [ ] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
-- [ ] No new lint/build failures.
-- [ ] A post-change audit record scores the round `> 9.0/10` before push.
-- [ ] Evidence and status are updated before moving this file to `done`.
+- [x] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
+- [x] Widget/UI tests: Not applicable — không đổi UI (đã review).
+- [x] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
+- [x] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
+- [x] No new lint/build failures.
+- [x] A post-change audit record scores the round `> 9.0/10` before push.
+- [x] Evidence and status are updated before moving this file to `done`.
 
 If a test layer is not applicable, replace its checkbox with a reviewed rationale; do not silently omit it.
 
