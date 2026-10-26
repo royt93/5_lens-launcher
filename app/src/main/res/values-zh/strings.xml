@@ -267,4 +267,5 @@
     <string name="setting_reset_permission_prompts">重新请求快捷操作权限</string>
     <string name="toast_permission_prompts_reset">已重置权限请求</string>
     <string name="toast_permission_prompts_nothing">没有需要重置的权限请求</string>
+    <string name="layout_import_workspace_recovered">工作区导入失败，自动回滚也不完整，但已从导入前刚创建的备份中恢复了您的工作区。</string>
 </resources>

@@ -277,4 +277,5 @@
     <string name="setting_reset_permission_prompts">Richiedi di nuovo i permessi delle azioni rapide</string>
     <string name="toast_permission_prompts_reset">Richieste di permessi reimpostate</string>
     <string name="toast_permission_prompts_nothing">Nessuna richiesta di permessi da reimpostare</string>
+    <string name="layout_import_workspace_recovered">L\'importazione dello spazio di lavoro non è riuscita e il ripristino automatico era incompleto, ma lo spazio di lavoro è stato ripristinato dal backup creato subito prima dell\'importazione.</string>
 </resources>

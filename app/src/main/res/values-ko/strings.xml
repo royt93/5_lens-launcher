@@ -267,4 +267,5 @@
     <string name="setting_reset_permission_prompts">빠른 작업 권한 다시 요청</string>
     <string name="toast_permission_prompts_reset">권한 요청을 초기화했습니다</string>
     <string name="toast_permission_prompts_nothing">초기화할 권한 요청이 없습니다</string>
+    <string name="layout_import_workspace_recovered">작업 공간 가져오기에 실패했고 자동 롤백도 완전하지 않았지만, 가져오기 직전에 만든 백업에서 작업 공간을 복원했습니다.</string>
 </resources>

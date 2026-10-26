@@ -267,4 +267,5 @@
     <string name="setting_reset_permission_prompts">Minta lagi izin aksi cepat</string>
     <string name="toast_permission_prompts_reset">Permintaan izin direset</string>
     <string name="toast_permission_prompts_nothing">Tidak ada permintaan izin untuk direset</string>
+    <string name="layout_import_workspace_recovered">Impor ruang kerja gagal dan pemulihan otomatis tidak lengkap, tetapi ruang kerja Anda dipulihkan dari cadangan yang dibuat tepat sebelum impor.</string>
 </resources>

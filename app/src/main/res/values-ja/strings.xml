@@ -267,4 +267,5 @@
     <string name="setting_reset_permission_prompts">クイックアクションの権限を再度確認する</string>
     <string name="toast_permission_prompts_reset">権限の確認をリセットしました</string>
     <string name="toast_permission_prompts_nothing">リセットする権限の確認はありません</string>
+    <string name="layout_import_workspace_recovered">ワークスペースのインポートに失敗し、自動ロールバックも不完全でしたが、インポート直前に作成したバックアップからワークスペースを復元しました。</string>
 </resources>

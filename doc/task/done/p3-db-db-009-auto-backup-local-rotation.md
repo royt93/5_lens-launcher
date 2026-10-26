@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | new |
-| Status | todo |
+| Status | done 2026-10-26 (audit 9.1/10, `doc/task/AUDIT_DB-009_2026-10-26.md`) |
 | Priority | P3 |
 | Evidence | idea |
 | Epic | Workspace backup |
@@ -21,10 +21,10 @@ Là người dùng, tôi muốn app tự giữ vài bản sao lưu để khôi p
 
 ## Acceptance criteria
 
-- [ ] Ghi file nội bộ (không quyền mới, không nằm trong `file_paths.xml`).
-- [ ] Giữ N bản (hằng số có tên), xoay vòng.
-- [ ] Dùng để phục hồi ở nhánh `RecoveryRequired`.
-- [ ] Loại khỏi backup hệ thống nếu cần, đồng bộ hai file rule.
+- [x] Ghi file nội bộ (`noBackupFilesDir/layout_backups/`, không quyền mới, không nằm trong `file_paths.xml`).
+- [x] Giữ N bản (`LocalWorkspaceBackups.MAX_BACKUPS = 5`), xoay vòng.
+- [x] Dùng để phục hồi ở nhánh `RecoveryRequired` (`WorkspaceImportRecovery` → kết quả `Recovered`); chỉ dùng checkpoint của chính lần import đó.
+- [x] Không cần rule: `noBackupFilesDir` không vào backup hệ thống; `BackupRulesTest` khóa điều này.
 
 ## Implementation notes
 
@@ -32,13 +32,13 @@ Chạy sau khi schema backup ổn định (DB-003/004/007).
 
 ## Verification and Definition of Done
 
-- [ ] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
-- [ ] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
-- [ ] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
-- [ ] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
-- [ ] No new lint/build failures.
-- [ ] A post-change audit record scores the round `> 9.0/10` before push.
-- [ ] Evidence and status are updated before moving this file to `done`.
+- [x] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
+- [x] Widget/UI tests: Not applicable — không thêm màn hình (đã review).
+- [x] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
+- [x] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
+- [x] No new lint/build failures.
+- [x] A post-change audit record scores the round `> 9.0/10` before push.
+- [x] Evidence and status are updated before moving this file to `done`.
 
 If a test layer is not applicable, replace its checkbox with a reviewed rationale; do not silently omit it.
 

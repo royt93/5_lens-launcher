@@ -274,4 +274,5 @@
     <string name="setting_reset_permission_prompts">Hỏi lại các quyền hành động nhanh</string>
     <string name="toast_permission_prompts_reset">Đã đặt lại các yêu cầu quyền</string>
     <string name="toast_permission_prompts_nothing">Không có yêu cầu quyền nào để đặt lại</string>
+    <string name="layout_import_workspace_recovered">Nhập không gian làm việc thất bại và tự khôi phục chưa hoàn tất, nhưng không gian làm việc của bạn đã được phục hồi từ bản sao lưu tạo ngay trước khi nhập.</string>
 </resources>

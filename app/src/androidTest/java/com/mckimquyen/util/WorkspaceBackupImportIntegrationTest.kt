@@ -581,4 +581,94 @@ class WorkspaceBackupImportIntegrationTest {
 
         assertTrue(result is WorkspaceBackupImportResult.RecoveryRequired)
     }
+
+    // ---- DB-009: pre-import checkpoint, restored when even the rollback fails ----
+
+    private fun recoveryDir() = File(context.cacheDir, "db009-${System.nanoTime()}")
+
+    @Test
+    fun checkpointRestoresTheTwoLensWorkspaceWhenImportAndRollbackBothFail() = runBlocking {
+        seedTwoLensWorkspace()
+        val dir = recoveryDir()
+        try {
+            val real = WorkspaceBackupRoomStore(context)
+            var replaceCalls = 0
+            val failingFirstThenBroken = object : WorkspaceBackupImportStore by real {
+                override fun replacePreferences(plan: LayoutImportApplier.WorkspacePlan) = error("injected prefs failure")
+                // Rollback of the first attempt must fail; the checkpoint restore (second replace) must work.
+                override suspend fun restoreDatabase(snapshot: Any) = error("injected rollback failure")
+                override suspend fun replaceDatabase(plan: LayoutImportApplier.WorkspacePlan) {
+                    replaceCalls++
+                    real.replaceDatabase(plan)
+                }
+                override fun restorePreferences(snapshot: Any): Boolean = false
+            }
+            var prefsCalls = 0
+            val store = object : WorkspaceBackupImportStore by failingFirstThenBroken {
+                override fun replacePreferences(plan: LayoutImportApplier.WorkspacePlan) {
+                    if (++prefsCalls == 1) error("injected prefs failure") else real.replacePreferences(plan)
+                }
+            }
+
+            val result = WorkspaceImportRecovery(store, LocalWorkspaceBackups(dir)) {
+                LayoutBackupIo.currentWorkspaceJson(context)
+            }.apply(v2Backup())
+
+            assertTrue("expected Recovered but was $result", result is WorkspaceBackupImportResult.Recovered)
+            assertEquals(listOf("default", "work"), database.lensWorkspaceDao().getAll().map { it.id })
+            assertEquals("Keep", database.appPersistentDao().findByIdentifier("work", "com.example.work-com.example.work.Main")?.folderName)
+            assertEquals("work", settings.getString(UtilSettings.KEY_ACTIVE_LENS_ID))
+            assertTrue(settings.isLensFrozen("work"))
+            assertEquals(2, replaceCalls)
+        } finally {
+            dir.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun aSuccessfulImportLeavesOneReadableCheckpointOfTheOldWorkspace() = runBlocking {
+        seedTwoLensWorkspace()
+        val dir = recoveryDir()
+        try {
+            val result = WorkspaceImportRecovery(WorkspaceBackupRoomStore(context), LocalWorkspaceBackups(dir)) {
+                LayoutBackupIo.currentWorkspaceJson(context)
+            }.apply(v2Backup())
+
+            assertEquals(WorkspaceBackupImportResult.Applied, result)
+            assertEquals(listOf("default"), database.lensWorkspaceDao().getAll().map { it.id })
+            val checkpoint = requireNotNull(LocalWorkspaceBackups(dir).latest())
+            assertEquals(listOf("default", "work"), checkpoint.lenses.map { it.id })
+        } finally {
+            dir.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun defaultBackupDirectoryIsPrivateAndOutsideSystemBackupAndFileProvider() {
+        val dir = LocalWorkspaceBackups.defaultDirectory(context)
+        assertTrue(dir.canonicalPath.startsWith(context.noBackupFilesDir.canonicalPath))
+        assertTrue(!dir.canonicalPath.startsWith(context.cacheDir.canonicalPath))
+    }
+
+    @Test
+    fun uiEntryPointWritesACheckpointIntoTheRealPrivateDirectoryAndRotates() {
+        seedTwoLensWorkspace()
+        val dir = LocalWorkspaceBackups.defaultDirectory(context)
+        dir.deleteRecursively()
+        try {
+            repeat(LocalWorkspaceBackups.MAX_BACKUPS + 2) {
+                val done = CountDownLatch(1)
+                var result: WorkspaceBackupImportResult? = null
+                LayoutBackupIo.applyWorkspaceAsync(context, v2Backup()) { result = it; done.countDown() }
+                assertTrue("import must finish", done.await(10, TimeUnit.SECONDS))
+                assertEquals(WorkspaceBackupImportResult.Applied, result)
+            }
+            val files = LocalWorkspaceBackups(dir).list()
+            assertEquals("rotation keeps only the newest", LocalWorkspaceBackups.MAX_BACKUPS, files.size)
+            assertTrue(files.all { it.canonicalPath.startsWith(context.noBackupFilesDir.canonicalPath) })
+            assertTrue("every kept file must parse", files.all { LocalWorkspaceBackups(dir).read(it) != null })
+        } finally {
+            dir.deleteRecursively()
+        }
+    }
 }

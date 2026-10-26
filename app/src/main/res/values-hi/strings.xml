@@ -272,4 +272,5 @@
     <string name="setting_reset_permission_prompts">त्वरित कार्रवाई की अनुमतियाँ फिर से माँगें</string>
     <string name="toast_permission_prompts_reset">अनुमति अनुरोध रीसेट हो गए</string>
     <string name="toast_permission_prompts_nothing">रीसेट करने के लिए कोई अनुमति अनुरोध नहीं</string>
+    <string name="layout_import_workspace_recovered">वर्कस्पेस आयात विफल रहा और स्वचालित रोलबैक अधूरा रहा, लेकिन आपका वर्कस्पेस आयात से ठीक पहले लिए गए बैकअप से बहाल कर दिया गया।</string>
 </resources>

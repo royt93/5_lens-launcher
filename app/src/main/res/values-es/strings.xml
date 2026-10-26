@@ -277,4 +277,5 @@
     <string name="setting_reset_permission_prompts">Volver a pedir permisos de acciones rápidas</string>
     <string name="toast_permission_prompts_reset">Solicitudes de permisos restablecidas</string>
     <string name="toast_permission_prompts_nothing">No hay solicitudes de permisos que restablecer</string>
+    <string name="layout_import_workspace_recovered">La importación del espacio de trabajo falló y la reversión automática quedó incompleta, pero tu espacio de trabajo se restauró desde la copia hecha justo antes de importar.</string>
 </resources>

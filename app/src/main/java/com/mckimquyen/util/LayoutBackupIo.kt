@@ -22,39 +22,47 @@ import java.io.InputStreamReader
  */
 object LayoutBackupIo {
 
+    /**
+     * Builds the workspace JSON from Room + preferences. Shared by the manual SAF export and the DB-009 pre-import
+     * checkpoint so both always describe the same thing.
+     */
+    suspend fun currentWorkspaceJson(context: Context): String {
+        val database = AppDatabase.getInstance()
+        val lenses = database.lensWorkspaceDao().getAll()
+        // Rows of a deleted lens can reappear (a late per-app write after deleteLens), and
+        // the snapshot factory rightly rejects unknown lenses - so export only live ones.
+        val liveLensIds = lenses.mapTo(mutableSetOf()) { it.id }
+        val rows = database.appPersistentDao().getAllRows().filter { it.lensId in liveLensIds }
+        val settings = UtilSettings(context.applicationContext)
+        val appSettings = lenses.map { lens ->
+            LensAppSettingsBackup(
+                lens.id,
+                settings.getLensAppScope(lens.id),
+                settings.getLensAppSelection(lens.id),
+                settings.isLensFrozen(lens.id),
+                settings.getLensHiddenAppIds(lens.id),
+                // Always written ({} when no keys) so import can tell "no override" from a legacy file.
+                settings.getLensPhysicsBackup(lens.id)
+            )
+        }
+        val activeLensId = settings.getString(UtilSettings.KEY_ACTIVE_LENS_ID)
+            ?.takeIf { id -> lenses.any { it.id == id } }
+            ?: LensWorkspace.DEFAULT_LENS_ID
+        return LayoutBackupSnapshotFactory.create(
+            lenses,
+            rows,
+            appSettings,
+            System.currentTimeMillis(),
+            activeLensId,
+            settings.getCollapsedLensGroups()
+        ).toJson()
+    }
+
     @JvmStatic
     fun exportAsync(context: Context, uri: Uri, onResult: (Boolean) -> Unit) {
         ApplicationScope.scope.launch(Dispatchers.IO) {
             val success = try {
-                val database = AppDatabase.getInstance()
-                val lenses = database.lensWorkspaceDao().getAll()
-                // Rows of a deleted lens can reappear (a late per-app write after deleteLens), and
-                // the snapshot factory rightly rejects unknown lenses - so export only live ones.
-                val liveLensIds = lenses.mapTo(mutableSetOf()) { it.id }
-                val rows = database.appPersistentDao().getAllRows().filter { it.lensId in liveLensIds }
-                val settings = UtilSettings(context.applicationContext)
-                val appSettings = lenses.map { lens ->
-                    LensAppSettingsBackup(
-                        lens.id,
-                        settings.getLensAppScope(lens.id),
-                        settings.getLensAppSelection(lens.id),
-                        settings.isLensFrozen(lens.id),
-                        settings.getLensHiddenAppIds(lens.id),
-                        // Always written ({} when no keys) so import can tell "no override" from a legacy file.
-                        settings.getLensPhysicsBackup(lens.id)
-                    )
-                }
-                val activeLensId = settings.getString(UtilSettings.KEY_ACTIVE_LENS_ID)
-                    ?.takeIf { id -> lenses.any { it.id == id } }
-                    ?: LensWorkspace.DEFAULT_LENS_ID
-                val json = LayoutBackupSnapshotFactory.create(
-                    lenses,
-                    rows,
-                    appSettings,
-                    System.currentTimeMillis(),
-                    activeLensId,
-                    settings.getCollapsedLensGroups()
-                ).toJson()
+                val json = currentWorkspaceJson(context)
                 context.applicationContext.contentResolver.openOutputStream(uri)?.use { stream ->
                     stream.write(json.toByteArray(Charsets.UTF_8))
                 } ?: error("Unable to open backup destination")
@@ -89,9 +97,14 @@ object LayoutBackupIo {
 
     @JvmStatic
     fun applyWorkspaceAsync(context: Context, backup: LayoutBackup, onResult: (WorkspaceBackupImportResult) -> Unit) {
-        val coordinator = WorkspaceBackupImportCoordinator(WorkspaceBackupRoomStore(context.applicationContext))
+        val appContext = context.applicationContext
+        // DB-009: every import first checkpoints the current workspace into rotating app-private snapshots.
+        val recovery = WorkspaceImportRecovery(
+            WorkspaceBackupRoomStore(appContext),
+            LocalWorkspaceBackups(LocalWorkspaceBackups.defaultDirectory(appContext))
+        ) { currentWorkspaceJson(appContext) }
         ApplicationScope.scope.launch(Dispatchers.IO) {
-            val result = coordinator.apply(backup)
+            val result = recovery.apply(backup)
             withContext(Dispatchers.Main) { onResult(result) }
         }
     }

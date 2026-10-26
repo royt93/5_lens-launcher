@@ -298,4 +298,5 @@
     <string name="setting_reset_permission_prompts">اطلب أذونات الإجراءات السريعة مرة أخرى</string>
     <string name="toast_permission_prompts_reset">تمت إعادة ضبط طلبات الأذونات</string>
     <string name="toast_permission_prompts_nothing">لا توجد طلبات أذونات لإعادة ضبطها</string>
+    <string name="layout_import_workspace_recovered">فشل استيراد مساحة العمل ولم يكتمل التراجع التلقائي، لكن تمت استعادة مساحة العمل من النسخة الاحتياطية التي أُخذت قبل الاستيراد مباشرة.</string>
 </resources>

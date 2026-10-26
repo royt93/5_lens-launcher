@@ -277,4 +277,5 @@
     <string name="setting_reset_permission_prompts">Pedir novamente as permissões das ações rápidas</string>
     <string name="toast_permission_prompts_reset">Pedidos de permissão redefinidos</string>
     <string name="toast_permission_prompts_nothing">Nenhum pedido de permissão para redefinir</string>
+    <string name="layout_import_workspace_recovered">A importação do espaço de trabalho falhou e a reversão automática ficou incompleta, mas seu espaço de trabalho foi restaurado a partir do backup feito logo antes da importação.</string>
 </resources>

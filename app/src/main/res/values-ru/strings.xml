@@ -282,4 +282,5 @@
     <string name="setting_reset_permission_prompts">Снова запрашивать разрешения быстрых действий</string>
     <string name="toast_permission_prompts_reset">Запросы разрешений сброшены</string>
     <string name="toast_permission_prompts_nothing">Нет запросов разрешений для сброса</string>
+    <string name="layout_import_workspace_recovered">Не удалось импортировать рабочее пространство, а автоматический откат был неполным, но пространство восстановлено из резервной копии, сделанной непосредственно перед импортом.</string>
 </resources>

@@ -54,6 +54,26 @@ class BackupRulesTest {
         }
     }
 
+    /**
+     * DB-009: rotating workspace snapshots live in `noBackupFilesDir`, which Android never includes in cloud
+     * backup or device transfer, so no rule entry is needed - but that only holds while the code keeps using it
+     * and no FileProvider path exposes it.
+     */
+    @Test
+    fun `local workspace snapshots stay in noBackupFilesDir and out of the file provider`() {
+        val source = File(appDir, "src/main/java/com/mckimquyen/util/LocalWorkspaceBackups.kt").readText()
+        assertTrue("snapshots must be written under noBackupFilesDir", source.contains("noBackupFilesDir"))
+        assertTrue("snapshots must not be written to filesDir", !Regex("""\bfilesDir\b""").containsMatchIn(source.replace("noBackupFilesDir", "")))
+
+        val paths = parse("src/main/res/xml/file_paths.xml")
+        val tags = paths.childNodes
+        for (i in 0 until tags.length) {
+            val node = tags.item(i) as? org.w3c.dom.Element ?: continue
+            assertTrue("FileProvider must not expose snapshots: ${node.tagName}", node.tagName == "cache-path")
+            assertEquals("polaroid/", node.getAttribute("path"))
+        }
+    }
+
     private companion object {
         const val VIP_PREFS = "vip_screen_prefs"
         const val SEARCH_HISTORY_PREFS = "app_search_history"

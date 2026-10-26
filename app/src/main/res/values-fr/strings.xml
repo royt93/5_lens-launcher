@@ -277,4 +277,5 @@
     <string name="setting_reset_permission_prompts">Redemander les autorisations des actions rapides</string>
     <string name="toast_permission_prompts_reset">Demandes d\'autorisation réinitialisées</string>
     <string name="toast_permission_prompts_nothing">Aucune demande d\'autorisation à réinitialiser</string>
+    <string name="layout_import_workspace_recovered">L\'importation de l\'espace de travail a échoué et le retour arrière automatique était incomplet, mais votre espace de travail a été restauré à partir de la sauvegarde faite juste avant l\'importation.</string>
 </resources>

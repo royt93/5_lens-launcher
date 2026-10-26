@@ -21,6 +21,8 @@ sealed class WorkspaceBackupImportResult {
     data class UnsupportedSchema(val version: Int) : WorkspaceBackupImportResult()
     data class Failed(val cause: Throwable) : WorkspaceBackupImportResult()
     data class RecoveryRequired(val cause: Throwable, val rollbackFailure: Throwable) : WorkspaceBackupImportResult()
+    /** DB-009: the import failed and its rollback failed too, but the pre-import checkpoint was restored. */
+    data class Recovered(val cause: Throwable) : WorkspaceBackupImportResult()
 }
 
 class WorkspaceBackupImportCoordinator(private val store: WorkspaceBackupImportStore) {

@@ -527,6 +527,8 @@ public class ActSettings extends ActBase implements SettingsMenuHost {
         if (isFinishing() || isDestroyed()) return Unit.INSTANCE;
         if (result instanceof WorkspaceBackupImportResult.Applied) {
             Toast.makeText(this, R.string.layout_import_success, Toast.LENGTH_SHORT).show();
+        } else if (result instanceof WorkspaceBackupImportResult.Recovered) {
+            Toast.makeText(this, R.string.layout_import_workspace_recovered, Toast.LENGTH_LONG).show();
         } else if (result instanceof WorkspaceBackupImportResult.RecoveryRequired) {
             Toast.makeText(this, R.string.layout_import_workspace_recovery_required, Toast.LENGTH_LONG).show();
         } else {
