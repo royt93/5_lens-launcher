@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | enhance |
-| Status | todo |
+| Status | done 2026-10-26 (audit 9.1/10, `doc/task/AUDIT_I18N-001_2026-10-26.md`) |
 | Priority | P3 |
 | Evidence | confirmed |
 | Epic | Localization |
@@ -21,10 +21,10 @@ Là người dùng Android 13+, tôi muốn đổi ngôn ngữ app từ Cài đ�
 
 ## Acceptance criteria
 
-- [ ] Thêm `res/xml/locales_config.xml` đủ 17 locale và khai trong manifest.
-- [ ] Chọn ngôn ngữ ở hệ thống và trong app cho cùng kết quả (một nguồn sự thật).
-- [ ] Fallback đúng cho minSdk 25-32.
-- [ ] Test ưu tiên `LocaleHelper` và smoke trên Android 13+.
+- [x] Thêm `res/xml/locales_config.xml` đủ 17 locale và khai trong manifest.
+- [x] Chọn ngôn ngữ ở hệ thống và trong app cho cùng kết quả (một nguồn sự thật).
+- [x] Fallback đúng cho minSdk 25-32 (Robolectric sdk 28; chưa có thiết bị thật API 25–32).
+- [x] Test ưu tiên `LocaleHelper` và smoke trên Android 13+.
 
 ## Implementation notes
 
@@ -32,13 +32,13 @@ Gộp N1 (audit build) và ENHANCE-4 (audit search).
 
 ## Verification and Definition of Done
 
-- [ ] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
-- [ ] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
-- [ ] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
-- [ ] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
-- [ ] No new lint/build failures.
-- [ ] A post-change audit record scores the round `> 9.0/10` before push.
-- [ ] Evidence and status are updated before moving this file to `done`.
+- [x] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
+- [x] Widget/UI tests: `LanguageBottomSheetWidgetTest` (4) xanh trên S24U; không thêm UI mới nên không thêm widget test.
+- [x] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
+- [x] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
+- [x] No new lint/build failures.
+- [x] A post-change audit record scores the round `> 9.0/10` before push.
+- [x] Evidence and status are updated before moving this file to `done`.
 
 If a test layer is not applicable, replace its checkbox with a reviewed rationale; do not silently omit it.
 

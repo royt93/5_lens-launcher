@@ -2,6 +2,8 @@ package com.mckimquyen.testing
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.os.Build
+import android.os.LocaleList
 import android.os.ParcelFileDescriptor
 import android.provider.Settings
 import androidx.preference.PreferenceManager
@@ -22,6 +24,7 @@ class DeviceStateGuard : ExternalResource() {
     private var savedPrefs: List<Pair<SharedPreferences, Map<String, Any?>>> = emptyList()
     private var savedApps: ArrayList<App>? = null
     private var savedSettings: Map<Pair<String, String>, String?> = emptyMap()
+    private var savedAppLocales: LocaleList? = null
 
     override fun before() {
         val stores = listOf(
@@ -35,6 +38,7 @@ class DeviceStateGuard : ExternalResource() {
         }
         savedApps = RAppsSingleton.instance.apps
         savedSettings = SETTING_KEYS.associateWith(::readSetting)
+        savedAppLocales = readAppLocales()
     }
 
     override fun after() {
@@ -54,6 +58,7 @@ class DeviceStateGuard : ExternalResource() {
                 }
             }.exceptionOrNull()?.let(failures::add)
         }
+        runCatching { restoreAppLocales() }.exceptionOrNull()?.let(failures::add)
         failures.firstOrNull()?.let { first ->
             failures.drop(1).forEach(first::addSuppressed)
             throw first
@@ -74,6 +79,23 @@ class DeviceStateGuard : ExternalResource() {
         db.appPersistentDao().getAllRows().map { it.lensId }.toSet()
             .filter { it !in lensIds }
             .forEach { db.appPersistentDao().deleteForLens(it) }
+    }
+
+    /** I18N-001: API 33+ per-app locales live in the framework, not in prefs, so prefs restore can't undo them. */
+    private fun readAppLocales(): LocaleList? =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+            context.getSystemService(android.app.LocaleManager::class.java)?.applicationLocales
+        else null
+
+    private fun restoreAppLocales() {
+        val saved = savedAppLocales ?: return
+        val manager = context.getSystemService(android.app.LocaleManager::class.java) ?: return
+        if (manager.applicationLocales != saved) manager.applicationLocales = saved
+        val deadline = android.os.SystemClock.uptimeMillis() + LOCALE_RESTORE_TIMEOUT_MS
+        while (manager.applicationLocales != saved && android.os.SystemClock.uptimeMillis() < deadline) {
+            Thread.sleep(LOCALE_RESTORE_POLL_MS)
+        }
+        check(manager.applicationLocales == saved) { "Không khôi phục được app locales" }
     }
 
     private fun restorePreferences(prefs: SharedPreferences, values: Map<String, Any?>) {
@@ -106,6 +128,8 @@ class DeviceStateGuard : ExternalResource() {
     }
 
     private companion object {
+        const val LOCALE_RESTORE_TIMEOUT_MS = 5_000L
+        const val LOCALE_RESTORE_POLL_MS = 100L
         const val GLOBAL = "global"
         const val SYSTEM = "system"
         const val VIP_PREFERENCES = "vip_screen_prefs"

@@ -77,6 +77,7 @@ Source of truth for implementation choices in this session. Detailed acceptance 
 ## 🟡 In progress
 
 - **PERF-008 — FrmSettings resume cost (25/10/2026)**: `assignValues()` chỉ resolve Home launcher khi cache rỗng/invalidated; sử dụng app-owned icon-pack cache; tránh gán lại text/drawables không đổi. TECNO BG6: targeted Settings tests 36/36; unit 1,050/1,050; lint/build xanh. Đo bind p50 10.79ms → 2.50ms, p95 15.12ms → 2.85ms (30 lượt, test harness). Audit 9.2/10 (`doc/task/AUDIT_PERF-008_2026-10-25.md`).
+- **I18N-001 — Android App language settings (26/10/2026)**: `locales_config.xml` đủ 17 locale (Indonesian là `id`) + `android:localeConfig`; API 33+ dùng `LocaleManager` làm nguồn sự thật, migrate pref cũ đúng một lần, API 25–32 giữ SharedPreferences. `DeviceStateGuard` nay khôi phục app locales (mutation check đỏ→xanh). Samsung S24 Ultra (Android 17): 20/20 locale tests; unit 1,055/1,055; lint 0 errors; smoke màn Ngôn ngữ ứng dụng. Chưa kiểm Android 13–16 và API 25–32 thật. Audit 9.1/10 (`doc/task/AUDIT_I18N-001_2026-10-26.md`).
 
 ## 🟡 In progress
 

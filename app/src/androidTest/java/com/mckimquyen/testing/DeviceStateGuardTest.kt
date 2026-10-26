@@ -89,6 +89,20 @@ class DeviceStateGuardTest {
         }
     }
 
+    /** I18N-001: a test that changes the per-app locale must not leak it to the next class. */
+    @Test
+    fun appLocalesAreRestoredAfterATestChangesThem() {
+        org.junit.Assume.assumeTrue(android.os.Build.VERSION.SDK_INT >= 33)
+        val manager = context.getSystemService(android.app.LocaleManager::class.java)
+        val original = manager.applicationLocales
+        try {
+            underGuard { manager.applicationLocales = android.os.LocaleList.forLanguageTags("ja-JP") }
+            assertEquals(original, manager.applicationLocales)
+        } finally {
+            manager.applicationLocales = original
+        }
+    }
+
     private fun shell(command: String) {
         android.os.ParcelFileDescriptor.AutoCloseInputStream(
             InstrumentationRegistry.getInstrumentation().uiAutomation.executeShellCommand(command)

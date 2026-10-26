@@ -288,7 +288,7 @@ Giới hạn: agent audit ui chưa đọc hết `LensView.kt`, `ActAbout.java`, 
 | `BUILD-004` | P3 | 3 | [Baseline/startup profile lệch mục tiêu và comment R8 sai](todo/p3-build-build-004-r8-and-baseline-profile-accuracy.md) |
 | `CORE-006` ✅ done 2026-10-25 | P3 | 1 | [Đổi ngôn ngữ không làm mới nhãn app và thứ tự A-Z](done/p3-core-core-006-refresh-on-locale-change.md) |
 | `DB-008` | P3 | 3 | [Không có migration dưới v7 và không có fallback, schema 7/8 thiếu snapshot](todo/p3-db-db-008-legacy-db-migration-fallback.md) |
-| `I18N-001` | P3 | 3 | [Thiếu android:localeConfig nên Android 13+ không hiện 'Ngôn ngữ ứng dụng'](todo/p3-i18n-i18n-001-locale-config-and-settings-app-language.md) |
+| `I18N-001` ✅ done 2026-10-26 | P3 | 3 | [Thiếu android:localeConfig nên Android 13+ không hiện 'Ngôn ngữ ứng dụng'](done/p3-i18n-i18n-001-locale-config-and-settings-app-language.md) |
 | `PERF-008` ✅ done 2026-10-25 | P3 | 2 | [FrmSettings.assignValues đọc 35 prefs và resolve launcher hệ thống mỗi lần resume](done/p3-perf-perf-008-settings-tab-resume-cost.md) |
 | `UI-031` ✅ done 2026-10-25 | P3 | 2 | [Hàng app ở font 2.0 bị cắt nhãn do ba icon chen vào](done/p3-ui-ui-031-app-row-font-scale-clipping.md) |
 

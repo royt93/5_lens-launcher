@@ -156,4 +156,60 @@ class LocaleHelperTest {
             AppEventManager.appsUpdated.removeObserver(observer)
         }
     }
+
+    @Test
+    fun mapsLegacyIndonesianResourceCodeToAndroidLanguageTag() {
+        assertEquals("id", LocaleHelper.toAndroidLanguageTag("in"))
+        assertEquals("in", LocaleHelper.toResourceLanguageCode("id"))
+        assertEquals("ar", LocaleHelper.toAndroidLanguageTag("ar"))
+        assertEquals("ja", LocaleHelper.toResourceLanguageCode("ja"))
+    }
+
+    @Test
+    fun emptyFrameworkLocaleUsesSystemDefaultAfterMigration() {
+        assertEquals("en", LocaleHelper.resolveFrameworkLanguage("", true, "vi", "en"))
+        assertEquals("vi", LocaleHelper.resolveFrameworkLanguage("", false, "vi", "en"))
+    }
+
+    @Test
+    fun emptyFrameworkLocaleAfterMigrationIgnoresStaleLegacyPreference() {
+        assertEquals("en", LocaleHelper.resolveFrameworkLanguage("", true, "fr", "en"))
+    }
+
+    @Test
+    fun explicitFrameworkLocaleWinsOverLegacyPreference() {
+        assertEquals("ja", LocaleHelper.resolveFrameworkLanguage("ja-JP", false, "vi", "en"))
+        assertEquals("fr", LocaleHelper.resolveFrameworkLanguage("fr", true, "vi", "en"))
+    }
+
+    @Test
+    fun localeConfigExactlyMatchesAllSupportedLanguagesAfterBcp47Mapping() {
+        val workingDirectory = File(requireNotNull(System.getProperty("user.dir")))
+        val config = sequenceOf(
+            File(workingDirectory, "src/main/res/xml/locales_config.xml"),
+            File(workingDirectory, "app/src/main/res/xml/locales_config.xml")
+        ).firstOrNull(File::isFile)
+        assertNotNull("locales_config.xml must exist", config)
+        val nodes = DocumentBuilderFactory.newInstance().newDocumentBuilder()
+            .parse(requireNotNull(config)).getElementsByTagName("locale")
+        val configured = (0 until nodes.length).map { index ->
+            nodes.item(index).attributes.getNamedItem("{http://schemas.android.com/apk/res/android}name")?.nodeValue
+                ?: nodes.item(index).attributes.getNamedItem("android:name")?.nodeValue
+                ?: nodes.item(index).attributes.item(0).nodeValue
+        }.toSet()
+        val supported = LocaleHelper.supportedLanguages.map { LocaleHelper.toAndroidLanguageTag(it.code) }.toSet()
+        assertEquals(supported, configured)
+        assertEquals(17, configured.size)
+
+        val resourcesDirectory = sequenceOf(
+            File(workingDirectory, "src/main/res"),
+            File(workingDirectory, "app/src/main/res")
+        ).first { it.isDirectory }
+        supported.forEach { localeTag ->
+            val resourceLocale = LocaleHelper.toResourceLanguageCode(localeTag)
+            val directory = if (localeTag == "en") "values" else "values-$resourceLocale"
+            assertTrue("Missing localized resources for $localeTag ($directory)",
+                File(resourcesDirectory, "$directory/strings.xml").isFile)
+        }
+    }
 }
