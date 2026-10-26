@@ -95,4 +95,23 @@ class SearchHistoryStoreTest {
 
         assertEquals(listOf("pkg/First"), SearchHistoryStore(context).recentKeys())
     }
+
+    /** SEARCH-016: real SharedPreferences round trip - expiry survives a new store instance and legacy keys load. */
+    @Test
+    fun expiredEntriesAreDroppedAcrossInstancesAndLegacyKeysSurvive() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        var now = 1_700_000_000_000L
+        val first = SearchHistoryStore(context) { now }
+        first.recordLaunch("pkg/Old")
+
+        now += java.util.concurrent.TimeUnit.DAYS.toMillis(SearchHistoryStore.TTL_DAYS) + 1
+        val second = SearchHistoryStore(context) { now }
+        second.recordLaunch("pkg/Fresh")
+
+        assertEquals(listOf("pkg/Fresh"), SearchHistoryStore(context) { now }.recentKeys())
+
+        context.getSharedPreferences("app_search_history", android.content.Context.MODE_PRIVATE).edit()
+            .clear().putString("recent_component_keys", "pkg/Legacy").commit()
+        assertEquals(listOf("pkg/Legacy"), SearchHistoryStore(context) { now }.recentKeys())
+    }
 }
