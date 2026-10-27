@@ -77,6 +77,7 @@ import com.mckimquyen.search.SearchFilterEngine;
 import com.mckimquyen.search.SearchHistoryStore;
 import com.mckimquyen.search.SearchResultAdapter;
 import com.mckimquyen.ui.home.HomeQuickActionDelegate;
+import com.mckimquyen.ui.home.HomeSearchController;
 import com.mckimquyen.ui.home.HomeQuickActionHost;
 import com.mckimquyen.ui.home.LensViewHolder;
 import com.mckimquyen.ui.home.LensViewHolderHost;
@@ -219,35 +220,22 @@ public class ActHome extends ActBase implements LensViewHolderHost, HomeQuickAct
     int reportFullyDrawnCallCount = 0;
     private SearchBar searchBar;
     private SearchView searchView;
-    private EditText appSearch;
-    private View recentHeader;
-    private TextView allAppsHeader;
-    private TextView resultsSectionHeader;
-    private View llEmptyQuickActions;
-    private TextView noSearchResults;
-    private TextView webSearchFallback;
-    private RecyclerView searchResults;
-    private View t9Keypad;
-    private SearchResultAdapter searchResultAdapter;
-    private com.google.android.material.chip.ChipGroup chipGroupSearchFilters;
-    private SearchHistoryStore searchHistoryStore;
-    private boolean searchEnterDownHandled;
-    private int searchLaunchCount;
+    private HomeSearchController searchController;
 
     @androidx.annotation.VisibleForTesting(otherwise = androidx.annotation.VisibleForTesting.NONE)
     public SearchResultAdapter getSearchResultAdapterForTest() {
-        return searchResultAdapter;
+        return searchController.adapter();
     }
 
     @androidx.annotation.VisibleForTesting(otherwise = androidx.annotation.VisibleForTesting.NONE)
     public boolean isSearchEnterDownHandledForTest() {
-        return searchEnterDownHandled;
+        return searchController.enterDownHandled();
     }
 
     /** How many times a search result has been launched from this Activity instance. */
     @androidx.annotation.VisibleForTesting(otherwise = androidx.annotation.VisibleForTesting.NONE)
     public int getSearchLaunchCountForTest() {
-        return searchLaunchCount;
+        return searchController.launchCount();
     }
 
     private void updateColor() {
@@ -485,7 +473,6 @@ public class ActHome extends ActBase implements LensViewHolderHost, HomeQuickAct
         searchBar = findViewById(R.id.searchBar);
         searchView = findViewById(R.id.searchView);
         searchView.setupWithSearchBar(searchBar);
-        appSearch = searchView.getEditText();
         // FEAT-009: recent-apps quick panel, reachable without opening search first.
         searchBar.inflateMenu(R.menu.menu_search_bar);
         searchBar.setOnMenuItemClickListener(item -> {
@@ -501,13 +488,23 @@ public class ActHome extends ActBase implements LensViewHolderHost, HomeQuickAct
         // that XML attribute at inflate time and exposes no public runtime setter for it. Content
         // sits directly on that scrim (no secondary card, see UI-011) since the scrim is already
         // near-opaque, so text contrast doesn't depend on an extra opaque layer.
-        recentHeader = findViewById(R.id.recentHeader);
-        allAppsHeader = findViewById(R.id.allAppsHeader);
-        resultsSectionHeader = findViewById(R.id.resultsSectionHeader);
-        llEmptyQuickActions = findViewById(R.id.llEmptyQuickActions);
-        noSearchResults = findViewById(R.id.tvNoSearchResults);
-        webSearchFallback = findViewById(R.id.tvWebSearchFallback);
-        searchResults = findViewById(R.id.rvSearchResults);
+        searchController = new HomeSearchController(this, searchBar, searchView, new HomeSearchController.Host() {
+            @Override public UtilSettings settings() { return utilSettings; }
+            @Override public ArrayList<App> apps() { return listApp; }
+            @Override public List<App> appsForLens(String lensId) { return scopedApps(lensId); }
+            @Override public LensViewHolder lenses() { return lensHolder; }
+            @Override public HomeQuickActionDelegate quickActions() { return quickActions; }
+            @Override public void restoreHiddenApps() {
+                int position = lensHolder.pager().getCurrentItem();
+                if (position >= 0 && position < lensHolder.currentLenses().size()) {
+                    showHiddenLensAppsDialog(lensHolder.currentLenses().get(position).getId());
+                }
+            }
+            @Override public void refreshSearchBarVisibility() { updateSearchBarVisibility(); }
+            @Override public void refreshHiddenRecovery() { updateHiddenRecoveryButton(); }
+            @Override public void hideHomeAppList() { if (rvHomeAppList != null) rvHomeAppList.setVisibility(View.GONE); }
+            @Override public void refreshModeVisibility() { updateModeVisibility(); }
+        });
         quickActions.attach();
 
         // Hide progress bar in test environments to prevent indeterminate animation loops from hanging tests
@@ -693,11 +690,7 @@ public class ActHome extends ActBase implements LensViewHolderHost, HomeQuickAct
      */
     @androidx.annotation.VisibleForTesting
     void openSearchFromHome() {
-        if (searchView == null || searchBar == null || searchView.isShowing()) return;
-        if (searchBar.getVisibility() == View.GONE) {
-            searchBar.setVisibility(View.INVISIBLE);
-        }
-        searchBar.post(searchView::show);
+        if (searchController != null) searchController.openSearchFromHome();
     }
 
     /** FEAT-009: shared by the SearchBar icon and the lens-management menu's own entry point. */
@@ -1152,355 +1145,25 @@ public class ActHome extends ActBase implements LensViewHolderHost, HomeQuickAct
     }
 
     private void setupSearch() {
-        searchHistoryStore = new SearchHistoryStore(this);
-        searchResultAdapter = new SearchResultAdapter(this::launchSearchResult);
-        searchResults.setLayoutManager(new LinearLayoutManager(this));
-        searchResults.setAdapter(searchResultAdapter);
-        // UI-002: one shared divider between flat rows instead of a per-row card, matching
-        // Pixel Launcher's search list and keeping layout nesting shallow (see LINT-008).
-        searchResults.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
-
-        chipGroupSearchFilters = findViewById(R.id.chipGroupSearchFilters);
-        if (chipGroupSearchFilters != null && utilSettings != null) {
-            updateSearchFilterChipChecked(utilSettings.getSearchFilterPreset());
-            chipGroupSearchFilters.setOnCheckedStateChangeListener((group, checkedIds) -> {
-                if (checkedIds == null || checkedIds.isEmpty()) return;
-                int checkedId = checkedIds.get(0);
-                SearchFilterPreset preset = SearchFilterPreset.ALL;
-                if (checkedId == R.id.chipFilterThisLens) {
-                    preset = SearchFilterPreset.THIS_LENS;
-                } else if (checkedId == R.id.chipFilterFavorites) {
-                    preset = SearchFilterPreset.FAVORITES;
-                } else if (checkedId == R.id.chipFilterHidden) {
-                    preset = SearchFilterPreset.HIDDEN;
-                }
-                if (utilSettings != null) {
-                    utilSettings.saveSearchFilterPreset(preset);
-                }
-                updateSearchResults(appSearch.getText());
-            });
-        }
-
-        appSearch.addTextChangedListener(new TextWatcher() {
-            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
-                updateSearchResults(s);
-            }
-            @Override public void afterTextChanged(Editable s) {}
-        });
-        // SearchBar->SearchView expand/collapse is a Material3 morph animation, not an instant
-        // focus change; refresh results once the panel is fully SHOWN and ready for input.
-        findViewById(R.id.restoreHiddenLensApps).setOnClickListener(v -> {
-            int position = lensHolder.pager().getCurrentItem();
-            if (position >= 0 && position < lensHolder.currentLenses().size()) {
-                showHiddenLensAppsDialog(lensHolder.currentLenses().get(position).getId());
-            }
-        });
-        searchView.addTransitionListener((view, previousState, newState) -> {
-            if (newState == SearchView.TransitionState.SHOWN) {
-                updateSearchResults(appSearch.getText());
-                // UI-007 fix: SearchBar was never actually hidden by the morph transition - it
-                // relied on the (now translucent, see UI-007) SearchView panel fully covering it.
-                // At the lighter 0.35 alpha this let the SearchBar's own hint text ("Tìm ứng
-                // dụng") show through, doubled up with the real SearchView edit text's hint at
-                // almost the same position - a confusing ghosted-text overlap. Hide it once the
-                // expand morph settles (kept visible during SHOWING so the animation still has
-                // its start-anchor); restored at HIDDEN below.
-                searchBar.setVisibility(View.INVISIBLE);
-            } else if (newState == SearchView.TransitionState.HIDDEN) {
-                // FISH-016: was an unconditional VISIBLE, which resurrected a bar that Clean mode
-                // or KEY_SHOW_SEARCH_BAR=false had deliberately hidden once search closed.
-                updateSearchBarVisibility();
-                // Closing via system BACK goes through SearchView's own back orchestrator, which
-                // makes the SearchBar VISIBLE again right after this callback returns (measured on
-                // TECNO KJ7: GONE here, VISIBLE ~10 ms later; the arrow/hide() path does not). Re-apply
-                // from settings on the next message so settings stay the single source of truth.
-                searchBar.post(this::updateSearchBarVisibility);
-            }
-            // UI-009: status/nav bar color now matches the search scrim (same
-            // ?attr/colorSurfaceContainerHigh tone) so the whole screen reads as one continuous
-            // surface while search is open. Toggled on SHOWING/HIDING (not SHOWN/HIDDEN) to match
-            // SearchView.isShowing() semantics, same reasoning as the old blur toggle it replaces.
-            if (newState == SearchView.TransitionState.SHOWING) {
-                lensHolder.pager().setVisibility(View.INVISIBLE);
-                updateHiddenRecoveryButton();
-                lensHolder.indicator().setVisibility(View.GONE);
-                if (lensHolder.nameLabel() != null) lensHolder.nameLabel().setVisibility(View.GONE);
-                if (rvHomeAppList != null) {
-                    rvHomeAppList.setVisibility(View.GONE);
-                }
-                setSearchSystemBarsHarmonized(true);
-            } else if (newState == SearchView.TransitionState.HIDING) {
-                setSearchSystemBarsHarmonized(false);
-            } else if (newState == SearchView.TransitionState.HIDDEN) {
-                updateModeVisibility();
-            }
-        });
-        appSearch.setOnEditorActionListener((view, actionId, event) -> {
-            SearchEnterKeyPolicy.Outcome outcome = SearchEnterKeyPolicy.decide(
-                    actionId,
-                    event == null ? null : event.getAction(),
-                    event == null ? null : event.getKeyCode(),
-                    event == null ? 0 : event.getRepeatCount(),
-                    searchEnterDownHandled
-            );
-            if (outcome.getDecision() == SearchEnterKeyPolicy.Decision.CONSUME) {
-                searchEnterDownHandled = outcome.getDownHandled();
-                return true;
-            }
-            if (outcome.getDecision() == SearchEnterKeyPolicy.Decision.LAUNCH) {
-                App first = searchResultAdapter.firstOrNull();
-                if (first != null) {
-                    searchEnterDownHandled = outcome.getDownHandled();
-                    launchSearchResult(first, appSearch);
-                    return true;
-                }
-                searchEnterDownHandled = false;
-                return false;
-            }
-            searchEnterDownHandled = outcome.getDownHandled();
-            return false;
-        });
-        // No manual clear-button wiring: SearchView's built-in clear affordance already does this.
-        Button clearHistory = findViewById(R.id.btClearSearchHistory);
-        clearHistory.setOnClickListener(view -> {
-            searchHistoryStore.clear();
-            updateSearchResults(appSearch.getText());
-            Toast.makeText(this, R.string.recent_apps_cleared, Toast.LENGTH_SHORT).show();
-        });
-
-        // UI-011: each tile prefills a working example into the search box instead of executing
-        // directly - the existing contextual quickActionRow (already wired above) then shows the
-        // real result exactly as if the user had typed it, so there's only one execution path.
-        prefillOnTap(R.id.tileCalculator, "12*7");
-        prefillOnTap(R.id.tileUnitConvert, "10 km to mi");
-        prefillOnTap(R.id.tileTimer, "hẹn giờ 5 phút");
-        prefillOnTap(R.id.tileBattery, "pin");
-        prefillOnTap(R.id.tileWifi, "wifi");
-
-        // SEARCH-006: local search found nothing - offer the user's own default browser/search
-        // app instead of a dead end. No network call from this app itself; ACTION_WEB_SEARCH
-        // hands the query off entirely, preserving the app's own local-only search property.
-        webSearchFallback.setOnClickListener(v -> {
-            String query = appSearch.getText().toString();
-            Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
-            intent.putExtra(android.app.SearchManager.QUERY, query);
-            try {
-                startActivity(intent);
-                hideSearchOverlay();
-            } catch (ActivityNotFoundException e) {
-                Toast.makeText(this, R.string.error_app_not_found, Toast.LENGTH_SHORT).show();
-            }
-        });
-        // SEARCH-010: T9 dialpad buttons wiring
-        setupT9Keypad();
-    }
-
-    private void setupT9Keypad() {
-        t9Keypad = findViewById(R.id.scrollT9Keypad);
-        int[] digitButtons = new int[]{
-                R.id.btnT9_0, R.id.btnT9_1, R.id.btnT9_2, R.id.btnT9_3, R.id.btnT9_4,
-                R.id.btnT9_5, R.id.btnT9_6, R.id.btnT9_7, R.id.btnT9_8, R.id.btnT9_9
-        };
-        char[] digits = new char[]{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
-        for (int i = 0; i < digitButtons.length; i++) {
-            char d = digits[i];
-            View btn = findViewById(digitButtons[i]);
-            if (btn != null) {
-                btn.setOnClickListener(v -> {
-                    v.performHapticFeedback(android.view.HapticFeedbackConstants.VIRTUAL_KEY);
-                    if (appSearch != null) {
-                        appSearch.append(String.valueOf(d));
-                    }
-                });
-            }
-        }
-
-        View btnClear = findViewById(R.id.btnT9_Clear);
-        if (btnClear != null) {
-            btnClear.setOnClickListener(v -> {
-                v.performHapticFeedback(android.view.HapticFeedbackConstants.VIRTUAL_KEY);
-                if (appSearch != null) {
-                    appSearch.setText("");
-                }
-            });
-        }
-
-        View btnBackspace = findViewById(R.id.btnT9_Backspace);
-        if (btnBackspace != null) {
-            btnBackspace.setOnClickListener(v -> {
-                v.performHapticFeedback(android.view.HapticFeedbackConstants.VIRTUAL_KEY);
-                if (appSearch != null) {
-                    CharSequence current = appSearch.getText();
-                    if (current != null && current.length() > 0) {
-                        appSearch.setText(current.subSequence(0, current.length() - 1));
-                        appSearch.setSelection(appSearch.getText().length());
-                    }
-                }
-            });
-            btnBackspace.setOnLongClickListener(v -> {
-                v.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS);
-                if (appSearch != null) {
-                    appSearch.setText("");
-                }
-                return true;
-            });
-        }
-    }
-
-    private void prefillOnTap(int tileViewId, String exampleQuery) {
-        findViewById(tileViewId).setOnClickListener(v -> {
-            appSearch.setText(exampleQuery);
-            appSearch.setSelection(exampleQuery.length());
-        });
-    }
-
-    private void updateSearchFilterChipChecked(SearchFilterPreset preset) {
-        if (chipGroupSearchFilters == null) return;
-        int targetChipId = R.id.chipFilterAll;
-        if (preset == SearchFilterPreset.THIS_LENS) {
-            targetChipId = R.id.chipFilterThisLens;
-        } else if (preset == SearchFilterPreset.FAVORITES) {
-            targetChipId = R.id.chipFilterFavorites;
-        } else if (preset == SearchFilterPreset.HIDDEN) {
-            targetChipId = R.id.chipFilterHidden;
-        }
-        chipGroupSearchFilters.check(targetChipId);
+        searchController.setupSearch();
     }
 
     /** UI-012: re-read on every resume (matches updateSearchBarVisibility's pattern) so toggling
      *  a quick action off/on in Settings, or changing the custom hint, applies immediately. */
     private void updateSearchCustomization() {
-        UtilSettings settings = new UtilSettings(this);
-        updateSearchFilterChipChecked(settings.getSearchFilterPreset());
-        String customHint = settings.getString(UtilSettings.KEY_SEARCH_HINT_TEXT);
-        String hint = (customHint == null || customHint.isEmpty())
-                ? getString(R.string.search_apps_hint)
-                : customHint;
-        searchBar.setHint(hint);
-        searchView.setHint(hint);
-
-        boolean t9Enabled = settings.getEnableT9SearchKeypad();
-        searchView.setAutoShowKeyboard(!t9Enabled);
-        if (t9Keypad != null) {
-            t9Keypad.setVisibility(t9Enabled ? View.VISIBLE : View.GONE);
-        }
-        if (appSearch != null) {
-            appSearch.setShowSoftInputOnFocus(!t9Enabled);
-        }
-
-        findViewById(R.id.tileCalculator).setVisibility(
-                settings.getBoolean(UtilSettings.KEY_QUICK_ACTION_CALCULATOR) ? View.VISIBLE : View.GONE);
-        findViewById(R.id.tileUnitConvert).setVisibility(
-                settings.getBoolean(UtilSettings.KEY_QUICK_ACTION_UNIT) ? View.VISIBLE : View.GONE);
-        findViewById(R.id.tileTimer).setVisibility(
-                settings.getBoolean(UtilSettings.KEY_QUICK_ACTION_TIMER) ? View.VISIBLE : View.GONE);
-        findViewById(R.id.tileBattery).setVisibility(
-                settings.getBoolean(UtilSettings.KEY_QUICK_ACTION_BATTERY) ? View.VISIBLE : View.GONE);
-        findViewById(R.id.tileWifi).setVisibility(
-                settings.getBoolean(UtilSettings.KEY_QUICK_ACTION_SETTINGS) ? View.VISIBLE : View.GONE);
-    }
-
-    private boolean isT9NumericQuery(CharSequence query) {
-        if (query == null || query.length() == 0) return false;
-        boolean hasDigit = false;
-        for (int i = 0; i < query.length(); i++) {
-            char c = query.charAt(i);
-            if (Character.isDigit(c)) {
-                hasDigit = true;
-            } else if (!Character.isWhitespace(c)) {
-                return false;
-            }
-        }
-        return hasDigit;
+        searchController.updateSearchCustomization();
     }
 
     private void updateSearchResults(CharSequence query) {
-        if (!searchView.isShowing() && query.length() == 0) {
-            return;
-        }
-
-        quickActions.updateQuickAction(query);
-        quickActions.updateContactAction(query);
-
-        ArrayList<App> apps = listApp == null ? new ArrayList<>() : listApp;
-        SearchFilterPreset preset = utilSettings != null
-                ? utilSettings.getSearchFilterPreset()
-                : SearchFilterPreset.ALL;
-        int currentPos = lensHolder.pager() != null ? lensHolder.pager().getCurrentItem() : 0;
-        String currentLensId = lensHolder.currentLenses() != null && currentPos >= 0 && currentPos < lensHolder.currentLenses().size()
-                ? lensHolder.currentLenses().get(currentPos).getId()
-                : LensWorkspace.DEFAULT_LENS_ID;
-        List<App> lensApps = scopedApps(currentLensId);
-        java.util.Set<String> hiddenIds = utilSettings != null
-                ? utilSettings.getLensHiddenAppIds(currentLensId)
-                : java.util.Collections.emptySet();
-        List<App> candidates = SearchFilterEngine.filterCandidates(apps, preset, lensApps, hiddenIds);
-
-        // SEARCH-010: if T9 dialpad is active and query is all digits, use T9SearchEngine instead.
-        boolean useT9 = utilSettings != null && utilSettings.getEnableT9SearchKeypad()
-                && isT9NumericQuery(query);
-        java.util.List<App> engineResults = useT9
-                ? T9SearchEngine.search(candidates, query, searchHistoryStore.recentKeys())
-                : AppSearchEngine.search(candidates, query, searchHistoryStore.recentKeys());
-        boolean isEmptyQuery = AppSearchEngine.normalize(query).isEmpty();
-        // UI-011: a blank query with no recent/favorite apps used to show a bare empty state.
-        // Falling back to the full (alphabetical) app list instead means the panel is only ever
-        // truly empty if the device has zero visible apps at all.
-        boolean showAllAppsFallback = isEmptyQuery && engineResults.isEmpty() && !candidates.isEmpty();
-        java.util.List<App> results = showAllAppsFallback ? sortedByLabel(candidates) : engineResults;
-        boolean hasResults = !results.isEmpty();
-
-        // UI-009 note: a TransitionManager.beginDelayedTransition crossfade was tried here for
-        // the state switch, but onTextChanged can fire once per keystroke (adb `input text` and
-        // some IMEs commit char-by-char) - overlapping beginDelayedTransition calls left stuck
-        // GhostView fade-out overlays rendering on top of the new content, i.e. the exact
-        // "overlapping UI" bug this whole revamp exists to remove. Plain visibility swaps instead.
-        searchResultAdapter.submitList(results);
-        int resultCount = results.size();
-        recentHeader.setVisibility(isEmptyQuery && hasResults && !showAllAppsFallback ? View.VISIBLE : View.GONE);
-        allAppsHeader.setVisibility(showAllAppsFallback ? View.VISIBLE : View.GONE);
-        if (showAllAppsFallback) {
-            allAppsHeader.setText(getResources().getQuantityString(
-                    R.plurals.apps_count, resultCount, resultCount));
-        }
-        resultsSectionHeader.setVisibility(!isEmptyQuery && hasResults ? View.VISIBLE : View.GONE);
-        if (!isEmptyQuery && hasResults) {
-            resultsSectionHeader.setText(getResources().getQuantityString(
-                    R.plurals.search_results_count, resultCount, resultCount));
-        }
-        llEmptyQuickActions.setVisibility(isEmptyQuery ? View.VISIBLE : View.GONE);
-        searchResults.setVisibility(hasResults ? View.VISIBLE : View.GONE);
-        noSearchResults.setText(isEmptyQuery ? R.string.search_empty_state : R.string.no_apps_found);
-        noSearchResults.setVisibility(hasResults ? View.GONE : View.VISIBLE);
-
-        updateWebSearchFallback(query, isEmptyQuery, hasResults);
-    }
-
-    private void updateWebSearchFallback(CharSequence query, boolean isEmptyQuery, boolean hasResults) {
-        boolean showWebFallback = !isEmptyQuery && !hasResults
-                && !quickActions.quickActionRowVisible()
-                && !quickActions.contactActionRowVisible();
-        webSearchFallback.setVisibility(showWebFallback ? View.VISIBLE : View.GONE);
-        if (showWebFallback && query != null) {
-            webSearchFallback.setText(getString(R.string.web_search_fallback, query.toString()));
-        }
+        searchController.updateSearchResults(query);
     }
 
     private void updateWebSearchFallback() {
-        CharSequence query = appSearch.getText();
-        boolean isEmptyQuery = query == null || query.length() == 0;
-        boolean hasResults = searchResultAdapter.getItemCount() > 0;
-        updateWebSearchFallback(query, isEmptyQuery, hasResults);
+        searchController.updateWebSearchFallback();
     }
 
     /** UI-011: all-apps fallback list, sorted alphabetically regardless of the lens grid's own
      *  sort setting (e.g. icon-color sort) - a text list should read A-Z. */
-    private java.util.List<App> sortedByLabel(java.util.List<App> apps) {
-        java.util.List<App> sorted = new ArrayList<>(apps);
-        sorted.sort(java.util.Comparator.comparing(a -> AppSearchEngine.normalize(a.getLabel())));
-        return sorted;
-    }
 
     /**
      * UI-009: replaces the old real-blur approach (RenderEffect on lensViews), which recomputed
@@ -1510,39 +1173,8 @@ public class ActHome extends ActBase implements LensViewHolderHost, HomeQuickAct
      * screen - bars included - reads as one continuous surface, with zero per-frame cost.
      */
     private void setSearchSystemBarsHarmonized(boolean showing) {
-        Window window = getWindow();
-        WindowInsetsControllerCompat controller =
-                new WindowInsetsControllerCompat(window, window.getDecorView());
-        if (showing) {
-            int scrimColor = MaterialColors.getColor(this, R.attr.colorSurfaceContainerHigh, Color.BLACK);
-            window.setStatusBarColor(scrimColor);
-            window.setNavigationBarColor(scrimColor);
-            // Dynamic color can land on a light or dark tone depending on wallpaper/day-night, so
-            // bar icon contrast is picked from the actual color instead of being hardcoded.
-            boolean lightIcons = ColorUtils.calculateLuminance(scrimColor) > 0.5;
-            controller.setAppearanceLightStatusBars(lightIcons);
-            controller.setAppearanceLightNavigationBars(lightIcons);
-        } else {
-            window.setStatusBarColor(Color.TRANSPARENT);
-            window.setNavigationBarColor(Color.TRANSPARENT);
-            // Restore the defaults in effect the rest of the time: status bar was never
-            // explicitly themed (system default = light/white icons); nav bar is statically
-            // android:windowLightNavigationBar=true in AppTheme (dark icons).
-            controller.setAppearanceLightStatusBars(false);
-            controller.setAppearanceLightNavigationBars(true);
-        }
+        searchController.setSearchSystemBarsHarmonized(showing);
     }
-
-
-
-
-
-
-
-
-
-
-
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
@@ -1550,30 +1182,8 @@ public class ActHome extends ActBase implements LensViewHolderHost, HomeQuickAct
         quickActions.onPermissionResult(requestCode, permissions, grantResults);
     }
 
-    private void launchSearchResult(App app, View source) {
-        // UI-010 fix: hideSearch() used to run first - its clearText() call fires the
-        // TextWatcher synchronously, wiping the result list to the empty/recent state a split
-        // second before the target app's launch animation covers the screen, i.e. a visible
-        // flash of the result the user just tapped disappearing. Launching first means whatever
-        // the user sees next is the app's own reveal animation, not our own UI clearing itself.
-        searchLaunchCount++;
-        searchHistoryStore.recordLaunch(AppSearchEngine.componentKey(app));
-        com.mckimquyen.util.UtilApp.launchComponent(
-                this,
-                app.getPackageName().toString(),
-                app.getLabel().toString(),
-                app.getName().toString(),
-                source,
-                new android.graphics.Rect(0, 0, source.getWidth(), source.getHeight()),
-                app.getUserId()
-        );
-        hideSearchOverlay();
-    }
-
     private void hideSearchOverlay() {
-        // SearchView.hide() runs the reverse morph animation and handles keyboard/focus itself.
-        searchView.clearText();
-        searchView.hide();
+        searchController.hideSearchOverlay();
     }
 
     /**
@@ -1583,9 +1193,7 @@ public class ActHome extends ActBase implements LensViewHolderHost, HomeQuickAct
      * predictive-back cancel convention).
      */
     private void resetPredictiveBackPreview() {
-        searchView.setScaleX(PREDICTIVE_BACK_MAX_SCALE);
-        searchView.setScaleY(PREDICTIVE_BACK_MAX_SCALE);
-        searchView.setAlpha(PREDICTIVE_BACK_MAX_ALPHA);
+        searchController.resetPredictiveBackPreview();
     }
 
     @Override
@@ -1613,7 +1221,7 @@ public class ActHome extends ActBase implements LensViewHolderHost, HomeQuickAct
             // SEARCH-007: DND access has no onRequestPermissionsResult callback - re-resolve the
             // quick-action row on every resume so returning from openDndAccessSettings() reflects
             // the real granted/denied state instead of the stale pre-Settings copy.
-            quickActions.updateQuickAction(appSearch.getText());
+            quickActions.updateQuickAction(searchController.text());
         }
         if (RAppsSingleton.getInstance().getApps() != null && !RAppsSingleton.getInstance().getApps().isEmpty()) {
             assignApps(Objects.requireNonNull(RAppsSingleton.getInstance().getApps()));
@@ -1732,7 +1340,6 @@ public class ActHome extends ActBase implements LensViewHolderHost, HomeQuickAct
         }
     }
 
-
     private void setupTransparentSystemBarsForLollipop() {
         Window window = getWindow();
         window.getAttributes().systemUiVisibility |= (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
@@ -1824,8 +1431,8 @@ public class ActHome extends ActBase implements LensViewHolderHost, HomeQuickAct
             progressBarHome.setVisibility(View.INVISIBLE);
             updateModeVisibility();
             updateLensNavigationChrome();
-            if (searchView.isShowing() || appSearch.getText().length() > 0) {
-                updateSearchResults(appSearch.getText());
+            if (searchView.isShowing() || searchController.text().length() > 0) {
+                updateSearchResults(searchController.text());
             }
             return;
         }
@@ -1843,8 +1450,8 @@ public class ActHome extends ActBase implements LensViewHolderHost, HomeQuickAct
             progressBarHome.setVisibility(View.INVISIBLE);
             updateModeVisibility();
             updateLensNavigationChrome();
-            if (searchView.isShowing() || appSearch.getText().length() > 0) {
-                updateSearchResults(appSearch.getText());
+            if (searchView.isShowing() || searchController.text().length() > 0) {
+                updateSearchResults(searchController.text());
             }
             return;
         }
@@ -1876,8 +1483,8 @@ public class ActHome extends ActBase implements LensViewHolderHost, HomeQuickAct
             reportFullyDrawnCallCount++;
             reportFullyDrawn();
         }
-        if (searchView.isShowing() || appSearch.getText().length() > 0) {
-            updateSearchResults(appSearch.getText());
+        if (searchView.isShowing() || searchController.text().length() > 0) {
+            updateSearchResults(searchController.text());
         }
     }
 
@@ -1888,13 +1495,13 @@ public class ActHome extends ActBase implements LensViewHolderHost, HomeQuickAct
     @Override
     public void onTrimMemory(int level) {
         super.onTrimMemory(level);
-        if (searchResultAdapter == null) return;
+        if (searchController == null) return;
         if (level >= TRIM_MEMORY_BACKGROUND) {
-            searchResultAdapter.trimShortcutCache(0f);
+            searchController.trimShortcutCache(0f);
         } else if (level >= TRIM_MEMORY_RUNNING_CRITICAL) {
-            searchResultAdapter.trimShortcutCache(0.5f);
+            searchController.trimShortcutCache(0.5f);
         } else if (level >= TRIM_MEMORY_RUNNING_LOW) {
-            searchResultAdapter.trimShortcutCache(0.75f);
+            searchController.trimShortcutCache(0.75f);
         }
     }
 
@@ -1920,7 +1527,7 @@ public class ActHome extends ActBase implements LensViewHolderHost, HomeQuickAct
     @Override public TabLayoutMediator lensTabMediator() { return lensTabMediator; }
 
     // HomeQuickActionHost
-    @Override public CharSequence searchText() { return appSearch.getText(); }
+    @Override public CharSequence searchText() { return searchController.text(); }
     @Override public void hideSearch() { hideSearchOverlay(); }
     @Override public void refreshWebSearchFallback() { updateWebSearchFallback(); }
 
@@ -1936,6 +1543,7 @@ public class ActHome extends ActBase implements LensViewHolderHost, HomeQuickAct
             lensManagementMenu = null;
         }
         removeLensMenuPressAnchor();
+        searchController.onDestroy();
         quickActions.onDestroy();
         super.onDestroy();
     }
