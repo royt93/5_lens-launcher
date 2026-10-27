@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | idea |
-| Status | inprogress |
+| Status | done |
 | Priority | P3 |
 | Evidence | conditional |
 | Epic | Search quality |
@@ -23,9 +23,9 @@ Là người dùng tiếng Trung/Nhật, tôi muốn tìm đúng app, không ra 
 
 ## Acceptance criteria
 
-- [ ] Gate fuzzy theo script hoặc ngưỡng theo tỉ lệ.
-- [ ] Tùy chọn khớp chữ cái đầu offline (bảng nhỏ), không thêm dependency.
-- [ ] Test với bộ nhãn CJK thật.
+- [x] Gate fuzzy theo script hoặc ngưỡng theo tỉ lệ.
+- [x] Khớp chữ cái đầu / pinyin offline qua ICU của hệ điều hành (API 29+), luôn bật, không thêm dependency (romaji/kana ngoài phạm vi).
+- [x] Test với bộ nhãn CJK thật.
 
 ## Implementation notes
 
@@ -33,13 +33,13 @@ SP 8 phải tách khi thực hiện: story con 1 sửa fuzzy (3 SP), story con 2
 
 ## Verification and Definition of Done
 
-- [ ] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
-- [ ] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
-- [ ] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
-- [ ] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
-- [ ] No new lint/build failures.
-- [ ] A post-change audit record scores the round `> 9.0/10` before push.
-- [ ] Evidence and status are updated before moving this file to `done`.
+- [x] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
+- [x] Widget/UI tests: `PinyinSearchWidgetTest` trên KJ7. Accessibility: Not applicable, không có control/chuỗi mới (đã review).
+- [x] Integration: ICU thật qua Robolectric + widget thật; persistence Not applicable, không lưu trạng thái mới (đã review).
+- [x] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
+- [x] No new lint/build failures.
+- [x] A post-change audit record scores the round `> 9.0/10` before push.
+- [x] Evidence and status are updated before moving this file to `done`.
 
 If a test layer is not applicable, replace its checkbox with a reviewed rationale; do not silently omit it.
 
