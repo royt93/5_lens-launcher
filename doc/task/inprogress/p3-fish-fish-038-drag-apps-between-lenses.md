@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | idea |
-| Status | todo |
+| Status | inprogress |
 | Priority | P3 |
 | Evidence | idea |
 | Epic | Multi-lens |
