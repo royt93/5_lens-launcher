@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | new |
-| Status | todo |
+| Status | inprogress |
 | Priority | P3 |
 | Evidence | confirmed |
 | Epic | Settings safety |
