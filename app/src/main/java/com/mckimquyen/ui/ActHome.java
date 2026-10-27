@@ -76,6 +76,8 @@ import com.mckimquyen.search.SearchEnterKeyPolicy;
 import com.mckimquyen.search.SearchFilterEngine;
 import com.mckimquyen.search.SearchHistoryStore;
 import com.mckimquyen.search.SearchResultAdapter;
+import com.mckimquyen.ui.home.LensViewHolder;
+import com.mckimquyen.ui.home.LensViewHolderHost;
 import com.mckimquyen.util.ApertureRevealHelper;
 import com.mckimquyen.util.LensAppScope;
 import com.mckimquyen.util.LensLabelResolver;
@@ -98,7 +100,7 @@ import com.google.android.material.progressindicator.CircularProgressIndicator;
 import kotlin.Unit;
 
 //2023.03.19 tried to convert kotlin but failed
-public class ActHome extends ActBase {
+public class ActHome extends ActBase implements LensViewHolderHost {
 
     // SEARCH-004: request codes for the two permission-gated quick actions.
     private static final int REQUEST_CODE_CAMERA = 1001;
@@ -184,19 +186,12 @@ public class ActHome extends ActBase {
     // written to from a page bind that isn't the tracked current one, so a not-yet-selected
     // prefetched page can't clobber it with the wrong lens's view.
     LensView lensViews;
-    private ViewPager2 lensPager;
     // Held so onDestroy can detach() it: the mediator registers observers on the pager/adapter.
     private TabLayoutMediator lensTabMediator;
-    private TabLayout lensPageIndicator;
-    private TextView tvLensName;
-    private String lensManagementReturnTargetId;
-    private LensPagerAdapter lensPagerAdapter;
-    private List<LensWorkspace> currentLenses = new ArrayList<>();
-    /** FISH-038: the one pending undo of the last lens move; dropped when the Activity goes away. */
-    private kotlin.jvm.functions.Function0<Boolean> pendingLensMoveUndo;
+    private final LensViewHolder lensHolder = new LensViewHolder(this);
 
     /** FISH-EXPORT: set by FrmLens's share button on the Intent that (re)launches this singleTask
-     *  activity, so onLensMenuItemSelected's item 5 path runs automatically once currentLenses is
+     *  activity, so onLensMenuItemSelected's item 5 path runs automatically once lensHolder.currentLenses() is
      *  loaded, instead of FrmLens needing its own copy of the export logic. */
     public static final String EXTRA_AUTO_EXPORT_LENS =
             "com.mckimquyen.lenslauncher.EXTRA_AUTO_EXPORT_LENS";
@@ -216,39 +211,6 @@ public class ActHome extends ActBase {
 
     @androidx.annotation.VisibleForTesting
     LensShareLauncher lensShareLauncher = this::startActivity;
-    private final ViewPager2.OnPageChangeCallback lensPageChangeCallback = new ViewPager2.OnPageChangeCallback() {
-        @Override
-        public void onPageSelected(int position) {
-            LensView view = lensViewAt(position);
-            if (view != null) {
-                lensViews = view;
-                if (listApp != null) {
-                    view.setApps(scopedApps(view.getLensId()));
-                }
-            }
-            if (position >= 0 && position < currentLenses.size()) {
-                LensWorkspace lens = currentLenses.get(position);
-                String currentActive = utilSettings != null
-                        ? utilSettings.getString(UtilSettings.KEY_ACTIVE_LENS_ID)
-                        : null;
-                if (lens.getId() != null && !lens.getId().equals(currentActive)) {
-                    if (utilSettings != null) {
-                        utilSettings.save(UtilSettings.KEY_ACTIVE_LENS_ID, lens.getId());
-                    }
-                    Object application = getApplication();
-                    if (application instanceof RApplication) {
-                        ((RApplication) application).getAppRefreshPipeline().switchLens(lens.getId());
-                    }
-                }
-                // FISH-012: this page may already have been bound (and its pending value already
-                // silently restored) as a prefetched neighbour before the user ever swiped to it
-                // - bindLensView will not run again just because it's now selected, so the
-                // confirmation Snackbar has to be (re-)offered from here too.
-                maybeShowResurrectSnackbar(lens);
-                updateLensNavigationChrome();
-            }
-        }
-    };
     private RecyclerView rvHomeAppList;
     private AppAdapter homeAppAdapter;
     private UtilSettings utilSettings;
@@ -391,7 +353,7 @@ public class ActHome extends ActBase {
         String requestedLensId = intent != null ? intent.getStringExtra(EXTRA_TARGET_LENS_ID) : null;
         applyTargetLensExtra(intent);
         if (requestedLensId != null && !requestedLensId.isEmpty()) {
-            lensManagementReturnTargetId = requestedLensId;
+            lensHolder.setManagementReturnTargetId(requestedLensId);
         }
         refreshLensList();
     }
@@ -472,7 +434,7 @@ public class ActHome extends ActBase {
                 int targetLensRightMargin = Math.max(systemBars.right, contentMaxWidthMargin);
 
                 ViewGroup.MarginLayoutParams updatedLensParams =
-                        (ViewGroup.MarginLayoutParams) lensPager.getLayoutParams();
+                        (ViewGroup.MarginLayoutParams) lensHolder.pager().getLayoutParams();
                 if (updatedLensParams.topMargin != targetLensTopMargin
                         || updatedLensParams.bottomMargin != systemBars.bottom
                         || updatedLensParams.leftMargin != targetLensSideMargin
@@ -481,7 +443,7 @@ public class ActHome extends ActBase {
                     updatedLensParams.bottomMargin = systemBars.bottom;
                     updatedLensParams.leftMargin = targetLensSideMargin;
                     updatedLensParams.rightMargin = targetLensRightMargin;
-                    lensPager.setLayoutParams(updatedLensParams);
+                    lensHolder.pager().setLayoutParams(updatedLensParams);
                 }
 
                 if (rvHomeAppList != null) {
@@ -526,31 +488,7 @@ public class ActHome extends ActBase {
     }
 
     private void setupViews() {
-        lensPager = findViewById(R.id.lensPager);
-        lensPageIndicator = findViewById(R.id.lensPageIndicator);
-        tvLensName = findViewById(R.id.tvLensName);
-        lensPagerAdapter = new LensPagerAdapter((view, lens) -> {
-            // FISH-008 Phase 3: every page carries its own lens identity, set on every bind and
-            // rebind (not on page selection) so a prefetched neighbour page never draws with the
-            // currently-visible lens's curvature/Smart Focus for a frame before being swiped to.
-            view.setLensId(lens.getId());
-            bindLensView(view, lens);
-            return Unit.INSTANCE;
-        });
-        lensPager.setAdapter(lensPagerAdapter);
-        lensTabMediator = new TabLayoutMediator(lensPageIndicator, lensPager,
-                (tab, position) -> tab.setIcon(R.drawable.lens_page_indicator_dot));
-        lensTabMediator.attach();
-        lensPager.registerOnPageChangeCallback(lensPageChangeCallback);
-        lensPageIndicator.setOnLongClickListener(v -> {
-            showLensManagementMenu(v);
-            return true;
-        });
-        tvLensName.setOnClickListener(v -> openLensManagement());
-        tvLensName.setOnLongClickListener(v -> {
-            showLensManagementMenu(v);
-            return true;
-        });
+        lensHolder.attach();
         rvHomeAppList = findViewById(R.id.rvHomeAppList);
         utilSettings = new UtilSettings(this);
         homeAppAdapter = new AppAdapter(this, new ArrayList<>());
@@ -616,29 +554,7 @@ public class ActHome extends ActBase {
      * and the active lens name label) in lockstep across all lifecycle, swipe, search, and mode states.
      */
     void updateLensNavigationChrome() {
-        updateHiddenRecoveryButton();
-        if (lensPageIndicator == null) return;
-        boolean isCleanMode = utilSettings != null && utilSettings.getBoolean(UtilSettings.KEY_CLEAN_LENS_MODE);
-        boolean isList = utilSettings != null && utilSettings.isListMode();
-        boolean isSearchShowing = searchView != null && searchView.isShowing();
-        boolean visible = com.mckimquyen.ui.home.LensViewHolder.chromeVisible(
-                isCleanMode, isList, isSearchShowing, currentLenses != null ? currentLenses.size() : 0);
-
-        lensPageIndicator.setVisibility(visible ? View.VISIBLE : View.GONE);
-        if (tvLensName != null) {
-            tvLensName.setVisibility(visible ? View.VISIBLE : View.GONE);
-            if (visible && currentLenses != null) {
-                int position = lensPager != null ? lensPager.getCurrentItem() : 0;
-                if (position >= 0 && position < currentLenses.size()) {
-                    tvLensName.setText(currentLenses.get(position).getName());
-                } else {
-                    String activeId = utilSettings != null
-                            ? utilSettings.getString(UtilSettings.KEY_ACTIVE_LENS_ID)
-                            : null;
-                    tvLensName.setText(LensLabelResolver.resolveActiveLensName(currentLenses, activeId));
-                }
-            }
-        }
+        lensHolder.updateLensNavigationChrome();
     }
 
     // ========================================================================
@@ -650,61 +566,7 @@ public class ActHome extends ActBase {
      *  exactly like before this feature. */
     @androidx.annotation.VisibleForTesting
     void refreshLensList() {
-        LensWorkspace.loadAll(lenses -> {
-            onLensesChanged(lenses);
-            lensPagerAdapter.submitLenses(lenses);
-            updateLensNavigationChrome();
-            if (lensManagementReturnTargetId != null) {
-                String targetId = lensManagementReturnTargetId;
-                lensManagementReturnTargetId = null;
-                for (int index = 0; index < lenses.size(); index++) {
-                    if (lenses.get(index).getId().equals(targetId)) {
-                        int targetIndex = index;
-                        lensPager.post(() -> {
-                            if (lensPager != null && lensPager.getCurrentItem() != targetIndex) {
-                                lensPager.setCurrentItem(targetIndex, false);
-                            }
-                        });
-                        break;
-                    }
-                }
-            }
-            // FISH-008 Phase 2 r2: restore active page after rotation/recreate so the user stays on
-            // the lens they were viewing instead of bouncing back to page 0.
-            if (utilSettings != null && !lenses.isEmpty()) {
-                java.util.Set<String> validLensIds = new java.util.HashSet<>();
-                for (LensWorkspace lens : lenses) validLensIds.add(lens.getId());
-                utilSettings.reconcileActiveLens(validLensIds);
-                String savedActive = utilSettings.getString(UtilSettings.KEY_ACTIVE_LENS_ID);
-                for (int i = 0; i < lenses.size(); i++) {
-                    if (lenses.get(i).getId().equals(savedActive)) {
-                        final int targetIndex = i;
-                        // ViewPager2 needs a layout tick after adapter update to accept target position
-                        lensPager.post(() -> {
-                            if (lensPager != null && lensPager.getCurrentItem() != targetIndex) {
-                                lensPager.setCurrentItem(targetIndex, false);
-                            }
-                        });
-                        break;
-                    }
-                }
-            }
-            // B3 (test-audit): consumed here ONLY when a page is already bound (lensViews !=
-            // null) - the real-world case that matters most, since ActHome is launchMode=
-            // "singleTask" and FrmLens's share button re-launches an already-running, already-
-            // fully-bound instance via onNewIntent. submitLenses() with an unchanged lens list
-            // triggers no rebind at all in that case, so bindLensView's own check below would
-            // never run - this is the only place that ever fires for that path. On a genuine
-            // cold launch, lensViews can still be null here (the DB load can finish before
-            // ViewPager2 has bound its first page) - leave the flag set so bindLensView catches
-            // it the moment that first bind actually happens, instead of firing against a null
-            // view or, worse, silently losing the one-shot request forever.
-            if (pendingAutoExportLens && lensViews != null) {
-                pendingAutoExportLens = false;
-                lensPager.post(this::exportActiveLensImage);
-            }
-            return Unit.INSTANCE;
-        });
+        lensHolder.refreshLensList();
     }
 
     /** Runs on every page bind (initial + recycled). Only the page currently tracked as
@@ -713,149 +575,11 @@ public class ActHome extends ActBase {
      *  lens's apps once the user actually swipes to it (see lensPageChangeCallback), so a
      *  prefetched adjacent page never briefly shows the wrong lens's layout. */
     private void bindLensView(LensView view) {
-        bindLensView(view, null);
+        lensHolder.bindLensView(view);
     }
 
-    /**
-     * @param lens the workspace this page is being bound to, when the caller knows it. During a
-     *             rebind the holder is not yet discoverable through the pager, so the lens id is
-     *             the only reliable way to tell "this is the page the user is looking at".
-     */
     private void bindLensView(LensView view, LensWorkspace lens) {
-        view.setPackageManager(getPackageManager());
-        // FISH-038: "Move to lens" needs a second lens; the Undo snackbar is owned here, not by the view.
-        view.setHasOtherLenses(currentLenses != null && currentLenses.size() > 1);
-        view.setOnAppMovedToLensListener((targetName, undo) -> {
-            pendingLensMoveUndo = undo;
-            Snackbar.make(lensPager, getString(R.string.move_to_lens_done, targetName), Snackbar.LENGTH_LONG)
-                    .setAction(R.string.reset_undo, v -> {
-                        kotlin.jvm.functions.Function0<Boolean> pending = pendingLensMoveUndo;
-                        if (pending != null && pending.invoke()) {
-                            pendingLensMoveUndo = null;
-                        } else {
-                            Toast.makeText(this, R.string.reset_undo_failed, Toast.LENGTH_LONG).show();
-                        }
-                    })
-                    .show();
-        });
-        view.setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
-        view.setOnCurvatureAdjustedListener((curvature, finished) -> {
-            if (finished) {
-                showPinchCurvatureSnackbar(curvature);
-            }
-        });
-        // FISH-008 Phase 3: the dots indicator - the menu's only other entry point - is hidden
-        // while a single lens exists, so long-pressing empty grid space has to reach it too.
-        // Otherwise no single-lens install (i.e. everyone, right after the v11 migration) can
-        // ever create a second lens. Anchored on the page itself, same as UI-022's icon menu.
-        view.setOnEmptySpaceLongPressListener((x, y) -> {
-            // The previous menu's dismiss listener removes the anchor, so it has to go first -
-            // otherwise it would tear down the anchor the new menu is about to be built on.
-            dismissLensManagementMenu();
-            showLensManagementMenu(anchorAtPressedPoint(view, x, y));
-        });
-        // FISH-016: pull-down from the lens top opens full search, in Clean mode too.
-        view.setOnSearchSwipeDownListener(this::openSearchFromHome);
-        // FISH-025: confirmed edge swipe switches pages; do not wrap past first/last lens.
-        view.setOnEdgeSwipeListener(direction -> {
-            if (lensPager == null || lensPager.getAdapter() == null) return;
-            int count = lensPager.getAdapter().getItemCount();
-            if (count <= 1) return;
-            int current = lensPager.getCurrentItem();
-            int target = current;
-            if (direction == com.mckimquyen.gesture.EdgeSwipeDirection.PREVIOUS && current > 0) {
-                target = current - 1;
-            } else if (direction == com.mckimquyen.gesture.EdgeSwipeDirection.NEXT && current < count - 1) {
-                target = current + 1;
-            }
-            if (target != current) {
-                lensPager.setCurrentItem(target, true);
-                view.performHapticFeedback(android.view.HapticFeedbackConstants.VIRTUAL_KEY);
-            }
-        });
-        // FISH-012: a pinch adjustment that was never resolved (Save/dismiss) before the process
-        // died is restored here silently, on every bind - not just the active page - so it's
-        // ready the instant the user swipes to whichever lens it belonged to. The confirmation
-        // Snackbar itself is only re-shown for the page currently on screen (below) - see
-        // maybeShowResurrectSnackbar's own doc comment for why onPageSelected also needs it.
-        restorePendingPinchIfAny(view, lens);
-        // FISH-008 Phase 3 fix: after a configuration change every page rebinds while `listApp`
-        // is already populated, but `lensViews` still points at the destroyed Activity's
-        // LensView - so no page matched here and the restored page was left with an empty grid
-        // until the next app-list broadcast. The pager cannot resolve its holder mid-rebind, so
-        // match on the lens id instead: the page whose lens is the active one is the visible one.
-        // Found by rotating a real TECNO KJ7 with two lenses on the second page.
-        boolean isActiveLensPage = lens != null && utilSettings != null
-                && lens.getId().equals(utilSettings.getString(UtilSettings.KEY_ACTIVE_LENS_ID));
-        if (lensViews == null || lensViews == view || isActiveLensPage) {
-            lensViews = view;
-            if (listApp != null) {
-                view.setApps(scopedApps(view.getLensId()));
-            }
-            maybeShowResurrectSnackbar(lens);
-            // B3 (test-audit): must fire from here, the exact point lensViews first becomes
-            // non-null, not from refreshLensList()'s DB-load callback via a separate
-            // lensPager.post() - that raced two independent queuing mechanisms (a plain
-            // Handler.post against the RecyclerView's own Choreographer-scheduled bind pass) and
-            // could silently lose the one-shot auto-export forever if this bind lost the race.
-            if (pendingAutoExportLens) {
-                pendingAutoExportLens = false;
-                view.post(this::exportActiveLensImage);
-            }
-        }
-    }
-
-    /** FISH-012: silently restores {@code lens}'s pending pinch value (if any) into {@code view}'s
-     *  live/preview state. Safe to call on every bind, active page or not, so a not-yet-visible
-     *  page already shows the right curvature the instant the user swipes to it. */
-    private void restorePendingPinchIfAny(LensView view, LensWorkspace lens) {
-        if (view == null || lens == null || utilSettings == null) return;
-        Float pending = utilSettings.getPendingDistortionFactor(lens.getId());
-        if (pending != null) {
-            view.restoreLiveDistortionFactor(pending);
-        }
-    }
-
-    /** FISH-012: lens ids this Activity instance has already offered the resurrect Snackbar for -
-     *  guards against showing it twice for the same cold-launch page (bindLensView AND
-     *  onPageSelected both fire for page 0 at launch). A second show would call
-     *  showPinchCurvatureSnackbar again, which dismisses the still-showing first Snackbar as a
-     *  side effect - and that dismissal now calls resetLiveDistortionFactor(), which clears the
-     *  pending key too, silently un-resurrecting what was just resurrected. Reset per Activity
-     *  instance only (a fresh instance after recreate/relaunch should still get one real prompt
-     *  if the value is still genuinely unresolved). */
-    private final java.util.Set<String> resurrectPromptedLensIds = new java.util.HashSet<>();
-
-    /** FISH-012: re-shows the confirmation Snackbar for {@code lens}'s pending pinch value, if
-     *  any - call this ONLY for the page the user is actually looking at right now. Called from
-     *  both bindLensView (covers the active page being freshly bound or rebound) and
-     *  lensPageChangeCallback.onPageSelected (covers swiping onto a page that was already bound
-     *  as a prefetched neighbour and therefore never goes through bindLensView again -
-     *  ViewPager2's underlying RecyclerView keeps adjacent pages bound without rebinding them on
-     *  selection). resurrectPromptedLensIds above ensures only the first of those two calls for a
-     *  given lens actually shows anything. */
-    private void maybeShowResurrectSnackbar(LensWorkspace lens) {
-        if (lens == null || utilSettings == null) return;
-        if (!resurrectPromptedLensIds.add(lens.getId())) return;
-        Float pending = utilSettings.getPendingDistortionFactor(lens.getId());
-        if (pending != null) {
-            showPinchCurvatureSnackbar(pending);
-        }
-    }
-
-    /** ViewPager2 wraps exactly one child, its own internal RecyclerView - a well-known (if
-     *  unofficial) way to reach a specific page's already-bound ViewHolder, used here only to
-     *  resolve which LensView a just-selected page actually is. */
-    private LensView lensViewAt(int position) {
-        if (lensPager == null || lensPager.getChildCount() == 0) return null;
-        View child = lensPager.getChildAt(0);
-        if (!(child instanceof RecyclerView)) return null;
-        RecyclerView.ViewHolder holder = ((RecyclerView) child).findViewHolderForAdapterPosition(position);
-        if (holder instanceof LensPagerAdapter.PageHolder) {
-            return ((LensPagerAdapter.PageHolder) holder).getLensView();
-        }
-        return null;
+        lensHolder.bindLensView(view, lens);
     }
 
     /** The lens menu currently built, exposed so tests can inspect what it actually offered. */
@@ -881,9 +605,9 @@ public class ActHome extends ActBase {
      */
     @androidx.annotation.VisibleForTesting
     View lensMenuAnchor() {
-        // setupViews() assigns lensPageIndicator before the adapter that can trigger this, so it
+        // setupViews() assigns lensHolder.indicator() before the adapter that can trigger this, so it
         // is non-null by the time any menu can open; rootLayout is a defensive fallback only.
-        return lensPageIndicator != null ? lensPageIndicator : findViewById(R.id.rootLayout);
+        return lensHolder.indicator() != null ? lensHolder.indicator() : findViewById(R.id.rootLayout);
     }
 
     /**
@@ -952,12 +676,12 @@ public class ActHome extends ActBase {
         }
         PopupMenu menu = new PopupMenu(themed, anchor);
         lensManagementMenu = menu;
-        int position = lensPager.getCurrentItem();
+        int position = lensHolder.pager().getCurrentItem();
         addLensMenuItem(menu, themed, 1, R.string.lens_add, R.drawable.ic_add_24dp, true);
         addLensMenuItem(menu, themed, 2, R.string.lens_rename, R.drawable.ic_edit_24dp, true);
         addLensMenuItem(menu, themed, 3, R.string.lens_delete, R.drawable.ic_delete_outline_24dp,
-                position >= 0 && position < currentLenses.size()
-                        && LensWorkspace.canDelete(currentLenses.get(position).getId(), currentLenses.size()));
+                position >= 0 && position < lensHolder.currentLenses().size()
+                        && LensWorkspace.canDelete(lensHolder.currentLenses().get(position).getId(), lensHolder.currentLenses().size()));
         // FISH-008 Phase 3: Smart Focus is per-lens, so it gets a quick toggle right here on the
         // lens it applies to (FrmSettings' own switch covers the same lens from Settings). The
         // label states the action rather than using a checkable item.
@@ -1017,8 +741,8 @@ public class ActHome extends ActBase {
      */
     @androidx.annotation.VisibleForTesting
     boolean onLensMenuItemSelected(int itemId, int position) {
-        if (position < 0 || position >= currentLenses.size()) return false;
-        LensWorkspace current = currentLenses.get(position);
+        if (position < 0 || position >= lensHolder.currentLenses().size()) return false;
+        LensWorkspace current = lensHolder.currentLenses().get(position);
         if (itemId == 1) {
             createLensDialog(current.getId());
             return true;
@@ -1067,9 +791,9 @@ public class ActHome extends ActBase {
     /** The menu entry names the action it performs, so it has to read the lens's current state. */
     @androidx.annotation.VisibleForTesting
     int lensSmartFocusMenuLabelRes(int position) {
-        boolean on = position >= 0 && position < currentLenses.size()
+        boolean on = position >= 0 && position < lensHolder.currentLenses().size()
                 && utilSettings != null
-                && utilSettings.isSmartFocusBias(currentLenses.get(position).getId());
+                && utilSettings.isSmartFocusBias(lensHolder.currentLenses().get(position).getId());
         return on ? R.string.lens_smart_focus_disable : R.string.lens_smart_focus_enable;
     }
 
@@ -1087,15 +811,7 @@ public class ActHome extends ActBase {
 
     /** FISH-021: one place that adopts a fresh lens list, so the launcher shortcuts never go stale. */
     private void onLensesChanged(List<LensWorkspace> lenses) {
-        currentLenses = lenses;
-        LensShortcuts.refresh(getApplicationContext(), lenses);
-        // FISH-038: pages bound before the list changed must learn whether a move target exists now.
-        if (lensPagerAdapter != null) {
-            for (int i = 0; i < lensPagerAdapter.getItemCount(); i++) {
-                LensView page = lensViewAt(i);
-                if (page != null) page.setHasOtherLenses(lenses.size() > 1);
-            }
-        }
+        lensHolder.onLensesChanged(lenses);
     }
 
     /** FISH-022: lens name opens grouped lens management and selection in a separate Activity. */
@@ -1117,8 +833,8 @@ public class ActHome extends ActBase {
     /** Like {@link #lensSmartFocusMenuLabelRes}: the entry names the action, so it reads current state. */
     @androidx.annotation.VisibleForTesting
     int lensFreezeMenuLabelRes(int position) {
-        boolean frozen = position >= 0 && position < currentLenses.size() && utilSettings != null
-                && utilSettings.isLensFrozen(currentLenses.get(position).getId());
+        boolean frozen = position >= 0 && position < lensHolder.currentLenses().size() && utilSettings != null
+                && utilSettings.isLensFrozen(lensHolder.currentLenses().get(position).getId());
         return frozen ? R.string.lens_unfreeze_positions : R.string.lens_freeze_positions;
     }
 
@@ -1186,7 +902,7 @@ public class ActHome extends ActBase {
         }
         String activeLensId = view.getLensId();
         LensWorkspace matched = null;
-        for (LensWorkspace lens : currentLenses) {
+        for (LensWorkspace lens : lensHolder.currentLenses()) {
             if (lens.getId().equals(activeLensId)) {
                 matched = lens;
                 break;
@@ -1233,7 +949,7 @@ public class ActHome extends ActBase {
     }
 
     private void createLensDialog(String copyFromLensId) {
-        String defaultName = getString(R.string.lens_new_name_template, currentLenses.size() + 1);
+        String defaultName = getString(R.string.lens_new_name_template, lensHolder.currentLenses().size() + 1);
         showLensNameDialog(R.string.lens_add, defaultName, name ->
                 LensWorkspace.createLens(name, copyFromLensId, lenses -> {
                     // FISH-008 Phase 3: the new lens copies its source's curvature/Smart Focus
@@ -1241,13 +957,13 @@ public class ActHome extends ActBase {
                     // the one lens that wasn't there before.
                     if (utilSettings != null) {
                         for (LensWorkspace lens : lenses) {
-                            if (!containsLens(currentLenses, lens.getId())) {
+                            if (!containsLens(lensHolder.currentLenses(), lens.getId())) {
                                 utilSettings.duplicateLensSettings(copyFromLensId, lens.getId());
                             }
                         }
                     }
                     onLensesChanged(lenses);
-                    lensPagerAdapter.submitLenses(lenses);
+                    lensHolder.adapter().submitLenses(lenses);
                     updateLensNavigationChrome();
                     return Unit.INSTANCE;
                 }));
@@ -1264,7 +980,7 @@ public class ActHome extends ActBase {
         showLensNameDialog(R.string.lens_rename_title, lens.getName(), name ->
                 LensWorkspace.renameLens(lens, name, lenses -> {
                     onLensesChanged(lenses);
-                    lensPagerAdapter.submitLenses(lenses);
+                    lensHolder.adapter().submitLenses(lenses);
                     updateLensNavigationChrome();
                     return Unit.INSTANCE;
                 }));
@@ -1439,14 +1155,14 @@ public class ActHome extends ActBase {
                                 utilSettings.deleteLensSettings(lens.getId());
                             }
                             onLensesChanged(lenses);
-                            lensPagerAdapter.submitLenses(lenses);
+                            lensHolder.adapter().submitLenses(lenses);
                             updateLensNavigationChrome();
                             // FISH-008 Phase 2 r2: if we just deleted the active lens, clamp the
                             // pager and switch RAppsSingleton to the newly active lens so the
                             // deleted lens's layout is not retained in memory.
                             if (!lenses.isEmpty()) {
-                                int targetPos = Math.min(lensPager.getCurrentItem(), lenses.size() - 1);
-                                lensPager.setCurrentItem(targetPos, false);
+                                int targetPos = Math.min(lensHolder.pager().getCurrentItem(), lenses.size() - 1);
+                                lensHolder.pager().setCurrentItem(targetPos, false);
                                 LensWorkspace targetLens = lenses.get(targetPos);
                                 if (utilSettings != null) {
                                     utilSettings.save(UtilSettings.KEY_ACTIVE_LENS_ID, targetLens.getId());
@@ -1503,9 +1219,9 @@ public class ActHome extends ActBase {
         // SearchBar->SearchView expand/collapse is a Material3 morph animation, not an instant
         // focus change; refresh results once the panel is fully SHOWN and ready for input.
         findViewById(R.id.restoreHiddenLensApps).setOnClickListener(v -> {
-            int position = lensPager.getCurrentItem();
-            if (position >= 0 && position < currentLenses.size()) {
-                showHiddenLensAppsDialog(currentLenses.get(position).getId());
+            int position = lensHolder.pager().getCurrentItem();
+            if (position >= 0 && position < lensHolder.currentLenses().size()) {
+                showHiddenLensAppsDialog(lensHolder.currentLenses().get(position).getId());
             }
         });
         searchView.addTransitionListener((view, previousState, newState) -> {
@@ -1534,10 +1250,10 @@ public class ActHome extends ActBase {
             // surface while search is open. Toggled on SHOWING/HIDING (not SHOWN/HIDDEN) to match
             // SearchView.isShowing() semantics, same reasoning as the old blur toggle it replaces.
             if (newState == SearchView.TransitionState.SHOWING) {
-                lensPager.setVisibility(View.INVISIBLE);
+                lensHolder.pager().setVisibility(View.INVISIBLE);
                 updateHiddenRecoveryButton();
-                lensPageIndicator.setVisibility(View.GONE);
-                if (tvLensName != null) tvLensName.setVisibility(View.GONE);
+                lensHolder.indicator().setVisibility(View.GONE);
+                if (lensHolder.nameLabel() != null) lensHolder.nameLabel().setVisibility(View.GONE);
                 if (rvHomeAppList != null) {
                     rvHomeAppList.setVisibility(View.GONE);
                 }
@@ -1739,9 +1455,9 @@ public class ActHome extends ActBase {
         SearchFilterPreset preset = utilSettings != null
                 ? utilSettings.getSearchFilterPreset()
                 : SearchFilterPreset.ALL;
-        int currentPos = lensPager != null ? lensPager.getCurrentItem() : 0;
-        String currentLensId = currentLenses != null && currentPos >= 0 && currentPos < currentLenses.size()
-                ? currentLenses.get(currentPos).getId()
+        int currentPos = lensHolder.pager() != null ? lensHolder.pager().getCurrentItem() : 0;
+        String currentLensId = lensHolder.currentLenses() != null && currentPos >= 0 && currentPos < lensHolder.currentLenses().size()
+                ? lensHolder.currentLenses().get(currentPos).getId()
                 : LensWorkspace.DEFAULT_LENS_ID;
         List<App> lensApps = scopedApps(currentLensId);
         java.util.Set<String> hiddenIds = utilSettings != null
@@ -2151,14 +1867,14 @@ public class ActHome extends ActBase {
 
     public void updateModeVisibility() {
         if (searchView != null && searchView.isShowing()) {
-            if (lensPager != null) lensPager.setVisibility(View.INVISIBLE);
+            if (lensHolder.pager() != null) lensHolder.pager().setVisibility(View.INVISIBLE);
             updateLensNavigationChrome();
             if (rvHomeAppList != null) rvHomeAppList.setVisibility(View.GONE);
             return;
         }
         boolean isList = utilSettings != null && utilSettings.isListMode();
         if (isList) {
-            if (lensPager != null) lensPager.setVisibility(View.GONE);
+            if (lensHolder.pager() != null) lensHolder.pager().setVisibility(View.GONE);
             updateLensNavigationChrome();
             if (rvHomeAppList != null) {
                 rvHomeAppList.setVisibility(listApp != null && !listApp.isEmpty() ? View.VISIBLE : View.GONE);
@@ -2166,8 +1882,8 @@ public class ActHome extends ActBase {
         } else {
             if (rvHomeAppList != null) rvHomeAppList.setVisibility(View.GONE);
             boolean hasApps = listApp != null && !listApp.isEmpty();
-            if (lensPager != null) {
-                lensPager.setVisibility(hasApps ? View.VISIBLE : View.INVISIBLE);
+            if (lensHolder.pager() != null) {
+                lensHolder.pager().setVisibility(hasApps ? View.VISIBLE : View.INVISIBLE);
             }
             updateLensNavigationChrome();
         }
@@ -2319,12 +2035,12 @@ public class ActHome extends ActBase {
         View button = findViewById(R.id.restoreHiddenLensApps);
         if (button == null) return;
         boolean show = false;
-        if (utilSettings != null && listApp != null && lensPager != null
-                && lensPager.getVisibility() == View.VISIBLE && searchView != null && !searchView.isShowing()
+        if (utilSettings != null && listApp != null && lensHolder.pager() != null
+                && lensHolder.pager().getVisibility() == View.VISIBLE && searchView != null && !searchView.isShowing()
                 && !utilSettings.isListMode()) {
-            int position = lensPager.getCurrentItem();
-            if (position >= 0 && position < currentLenses.size()) {
-                String lensId = currentLenses.get(position).getId();
+            int position = lensHolder.pager().getCurrentItem();
+            if (position >= 0 && position < lensHolder.currentLenses().size()) {
+                String lensId = lensHolder.currentLenses().get(position).getId();
                 show = !LensAppScope.filter(listApp, utilSettings.getLensAppScope(lensId),
                         utilSettings.getLensAppSelection(lensId)).isEmpty()
                         && scopedApps(lensId).isEmpty();
@@ -2337,8 +2053,8 @@ public class ActHome extends ActBase {
     @androidx.annotation.VisibleForTesting
     void refreshLensScope() {
         if (listApp == null) return;
-        for (int i = 0; i < currentLenses.size(); i++) {
-            LensView page = lensViewAt(i);
+        for (int i = 0; i < lensHolder.currentLenses().size(); i++) {
+            LensView page = lensHolder.lensViewAt(i);
             if (page != null) {
                 page.setApps(scopedApps(page.getLensId()));
             }
@@ -2427,16 +2143,30 @@ public class ActHome extends ActBase {
         }
     }
 
+    // LensViewHolderHost: the holder is the only writer of the active LensView pointer.
+    @Override public android.app.Activity activity() { return this; }
+    @Override public UtilSettings utilSettings() { return utilSettings; }
+    @Override public ArrayList<App> listApp() { return listApp; }
+    @Override public ArrayList<App> appsForLens(String lensId) { return scopedApps(lensId); }
+    @Override public boolean isSearchShowing() { return searchView != null && searchView.isShowing(); }
+    @Override public void refreshHiddenRecovery() { updateHiddenRecoveryButton(); }
+    @Override public void offerPinchConfirmation(float curvature) { showPinchCurvatureSnackbar(curvature); }
+    @Override public void offerLensMenu(View anchor) { showLensManagementMenu(anchor); }
+    @Override public void dismissLensMenu() { dismissLensManagementMenu(); }
+    @Override public View lensMenuAnchorAt(View lens, float x, float y) { return anchorAtPressedPoint(lens, x, y); }
+    @Override public void requestLensManagement() { openLensManagement(); }
+    @Override public void requestSearch() { openSearchFromHome(); }
+    @Override public boolean pendingAutoExportLens() { return pendingAutoExportLens; }
+    @Override public void clearPendingAutoExportLens() { pendingAutoExportLens = false; }
+    @Override public void requestLensExport() { exportActiveLensImage(); }
+    @Override public void setActiveLensView(LensView view) { lensViews = view; }
+    @Override public LensView activeLensView() { return lensViews; }
+    @Override public void setLensTabMediator(TabLayoutMediator mediator) { lensTabMediator = mediator; }
+    @Override public TabLayoutMediator lensTabMediator() { return lensTabMediator; }
+
     @Override
     protected void onDestroy() {
-        pendingLensMoveUndo = null;
-        if (lensTabMediator != null) {
-            lensTabMediator.detach();
-            lensTabMediator = null;
-        }
-        if (lensPager != null && lensPageChangeCallback != null) {
-            lensPager.unregisterOnPageChangeCallback(lensPageChangeCallback);
-        }
+        lensHolder.onDestroy();
         // FISH-008 Phase 3: both hold a View (a dialog's decor, a popup's anchor) belonging to
         // this Activity. Dismiss a dialog still showing during a rotation - it would leak its
         // window - and drop both references so the destroyed Activity is not retained.

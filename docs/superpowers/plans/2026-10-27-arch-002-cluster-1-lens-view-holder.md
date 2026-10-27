@@ -24,7 +24,7 @@ Parent: `docs/superpowers/plans/2026-10-27-arch-002-split-acthome.md`. Written f
 
 ## Host interface `LensViewHolderHost` (Java, package `com.mckimquyen.ui.home`)
 
-Only what the moved code calls back into `ActHome`:
+Only what the moved code calls back into `ActHome`. Tên callback thực thi dùng `appsForLens`, `refreshHiddenRecovery`, `offerPinchConfirmation`, `offerLensMenu`, `dismissLensMenu`, `lensMenuAnchorAt`, `requestLensManagement`, `requestSearch`, `requestLensExport` thay cho tên method cùng chức năng bên dưới. Java interface yêu cầu method public; dùng tên riêng giữ nguyên visibility của API private/package-private hiện có, tránh khai báo trùng hoặc delegate đệ quy. Thiết bị hiện tại là Pixel 7 Pro `2B051FDH3006MU` theo yêu cầu owner; KJ7 chỉ là bằng chứng lịch sử.
 
 ```java
 public interface LensViewHolderHost {

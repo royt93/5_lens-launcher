@@ -21,6 +21,13 @@
 - Thiết bị TECNO KJ7 `115333744A005844` (Android 14), 35 lớp `ActHome*` / 145 test: **35/35 xanh** trên code chưa đổi, không có lớp đỏ hay flaky có sẵn. Dữ liệu app sao lưu 583.680 byte trước khi cài.
 - Lỗi script phát hiện: `adb shell` trong vòng lặp `while read` nuốt stdin nên lần chạy đầu chỉ chạy 1 lớp; đã thêm `</dev/null` và ghi vào plan.
 
+## Tiến độ cụm 1 (chưa commit/push refactor)
+
+- Đã chuyển pager/bind sang `ui/home/LensViewHolder.java`; giữ tên/phạm vi method cũ của `ActHome` bằng callback host có tên riêng để tránh trùng chữ ký Java.
+- Build app + androidTest và 1.262 unit test xanh. `lintDevDebug` chạy riêng xanh; lượt gate gộp lỗi `FileNotFoundException` trong kapt stub androidTest khi lint phân tích, nên chưa coi gate gộp là xanh.
+- KJ7 `115333744A005844` ngắt kết nối trước regression sau refactor; backup còn tại `/tmp/b-arch002/state/before.tar` (583.680 byte), chưa thể khôi phục.
+- Owner sau đó yêu cầu "dùng pixel thay thế đi": khóa Pixel 7 Pro `2B051FDH3006MU` cho phần còn lại của phiên (Android 17/API 37). Backup riêng `/tmp/b-arch002-pixel/before.tar` (665.600 byte) và APK cũ; locale `[]`, font `1.0`, Contacts denied. Baseline Pixel từ APK HEAD chưa refactor: 35/35 lớp xanh (145 test). Bản cụm 1 đang chạy 35 lớp + 4 lớp phụ; chưa commit/push refactor.
+
 ## User story
 
 Là dev, tôi muốn `ActHome` đủ nhỏ để sửa và test an toàn.

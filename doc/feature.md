@@ -90,6 +90,8 @@ Source of truth for implementation choices in this session. Detailed acceptance 
 
 ## 🟡 In progress
 
+- **ARCH-002 — Tách ActHome trước FISH-038b (27/10/2026)**: owner chọn đủ 5 cụm, triển khai tuần tự trong phiên; mỗi cụm có plan chi tiết và chạy toàn bộ 35 lớp `ActHome*`. Ban đầu dùng TECNO KJ7; owner đã đổi sang Pixel 7 Pro `2B051FDH3006MU` khi KJ7 ngắt kết nối. Baseline code chưa đổi trên cả hai máy: 35/35 lớp, 145 test xanh. Cụm 1 đang chuyển pager/bind sang `LensViewHolder`, giữ field `lensViews` và `lensTabMediator` cho test hiện có; chưa đóng story hay push phần refactor.
+
 
 
 

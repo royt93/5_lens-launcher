@@ -10,6 +10,10 @@
 
 **Tech Stack:** Java (ActHome) + Kotlin (collaborators), AndroidX, Material 3, JUnit4, Robolectric, AndroidJUnitRunner on the locked device.
 
+## Cập nhật thiết bị (2026-10-27)
+
+Owner yêu cầu: "dùng pixel thay thế đi". Từ thời điểm này, khóa **Pixel 7 Pro `2B051FDH3006MU`** cho phần còn lại của phiên; mọi hướng dẫn KJ7 bên dưới là lịch sử, phải thay bằng Pixel khi thực thi. Pixel Android 17/API 37; backup riêng `/tmp/b-arch002-pixel/before.tar` (665.600 byte) và `before.apk`, trạng thái locale `[]`, font `1.0`, Contacts denied. Chạy lại baseline 35 lớp trên APK HEAD trước refactor để tách khác biệt thiết bị khỏi hồi quy. KJ7 đã ngắt kết nối trước khôi phục: backup `/tmp/b-arch002/state/before.tar` còn nguyên, chưa khôi phục; không tự gửi lệnh tới KJ7 sau khi đổi khóa.
+
 ## Global Constraints
 
 - **Pure refactor.** No visible change, no new feature, no string/layout/Room/prefs change, no renamed test-visible member.
