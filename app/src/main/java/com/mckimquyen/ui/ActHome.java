@@ -621,7 +621,8 @@ public class ActHome extends ActBase {
         boolean isCleanMode = utilSettings != null && utilSettings.getBoolean(UtilSettings.KEY_CLEAN_LENS_MODE);
         boolean isList = utilSettings != null && utilSettings.isListMode();
         boolean isSearchShowing = searchView != null && searchView.isShowing();
-        boolean visible = !isCleanMode && !isList && !isSearchShowing && currentLenses != null && currentLenses.size() > 1;
+        boolean visible = com.mckimquyen.ui.home.LensViewHolder.chromeVisible(
+                isCleanMode, isList, isSearchShowing, currentLenses != null ? currentLenses.size() : 0);
 
         lensPageIndicator.setVisibility(visible ? View.VISIBLE : View.GONE);
         if (tvLensName != null) {
