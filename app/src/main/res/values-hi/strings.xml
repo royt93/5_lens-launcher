@@ -91,6 +91,13 @@
     <string name="error_no_flashlight">इस डिवाइस में फ्लैशलाइट नहीं है</string>
     <string name="error_too_many_apps">ऐप्स लोड करने में विफल</string>
     <string name="snackbar_reset_successful">सेटिंग्स डिफ़ॉल्ट पर रीसेट कर दी गईं</string>
+    <!-- UI-034: reset preview and undo -->
+    <string name="reset_preview_title">डिफ़ॉल्ट पर रीसेट करें?</string>
+    <string name="reset_preview_confirm">रीसेट करें</string>
+    <string name="reset_undo">पूर्ववत करें</string>
+    <string name="reset_already_default">पहले से डिफ़ॉल्ट मान पर है</string>
+    <string name="reset_value_on">चालू</string>
+    <string name="reset_value_off">बंद</string>
     <!-- FISH-009: Live pinch-to-adjust lens curvature -->
     <string name="pinch_curvature_preview">%1$s: %2$.1fx</string>
     <string name="pinch_save_default">डिफ़ॉल्ट के रूप में सहेजें</string>
@@ -273,4 +280,5 @@
     <string name="toast_permission_prompts_reset">अनुमति अनुरोध रीसेट हो गए</string>
     <string name="toast_permission_prompts_nothing">रीसेट करने के लिए कोई अनुमति अनुरोध नहीं</string>
     <string name="layout_import_workspace_recovered">वर्कस्पेस आयात विफल रहा और स्वचालित रोलबैक अधूरा रहा, लेकिन आपका वर्कस्पेस आयात से ठीक पहले लिए गए बैकअप से बहाल कर दिया गया।</string>
+    <string name="reset_undo_failed">रीसेट पूर्ववत नहीं हो सका। फिर कोशिश करें।</string>
 </resources>

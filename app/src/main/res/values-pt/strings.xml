@@ -91,6 +91,13 @@
     <string name="error_no_flashlight">Sem lanterna neste dispositivo</string>
     <string name="error_too_many_apps">Erro ao carregar aplicativos</string>
     <string name="snackbar_reset_successful">Configurações restauradas para o padrão</string>
+    <!-- UI-034: reset preview and undo -->
+    <string name="reset_preview_title">Redefinir para o padrão?</string>
+    <string name="reset_preview_confirm">Redefinir</string>
+    <string name="reset_undo">Desfazer</string>
+    <string name="reset_already_default">Já está nos valores padrão</string>
+    <string name="reset_value_on">Ativado</string>
+    <string name="reset_value_off">Desativado</string>
     <!-- FISH-009: Live pinch-to-adjust lens curvature -->
     <string name="pinch_curvature_preview">%1$s: %2$.1fx</string>
     <string name="pinch_save_default">Salvar como padrão</string>
@@ -278,4 +285,5 @@
     <string name="toast_permission_prompts_reset">Pedidos de permissão redefinidos</string>
     <string name="toast_permission_prompts_nothing">Nenhum pedido de permissão para redefinir</string>
     <string name="layout_import_workspace_recovered">A importação do espaço de trabalho falhou e a reversão automática ficou incompleta, mas seu espaço de trabalho foi restaurado a partir do backup feito logo antes da importação.</string>
+    <string name="reset_undo_failed">Não foi possível desfazer a redefinição. Tente novamente.</string>
 </resources>

@@ -91,6 +91,13 @@
     <string name="error_no_flashlight">이 기기에는 손전등이 없습니다</string>
     <string name="error_too_many_apps">앱 로드 실패</string>
     <string name="snackbar_reset_successful">설정이 기본값으로 재설정되었습니다</string>
+    <!-- UI-034: reset preview and undo -->
+    <string name="reset_preview_title">기본값으로 재설정할까요?</string>
+    <string name="reset_preview_confirm">재설정</string>
+    <string name="reset_undo">실행 취소</string>
+    <string name="reset_already_default">이미 기본값입니다</string>
+    <string name="reset_value_on">켜짐</string>
+    <string name="reset_value_off">꺼짐</string>
     <!-- FISH-009: Live pinch-to-adjust lens curvature -->
     <string name="pinch_curvature_preview">%1$s: %2$.1fx</string>
     <string name="pinch_save_default">기본값으로 저장</string>
@@ -268,4 +275,5 @@
     <string name="toast_permission_prompts_reset">권한 요청을 초기화했습니다</string>
     <string name="toast_permission_prompts_nothing">초기화할 권한 요청이 없습니다</string>
     <string name="layout_import_workspace_recovered">작업 공간 가져오기에 실패했고 자동 롤백도 완전하지 않았지만, 가져오기 직전에 만든 백업에서 작업 공간을 복원했습니다.</string>
+    <string name="reset_undo_failed">재설정을 실행 취소할 수 없습니다. 다시 시도하세요.</string>
 </resources>

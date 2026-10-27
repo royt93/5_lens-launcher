@@ -91,6 +91,13 @@
     <string name="error_no_flashlight">この端末にはフラッシュライトがありません</string>
     <string name="error_too_many_apps">アプリの読み込みに失敗しました</string>
     <string name="snackbar_reset_successful">設定をデフォルトにリセットしました</string>
+    <!-- UI-034: reset preview and undo -->
+    <string name="reset_preview_title">デフォルトに戻しますか？</string>
+    <string name="reset_preview_confirm">リセット</string>
+    <string name="reset_undo">元に戻す</string>
+    <string name="reset_already_default">すでにデフォルト値です</string>
+    <string name="reset_value_on">オン</string>
+    <string name="reset_value_off">オフ</string>
     <!-- FISH-009: Live pinch-to-adjust lens curvature -->
     <string name="pinch_curvature_preview">%1$s: %2$.1fx</string>
     <string name="pinch_save_default">デフォルトとして保存</string>
@@ -268,4 +275,5 @@
     <string name="toast_permission_prompts_reset">権限の確認をリセットしました</string>
     <string name="toast_permission_prompts_nothing">リセットする権限の確認はありません</string>
     <string name="layout_import_workspace_recovered">ワークスペースのインポートに失敗し、自動ロールバックも不完全でしたが、インポート直前に作成したバックアップからワークスペースを復元しました。</string>
+    <string name="reset_undo_failed">リセットを元に戻せませんでした。もう一度お試しください。</string>
 </resources>

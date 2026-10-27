@@ -91,6 +91,13 @@
     <string name="error_no_flashlight">На этом устройстве нет фонарика</string>
     <string name="error_too_many_apps">Не удалось загрузить приложения</string>
     <string name="snackbar_reset_successful">Настройки сброшены по умолчанию</string>
+    <!-- UI-034: reset preview and undo -->
+    <string name="reset_preview_title">Сбросить к значениям по умолчанию?</string>
+    <string name="reset_preview_confirm">Сбросить</string>
+    <string name="reset_undo">Отменить</string>
+    <string name="reset_already_default">Уже значения по умолчанию</string>
+    <string name="reset_value_on">Вкл.</string>
+    <string name="reset_value_off">Выкл.</string>
     <!-- FISH-009: Live pinch-to-adjust lens curvature -->
     <string name="pinch_curvature_preview">%1$s: %2$.1fx</string>
     <string name="pinch_save_default">Сохранить по умолчанию</string>
@@ -283,4 +290,5 @@
     <string name="toast_permission_prompts_reset">Запросы разрешений сброшены</string>
     <string name="toast_permission_prompts_nothing">Нет запросов разрешений для сброса</string>
     <string name="layout_import_workspace_recovered">Не удалось импортировать рабочее пространство, а автоматический откат был неполным, но пространство восстановлено из резервной копии, сделанной непосредственно перед импортом.</string>
+    <string name="reset_undo_failed">Не удалось отменить сброс. Попробуйте ещё раз.</string>
 </resources>

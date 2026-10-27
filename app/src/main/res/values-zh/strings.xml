@@ -91,6 +91,13 @@
     <string name="error_no_flashlight">此设备没有手电筒</string>
     <string name="error_too_many_apps">加载应用失败</string>
     <string name="snackbar_reset_successful">设置已重置为默认值</string>
+    <!-- UI-034: reset preview and undo -->
+    <string name="reset_preview_title">恢复默认设置？</string>
+    <string name="reset_preview_confirm">重置</string>
+    <string name="reset_undo">撤销</string>
+    <string name="reset_already_default">已是默认值</string>
+    <string name="reset_value_on">开</string>
+    <string name="reset_value_off">关</string>
     <!-- FISH-009: Live pinch-to-adjust lens curvature -->
     <string name="pinch_curvature_preview">%1$s: %2$.1fx</string>
     <string name="pinch_save_default">设为默认</string>
@@ -268,4 +275,5 @@
     <string name="toast_permission_prompts_reset">已重置权限请求</string>
     <string name="toast_permission_prompts_nothing">没有需要重置的权限请求</string>
     <string name="layout_import_workspace_recovered">工作区导入失败，自动回滚也不完整，但已从导入前刚创建的备份中恢复了您的工作区。</string>
+    <string name="reset_undo_failed">无法撤销重置，请重试。</string>
 </resources>

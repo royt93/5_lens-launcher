@@ -91,6 +91,13 @@
     <string name="error_no_flashlight">No hay linterna en este dispositivo</string>
     <string name="error_too_many_apps">Error al cargar aplicaciones</string>
     <string name="snackbar_reset_successful">Ajustes restablecidos a valores predeterminados</string>
+    <!-- UI-034: reset preview and undo -->
+    <string name="reset_preview_title">¿Restablecer los valores predeterminados?</string>
+    <string name="reset_preview_confirm">Restablecer</string>
+    <string name="reset_undo">Deshacer</string>
+    <string name="reset_already_default">Ya están los valores predeterminados</string>
+    <string name="reset_value_on">Activado</string>
+    <string name="reset_value_off">Desactivado</string>
     <!-- FISH-009: Live pinch-to-adjust lens curvature -->
     <string name="pinch_curvature_preview">%1$s: %2$.1fx</string>
     <string name="pinch_save_default">Guardar como predeterminado</string>
@@ -278,4 +285,5 @@
     <string name="toast_permission_prompts_reset">Solicitudes de permisos restablecidas</string>
     <string name="toast_permission_prompts_nothing">No hay solicitudes de permisos que restablecer</string>
     <string name="layout_import_workspace_recovered">La importación del espacio de trabajo falló y la reversión automática quedó incompleta, pero tu espacio de trabajo se restauró desde la copia hecha justo antes de importar.</string>
+    <string name="reset_undo_failed">No se pudo deshacer el restablecimiento. Inténtalo de nuevo.</string>
 </resources>

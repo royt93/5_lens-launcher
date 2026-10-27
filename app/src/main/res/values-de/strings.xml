@@ -91,6 +91,13 @@
     <string name="error_no_flashlight">Kein Blitzlicht auf diesem Gerät</string>
     <string name="error_too_many_apps">Laden der Apps fehlgeschlagen</string>
     <string name="snackbar_reset_successful">Einstellungen auf Standard zurückgesetzt</string>
+    <!-- UI-034: reset preview and undo -->
+    <string name="reset_preview_title">Auf Standard zurücksetzen?</string>
+    <string name="reset_preview_confirm">Zurücksetzen</string>
+    <string name="reset_undo">Rückgängig</string>
+    <string name="reset_already_default">Bereits auf Standardwerten</string>
+    <string name="reset_value_on">Ein</string>
+    <string name="reset_value_off">Aus</string>
     <!-- FISH-009: Live pinch-to-adjust lens curvature -->
     <string name="pinch_curvature_preview">%1$s: %2$.1fx</string>
     <string name="pinch_save_default">Als Standard speichern</string>
@@ -273,4 +280,5 @@
     <string name="toast_permission_prompts_reset">Berechtigungsabfragen zurückgesetzt</string>
     <string name="toast_permission_prompts_nothing">Keine Berechtigungsabfragen zum Zurücksetzen</string>
     <string name="layout_import_workspace_recovered">Der Import des Arbeitsbereichs ist fehlgeschlagen und das automatische Zurücksetzen war unvollständig, aber Ihr Arbeitsbereich wurde aus der unmittelbar vor dem Import erstellten Sicherung wiederhergestellt.</string>
+    <string name="reset_undo_failed">Zurücksetzen konnte nicht rückgängig gemacht werden. Bitte erneut versuchen.</string>
 </resources>

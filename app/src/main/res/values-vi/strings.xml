@@ -90,6 +90,13 @@
     <string name="error_no_flashlight">Thiết bị này không có đèn pin</string>
     <string name="error_too_many_apps">Lỗi tải ứng dụng</string>
     <string name="snackbar_reset_successful">Giá trị đã được thiết lập lại mặc định</string>
+    <!-- UI-034: reset preview and undo -->
+    <string name="reset_preview_title">Đặt lại về mặc định?</string>
+    <string name="reset_preview_confirm">Đặt lại</string>
+    <string name="reset_undo">Hoàn tác</string>
+    <string name="reset_already_default">Đã ở giá trị mặc định</string>
+    <string name="reset_value_on">Bật</string>
+    <string name="reset_value_off">Tắt</string>
     <!-- FISH-009: Live pinch-to-adjust lens curvature -->
     <string name="pinch_curvature_preview">%1$s: %2$.1fx</string>
     <string name="pinch_save_default">Lưu mặc định</string>
@@ -275,4 +282,5 @@
     <string name="toast_permission_prompts_reset">Đã đặt lại các yêu cầu quyền</string>
     <string name="toast_permission_prompts_nothing">Không có yêu cầu quyền nào để đặt lại</string>
     <string name="layout_import_workspace_recovered">Nhập không gian làm việc thất bại và tự khôi phục chưa hoàn tất, nhưng không gian làm việc của bạn đã được phục hồi từ bản sao lưu tạo ngay trước khi nhập.</string>
+    <string name="reset_undo_failed">Không thể hoàn tác đặt lại. Hãy thử lại.</string>
 </resources>

@@ -91,6 +91,13 @@
     <string name="error_no_flashlight">Tidak ada senter di perangkat ini</string>
     <string name="error_too_many_apps">Gagal Memuat Aplikasi</string>
     <string name="snackbar_reset_successful">Pengaturan Telah Direset ke Default</string>
+    <!-- UI-034: reset preview and undo -->
+    <string name="reset_preview_title">Setel ulang ke default?</string>
+    <string name="reset_preview_confirm">Setel ulang</string>
+    <string name="reset_undo">Urungkan</string>
+    <string name="reset_already_default">Sudah berada di nilai default</string>
+    <string name="reset_value_on">Aktif</string>
+    <string name="reset_value_off">Nonaktif</string>
     <!-- FISH-009: Live pinch-to-adjust lens curvature -->
     <string name="pinch_curvature_preview">%1$s: %2$.1fx</string>
     <string name="pinch_save_default">Simpan sebagai default</string>
@@ -268,4 +275,5 @@
     <string name="toast_permission_prompts_reset">Permintaan izin direset</string>
     <string name="toast_permission_prompts_nothing">Tidak ada permintaan izin untuk direset</string>
     <string name="layout_import_workspace_recovered">Impor ruang kerja gagal dan pemulihan otomatis tidak lengkap, tetapi ruang kerja Anda dipulihkan dari cadangan yang dibuat tepat sebelum impor.</string>
+    <string name="reset_undo_failed">Reset tidak dapat diurungkan. Coba lagi.</string>
 </resources>

@@ -91,6 +91,13 @@
     <string name="error_no_flashlight">Nessuna torcia su questo dispositivo</string>
     <string name="error_too_many_apps">Impossibile caricare le app</string>
     <string name="snackbar_reset_successful">Impostazioni ripristinate ai valori predefiniti</string>
+    <!-- UI-034: reset preview and undo -->
+    <string name="reset_preview_title">Ripristinare i valori predefiniti?</string>
+    <string name="reset_preview_confirm">Ripristina</string>
+    <string name="reset_undo">Annulla</string>
+    <string name="reset_already_default">Già ai valori predefiniti</string>
+    <string name="reset_value_on">Attivo</string>
+    <string name="reset_value_off">Disattivo</string>
     <!-- FISH-009: Live pinch-to-adjust lens curvature -->
     <string name="pinch_curvature_preview">%1$s: %2$.1fx</string>
     <string name="pinch_save_default">Salva come predefinito</string>
@@ -278,4 +285,5 @@
     <string name="toast_permission_prompts_reset">Richieste di permessi reimpostate</string>
     <string name="toast_permission_prompts_nothing">Nessuna richiesta di permessi da reimpostare</string>
     <string name="layout_import_workspace_recovered">L\'importazione dello spazio di lavoro non è riuscita e il ripristino automatico era incompleto, ma lo spazio di lavoro è stato ripristinato dal backup creato subito prima dell\'importazione.</string>
+    <string name="reset_undo_failed">Impossibile annullare il ripristino. Riprova.</string>
 </resources>

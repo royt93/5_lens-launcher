@@ -80,8 +80,7 @@ object ResetEntries {
             ),
             ResetEntry(
                 UtilSettings.KEY_BACKGROUND_COLOR, R.string.setting_background,
-                UtilSettings.DEFAULT_BACKGROUND_COLOR, us.getString(UtilSettings.KEY_BACKGROUND_COLOR).orEmpty(),
-                showInPreview = false
+                UtilSettings.DEFAULT_BACKGROUND_COLOR, us.getString(UtilSettings.KEY_BACKGROUND_COLOR).orEmpty()
             ),
             ResetEntry(
                 UtilSettings.KEY_HIGHLIGHT_COLOR, R.string.setting_highlight_color,
@@ -89,7 +88,12 @@ object ResetEntries {
             ),
             ResetEntry(
                 UtilSettings.KEY_ICON_PACK_PACKAGE_NAME, R.string.setting_icon_pack,
-                UtilSettings.DEFAULT_ICON_PACK_PACKAGE_NAME, us.storedIconPackPackageName()
+                UtilSettings.DEFAULT_ICON_PACK_PACKAGE_NAME,
+                us.storedIconPackPackageName().ifEmpty {
+                    us.getString(UtilSettings.KEY_ICON_PACK_LABEL_NAME).orEmpty()
+                        .takeUnless { it == UtilSettings.DEFAULT_ICON_PACK_LABEL_NAME }
+                        .orEmpty()
+                }
             ),
             ResetEntry(
                 UtilSettings.KEY_ICON_PACK_LABEL_NAME, R.string.setting_icon_pack,

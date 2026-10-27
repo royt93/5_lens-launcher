@@ -91,6 +91,13 @@
     <string name="error_no_flashlight">ອຸປະກອນນີ້ບໍ່ມີໄຟສາຍ</string>
     <string name="error_too_many_apps">ໂຫຼດແອັບບໍ່ສຳເລັດ</string>
     <string name="snackbar_reset_successful">ຣີເຊັດຄ່າເປັນເລີ່ມຕົ້ນແລ້ວ</string>
+    <!-- UI-034: reset preview and undo -->
+    <string name="reset_preview_title">ຣີເຊັດເປັນຄ່າເລີ່ມຕົ້ນບໍ?</string>
+    <string name="reset_preview_confirm">ຣີເຊັດ</string>
+    <string name="reset_undo">ຍົກເລີກ</string>
+    <string name="reset_already_default">ເປັນຄ່າເລີ່ມຕົ້ນແລ້ວ</string>
+    <string name="reset_value_on">ເປີດ</string>
+    <string name="reset_value_off">ປິດ</string>
     <!-- FISH-009: Live pinch-to-adjust lens curvature -->
     <string name="pinch_curvature_preview">%1$s: %2$.1fx</string>
     <string name="pinch_save_default">ບັນທຶກເປັນຄ່າເລີ່ມຕົ້ນ</string>
@@ -268,4 +275,5 @@
     <string name="toast_permission_prompts_reset">ຣີເຊັດການຂໍສິດແລ້ວ</string>
     <string name="toast_permission_prompts_nothing">ບໍ່ມີການຂໍສິດໃຫ້ຣີເຊັດ</string>
     <string name="layout_import_workspace_recovered">ການນຳເຂົ້າພື້ນທີ່ເຮັດວຽກລົ້ມເຫຼວ ແລະ ການຍ້ອນກັບອັດຕະໂນມັດບໍ່ສົມບູນ ແຕ່ພື້ນທີ່ເຮັດວຽກຂອງທ່ານຖືກກູ້ຄືນຈາກສຳຮອງທີ່ເຮັດກ່ອນນຳເຂົ້າ.</string>
+    <string name="reset_undo_failed">ບໍ່ສາມາດຍົກເລີກການຣີເຊັດໄດ້. ລອງອີກຄັ້ງ.</string>
 </resources>

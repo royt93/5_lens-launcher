@@ -109,6 +109,15 @@
     <string name="error_no_flashlight">No flashlight on this device</string>
     <string name="error_too_many_apps">Failed to Load Apps</string>
     <string name="snackbar_reset_successful">Values Reset To Default</string>
+    <!-- UI-034: reset preview and undo -->
+    <string name="reset_preview_title">Reset to defaults?</string>
+    <string name="reset_preview_confirm">Reset</string>
+    <string name="reset_undo">Undo</string>
+    <string name="reset_already_default">Already at default values</string>
+    <string name="reset_value_on">On</string>
+    <string name="reset_value_off">Off</string>
+    <string name="reset_undo_failed">Could not undo reset. Try again.</string>
+    <string name="reset_preview_row_format" translatable="false">%1$s: %2$s → %3$s</string>
     <!-- FISH-009: Live pinch-to-adjust lens curvature -->
     <string name="pinch_curvature_preview">%1$s: %2$.1fx</string>
     <string name="pinch_save_default">Save as default</string>

@@ -91,6 +91,13 @@
     <string name="error_no_flashlight">ឧបករណ៍នេះគ្មានពិល</string>
     <string name="error_too_many_apps">មិនអាចផ្ទុកកម្មវិធីបានទេ</string>
     <string name="snackbar_reset_successful">ការកំណត់ត្រូវបានកំណត់ទៅលំនាំដើមវិញហើយ</string>
+    <!-- UI-034: reset preview and undo -->
+    <string name="reset_preview_title">កំណត់ឡើងវិញទៅលំនាំដើម?</string>
+    <string name="reset_preview_confirm">កំណត់ឡើងវិញ</string>
+    <string name="reset_undo">មិនធ្វើវិញ</string>
+    <string name="reset_already_default">ជាតម្លៃលំនាំដើមរួចហើយ</string>
+    <string name="reset_value_on">បើក</string>
+    <string name="reset_value_off">បិទ</string>
     <!-- FISH-009: Live pinch-to-adjust lens curvature -->
     <string name="pinch_curvature_preview">%1$s: %2$.1fx</string>
     <string name="pinch_save_default">រក្សាទុកជាលំនាំដើម</string>
@@ -268,4 +275,5 @@
     <string name="toast_permission_prompts_reset">បានកំណត់ការស្នើសុំការអនុញ្ញាតឡើងវិញ</string>
     <string name="toast_permission_prompts_nothing">គ្មានការស្នើសុំការអនុញ្ញាតត្រូវកំណត់ឡើងវិញទេ</string>
     <string name="layout_import_workspace_recovered">ការនាំចូលកន្លែងធ្វើការបរាជ័យ ហើយការត្រឡប់ស្វ័យប្រវត្តិមិនពេញលេញ ប៉ុន្តែកន្លែងធ្វើការរបស់អ្នកត្រូវបានស្ដារពីការបម្រុងទុកដែលបានធ្វើមុនការនាំចូលភ្លាម។</string>
+    <string name="reset_undo_failed">មិនអាចមិនធ្វើការកំណត់ឡើងវិញបានទេ។ សូមព្យាយាមម្ដងទៀត។</string>
 </resources>

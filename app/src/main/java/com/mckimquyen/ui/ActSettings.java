@@ -69,6 +69,11 @@ import com.mckimquyen.util.UtilNightModeUtil;
 import com.mckimquyen.util.UtilSettings;
 
 import com.mckimquyen.ui.settings.SettingsAdVipDelegate;
+import com.mckimquyen.ui.settings.ResetEntry;
+import com.mckimquyen.ui.settings.ResetFlow;
+import com.mckimquyen.ui.settings.ResetPlan;
+import com.mckimquyen.ui.settings.ResetStore;
+import com.mckimquyen.ui.settings.ResetValueFormatter;
 import com.mckimquyen.ui.settings.SettingsDialogCoordinator;
 import com.mckimquyen.ui.settings.SettingsIntentHelper;
 import com.mckimquyen.ui.settings.SettingsMenuAction;
@@ -127,6 +132,8 @@ public class ActSettings extends ActBase implements SettingsMenuHost {
     private AlertDialog dlgBackground;
     private AlertDialog dlgHighlightColor;
     private AlertDialog dlgTerms;
+    private AlertDialog resetPreviewDialog;
+    private ResetFlow resetFlow;
     AlertDialog layoutImportDialog;
     private LensInterface lensInterface;
 
@@ -338,24 +345,92 @@ public class ActSettings extends ActBase implements SettingsMenuHost {
 
     @Override
     public void resetTabDefaults(int currentTab) {
+        if (utilSettings == null || toolbar == null) return;
+        List<ResetEntry> entries;
         switch (currentTab) {
             case 0:
-                if (lensInterface != null) {
-                    lensInterface.onDefaultsReset();
-                }
+                if (lensInterface == null) return;
+                entries = lensInterface.resetEntries();
                 break;
             case 1:
-                if (appsInterface != null) {
-                    appsInterface.onDefaultsReset();
-                }
+                if (appsInterface == null) return;
+                entries = appsInterface.resetEntries();
                 break;
             case 2:
-                if (settingsInterface != null) {
-                    settingsInterface.onDefaultsReset();
-                }
+                if (settingsInterface == null) return;
+                entries = settingsInterface.resetEntries();
+                break;
+            default:
+                return;
+        }
+        if (entries.isEmpty()) return;
+        if (resetFlow == null) resetFlow = new ResetFlow(new ResetStore(this, utilSettings));
+        ResetPlan plan = resetFlow.prepare(entries);
+        if (plan == null) {
+            Snackbar.make(toolbar, R.string.reset_already_default, Snackbar.LENGTH_SHORT).show();
+            return;
+        }
+        showResetPreview(currentTab, entries, plan);
+    }
+
+    private void showResetPreview(int tab, List<ResetEntry> entries, ResetPlan plan) {
+        ResetValueFormatter formatter = new ResetValueFormatter(
+                getString(R.string.reset_value_on), getString(R.string.reset_value_off),
+                getString(R.string.reset_already_default), value -> getString(R.string.unit_ms_format, value));
+        StringBuilder message = new StringBuilder();
+        for (com.mckimquyen.ui.settings.ResetPreviewRow row : plan.getRows()) {
+            if (message.length() > 0) message.append('\n');
+            message.append(getString(R.string.reset_preview_row_format,
+                    getString(row.getLabelRes()),
+                    formatter.format(row.getKey(), row.getCurrentValue()),
+                    formatter.format(row.getKey(), row.getDefaultValue())));
+        }
+        resetPreviewDialog = new MaterialAlertDialogBuilder(this, R.style.MaterialYouDialogTheme)
+                .setTitle(R.string.reset_preview_title)
+                .setMessage(message.toString())
+                .setPositiveButton(R.string.reset_preview_confirm, null)
+                .setNegativeButton(android.R.string.cancel, null)
+                .create();
+        AlertDialog dialog = resetPreviewDialog;
+        dialog.setOnShowListener(ignored -> dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(view -> {
+            dialog.dismiss();
+            resetPreviewDialog = null;
+            resetFlow.confirm(plan, entries);
+            refreshResetTab(tab);
+            showResetUndo();
+        }));
+        dialog.setOnDismissListener(ignored -> {
+            if (resetPreviewDialog == dialog) resetPreviewDialog = null;
+        });
+        dialog.show();
+    }
+
+    private void refreshResetTab(int tab) {
+        switch (tab) {
+            case 0:
+                if (lensInterface != null) lensInterface.onResetStateChanged();
+                break;
+            case 1:
+                if (appsInterface != null) appsInterface.onResetStateChanged();
+                break;
+            case 2:
+                if (settingsInterface != null) settingsInterface.onResetStateChanged();
+                break;
+            default:
                 break;
         }
-        Snackbar.make(toolbar, getString(R.string.snackbar_reset_successful), Snackbar.LENGTH_LONG).show();
+    }
+
+    private void showResetUndo() {
+        Snackbar.make(toolbar, getString(R.string.snackbar_reset_successful), Snackbar.LENGTH_LONG)
+                .setAction(R.string.reset_undo, view -> {
+                    if (resetFlow == null || !resetFlow.undo()) {
+                        Toast.makeText(this, R.string.reset_undo_failed, Toast.LENGTH_LONG).show();
+                        return;
+                    }
+                    refreshResetTab(viewpager.getCurrentItem());
+                })
+                .show();
     }
 
     @Override
@@ -602,6 +677,10 @@ public class ActSettings extends ActBase implements SettingsMenuHost {
         dlgBackground = null;
         dlgHighlightColor = null;
         dlgTerms = null;
+        if (resetPreviewDialog != null) {
+            if (resetPreviewDialog.isShowing()) resetPreviewDialog.dismiss();
+            resetPreviewDialog = null;
+        }
     }
 
     @Override
@@ -626,6 +705,8 @@ public class ActSettings extends ActBase implements SettingsMenuHost {
             lensInterface = null;
             appsInterface = null;
             settingsInterface = null;
+            if (resetFlow != null) resetFlow.clear();
+            resetFlow = null;
         } finally {
             adVipDelegate.onDestroy();
             adView = null;

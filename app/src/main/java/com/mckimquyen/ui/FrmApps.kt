@@ -187,9 +187,10 @@ class FrmApps : Fragment(), AppsInterface, AppAdapter.SelectionListener, ActionM
         indexScrolledItem = 0
     }
 
-    /** Writes this tab's defaults only; [onResetStateChanged] refreshes the UI afterwards. */
+    /** Writes this tab's defaults and refreshes what is on screen. */
     override fun onDefaultsReset() {
         utilSettings?.let { us -> ResetApplier.apply(us, ResetEntries.apps(us)) }
+        onResetStateChanged()
     }
 
     override fun resetEntries(): List<ResetEntry> =

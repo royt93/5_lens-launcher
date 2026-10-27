@@ -91,6 +91,13 @@
     <string name="error_no_flashlight">Pas de lampe torche sur cet appareil</string>
     <string name="error_too_many_apps">Échec du chargement des applications</string>
     <string name="snackbar_reset_successful">Paramètres réinitialisés par défaut</string>
+    <!-- UI-034: reset preview and undo -->
+    <string name="reset_preview_title">Rétablir les valeurs par défaut ?</string>
+    <string name="reset_preview_confirm">Rétablir</string>
+    <string name="reset_undo">Annuler</string>
+    <string name="reset_already_default">Déjà aux valeurs par défaut</string>
+    <string name="reset_value_on">Activé</string>
+    <string name="reset_value_off">Désactivé</string>
     <!-- FISH-009: Live pinch-to-adjust lens curvature -->
     <string name="pinch_curvature_preview">%1$s: %2$.1fx</string>
     <string name="pinch_save_default">Enregistrer par défaut</string>
@@ -278,4 +285,5 @@
     <string name="toast_permission_prompts_reset">Demandes d\'autorisation réinitialisées</string>
     <string name="toast_permission_prompts_nothing">Aucune demande d\'autorisation à réinitialiser</string>
     <string name="layout_import_workspace_recovered">L\'importation de l\'espace de travail a échoué et le retour arrière automatique était incomplet, mais votre espace de travail a été restauré à partir de la sauvegarde faite juste avant l\'importation.</string>
+    <string name="reset_undo_failed">Impossible d’annuler la réinitialisation. Réessayez.</string>
 </resources>

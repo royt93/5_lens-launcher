@@ -261,9 +261,10 @@ class FrmLens : Fragment(), LensInterface {
         refreshCustomPresetButtonState()
     }
 
-    /** Writes this tab's defaults only; [onResetStateChanged] refreshes the UI afterwards. */
+    /** Writes this tab's defaults and refreshes what is on screen. */
     override fun onDefaultsReset() {
         utilSettings?.let { us -> ResetApplier.apply(us, ResetEntries.lens(us, activeLensId)) }
+        onResetStateChanged()
     }
 
     override fun resetEntries(): List<ResetEntry> =
