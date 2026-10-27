@@ -30,7 +30,7 @@ cat > /tmp/run_acthome.sh <<'EOS'
 #!/bin/bash
 K=115333744A005844; pass=0; fail=0; failed=""
 while read -r c; do
-  out=$(timeout 420 adb -s $K shell am instrument --user 0 -w -e class "$c" com.mckimquyen.lenslauncher.test/androidx.test.runner.AndroidJUnitRunner 2>&1 | grep -E "^OK \(|^FAILURES|^Tests run" | head -2 | tr '\n' ' ')
+  out=$(timeout 420 adb -s $K shell am instrument --user 0 -w -e class "$c" com.mckimquyen.lenslauncher.test/androidx.test.runner.AndroidJUnitRunner </dev/null 2>&1 | grep -E "^OK \(|^FAILURES|^Tests run" | head -2 | tr '\n' ' ')
   echo "$c :: $out"
   case "$out" in OK*) pass=$((pass+1));; *) fail=$((fail+1)); failed="$failed $c";; esac
 done < /tmp/acthome_classes.txt
@@ -39,7 +39,7 @@ EOS
 chmod +x /tmp/run_acthome.sh
 ```
 
-Expected: `TOTAL classes ok=35 failed=0`. A single class can take over a minute; the run is long, so use a background Bash call and read the output file, not a fixed sleep.
+`</dev/null` is required: without it `adb shell` swallows the loop's stdin and only the first class runs (found in Task 0). Expected: `TOTAL classes ok=35 failed=0`; if the total is not 35, the run is invalid. A single class can take over a minute; the run is long, so use a background Bash call and read the output file, not a fixed sleep.
 
 ---
 

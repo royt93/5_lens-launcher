@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | enhance |
-| Status | todo |
+| Status | inprogress |
 | Priority | P3 |
 | Evidence | confirmed |
 | Epic | Architecture |
@@ -14,6 +14,12 @@
 ## Context and evidence
 
 `ui/ActHome.java:101-2358`. ARCH-001 đã tách `ActSettings` (946→669) nhưng `ActHome` chưa. Cụm tách được: search UI/state (`:1418-1758`, ~340 dòng, `HomeSearchController`), quick action + permission (`:1795-2001`, ~210 dòng, `HomeQuickActionDelegate`), T9 keypad (`:1563-1613`, `T9KeypadBinder`), lens menu + dialog (`:916-1416`, ~500 dòng, `LensMenuCoordinator`), insets/chrome (`:422-501`, `:1767-1789`, `:2185-2194`). `lensViews` (`:186`) là state chia sẻ giữa pager callback, bind, export, pinch nên cần một chủ sở hữu.
+
+## Baseline (2026-10-27, trước khi đụng code)
+
+- `ActHome.java` **2.454 dòng** (story ghi 2.358, đã cũ), 55 field, 30 `@VisibleForTesting`, 34 chỗ dùng `lensViews`. `CORE-004` và `UI-028` đã `done`.
+- Thiết bị TECNO KJ7 `115333744A005844` (Android 14), 35 lớp `ActHome*` / 145 test: **35/35 xanh** trên code chưa đổi, không có lớp đỏ hay flaky có sẵn. Dữ liệu app sao lưu 583.680 byte trước khi cài.
+- Lỗi script phát hiện: `adb shell` trong vòng lặp `while read` nuốt stdin nên lần chạy đầu chỉ chạy 1 lớp; đã thêm `</dev/null` và ghi vào plan.
 
 ## User story
 
