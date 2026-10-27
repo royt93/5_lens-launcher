@@ -6,7 +6,7 @@ Date: 2026-10-27. Story: `doc/task/todo/p3-arch-arch-002-split-act-home-god-clas
 
 - `ActHome.java` is **2.454 lines** now (story says 2.358; FISH-038 and earlier work added lines). 55 fields, 34 references to `lensViews`, 30 `@VisibleForTesting` members.
 - Dependencies `CORE-004` and `UI-028` are **done** (README).
-- Safety net: **145 `@Test` in 28 `ActHome*` androidTest classes**, 75 androidTest classes touch `ActHome`, 5 unit tests. Most-used members from tests: `findViewById`, `onLensMenuItemSelected` (20), `quickActionsMenuForTest`, `lensGroupDialogForTest`, `toggleEditModeForTest`, `selectLensForGroupEdit`, `searchResultAdapterForTest`, `setPermissionGrantedForTest`.
+- Safety net: **145 `@Test` in 35 `ActHome*` androidTest source files**, 75 androidTest classes touch `ActHome`, 5 unit tests. Most-used members from tests: `findViewById`, `onLensMenuItemSelected` (20), `quickActionsMenuForTest`, `lensGroupDialogForTest`, `toggleEditModeForTest`, `selectLensForGroupEdit`, `searchResultAdapterForTest`, `setPermissionGrantedForTest`.
 - Cluster sizes (approx lines): lens menu + dialogs 597, search + T9 + results 386, quick action + contacts + permissions 250, lens bind/pager 338, scope/`assignApps` 135. Existing collaborator pattern from ARCH-001: `SettingsDialogCoordinator`, `SettingsMenuDispatcher` + `SettingsMenuHost` interface, `SettingsAdVipDelegate` in `ui/settings/`.
 
 ## Decisions (owner, 2026-10-27)
@@ -32,7 +32,7 @@ Pure refactor: **no behavior change, no new feature, no string or layout change.
 
 1. **Characterization first.** Before moving a cluster, add unit or widget tests that pin the behavior of any pure decision that is not already covered, run them green on the old code, then move the code and keep them green.
 2. **One cluster per commit**, each commit builds and passes `testDevDebugUnitTest` + `lintDevDebug`.
-3. **After each cluster, run all 28 `ActHome*` androidTest classes** (one class at a time with `timeout`, never a Gradle `connected*` task) on KJ7, plus the non-prefixed classes that touch the moved code. Zero regression allowed; a failure stops the work and is fixed before the next cluster.
+3. **After each cluster, run all 35 `ActHome*` androidTest classes** (one class at a time with `timeout`, never a Gradle `connected*` task) on KJ7, plus the non-prefixed classes that touch the moved code. Zero regression allowed; a failure stops the work and is fixed before the next cluster.
 4. Back up and restore app data on KJ7 byte for byte, as in earlier rounds; the screen must be awake and unlocked.
 5. Mutation-check the extracted pure logic only; do not mutate view wiring.
 
