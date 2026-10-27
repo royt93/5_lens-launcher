@@ -80,4 +80,87 @@ class T9SearchEngineTest {
         assertTrue(T9SearchEngine.search(listOf(app), "").isEmpty())
         assertTrue(T9SearchEngine.search(listOf(app), null).isEmpty())
     }
+
+    @Test
+    fun `recent history orders apps within the same t9 match tier`() {
+        val recent = App(label = "Chrome", packageName = "com.chrome.recent", name = "Main")
+        val older = App(label = "Chrome", packageName = "com.chrome.older", name = "Main")
+        val keys = listOf(AppSearchEngine.componentKey(recent), AppSearchEngine.componentKey(older))
+
+        assertEquals(
+            listOf(recent, older),
+            T9SearchEngine.search(listOf(older, recent), "247", recentKeys = keys)
+        )
+    }
+
+    @Test
+    fun `favorite outranks recency and stronger match tier outranks recent history`() {
+        val recentSubstring = App(label = "Monochrome", packageName = "com.mono", name = "Main")
+        val prefix = App(label = "Chrome", packageName = "com.chrome", name = "Main")
+        val recentNonFavorite = App(label = "Chrome", packageName = "com.chrome.recent", name = "Main")
+        val favorite = App(label = "Chrome", packageName = "com.chrome.favorite", name = "Main", isFavorite = true)
+        val keys = listOf(AppSearchEngine.componentKey(recentSubstring), AppSearchEngine.componentKey(recentNonFavorite))
+
+        assertEquals(
+            listOf(favorite, recentNonFavorite, prefix, recentSubstring),
+            T9SearchEngine.search(listOf(recentSubstring, prefix, recentNonFavorite, favorite), "247", recentKeys = keys)
+        )
+    }
+
+    @Test
+    fun `empty history keeps the existing t9 ordering`() {
+        val lowOpen = App(label = "Chrome", packageName = "com.chrome.low", name = "Main", openCount = 1)
+        val highOpen = App(label = "Chrome", packageName = "com.chrome.high", name = "Main", openCount = 9)
+
+        assertEquals(listOf(highOpen, lowOpen), T9SearchEngine.search(listOf(lowOpen, highOpen), "247"))
+    }
+
+    @Test
+    fun `results are capped after ranking and a non-positive limit returns empty`() {
+        val apps = (0 until 40).map { index ->
+            App(label = "Chrome", packageName = "com.chrome.app$index", name = "Main", openCount = index.toLong())
+        }
+
+        val capped = T9SearchEngine.search(apps, "247", limit = 7)
+        assertEquals(7, capped.size)
+        assertEquals(apps.sortedByDescending(App::openCount).take(7), capped)
+        assertTrue(T9SearchEngine.search(apps, "247", limit = 0).isEmpty())
+        assertTrue(T9SearchEngine.search(apps, "247", limit = -1).isEmpty())
+    }
+
+    @Test
+    fun `default limit is the shared text search limit`() {
+        val apps = (0 until 40).map { index ->
+            App(label = "Chrome", packageName = "com.chrome.app$index", name = "Main")
+        }
+
+        assertEquals(AppSearchEngine.SEARCH_RESULT_LIMIT, T9SearchEngine.search(apps, "247").size)
+    }
+
+    @Test
+    fun `alias matches are capped by the same shared result limit`() {
+        val apps = (0 until 30).map { index ->
+            App(label = "微信", packageName = "com.chrome.alias$index", name = "Main", openCount = index.toLong())
+        }
+
+        assertEquals(AppSearchEngine.SEARCH_RESULT_LIMIT, T9SearchEngine.search(apps, "247").size)
+    }
+
+    @Test
+    fun `work profile history does not rank the personal copy as recent`() {
+        val personal = App(label = "Chrome", packageName = "com.chrome", name = "Main", userId = 0)
+        val work = App(label = "Chrome", packageName = "com.chrome", name = "Main", userId = 10, isWorkProfile = true)
+        val keys = listOf(AppSearchEngine.componentKey(work))
+
+        assertEquals(listOf(work, personal), T9SearchEngine.search(listOf(personal, work), "247", recentKeys = keys))
+    }
+
+    @Test
+    fun `an earlier recent position beats a later one`() {
+        val first = App(label = "Chrome", packageName = "com.chrome.a", name = "Main")
+        val second = App(label = "Chrome", packageName = "com.chrome.b", name = "Main")
+        val keys = listOf(AppSearchEngine.componentKey(first), AppSearchEngine.componentKey(second))
+
+        assertEquals(listOf(first, second), T9SearchEngine.search(listOf(second, first), "247", recentKeys = keys))
+    }
 }

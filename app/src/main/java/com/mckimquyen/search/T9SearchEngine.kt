@@ -21,11 +21,25 @@ object T9SearchEngine {
         }
     }
 
+    /**
+     * Ranked T9 matching. Same-tier results are ordered like text search ([AppSearchEngine.search]): favorite,
+     * then recent-launch position in [recentKeys], then open count, then label and key. Capped at [limit].
+     */
     @JvmStatic
-    fun search(candidates: List<App>, query: CharSequence?): List<App> {
+    @JvmOverloads
+    fun search(
+        candidates: List<App>,
+        query: CharSequence?,
+        recentKeys: List<String> = emptyList(),
+        limit: Int = AppSearchEngine.SEARCH_RESULT_LIMIT
+    ): List<App> {
+        if (limit <= 0) return emptyList()
         val digitsQuery = query?.toString()?.trim().orEmpty()
         if (digitsQuery.isEmpty() || digitsQuery.any { !it.isDigit() }) return emptyList()
 
+        val recentPositions = buildMap {
+            recentKeys.forEachIndexed { index, key -> putIfAbsent(key, index) }
+        }
         return candidates.asSequence()
             .filter(App::isVisible)
             .mapNotNull { app ->
@@ -35,10 +49,12 @@ object T9SearchEngine {
             .sortedWith(
                 compareBy<Pair<App, Int>> { it.second }
                     .thenByDescending { it.first.isFavorite }
+                    .thenBy { recentPositions[AppSearchEngine.componentKey(it.first)] ?: Int.MAX_VALUE }
                     .thenByDescending { it.first.openCount }
                     .thenBy { AppSearchEngine.normalize(it.first.label) }
-                    .thenBy { it.first.packageName.toString() }
+                    .thenBy { AppSearchEngine.componentKey(it.first) }
             )
+            .take(limit)
             .map { it.first }
             .toList()
     }
