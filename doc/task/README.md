@@ -314,7 +314,8 @@ Giới hạn: agent audit ui chưa đọc hết `LensView.kt`, `ActAbout.java`, 
 | `FISH-028` | P3 | 3 | [Bán kính ảnh hưởng của lens (lens hood)](todo/p3-fish-fish-028-lens-hood-bounded-radius.md) |
 | `FISH-029` | P3 | 3 | [Khóa tiêu điểm (macro mode) bằng double-tap](todo/p3-fish-fish-029-focus-lock-macro-mode.md) |
 | `FISH-030` | P3 | 3 | [Chế độ ống kính đảo (pincushion)](todo/p3-fish-fish-030-negative-distortion-pincushion.md) |
-| `FISH-038` | P3 | 8 | [Kéo thả app giữa các lens](todo/p3-fish-fish-038-drag-apps-between-lenses.md) |
+| `FISH-038` ✅ done 2026-10-27 (một phần: menu chuyển lens + hoàn tác + TalkBack) | P3 | 8 | [Kéo thả app giữa các lens](done/p3-fish-fish-038-drag-apps-between-lenses.md) |
+| `FISH-038b` | P3 | 5 | [Kéo thả app giữa các lens (phần kéo thả thật)](todo/p3-fish-fish-038b-drag-apps-between-lenses.md) |
 | `FISH-039` | P3 | 2 | [Focus peaking cho người thị lực kém](todo/p3-fish-fish-039-focus-peaking-low-vision.md) |
 | `SEARCH-017` ✅ done 2026-10-27 | P3 | 2 | [T9 đồng bộ hạn mức, lịch sử và alias với tìm kiếm chữ](done/p3-search-search-017-t9-parity-with-text-search.md) |
 | `SEARCH-018` ✅ done 2026-10-27 | P3 | 8 | [Fuzzy Levenshtein tạo match rác ở CJK; thêm khớp chữ cái đầu pinyin/romaji](done/p3-search-search-018-cjk-fuzzy-and-pinyin-initials.md) |

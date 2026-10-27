@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | idea |
-| Status | inprogress |
+| Status | done (partial: menu path) |
 | Priority | P3 |
 | Evidence | idea |
 | Epic | Multi-lens |
@@ -21,24 +21,24 @@ Là người nhiều lens, tôi muốn kéo app sang lens khác.
 
 ## Acceptance criteria
 
-- [ ] Kéo thả giữa lens có phản hồi rõ.
-- [ ] Không phá pan/pinch/edge-swipe.
-- [ ] Có đường thay thế a11y.
-- [ ] Test + smoke.
+- [x] Kéo thả giữa lens có phản hồi rõ. → chuyển sang `FISH-038b` (owner chọn 2026-10-27: làm menu trước, kéo thả sau `ARCH-002`).
+- [x] Không phá pan/pinch/edge-swipe. → chuyển sang `FISH-038b` (không đụng code gesture ở round này).
+- [x] Có đường thay thế a11y: mục menu "Chuyển sang lens…" và action TalkBack `menuItemMoveToLens`.
+- [x] Test + smoke (KJ7, xem `doc/task/AUDIT_FISH-038_2026-10-27.md`).
 
 ## Implementation notes
 
-SP 8 phải tách khi thực hiện; làm sau ARCH-002.
+Đã tách 2026-10-27: phần menu + hoàn tác + TalkBack xong ở đây (lens là phạm vi hiển thị nên chỉ ghi SharedPreferences, không đổi Room); phần kéo thả thật là `FISH-038b`.
 
 ## Verification and Definition of Done
 
-- [ ] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
-- [ ] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
-- [ ] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
-- [ ] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
-- [ ] No new lint/build failures.
-- [ ] A post-change audit record scores the round `> 9.0/10` before push.
-- [ ] Evidence and status are updated before moving this file to `done`.
+- [x] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
+- [x] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
+- [x] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
+- [x] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
+- [x] No new lint/build failures.
+- [x] A post-change audit record scores the round `> 9.0/10` before push.
+- [x] Evidence and status are updated before moving this file to `done`.
 
 If a test layer is not applicable, replace its checkbox with a reviewed rationale; do not silently omit it.
 
