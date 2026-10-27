@@ -16,6 +16,9 @@ import com.mckimquyen.R
 import com.mckimquyen.enums.DrawType
 import com.mckimquyen.itf.LensInterface
 import com.mckimquyen.model.LensWorkspace
+import com.mckimquyen.ui.settings.ResetApplier
+import com.mckimquyen.ui.settings.ResetEntries
+import com.mckimquyen.ui.settings.ResetEntry
 import com.mckimquyen.util.LensPhysicsPreset
 import com.mckimquyen.util.UtilSettings
 import com.mckimquyen.views.LensView
@@ -259,19 +262,16 @@ class FrmLens : Fragment(), LensInterface {
     }
 
     override fun onDefaultsReset() {
-        resetToDefault()
-        assignValues()
-        lensViewsSettings?.invalidate()
+        utilSettings?.let { us -> ResetApplier.apply(us, ResetEntries.lens(us, activeLensId)) }
+        onResetStateChanged()
     }
 
-    private fun resetToDefault() {
-        utilSettings?.let { us ->
-            us.saveIconSize(activeLensId, us.autoDefaultIconSize)
-            us.saveDistortionFactor(activeLensId, UtilSettings.DEFAULT_DISTORTION_FACTOR)
-            us.save(UtilSettings.KEY_SCALE_FACTOR, UtilSettings.DEFAULT_SCALE_FACTOR)
-            us.save(UtilSettings.KEY_ANIMATION_TIME, UtilSettings.DEFAULT_ANIMATION_TIME)
-            us.saveLensElasticOverscroll(UtilSettings.DEFAULT_LENS_ELASTIC_OVERSCROLL)
-        }
+    override fun resetEntries(): List<ResetEntry> =
+        utilSettings?.let { ResetEntries.lens(it, activeLensId) }.orEmpty()
+
+    override fun onResetStateChanged() {
+        assignValues()
+        lensViewsSettings?.invalidate()
     }
 
     /**

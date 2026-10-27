@@ -34,6 +34,9 @@ import com.mckimquyen.app.RAppsSingleton
 import com.mckimquyen.model.LensWorkspace
 import com.mckimquyen.util.LensAppScope
 import com.mckimquyen.util.LensAppScopeEditor
+import com.mckimquyen.ui.settings.ResetApplier
+import com.mckimquyen.ui.settings.ResetEntries
+import com.mckimquyen.ui.settings.ResetEntry
 import com.mckimquyen.util.UtilSettings
 import androidx.annotation.VisibleForTesting
 
@@ -185,12 +188,15 @@ class FrmApps : Fragment(), AppsInterface, AppAdapter.SelectionListener, ActionM
     }
 
     override fun onDefaultsReset() {
-        utilSettings?.let { us ->
-            if (us.sortType != UtilSettings.DEFAULT_SORT_TYPE_ENUM) {
-                us.save(UtilSettings.DEFAULT_SORT_TYPE_ENUM)
-                sendEditAppsBroadcast()
-            }
-        }
+        utilSettings?.let { us -> ResetApplier.apply(us, ResetEntries.apps(us)) }
+        onResetStateChanged()
+    }
+
+    override fun resetEntries(): List<ResetEntry> =
+        utilSettings?.let { ResetEntries.apps(it) }.orEmpty()
+
+    override fun onResetStateChanged() {
+        sendEditAppsBroadcast()
     }
 
     override fun onAppsUpdated(apps: ArrayList<App>?) {

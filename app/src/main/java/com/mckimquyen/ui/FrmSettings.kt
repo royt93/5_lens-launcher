@@ -26,6 +26,9 @@ import com.mckimquyen.util.SafeColor
 import com.mckimquyen.util.UtilLauncher
 import com.mckimquyen.util.UtilNightModeUtil
 import com.mckimquyen.util.UtilIconPackManager
+import com.mckimquyen.ui.settings.ResetApplier
+import com.mckimquyen.ui.settings.ResetEntries
+import com.mckimquyen.ui.settings.ResetEntry
 import com.mckimquyen.util.UtilSettings
 
 class FrmSettings : Fragment(), SettingsInterface {
@@ -569,8 +572,17 @@ class FrmSettings : Fragment(), SettingsInterface {
     }
 
     override fun onDefaultsReset() {
-        resetToDefault()
+        utilSettings?.let { us -> ResetApplier.apply(us, ResetEntries.settings(us, activeLensId)) }
+        onResetStateChanged()
+    }
+
+    override fun resetEntries(): List<ResetEntry> =
+        utilSettings?.let { ResetEntries.settings(it, activeLensId) }.orEmpty()
+
+    override fun onResetStateChanged() {
         assignValues()
+        com.mckimquyen.services.AppEventManager.notifyAppsUpdated()
+        (activity as? ActSettings)?.sendNightModeBroadcast()
     }
 
     override fun onValuesUpdated() {
@@ -579,39 +591,6 @@ class FrmSettings : Fragment(), SettingsInterface {
 
     override fun onHomeLauncherChooserStarted() {
         homeLauncherLabelDirty = true
-    }
-
-    private fun resetToDefault() {
-        utilSettings?.let { us ->
-            us.save(UtilSettings.KEY_VIBRATE_APP_HOVER, false)
-            us.save(UtilSettings.KEY_VIBRATE_APP_LAUNCH, true)
-            us.saveHapticIntensity(HapticIntensity.DEFAULT)
-            us.save(UtilSettings.KEY_SHOW_NAME_APP_HOVER, true)
-            us.save(UtilSettings.KEY_SHOW_TOUCH_SELECTION, false)
-            us.save(UtilSettings.KEY_SHOW_FOCUS_HALO, UtilSettings.DEFAULT_SHOW_FOCUS_HALO)
-            us.save(UtilSettings.KEY_SHOW_SEARCH_BAR, UtilSettings.DEFAULT_SHOW_SEARCH_BAR)
-            us.save(UtilSettings.KEY_RECENT_APPS_QUICK_PANEL_ENABLED, UtilSettings.DEFAULT_RECENT_APPS_QUICK_PANEL_ENABLED)
-            us.save(UtilSettings.KEY_KEEP_SCREEN_ON, UtilSettings.DEFAULT_KEEP_SCREEN_ON)
-            us.save(UtilSettings.KEY_CLEAN_LENS_MODE, UtilSettings.DEFAULT_CLEAN_LENS_MODE)
-            us.save(UtilSettings.KEY_DEPTH_OF_FIELD, UtilSettings.DEFAULT_DEPTH_OF_FIELD)
-            us.saveSmartFocusBias(activeLensId, UtilSettings.DEFAULT_SMART_FOCUS_BIAS)
-            us.save(UtilSettings.KEY_QUICK_ACTION_CALCULATOR, UtilSettings.DEFAULT_QUICK_ACTION_ENABLED)
-            us.save(UtilSettings.KEY_QUICK_ACTION_UNIT, UtilSettings.DEFAULT_QUICK_ACTION_ENABLED)
-            us.save(UtilSettings.KEY_QUICK_ACTION_TIMER, UtilSettings.DEFAULT_QUICK_ACTION_ENABLED)
-            us.save(UtilSettings.KEY_QUICK_ACTION_BATTERY, UtilSettings.DEFAULT_QUICK_ACTION_ENABLED)
-            us.save(UtilSettings.KEY_QUICK_ACTION_SETTINGS, UtilSettings.DEFAULT_QUICK_ACTION_ENABLED)
-            us.save(UtilSettings.KEY_SEARCH_HINT_TEXT, "")
-            us.save(UtilSettings.KEY_SHOW_NEW_APP_TAG, true)
-            us.save(UtilSettings.KEY_SHOW_NOTIFICATION_BADGES, UtilSettings.DEFAULT_SHOW_NOTIFICATION_BADGES)
-            us.save(UtilSettings.DEFAULT_BACKGROUND_MODE)
-            us.save(UtilSettings.KEY_BACKGROUND_COLOR, UtilSettings.DEFAULT_BACKGROUND_COLOR)
-            us.save(UtilSettings.KEY_HIGHLIGHT_COLOR, UtilSettings.DEFAULT_HIGHLIGHT_COLOR)
-            us.saveIconPackPackageName(UtilSettings.DEFAULT_ICON_PACK_PACKAGE_NAME)
-            us.saveLegacyIconPackLabel(UtilSettings.DEFAULT_ICON_PACK_LABEL_NAME)
-            us.save(UtilSettings.KEY_NIGHT_MODE, UtilSettings.DEFAULT_NIGHT_MODE)
-        }
-        com.mckimquyen.services.AppEventManager.notifyAppsUpdated()
-        (activity as? ActSettings)?.sendNightModeBroadcast()
     }
 
     private fun showLanguagePicker() {

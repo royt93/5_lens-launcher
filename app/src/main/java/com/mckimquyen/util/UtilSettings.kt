@@ -232,6 +232,10 @@ class UtilSettings(context: Context) {
         (appContext as? com.mckimquyen.app.RApplication)?.iconPackManager?.invalidate()
     }
 
+    /** UI-034: the stored icon-pack package name, "" (default pack) when none is stored. */
+    fun storedIconPackPackageName(): String =
+        prefs.getString(KEY_ICON_PACK_PACKAGE_NAME, DEFAULT_ICON_PACK_PACKAGE_NAME).orEmpty()
+
     fun saveLegacyIconPackLabel(label: String) {
         save(KEY_ICON_PACK_LABEL_NAME, label)
     }
@@ -456,7 +460,7 @@ class UtilSettings(context: Context) {
     // adding a lens never silently resets its physics to the hardcoded default.
     // ========================================================================
 
-    private fun lensKey(baseKey: String, lensId: String?): String =
+    fun lensKey(baseKey: String, lensId: String?): String =
         if (lensId.isNullOrEmpty() || lensId == LensWorkspace.DEFAULT_LENS_ID) {
             baseKey
         } else {
