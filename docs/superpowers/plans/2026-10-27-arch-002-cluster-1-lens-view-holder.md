@@ -44,6 +44,8 @@ public interface LensViewHolderHost {
     void clearPendingAutoExportLens();
     void setActiveLensView(LensView view);               // the single writer of ActHome.lensViews
     LensView activeLensView();                           // current value (may be null)
+    void setLensTabMediator(TabLayoutMediator mediator); // storage stays on ActHome for ActHomeLensMediatorLeakTest
+    TabLayoutMediator lensTabMediator();
     void exportActiveLensImage();
 }
 ```
@@ -53,6 +55,8 @@ public interface LensViewHolderHost {
 ## Members that stay on `ActHome` as delegates (tests reference them)
 
 **`lensViews` decision (68 test lines read the field `activity.lensViews`, so the field must keep that exact name and package-private visibility):** the **storage** stays on `ActHome` as `LensView lensViews`, but it is **written only by `LensViewHolder`**, through a host method `void setActiveLensView(LensView view)`. That gives one writer (the holder) and zero test edits. The audit checks that `lensViews =` appears exactly once in `ActHome.java`, inside `setActiveLensView`. Add `setActiveLensView` to `LensViewHolderHost`; the holder reads the current view through `host.activeLensView()` (also added).
+
+**Second field that tests read by name:** `ActHomeLensMediatorLeakTest` reads the private field `ActHome.lensTabMediator` through reflection (`getDeclaredField("lensTabMediator")`) and asserts it is non-null while alive and null after destroy. Same rule as `lensViews`: **the field stays on `ActHome`** (name and privacy unchanged), the holder creates and detaches the mediator and writes the field through host methods `setLensTabMediator(TabLayoutMediator)` / `lensTabMediator()`. No other test reads a private pager field by reflection (checked 2026-10-27: `lensPager`, `lensPageIndicator`, `tvLensName` are reached only through `findViewById(R.id.*)`, so those fields can move freely).
 
 Also keep as delegates: `refreshLensList()` (3 test lines), `updateLensNavigationChrome()`, `bindLensView` is private (5 test lines use the name: re-check they are comments or `LensPagerAdapter` binds before deleting).
 
