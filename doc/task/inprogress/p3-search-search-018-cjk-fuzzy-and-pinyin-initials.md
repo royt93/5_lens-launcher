@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | idea |
-| Status | todo |
+| Status | inprogress |
 | Priority | P3 |
 | Evidence | conditional |
 | Epic | Search quality |
@@ -14,6 +14,8 @@
 ## Context and evidence
 
 `search/AppSearchEngine.kt:99-114` ngưỡng 2 edit cho token >=6 ký tự tính theo ký tự: nhãn CJK 4 ký tự (`微信读书` vs `微信支付`, khoảng cách 2) khớp fuzzy; tier word-prefix (`:63`) không bao giờ bắn cho nhãn không có khoảng trắng.
+
+**Kiểm chứng 2026-10-27:** ví dụ `微信读书` vs `微信支付` KHÔNG khớp (token 4 ký tự chỉ cho 1 edit). Rác thật vẫn có ở 1 edit: gõ `微信读书` ra `微信支书`, gõ `微信读` ra `微信书`. Tier word-prefix không bắn cho nhãn CJK: đúng. Quyết định owner: tắt fuzzy khi nhãn/token có CJK; pinyin lấy từ `android.icu` Han-Latin; luôn bật, không công tắc. Kana/romaji ngoài phạm vi.
 
 ## User story
 

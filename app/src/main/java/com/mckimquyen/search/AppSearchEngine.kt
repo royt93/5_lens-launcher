@@ -139,6 +139,8 @@ object AppSearchEngine {
 
     private fun hasFuzzyMatch(label: String, token: String): Boolean {
         if (token.length < MIN_FUZZY_TOKEN_LENGTH) return false
+        // SEARCH-018: one edit in a short CJK label swaps a whole word, so fuzzy only yields junk there.
+        if (containsCjk(label) || containsCjk(token)) return false
         val threshold = if (token.length <= SHORT_TOKEN_MAX_LENGTH) {
             SHORT_TOKEN_EDIT_THRESHOLD
         } else {
@@ -146,6 +148,16 @@ object AppSearchEngine {
         }
         return label.split(WHITESPACE).any { word ->
             word.isNotEmpty() && levenshteinDistance(word, token) <= threshold
+        }
+    }
+
+    private fun containsCjk(value: String): Boolean = value.any { char ->
+        when (Character.UnicodeScript.of(char.code)) {
+            Character.UnicodeScript.HAN,
+            Character.UnicodeScript.HIRAGANA,
+            Character.UnicodeScript.KATAKANA,
+            Character.UnicodeScript.HANGUL -> true
+            else -> false
         }
     }
 

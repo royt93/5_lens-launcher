@@ -209,6 +209,35 @@ class AppSearchEngineTest {
         assertTrue("Average search took ${elapsedMs}ms", elapsedMs < 150.0)
     }
 
+    @Test
+    fun `fuzzy search does not match near miss Chinese Japanese or Korean labels`() {
+        val chineseNearMiss = app("微信支书", "com.test.chinese", "Main")
+        val japaneseNearMiss = app("カメヲ", "com.test.japanese", "Main")
+        val koreanNearMiss = app("나카오", "com.test.korean", "Main")
+
+        assertTrue(AppSearchEngine.search(listOf(chineseNearMiss), "微信读书").isEmpty())
+        assertTrue(AppSearchEngine.search(listOf(japaneseNearMiss), "カメラ").isEmpty())
+        assertTrue(AppSearchEngine.search(listOf(app("かめを", "com.test.hiragana", "Main")), "かめら").isEmpty())
+        assertTrue(AppSearchEngine.search(listOf(koreanNearMiss), "카카오").isEmpty())
+    }
+
+    @Test
+    fun `the cjk fuzzy gate also applies when only the label or only the token is cjk`() {
+        // "camera微" is within 2 edits of "camerb" and "camp" is within 1 edit of "cam微" once the gate is gone.
+        val cjkLabel = app("camera微", "com.test.mixed", "Main")
+        val latinLabel = app("camp", "com.test.latin", "Main")
+
+        assertTrue(AppSearchEngine.search(listOf(cjkLabel), "camerb").isEmpty())
+        assertTrue(AppSearchEngine.search(listOf(latinLabel), "cam微").isEmpty())
+    }
+
+    @Test
+    fun `latin typo tolerance remains enabled`() {
+        val camera = app("Camera", "com.test.camera", "Main")
+
+        assertEquals(listOf(camera), AppSearchEngine.search(listOf(camera), "camra"))
+    }
+
     private fun app(
         label: String,
         packageName: String,
