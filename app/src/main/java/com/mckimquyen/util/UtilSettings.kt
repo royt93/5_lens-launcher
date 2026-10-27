@@ -13,6 +13,7 @@ import com.mckimquyen.enums.SortType
 import com.mckimquyen.model.LensPhysicsBackup
 import com.mckimquyen.model.LensWorkspace
 import com.mckimquyen.model.EdgeSwipeMode
+import com.mckimquyen.ui.settings.ResetSnapshot
 import kotlin.math.roundToInt
 
 /**
@@ -593,6 +594,30 @@ class UtilSettings(context: Context) {
         if (activeLensId in validLensIds) return true
         @Suppress("UseKtx") // commit() result is the contract; KTX apply() returns nothing
         return prefs.edit().putString(KEY_ACTIVE_LENS_ID, LensWorkspace.DEFAULT_LENS_ID).commit()
+    }
+
+    /** UI-034: raw values of exactly [keys]; a key that is not stored maps to null so undo can remove it again. */
+    fun snapshotKeys(keys: Set<String>): ResetSnapshot {
+        val all = prefs.all
+        return ResetSnapshot(keys.associateWith { all[it] })
+    }
+
+    /** UI-034: puts back only the keys in [snapshot]; null removes the key. Synchronous so the caller knows it stuck. */
+    fun restoreKeys(snapshot: ResetSnapshot): Boolean {
+        @Suppress("UseKtx") // undo must report whether the synchronous commit succeeded
+        val editor = prefs.edit()
+        snapshot.values.forEach { (key, value) ->
+            when (value) {
+                null -> editor.remove(key)
+                is String -> editor.putString(key, value)
+                is Boolean -> editor.putBoolean(key, value)
+                is Int -> editor.putInt(key, value)
+                is Long -> editor.putLong(key, value)
+                is Float -> editor.putFloat(key, value)
+                is Set<*> -> editor.putStringSet(key, value.filterIsInstance<String>().toSet())
+            }
+        }
+        return editor.commit()
     }
 
     fun restoreWorkspacePreferences(snapshot: WorkspacePreferencesSnapshot): Boolean {
