@@ -76,6 +76,8 @@ import com.mckimquyen.search.SearchEnterKeyPolicy;
 import com.mckimquyen.search.SearchFilterEngine;
 import com.mckimquyen.search.SearchHistoryStore;
 import com.mckimquyen.search.SearchResultAdapter;
+import com.mckimquyen.ui.home.HomeQuickActionDelegate;
+import com.mckimquyen.ui.home.HomeQuickActionHost;
 import com.mckimquyen.ui.home.LensViewHolder;
 import com.mckimquyen.ui.home.LensViewHolderHost;
 import com.mckimquyen.util.ApertureRevealHelper;
@@ -100,12 +102,7 @@ import com.google.android.material.progressindicator.CircularProgressIndicator;
 import kotlin.Unit;
 
 //2023.03.19 tried to convert kotlin but failed
-public class ActHome extends ActBase implements LensViewHolderHost {
-
-    // SEARCH-004: request codes for the two permission-gated quick actions.
-    private static final int REQUEST_CODE_CAMERA = 1001;
-    private static final int REQUEST_CODE_WIFI_SSID = 1002;
-    private static final int REQUEST_CODE_CONTACTS = 1003;
+public class ActHome extends ActBase implements LensViewHolderHost, HomeQuickActionHost {
 
     // FISH-016: ids 1-6 of the lens-management menu are the pre-existing literals above in
     // showLensManagementMenu/onLensMenuItemSelected; the two new entries are named.
@@ -176,7 +173,7 @@ public class ActHome extends ActBase implements LensViewHolderHost {
         public void handleOnBackPressed() {
             resetPredictiveBackPreview();
             if (searchView.isShowing()) {
-                hideSearch();
+                hideSearchOverlay();
             }
         }
     };
@@ -189,6 +186,7 @@ public class ActHome extends ActBase implements LensViewHolderHost {
     // Held so onDestroy can detach() it: the mediator registers observers on the pager/adapter.
     private TabLayoutMediator lensTabMediator;
     private final LensViewHolder lensHolder = new LensViewHolder(this);
+    private final HomeQuickActionDelegate quickActions = new HomeQuickActionDelegate(this);
 
     /** FISH-EXPORT: set by FrmLens's share button on the Intent that (re)launches this singleTask
      *  activity, so onLensMenuItemSelected's item 5 path runs automatically once lensHolder.currentLenses() is
@@ -230,17 +228,6 @@ public class ActHome extends ActBase implements LensViewHolderHost {
     private TextView webSearchFallback;
     private RecyclerView searchResults;
     private View t9Keypad;
-    private View quickActionRow;
-    private View quickActionDivider;
-    private TextView tvQuickActionLabel;
-    private TextView tvQuickActionValue;
-    private View contactActionRow;
-    private com.mckimquyen.search.ContactSearchController contactSearchController;
-    private View contactActionDivider;
-    private TextView tvContactResultName;
-    private TextView tvContactResultPhone;
-    private Button btContactCall;
-    private Button btContactMessage;
     private SearchResultAdapter searchResultAdapter;
     private com.google.android.material.chip.ChipGroup chipGroupSearchFilters;
     private SearchHistoryStore searchHistoryStore;
@@ -521,22 +508,7 @@ public class ActHome extends ActBase implements LensViewHolderHost {
         noSearchResults = findViewById(R.id.tvNoSearchResults);
         webSearchFallback = findViewById(R.id.tvWebSearchFallback);
         searchResults = findViewById(R.id.rvSearchResults);
-        quickActionRow = findViewById(R.id.quickActionRow);
-        quickActionDivider = findViewById(R.id.quickActionDivider);
-        tvQuickActionLabel = findViewById(R.id.tvQuickActionLabel);
-        tvQuickActionValue = findViewById(R.id.tvQuickActionValue);
-        contactActionRow = findViewById(R.id.contactActionRow);
-        contactActionDivider = findViewById(R.id.contactActionDivider);
-        tvContactResultName = findViewById(R.id.tvContactResultName);
-        tvContactResultPhone = findViewById(R.id.tvContactResultPhone);
-        btContactCall = findViewById(R.id.btContactCall);
-        btContactMessage = findViewById(R.id.btContactMessage);
-        contactSearchController = com.mckimquyen.search.ContactSearchController.create(
-                this,
-                state -> {
-                    renderContactSearchState(state);
-                    return kotlin.Unit.INSTANCE;
-                });
+        quickActions.attach();
 
         // Hide progress bar in test environments to prevent indeterminate animation loops from hanging tests
         boolean isTestEnv = false;
@@ -1315,7 +1287,7 @@ public class ActHome extends ActBase implements LensViewHolderHost {
             intent.putExtra(android.app.SearchManager.QUERY, query);
             try {
                 startActivity(intent);
-                hideSearch();
+                hideSearchOverlay();
             } catch (ActivityNotFoundException e) {
                 Toast.makeText(this, R.string.error_app_not_found, Toast.LENGTH_SHORT).show();
             }
@@ -1448,8 +1420,8 @@ public class ActHome extends ActBase implements LensViewHolderHost {
             return;
         }
 
-        updateQuickAction(query);
-        updateContactAction(query);
+        quickActions.updateQuickAction(query);
+        quickActions.updateContactAction(query);
 
         ArrayList<App> apps = listApp == null ? new ArrayList<>() : listApp;
         SearchFilterPreset preset = utilSettings != null
@@ -1507,8 +1479,8 @@ public class ActHome extends ActBase implements LensViewHolderHost {
 
     private void updateWebSearchFallback(CharSequence query, boolean isEmptyQuery, boolean hasResults) {
         boolean showWebFallback = !isEmptyQuery && !hasResults
-                && quickActionRow.getVisibility() != View.VISIBLE
-                && contactActionRow.getVisibility() != View.VISIBLE;
+                && !quickActions.quickActionRowVisible()
+                && !quickActions.contactActionRowVisible();
         webSearchFallback.setVisibility(showWebFallback ? View.VISIBLE : View.GONE);
         if (showWebFallback && query != null) {
             webSearchFallback.setText(getString(R.string.web_search_fallback, query.toString()));
@@ -1561,238 +1533,21 @@ public class ActHome extends ActBase implements LensViewHolderHost {
         }
     }
 
-    /**
-     * SEARCH-002: show/hide/populate the calculator/unit-conversion/timer/battery%/settings
-     * quick-action row above the normal app results, based on what the typed query resolves to.
-     */
-    private void updateQuickAction(CharSequence query) {
-        QuickAction action = QuickActionEngine.resolve(this, query);
-        boolean show = action != null;
-        quickActionRow.setVisibility(show ? View.VISIBLE : View.GONE);
-        quickActionDivider.setVisibility(show ? View.VISIBLE : View.GONE);
-        if (!show) {
-            quickActionRow.setOnClickListener(null);
-            return;
-        }
 
-        if (action instanceof QuickAction.Info info) {
-            tvQuickActionLabel.setText(info.getLabel());
-            tvQuickActionValue.setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0, 0, 0);
-            tvQuickActionValue.setText(info.getValue());
-            quickActionRow.setOnClickListener(v -> {
-                ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-                clipboard.setPrimaryClip(ClipData.newPlainText(info.getLabel(), info.getValue()));
-                Toast.makeText(this, info.getValue(), Toast.LENGTH_SHORT).show();
-            });
-        } else if (action instanceof QuickAction.Action quickAction) {
-            tvQuickActionLabel.setText(quickAction.getLabel());
-            // UI-016: was empty - the row looked like dead space with nothing on the right,
-            // compounding why this row read as "not working" (it did; it was just too
-            // understated to notice). A trailing chevron signals "this opens something" the
-            // same way a tappable list row conventionally does.
-            tvQuickActionValue.setText("");
-            tvQuickActionValue.setCompoundDrawablesRelativeWithIntrinsicBounds(
-                    0, 0, R.drawable.ic_arrow_forward_24dp, 0);
-            quickActionRow.setOnClickListener(v -> {
-                try {
-                    startActivity(quickAction.getIntent());
-                    hideSearch();
-                } catch (ActivityNotFoundException e) {
-                    Toast.makeText(this, R.string.error_app_not_found, Toast.LENGTH_SHORT).show();
-                }
-            });
-        } else if (action instanceof QuickAction.FlashlightToggle toggle) {
-            tvQuickActionLabel.setText(toggle.getLabel());
-            tvQuickActionValue.setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0, 0, 0);
-            tvQuickActionValue.setText(flashlightOn ? R.string.quick_action_flashlight_on : R.string.quick_action_flashlight_off);
-            quickActionRow.setOnClickListener(v -> toggleFlashlight());
-        } else if (action instanceof QuickAction.WifiSsidPermissionRequest permissionRequest) {
-            tvQuickActionLabel.setText(permissionRequest.getLabel());
-            tvQuickActionValue.setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0, 0, 0);
-            tvQuickActionValue.setText(R.string.quick_action_tap_to_allow);
-            quickActionRow.setOnClickListener(v -> requestWifiSsidPermission());
-        } else if (action instanceof QuickAction.DndAccessRequest dndRequest) {
-            tvQuickActionLabel.setText(dndRequest.getLabel());
-            tvQuickActionValue.setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0, 0, 0);
-            tvQuickActionValue.setText(dndRequest.getPreviouslyRequested()
-                    ? R.string.quick_action_dnd_denied
-                    : R.string.quick_action_tap_to_allow);
-            quickActionRow.setOnClickListener(v -> openDndAccessSettings());
-        } else if (action instanceof QuickAction.DndToggle dndToggle) {
-            tvQuickActionLabel.setText(dndToggle.getLabel());
-            tvQuickActionValue.setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0, 0, 0);
-            tvQuickActionValue.setText(dndToggle.isOn() ? R.string.quick_action_flashlight_on : R.string.quick_action_flashlight_off);
-            quickActionRow.setOnClickListener(v -> performDndToggle(dndToggle.isOn()));
-        }
-    }
 
-    /**
-     * SEARCH-004: CameraManager.setTorchMode() has no public getter for current state, so this
-     * app tracks it itself - correct as long as nothing else in the system toggles the torch
-     * behind this app's back, an accepted limitation matching how every flashlight app works.
-     */
-    private boolean flashlightOn = false;
 
-    private void toggleFlashlight() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
-                != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, REQUEST_CODE_CAMERA);
-            return;
-        }
-        performFlashlightToggle();
-    }
 
-    private void performFlashlightToggle() {
-        CameraManager cameraManager = (CameraManager) getSystemService(CAMERA_SERVICE);
-        try {
-            String torchCameraId = null;
-            for (String id : cameraManager.getCameraIdList()) {
-                Boolean hasFlash = cameraManager.getCameraCharacteristics(id)
-                        .get(CameraCharacteristics.FLASH_INFO_AVAILABLE);
-                if (Boolean.TRUE.equals(hasFlash)) {
-                    torchCameraId = id;
-                    break;
-                }
-            }
-            if (torchCameraId == null) {
-                Toast.makeText(this, R.string.error_no_flashlight, Toast.LENGTH_SHORT).show();
-                return;
-            }
-            flashlightOn = !flashlightOn;
-            cameraManager.setTorchMode(torchCameraId, flashlightOn);
-            updateQuickAction(appSearch.getText());
-        } catch (CameraAccessException e) {
-            Toast.makeText(this, R.string.error_no_flashlight, Toast.LENGTH_SHORT).show();
-        }
-    }
 
-    private void requestWifiSsidPermission() {
-        // Android 12+ requires requesting ACCESS_COARSE_LOCATION alongside FINE (lint
-        // CoarseFineLocation) - the user may grant only coarse, in which case
-        // QuickActionEngine.resolveWifiSsid still won't read the SSID (needs FINE specifically)
-        // and silently falls through, same as an outright denial.
-        ActivityCompat.requestPermissions(
-                this,
-                new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
-                REQUEST_CODE_WIFI_SSID
-        );
-    }
 
-    /**
-     * SEARCH-007: DND special access has no requestPermissions() callback - the only way to grant
-     * it is this Settings screen, and the only way to detect the result is re-checking
-     * isNotificationPolicyAccessGranted() next time the row renders, which onResume() does below.
-     */
-    private void openDndAccessSettings() {
-        new UtilSettings(this).save(UtilSettings.KEY_DND_PERMISSION_REQUESTED, true);
-        try {
-            startActivity(new Intent(android.provider.Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS));
-        } catch (ActivityNotFoundException e) {
-            Toast.makeText(this, R.string.error_app_not_found, Toast.LENGTH_SHORT).show();
-        }
-    }
 
-    private void performDndToggle(boolean currentlyOn) {
-        android.app.NotificationManager notificationManager =
-                (android.app.NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        if (!notificationManager.isNotificationPolicyAccessGranted()) {
-            // Access was revoked externally between resolve() and this tap - fall back to the
-            // request flow instead of crashing on setInterruptionFilter's SecurityException.
-            openDndAccessSettings();
-            return;
-        }
-        notificationManager.setInterruptionFilter(currentlyOn
-                ? android.app.NotificationManager.INTERRUPTION_FILTER_ALL
-                : android.app.NotificationManager.INTERRUPTION_FILTER_NONE);
-        updateQuickAction(appSearch.getText());
-    }
 
-    private void updateContactAction(CharSequence query) {
-        if (contactSearchController != null) {
-            contactSearchController.onQueryChanged(query);
-        }
-    }
 
-    private void renderContactSearchState(com.mckimquyen.search.ContactSearchUiState state) {
-        if (isFinishing() || isDestroyed()) return;
-        if (state instanceof com.mckimquyen.search.ContactSearchUiState.Result) {
-            ContactSearchResult contact = ((com.mckimquyen.search.ContactSearchUiState.Result) state).getContact();
-            contactActionRow.setVisibility(View.VISIBLE);
-            contactActionDivider.setVisibility(View.VISIBLE);
-            btContactCall.setText(R.string.contact_search_call);
-            btContactMessage.setVisibility(View.VISIBLE);
-            tvContactResultName.setText(contact.getDisplayName());
-            tvContactResultPhone.setText(contact.getPhoneNumber());
-            contactActionRow.setContentDescription(getString(R.string.search_open_contact, contact.getDisplayName()));
-            contactActionRow.setOnClickListener(v -> startContactIntent(contact.dialIntent()));
-            btContactCall.setOnClickListener(v -> startContactIntent(contact.dialIntent()));
-            btContactMessage.setOnClickListener(v -> startContactIntent(contact.messageIntent()));
-        } else if (state instanceof com.mckimquyen.search.ContactSearchUiState.PermissionRequest) {
-            contactActionRow.setVisibility(View.VISIBLE);
-            contactActionDivider.setVisibility(View.VISIBLE);
-            tvContactResultName.setText(R.string.contact_search_permission_label);
-            tvContactResultPhone.setText(R.string.contact_search_permission_rationale);
-            contactActionRow.setContentDescription(getString(R.string.contact_search_permission_rationale));
-            btContactCall.setText(R.string.contact_search_allow);
-            btContactMessage.setVisibility(View.GONE);
-            contactActionRow.setOnClickListener(v -> requestContactsPermission());
-            btContactCall.setOnClickListener(v -> requestContactsPermission());
-        } else {
-            contactActionRow.setVisibility(View.GONE);
-            contactActionDivider.setVisibility(View.GONE);
-            contactActionRow.setOnClickListener(null);
-            btContactCall.setOnClickListener(null);
-            btContactMessage.setOnClickListener(null);
-        }
-        updateWebSearchFallback();
-    }
 
-    private void requestContactsPermission() {
-        ActivityCompat.requestPermissions(
-                this,
-                new String[]{Manifest.permission.READ_CONTACTS},
-                REQUEST_CODE_CONTACTS
-        );
-    }
-
-    private void startContactIntent(Intent intent) {
-        try {
-            startActivity(intent);
-            hideSearch();
-        } catch (ActivityNotFoundException e) {
-            Toast.makeText(this, R.string.error_app_not_found, Toast.LENGTH_SHORT).show();
-        }
-    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        // SEARCH-015: remember "already asked" only once the user actually answered the dialog.
-        if (requestCode == REQUEST_CODE_CAMERA) {
-            com.mckimquyen.search.PermissionAskedFlags.recordResult(this,
-                    UtilSettings.KEY_FLASHLIGHT_PERMISSION_REQUESTED, permissions, grantResults,
-                    Manifest.permission.CAMERA);
-        } else if (requestCode == REQUEST_CODE_WIFI_SSID) {
-            com.mckimquyen.search.PermissionAskedFlags.recordResult(this,
-                    UtilSettings.KEY_WIFI_SSID_PERMISSION_REQUESTED, permissions, grantResults,
-                    Manifest.permission.ACCESS_FINE_LOCATION);
-        } else if (requestCode == REQUEST_CODE_CONTACTS) {
-            com.mckimquyen.search.PermissionAskedFlags.recordResult(this,
-                    UtilSettings.KEY_CONTACTS_PERMISSION_REQUESTED, permissions, grantResults,
-                    Manifest.permission.READ_CONTACTS);
-        }
-        if (requestCode == REQUEST_CODE_CAMERA) {
-            boolean granted = grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED;
-            if (granted) {
-                performFlashlightToggle();
-            } else {
-                updateQuickAction(appSearch.getText());
-            }
-        } else if (requestCode == REQUEST_CODE_WIFI_SSID) {
-            updateQuickAction(appSearch.getText());
-        } else if (requestCode == REQUEST_CODE_CONTACTS) {
-            updateContactAction(appSearch.getText());
-        }
+        quickActions.onPermissionResult(requestCode, permissions, grantResults);
     }
 
     private void launchSearchResult(App app, View source) {
@@ -1812,10 +1567,10 @@ public class ActHome extends ActBase implements LensViewHolderHost {
                 new android.graphics.Rect(0, 0, source.getWidth(), source.getHeight()),
                 app.getUserId()
         );
-        hideSearch();
+        hideSearchOverlay();
     }
 
-    private void hideSearch() {
+    private void hideSearchOverlay() {
         // SearchView.hide() runs the reverse morph animation and handles keyboard/focus itself.
         searchView.clearText();
         searchView.hide();
@@ -1858,7 +1613,7 @@ public class ActHome extends ActBase implements LensViewHolderHost {
             // SEARCH-007: DND access has no onRequestPermissionsResult callback - re-resolve the
             // quick-action row on every resume so returning from openDndAccessSettings() reflects
             // the real granted/denied state instead of the stale pre-Settings copy.
-            updateQuickAction(appSearch.getText());
+            quickActions.updateQuickAction(appSearch.getText());
         }
         if (RAppsSingleton.getInstance().getApps() != null && !RAppsSingleton.getInstance().getApps().isEmpty()) {
             assignApps(Objects.requireNonNull(RAppsSingleton.getInstance().getApps()));
@@ -2164,6 +1919,11 @@ public class ActHome extends ActBase implements LensViewHolderHost {
     @Override public void setLensTabMediator(TabLayoutMediator mediator) { lensTabMediator = mediator; }
     @Override public TabLayoutMediator lensTabMediator() { return lensTabMediator; }
 
+    // HomeQuickActionHost
+    @Override public CharSequence searchText() { return appSearch.getText(); }
+    @Override public void hideSearch() { hideSearchOverlay(); }
+    @Override public void refreshWebSearchFallback() { updateWebSearchFallback(); }
+
     @Override
     protected void onDestroy() {
         lensHolder.onDestroy();
@@ -2176,10 +1936,7 @@ public class ActHome extends ActBase implements LensViewHolderHost {
             lensManagementMenu = null;
         }
         removeLensMenuPressAnchor();
-        if (contactSearchController != null) {
-            contactSearchController.close();
-            contactSearchController = null;
-        }
+        quickActions.onDestroy();
         super.onDestroy();
     }
 }
