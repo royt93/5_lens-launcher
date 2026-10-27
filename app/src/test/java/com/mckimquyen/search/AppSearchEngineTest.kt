@@ -292,4 +292,64 @@ class AppSearchEngineTest {
         assertEquals(listOf(work), AppSearchEngine.recentInstalls(listOf(personal, work), now))
     }
 
+    @Test
+    fun `each keyword and its accent or case variants list the recent installs`() {
+        val recent = installed("com.recent", 1 * day, label = "Zeta")
+        val old = installed("com.old", 30 * day, label = "Alpha")
+        val apps = listOf(old, recent)
+
+        listOf("new", "NEW", " recent ", "mới cài", "MOI CAI", "vừa cài", "vua cai").forEach { query ->
+            assertEquals(query, listOf(recent), AppSearchEngine.search(apps, query, nowMillis = now))
+        }
+    }
+
+    @Test
+    fun `a longer query that merely contains a keyword uses normal search`() {
+        val newYork = App(label = "New York Times", packageName = "com.nyt", name = "Main", installDate = now - 40 * day)
+        val recent = installed("com.recent", 1 * day, label = "Zeta")
+
+        assertEquals(listOf(newYork), AppSearchEngine.search(listOf(newYork, recent), "new york", nowMillis = now))
+    }
+
+    @Test
+    fun `a keyword query does not return old apps and ignores history and favorites`() {
+        val old = installed("com.old", 30 * day, label = "New Notes")
+        val recent = installed("com.recent", 2 * day, label = "Zeta")
+
+        val result = AppSearchEngine.search(
+            listOf(old, recent), "new",
+            recentKeys = listOf(AppSearchEngine.componentKey(old)),
+            favoriteKeys = setOf(AppSearchEngine.componentKey(old)),
+            nowMillis = now
+        )
+
+        assertEquals(listOf(recent), result)
+    }
+
+    @Test
+    fun `keyword queries respect hidden apps and the explicit limit`() {
+        val hidden = installed("com.hidden", 1 * day, visible = false)
+        val apps = (1..10).map { installed("com.app$it", it * 60_000L) } + hidden
+
+        assertEquals(3, AppSearchEngine.search(apps, "new", limit = 3, nowMillis = now).size)
+        assertTrue(AppSearchEngine.search(apps, "new", nowMillis = now).none { it.packageName == "com.hidden" })
+        assertTrue(AppSearchEngine.search(apps, "new", limit = 0, nowMillis = now).isEmpty())
+    }
+
+    @Test
+    fun `blank and unrelated queries behave exactly as before`() {
+        val recent = installed("com.recent", 1 * day, label = "Zeta")
+
+        assertTrue(AppSearchEngine.search(listOf(recent), "", nowMillis = now).isEmpty())
+        assertEquals(listOf(recent), AppSearchEngine.search(listOf(recent), "zeta", nowMillis = now))
+        assertTrue(AppSearchEngine.search(listOf(recent), "newer", nowMillis = now).isEmpty())
+    }
+
+    @Test
+    fun `an unknown install date is never recent even when the clock itself is near zero`() {
+        val unknown = App(label = "Unknown", packageName = "com.unknown", name = "Main", installDate = 0L)
+        val negative = App(label = "Negative", packageName = "com.negative", name = "Main", installDate = -5L)
+
+        assertTrue(AppSearchEngine.recentInstalls(listOf(unknown, negative), nowMillis = day).isEmpty())
+    }
 }

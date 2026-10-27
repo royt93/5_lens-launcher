@@ -36,12 +36,15 @@ object AppSearchEngine {
         query: CharSequence?,
         recentKeys: List<String> = emptyList(),
         favoriteKeys: Set<String> = emptySet(),
-        limit: Int = SEARCH_RESULT_LIMIT
+        limit: Int = SEARCH_RESULT_LIMIT,
+        nowMillis: Long = System.currentTimeMillis()
     ): List<App> {
         if (limit <= 0) return emptyList()
 
         val visibleApps = apps.filter(App::isVisible)
         val normalizedQuery = normalize(query)
+        // FEAT-013: the whole query is a recent-installs keyword (e.g. "new") - list recent installs instead.
+        if (normalizedQuery in RECENT_INSTALL_KEYWORDS) return recentInstalls(visibleApps, nowMillis, limit)
         val recentPositions = buildMap {
             recentKeys.forEachIndexed { index, key -> putIfAbsent(key, index) }
         }
