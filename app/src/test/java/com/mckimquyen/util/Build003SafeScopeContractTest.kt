@@ -56,7 +56,7 @@ class Build003SafeScopeContractTest {
 
     @Test
     fun `the safe-scope task explicitly records deferred permissions crash logs and heap`() {
-        val story = File(projectRoot, "doc/task/inprogress/p3-build-build-003-repo-hygiene-quick-wins.md").readText()
+        val story = File(projectRoot, "doc/task/done/p3-build-build-003-repo-hygiene-quick-wins.md").readText()
         assertTrue(story.contains("Giữ nguyên 2 manifest permissions"))
         assertTrue(story.contains("7 JVM crash logs"))
         assertTrue(story.contains("-Xmx2048m"))

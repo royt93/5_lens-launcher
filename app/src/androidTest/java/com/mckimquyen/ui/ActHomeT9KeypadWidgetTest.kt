@@ -168,4 +168,37 @@ class ActHomeT9KeypadWidgetTest {
             }
         }
     }
+
+    /** SEARCH-017: in T9 mode a recently launched app precedes an equally ranked one that was not. */
+    @Test
+    fun t9ResultsPutTheRecentlyLaunchedAppFirstWithinTheSameMatchTier() {
+        val older = App(label = "Chrome", packageName = "com.test.chrome.older", name = "Main", isVisible = true)
+        val recent = App(label = "Chrome", packageName = "com.test.chrome.recent", name = "Main", isVisible = true)
+        RAppsSingleton.instance.apps = arrayListOf(older, recent)
+        val store = com.mckimquyen.search.SearchHistoryStore(context)
+        store.clear()
+        store.recordLaunch(com.mckimquyen.search.AppSearchEngine.componentKey(recent))
+        try {
+            ActivityScenario.launch(ActHome::class.java).use { scenario ->
+                scenario.onActivity { it.openSearchFromHome() }
+                awaitSearchShown(scenario)
+                scenario.onActivity { activity ->
+                    activity.findViewById<View>(R.id.btnT9_Clear).performClick()
+                    activity.findViewById<View>(R.id.btnT9_2).performClick()
+                    activity.findViewById<View>(R.id.btnT9_4).performClick()
+                    activity.findViewById<View>(R.id.btnT9_7).performClick()
+                }
+                instrumentation.waitForIdleSync()
+                scenario.onActivity { activity ->
+                    val list = activity.searchResultAdapterForTest?.currentListForTest().orEmpty()
+                    assertEquals(
+                        listOf("com.test.chrome.recent", "com.test.chrome.older"),
+                        list.map { it.packageName.toString() }
+                    )
+                }
+            }
+        } finally {
+            store.clear()
+        }
+    }
 }

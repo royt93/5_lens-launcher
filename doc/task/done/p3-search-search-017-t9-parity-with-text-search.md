@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | idea |
-| Status | todo |
+| Status | done 2026-10-27 (audit 9.2/10, `doc/task/AUDIT_SEARCH-017_2026-10-27.md`) |
 | Priority | P3 |
 | Evidence | confirmed |
 | Epic | SEARCH-010 |
@@ -21,10 +21,10 @@ Là người dùng T9, tôi muốn kết quả có thứ tự và số lượng 
 
 ## Acceptance criteria
 
-- [ ] Giới hạn kết quả.
-- [ ] Ưu tiên theo lịch sử gần đây.
-- [ ] Khớp cả alias.
-- [ ] Test thứ tự và giới hạn.
+- [x] Giới hạn kết quả: `SEARCH_RESULT_LIMIT = 24` dùng chung với tìm chữ.
+- [x] Ưu tiên theo lịch sử gần đây (`recentKeys`, sau độ khớp và yêu thích).
+- [x] Khớp cả alias: đã có từ SEARCH-012; thêm test giới hạn cho đường alias.
+- [x] Test thứ tự và giới hạn: 9 test unit mới + widget trên KJ7.
 
 ## Implementation notes
 
@@ -32,13 +32,13 @@ Làm sau SEARCH-012.
 
 ## Verification and Definition of Done
 
-- [ ] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
-- [ ] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
-- [ ] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
-- [ ] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
-- [ ] No new lint/build failures.
-- [ ] A post-change audit record scores the round `> 9.0/10` before push.
-- [ ] Evidence and status are updated before moving this file to `done`.
+- [x] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
+- [x] Widget/UI tests: `ActHomeT9KeypadWidgetTest` +1, đỏ→xanh trên KJ7.
+- [x] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
+- [x] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
+- [x] No new lint/build failures.
+- [x] A post-change audit record scores the round `> 9.0/10` before push.
+- [x] Evidence and status are updated before moving this file to `done`.
 
 If a test layer is not applicable, replace its checkbox with a reviewed rationale; do not silently omit it.
 

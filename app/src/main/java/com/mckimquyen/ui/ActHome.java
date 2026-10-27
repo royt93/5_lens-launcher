@@ -1728,7 +1728,7 @@ public class ActHome extends ActBase {
         boolean useT9 = utilSettings != null && utilSettings.getEnableT9SearchKeypad()
                 && isT9NumericQuery(query);
         java.util.List<App> engineResults = useT9
-                ? T9SearchEngine.search(candidates, query)
+                ? T9SearchEngine.search(candidates, query, searchHistoryStore.recentKeys())
                 : AppSearchEngine.search(candidates, query, searchHistoryStore.recentKeys());
         boolean isEmptyQuery = AppSearchEngine.normalize(query).isEmpty();
         // UI-011: a blank query with no recent/favorite apps used to show a bare empty state.
