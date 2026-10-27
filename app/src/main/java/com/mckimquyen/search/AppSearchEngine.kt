@@ -6,7 +6,8 @@ import java.util.Locale
 
 /** Pure, deterministic on-device app search and ranking. */
 object AppSearchEngine {
-    private const val DEFAULT_LIMIT = 24
+    /** Result cap shared by text search and T9 so both lists stay the same size. */
+    const val SEARCH_RESULT_LIMIT = 24
 
     @JvmStatic
     fun componentKey(app: App): String =
@@ -27,7 +28,7 @@ object AppSearchEngine {
         query: CharSequence?,
         recentKeys: List<String> = emptyList(),
         favoriteKeys: Set<String> = emptySet(),
-        limit: Int = DEFAULT_LIMIT
+        limit: Int = SEARCH_RESULT_LIMIT
     ): List<App> {
         if (limit <= 0) return emptyList()
 

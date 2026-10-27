@@ -8,6 +8,11 @@ import kotlin.system.measureNanoTime
 
 class AppSearchEngineTest {
     @Test
+    fun `text search shared result limit is twenty four`() {
+        assertEquals(24, AppSearchEngine.SEARCH_RESULT_LIMIT)
+    }
+
+    @Test
     fun `normalize ignores case accents and extra whitespace`() {
         assertEquals("dien thoai", AppSearchEngine.normalize(" \t ĐIỆN   THOẠI \n "))
         assertEquals("", AppSearchEngine.normalize(null))
