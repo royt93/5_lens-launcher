@@ -42,6 +42,8 @@ public interface LensViewHolderHost {
     void openSearchFromHome();
     boolean pendingAutoExportLens();
     void clearPendingAutoExportLens();
+    void setActiveLensView(LensView view);               // the single writer of ActHome.lensViews
+    LensView activeLensView();                           // current value (may be null)
     void exportActiveLensImage();
 }
 ```
@@ -50,7 +52,7 @@ public interface LensViewHolderHost {
 
 ## Members that stay on `ActHome` as delegates (tests reference them)
 
-`lensViews` becomes a package-private **read-through** (`LensView lensViews()` is not enough: 68 test lines read the field `activity.lensViews`). Keep a real field `LensView lensViews` on `ActHome`? No: that would be a second writer. Instead make it a Kotlin-style property via a package-private final getter is impossible from Java field syntax, so the plan uses this compromise, decided up front: **`ActHome.lensViews` stays a package-private field that only `LensViewHolder` writes, through `host.setActiveLensView(LensView)`**. One writer (the holder), one storage location (ActHome), zero test edits. Add `void setActiveLensView(LensView view)` to the host interface and a unit-visible assertion in the audit that `lensViews =` appears exactly once in `ActHome`... which is inside `setActiveLensView`.
+**`lensViews` decision (68 test lines read the field `activity.lensViews`, so the field must keep that exact name and package-private visibility):** the **storage** stays on `ActHome` as `LensView lensViews`, but it is **written only by `LensViewHolder`**, through a host method `void setActiveLensView(LensView view)`. That gives one writer (the holder) and zero test edits. The audit checks that `lensViews =` appears exactly once in `ActHome.java`, inside `setActiveLensView`. Add `setActiveLensView` to `LensViewHolderHost`; the holder reads the current view through `host.activeLensView()` (also added).
 
 Also keep as delegates: `refreshLensList()` (3 test lines), `updateLensNavigationChrome()`, `bindLensView` is private (5 test lines use the name: re-check they are comments or `LensPagerAdapter` binds before deleting).
 
