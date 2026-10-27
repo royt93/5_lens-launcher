@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | idea |
-| Status | todo |
+| Status | done |
 | Priority | P3 |
 | Evidence | idea |
 | Epic | Search |
@@ -21,23 +21,23 @@ Là người dùng, tôi muốn gõ vài chữ để mở nhanh app vừa cài.
 
 ## Acceptance criteria
 
-- [ ] Quick action liệt kê app cài trong N ngày (hằng số có tên).
-- [ ] Tôn trọng app ẩn.
-- [ ] Test thuần.
+- [x] Quick action liệt kê app cài trong N ngày (hằng số có tên).
+- [x] Tôn trọng app ẩn.
+- [x] Test thuần.
 
 ## Implementation notes
 
-Nhỏ, dùng pipeline `QuickActionEngine` hiện có.
+Đã làm trong `AppSearchEngine` (không dùng `QuickActionEngine` vì nó chỉ trả một dòng) và gắn từ khóa `new`/`recent`/`moi cai`/`vua cai`; xem `doc/task/AUDIT_FEAT-013_2026-10-27.md`.
 
 ## Verification and Definition of Done
 
-- [ ] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
-- [ ] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
-- [ ] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
-- [ ] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
-- [ ] No new lint/build failures.
-- [ ] A post-change audit record scores the round `> 9.0/10` before push.
-- [ ] Evidence and status are updated before moving this file to `done`.
+- [x] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
+- [x] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
+- [x] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
+- [x] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
+- [x] No new lint/build failures.
+- [x] A post-change audit record scores the round `> 9.0/10` before push.
+- [x] Evidence and status are updated before moving this file to `done`.
 
 If a test layer is not applicable, replace its checkbox with a reviewed rationale; do not silently omit it.
 

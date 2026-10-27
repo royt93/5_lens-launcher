@@ -309,7 +309,7 @@ Giới hạn: agent audit ui chưa đọc hết `LensView.kt`, `ActAbout.java`, 
 | ID | P | SP | Story |
 |---|---|---|---|
 | `BUILD-005` | P3 | 5 | [Icon launcher vector và dọn density lệch (5 IconLauncherShape, IconLocation, IconMissingDensityFolder)](todo/p3-build-build-005-vector-launcher-icon-and-density-assets.md) |
-| `FEAT-013` | P3 | 2 | [Quick action 'app vừa cài' dựa trên installDate](todo/p3-feat-feat-013-recent-install-quick-action.md) |
+| `FEAT-013` ✅ done 2026-10-27 | P3 | 2 | [Quick action 'app vừa cài' dựa trên installDate](done/p3-feat-feat-013-recent-install-quick-action.md) |
 | `FISH-027` | P3 | 5 | [Profile độ cong lens (fisheye / anamorphic / cylindrical)](todo/p3-fish-fish-027-lens-profiles-curve-shapes.md) |
 | `FISH-028` | P3 | 3 | [Bán kính ảnh hưởng của lens (lens hood)](todo/p3-fish-fish-028-lens-hood-bounded-radius.md) |
 | `FISH-029` | P3 | 3 | [Khóa tiêu điểm (macro mode) bằng double-tap](todo/p3-fish-fish-029-focus-lock-macro-mode.md) |
