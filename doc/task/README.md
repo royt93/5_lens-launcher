@@ -301,7 +301,7 @@ Giới hạn: agent audit ui chưa đọc hết `LensView.kt`, `ActAbout.java`, 
 | `SEARCH-015` ✅ done 2026-10-26 | P3 | 2 | [Hàng 'Hỏi lại các quyền quick action' và sửa cờ đã hỏi một chiều](done/p3-search-search-015-reset-permission-asked-flags.md) |
 | `SEARCH-016` ✅ done 2026-10-26 | P3 | 2 | [Search history có thời hạn lưu](done/p3-search-search-016-search-history-ttl.md) |
 | `UI-033` | P3 | 5 | [Trang gom mọi cài đặt theo từng lens](todo/p3-ui-ui-033-per-lens-settings-page.md) |
-| `UI-034` | P3 | 3 | [Xem trước và hoàn tác khi reset về mặc định](todo/p3-ui-ui-034-reset-undo-preview.md) |
+| `UI-034` ✅ done 2026-10-27 | P3 | 3 | [Xem trước và hoàn tác khi reset về mặc định](done/p3-ui-ui-034-reset-undo-preview.md) |
 | `UI-035` | P3 | 5 | [Khóa một lens (chế độ khách)](todo/p3-ui-ui-035-lens-guest-lock.md) |
 
 ### IDEA (giả thuyết cần owner chọn)

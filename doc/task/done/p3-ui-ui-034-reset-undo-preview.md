@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | new |
-| Status | inprogress |
+| Status | done |
 | Priority | P3 |
 | Evidence | confirmed |
 | Epic | Settings safety |
@@ -13,7 +13,7 @@
 
 ## Context and evidence
 
-`ui/FrmLens.kt:267` `resetToDefault` và `ui/FrmSettings.kt:519` xóa ~22 key tức thì, chỉ có Snackbar sau (`ActSettings.java:358`), không hoàn tác.
+`ui/FrmLens.kt:267` `resetToDefault` và `ui/FrmSettings.kt:519` xóa tức thì (thực tế Lens 5 + Settings 26 + Apps 1 khóa, không phải ~22), chỉ có Snackbar sau (`ActSettings.java:358`), không hoàn tác.
 
 ## User story
 
@@ -21,9 +21,9 @@ Là người dùng, tôi muốn biết reset sẽ đổi gì và hoàn tác đư
 
 ## Acceptance criteria
 
-- [ ] Dialog liệt kê các mục sẽ đổi.
-- [ ] Hoàn tác một lần bằng snapshot prefs trong bộ nhớ (Snackbar action).
-- [ ] Test: reset rồi undo trả đúng toàn bộ giá trị cũ, kể cả key vắng.
+- [x] Dialog liệt kê các mục sẽ đổi.
+- [x] Hoàn tác một lần bằng snapshot prefs trong bộ nhớ (Snackbar action).
+- [x] Test: reset rồi undo trả đúng toàn bộ giá trị cũ, kể cả key vắng.
 
 ## Implementation notes
 
@@ -31,13 +31,13 @@ Snapshot/restore theo mẫu test isolation (nhớ cả key không tồn tại).
 
 ## Verification and Definition of Done
 
-- [ ] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
-- [ ] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
-- [ ] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
-- [ ] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
-- [ ] No new lint/build failures.
-- [ ] A post-change audit record scores the round `> 9.0/10` before push.
-- [ ] Evidence and status are updated before moving this file to `done`.
+- [x] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
+- [x] Widget/UI tests: `ResetDefaultsWidgetTest` trên KJ7. Accessibility: Not applicable, dùng AlertDialog/Snackbar chuẩn của Material, không có control tuỳ biến (đã review).
+- [x] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
+- [x] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
+- [x] No new lint/build failures.
+- [x] A post-change audit record scores the round `> 9.0/10` before push.
+- [x] Evidence and status are updated before moving this file to `done`.
 
 If a test layer is not applicable, replace its checkbox with a reviewed rationale; do not silently omit it.
 
