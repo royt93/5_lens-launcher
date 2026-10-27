@@ -228,6 +228,9 @@
     <string name="menu_bulk_remove_from_lens">Xóa khỏi thấu kính…</string>
     <string name="menu_remove_from_lens">Xóa khỏi thấu kính này</string>
     <string name="lens_hide_app">Ẩn khỏi thấu kính này</string>
+    <string name="menu_move_to_lens">Chuyển sang lens…</string>
+    <string name="move_to_lens_title">Chuyển sang lens nào?</string>
+    <string name="move_to_lens_done">Đã chuyển sang %1$s</string>
     <string name="lens_hidden_apps">Ứng dụng đã ẩn trong thấu kính này</string>
     <string name="lens_restore_apps">Khôi phục ứng dụng</string>
     <string name="lens_hidden_apps_empty">Ứng dụng ẩn khỏi thấu kính này vẫn có thể tìm kiếm.</string>

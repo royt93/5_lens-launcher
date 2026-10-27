@@ -224,6 +224,9 @@
     <string name="menu_bulk_remove_from_lens">Aus Linse entfernen …</string>
     <string name="menu_remove_from_lens">Aus dieser Linse entfernen</string>
     <string name="lens_hide_app">In dieser Linse ausblenden</string>
+    <string name="menu_move_to_lens">In Linse verschieben …</string>
+    <string name="move_to_lens_title">In welche Linse verschieben?</string>
+    <string name="move_to_lens_done">Verschoben nach %1$s</string>
     <string name="lens_hidden_apps">In dieser Linse ausgeblendete Apps</string>
     <string name="lens_restore_apps">Apps wiederherstellen</string>
     <string name="lens_hidden_apps_empty">In dieser Linse ausgeblendete Apps bleiben in der Suche verfügbar.</string>

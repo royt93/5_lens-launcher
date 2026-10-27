@@ -192,6 +192,8 @@ public class ActHome extends ActBase {
     private String lensManagementReturnTargetId;
     private LensPagerAdapter lensPagerAdapter;
     private List<LensWorkspace> currentLenses = new ArrayList<>();
+    /** FISH-038: the one pending undo of the last lens move; dropped when the Activity goes away. */
+    private kotlin.jvm.functions.Function0<Boolean> pendingLensMoveUndo;
 
     /** FISH-EXPORT: set by FrmLens's share button on the Intent that (re)launches this singleTask
      *  activity, so onLensMenuItemSelected's item 5 path runs automatically once currentLenses is
@@ -720,6 +722,21 @@ public class ActHome extends ActBase {
      */
     private void bindLensView(LensView view, LensWorkspace lens) {
         view.setPackageManager(getPackageManager());
+        // FISH-038: "Move to lens" needs a second lens; the Undo snackbar is owned here, not by the view.
+        view.setHasOtherLenses(currentLenses != null && currentLenses.size() > 1);
+        view.setOnAppMovedToLensListener((targetName, undo) -> {
+            pendingLensMoveUndo = undo;
+            Snackbar.make(lensPager, getString(R.string.move_to_lens_done, targetName), Snackbar.LENGTH_LONG)
+                    .setAction(R.string.reset_undo, v -> {
+                        kotlin.jvm.functions.Function0<Boolean> pending = pendingLensMoveUndo;
+                        if (pending != null && pending.invoke()) {
+                            pendingLensMoveUndo = null;
+                        } else {
+                            Toast.makeText(this, R.string.reset_undo_failed, Toast.LENGTH_LONG).show();
+                        }
+                    })
+                    .show();
+        });
         view.setSystemUiVisibility(
                 View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
         view.setOnCurvatureAdjustedListener((curvature, finished) -> {
@@ -1071,6 +1088,13 @@ public class ActHome extends ActBase {
     private void onLensesChanged(List<LensWorkspace> lenses) {
         currentLenses = lenses;
         LensShortcuts.refresh(getApplicationContext(), lenses);
+        // FISH-038: pages bound before the list changed must learn whether a move target exists now.
+        if (lensPagerAdapter != null) {
+            for (int i = 0; i < lensPagerAdapter.getItemCount(); i++) {
+                LensView page = lensViewAt(i);
+                if (page != null) page.setHasOtherLenses(lenses.size() > 1);
+            }
+        }
     }
 
     /** FISH-022: lens name opens grouped lens management and selection in a separate Activity. */
@@ -2404,6 +2428,7 @@ public class ActHome extends ActBase {
 
     @Override
     protected void onDestroy() {
+        pendingLensMoveUndo = null;
         if (lensTabMediator != null) {
             lensTabMediator.detach();
             lensTabMediator = null;

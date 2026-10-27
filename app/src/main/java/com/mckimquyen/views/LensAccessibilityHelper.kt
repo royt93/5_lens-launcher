@@ -25,7 +25,10 @@ class LensAccessibilityHelper(
     // UI-024: defaults to "off" so existing tests that don't pass this still get the pre-badge
     // announcement behavior rather than silently depending on a real SharedPreferences read.
     private val showBadgesSettingProvider: () -> Boolean = { false },
-    private val onAppHidden: ((index: Int) -> Unit)? = null
+    private val onAppHidden: ((index: Int) -> Unit)? = null,
+    private val onAppMoveRequested: ((index: Int) -> Unit)? = null,
+    /** FISH-038: read on every populate, so TalkBack never offers a move while no other lens exists. */
+    private val moveAvailableProvider: () -> Boolean = { false }
 ) : ExploreByTouchHelper(host) {
 
     override fun getVirtualViewAt(x: Float, y: Float): Int {
@@ -87,6 +90,12 @@ class LensAccessibilityHelper(
             ))
         }
 
+        if (onAppMoveRequested != null && moveAvailableProvider()) {
+            node.addAction(AccessibilityNodeInfoCompat.AccessibilityActionCompat(
+                R.id.menuItemMoveToLens, host.context.getString(R.string.menu_move_to_lens)
+            ))
+        }
+
         val bounds = Rect()
         if (rectProvider(virtualViewId, bounds) && !bounds.isEmpty) {
             node.setBoundsInParent(bounds)
@@ -114,6 +123,12 @@ class LensAccessibilityHelper(
             R.id.menuItemHideFromLens -> {
                 val hide = onAppHidden ?: return false
                 hide(virtualViewId)
+                true
+            }
+            R.id.menuItemMoveToLens -> {
+                val move = onAppMoveRequested ?: return false
+                if (!moveAvailableProvider()) return false
+                move(virtualViewId)
                 true
             }
             else -> false

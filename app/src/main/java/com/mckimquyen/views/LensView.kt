@@ -48,6 +48,7 @@ import com.mckimquyen.util.UtilApp
 import com.mckimquyen.util.UtilCalculator
 import com.mckimquyen.util.LensAppScope
 import com.mckimquyen.util.LensAppScopeEditor
+import com.mckimquyen.util.LensMoveApplier
 import com.mckimquyen.util.UtilSettings
 import kotlinx.coroutines.launch
 import java.util.Locale
@@ -80,6 +81,11 @@ fun interface OnSearchSwipeDownListener {
     fun onSearchSwipeDown()
 }
 
+/** FISH-038: told after a successful move so the host can offer Undo; LensView is not an Activity. */
+fun interface OnAppMovedToLensListener {
+    fun onAppMoved(targetLensName: String, undo: () -> Boolean)
+}
+
 /** FISH-025: fired once when a horizontal swipe from a configured screen edge is accepted. */
 fun interface OnEdgeSwipeListener {
     fun onEdgeSwipe(direction: EdgeSwipeDirection)
@@ -101,6 +107,10 @@ enum class LensGestureState {
 class LensView : View {
 
     companion object {
+        /** FISH-038: every lens except the one being viewed. */
+        internal fun moveTargets(lenses: List<LensWorkspace>, currentLensId: String): List<LensWorkspace> =
+            lenses.filter { it.id != currentLensId }
+
         // PERF-001: documented frame-time budgets used to judge the real-device drag benchmark
         // (adb shell dumpsys gfxinfo framestats) against 60/90/120 Hz displays.
         const val FRAME_BUDGET_60HZ_MS = 16.6f
@@ -458,6 +468,16 @@ class LensView : View {
     var onSearchSwipeDownListener: OnSearchSwipeDownListener? = null
     /** FISH-025: edge-swipe listener invoked when a side edge gesture triggers lens switching. */
     var onEdgeSwipeListener: OnEdgeSwipeListener? = null
+
+    /** FISH-038: see [OnAppMovedToLensListener]. Null (the default) means no Undo is offered. */
+    var onAppMovedToLensListener: OnAppMovedToLensListener? = null
+
+    /** FISH-038: "Move to lens" only makes sense while at least one other lens exists. Set by the host. */
+    private var mHasOtherLenses = false
+
+    fun setHasOtherLenses(hasOtherLenses: Boolean) {
+        mHasOtherLenses = hasOtherLenses
+    }
     private var mTouchDownX = 0f
     private var mTouchDownY = 0f
     // PERF-005: lấy mẫu reduced-motion ở ACTION_DOWN, không đọc lại mỗi MotionEvent.
@@ -679,6 +699,7 @@ class LensView : View {
             popupMenu.inflate(R.menu.menu_search_result)
             popupMenu.menu.findItem(R.id.menuItemUnpin).isVisible = app.pinnedZone != PinnedZone.NONE
             popupMenu.menu.findItem(R.id.menuItemHideFromLens).isVisible = true
+            popupMenu.menu.findItem(R.id.menuItemMoveToLens).isVisible = mHasOtherLenses
             popupMenu.menu.findItem(R.id.menuItemRemoveFromLens).isVisible =
                 shouldOfferRemoveFromLens(mUtilSettings?.getLensAppScope(lensId))
             popupMenu.setForceShowIcon(true)
@@ -710,6 +731,10 @@ class LensView : View {
                     }
                     R.id.menuItemHideFromLens -> {
                         hideFromLens(app)
+                        true
+                    }
+                    R.id.menuItemMoveToLens -> {
+                        chooseMoveTarget(app)
                         true
                     }
                     else -> false
@@ -744,6 +769,35 @@ class LensView : View {
         val settings = mUtilSettings ?: return
         LensAppScopeEditor(settings).remove(lensId, setOf(LensAppScope.identifierOf(app)), emptySet())
     }
+
+    /** FISH-038: asks which lens to move [app] to; the current lens is never offered. */
+    private fun chooseMoveTarget(app: App) {
+        LensWorkspace.loadAll { lenses ->
+            val targets = moveTargets(lenses, lensId)
+            if (targets.isEmpty() || !isAttachedToWindow) return@loadAll
+            com.google.android.material.dialog.MaterialAlertDialogBuilder(context, R.style.MaterialYouDialogTheme)
+                .setTitle(R.string.move_to_lens_title)
+                .setItems(targets.map { it.name }.toTypedArray()) { _, which ->
+                    moveAppToLens(app, targets[which].id, targets[which].name)
+                }
+                .setNegativeButton(android.R.string.cancel, null)
+                .show()
+        }
+    }
+
+    private fun moveAppToLens(app: App, targetLensId: String, targetName: String) {
+        val settings = mUtilSettings ?: return
+        val applier = LensMoveApplier(settings)
+        val result = applier.move(LensAppScope.identifierOf(app), lensId, targetLensId) ?: return
+        onAppMovedToLensListener?.onAppMoved(targetName) { applier.undo(result.snapshot) }
+    }
+
+    @androidx.annotation.VisibleForTesting
+    internal fun moveAppToLensForTest(app: App, targetLensId: String, targetName: String) =
+        moveAppToLens(app, targetLensId, targetName)
+
+    @androidx.annotation.VisibleForTesting
+    internal fun moveTargetsForTest(lenses: List<LensWorkspace>) = moveTargets(lenses, lensId)
 
     private fun hideFromLens(app: App) {
         val settings = mUtilSettings ?: return
@@ -805,6 +859,8 @@ class LensView : View {
             onAppClicked = { index -> launchAppAtIndex(index) },
             onAppLongClicked = { index -> showAppOptionsAtIndex(index) },
             onAppHidden = { index -> mApps?.getOrNull(index)?.let(::hideFromLens) },
+            onAppMoveRequested = { index -> mApps?.getOrNull(index)?.let(::chooseMoveTarget) },
+            moveAvailableProvider = { mHasOtherLenses },
             // UI-024: TalkBack must honor the same toggle the visual badge paths do.
             showBadgesSettingProvider = {
                 mUtilSettings?.let {
@@ -1763,6 +1819,7 @@ class LensView : View {
             onCurvatureAdjustedListener = null
             onEmptySpaceLongPressListener = null
             onSearchSwipeDownListener = null
+            onAppMovedToLensListener = null
             mApps = null
             mUtilSettings = null
             mPackageManager = null

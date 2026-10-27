@@ -232,6 +232,9 @@
     <string name="menu_bulk_remove_from_lens">Убрать из линзы…</string>
     <string name="menu_remove_from_lens">Убрать из этой линзы</string>
     <string name="lens_hide_app">Скрыть из этой линзы</string>
+    <string name="menu_move_to_lens">Переместить в линзу…</string>
+    <string name="move_to_lens_title">В какую линзу переместить?</string>
+    <string name="move_to_lens_done">Перемещено в %1$s</string>
     <string name="lens_hidden_apps">Скрытые приложения в этой линзе</string>
     <string name="lens_restore_apps">Восстановить приложения</string>
     <string name="lens_hidden_apps_empty">Скрытые из этой линзы приложения по-прежнему доступны в поиске.</string>

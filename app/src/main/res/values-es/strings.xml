@@ -228,6 +228,9 @@
     <string name="menu_bulk_remove_from_lens">Quitar de una lente…</string>
     <string name="menu_remove_from_lens">Quitar de esta lente</string>
     <string name="lens_hide_app">Ocultar de esta lente</string>
+    <string name="menu_move_to_lens">Mover a lente…</string>
+    <string name="move_to_lens_title">¿A qué lente moverla?</string>
+    <string name="move_to_lens_done">Movida a %1$s</string>
     <string name="lens_hidden_apps">Apps ocultas en esta lente</string>
     <string name="lens_restore_apps">Restaurar apps</string>
     <string name="lens_hidden_apps_empty">Las apps ocultas de esta lente siguen disponibles en la búsqueda.</string>

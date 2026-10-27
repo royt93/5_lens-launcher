@@ -220,6 +220,9 @@
     <string name="menu_bulk_remove_from_lens">ເອົາອອກຈາກເລນ…</string>
     <string name="menu_remove_from_lens">ເອົາອອກຈາກເລນນີ້</string>
     <string name="lens_hide_app">ເຊື່ອງຈາກເລນນີ້</string>
+    <string name="menu_move_to_lens">ຍ້າຍໄປເລນ…</string>
+    <string name="move_to_lens_title">ຍ້າຍໄປເລນໃດ?</string>
+    <string name="move_to_lens_done">ຍ້າຍໄປ %1$s ແລ້ວ</string>
     <string name="lens_hidden_apps">ແອັບທີ່ເຊື່ອງໃນເລນນີ້</string>
     <string name="lens_restore_apps">ກູ້ຄືນແອັບ</string>
     <string name="lens_hidden_apps_empty">ແອັບທີ່ເຊື່ອງຈາກເລນນີ້ຍັງຄົ້ນຫາໄດ້.</string>

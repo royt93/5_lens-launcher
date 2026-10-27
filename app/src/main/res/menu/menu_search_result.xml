@@ -42,6 +42,14 @@
         android:title="@string/menu_remove_from_lens"
         app:iconTint="@color/popup_menu_icon_tint" />
 
+    <!-- FISH-038: only offered by the lens grid, and only while two or more lenses exist. -->
+    <item
+        android:id="@+id/menuItemMoveToLens"
+        android:icon="@drawable/ic_swap_horiz_24dp"
+        android:title="@string/menu_move_to_lens"
+        android:visible="false"
+        app:iconTint="@color/popup_menu_icon_tint" />
+
     <item
         android:id="@+id/menuItemElementUninstall"
         android:icon="@drawable/ic_delete_outline_24dp"

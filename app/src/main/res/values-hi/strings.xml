@@ -224,6 +224,9 @@
     <string name="menu_bulk_remove_from_lens">लेंस से हटाएं…</string>
     <string name="menu_remove_from_lens">इस लेंस से हटाएं</string>
     <string name="lens_hide_app">इस लेंस से छिपाएं</string>
+    <string name="menu_move_to_lens">लेंस में ले जाएँ…</string>
+    <string name="move_to_lens_title">किस लेंस में ले जाएँ?</string>
+    <string name="move_to_lens_done">%1$s में ले जाया गया</string>
     <string name="lens_hidden_apps">इस लेंस में छिपे ऐप</string>
     <string name="lens_restore_apps">ऐप वापस दिखाएं</string>
     <string name="lens_hidden_apps_empty">इस लेंस से छिपे ऐप खोज में उपलब्ध रहते हैं।</string>
