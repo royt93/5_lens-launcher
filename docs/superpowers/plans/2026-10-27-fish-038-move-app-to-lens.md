@@ -202,7 +202,8 @@ class LensMoveApplier(private val settings: UtilSettings) {
   3. Snapshot restore: after `move` then `undo(result.snapshot)`, all six keys (`lensKey(KEY_LENS_APP_SCOPE/KEY_LENS_APP_SELECTION/KEY_LENS_HIDDEN_APP_IDS, lens)` for both lenses) equal their pre-move raw values, and keys that were absent are absent again (assert with `prefs.contains`).
   4. An unrelated sentinel key (`"ui_sentinel"`) is untouched by move and undo.
   5. `move(id, "work", "work")` returns `null` and writes nothing.
-  6. A second lens id other than `default` uses the suffixed keys (`lens_app_selection_work`), proving `lensKey` is honoured.
+  6. Target `ALL` with a stale non-empty selection `{other}`: after the move its scope is still `ALL` and the selection is unchanged.
+  7. A second lens id other than `default` uses the suffixed keys (`lens_app_selection_work`), proving `lensKey` is honoured.
 
 - [ ] **Step 2: Run and confirm red** (`LensMoveApplier` unresolved).
 
@@ -240,8 +241,10 @@ class LensMoveApplier(private val settings: UtilSettings) {
     )
 
     private fun write(lensId: String, state: LensState) {
-        // Keep LensAppScopeEditor as the only scope/selection writer; it enforces empty -> ALL.
-        LensAppScopeEditor(settings).apply(lensId, state.selection)
+        // Write the plan's scope as is: LensAppScopeEditor.apply would infer SELECTED from a stale selection on an
+        // ALL target. The empty -> ALL safeguard already lives in LensMovePlan, so a blank lens cannot happen here.
+        settings.saveLensAppScope(lensId, state.scope)
+        settings.saveLensAppSelection(lensId, state.selection)
         settings.saveLensHiddenAppIds(lensId, state.hidden)
     }
 
