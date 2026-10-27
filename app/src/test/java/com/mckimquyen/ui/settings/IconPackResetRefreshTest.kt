@@ -31,8 +31,9 @@ class IconPackResetRefreshTest {
         AppEventManager.appsUpdated.observeForever(observer)
         val baseline = refreshes
         try {
-            FrmSettings::class.java.getDeclaredMethod("resetToDefault").apply { isAccessible = true }
-                .invoke(fragment)
+            // The host's reset flow: write the defaults, then refresh what is on screen.
+            fragment.onDefaultsReset()
+            fragment.onResetStateChanged()
             assertEquals(UtilSettings.DEFAULT_ICON_PACK_PACKAGE_NAME,
                 settings.getString(UtilSettings.KEY_ICON_PACK_PACKAGE_NAME))
             assertTrue("reset phải yêu cầu nạp lại icons đang hiển thị", refreshes > baseline)

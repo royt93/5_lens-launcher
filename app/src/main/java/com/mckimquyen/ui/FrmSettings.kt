@@ -571,18 +571,19 @@ class FrmSettings : Fragment(), SettingsInterface {
         }
     }
 
+    /** Writes this tab's defaults only; [onResetStateChanged] refreshes the UI afterwards. */
     override fun onDefaultsReset() {
         utilSettings?.let { us -> ResetApplier.apply(us, ResetEntries.settings(us, activeLensId)) }
-        onResetStateChanged()
     }
 
     override fun resetEntries(): List<ResetEntry> =
         utilSettings?.let { ResetEntries.settings(it, activeLensId) }.orEmpty()
 
     override fun onResetStateChanged() {
-        assignValues()
         com.mckimquyen.services.AppEventManager.notifyAppsUpdated()
         (activity as? ActSettings)?.sendNightModeBroadcast()
+        // No view (fragment not shown or already destroyed): the prefs are right, there is nothing to repaint.
+        if (view != null) assignValues()
     }
 
     override fun onValuesUpdated() {
