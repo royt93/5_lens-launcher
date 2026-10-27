@@ -9,6 +9,14 @@ object AppSearchEngine {
     /** Result cap shared by text search and T9 so both lists stay the same size. */
     const val SEARCH_RESULT_LIMIT = 24
 
+    /** FEAT-013: an app counts as "recently installed" for this many days, whether or not it has been opened. */
+    const val RECENT_INSTALL_DAYS = 7
+
+    /** FEAT-013: queries that list recent installs. Compared after [normalize], so accents and case do not matter. */
+    val RECENT_INSTALL_KEYWORDS: Set<String> = setOf("new", "recent", "moi cai", "vua cai")
+
+    private const val MILLIS_PER_DAY = 24L * 60 * 60 * 1000
+
     @JvmStatic
     fun componentKey(app: App): String =
         com.mckimquyen.model.AppIdentity.componentKey(app.packageName.toString(), app.name.toString(), app.userId)
@@ -87,6 +95,29 @@ object AppSearchEngine {
                 .thenBy { normalize(it.app.label) }
                 .thenBy { componentKey(it.app) }
         ).take(limit).map(RankedApp::app)
+    }
+
+    /**
+     * FEAT-013: visible apps installed within [RECENT_INSTALL_DAYS] of [nowMillis], newest first. An app with no known
+     * install date is left out; a date in the future (clock skew) counts as recent.
+     */
+    @JvmStatic
+    @JvmOverloads
+    fun recentInstalls(
+        apps: List<App>,
+        nowMillis: Long = System.currentTimeMillis(),
+        limit: Int = SEARCH_RESULT_LIMIT
+    ): List<App> {
+        if (limit <= 0) return emptyList()
+        val windowMillis = RECENT_INSTALL_DAYS * MILLIS_PER_DAY
+        return apps
+            .filter { it.isVisible && it.installDate > 0L && nowMillis - it.installDate <= windowMillis }
+            .sortedWith(
+                compareByDescending<App> { it.installDate }
+                    .thenBy { normalize(it.label) }
+                    .thenBy { componentKey(it) }
+            )
+            .take(limit)
     }
 
     private data class RankedApp(

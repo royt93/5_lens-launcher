@@ -222,4 +222,74 @@ class AppSearchEngineTest {
         openCount = openCount,
         isVisible = visible
     )
+
+    // ---- FEAT-013: recent installs ----
+
+    private val now = 1_800_000_000_000L
+    private val day = 24L * 60 * 60 * 1000
+    private fun installed(pkg: String, ago: Long, label: String = pkg, visible: Boolean = true, name: String = "Main") =
+        App(label = label, packageName = pkg, name = name, installDate = now - ago, isVisible = visible)
+
+    @Test
+    fun `recent install window is seven days`() {
+        assertEquals(7, AppSearchEngine.RECENT_INSTALL_DAYS)
+    }
+
+    @Test
+    fun `an app installed exactly seven days ago is recent and one millisecond older is not`() {
+        val onEdge = installed("com.edge", 7 * day)
+        val tooOld = installed("com.old", 7 * day + 1)
+
+        assertEquals(listOf(onEdge), AppSearchEngine.recentInstalls(listOf(tooOld, onEdge), now))
+    }
+
+    @Test
+    fun `recent installs are newest first with deterministic ties`() {
+        val newest = installed("com.newest", 1 * day)
+        val middle = installed("com.middle", 3 * day)
+        val tieB = installed("com.tie.b", 5 * day, label = "Beta")
+        val tieA = installed("com.tie.a", 5 * day, label = "Alpha")
+
+        assertEquals(
+            listOf(newest, middle, tieA, tieB),
+            AppSearchEngine.recentInstalls(listOf(tieB, middle, tieA, newest), now)
+        )
+    }
+
+    @Test
+    fun `hidden apps and apps without an install date are excluded`() {
+        val visible = installed("com.visible", 1 * day)
+        val hidden = installed("com.hidden", 1 * day, visible = false)
+        val unknown = App(label = "Unknown", packageName = "com.unknown", name = "Main", installDate = 0L)
+
+        assertEquals(listOf(visible), AppSearchEngine.recentInstalls(listOf(hidden, unknown, visible), now))
+    }
+
+    @Test
+    fun `an install date in the future counts as recent`() {
+        val skewed = App(label = "Skewed", packageName = "com.skew", name = "Main", installDate = now + day)
+
+        assertEquals(listOf(skewed), AppSearchEngine.recentInstalls(listOf(skewed), now))
+    }
+
+    @Test
+    fun `recent installs are capped and a non-positive limit is empty`() {
+        val apps = (1..40).map { installed("com.app$it", it * 60_000L) }
+
+        assertEquals(AppSearchEngine.SEARCH_RESULT_LIMIT, AppSearchEngine.recentInstalls(apps, now).size)
+        assertEquals(apps.take(5), AppSearchEngine.recentInstalls(apps, now, limit = 5))
+        assertTrue(AppSearchEngine.recentInstalls(apps, now, limit = 0).isEmpty())
+    }
+
+    @Test
+    fun `a work profile copy installed recently is listed separately from the personal copy`() {
+        val personal = installed("com.chat", 10 * day)
+        val work = App(
+            label = "Chat", packageName = "com.chat", name = "Main", installDate = now - 1 * day,
+            userId = 10, isWorkProfile = true
+        )
+
+        assertEquals(listOf(work), AppSearchEngine.recentInstalls(listOf(personal, work), now))
+    }
+
 }
