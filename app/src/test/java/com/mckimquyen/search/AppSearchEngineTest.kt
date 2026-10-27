@@ -238,6 +238,85 @@ class AppSearchEngineTest {
         assertEquals(listOf(camera), AppSearchEngine.search(listOf(camera), "camra"))
     }
 
+    private class FakePinyinProvider(private val values: Map<String, List<String>>) : PinyinProvider {
+        override fun syllables(label: String): List<String> = values[label].orEmpty()
+    }
+
+    private val weixinDuShu = FakePinyinProvider(mapOf("微信读书" to listOf("wei", "xin", "du", "shu")))
+
+    @Test
+    fun `pinyin initials and full syllables match Han labels by prefix`() {
+        val wechat = app("微信读书", "com.test.wechat", "Main")
+
+        listOf("wx", "wxds", "weixin", "weixind", "WX").forEach { query ->
+            assertEquals(query, listOf(wechat), AppSearchEngine.search(listOf(wechat), query, pinyinProvider = weixinDuShu))
+        }
+        assertTrue(AppSearchEngine.search(listOf(wechat), "xw", pinyinProvider = weixinDuShu).isEmpty())
+        assertTrue(AppSearchEngine.search(listOf(wechat), "xin", pinyinProvider = weixinDuShu).isEmpty())
+        assertTrue(AppSearchEngine.search(listOf(wechat), "wxdsx", pinyinProvider = weixinDuShu).isEmpty())
+    }
+
+    @Test
+    fun `pinyin does not apply to non-Han labels or non-letter queries`() {
+        val latin = app("WeChat", "com.test.latin", "Main")
+        val han = app("微信读书", "com.test.han", "Main")
+        val provider = FakePinyinProvider(mapOf("WeChat" to listOf("wei", "chat"), "微信读书" to listOf("wei", "xin", "du", "shu")))
+
+        assertTrue(AppSearchEngine.search(listOf(latin), "wc", pinyinProvider = provider).isEmpty())
+        assertTrue(AppSearchEngine.search(listOf(han), "w-x", pinyinProvider = provider).isEmpty())
+        assertTrue(AppSearchEngine.search(listOf(han), "12", pinyinProvider = provider).isEmpty())
+    }
+
+    @Test
+    fun `an app without pinyin data is not matched and the provider never breaks search`() {
+        val han = app("微信读书", "com.test.han", "Main")
+
+        assertTrue(AppSearchEngine.search(listOf(han), "wx", pinyinProvider = FakePinyinProvider(emptyMap())).isEmpty())
+        assertEquals(listOf(han), AppSearchEngine.search(listOf(han), "微信", pinyinProvider = FakePinyinProvider(emptyMap())))
+    }
+
+    @Test
+    fun `pinyin match ranks between label contains and package alias`() {
+        val contains = app("Aweixin", "com.test.contains", "Main")
+        val pinyin = app("微信读书", "com.test.pinyin", "Main")
+        val alias = app("阅读", "com.test.weixin", "Main")
+
+        assertEquals(
+            listOf(contains, pinyin, alias),
+            AppSearchEngine.search(listOf(alias, pinyin, contains), "weixin", pinyinProvider = weixinDuShu)
+        )
+    }
+
+    @Test
+    fun `pinyin only matches the start of the initials or of the full pinyin`() {
+        val wechat = app("微信读书", "com.test.wechat", "Main")
+
+        // "xd" sits inside the initials "wxds" but does not begin them.
+        assertTrue(AppSearchEngine.search(listOf(wechat), "xd", pinyinProvider = weixinDuShu).isEmpty())
+        assertTrue(AppSearchEngine.search(listOf(wechat), "ds", pinyinProvider = weixinDuShu).isEmpty())
+    }
+
+    @Test
+    fun `the pinyin provider is only asked about Han labels and letter tokens`() {
+        var calls = 0
+        val counting = object : PinyinProvider {
+            override fun syllables(label: String): List<String> {
+                calls++
+                return emptyList()
+            }
+        }
+        val han = app("微信读书", "com.test.han", "Main")
+        val latin = app("WeChat", "com.test.latin", "Main")
+
+        AppSearchEngine.search(listOf(han), "w-x", pinyinProvider = counting)
+        AppSearchEngine.search(listOf(han), "12", pinyinProvider = counting)
+        AppSearchEngine.search(listOf(latin), "zzz", pinyinProvider = counting)
+        assertEquals(0, calls)
+
+        AppSearchEngine.search(listOf(han), "zzz", pinyinProvider = counting)
+        assertEquals(1, calls)
+    }
+
     private fun app(
         label: String,
         packageName: String,

@@ -37,7 +37,8 @@ object AppSearchEngine {
         recentKeys: List<String> = emptyList(),
         favoriteKeys: Set<String> = emptySet(),
         limit: Int = SEARCH_RESULT_LIMIT,
-        nowMillis: Long = System.currentTimeMillis()
+        nowMillis: Long = System.currentTimeMillis(),
+        pinyinProvider: PinyinProvider = IcuPinyinProvider
     ): List<App> {
         if (limit <= 0) return emptyList()
 
@@ -75,6 +76,7 @@ object AppSearchEngine {
                     label.startsWith(token) -> 10
                     label.split(WHITESPACE).any { it.startsWith(token) } -> 20
                     label.contains(token) -> 30
+                    matchesPinyin(app.label.toString(), token, pinyinProvider) -> PINYIN_SCORE
                     packageAliases.any { it.startsWith(token) } -> 40
                     packageName.contains(token) -> 50
                     componentName.contains(token) -> 60
@@ -132,6 +134,8 @@ object AppSearchEngine {
 
     // SEARCH-001: typo tolerance. Only attempted for tokens long enough that a 1-2 char edit
     // can't turn them into a nonsense match (e.g. "ab" fuzzy-matching half the app list).
+    /** Between "label contains" (30) and "package alias" (40). */
+    private const val PINYIN_SCORE = 35
     private const val MIN_FUZZY_TOKEN_LENGTH = 3
     private const val SHORT_TOKEN_MAX_LENGTH = 5
     private const val SHORT_TOKEN_EDIT_THRESHOLD = 1
@@ -150,6 +154,16 @@ object AppSearchEngine {
             word.isNotEmpty() && levenshteinDistance(word, token) <= threshold
         }
     }
+
+    /** SEARCH-018: [token] (ASCII letters only) is a prefix of the label's pinyin initials or of its full pinyin. */
+    private fun matchesPinyin(label: String, token: String, provider: PinyinProvider): Boolean {
+        if (token.any { it !in 'a'..'z' } || label.none(::isHan)) return false
+        val syllables = provider.syllables(label)
+        if (syllables.isEmpty()) return false
+        return syllables.joinToString("") { it.take(1) }.startsWith(token) || syllables.joinToString("").startsWith(token)
+    }
+
+    private fun isHan(char: Char): Boolean = Character.UnicodeScript.of(char.code) == Character.UnicodeScript.HAN
 
     private fun containsCjk(value: String): Boolean = value.any { char ->
         when (Character.UnicodeScript.of(char.code)) {
