@@ -1,6 +1,8 @@
 package com.mckimquyen.search
 
 import android.icu.text.Transliterator
+import android.os.Build
+import androidx.annotation.RequiresApi
 import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
 
@@ -11,33 +13,30 @@ interface PinyinProvider {
 }
 
 /**
- * Pinyin from the platform's own ICU data (API 24+), so no dictionary ships with the app. Results are cached per label
- * because the first transliteration is slow. Any ICU failure means "no pinyin", never a failed search.
+ * Pinyin from the platform's own ICU data, so no dictionary ships with the app. `android.icu.text.Transliterator` only
+ * exists from API 29, so on API 25-28 there is simply no pinyin matching. Results are cached per label because the
+ * first transliteration is slow. Any ICU failure means "no pinyin", never a failed search.
  */
 object IcuPinyinProvider : PinyinProvider {
     private const val TRANSLITERATOR_ID = "Han-Latin; Latin-ASCII"
     private val WHITESPACE = "\\s+".toRegex()
 
     private val cache = ConcurrentHashMap<String, List<String>>()
-    private val transliterator: Transliterator? by lazy {
-        try {
-            Transliterator.getInstance(TRANSLITERATOR_ID)
-        } catch (error: RuntimeException) {
-            null
-        }
-    }
+
+    @Volatile
+    private var transliterator: Transliterator? = null
 
     override fun syllables(label: String): List<String> {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return emptyList()
         if (label.none { Character.UnicodeScript.of(it.code) == Character.UnicodeScript.HAN }) return emptyList()
         return cache.getOrPut(label) { transliterate(label) }
     }
 
-    private fun transliterate(label: String): List<String> {
-        val engine = transliterator ?: return emptyList()
-        return try {
-            engine.transliterate(label).lowercase(Locale.ROOT).split(WHITESPACE).filter { it.isNotEmpty() }
-        } catch (error: RuntimeException) {
-            emptyList()
-        }
+    @RequiresApi(Build.VERSION_CODES.Q)
+    private fun transliterate(label: String): List<String> = try {
+        val engine = transliterator ?: Transliterator.getInstance(TRANSLITERATOR_ID).also { transliterator = it }
+        engine.transliterate(label).lowercase(Locale.ROOT).split(WHITESPACE).filter { it.isNotEmpty() }
+    } catch (error: RuntimeException) {
+        emptyList()
     }
 }

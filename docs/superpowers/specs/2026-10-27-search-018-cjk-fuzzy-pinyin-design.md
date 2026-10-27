@@ -6,7 +6,7 @@ Date: 2026-10-27. Story: `doc/task/todo/p3-search-search-018-cjk-fuzzy-and-pinyi
 
 - The story's example (`微信读书` vs `微信支付`, distance 2) does **not** match: a 4-character token only allows 1 edit, so it returns nothing. Real junk still exists at 1 edit: query `微信读书` returns `微信支书`; query `微信读` returns `微信书`.
 - Word-prefix tier never fires for labels without spaces (CJK): confirmed.
-- `android.icu.text.Transliterator("Han-Latin; Latin-ASCII")` works under Robolectric sdk 28: `微信读书` -> `wei xin du shu`. minSdk 25 satisfies ICU API 24+.
+- `android.icu.text.Transliterator("Han-Latin; Latin-ASCII")` works under Robolectric sdk 28: `微信读书` -> `wei xin du shu`. **Correction found by lint:** `android.icu.text.Transliterator` exists only from API 29 (not 24); minSdk is 25, so API 25-28 devices get no pinyin matching (the provider returns empty there). Robolectric ICU tests therefore run at sdk 29.
 
 ## Decisions (owner, 2026-10-27)
 

@@ -8,7 +8,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [28])
+@Config(sdk = [29])
 class IcuPinyinProviderTest {
     @Test
     fun `Han labels produce normalized pinyin syllables`() {
@@ -21,5 +21,11 @@ class IcuPinyinProviderTest {
     @Test
     fun `non Han label has no pinyin`() {
         assertTrue(IcuPinyinProvider.syllables("Camera Pro").isEmpty())
+    }
+
+    @Test
+    @Config(sdk = [28])
+    fun `below API 29 there is no ICU transliterator so there is no pinyin`() {
+        assertTrue(IcuPinyinProvider.syllables("微信读书").isEmpty())
     }
 }
