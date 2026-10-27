@@ -235,4 +235,31 @@ class ProfileAppSourceTest {
     fun `with no profile information a primary user app still launches`() {
         assertEquals(ProfileAppSource.LaunchRoute.PLAIN_INTENT, ProfileAppSource.routeFor(appUserId = 0, liveUserIds = emptyList()))
     }
+
+    @Test
+    fun `a work app's install date reaches its shell so it can be listed as recently installed`() {
+        val installed = 1_800_000_000_000L
+        val shells = ProfileAppSource.toShells(
+            entries = listOf(ProfileAppEntry("com.chat", "Main", "Chat", 10, true, installDate = installed)),
+            firstId = 0,
+            iconFor = { null },
+            cacheKeyFor = { "k" },
+            paletteFor = { _, _ -> 0 }
+        )
+
+        assertEquals(installed, shells.single().installDate)
+    }
+
+    @Test
+    fun `an entry without an install date keeps the unknown value zero`() {
+        val shells = ProfileAppSource.toShells(
+            entries = listOf(entry("com.w", "W", 10)),
+            firstId = 0,
+            iconFor = { null },
+            cacheKeyFor = { "k" },
+            paletteFor = { _, _ -> 0 }
+        )
+
+        assertEquals(0L, shells.single().installDate)
+    }
 }

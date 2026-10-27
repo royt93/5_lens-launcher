@@ -10,7 +10,9 @@ data class ProfileAppEntry(
     val name: String,
     val label: CharSequence,
     val userId: Int,
-    val isWorkProfile: Boolean
+    val isWorkProfile: Boolean,
+    /** First-install time in ms, or 0 when unknown. Filled by [LauncherAppsDirectory]. */
+    val installDate: Long = 0L
 ) {
     val identifier: String get() = AppIdentity.identifier(packageName, name, userId)
 }
@@ -76,7 +78,8 @@ object ProfileAppSource {
             paletteColor = paletteFor(entry, icon),
             iconCacheKey = AppIdentity.cacheKeySegment(cacheKeyFor(entry), entry.userId),
             userId = entry.userId,
-            isWorkProfile = entry.isWorkProfile
+            isWorkProfile = entry.isWorkProfile,
+            installDate = entry.installDate
         )
     }
 

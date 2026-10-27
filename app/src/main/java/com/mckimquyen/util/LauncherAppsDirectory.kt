@@ -46,7 +46,8 @@ class LauncherAppsDirectory(context: Context) : ProfileDirectory {
                 name = info.componentName.className,
                 label = info.label,
                 userId = userId,
-                isWorkProfile = isManagedProfile(userId)
+                isWorkProfile = isManagedProfile(userId),
+                installDate = info.firstInstallTime
             )
         }
     }
