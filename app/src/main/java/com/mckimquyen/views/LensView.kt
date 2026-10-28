@@ -1,6 +1,7 @@
 package com.mckimquyen.views
 
 import android.annotation.SuppressLint
+import android.content.ClipData
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -84,6 +85,14 @@ fun interface OnSearchSwipeDownListener {
 /** FISH-038: told after a successful move so the host can offer Undo; LensView is not an Activity. */
 fun interface OnAppMovedToLensListener {
     fun onAppMoved(targetLensName: String, undo: () -> Boolean)
+}
+
+/** FISH-038b: what a lens drag carries; the drop target moves [app] out of [sourceLensId] through [sourceView]. */
+internal class LensDragPayload(val sourceView: LensView, val app: App, val sourceLensId: String)
+
+/** FISH-038b: tells the host a drag began (to show the drop strip); the strip hides itself on drag end. */
+fun interface OnAppDragStartListener {
+    fun onDragStarted(sourceView: LensView, app: App, sourceLensId: String)
 }
 
 /** FISH-025: fired once when a horizontal swipe from a configured screen edge is accepted. */
@@ -407,6 +416,23 @@ class LensView : View {
     private var mLongPressArmed = false
     private var mLongPressTriggered = false
 
+    // FISH-038b: with 2+ lenses a hold on an icon does not open the menu at the timeout. It stays
+    // "pending": moving past touch slop turns it into a system drag, releasing in place opens the menu.
+    private var mHoldIndex = -1
+    private var mDragStarted = false
+
+    /** FISH-038b: told when a drag begins so the host can show the drop strip. Null means no strip. */
+    var onAppDragStartListener: OnAppDragStartListener? = null
+
+    /** Test seam: the one place `startDragAndDrop` is called, so tests can observe or refuse a drag. */
+    @androidx.annotation.VisibleForTesting
+    internal var dragStarter: (LensView, ClipData, View.DragShadowBuilder, Any) -> Boolean =
+        { view, clip, shadow, payload -> view.startDragAndDrop(clip, shadow, payload, 0) }
+
+    /** Test seam: opens the app menu for an index; defaults to the real quick-actions menu. */
+    @androidx.annotation.VisibleForTesting
+    internal var appOptionsOpener: ((Int) -> Boolean)? = null
+
     // UI-025: LensView draws every icon on one canvas, so there is no child view to anchor a
     // popup to. A transient 1x1 invisible View is placed in the parent FrameLayout at the pressed
     // icon's resting cell and removed again on dismiss/detach. It uses the BASE rect (the cell the
@@ -447,7 +473,11 @@ class LensView : View {
             if (mGestureReduceMotion != true) {
                 performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
             }
-            showAppOptionsAtIndex(mSelectIndex)
+            if (LensDragPolicy.shouldOpenMenuOnTimeout(mHasOtherLenses)) {
+                showAppOptionsAtIndex(mSelectIndex)
+            } else {
+                mHoldIndex = mSelectIndex
+            }
         } else if (onEmptySpaceLongPressListener != null
             && shouldTriggerEmptySpaceLongPress(mLongPressArmed, mMoving, mSelectIndex)
         ) {
@@ -667,6 +697,7 @@ class LensView : View {
      * touch long-press does (this project's A11Y-001 standard).
      */
     fun showAppOptionsAtIndex(index: Int): Boolean {
+        appOptionsOpener?.let { return it(index) }
         val list = mApps ?: return false
         if (index !in list.indices) return false
         return showQuickActionsMenu(list[index], index)
@@ -784,6 +815,57 @@ class LensView : View {
                 .show()
         }
     }
+
+    /**
+     * FISH-038b: a held icon that moved past touch slop becomes a system drag. The system then owns
+     * the touch stream, so the pager, pan, pinch and edge-swipe cannot compete with it. If the system
+     * refuses, the hold falls back to the menu so it never silently does nothing.
+     */
+    private fun maybeStartDrag(dx: Float, dy: Float) {
+        val index = mHoldIndex
+        val list = mApps ?: return
+        if (mDragStarted || index !in list.indices) return
+        if (!LensDragPolicy.shouldStartDrag(true, mHasOtherLenses, exceedsTouchSlop(dx, dy, mTouchSlop))) return
+        val app = list[index]
+        val payload = LensDragPayload(this, app, lensId)
+        val clip = ClipData.newPlainText(app.label, LensAppScope.identifierOf(app))
+        val started = dragStarter(this, clip, DragShadowBuilder(this, index), payload)
+        if (started) {
+            mDragStarted = true
+            onAppDragStartListener?.onDragStarted(this, app, lensId)
+        } else {
+            mHoldIndex = -1
+            showAppOptionsAtIndex(index)
+        }
+    }
+
+    /** Draws the held icon's cached bitmap under the finger; nothing if the icon is not cached yet. */
+    private class DragShadowBuilder(view: LensView, private val index: Int) : View.DragShadowBuilder(view) {
+        private val bitmap: Bitmap? = view.mApps?.getOrNull(index)?.let {
+            com.mckimquyen.app.RAppsSingleton.instance.getAppIcon(it.iconCacheKey)?.takeIf { b -> !b.isRecycled }
+        }
+        private val size = view.mGridCache.baseRects.getOrNull(index)?.let { it.width().toInt() } ?: 0
+
+        override fun onProvideShadowMetrics(outShadowSize: Point, outShadowTouchPoint: Point) {
+            val edge = size.coerceAtLeast(MIN_SHADOW_PX)
+            outShadowSize.set(edge, edge)
+            outShadowTouchPoint.set(edge / 2, edge / 2)
+        }
+
+        override fun onDrawShadow(canvas: Canvas) {
+            val icon = bitmap ?: return
+            val edge = size.coerceAtLeast(MIN_SHADOW_PX)
+            canvas.drawBitmap(icon, null, Rect(0, 0, edge, edge), null)
+        }
+
+        private companion object {
+            const val MIN_SHADOW_PX = 96
+        }
+    }
+
+    /** FISH-038b: the drop target calls this on the source view; same write and Undo as the menu path. */
+    internal fun moveAppToLensFromDrop(app: App, targetLensId: String, targetName: String) =
+        moveAppToLens(app, targetLensId, targetName)
 
     private fun moveAppToLens(app: App, targetLensId: String, targetName: String) {
         val settings = mUtilSettings ?: return
@@ -1112,6 +1194,8 @@ class LensView : View {
                 mSelectIndex = -1
                 mMoving = false
                 mLongPressTriggered = false
+                mHoldIndex = -1
+                mDragStarted = false
                 mLongPressArmed = true
                 mLongPressHandler.removeCallbacks(mLongPressRunnable)
                 mLongPressHandler.postDelayed(
@@ -1150,7 +1234,10 @@ class LensView : View {
                 if (gestureState == LensGestureState.PINCHING || gestureState == LensGestureState.PINCH_RELEASE) {
                     return true
                 }
-                if (mLongPressTriggered) return true
+                if (mLongPressTriggered) {
+                    maybeStartDrag(event.x - mTouchDownX, event.y - mTouchDownY)
+                    return true
+                }
                 val searchDx = event.x - mTouchDownX
                 val searchDy = event.y - mTouchDownY
                 if (!mEdgeSwipeTriggered) {
@@ -1291,6 +1378,12 @@ class LensView : View {
                 gestureState = LensGestureState.IDLE
                 if (mLongPressTriggered) {
                     mLongPressTriggered = false
+                    val heldIndex = mHoldIndex
+                    val openMenu = heldIndex >= 0 &&
+                        LensDragPolicy.shouldOpenMenuOnRelease(true, mDragStarted, mHasOtherLenses)
+                    mHoldIndex = -1
+                    mDragStarted = false
+                    if (openMenu) showAppOptionsAtIndex(heldIndex)
                     return true
                 }
                 performLaunchVibration()
@@ -1308,6 +1401,8 @@ class LensView : View {
                 parent?.requestDisallowInterceptTouchEvent(false)
                 mLongPressArmed = false
                 mLongPressTriggered = false
+                mHoldIndex = -1
+                mDragStarted = false
                 mLongPressHandler.removeCallbacks(mLongPressRunnable)
                 resetSearchSwipeState()
                 gestureState = LensGestureState.IDLE
@@ -1820,6 +1915,9 @@ class LensView : View {
             onEmptySpaceLongPressListener = null
             onSearchSwipeDownListener = null
             onAppMovedToLensListener = null
+            onAppDragStartListener = null
+            mHoldIndex = -1
+            mDragStarted = false
             mApps = null
             mUtilSettings = null
             mPackageManager = null
