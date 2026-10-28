@@ -16,6 +16,7 @@ import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -431,9 +432,12 @@ class LensManagementActivityWidgetTest {
                 dialog.findViewById<android.widget.EditText>(android.R.id.edit)!!.setText("   ")
                 dialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE).performClick()
                 assertTrue("Dialog must stay open for correction", dialog.isShowing)
+                var layout: android.view.View? = dialog.findViewById<android.widget.EditText>(android.R.id.edit)!!
+                while (layout != null && layout !is com.google.android.material.textfield.TextInputLayout) layout = layout.parent as? android.view.View
                 assertEquals(
+                    "the blank-name error must be the TextInputLayout error of the shared dialog",
                     activity.getString(R.string.lens_group_error_blank),
-                    dialog.findViewById<android.widget.EditText>(android.R.id.edit)!!.error.toString()
+                    (layout as com.google.android.material.textfield.TextInputLayout).error.toString()
                 )
             }
             awaitGroupName(scenario, "ungrouped", null)
@@ -762,6 +766,76 @@ class LensManagementActivityWidgetTest {
         }
 
         runBlocking { assertEquals("work", dao.findById("travel")?.groupName) }
+    }
+
+    private fun openCreateGroupDialog(scenario: ActivityScenario<LensManagementActivity>) {
+        scenario.onActivity { activity ->
+            activity.toggleEditModeForTest()
+            activity.selectLensForGroupEdit("ungrouped", true)
+            activity.findViewById<View>(R.id.btLensGroupAssign).performClick()
+        }
+        awaitLensGroupDialog(scenario)
+        scenario.onActivity { activity ->
+            clickDialogChoice(activity.lensGroupDialogForTest!!, activity.getString(R.string.lens_group_create))
+        }
+        awaitLensGroupDialog(scenario)
+    }
+
+    @Test
+    fun cancellingCreateGroupReturnsTheManagerToIdleSoAssignWorksAgain() {
+        ActivityScenario.launch(LensManagementActivity::class.java).use { scenario ->
+            InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+            openCreateGroupDialog(scenario)
+            scenario.onActivity { activity ->
+                activity.lensGroupDialogForTest!!.getButton(android.content.DialogInterface.BUTTON_NEGATIVE).performClick()
+            }
+            InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+            scenario.onActivity { activity ->
+                assertTrue(
+                    "after cancel the Assign action must be usable again, not stuck behind an unfinished operation",
+                    activity.findViewById<View>(R.id.btLensGroupAssign).isEnabled
+                )
+                assertTrue(activity.findViewById<View>(R.id.btLensGroupUngroup).isEnabled)
+            }
+        }
+    }
+
+    @Test
+    fun confirmingCreateGroupDoesNotReportItAsACancellation() {
+        ActivityScenario.launch(LensManagementActivity::class.java).use { scenario ->
+            InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+            openCreateGroupDialog(scenario)
+            scenario.onActivity { activity ->
+                val dialog = activity.lensGroupDialogForTest!!
+                dialog.findViewById<android.widget.EditText>(android.R.id.edit)!!.setText("Fresh")
+                dialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE).performClick()
+            }
+            awaitGroupName(scenario, "ungrouped", "Fresh")
+            InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+            scenario.onActivity { activity ->
+                assertNull("a confirmed dialog must not leave a draft dialog behind", activity.lensGroupDialogForTest)
+                assertNull("the operation must finish without an error", activity.groupOperationErrorForTest)
+            }
+        }
+    }
+
+    @Test
+    fun deleteConfirmationUsesTheDestructiveButtonColour() {
+        ActivityScenario.launch(LensManagementActivity::class.java).use { scenario ->
+            InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+            scenario.onActivity { activity ->
+                activity.findViewById<RecyclerView>(R.id.rvLensGroups)
+                    .findViewHolderForAdapterPosition(5)!!.itemView.findViewById<View>(R.id.btLensGroupMore).performClick()
+                activity.lensRowMenuForTest!!.menu.performIdentifierAction(R.id.menuLensDelete, 0)
+            }
+            awaitLensGroupDialog(scenario)
+            scenario.onActivity { activity ->
+                val dialog = activity.lensGroupDialogForTest!!
+                val error = com.google.android.material.color.MaterialColors.getColor(dialog.context, androidx.appcompat.R.attr.colorError, 0)
+                assertEquals(error, dialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE).currentTextColor)
+                dialog.getButton(android.content.DialogInterface.BUTTON_NEGATIVE).performClick()
+            }
+        }
     }
 
     @Test

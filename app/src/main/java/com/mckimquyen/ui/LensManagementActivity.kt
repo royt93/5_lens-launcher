@@ -276,71 +276,48 @@ class LensManagementActivity : ActBase() {
     private fun showRenameLensDialog(lens: LensWorkspace, draftText: String? = null) {
         activeDialogKind = DIALOG_KIND_RENAME
         activeDialogLensId = lens.id
-        val input = EditText(this).apply {
-            id = android.R.id.edit
-            setText(draftText ?: lens.name)
-            setHint(R.string.lens_name_hint)
-            setSingleLine(true)
-            if (draftText != null) setSelection(text.length) else setSelectAllOnFocus(true)
-        }
-        val container = android.widget.FrameLayout(this).apply {
-            val horizontal = (24 * resources.displayMetrics.density).toInt()
-            val vertical = (8 * resources.displayMetrics.density).toInt()
-            setPadding(horizontal, vertical, horizontal, 0)
-            addView(input)
-        }
-        lensGroupDialog = com.google.android.material.dialog.MaterialAlertDialogBuilder(this, R.style.MaterialYouDialogTheme)
-            .setTitle(R.string.lens_rename_title)
-            .setView(container)
-            .setPositiveButton(android.R.string.ok, null)
-            .setNegativeButton(android.R.string.cancel, null)
-            .create()
-        lensGroupDialog?.setOnDismissListener {
-            lensGroupDialog = null
-            activeDialogKind = null
-            activeDialogLensId = null
-        }
-        lensGroupDialog?.setOnShowListener {
-            lensGroupDialog?.getButton(AlertDialog.BUTTON_POSITIVE)?.setOnClickListener {
-                val name = input.text?.toString()?.trim().orEmpty()
-                if (name.isEmpty()) {
-                    input.error = getString(R.string.lens_group_error_blank)
-                    confirmHaptic(rejectFeedbackConstant())
-                    return@setOnClickListener
-                }
-                lensGroupDialog?.dismiss()
+        val dialog = com.mckimquyen.ui.dialog.LensDialogs.textInput(
+            this, R.string.lens_rename_title, R.string.lens_name_hint, draftText ?: lens.name,
+            R.string.lens_group_error_blank,
+            { name ->
                 LensWorkspace.renameLens(lens, name) { lenses ->
                     if (!isFinishing && !isDestroyed) {
                         refreshAfterLensChange(lenses)
                         confirmHaptic(lensOperationFeedback())
                     }
                 }
+            },
+            {
+                lensGroupDialog = null
+                activeDialogKind = null
+                activeDialogLensId = null
             }
-        }
-        lensGroupDialog?.show()
+        )
+        lensGroupDialog = dialog
+        dialog.show()
     }
 
     private fun showDeleteLensDialog(lens: LensWorkspace) {
         activeDialogKind = DIALOG_KIND_DELETE
         activeDialogLensId = lens.id
-        lensGroupDialog = com.google.android.material.dialog.MaterialAlertDialogBuilder(this, R.style.MaterialYouDialogTheme)
-            .setTitle(R.string.lens_delete)
-            .setMessage(getString(R.string.lens_delete_confirm_message, lens.name))
-            .setPositiveButton(R.string.lens_delete) { _, _ ->
+        val dialog = com.mckimquyen.ui.dialog.LensDialogs.confirm(
+            this, R.string.lens_delete, getString(R.string.lens_delete_confirm_message, lens.name),
+            R.string.lens_delete, true,
+            {
                 LensWorkspace.deleteLens(lens.id) { lenses ->
                     if (!isFinishing && !isDestroyed) {
                         finishLensDeletion(lens.id, lenses)
                     }
                 }
+            },
+            {
+                lensGroupDialog = null
+                activeDialogKind = null
+                activeDialogLensId = null
             }
-            .setNegativeButton(android.R.string.cancel, null)
-            .create()
-        lensGroupDialog?.setOnDismissListener {
-            lensGroupDialog = null
-            activeDialogKind = null
-            activeDialogLensId = null
-        }
-        lensGroupDialog?.show()
+        )
+        lensGroupDialog = dialog
+        dialog.show()
     }
 
     private fun finishLensDeletion(deletedId: String, lenses: List<LensWorkspace>) {
@@ -560,44 +537,19 @@ class LensManagementActivity : ActBase() {
         lensGroupDialog = null
         activeDialogKind = DIALOG_KIND_CREATE_GROUP
         onGroupSelectionChanged(selectedLensIds)
-        val input = EditText(this).apply {
-            id = android.R.id.edit
-            setHint(R.string.lens_group_name_hint)
-            draftText?.let {
-                setText(it)
-                setSelection(it.length)
-            }
-        }
-        lensGroupDialog = AlertDialog.Builder(this)
-            .setTitle(R.string.lens_group_create)
-            .setView(input)
-            .setPositiveButton(android.R.string.ok, null)
-            .setNegativeButton(android.R.string.cancel, null)
-            .create()
-        lensGroupDialog?.setOnCancelListener {
-            lensGroupDialog = null
-            activeDialogKind = null
-            setGroupOperationIdle()
-        }
-        lensGroupDialog?.setOnDismissListener {
-            lensGroupDialog = null
-            activeDialogKind = null
-        }
-        lensGroupDialog?.setOnShowListener {
-            lensGroupDialog?.getButton(AlertDialog.BUTTON_POSITIVE)?.setOnClickListener {
-                val name = LensGroupPolicy.normalizeName(input.text.toString())
-                if (name == null) {
-                    input.error = getString(R.string.lens_group_error_blank)
-                    confirmHaptic(rejectFeedbackConstant())
-                    return@setOnClickListener
-                }
-                lensGroupDialog?.dismiss()
+        val dialog = com.mckimquyen.ui.dialog.LensDialogs.textInput(
+            this, R.string.lens_group_create, R.string.lens_group_name_hint, draftText,
+            R.string.lens_group_error_blank,
+            { name -> assignGroup(selectedIds, name) },
+            {
+                // groupOperationInProgress was already cleared above and assignGroup sets its own flag,
+                // so a cancel and a confirm need no extra state change here.
                 lensGroupDialog = null
                 activeDialogKind = null
-                assignGroup(selectedIds, name)
             }
-        }
-        lensGroupDialog?.show()
+        )
+        lensGroupDialog = dialog
+        dialog.show()
     }
 
     private fun setGroupOperationIdle() {
