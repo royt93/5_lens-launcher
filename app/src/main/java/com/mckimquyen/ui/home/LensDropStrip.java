@@ -18,6 +18,7 @@ import com.mckimquyen.R;
 import com.mckimquyen.model.LensWorkspace;
 import com.mckimquyen.views.LensDragPayload;
 import com.mckimquyen.views.LensDragPolicy;
+import com.mckimquyen.views.LensView;
 
 import java.util.HashMap;
 import java.util.List;
@@ -183,6 +184,20 @@ public final class LensDropStrip {
         }
         ViewGroup parent = (ViewGroup) strip.getParent();
         if (parent != null) parent.removeView(strip);
+    }
+
+    /** Drops the held app on [chip] the way a real DROP would; false when the strip has no matching drag. */
+    @androidx.annotation.VisibleForTesting
+    public boolean dropForTest(View chip, LensView source, String packageName) {
+        LensDragPayload current = payload;
+        if (current == null || current.getSourceView() != source
+                || !packageName.equals(current.getApp().getPackageName().toString())) return false;
+        return handleDrag(chip, android.view.DragEvent.ACTION_DROP, current);
+    }
+
+    @androidx.annotation.VisibleForTesting
+    public void endForTest(View chip) {
+        handleDrag(chip, android.view.DragEvent.ACTION_DRAG_ENDED, payload);
     }
 
     public View viewForTest() {

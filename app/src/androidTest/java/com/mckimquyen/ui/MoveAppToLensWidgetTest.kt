@@ -177,6 +177,75 @@ class MoveAppToLensWidgetTest {
         }
     }
 
+    /** Starts a drag exactly as a hold-then-move would: through the view's own drag seam. */
+    private fun startDragOf(grid: com.mckimquyen.views.LensView, packageName: String) {
+        val app = grid.appsForTest.orEmpty().first { it.packageName == packageName }
+        grid.onAppDragStartListener?.onDragStarted(grid, app, grid.lensId)
+    }
+
+    private fun dropStripChips(activity: ActHome): List<android.widget.TextView> {
+        val out = ArrayList<android.widget.TextView>()
+        fun walk(v: android.view.View) {
+            if (v is android.widget.TextView && v.tag is String) out.add(v)
+            if (v is android.view.ViewGroup) for (i in 0 until v.childCount) walk(v.getChildAt(i))
+        }
+        walk(activity.findViewById(R.id.rootLayout))
+        return out
+    }
+
+    @Test
+    fun draggingOntoAChipMovesTheAppAndTheSameUndoRestoresBothLenses() {
+        addWorkLens()
+        ActivityScenario.launch(ActHome::class.java).use { scenario ->
+            awaitGrid(scenario, homeLens)
+            scenario.onActivity { activity ->
+                startDragOf(requireNotNull(activity.lensViews), mail.packageName.toString())
+                val chips = dropStripChips(activity)
+                assertEquals("only the other lens is offered", listOf(WORK_LENS), chips.map { it.tag })
+                assertTrue(activity.dropStripDropForTest(chips.single(), activity.lensViews!!, mail.packageName.toString()))
+            }
+            instrumentation.waitForIdleSync()
+            assertEquals(setOf(LensAppScope.identifierOf(chat)), settings.getLensAppSelection(homeLens))
+            assertEquals(setOf(LensAppScope.identifierOf(chat), LensAppScope.identifierOf(mail)), settings.getLensAppSelection(WORK_LENS))
+
+            clickUndo(scenario)
+            instrumentation.waitForIdleSync()
+            assertEquals(setOf(LensAppScope.identifierOf(mail), LensAppScope.identifierOf(chat)), settings.getLensAppSelection(homeLens))
+            assertEquals(setOf(LensAppScope.identifierOf(chat)), settings.getLensAppSelection(WORK_LENS))
+        }
+    }
+
+    @Test
+    fun aDragWithNoDropLeavesBothLensesUntouchedAndHidesTheStrip() {
+        addWorkLens()
+        ActivityScenario.launch(ActHome::class.java).use { scenario ->
+            awaitGrid(scenario, homeLens)
+            scenario.onActivity { activity ->
+                startDragOf(requireNotNull(activity.lensViews), mail.packageName.toString())
+                assertEquals(1, dropStripChips(activity).size)
+                activity.dropStripEndForTest(dropStripChips(activity).single())
+                assertTrue("the strip must be gone after the drag ends", dropStripChips(activity).isEmpty())
+            }
+            instrumentation.waitForIdleSync()
+            assertEquals(setOf(LensAppScope.identifierOf(mail), LensAppScope.identifierOf(chat)), settings.getLensAppSelection(homeLens))
+            assertEquals(setOf(LensAppScope.identifierOf(chat)), settings.getLensAppSelection(WORK_LENS))
+        }
+    }
+
+    @Test
+    fun theViewPagerStaysOnTheSamePageWhileADragIsShowing() {
+        addWorkLens()
+        ActivityScenario.launch(ActHome::class.java).use { scenario ->
+            awaitGrid(scenario, homeLens)
+            scenario.onActivity { activity ->
+                val pager = activity.findViewById<androidx.viewpager2.widget.ViewPager2>(R.id.lensPager)
+                val before = pager.currentItem
+                startDragOf(requireNotNull(activity.lensViews), mail.packageName.toString())
+                assertEquals("showing the strip must not page the pager", before, pager.currentItem)
+            }
+        }
+    }
+
     private fun findChooserList(activity: ActHome): android.widget.ListView? {
         val title = activity.getString(R.string.move_to_lens_title)
         val root = activity.window.decorView.rootView

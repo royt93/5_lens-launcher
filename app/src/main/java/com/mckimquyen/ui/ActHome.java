@@ -81,6 +81,7 @@ import com.mckimquyen.ui.home.HomeSearchController;
 import com.mckimquyen.ui.home.HomeQuickActionHost;
 import com.mckimquyen.ui.home.LensViewHolder;
 import com.mckimquyen.ui.home.LensViewHolderHost;
+import com.mckimquyen.ui.home.LensDropStrip;
 import com.mckimquyen.ui.home.LensMenuCoordinator;
 import com.mckimquyen.util.ApertureRevealHelper;
 import com.mckimquyen.util.LensAppScope;
@@ -189,6 +190,8 @@ public class ActHome extends ActBase implements LensViewHolderHost, HomeQuickAct
     private TabLayoutMediator lensTabMediator;
     private final LensViewHolder lensHolder = new LensViewHolder(this);
     private final HomeQuickActionDelegate quickActions = new HomeQuickActionDelegate(this);
+    /** FISH-038b: created lazily on the first drag so installs that never drag pay nothing. */
+    private LensDropStrip dropStrip;
     private final LensMenuCoordinator lensMenu = new LensMenuCoordinator(new LensMenuCoordinator.Host() {
         @Override public android.app.Activity activity() { return ActHome.this; }
         @Override public UtilSettings settings() { return utilSettings; }
@@ -1030,6 +1033,33 @@ public class ActHome extends ActBase implements LensViewHolderHost, HomeQuickAct
     @Override public boolean pendingAutoExportLens() { return pendingAutoExportLens; }
     @Override public void clearPendingAutoExportLens() { pendingAutoExportLens = false; }
     @Override public void requestLensExport() { exportActiveLensImage(); }
+
+    @Override
+    public void offerDropStrip(LensView source, App app, String sourceLensId) {
+        if (dropStrip == null) {
+            dropStrip = new LensDropStrip(new LensDropStrip.Host() {
+                @Override public android.app.Activity activity() { return ActHome.this; }
+                @Override public ViewGroup root() { return findViewById(R.id.rootLayout); }
+                @Override public List<LensWorkspace> lenses() { return lensHolder.currentLenses(); }
+                @Override public void onDrop(com.mckimquyen.views.LensDragPayload payload, String targetLensId, String targetName) {
+                    payload.getSourceView().moveAppToLensFromDrop(payload.getApp(), targetLensId, targetName);
+                }
+            });
+        }
+        dropStrip.show(new com.mckimquyen.views.LensDragPayload(source, app, sourceLensId));
+    }
+
+    /** Test seam: drops [app] (by package) from [source] on [chip], as a drop on that chip would. */
+    @androidx.annotation.VisibleForTesting
+    boolean dropStripDropForTest(View chip, LensView source, String packageName) {
+        return dropStrip != null && dropStrip.dropForTest(chip, source, packageName);
+    }
+
+    /** Test seam: ends the drag without a drop, as the system does on cancel. */
+    @androidx.annotation.VisibleForTesting
+    void dropStripEndForTest(View chip) {
+        if (dropStrip != null) dropStrip.endForTest(chip);
+    }
     @Override public void setActiveLensView(LensView view) { lensViews = view; }
     @Override public LensView activeLensView() { return lensViews; }
     @Override public void setLensTabMediator(TabLayoutMediator mediator) { lensTabMediator = mediator; }
@@ -1042,6 +1072,10 @@ public class ActHome extends ActBase implements LensViewHolderHost, HomeQuickAct
 
     @Override
     protected void onDestroy() {
+        if (dropStrip != null) {
+            dropStrip.onDestroy();
+            dropStrip = null;
+        }
         lensHolder.onDestroy();
         // FISH-008 Phase 3: both hold a View (a dialog's decor, a popup's anchor) belonging to
         // this Activity. Dismiss a dialog still showing during a rotation - it would leak its

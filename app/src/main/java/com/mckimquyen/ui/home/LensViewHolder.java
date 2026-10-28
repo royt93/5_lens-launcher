@@ -279,6 +279,8 @@ public final class LensViewHolder {
                     })
                     .show();
         });
+        // FISH-038b: a held icon that moved becomes a system drag; the host shows the drop strip.
+        view.setOnAppDragStartListener(host::offerDropStrip);
         view.setSystemUiVisibility(
                 View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
         view.setOnCurvatureAdjustedListener((curvature, finished) -> {

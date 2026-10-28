@@ -44,6 +44,9 @@ public interface LensViewHolderHost {
 
     void requestLensExport();
 
+    /** FISH-038b: a held app began a drag; show the strip of other lenses to drop it on. */
+    void offerDropStrip(LensView source, App app, String sourceLensId);
+
     /** The single writer of {@code ActHome.lensViews}; the field stays on ActHome because tests read it by name. */
     void setActiveLensView(LensView view);
 
