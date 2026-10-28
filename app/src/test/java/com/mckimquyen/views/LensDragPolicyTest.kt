@@ -41,6 +41,43 @@ class LensDragPolicyTest {
     }
 
     @Test
+    fun `a pointer in the left edge zone scrolls left`() {
+        assertEquals(-20, LensDragPolicy.edgeScrollDelta(10f, 1000, 100, 20))
+        assertEquals(-20, LensDragPolicy.edgeScrollDelta(100f, 1000, 100, 20))
+    }
+
+    @Test
+    fun `a pointer in the right edge zone scrolls right`() {
+        assertEquals(20, LensDragPolicy.edgeScrollDelta(990f, 1000, 100, 20))
+        assertEquals(20, LensDragPolicy.edgeScrollDelta(900f, 1000, 100, 20))
+    }
+
+    @Test
+    fun `a pointer away from both edges does not scroll`() {
+        assertEquals(0, LensDragPolicy.edgeScrollDelta(500f, 1000, 100, 20))
+        assertEquals(0, LensDragPolicy.edgeScrollDelta(101f, 1000, 100, 20))
+        assertEquals(0, LensDragPolicy.edgeScrollDelta(899f, 1000, 100, 20))
+    }
+
+    @Test
+    fun `a viewport narrower than both edge zones still scrolls toward the nearer edge`() {
+        assertEquals(-20, LensDragPolicy.edgeScrollDelta(10f, 100, 80, 20))
+        assertEquals(20, LensDragPolicy.edgeScrollDelta(90f, 100, 80, 20))
+    }
+
+    @Test
+    fun `invalid scroll input produces no movement`() {
+        assertEquals(0, LensDragPolicy.edgeScrollDelta(Float.NaN, 1000, 100, 20))
+        assertEquals(0, LensDragPolicy.edgeScrollDelta(10f, 1000, 0, 20))
+        assertEquals(0, LensDragPolicy.edgeScrollDelta(10f, 1000, 100, 0))
+    }
+
+    @Test
+    fun `an empty viewport never scrolls`() {
+        assertEquals(0, LensDragPolicy.edgeScrollDelta(0f, 0, 100, 20))
+    }
+
+    @Test
     fun `targets exclude the source lens and keep order`() {
         val all = listOf(lens("a"), lens("b"), lens("c"))
         assertEquals(listOf("a", "c"), LensDragPolicy.targets(all, "b").map { it.id })

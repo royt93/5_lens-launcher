@@ -40,11 +40,25 @@ public final class LensDropStrip {
     private static final int STRIP_ELEVATION_DP = 24;
     private static final int HIGHLIGHT_ALPHA = 255;
     private static final int NORMAL_ALPHA = 210;
+    private static final int SCROLL_EDGE_DP = 48;
+    private static final int SCROLL_STEP_DP = 8;
+    private static final float HIGHLIGHT_SCALE = 1.06f;
 
     private final Host host;
     private final FrameLayout strip;
     private final Map<String, TextView> chips = new HashMap<>();
     private LensDragPayload payload;
+    private HorizontalScrollView scroll;
+    private int scrollDelta;
+    private final Runnable edgeScroll = new Runnable() {
+        @Override public void run() {
+            HorizontalScrollView current = scroll;
+            if (current == null || payload == null || scrollDelta == 0 || !strip.isShown()) return;
+            int before = current.getScrollX();
+            current.scrollBy(scrollDelta, 0);
+            if (current.getScrollX() != before) strip.postOnAnimation(this);
+        }
+    };
 
     public LensDropStrip(Host host) {
         this.host = host;
@@ -52,8 +66,8 @@ public final class LensDropStrip {
         strip = new FrameLayout(activity);
         strip.setVisibility(View.GONE);
         strip.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
-        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.TOP | Gravity.CENTER_HORIZONTAL);
+        ViewGroup.MarginLayoutParams params = new ViewGroup.MarginLayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         params.topMargin = dp(TOP_MARGIN_DP);
         host.root().addView(strip, params);
         // Above the SearchBar, which has its own elevation and would otherwise draw over the chips.
@@ -61,6 +75,7 @@ public final class LensDropStrip {
     }
 
     public void show(LensDragPayload dragPayload) {
+        hide();
         payload = dragPayload;
         // Read the current insets instead of listening: ActHome already owns the root's inset listener
         // and a second one would replace it.
@@ -68,15 +83,17 @@ public final class LensDropStrip {
         int top = rootInsets == null ? 0 : rootInsets.getInsets(
                 WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.displayCutout()).top;
         ViewGroup.LayoutParams raw = strip.getLayoutParams();
-        if (raw instanceof FrameLayout.LayoutParams) {
-            ((FrameLayout.LayoutParams) raw).topMargin = top + dp(TOP_MARGIN_DP);
+        if (raw instanceof ViewGroup.MarginLayoutParams) {
+            ((ViewGroup.MarginLayoutParams) raw).topMargin = top + dp(TOP_MARGIN_DP);
             strip.setLayoutParams(raw);
         }
         strip.removeAllViews();
         chips.clear();
-        HorizontalScrollView scroll = new HorizontalScrollView(host.activity());
+        scroll = new HorizontalScrollView(host.activity());
+        scroll.setOnDragListener((view, event) -> handleDrag(view, event.getAction(), event.getLocalState(), event.getX()));
         scroll.setHorizontalScrollBarEnabled(false);
         scroll.setFillViewport(false);
+        strip.setOnDragListener((view, event) -> handleDrag(view, event.getAction(), event.getLocalState(), event.getX()));
         FrameLayout.LayoutParams scrollParams = new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.TOP | Gravity.CENTER_HORIZONTAL);
         strip.addView(scroll, scrollParams);
@@ -105,7 +122,7 @@ public final class LensDropStrip {
             chip.setContentDescription(host.activity().getString(R.string.lens_drag_targets_description) + ": " + lens.getName());
             chip.setAlpha(NORMAL_ALPHA / 255f);
             chip.setTag(lens.getId());
-            chip.setOnDragListener((view, event) -> handleDrag(view, event.getAction(), event.getLocalState()));
+            chip.setOnDragListener((view, event) -> handleDrag(view, event.getAction(), event.getLocalState(), event.getX()));
             android.widget.LinearLayout.LayoutParams chipParams = new android.widget.LinearLayout.LayoutParams(
                     ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             chipParams.setMargins(dp(CHIP_SPACING_DP / 2), 0, dp(CHIP_SPACING_DP / 2), 0);
@@ -115,24 +132,40 @@ public final class LensDropStrip {
         strip.setVisibility(chips.isEmpty() ? View.GONE : View.VISIBLE);
     }
 
-    /** What a chip does for a drag event; separate from the listener so tests need no framework DragEvent. */
+    /** Chiếu tọa độ con về viewport để cuộn khi ngón tay giữ ở mép. */
     @androidx.annotation.VisibleForTesting
-    boolean handleDrag(View view, int action, Object localState) {
+    boolean handleDrag(View view, int action, Object localState, float x) {
+        if (payload == null || payload != localState) return false;
         switch (action) {
             case android.view.DragEvent.ACTION_DRAG_STARTED:
-                return localState instanceof LensDragPayload && payload == localState;
+                return true;
+            case android.view.DragEvent.ACTION_DRAG_LOCATION:
+                if (scroll != null) {
+                    int[] point = new int[2];
+                    int[] viewport = new int[2];
+                    view.getLocationOnScreen(point);
+                    scroll.getLocationOnScreen(viewport);
+                    scrollDelta = LensDragPolicy.INSTANCE.edgeScrollDelta(
+                            x + point[0] - viewport[0], scroll.getWidth(), dp(SCROLL_EDGE_DP), dp(SCROLL_STEP_DP));
+                    strip.removeCallbacks(edgeScroll);
+                    if (scrollDelta != 0) strip.postOnAnimation(edgeScroll);
+                }
+                return true;
             case android.view.DragEvent.ACTION_DRAG_ENTERED:
-                view.setAlpha(HIGHLIGHT_ALPHA / 255f);
-                view.setScaleX(1.06f);
-                view.setScaleY(1.06f);
+                if (view instanceof TextView) {
+                    view.setAlpha(HIGHLIGHT_ALPHA / 255f);
+                    view.setScaleX(HIGHLIGHT_SCALE);
+                    view.setScaleY(HIGHLIGHT_SCALE);
+                }
                 return true;
             case android.view.DragEvent.ACTION_DRAG_EXITED:
+                stopScrolling();
                 restoreChip(view);
                 return true;
             case android.view.DragEvent.ACTION_DROP:
+                stopScrolling();
                 return dropOn(view);
             case android.view.DragEvent.ACTION_DRAG_ENDED:
-                restoreChip(view);
                 hide();
                 return true;
             default:
@@ -140,15 +173,24 @@ public final class LensDropStrip {
         }
     }
 
+    private void stopScrolling() {
+        scrollDelta = 0;
+        strip.removeCallbacks(edgeScroll);
+    }
+
     private boolean dropOn(View view) {
         LensDragPayload current = payload;
-        if (current == null) return false;
+        if (current == null || !current.getSourceView().isAttachedToWindow()
+                || !LensMenuCoordinator.containsLens(host.lenses(), current.getSourceLensId())) return false;
         Object tag = view.getTag();
         if (!(tag instanceof String)) return false;
         String targetId = (String) tag;
         for (LensWorkspace lens : host.lenses()) {
             if (targetId.equals(lens.getId()) && !targetId.equals(current.getSourceLensId())) {
+                // Tiêu thụ trước callback: event lặp không được tạo snapshot Undo thứ hai.
+                payload = null;
                 host.onDrop(current, targetId, lens.getName());
+                hide();
                 return true;
             }
         }
@@ -163,6 +205,10 @@ public final class LensDropStrip {
     }
 
     public void hide() {
+        stopScrolling();
+        strip.setOnDragListener(null);
+        if (scroll != null) scroll.setOnDragListener(null);
+        scroll = null;
         for (TextView chip : chips.values()) {
             chip.setOnDragListener(null);
             restoreChip(chip);
@@ -185,12 +231,12 @@ public final class LensDropStrip {
         LensDragPayload current = payload;
         if (current == null || current.getSourceView() != source
                 || !packageName.equals(current.getApp().getPackageName().toString())) return false;
-        return handleDrag(chip, android.view.DragEvent.ACTION_DROP, current);
+        return handleDrag(chip, android.view.DragEvent.ACTION_DROP, current, 0f);
     }
 
     @androidx.annotation.VisibleForTesting
     public void endForTest(View chip) {
-        handleDrag(chip, android.view.DragEvent.ACTION_DRAG_ENDED, payload);
+        handleDrag(chip, android.view.DragEvent.ACTION_DRAG_ENDED, payload, 0f);
     }
 
     public View viewForTest() {

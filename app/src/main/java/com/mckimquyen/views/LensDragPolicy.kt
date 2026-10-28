@@ -18,6 +18,17 @@ object LensDragPolicy {
     /** On a single lens the hold opens the menu at the timeout, as before this feature. */
     fun shouldOpenMenuOnTimeout(hasOtherLenses: Boolean): Boolean = !hasOtherLenses
 
+    /** Cuộn theo mép gần nhất; hai vùng mép không chồng nhau trên màn hình hẹp. */
+    fun edgeScrollDelta(xInViewport: Float, viewportWidth: Int, edgePx: Int, stepPx: Int): Int {
+        if (viewportWidth <= 0 || !xInViewport.isFinite() || edgePx <= 0 || stepPx <= 0) return 0
+        val edge = edgePx.coerceAtMost(viewportWidth / 2)
+        return when {
+            xInViewport <= edge -> -stepPx
+            xInViewport >= viewportWidth - edge -> stepPx
+            else -> 0
+        }
+    }
+
     /** Every lens except the one the app is dragged from. */
     fun targets(lenses: List<LensWorkspace>, sourceLensId: String): List<LensWorkspace> =
         lenses.filter { it.id != sourceLensId }
