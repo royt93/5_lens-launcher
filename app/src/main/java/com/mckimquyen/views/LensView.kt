@@ -812,13 +812,10 @@ class LensView : View {
         LensWorkspace.loadAll { lenses ->
             val targets = moveTargets(lenses, lensId)
             if (targets.isEmpty() || !isAttachedToWindow) return@loadAll
-            com.google.android.material.dialog.MaterialAlertDialogBuilder(context, R.style.MaterialYouDialogTheme)
-                .setTitle(R.string.move_to_lens_title)
-                .setItems(targets.map { it.name }.toTypedArray()) { _, which ->
-                    moveAppToLens(app, targets[which].id, targets[which].name)
-                }
-                .setNegativeButton(android.R.string.cancel, null)
-                .show()
+            com.mckimquyen.ui.dialog.LensDialogs.singleChoice(
+                context, R.string.move_to_lens_title, targets.map { it.name },
+                { which -> moveAppToLens(app, targets[which].id, targets[which].name) }, null
+            ).show()
         }
     }
 

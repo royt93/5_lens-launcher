@@ -23,6 +23,7 @@ import com.mckimquyen.model.AppPersistent;
 import com.mckimquyen.model.LensWorkspace;
 import com.mckimquyen.services.AppEventManager;
 import com.mckimquyen.ui.LensManagementActivity;
+import com.mckimquyen.ui.dialog.LensDialogs;
 import com.mckimquyen.util.ApertureRevealHelper;
 import com.mckimquyen.util.LensAppScope;
 import com.mckimquyen.util.LensAppScopeEditor;
@@ -357,16 +358,15 @@ public final class LensMenuCoordinator {
         if (settings == null) return;
         if (settings.isLensFrozen(lens.getId())) {
             dismissLensDialog();
-            host.setDialog(new MaterialAlertDialogBuilder(host.activity(), R.style.MaterialYouDialogTheme)
-                    .setTitle(R.string.lens_unfreeze_title)
-                    .setMessage(R.string.lens_unfreeze_message)
-                    .setPositiveButton(R.string.lens_unfreeze_positions, (d, w) -> {
-                        settings.saveLensFrozen(lens.getId(), false);
+            AlertDialog dialog = LensDialogs.confirm(host.activity(), R.string.lens_unfreeze_title,
+                    host.activity().getString(R.string.lens_unfreeze_message), R.string.lens_unfreeze_positions,
+                    false, () -> {
+                    settings.saveLensFrozen(lens.getId(), false);
                         AppPersistent.clearOrderForLens(lens.getId());
                         reloadLensAfterOrderChange(lens);
-                    })
-                    .setNegativeButton(android.R.string.cancel, null)
-                    .show());
+                    }, null);
+            host.setDialog(dialog);
+            dialog.show();
             return;
         }
         LensView view = host.activeLensView();
@@ -533,26 +533,17 @@ public final class LensMenuCoordinator {
         }
 
         dismissLensDialog();
-        AlertDialog dialog = new MaterialAlertDialogBuilder(activity, R.style.MaterialYouDialogTheme)
-                .setTitle(R.string.lens_choose_apps)
-                .setAdapter(new LensAppChoiceAdapter(activity, apps), null)
-                .setPositiveButton(android.R.string.ok, null)
-                .setNegativeButton(android.R.string.cancel, null)
-                .create();
+        dismissLensDialog();
+        AlertDialog dialog = LensDialogs.multiChoice(activity, R.string.lens_choose_apps,
+                new LensAppChoiceAdapter(activity, apps), initialChoiceIndexes(ids, picked),
+                android.R.string.ok, indexes -> {
+                    Set<String> chosen = new HashSet<>();
+                    for (int index : indexes) if (index >= 0 && index < ids.length) chosen.add(ids[index]);
+                    editor.apply(lens.getId(), chosen);
+                    return Unit.INSTANCE;
+                }, null);
         host.setDialog(dialog);
         dialog.show();
-        android.widget.ListView choices = dialog.getListView();
-        choices.setChoiceMode(android.widget.ListView.CHOICE_MODE_MULTIPLE);
-        for (int i = 0; i < ids.length; i++) choices.setItemChecked(i, picked.contains(ids[i]));
-        choices.setOnItemClickListener((parent, row, position, id) -> {
-            if (choices.isItemChecked(position)) picked.add(ids[position]); else picked.remove(ids[position]);
-        });
-        dialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE).setOnClickListener(v -> {
-            editor.apply(lens.getId(), new HashSet<>(picked));
-            dialog.dismiss();
-        });
-        dialog.getButton(android.content.DialogInterface.BUTTON_NEGATIVE)
-                .setOnClickListener(v -> dialog.dismiss());
     }
 
     public void showHiddenLensAppsDialog(String lensId) {
@@ -568,126 +559,85 @@ public final class LensMenuCoordinator {
             }
         }
         dismissLensDialog();
-        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(activity, R.style.MaterialYouDialogTheme)
-                .setTitle(R.string.lens_hidden_apps)
-                .setNegativeButton(android.R.string.cancel, null);
         if (apps.isEmpty()) {
-            AlertDialog empty = builder.setMessage(R.string.lens_hidden_apps_empty).create();
+            AlertDialog empty = LensDialogs.confirm(activity, R.string.lens_hidden_apps,
+                    activity.getString(R.string.lens_hidden_apps_empty), android.R.string.cancel,
+                    false, () -> {}, null);
             host.setDialog(empty);
             empty.show();
             return;
         }
         Set<String> restored = new HashSet<>();
-        AlertDialog dialog = builder.setAdapter(new LensAppChoiceAdapter(activity, apps), null)
-                .setPositiveButton(R.string.lens_restore_apps, null).create();
+        ArrayList<String> ids = new ArrayList<>();
+        for (App app : apps) ids.add(LensAppScope.identifierOf(app));
+        Set<Integer> initiallyChecked = new HashSet<>();
+        AlertDialog dialog = LensDialogs.multiChoice(activity, R.string.lens_hidden_apps,
+                new LensAppChoiceAdapter(activity, apps), initiallyChecked, R.string.lens_restore_apps,
+                indexes -> {
+                    for (int index : indexes) if (index >= 0 && index < ids.size()) restored.add(ids.get(index));
+                    Set<String> remaining = new HashSet<>(settings.getLensHiddenAppIds(lensId));
+                    remaining.removeAll(restored);
+                    settings.saveLensHiddenAppIds(lensId, remaining);
+                    AppEventManager.INSTANCE.notifyLensScopeChanged(lensId);
+                    return Unit.INSTANCE;
+                }, null);
         host.setDialog(dialog);
         dialog.show();
-        android.widget.ListView choices = dialog.getListView();
-        choices.setChoiceMode(android.widget.ListView.CHOICE_MODE_MULTIPLE);
-        choices.setOnItemClickListener((parent, row, position, id) -> {
-            String appId = LensAppScope.identifierOf(apps.get(position));
-            if (choices.isItemChecked(position)) restored.add(appId); else restored.remove(appId);
-        });
-        dialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE).setOnClickListener(v -> {
-            Set<String> remaining = new HashSet<>(settings.getLensHiddenAppIds(lensId));
-            remaining.removeAll(restored);
-            settings.saveLensHiddenAppIds(lensId, remaining);
-            dialog.dismiss();
-            AppEventManager.INSTANCE.notifyLensScopeChanged(lensId);
-        });
     }
 
     private void showLensNameDialog(int titleRes, String initialText, LensNameCallback onDone) {
         Activity activity = host.activity();
-        EditText input = new EditText(activity);
-        // A programmatic View with no id is skipped by onSaveInstanceState, so the typed name would
-        // be lost on rotation. android.R.id.edit is the platform's own id for this exact role.
-        input.setId(android.R.id.edit);
-        input.setText(initialText);
-        input.setHint(R.string.lens_name_hint);
-        input.setSingleLine(true);
-        input.setSelectAllOnFocus(true);
-        int paddingH = (int) (24 * activity.getResources().getDisplayMetrics().density);
-        int paddingV = (int) (8 * activity.getResources().getDisplayMetrics().density);
-        android.widget.FrameLayout container = new android.widget.FrameLayout(activity);
-        container.setPadding(paddingH, paddingV, paddingH, 0);
-        container.addView(input);
-
         dismissLensDialog();
-        AlertDialog dialog = new MaterialAlertDialogBuilder(activity, R.style.MaterialYouDialogTheme)
-                .setTitle(titleRes)
-                .setView(container)
-                .setPositiveButton(android.R.string.ok, null)
-                .setNegativeButton(android.R.string.cancel, null)
-                .create();
+        final AlertDialog[] dialogHolder = new AlertDialog[1];
+        AlertDialog dialog = LensDialogs.textInput(activity, titleRes, R.string.lens_name_hint,
+                initialText, R.string.lens_group_error_blank, name -> {
+                    ApertureRevealHelper.INSTANCE.dismissWithReveal(dialogHolder[0], lensMenuAnchor(),
+                            () -> onDone.onNameEntered(name));
+                    return Unit.INSTANCE;
+                }, null, false);
+        dialogHolder[0] = dialog;
         host.setDialog(dialog);
-
-        // FISH-010: circular reveal expanding from/collapsing to the lens menu's own anchor -
-        // the same anchor already resolved for the menu itself (lensMenuAnchor()).
         ApertureRevealHelper.INSTANCE.prepareDialog(dialog);
         dialog.show();
         ApertureRevealHelper.INSTANCE.revealShownDialog(dialog, lensMenuAnchor());
-
-        dialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE).setOnClickListener(v -> {
-            String name = input.getText() != null ? input.getText().toString().trim() : "";
-            ApertureRevealHelper.INSTANCE.dismissWithReveal(dialog, lensMenuAnchor(), () -> {
-                if (!name.isEmpty()) {
-                    onDone.onNameEntered(name);
-                }
-            });
-        });
-        dialog.getButton(android.content.DialogInterface.BUTTON_NEGATIVE).setOnClickListener(v ->
-                ApertureRevealHelper.INSTANCE.dismissWithReveal(dialog, lensMenuAnchor(), null)
-        );
     }
 
     private void confirmDeleteLensDialog(LensWorkspace lens) {
         Activity activity = host.activity();
         String message = activity.getString(R.string.lens_delete_confirm_message, lens.getName());
         dismissLensDialog();
-        AlertDialog dialog = new MaterialAlertDialogBuilder(activity, R.style.MaterialYouDialogTheme)
-                .setTitle(R.string.lens_delete)
-                .setMessage(message)
-                .setPositiveButton(R.string.lens_delete, null)
-                .setNegativeButton(android.R.string.cancel, null)
-                .create();
+        final AlertDialog[] dialogHolder = new AlertDialog[1];
+        AlertDialog dialog = LensDialogs.confirm(activity, R.string.lens_delete, message, R.string.lens_delete,
+                true, () -> { ApertureRevealHelper.INSTANCE.dismissWithReveal(dialogHolder[0], lensMenuAnchor(), () -> {
+                    LensWorkspace.deleteLens(lens.getId(), lenses -> {
+                        UtilSettings settings = host.settings();
+                        if (settings != null) settings.deleteLensSettings(lens.getId());
+                        adoptLenses(lenses);
+                        if (!lenses.isEmpty()) {
+                            LensViewHolder holder = host.lenses();
+                            int targetPos = Math.min(holder.pager().getCurrentItem(), lenses.size() - 1);
+                            holder.pager().setCurrentItem(targetPos, false);
+                            LensWorkspace targetLens = lenses.get(targetPos);
+                            if (settings != null) settings.save(UtilSettings.KEY_ACTIVE_LENS_ID, targetLens.getId());
+                            Object app = activity.getApplication();
+                            if (app instanceof RApplication) {
+                                ((RApplication) app).getAppRefreshPipeline().switchLens(targetLens.getId());
+                            }
+                        }
+                        return Unit.INSTANCE;
+                    });
+                }); }, null, false);
+        dialogHolder[0] = dialog;
         host.setDialog(dialog);
-
         ApertureRevealHelper.INSTANCE.prepareDialog(dialog);
         dialog.show();
         ApertureRevealHelper.INSTANCE.revealShownDialog(dialog, lensMenuAnchor());
+    }
 
-        dialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE).setOnClickListener(v ->
-                ApertureRevealHelper.INSTANCE.dismissWithReveal(dialog, lensMenuAnchor(), () ->
-                        LensWorkspace.deleteLens(lens.getId(), lenses -> {
-                            // FISH-008 Phase 3: no cascade exists for prefs either - drop the
-                            // deleted lens's own curvature/Smart Focus keys explicitly.
-                            UtilSettings settings = host.settings();
-                            if (settings != null) {
-                                settings.deleteLensSettings(lens.getId());
-                            }
-                            adoptLenses(lenses);
-                            // FISH-008 Phase 2 r2: if we just deleted the active lens, clamp the
-                            // pager and switch RAppsSingleton to the newly active lens so the
-                            // deleted lens's layout is not retained in memory.
-                            if (!lenses.isEmpty()) {
-                                LensViewHolder holder = host.lenses();
-                                int targetPos = Math.min(holder.pager().getCurrentItem(), lenses.size() - 1);
-                                holder.pager().setCurrentItem(targetPos, false);
-                                LensWorkspace targetLens = lenses.get(targetPos);
-                                if (settings != null) {
-                                    settings.save(UtilSettings.KEY_ACTIVE_LENS_ID, targetLens.getId());
-                                }
-                                Object app = activity.getApplication();
-                                if (app instanceof RApplication) {
-                                    ((RApplication) app).getAppRefreshPipeline().switchLens(targetLens.getId());
-                                }
-                            }
-                            return Unit.INSTANCE;
-                        })));
-        dialog.getButton(android.content.DialogInterface.BUTTON_NEGATIVE).setOnClickListener(v ->
-                ApertureRevealHelper.INSTANCE.dismissWithReveal(dialog, lensMenuAnchor(), null)
-        );
+    private static Set<Integer> initialChoiceIndexes(String[] ids, Set<String> selected) {
+        Set<Integer> indexes = new HashSet<>();
+        for (int i = 0; i < ids.length; i++) if (selected.contains(ids[i])) indexes.add(i);
+        return indexes;
     }
 
     /** Teardown order matters: dialog first, then the menu, then the press anchor. */
