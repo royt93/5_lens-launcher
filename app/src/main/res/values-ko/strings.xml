@@ -223,6 +223,7 @@
     <string name="menu_move_to_lens">렌즈로 이동…</string>
     <string name="move_to_lens_title">어느 렌즈로 이동할까요?</string>
     <string name="move_to_lens_done">%1$s(으)로 이동했습니다</string>
+    <string name="lens_drag_targets_description">렌즈 위에 놓으면 앱이 이동합니다</string>
     <string name="lens_hidden_apps">이 렌즈에서 숨긴 앱</string>
     <string name="lens_restore_apps">앱 복원</string>
     <string name="lens_hidden_apps_empty">이 렌즈에서 숨긴 앱도 검색에서 계속 사용할 수 있습니다.</string>

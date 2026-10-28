@@ -223,6 +223,7 @@
     <string name="menu_move_to_lens">移动到镜头…</string>
     <string name="move_to_lens_title">移动到哪个镜头？</string>
     <string name="move_to_lens_done">已移动到 %1$s</string>
+    <string name="lens_drag_targets_description">拖放到镜头上即可移动应用</string>
     <string name="lens_hidden_apps">此镜头中隐藏的应用</string>
     <string name="lens_restore_apps">恢复应用</string>
     <string name="lens_hidden_apps_empty">从此镜头隐藏的应用仍可在搜索中找到。</string>

@@ -223,6 +223,7 @@
     <string name="menu_move_to_lens">Pindahkan ke lensa…</string>
     <string name="move_to_lens_title">Pindahkan ke lensa mana?</string>
     <string name="move_to_lens_done">Dipindahkan ke %1$s</string>
+    <string name="lens_drag_targets_description">Lepas di lensa untuk memindahkan aplikasi</string>
     <string name="lens_hidden_apps">Aplikasi tersembunyi di lensa ini</string>
     <string name="lens_restore_apps">Pulihkan aplikasi</string>
     <string name="lens_hidden_apps_empty">Aplikasi yang disembunyikan dari lensa ini tetap tersedia di pencarian.</string>

@@ -88,7 +88,7 @@ fun interface OnAppMovedToLensListener {
 }
 
 /** FISH-038b: what a lens drag carries; the drop target moves [app] out of [sourceLensId] through [sourceView]. */
-internal class LensDragPayload(val sourceView: LensView, val app: App, val sourceLensId: String)
+class LensDragPayload(val sourceView: LensView, val app: App, val sourceLensId: String)
 
 /** FISH-038b: tells the host a drag began (to show the drop strip); the strip hides itself on drag end. */
 fun interface OnAppDragStartListener {
@@ -864,7 +864,7 @@ class LensView : View {
     }
 
     /** FISH-038b: the drop target calls this on the source view; same write and Undo as the menu path. */
-    internal fun moveAppToLensFromDrop(app: App, targetLensId: String, targetName: String) =
+    fun moveAppToLensFromDrop(app: App, targetLensId: String, targetName: String) =
         moveAppToLens(app, targetLensId, targetName)
 
     private fun moveAppToLens(app: App, targetLensId: String, targetName: String) {

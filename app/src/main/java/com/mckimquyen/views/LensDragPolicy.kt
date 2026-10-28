@@ -6,7 +6,7 @@ import com.mckimquyen.model.LensWorkspace
  * FISH-038b: pure decisions for "hold an icon, then drag it onto another lens". With one lens
  * nothing changes: the app menu still opens when the hold times out.
  */
-internal object LensDragPolicy {
+object LensDragPolicy {
     /** A held icon that moved past touch slop becomes a drag, but only when another lens exists. */
     fun shouldStartDrag(holdTriggered: Boolean, hasOtherLenses: Boolean, movedPastSlop: Boolean): Boolean =
         holdTriggered && hasOtherLenses && movedPastSlop

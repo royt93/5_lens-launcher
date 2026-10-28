@@ -281,6 +281,7 @@
     <string name="menu_move_to_lens">Move to lens…</string>
     <string name="move_to_lens_title">Move to which lens?</string>
     <string name="move_to_lens_done">Moved to %1$s</string>
+    <string name="lens_drag_targets_description">Drop on a lens to move the app</string>
     <string name="lens_hidden_apps">Hidden apps in this lens</string>
     <string name="lens_restore_apps">Restore apps</string>
     <string name="lens_hidden_apps_empty">Apps hidden from this lens remain available in search.</string>

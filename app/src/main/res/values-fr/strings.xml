@@ -231,6 +231,7 @@
     <string name="menu_move_to_lens">Déplacer vers une lentille…</string>
     <string name="move_to_lens_title">Déplacer vers quelle lentille ?</string>
     <string name="move_to_lens_done">Déplacée vers %1$s</string>
+    <string name="lens_drag_targets_description">Déposez sur une lentille pour déplacer l’appli</string>
     <string name="lens_hidden_apps">Applis masquées dans cette lentille</string>
     <string name="lens_restore_apps">Restaurer les applis</string>
     <string name="lens_hidden_apps_empty">Les applis masquées de cette lentille restent disponibles dans la recherche.</string>

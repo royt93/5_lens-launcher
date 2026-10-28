@@ -231,6 +231,7 @@
     <string name="menu_move_to_lens">Sposta nella lente…</string>
     <string name="move_to_lens_title">In quale lente spostarla?</string>
     <string name="move_to_lens_done">Spostata in %1$s</string>
+    <string name="lens_drag_targets_description">Rilascia su una lente per spostare l’app</string>
     <string name="lens_hidden_apps">App nascoste in questa lente</string>
     <string name="lens_restore_apps">Ripristina app</string>
     <string name="lens_hidden_apps_empty">Le app nascoste da questa lente restano disponibili nella ricerca.</string>

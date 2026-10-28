@@ -223,6 +223,7 @@
     <string name="menu_move_to_lens">ផ្លាស់ទីទៅកែវថត…</string>
     <string name="move_to_lens_title">ផ្លាស់ទីទៅកែវថតមួយណា?</string>
     <string name="move_to_lens_done">បានផ្លាស់ទីទៅ %1$s</string>
+    <string name="lens_drag_targets_description">ទម្លាក់លើកែវថតដើម្បីផ្លាស់ទីកម្មវិធី</string>
     <string name="lens_hidden_apps">កម្មវិធីដែលបានលាក់ក្នុងកែវពង្រីកនេះ</string>
     <string name="lens_restore_apps">ស្ដារកម្មវិធី</string>
     <string name="lens_hidden_apps_empty">កម្មវិធីដែលបានលាក់ពីកែវពង្រីកនេះនៅតែអាចរកបានក្នុងការស្វែងរក។</string>
