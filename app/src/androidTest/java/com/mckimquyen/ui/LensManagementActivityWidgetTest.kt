@@ -268,7 +268,7 @@ class LensManagementActivityWidgetTest {
                 val input = dialog.findViewById<android.widget.EditText>(android.R.id.edit)!!
                 assertEquals("Work", input.text.toString())
                 input.setText("Renamed Work")
-                dialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE).performClick()
+                (dialog as androidx.appcompat.app.AlertDialog).getButton(android.content.DialogInterface.BUTTON_POSITIVE).performClick()
             }
             awaitActivity(scenario, "rename must update visible row") { activity ->
                 activity.findViewById<RecyclerView>(R.id.rvLensGroups).let { list ->
@@ -291,7 +291,7 @@ class LensManagementActivityWidgetTest {
             }
             awaitLensGroupDialog(scenario)
             scenario.onActivity { activity ->
-                activity.lensGroupDialogForTest!!.getButton(android.content.DialogInterface.BUTTON_NEGATIVE).performClick()
+                activity.lensGroupDialogForTest!!.cancel()
             }
             assertNotNull(runBlocking { dao.findById("work") })
 
@@ -302,7 +302,7 @@ class LensManagementActivityWidgetTest {
             }
             awaitLensGroupDialog(scenario)
             scenario.onActivity { activity ->
-                activity.lensGroupDialogForTest!!.getButton(android.content.DialogInterface.BUTTON_POSITIVE).performClick()
+                (activity.lensGroupDialogForTest as androidx.appcompat.app.AlertDialog).getButton(android.content.DialogInterface.BUTTON_POSITIVE).performClick()
             }
             // The row disappears in Room before the Activity callback has cleaned up the active id,
             // so wait for the observable end state instead of asserting between the two steps.
@@ -409,7 +409,7 @@ class LensManagementActivityWidgetTest {
             scenario.onActivity { activity ->
                 val dialog = activity.lensGroupDialogForTest!!
                 dialog.findViewById<android.widget.EditText>(android.R.id.edit)!!.setText("  WORK  ")
-                dialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE).performClick()
+                (dialog as androidx.appcompat.app.AlertDialog).getButton(android.content.DialogInterface.BUTTON_POSITIVE).performClick()
             }
             awaitGroupName(scenario, "ungrouped", "Work")
         }
@@ -430,7 +430,7 @@ class LensManagementActivityWidgetTest {
             scenario.onActivity { activity ->
                 val dialog = activity.lensGroupDialogForTest!!
                 dialog.findViewById<android.widget.EditText>(android.R.id.edit)!!.setText("   ")
-                dialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE).performClick()
+                (dialog as androidx.appcompat.app.AlertDialog).getButton(android.content.DialogInterface.BUTTON_POSITIVE).performClick()
                 assertTrue("Dialog must stay open for correction", dialog.isShowing)
                 var layout: android.view.View? = dialog.findViewById<android.widget.EditText>(android.R.id.edit)!!
                 while (layout != null && layout !is com.google.android.material.textfield.TextInputLayout) layout = layout.parent as? android.view.View
@@ -723,10 +723,8 @@ class LensManagementActivityWidgetTest {
             scenario.onActivity { activity ->
                 val dialog = activity.lensGroupDialogForTest!!
                 val input = dialog.findViewById<android.widget.EditText>(android.R.id.edit)
-                    ?: (dialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE).rootView
-                        .findViewById(android.R.id.edit))
                 requireNotNull(input).setText("Shared")
-                dialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE).performClick()
+                (dialog as androidx.appcompat.app.AlertDialog).getButton(android.content.DialogInterface.BUTTON_POSITIVE).performClick()
             }
             awaitGroupName(scenario, LensWorkspace.DEFAULT_LENS_ID, "Shared")
             awaitGroupName(scenario, "travel", "Shared")
@@ -759,8 +757,7 @@ class LensManagementActivityWidgetTest {
             }
             awaitLensGroupDialog(scenario)
             scenario.onActivity { activity ->
-                activity.lensGroupDialogForTest!!.getButton(android.content.DialogInterface.BUTTON_NEGATIVE)
-                    .performClick()
+                activity.lensGroupDialogForTest!!.cancel()
             }
             awaitGroupName(scenario, "travel", "work")
         }
@@ -787,7 +784,7 @@ class LensManagementActivityWidgetTest {
             InstrumentationRegistry.getInstrumentation().waitForIdleSync()
             openCreateGroupDialog(scenario)
             scenario.onActivity { activity ->
-                activity.lensGroupDialogForTest!!.getButton(android.content.DialogInterface.BUTTON_NEGATIVE).performClick()
+                activity.lensGroupDialogForTest!!.cancel()
             }
             InstrumentationRegistry.getInstrumentation().waitForIdleSync()
             scenario.onActivity { activity ->
@@ -801,6 +798,27 @@ class LensManagementActivityWidgetTest {
     }
 
     @Test
+    fun cancellingAssignSheetClearsTheActivityDialogReferenceAndCanReopen() {
+        ActivityScenario.launch(LensManagementActivity::class.java).use { scenario ->
+            InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+            scenario.onActivity { activity ->
+                activity.toggleEditModeForTest()
+                activity.selectLensForGroupEdit("work", true)
+                activity.findViewById<View>(R.id.btLensGroupAssign).performClick()
+            }
+            awaitLensGroupDialog(scenario)
+            scenario.onActivity { it.lensGroupDialogForTest!!.cancel() }
+            InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+            scenario.onActivity { activity ->
+                assertNull("dismissed sheet must not remain owned by the Activity", activity.lensGroupDialogForTest)
+                activity.findViewById<View>(R.id.btLensGroupAssign).performClick()
+            }
+            awaitLensGroupDialog(scenario)
+            scenario.onActivity { assertTrue(it.lensGroupDialogForTest!!.isShowing) }
+        }
+    }
+
+    @Test
     fun confirmingCreateGroupDoesNotReportItAsACancellation() {
         ActivityScenario.launch(LensManagementActivity::class.java).use { scenario ->
             InstrumentationRegistry.getInstrumentation().waitForIdleSync()
@@ -808,7 +826,7 @@ class LensManagementActivityWidgetTest {
             scenario.onActivity { activity ->
                 val dialog = activity.lensGroupDialogForTest!!
                 dialog.findViewById<android.widget.EditText>(android.R.id.edit)!!.setText("Fresh")
-                dialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE).performClick()
+                (dialog as androidx.appcompat.app.AlertDialog).getButton(android.content.DialogInterface.BUTTON_POSITIVE).performClick()
             }
             awaitGroupName(scenario, "ungrouped", "Fresh")
             InstrumentationRegistry.getInstrumentation().waitForIdleSync()
@@ -831,9 +849,10 @@ class LensManagementActivityWidgetTest {
             awaitLensGroupDialog(scenario)
             scenario.onActivity { activity ->
                 val dialog = activity.lensGroupDialogForTest!!
+                val alert = dialog as androidx.appcompat.app.AlertDialog
                 val error = com.google.android.material.color.MaterialColors.getColor(dialog.context, androidx.appcompat.R.attr.colorError, 0)
-                assertEquals(error, dialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE).currentTextColor)
-                dialog.getButton(android.content.DialogInterface.BUTTON_NEGATIVE).performClick()
+                assertEquals(error, alert.getButton(android.content.DialogInterface.BUTTON_POSITIVE).currentTextColor)
+                alert.getButton(android.content.DialogInterface.BUTTON_NEGATIVE).performClick()
             }
         }
     }
@@ -856,12 +875,8 @@ class LensManagementActivityWidgetTest {
         }
     }
 
-    private fun clickDialogChoice(dialog: androidx.appcompat.app.AlertDialog, label: String) {
-        val list = requireNotNull(dialog.listView)
-        val labels = (0 until list.count).map { list.getItemAtPosition(it).toString() }
-        val index = labels.indexOf(label)
-        assertTrue("Expected '$label' in dialog options: $labels", index >= 0)
-        list.performItemClick(list.getChildAt(index), index, list.adapter.getItemId(index))
+    private fun clickDialogChoice(dialog: android.app.Dialog, label: String) {
+        GroupPickerTestSupport.click(dialog, label)
     }
 
     private fun awaitGroupName(scenario: ActivityScenario<LensManagementActivity>, lensId: String, expected: String?) {

@@ -48,7 +48,7 @@ class LensManagementActivity : ActBase() {
     private val dao: LensWorkspaceDao by lazy { AppDatabase.getInstance().lensWorkspaceDao() }
     private val selectedLensIds = mutableSetOf<String>()
     private var editingGroups = false
-    private var lensGroupDialog: AlertDialog? = null
+    private var lensGroupDialog: android.app.Dialog? = null
     // UI-032: track open dialog kind and target so onSaveInstanceState can preserve drafts
     private var activeDialogKind: String? = null
     private var activeDialogLensId: String? = null
@@ -75,7 +75,7 @@ class LensManagementActivity : ActBase() {
         get() = lastGroupOperationError
 
     @androidx.annotation.VisibleForTesting
-    val lensGroupDialogForTest: AlertDialog?
+    val lensGroupDialogForTest: android.app.Dialog?
         get() = lensGroupDialog
 
     @androidx.annotation.VisibleForTesting
@@ -505,24 +505,32 @@ class LensManagementActivity : ActBase() {
             if (isFinishing || isDestroyed || version != groupLoadVersion) return@loadAll
             try {
                 val groupNames = LensGroupPolicy.sections(lenses).mapNotNull { it.groupName }.distinct()
-                val options = groupNames + getString(R.string.lens_group_create)
-                lensGroupDialog = AlertDialog.Builder(this)
-                    .setTitle(R.string.lens_group_edit_title)
-                    .setItems(options.toTypedArray()) { dialog, which ->
-                        dialog.dismiss()
-                        lensGroupDialog = null
+                val dialog = com.mckimquyen.ui.dialog.LensDialogs.choiceSheet(
+                    this, R.string.lens_group_edit_title, groupNames, R.string.lens_group_create,
+                    { index ->
+                        if (index in groupNames.indices) {
+                            groupOperationInProgress = false
+                            activeDialogKind = null
+                            assignGroup(selectedIds, groupNames[index])
+                        }
+                    },
+                    {
+                        groupOperationInProgress = false
                         activeDialogKind = null
-                        setGroupOperationIdle()
-                        if (which < groupNames.size) assignGroup(selectedIds, groupNames[which])
-                        else showCreateGroupDialog(selectedIds)
-                    }
-                    .setNegativeButton(android.R.string.cancel, null)
-                    .setOnCancelListener {
-                        lensGroupDialog = null
+                        showCreateGroupDialog(selectedIds)
+                    },
+                    {
+                        groupOperationInProgress = false
                         activeDialogKind = null
-                        if (version == groupLoadVersion) setGroupOperationIdle()
+                        onGroupSelectionChanged(selectedLensIds)
                     }
-                    .show()
+                )
+                lensGroupDialog = dialog
+                dialog.setOnDismissListener {
+                    if (lensGroupDialog === dialog) lensGroupDialog = null
+                    if (activeDialogKind == DIALOG_KIND_ASSIGN_GROUP) activeDialogKind = null
+                }
+                dialog.show()
             } catch (error: Exception) {
                 groupPickerFailureForTest = error
                 if (version == groupLoadVersion) setGroupOperationIdle()
@@ -537,17 +545,19 @@ class LensManagementActivity : ActBase() {
         lensGroupDialog = null
         activeDialogKind = DIALOG_KIND_CREATE_GROUP
         onGroupSelectionChanged(selectedLensIds)
+        val dialogHolder = arrayOfNulls<android.app.Dialog>(1)
         val dialog = com.mckimquyen.ui.dialog.LensDialogs.textInput(
             this, R.string.lens_group_create, R.string.lens_group_name_hint, draftText,
             R.string.lens_group_error_blank,
             { name -> assignGroup(selectedIds, name) },
             {
-                // groupOperationInProgress was already cleared above and assignGroup sets its own flag,
-                // so a cancel and a confirm need no extra state change here.
-                lensGroupDialog = null
-                activeDialogKind = null
+                if (lensGroupDialog === dialogHolder[0]) {
+                    lensGroupDialog = null
+                    activeDialogKind = null
+                }
             }
         )
+        dialogHolder[0] = dialog
         lensGroupDialog = dialog
         dialog.show()
     }

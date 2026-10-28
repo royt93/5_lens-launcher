@@ -72,7 +72,7 @@ class LensManagementStateRestorationTest {
         else UtilSettings(context).save(UtilSettings.KEY_ACTIVE_LENS_ID, originalActiveLensId)
     }
 
-    private fun findInput(dialog: AlertDialog): EditText {
+    private fun findInput(dialog: android.app.Dialog): EditText {
         val input = dialog.findViewById<EditText>(android.R.id.edit)
         return requireNotNull(input) { "EditText android.R.id.edit not found in dialog" }
     }
@@ -127,13 +127,15 @@ class LensManagementStateRestorationTest {
             awaitDialog(scenario)
             scenario.onActivity { activity ->
                 val dialog = requireNotNull(activity.lensGroupDialogForTest)
-                assertTrue("assign-group picker must show existing groups", dialog.listView.count > 0)
+                assertTrue("assign-group picker must be a bottom sheet", GroupPickerTestSupport.isSheet(dialog))
+                assertTrue("assign-group picker must show existing groups", GroupPickerTestSupport.labels(dialog).size > 1)
             }
             scenario.recreate()
             awaitDialog(scenario)
             scenario.onActivity { activity ->
                 val dialog = requireNotNull(activity.lensGroupDialogForTest)
-                assertTrue("restored assign-group picker must retain group options", dialog.listView.count > 0)
+                assertTrue("restored assign-group picker must be a bottom sheet", GroupPickerTestSupport.isSheet(dialog))
+                assertTrue("restored assign-group picker must retain group options", GroupPickerTestSupport.labels(dialog).size > 1)
             }
         }
     }
@@ -160,10 +162,7 @@ class LensManagementStateRestorationTest {
             awaitDialog(scenario)
             scenario.onActivity { activity ->
                 val picker = requireNotNull(activity.lensGroupDialogForTest)
-                val createIndex = (0 until picker.listView.count).first { index ->
-                    picker.listView.adapter.getItem(index).toString() == activity.getString(com.mckimquyen.R.string.lens_group_create)
-                }
-                picker.listView.performItemClick(picker.listView.getChildAt(createIndex), createIndex, picker.listView.adapter.getItemId(createIndex))
+                GroupPickerTestSupport.click(picker, activity.getString(com.mckimquyen.R.string.lens_group_create))
             }
             awaitDialog(scenario)
             scenario.onActivity { activity ->
