@@ -1035,7 +1035,7 @@ public class ActHome extends ActBase implements LensViewHolderHost, HomeQuickAct
     @Override public void requestLensExport() { exportActiveLensImage(); }
 
     @Override
-    public void offerDropStrip(LensView source, App app, String sourceLensId) {
+    public void offerDropStrip(com.mckimquyen.views.LensDragPayload payload) {
         if (dropStrip == null) {
             dropStrip = new LensDropStrip(new LensDropStrip.Host() {
                 @Override public android.app.Activity activity() { return ActHome.this; }
@@ -1046,7 +1046,12 @@ public class ActHome extends ActBase implements LensViewHolderHost, HomeQuickAct
                 }
             });
         }
-        dropStrip.show(new com.mckimquyen.views.LensDragPayload(source, app, sourceLensId));
+        dropStrip.show(payload);
+    }
+
+    @Override
+    public void dismissDropStrip() {
+        if (dropStrip != null) dropStrip.hide();
     }
 
     /** Test seam: drops [app] (by package) from [source] on [chip], as a drop on that chip would. */

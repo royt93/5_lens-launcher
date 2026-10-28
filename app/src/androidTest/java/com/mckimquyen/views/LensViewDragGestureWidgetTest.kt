@@ -142,6 +142,66 @@ class LensViewDragGestureWidgetTest {
     }
 
     @Test
+    fun theHostListenerReceivesTheVerySamePayloadTheSystemDragCarries() {
+        val seen = ArrayList<LensDragPayload>()
+        instrumentation.runOnMainSync {
+            lensView.onAppDragStartListener = object : OnAppDragStartListener {
+                override fun onDragStarted(payload: LensDragPayload) { seen.add(payload) }
+                override fun onDragCancelled() {}
+            }
+        }
+        val point = pressIcon(hasOtherLenses = true)
+        waitPastLongPress()
+        instrumentation.runOnMainSync {
+            touch(MotionEvent.ACTION_MOVE, point.first + slop() + 40f, point.second)
+        }
+        assertEquals(1, seen.size)
+        assertTrue(
+            "the strip only accepts the drag's own local state, so the host must receive that exact object",
+            seen.single() === dragRequests.single()
+        )
+    }
+
+    @Test
+    fun theDropTargetsAreShownBeforeTheSystemStartsTheDrag() {
+        val order = ArrayList<String>()
+        instrumentation.runOnMainSync {
+            lensView.onAppDragStartListener = object : OnAppDragStartListener {
+                override fun onDragStarted(payload: LensDragPayload) { order.add("targets") }
+                override fun onDragCancelled() { order.add("cancelled") }
+            }
+            lensView.dragStarter = { _: LensView, _: ClipData, _: View.DragShadowBuilder, _: Any -> order.add("system"); true }
+        }
+        val point = pressIcon(hasOtherLenses = true)
+        waitPastLongPress()
+        instrumentation.runOnMainSync {
+            touch(MotionEvent.ACTION_MOVE, point.first + slop() + 40f, point.second)
+        }
+        assertEquals(
+            "chips must exist before startDragAndDrop dispatches DRAG_STARTED, or they never accept the drop",
+            listOf("targets", "system"), order
+        )
+    }
+
+    @Test
+    fun aRefusedDragRemovesTheDropTargetsAgain() {
+        val order = ArrayList<String>()
+        instrumentation.runOnMainSync {
+            lensView.onAppDragStartListener = object : OnAppDragStartListener {
+                override fun onDragStarted(payload: LensDragPayload) { order.add("targets") }
+                override fun onDragCancelled() { order.add("cancelled") }
+            }
+        }
+        dragAccepted = false
+        val point = pressIcon(hasOtherLenses = true)
+        waitPastLongPress()
+        instrumentation.runOnMainSync {
+            touch(MotionEvent.ACTION_MOVE, point.first + slop() + 40f, point.second)
+        }
+        assertEquals(listOf("targets", "cancelled"), order)
+    }
+
+    @Test
     fun multiLens_moveBeforeTimeout_isAPanNotADrag() {
         val point = pressIcon(hasOtherLenses = true)
         instrumentation.runOnMainSync {

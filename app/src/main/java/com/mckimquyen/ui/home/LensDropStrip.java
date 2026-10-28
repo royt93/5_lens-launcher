@@ -10,7 +10,6 @@ import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.TextView;
 
-import androidx.core.view.OnApplyWindowInsetsListener;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
@@ -38,6 +37,7 @@ public final class LensDropStrip {
     private static final int VERTICAL_PADDING_DP = 8;
     private static final int CHIP_SPACING_DP = 8;
     private static final int TOP_MARGIN_DP = 8;
+    private static final int STRIP_ELEVATION_DP = 24;
     private static final int HIGHLIGHT_ALPHA = 255;
     private static final int NORMAL_ALPHA = 210;
 
@@ -45,7 +45,6 @@ public final class LensDropStrip {
     private final FrameLayout strip;
     private final Map<String, TextView> chips = new HashMap<>();
     private LensDragPayload payload;
-    private OnApplyWindowInsetsListener insetsListener;
 
     public LensDropStrip(Host host) {
         this.host = host;
@@ -57,24 +56,22 @@ public final class LensDropStrip {
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.TOP | Gravity.CENTER_HORIZONTAL);
         params.topMargin = dp(TOP_MARGIN_DP);
         host.root().addView(strip, params);
-        insetsListener = (view, insets) -> {
-            int top = insets.getInsets(WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.displayCutout()).top;
-            ViewGroup.LayoutParams raw = strip.getLayoutParams();
-            if (raw instanceof FrameLayout.LayoutParams) {
-                FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) raw;
-                int target = top + dp(TOP_MARGIN_DP);
-                if (lp.topMargin != target) {
-                    lp.topMargin = target;
-                    strip.setLayoutParams(lp);
-                }
-            }
-            return insets;
-        };
-        ViewCompat.setOnApplyWindowInsetsListener(host.root(), insetsListener);
+        // Above the SearchBar, which has its own elevation and would otherwise draw over the chips.
+        strip.setElevation(dp(STRIP_ELEVATION_DP));
     }
 
     public void show(LensDragPayload dragPayload) {
         payload = dragPayload;
+        // Read the current insets instead of listening: ActHome already owns the root's inset listener
+        // and a second one would replace it.
+        WindowInsetsCompat rootInsets = ViewCompat.getRootWindowInsets(host.root());
+        int top = rootInsets == null ? 0 : rootInsets.getInsets(
+                WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.displayCutout()).top;
+        ViewGroup.LayoutParams raw = strip.getLayoutParams();
+        if (raw instanceof FrameLayout.LayoutParams) {
+            ((FrameLayout.LayoutParams) raw).topMargin = top + dp(TOP_MARGIN_DP);
+            strip.setLayoutParams(raw);
+        }
         strip.removeAllViews();
         chips.clear();
         HorizontalScrollView scroll = new HorizontalScrollView(host.activity());
@@ -178,10 +175,6 @@ public final class LensDropStrip {
 
     public void onDestroy() {
         hide();
-        if (insetsListener != null) {
-            ViewCompat.setOnApplyWindowInsetsListener(host.root(), null);
-            insetsListener = null;
-        }
         ViewGroup parent = (ViewGroup) strip.getParent();
         if (parent != null) parent.removeView(strip);
     }

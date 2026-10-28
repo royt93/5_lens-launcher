@@ -180,7 +180,7 @@ class MoveAppToLensWidgetTest {
     /** Starts a drag exactly as a hold-then-move would: through the view's own drag seam. */
     private fun startDragOf(grid: com.mckimquyen.views.LensView, packageName: String) {
         val app = grid.appsForTest.orEmpty().first { it.packageName == packageName }
-        grid.onAppDragStartListener?.onDragStarted(grid, app, grid.lensId)
+        grid.onAppDragStartListener?.onDragStarted(com.mckimquyen.views.LensDragPayload(grid, app, grid.lensId))
     }
 
     private fun dropStripChips(activity: ActHome): List<android.widget.TextView> {

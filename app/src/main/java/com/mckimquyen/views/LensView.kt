@@ -90,9 +90,15 @@ fun interface OnAppMovedToLensListener {
 /** FISH-038b: what a lens drag carries; the drop target moves [app] out of [sourceLensId] through [sourceView]. */
 class LensDragPayload(val sourceView: LensView, val app: App, val sourceLensId: String)
 
-/** FISH-038b: tells the host a drag began (to show the drop strip); the strip hides itself on drag end. */
-fun interface OnAppDragStartListener {
-    fun onDragStarted(sourceView: LensView, app: App, sourceLensId: String)
+/**
+ * FISH-038b: tells the host a drag began (to show the drop strip); the strip hides itself on drag end.
+ * The host must hand this very [payload] to the strip: the system delivers it as the drag's local
+ * state and the strip only accepts that exact object.
+ */
+interface OnAppDragStartListener {
+    /** Must attach drop targets before `startDragAndDrop` dispatches ACTION_DRAG_STARTED. */
+    fun onDragStarted(payload: LensDragPayload)
+    fun onDragCancelled()
 }
 
 /** FISH-025: fired once when a horizontal swipe from a configured screen edge is accepted. */
@@ -829,11 +835,13 @@ class LensView : View {
         val app = list[index]
         val payload = LensDragPayload(this, app, lensId)
         val clip = ClipData.newPlainText(app.label, LensAppScope.identifierOf(app))
+        // Drop targets must exist before the system dispatches ACTION_DRAG_STARTED.
+        onAppDragStartListener?.onDragStarted(payload)
         val started = dragStarter(this, clip, DragShadowBuilder(this, index), payload)
         if (started) {
             mDragStarted = true
-            onAppDragStartListener?.onDragStarted(this, app, lensId)
         } else {
+            onAppDragStartListener?.onDragCancelled()
             mHoldIndex = -1
             showAppOptionsAtIndex(index)
         }
