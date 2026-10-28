@@ -179,6 +179,7 @@ object LensDialogs {
         onCancel: Runnable?,
     ): BottomSheetDialog {
         val dialog = BottomSheetDialog(context, R.style.TransBottomSheetDialog)
+        dialog.setOnCancelListener { onCancel?.run() }
         val content = LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(0, dp(context, 12), 0, dp(context, 8))
@@ -203,7 +204,6 @@ object LensDialogs {
         }
         content.addView(list, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT))
         dialog.setContentView(content)
-        dialog.setOnCancelListener { onCancel?.run() }
         dialog.setOnShowListener {
             dialog.behavior.state = com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED
         }

@@ -1,6 +1,6 @@
 # FISH-022 — Lens groups and management
 
-**Status:** In progress
+**Status:** Done (28/10/2026; nhóm lens đã chạy lại trên S24U, dialog chung audit riêng 8.7/10; không push)
 **Started:** 2026-10-14
 **Branch:** `dev`
 **Design:** `docs/superpowers/specs/2026-10-14-lens-groups-design.md`
@@ -19,7 +19,7 @@ Add nullable Room-backed lens group labels; derive canonical group sections, col
 
 ## Verification
 
-Device: TECNO BG6 `118743744X002560` (locked; Gradle `connected*` not used). Earlier KJ7 `115333744A005844` runs are superseded.
+Historical verification below was on TECNO BG6 `118743744X002560`; do not treat it as a current-session device. Re-verification on 2026-10-28 used S24U `R5CX613VZBR` (SM-S928B) after owner changed active device.
 
 - Instrumentation (direct `adb -s`): manager widget **19/19**, Home lens-management **26/26**, quick lens switch **12/12**, multi-lens **4/4**, backup+import integration **10/10**, DB migration **4/4**.
 - JVM: full `testDevDebugUnitTest` **856/856**, `lintDevDebug` 0 errors / 33 warnings, `scripts/check-secrets.sh` exit 0, `git diff --check` clean.
@@ -28,6 +28,13 @@ Device: TECNO BG6 `118743744X002560` (locked; Gradle `connected*` not used). Ear
 - Manual smoke on device (no ad seen in any dump/screenshot): popup -> Manage group, edit/selection UI, create group, collapse/expand, ungroup, add 2nd lens, both lenses grouped, tap lens switches Home (active_lens_id verified), delete temp lens. Test data restored (single ungrouped Lens 1).
 - Not smoked by hand: backup export/import via system file picker (consent dialog reappeared after reinstall; covered by 10 integration tests incl. real JSON round trip) and dark mode visually (covered by night-mode widget test).
 
-## Remaining before done
+## Re-verification 2026-10-28
 
-- Owner push decision per score gate. Do not move to `done/` until owner confirms.
+- Fresh gate: `testDevDebugUnitTest assembleDevDebug assembleDevDebugAndroidTest --rerun-tasks` green, 1,307 unit; lint green; diff/secrets clean.
+- S24U regression: 17 classes / 157 tests green, including manager 32, Room migration 5, backup import 21, accessibility 4, state restoration 3.
+- S24U had no pre-existing package. After test, app archive restored exactly 15/15 files; locale `[]`, font `1.0`, Contacts denied.
+- Manual smoke did not run: app displayed consent then language onboarding. Consent was cancelled, not accepted on owner's behalf. Audit: `doc/task/AUDIT_LENS_DIALOGS_2026-10-28.md` (8.7/10).
+
+## Push decision
+
+FISH-022's code is already on origin/dev from `db391c11`; this close is documentation-only. Do not push anything in this round because dialog audit score is below the required >9.0. Device smoke still requires owner to resolve onboarding consent.

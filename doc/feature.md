@@ -89,6 +89,8 @@ Source of truth for implementation choices in this session. Detailed acceptance 
 - **ARCH-002 — Tách ActHome (28/10/2026)**: `ActHome` 2.454 → 1.054 dòng, chuyển pager/bind sang `LensViewHolder`, quick action sang `HomeQuickActionDelegate`, search + T9 sang `HomeSearchController`/`T9KeypadBinder`, menu và dialog lens sang `LensMenuCoordinator`; không đổi hành vi, field test đọc theo tên giữ storage trên `ActHome`. Cụm 5 (insets/chrome, app list) bỏ theo quyết định owner. Unit 1.285/1.285, hồi quy cuối 50 lớp/244 test xanh trên TECNO KJ7. Audit 9,1/10 (`doc/task/AUDIT_ARCH-002_2026-10-28.md`).
 - **FISH-038b — Kéo thả app giữa lens (28/10/2026)**: giữ icon rồi kéo vào dải chip lens khác bằng system drag; từ 2 lens, nhả tại chỗ mới mở menu. Tái dùng `LensMoveApplier` và Snackbar Hoàn tác. Smoke thật trên TECNO KJ7 phát hiện lỗi thứ tự attach chip; rà code bổ sung cuộn mép, từ chối DROP lặp/nguồn detach và sửa inset. Unit 1.300, regression 57 lớp/309 test xanh, Undo thật khớp hai lens, dữ liệu máy khôi phục 1.189 file. Audit 9,1/10 (`doc/task/AUDIT_FISH-038b_2026-10-28.md`).
 
+- **FISH-022 — Nhóm lens + dialog Material You dùng chung (28/10/2026)**: Room v13 group metadata, backup v2, manager nhóm, assign group bằng bottom sheet và toàn bộ dialog lens dùng `LensDialogs` (outlined input, confirm, multi/single choice). Gate 1.307 unit, lint/diff/secrets xanh; S24U 17 lớp/157 test xanh, dữ liệu máy khôi phục 15/15 file. Smoke tay chưa chạy vì consent/onboarding chưa được chấp thuận; audit dialog 8,7/10 (`doc/task/AUDIT_LENS_DIALOGS_2026-10-28.md`), chưa push theo ngưỡng > 9,0.
+
 
 ## 🟡 In progress
 
@@ -106,8 +108,6 @@ Source of truth for implementation choices in this session. Detailed acceptance 
 
 
 
-
-- **FISH-022 — Nhóm lens (2026-10-15)**: Room group metadata + backup v2, `LensManagementActivity` Material You (active lens, count, edit theo ngữ cảnh), bulk assign/create/ungroup, popup action, đủ locale. Audit sửa 3 lỗi (manage-id lạ, mất edit state khi recreate, `createLens` không copy group). TECNO KJ7: manager 28/28, Home 26/26, quick-switch 12/12, multi-lens 4/4, backup 11/11, migration 4/4; full unit 866/866; secret scan + diff check xanh. Backup export/import smoke tay pass group + collapsed state; file picker export lỗi orphan-row đã sửa và commit `2ba4f58d`.
 
 - **FISH-021 follow-up — Icon trong danh sách chọn app (09/10/2026)**: owner duyệt mỗi dòng gồm icon launcher 40dp + tên + checkbox. Tái dùng iconCacheKey/cache và ListView multi-choice; Set vẫn là nguồn lựa chọn để cuộn không mất tick. Thiết bị khóa hiện tại: Pixel 7 Pro `2B051FDH3006MU`. Chưa kiểm chứng và chưa push; plan `docs/superpowers/plans/2026-10-09-lens-picker-icons.md`.
 

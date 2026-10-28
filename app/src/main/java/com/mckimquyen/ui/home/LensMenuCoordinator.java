@@ -13,7 +13,6 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.PopupMenu;
 
 import com.google.android.material.color.MaterialColors;
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.mckimquyen.R;
 import com.mckimquyen.adt.LensAppChoiceAdapter;
 import com.mckimquyen.app.RAppsSingleton;
