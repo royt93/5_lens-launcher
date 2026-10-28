@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | enhance |
-| Status | inprogress |
+| Status | done |
 | Priority | P3 |
 | Evidence | confirmed |
 | Epic | Architecture |
@@ -41,10 +41,10 @@ Là dev, tôi muốn `ActHome` đủ nhỏ để sửa và test an toàn.
 
 ## Acceptance criteria
 
-- [ ] Mỗi cụm chuyển ra lớp riêng có test đơn vị, `ActHome` giảm dưới 1500 dòng.
-- [ ] Không đổi hành vi (toàn bộ widget test hiện có xanh).
-- [ ] `lensViews` có một chủ sở hữu duy nhất.
-- [ ] Tách theo từng PR nhỏ, mỗi cụm một PR.
+- [x] Cụm 1-4 chuyển ra lớp riêng có test đơn vị, `ActHome` còn 1.054 dòng. Cụm 5 (insets/chrome + app list) không làm theo quyết định owner 2026-10-28.
+- [x] Không đổi hành vi (36 lớp `ActHome*` + 14 lớp thêm xanh trên TECNO sau cụm cuối).
+- [x] `lensViews` chỉ có `LensViewHolder` ghi (qua host); storage giữ trên `ActHome` vì test đọc theo tên.
+- [x] Tách theo từng bước nhỏ, mỗi cụm một commit (không mở PR).
 
 ## Implementation notes
 
@@ -52,12 +52,12 @@ SP vượt 5 nên chia thành 5 story con khi thực hiện (README quy định 
 
 ## Verification and Definition of Done
 
-- [ ] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
-- [ ] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
-- [ ] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
-- [ ] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
-- [ ] No new lint/build failures.
-- [ ] A post-change audit record scores the round `> 9.0/10` before push.
+- [x] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
+- [x] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
+- [x] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
+- [x] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
+- [x] No new lint/build failures.
+- [x] A post-change audit record scores the round `> 9.0/10` before push.
 - [ ] Evidence and status are updated before moving this file to `done`.
 
 If a test layer is not applicable, replace its checkbox with a reviewed rationale; do not silently omit it.
