@@ -81,6 +81,7 @@ import com.mckimquyen.ui.home.HomeSearchController;
 import com.mckimquyen.ui.home.HomeQuickActionHost;
 import com.mckimquyen.ui.home.LensViewHolder;
 import com.mckimquyen.ui.home.LensViewHolderHost;
+import com.mckimquyen.ui.home.LensMenuCoordinator;
 import com.mckimquyen.util.ApertureRevealHelper;
 import com.mckimquyen.util.LensAppScope;
 import com.mckimquyen.util.LensLabelResolver;
@@ -188,6 +189,22 @@ public class ActHome extends ActBase implements LensViewHolderHost, HomeQuickAct
     private TabLayoutMediator lensTabMediator;
     private final LensViewHolder lensHolder = new LensViewHolder(this);
     private final HomeQuickActionDelegate quickActions = new HomeQuickActionDelegate(this);
+    private final LensMenuCoordinator lensMenu = new LensMenuCoordinator(new LensMenuCoordinator.Host() {
+        @Override public android.app.Activity activity() { return ActHome.this; }
+        @Override public UtilSettings settings() { return utilSettings; }
+        @Override public ArrayList<App> apps() { return listApp; }
+        @Override public LensViewHolder lenses() { return lensHolder; }
+        @Override public LensView activeLensView() { return lensViews; }
+        @Override public PopupMenu menu() { return lensManagementMenu; }
+        @Override public void setMenu(PopupMenu menu) { lensManagementMenu = menu; }
+        @Override public androidx.appcompat.app.AlertDialog dialog() { return lensDialog; }
+        @Override public void setDialog(androidx.appcompat.app.AlertDialog dialog) { lensDialog = dialog; }
+        @Override public void launchShare(Intent chooser) { lensShareLauncher.launch(chooser); }
+        @Override public void setLaunchIntent(Intent intent) { lensManagementLaunchIntentForTest = intent; }
+        @Override public void showRecentAppsPanel() { ActHome.this.showRecentAppsPanel(); }
+        @Override public void openSearch() { openSearchFromHome(); }
+        @Override public void refreshSearchBarVisibility() { updateSearchBarVisibility(); }
+    });
 
     /** FISH-EXPORT: set by FrmLens's share button on the Intent that (re)launches this singleTask
      *  activity, so onLensMenuItemSelected's item 5 path runs automatically once lensHolder.currentLenses() is
@@ -497,7 +514,7 @@ public class ActHome extends ActBase implements LensViewHolderHost, HomeQuickAct
             @Override public void restoreHiddenApps() {
                 int position = lensHolder.pager().getCurrentItem();
                 if (position >= 0 && position < lensHolder.currentLenses().size()) {
-                    showHiddenLensAppsDialog(lensHolder.currentLenses().get(position).getId());
+                    lensMenu.showHiddenLensAppsDialog(lensHolder.currentLenses().get(position).getId());
                 }
             }
             @Override public void refreshSearchBarVisibility() { updateSearchBarVisibility(); }
@@ -551,135 +568,20 @@ public class ActHome extends ActBase implements LensViewHolderHost, HomeQuickAct
         lensHolder.bindLensView(view, lens);
     }
 
-    /** The lens menu currently built, exposed so tests can inspect what it actually offered. */
+    /** The lens menu currently built, exposed so tests can inspect what it actually offered.
+     *  ARCH-002: storage stays here (tests read it by name); {@link LensMenuCoordinator} owns the behavior. */
     @androidx.annotation.VisibleForTesting
     PopupMenu lensManagementMenu;
 
-    /** UI-025: transient 1x1 view the lens menu is anchored to; null while no menu is open. */
-    private View lensMenuPressAnchor;
-
     @androidx.annotation.VisibleForTesting
     View getLensMenuAnchorForTest() {
-        return lensMenuPressAnchor;
+        return lensMenu.menuAnchorForTest();
     }
 
-    /**
-     * A PopupMenu sizes and places itself against its anchor, so anchoring to the full-screen
-     * LensView pushed the menu off the top edge and clipped it to a single visible row - found on
-     * a real TECNO KJ7, where only "Add lens" of the four items was reachable. The page-dots
-     * indicator is a small view near the top with room below it, exactly what a popup wants; it is
-     * the menu's other entry point anyway, so both routes now open the identical menu. It is GONE
-     * on a single-lens install, but a hidden view is still a valid anchor (it has real bounds),
-     * which is precisely the case this entry point exists for.
-     */
+    /** See {@link LensMenuCoordinator#lensMenuAnchor()}. */
     @androidx.annotation.VisibleForTesting
     View lensMenuAnchor() {
-        // setupViews() assigns lensHolder.indicator() before the adapter that can trigger this, so it
-        // is non-null by the time any menu can open; rootLayout is a defensive fallback only.
-        return lensHolder.indicator() != null ? lensHolder.indicator() : findViewById(R.id.rootLayout);
-    }
-
-    /**
-     * UI-025: LensView draws on one canvas, so the pressed point has no view of its own. A 1x1
-     * invisible view is placed there in the root layout; the menu anchors to it and opens beside
-     * the finger. Falls back to the old indicator anchor if the root layout is unavailable.
-     */
-    private View anchorAtPressedPoint(View lens, float x, float y) {
-        removeLensMenuPressAnchor();
-        ViewGroup root = findViewById(R.id.rootLayout);
-        if (root == null) return lensMenuAnchor();
-        int[] lensOnScreen = new int[2];
-        int[] rootOnScreen = new int[2];
-        lens.getLocationOnScreen(lensOnScreen);
-        root.getLocationOnScreen(rootOnScreen);
-        lensMenuPressAnchor = PointAnchor.INSTANCE.attach(
-                root,
-                lensOnScreen[0] + (int) x - rootOnScreen[0],
-                lensOnScreen[1] + (int) y - rootOnScreen[1],
-                new androidx.coordinatorlayout.widget.CoordinatorLayout.LayoutParams(
-                        PointAnchor.SIZE_PX, PointAnchor.SIZE_PX));
-        return lensMenuPressAnchor;
-    }
-
-    private void dismissLensManagementMenu() {
-        PopupMenu previous = lensManagementMenu;
-        lensManagementMenu = null;
-        if (previous != null) {
-            previous.dismiss();
-        }
-        removeLensMenuPressAnchor();
-    }
-
-    private void removeLensMenuPressAnchor() {
-        if (lensMenuPressAnchor == null) return;
-        View anchor = lensMenuPressAnchor;
-        lensMenuPressAnchor = null;
-        PointAnchor.INSTANCE.remove(anchor, isFinishing() || isDestroyed());
-    }
-
-    /** UI-025: every item carries an icon so the text column is aligned like the icon menus. */
-    private void addLensMenuItem(PopupMenu menu, Context themed, int id, int titleRes, int iconRes,
-                                 boolean enabled) {
-        android.view.MenuItem item = menu.getMenu().add(0, id, 0, titleRes);
-        android.graphics.drawable.Drawable icon = androidx.appcompat.content.res.AppCompatResources
-                .getDrawable(themed, iconRes);
-        if (icon != null) {
-            icon = androidx.core.graphics.drawable.DrawableCompat.wrap(icon.mutate());
-            androidx.core.graphics.drawable.DrawableCompat.setTint(icon, MaterialColors.getColor(
-                    themed, com.google.android.material.R.attr.colorOnSurface, android.graphics.Color.BLACK));
-            item.setIcon(icon);
-        }
-        item.setEnabled(enabled);
-    }
-
-    private void showLensManagementMenu(View anchor) {
-        // UI-025: same rounded popup theme as AppAdapter/SearchResultAdapter/LensView - a bare
-        // Activity context skips it and renders the default square popup.
-        Context themed = new ContextThemeWrapper(this, R.style.PopupMenuTheme);
-        // Quiet dismiss: the anchor this menu is about to use already exists, so only the old
-        // popup goes. Clearing the field first keeps its dismiss listener from removing it.
-        PopupMenu previous = lensManagementMenu;
-        lensManagementMenu = null;
-        if (previous != null) {
-            previous.dismiss();
-        }
-        PopupMenu menu = new PopupMenu(themed, anchor);
-        lensManagementMenu = menu;
-        int position = lensHolder.pager().getCurrentItem();
-        addLensMenuItem(menu, themed, 1, R.string.lens_add, R.drawable.ic_add_24dp, true);
-        addLensMenuItem(menu, themed, 2, R.string.lens_rename, R.drawable.ic_edit_24dp, true);
-        addLensMenuItem(menu, themed, 3, R.string.lens_delete, R.drawable.ic_delete_outline_24dp,
-                position >= 0 && position < lensHolder.currentLenses().size()
-                        && LensWorkspace.canDelete(lensHolder.currentLenses().get(position).getId(), lensHolder.currentLenses().size()));
-        // FISH-008 Phase 3: Smart Focus is per-lens, so it gets a quick toggle right here on the
-        // lens it applies to (FrmSettings' own switch covers the same lens from Settings). The
-        // label states the action rather than using a checkable item.
-        addLensMenuItem(menu, themed, 4, lensSmartFocusMenuLabelRes(position),
-                R.drawable.ic_center_focus_24dp, true);
-        addLensMenuItem(menu, themed, 5, R.string.lens_share_image, R.drawable.ic_share_24dp, true);
-        addLensMenuItem(menu, themed, 6, R.string.recent_apps, R.drawable.ic_history_24dp, true);
-        // FISH-016: accessible fallback to the pull-down gesture, plus a quick Clean-mode switch
-        // (reusing the Settings strings, already translated in every locale).
-        addLensMenuItem(menu, themed, MENU_ID_SEARCH_APPS, R.string.search_apps_hint,
-                R.drawable.ic_search_menu_24dp, true);
-        addLensMenuItem(menu, themed, MENU_ID_TOGGLE_CLEAN_LENS, R.string.setting_clean_lens_mode,
-                R.drawable.ic_cleaning_24dp, true);
-        addLensMenuItem(menu, themed, MENU_ID_LENS_APPS, R.string.lens_choose_apps,
-                R.drawable.ic_apps_24dp, true);
-        addLensMenuItem(menu, themed, MENU_ID_FREEZE_LENS, lensFreezeMenuLabelRes(position),
-                R.drawable.ic_lock_24dp, true);
-        addLensMenuItem(menu, themed, MENU_ID_MANAGE_CURRENT_LENS_GROUP, R.string.lens_group_manage,
-                R.drawable.ic_group_24dp, true);
-        addLensMenuItem(menu, themed, MENU_ID_HIDDEN_LENS_APPS, R.string.lens_hidden_apps,
-                R.drawable.ic_visibility_24dp, true);
-        menu.setOnMenuItemClickListener(item -> onLensMenuItemSelected(item.getItemId(), position));
-        menu.setForceShowIcon(true);
-        menu.setOnDismissListener(dismissed -> {
-            if (lensManagementMenu == menu) {
-                removeLensMenuPressAnchor();
-            }
-        });
-        menu.show();
+        return lensMenu.lensMenuAnchor();
     }
 
     /**
@@ -698,80 +600,16 @@ public class ActHome extends ActBase implements LensViewHolderHost, HomeQuickAct
         new RecentAppsPanelFragment().show(getSupportFragmentManager(), RecentAppsPanelFragment.TAG);
     }
 
-    /**
-     * The menu's real behavior, split out from the {@link PopupMenu} that hosts it. Espresso
-     * cannot inject the touches that drive a popup on this project's newer test devices
-     * (InputManager.getInstance is gone on API 37), so tests exercise this exact method instead
-     * of a reimplementation of it.
-     */
+    /** Tests exercise this exact method instead of a reimplementation (see {@link LensMenuCoordinator}). */
     @androidx.annotation.VisibleForTesting
     boolean onLensMenuItemSelected(int itemId, int position) {
-        if (position < 0 || position >= lensHolder.currentLenses().size()) return false;
-        LensWorkspace current = lensHolder.currentLenses().get(position);
-        if (itemId == 1) {
-            createLensDialog(current.getId());
-            return true;
-        } else if (itemId == 2) {
-            renameLensDialog(current);
-            return true;
-        } else if (itemId == 3) {
-            confirmDeleteLensDialog(current);
-            return true;
-        } else if (itemId == 4) {
-            toggleSmartFocusForLens(current);
-            return true;
-        } else if (itemId == 5) {
-            // FISH-013: this menu's "Share" entry calls exportActiveLensImage() directly, with no
-            // pending-flag write first - intentional, not a missed call site. It's a synchronous
-            // foreground action (the menu is already on screen), not the cross-activity/
-            // process-death gap between FrmLens's tap and export completing that FISH-013 exists
-            // to cover; exportActiveLensImage() clearing an already-absent key is a harmless no-op.
-            exportActiveLensImage();
-            return true;
-        } else if (itemId == 6) {
-            showRecentAppsPanel();
-            return true;
-        } else if (itemId == MENU_ID_SEARCH_APPS) {
-            openSearchFromHome();
-            return true;
-        } else if (itemId == MENU_ID_TOGGLE_CLEAN_LENS) {
-            toggleCleanLensMode();
-            return true;
-        } else if (itemId == MENU_ID_LENS_APPS) {
-            showLensAppsDialog(current);
-            return true;
-        } else if (itemId == MENU_ID_FREEZE_LENS) {
-            toggleFreezeForLens(current);
-            return true;
-        } else if (itemId == MENU_ID_HIDDEN_LENS_APPS) {
-            showHiddenLensAppsDialog(current.getId());
-            return true;
-        } else if (itemId == MENU_ID_MANAGE_CURRENT_LENS_GROUP) {
-            openLensManagement(current.getId());
-            return true;
-        }
-        return false;
+        return lensMenu.onLensMenuItemSelected(itemId, position);
     }
 
     /** The menu entry names the action it performs, so it has to read the lens's current state. */
     @androidx.annotation.VisibleForTesting
     int lensSmartFocusMenuLabelRes(int position) {
-        boolean on = position >= 0 && position < lensHolder.currentLenses().size()
-                && utilSettings != null
-                && utilSettings.isSmartFocusBias(lensHolder.currentLenses().get(position).getId());
-        return on ? R.string.lens_smart_focus_disable : R.string.lens_smart_focus_enable;
-    }
-
-    /** FISH-016: Clean mode is global, so unlike Smart Focus it flips one shared key, then
-     *  re-applies the same gates every resume already uses - no second source of truth. */
-    private void toggleCleanLensMode() {
-        if (utilSettings == null) return;
-        utilSettings.save(UtilSettings.KEY_CLEAN_LENS_MODE,
-                !utilSettings.getBoolean(UtilSettings.KEY_CLEAN_LENS_MODE));
-        updateSearchBarVisibility();
-        if (lensViews != null) {
-            lensViews.invalidate();
-        }
+        return lensMenu.smartFocusLabelResAt(position);
     }
 
     /** FISH-021: one place that adopts a fresh lens list, so the launcher shortcuts never go stale. */
@@ -782,187 +620,23 @@ public class ActHome extends ActBase implements LensViewHolderHost, HomeQuickAct
     /** FISH-022: lens name opens grouped lens management and selection in a separate Activity. */
     @androidx.annotation.VisibleForTesting
     void openLensManagement() {
-        openLensManagement(null);
+        lensMenu.openLensManagement(null);
     }
 
     @androidx.annotation.VisibleForTesting
     Intent lensManagementLaunchIntentForTest;
 
-    private void openLensManagement(String lensId) {
-        Intent intent = new Intent(this, LensManagementActivity.class);
-        lensManagementLaunchIntentForTest = intent;
-        if (lensId != null) intent.putExtra(LensManagementActivity.EXTRA_MANAGE_LENS_ID, lensId);
-        startActivity(intent);
-    }
-
     /** Like {@link #lensSmartFocusMenuLabelRes}: the entry names the action, so it reads current state. */
     @androidx.annotation.VisibleForTesting
     int lensFreezeMenuLabelRes(int position) {
-        boolean frozen = position >= 0 && position < lensHolder.currentLenses().size() && utilSettings != null
-                && utilSettings.isLensFrozen(lensHolder.currentLenses().get(position).getId());
-        return frozen ? R.string.lens_unfreeze_positions : R.string.lens_freeze_positions;
+        return lensMenu.freezeLabelResAt(position);
     }
 
-    /**
-     * FISH-021: freezing writes the order the user currently sees as each app's orderNumber, so
-     * the sorter keeps it and Smart Focus stops rearranging this lens. Unfreezing also discards
-     * any manual drag order, hence the confirmation.
-     */
-    private void toggleFreezeForLens(LensWorkspace lens) {
-        if (utilSettings == null) return;
-        if (utilSettings.isLensFrozen(lens.getId())) {
-            dismissLensDialog();
-            lensDialog = new MaterialAlertDialogBuilder(this, R.style.MaterialYouDialogTheme)
-                    .setTitle(R.string.lens_unfreeze_title)
-                    .setMessage(R.string.lens_unfreeze_message)
-                    .setPositiveButton(R.string.lens_unfreeze_positions, (d, w) -> {
-                        utilSettings.saveLensFrozen(lens.getId(), false);
-                        AppPersistent.clearOrderForLens(lens.getId());
-                        reloadLensAfterOrderChange(lens);
-                    })
-                    .setNegativeButton(android.R.string.cancel, null)
-                    .show();
-            return;
-        }
-        LensView view = lensViews;
-        if (view == null) return;
-        AppPersistent.setAppOrderBatch(new ArrayList<>(view.getDisplayedApps()), lens.getId());
-        utilSettings.saveLensFrozen(lens.getId(), true);
-        view.refreshSmartFocus();
-    }
-
-    private void reloadLensAfterOrderChange(LensWorkspace lens) {
-        Object application = getApplication();
-        if (application instanceof RApplication) {
-            ((RApplication) application).getAppRefreshPipeline().switchLens(lens.getId());
-        }
-        if (lensViews != null) {
-            lensViews.refreshSmartFocus();
-        }
-    }
-
-    private void toggleSmartFocusForLens(LensWorkspace lens) {
-        if (utilSettings == null) return;
-        boolean enabled = !utilSettings.isSmartFocusBias(lens.getId());
-        utilSettings.saveSmartFocusBias(lens.getId(), enabled);
-        if (lensViews != null) {
-            lensViews.refreshSmartFocus();
-        }
-    }
-
-    /** FISH-EXPORT: snapshots the currently visible lens - via {@link #lensViews}, this file's
-     *  existing "which LensView is actually on screen" pointer (see its own field comment), kept
-     *  correct across page-selection and rebind-after-rotation - into a polaroid-framed PNG and
-     *  hands it to the share sheet via {@link #lensShareLauncher}. Package-visible (not private)
-     *  so FISH-013's unrecoverable-state test can call it directly with lensViews == null instead
-     *  of racing ViewPager2's real bind timing to reach that branch. */
+    /** FISH-EXPORT: see {@link LensMenuCoordinator#exportActiveLensImage()}. Package-visible so
+     *  FISH-013's unrecoverable-state test can call it directly with lensViews == null. */
     @androidx.annotation.VisibleForTesting
     void exportActiveLensImage() {
-        LensView view = lensViews;
-        if (view == null) {
-            // FISH-013: an auto-export request that can never be resolved (no bound page) must
-            // not stay pending on disk forever, and must not fail silently.
-            clearPendingAutoExportLensAndNotifyFailure();
-            return;
-        }
-        String activeLensId = view.getLensId();
-        LensWorkspace matched = null;
-        for (LensWorkspace lens : lensHolder.currentLenses()) {
-            if (lens.getId().equals(activeLensId)) {
-                matched = lens;
-                break;
-            }
-        }
-        if (matched == null) {
-            // FISH-013: the requesting lens no longer exists (e.g. deleted while the request was
-            // in flight) - same unrecoverable case as above.
-            clearPendingAutoExportLensAndNotifyFailure();
-            return;
-        }
-        String lensName = matched.getName();
-        PolaroidExportHelper.exportAsync(view, lensName, this, uri -> {
-            // FISH-013: only clear the durable pending flag once export has actually reached a
-            // terminal outcome (success or failure) - never at request time - so a process kill
-            // mid-export still resurrects the request on next launch instead of losing it.
-            if (utilSettings != null) {
-                utilSettings.clearPendingAutoExportLens();
-            }
-            if (uri != null) {
-                try {
-                    lensShareLauncher.launch(Intent.createChooser(
-                            PolaroidExportHelper.buildShareIntent(uri),
-                            getString(R.string.share_via)));
-                } catch (Exception e) {
-                    Toast.makeText(this, R.string.error_lens_share_failed, Toast.LENGTH_SHORT).show();
-                }
-            } else {
-                Toast.makeText(this, R.string.error_lens_share_failed, Toast.LENGTH_SHORT).show();
-            }
-            return Unit.INSTANCE;
-        });
-    }
-
-    /** FISH-013: shared terminal-failure path for exportActiveLensImage's two unrecoverable
-     *  early-return cases (no bound view, or the active lens was deleted) - clears the durable
-     *  pending flag so the request stops resurrecting forever, and tells the user explicitly
-     *  instead of the previous silent no-op. */
-    private void clearPendingAutoExportLensAndNotifyFailure() {
-        if (utilSettings != null) {
-            utilSettings.clearPendingAutoExportLens();
-        }
-        Toast.makeText(this, R.string.error_lens_share_failed, Toast.LENGTH_SHORT).show();
-    }
-
-    private void createLensDialog(String copyFromLensId) {
-        String defaultName = getString(R.string.lens_new_name_template, lensHolder.currentLenses().size() + 1);
-        showLensNameDialog(R.string.lens_add, defaultName, name ->
-                LensWorkspace.createLens(name, copyFromLensId, lenses -> {
-                    // FISH-008 Phase 3: the new lens copies its source's curvature/Smart Focus
-                    // too, not just its layout. createLens() doesn't return the new id, so find
-                    // the one lens that wasn't there before.
-                    if (utilSettings != null) {
-                        for (LensWorkspace lens : lenses) {
-                            if (!containsLens(lensHolder.currentLenses(), lens.getId())) {
-                                utilSettings.duplicateLensSettings(copyFromLensId, lens.getId());
-                            }
-                        }
-                    }
-                    onLensesChanged(lenses);
-                    lensHolder.adapter().submitLenses(lenses);
-                    updateLensNavigationChrome();
-                    return Unit.INSTANCE;
-                }));
-    }
-
-    private static boolean containsLens(List<LensWorkspace> lenses, String lensId) {
-        for (LensWorkspace lens : lenses) {
-            if (lens.getId().equals(lensId)) return true;
-        }
-        return false;
-    }
-
-    private void renameLensDialog(LensWorkspace lens) {
-        showLensNameDialog(R.string.lens_rename_title, lens.getName(), name ->
-                LensWorkspace.renameLens(lens, name, lenses -> {
-                    onLensesChanged(lenses);
-                    lensHolder.adapter().submitLenses(lenses);
-                    updateLensNavigationChrome();
-                    return Unit.INSTANCE;
-                }));
-    }
-
-    private interface LensNameCallback {
-        void onNameEntered(String name);
-    }
-
-    /** Dismisses the current lens dialog before replacing it or releasing the Activity. */
-    private void dismissLensDialog() {
-        if (lensDialog != null) {
-            if (lensDialog.isShowing()) {
-                lensDialog.dismiss();
-            }
-            lensDialog = null;
-        }
+        lensMenu.exportActiveLensImage();
     }
 
     /**
@@ -973,175 +647,10 @@ public class ActHome extends ActBase implements LensViewHolderHost, HomeQuickAct
     @androidx.annotation.VisibleForTesting
     androidx.appcompat.app.AlertDialog lensDialog;
 
-    /**
-     * FISH-021: tick the apps a lens shows. Reuses {@link #lensDialog}, so onDestroy and rotation
-     * already dismiss it. Search is deliberately not filtered, so this lists every installed app.
-     */
+    /** FISH-021: tick the apps a lens shows. See {@link LensMenuCoordinator#showLensAppsDialog}. */
     @androidx.annotation.VisibleForTesting
     void showLensAppsDialog(com.mckimquyen.model.LensWorkspace lens) {
-        if (listApp == null || listApp.isEmpty() || utilSettings == null) return;
-        java.util.ArrayList<com.mckimquyen.model.App> apps = new java.util.ArrayList<>(listApp);
-        java.util.Set<String> allIds = new java.util.HashSet<>();
-        for (com.mckimquyen.model.App app : apps) allIds.add(com.mckimquyen.util.LensAppScope.identifierOf(app));
-        com.mckimquyen.util.LensAppScopeEditor editor = new com.mckimquyen.util.LensAppScopeEditor(utilSettings);
-
-        // The choice lives in this set, updated by the dialog's own click callback. Never read it
-        // back from the ListView: it only knows rows that have been bound, so on a list longer
-        // than the screen the rows not yet scrolled into view report "unticked" untouched.
-        final java.util.Set<String> picked = new java.util.HashSet<>(editor.effectiveIds(lens.getId(), allIds));
-
-        String[] ids = new String[apps.size()];
-        for (int i = 0; i < apps.size(); i++) {
-            ids[i] = com.mckimquyen.util.LensAppScope.identifierOf(apps.get(i));
-        }
-
-        dismissLensDialog();
-        lensDialog = new com.google.android.material.dialog.MaterialAlertDialogBuilder(this, com.mckimquyen.R.style.MaterialYouDialogTheme)
-                .setTitle(com.mckimquyen.R.string.lens_choose_apps)
-                .setAdapter(new com.mckimquyen.adt.LensAppChoiceAdapter(this, apps), null)
-                .setPositiveButton(android.R.string.ok, null)
-                .setNegativeButton(android.R.string.cancel, null)
-                .create();
-        lensDialog.show();
-        android.widget.ListView choices = lensDialog.getListView();
-        choices.setChoiceMode(android.widget.ListView.CHOICE_MODE_MULTIPLE);
-        for (int i = 0; i < ids.length; i++) choices.setItemChecked(i, picked.contains(ids[i]));
-        choices.setOnItemClickListener((parent, row, position, id) -> {
-            if (choices.isItemChecked(position)) picked.add(ids[position]); else picked.remove(ids[position]);
-        });
-        lensDialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE).setOnClickListener(v -> {
-            editor.apply(lens.getId(), new java.util.HashSet<>(picked));
-            lensDialog.dismiss();
-        });
-        lensDialog.getButton(android.content.DialogInterface.BUTTON_NEGATIVE)
-                .setOnClickListener(v -> lensDialog.dismiss());
-    }
-
-    private void showHiddenLensAppsDialog(String lensId) {
-        if (utilSettings == null) return;
-        java.util.Set<String> hidden = utilSettings.getLensHiddenAppIds(lensId);
-        java.util.ArrayList<App> apps = new java.util.ArrayList<>();
-        java.util.List<App> installed = RAppsSingleton.getInstance().getApps();
-        if (installed != null) {
-            for (App app : installed) {
-                if (hidden.contains(LensAppScope.identifierOf(app))) apps.add(app);
-            }
-        }
-        dismissLensDialog();
-        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this, R.style.MaterialYouDialogTheme)
-                .setTitle(R.string.lens_hidden_apps)
-                .setNegativeButton(android.R.string.cancel, null);
-        if (apps.isEmpty()) {
-            lensDialog = builder.setMessage(R.string.lens_hidden_apps_empty).create();
-            lensDialog.show();
-            return;
-        }
-        java.util.Set<String> restored = new java.util.HashSet<>();
-        lensDialog = builder.setAdapter(new com.mckimquyen.adt.LensAppChoiceAdapter(this, apps), null)
-                .setPositiveButton(R.string.lens_restore_apps, null).create();
-        lensDialog.show();
-        android.widget.ListView choices = lensDialog.getListView();
-        choices.setChoiceMode(android.widget.ListView.CHOICE_MODE_MULTIPLE);
-        choices.setOnItemClickListener((parent, row, position, id) -> {
-            String appId = LensAppScope.identifierOf(apps.get(position));
-            if (choices.isItemChecked(position)) restored.add(appId); else restored.remove(appId);
-        });
-        lensDialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE).setOnClickListener(v -> {
-            java.util.Set<String> remaining = new java.util.HashSet<>(utilSettings.getLensHiddenAppIds(lensId));
-            remaining.removeAll(restored);
-            utilSettings.saveLensHiddenAppIds(lensId, remaining);
-            lensDialog.dismiss();
-            AppEventManager.INSTANCE.notifyLensScopeChanged(lensId);
-        });
-    }
-
-    private void showLensNameDialog(int titleRes, String initialText, LensNameCallback onDone) {
-        EditText input = new EditText(this);
-        // A programmatic View with no id is skipped by onSaveInstanceState, so the typed name would
-        // be lost on rotation. android.R.id.edit is the platform's own id for this exact role.
-        input.setId(android.R.id.edit);
-        input.setText(initialText);
-        input.setHint(R.string.lens_name_hint);
-        input.setSingleLine(true);
-        input.setSelectAllOnFocus(true);
-        int paddingH = (int) (24 * getResources().getDisplayMetrics().density);
-        int paddingV = (int) (8 * getResources().getDisplayMetrics().density);
-        android.widget.FrameLayout container = new android.widget.FrameLayout(this);
-        container.setPadding(paddingH, paddingV, paddingH, 0);
-        container.addView(input);
-
-        dismissLensDialog();
-        lensDialog = new MaterialAlertDialogBuilder(this, R.style.MaterialYouDialogTheme)
-                .setTitle(titleRes)
-                .setView(container)
-                .setPositiveButton(android.R.string.ok, null)
-                .setNegativeButton(android.R.string.cancel, null)
-                .create();
-
-        // FISH-010: circular reveal expanding from/collapsing to the lens menu's own anchor -
-        // the same anchor already resolved for the menu itself (lensMenuAnchor()).
-        ApertureRevealHelper.prepareDialog(lensDialog);
-        lensDialog.show();
-        ApertureRevealHelper.revealShownDialog(lensDialog, lensMenuAnchor());
-
-        lensDialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE).setOnClickListener(v -> {
-            String name = input.getText() != null ? input.getText().toString().trim() : "";
-            ApertureRevealHelper.dismissWithReveal(lensDialog, lensMenuAnchor(), () -> {
-                if (!name.isEmpty()) {
-                    onDone.onNameEntered(name);
-                }
-            });
-        });
-        lensDialog.getButton(android.content.DialogInterface.BUTTON_NEGATIVE).setOnClickListener(v ->
-                ApertureRevealHelper.dismissWithReveal(lensDialog, lensMenuAnchor(), null)
-        );
-    }
-
-    private void confirmDeleteLensDialog(LensWorkspace lens) {
-        String message = getString(R.string.lens_delete_confirm_message, lens.getName());
-        dismissLensDialog();
-        lensDialog = new MaterialAlertDialogBuilder(this, R.style.MaterialYouDialogTheme)
-                .setTitle(R.string.lens_delete)
-                .setMessage(message)
-                .setPositiveButton(R.string.lens_delete, null)
-                .setNegativeButton(android.R.string.cancel, null)
-                .create();
-
-        ApertureRevealHelper.prepareDialog(lensDialog);
-        lensDialog.show();
-        ApertureRevealHelper.revealShownDialog(lensDialog, lensMenuAnchor());
-
-        lensDialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE).setOnClickListener(v ->
-                ApertureRevealHelper.dismissWithReveal(lensDialog, lensMenuAnchor(), () ->
-                        LensWorkspace.deleteLens(lens.getId(), lenses -> {
-                            // FISH-008 Phase 3: no cascade exists for prefs either - drop the
-                            // deleted lens's own curvature/Smart Focus keys explicitly.
-                            if (utilSettings != null) {
-                                utilSettings.deleteLensSettings(lens.getId());
-                            }
-                            onLensesChanged(lenses);
-                            lensHolder.adapter().submitLenses(lenses);
-                            updateLensNavigationChrome();
-                            // FISH-008 Phase 2 r2: if we just deleted the active lens, clamp the
-                            // pager and switch RAppsSingleton to the newly active lens so the
-                            // deleted lens's layout is not retained in memory.
-                            if (!lenses.isEmpty()) {
-                                int targetPos = Math.min(lensHolder.pager().getCurrentItem(), lenses.size() - 1);
-                                lensHolder.pager().setCurrentItem(targetPos, false);
-                                LensWorkspace targetLens = lenses.get(targetPos);
-                                if (utilSettings != null) {
-                                    utilSettings.save(UtilSettings.KEY_ACTIVE_LENS_ID, targetLens.getId());
-                                }
-                                Object app = getApplication();
-                                if (app instanceof RApplication) {
-                                    ((RApplication) app).getAppRefreshPipeline().switchLens(targetLens.getId());
-                                }
-                            }
-                            return Unit.INSTANCE;
-                        })));
-        lensDialog.getButton(android.content.DialogInterface.BUTTON_NEGATIVE).setOnClickListener(v ->
-                ApertureRevealHelper.dismissWithReveal(lensDialog, lensMenuAnchor(), null)
-        );
+        lensMenu.showLensAppsDialog(lens);
     }
 
     private void setupSearch() {
@@ -1513,10 +1022,10 @@ public class ActHome extends ActBase implements LensViewHolderHost, HomeQuickAct
     @Override public boolean isSearchShowing() { return searchView != null && searchView.isShowing(); }
     @Override public void refreshHiddenRecovery() { updateHiddenRecoveryButton(); }
     @Override public void offerPinchConfirmation(float curvature) { showPinchCurvatureSnackbar(curvature); }
-    @Override public void offerLensMenu(View anchor) { showLensManagementMenu(anchor); }
-    @Override public void dismissLensMenu() { dismissLensManagementMenu(); }
-    @Override public View lensMenuAnchorAt(View lens, float x, float y) { return anchorAtPressedPoint(lens, x, y); }
-    @Override public void requestLensManagement() { openLensManagement(); }
+    @Override public void offerLensMenu(View anchor) { lensMenu.showLensManagementMenu(anchor); }
+    @Override public void dismissLensMenu() { lensMenu.dismissLensManagementMenu(); }
+    @Override public View lensMenuAnchorAt(View lens, float x, float y) { return lensMenu.anchorAtPressedPoint(lens, x, y); }
+    @Override public void requestLensManagement() { lensMenu.openLensManagement(null); }
     @Override public void requestSearch() { openSearchFromHome(); }
     @Override public boolean pendingAutoExportLens() { return pendingAutoExportLens; }
     @Override public void clearPendingAutoExportLens() { pendingAutoExportLens = false; }
@@ -1537,12 +1046,7 @@ public class ActHome extends ActBase implements LensViewHolderHost, HomeQuickAct
         // FISH-008 Phase 3: both hold a View (a dialog's decor, a popup's anchor) belonging to
         // this Activity. Dismiss a dialog still showing during a rotation - it would leak its
         // window - and drop both references so the destroyed Activity is not retained.
-        dismissLensDialog();
-        if (lensManagementMenu != null) {
-            lensManagementMenu.dismiss();
-            lensManagementMenu = null;
-        }
-        removeLensMenuPressAnchor();
+        lensMenu.onDestroy();
         searchController.onDestroy();
         quickActions.onDestroy();
         super.onDestroy();

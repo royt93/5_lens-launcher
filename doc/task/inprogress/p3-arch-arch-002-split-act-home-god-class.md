@@ -28,6 +28,13 @@
 - KJ7 `115333744A005844` ngắt kết nối trước regression sau refactor; backup còn tại `/tmp/b-arch002/state/before.tar` (583.680 byte), chưa thể khôi phục.
 - Owner sau đó yêu cầu "dùng pixel thay thế đi": khóa Pixel 7 Pro `2B051FDH3006MU` cho phần còn lại của phiên (Android 17/API 37). Backup riêng `/tmp/b-arch002-pixel/before.tar` (665.600 byte) và APK cũ; locale `[]`, font `1.0`, Contacts denied. Baseline Pixel từ APK HEAD chưa refactor: 35/35 lớp xanh (145 test). Bản cụm 1 đang chạy 35 lớp + 4 lớp phụ; chưa commit/push refactor.
 
+## Tiến độ cụm 2-4 (28/10/2026, đã commit, chưa push)
+
+- Cụm 2 `HomeQuickActionDelegate` (ActHome 2.185 → 1.942), cụm 3 `HomeSearchController` + `T9KeypadBinder` (→ 1.550), cụm 4 `LensMenuCoordinator` (→ 1.054 dòng, đạt mục tiêu < 1.500). `LensMenuCoordinator.java` 703 dòng; menu, dialog, share launcher, launch intent giữ storage trên `ActHome` vì test đọc theo tên.
+- Cụm 4: `LensMenuLogicTest` 6 test (đỏ vì thiếu lớp, rồi xanh), mutation 8/8 bị bắt. Unit 1.285/1.285, lint 0 lỗi, `git diff --check` và `check-secrets.sh` sạch.
+- Owner chốt "chỉ dùng TECNO cho toàn bộ phiên": regression cụm 4 chạy trên TECNO KJ7 `115333744A005844` (Android 14): 36 lớp `ActHome*` + 14 lớp thêm, 50 lớp / 244 test xanh. Dữ liệu app khôi phục từ `/tmp/b-arch002-tecno/before.tar` (37.788.672 byte), 1.189/1.189 file khớp hash, locale `[en]`, font `1.15`, Contacts denied như trước.
+- Ngoại lệ cần ghi nhận: trước khi owner chốt TECNO, một lượt chạy dở đã cài APK cụm 4 và chạy 3 lớp lên Pixel `2B051FDH3006MU` (đã dừng); dữ liệu Pixel chưa so lại với backup. Regression các cụm 1-3 chạy trên Pixel theo yêu cầu trước đó.
+
 ## User story
 
 Là dev, tôi muốn `ActHome` đủ nhỏ để sửa và test an toàn.
