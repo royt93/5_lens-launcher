@@ -36,4 +36,6 @@
     <dimen name="margin_fab">16dp</dimen>
     <dimen name="activity_horizontal_margin">16dp</dimen>
 
+    <dimen name="dialog_text_padding">24dp</dimen>
+    <dimen name="dialog_text_padding_vertical">8dp</dimen>
 </resources>
