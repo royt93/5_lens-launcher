@@ -115,9 +115,16 @@ Source of truth for implementation choices in this session. Detailed acceptance 
 
 ## 📋 Picked
 
-- **UI-028 — Dialog của ActHome/Fragments không được dismiss khi destroy (23/10/2026)**: xác minh evidence: `ActHome` có 5 dialog dùng chung `lensDialog`, destroy chỉ dismiss tham chiếu cuối; `AppAdapter.AppViewHolder.folderDialog`, `FrmSettings.searchHintDialog`, `FrmApps.pendingUninstallDialog` chưa dismiss ở lifecycle teardown. Đang triển khai đúng story backlog (không phải menu actions). Plan đã duyệt, RED/GREEN sẽ phủ single-dialog replacement/dismiss, Activity/Fragment cleanup và widget recreate test, giữ state UI-023.
+Thứ tự owner chọn 2026-10-29; từng bước cần smoke thật trên TECNO KJ7 `115333744A005844`:
 
-1. **FISH-022 — Nhóm lens (2026-10-14, owner-approved design)**: Add nullable `groupName` to `LensWorkspace` (Room v13 + migration); group sections are derived from lens labels, trimmed and compared case-insensitively, with empty groups removed. Replace lens-switch dialog with a dedicated management Activity: browse/collapse group sections and tap a lens to switch; edit mode supports bulk assign-to-existing-group, create-group-from-selection, and ungroup. Keep a quick current-lens group action and manager entry in the existing lens popup. Export/import optional `groupName` and root `collapsedGroupNames` additively in backup schema v2; old v2 files default collapsed state to empty. Import replaces collapsed state and includes it in existing prefs snapshot/rollback. No change to paging order, active-lens semantics, app scope, ads/VIP, or store-assets. Spec: `docs/superpowers/specs/2026-10-14-lens-groups-design.md`; plan: `docs/superpowers/plans/2026-10-14-fish-022-lens-groups.md`.
+✅ **UI-028 — Xác minh lifecycle dialog (2026-10-29)**: 12/12 instrumentation pass trên TECNO KJ7; smoke mở Home, Rename và Choose apps, hủy đúng cách, không thấy quảng cáo/crash; backup restore 1.189/1.189 file. Audit `doc/task/AUDIT_UI-028_2026-10-29.md` (9,1/10).
+
+✅ **UI-033 — Trang cài đặt theo lens (2026-10-29)**: trang riêng mở từ menu hàng lens (icon size, độ cong, Smart Focus, scope, freeze, app ẩn), dùng key `_<lensId>` có sẵn; freeze lens không active ghi DB riêng, không đụng snapshot lens đang hiển thị. Unit 1.310, widget 6 + manager 33, mutation 8/8, smoke TECNO KJ7 thật, dữ liệu khôi phục 1.189/1.189. Audit `doc/task/AUDIT_UI-033_2026-10-29.md` (9,1/10), chưa push.
+
+1. **FISH-027 — Profile hình dạng lens**: thiết kế công thức sau UI-033, mặc định giữ fisheye cũ.
+2. **BUILD-005 — Icon launcher và density assets**: sau FISH-027, giữ branding hiện có.
+
+FISH-022 đã chuyển Implemented; không còn nằm trong Picked.
 
 ## ⏸️ Deferred
 
@@ -126,6 +133,8 @@ Source of truth for implementation choices in this session. Detailed acceptance 
 
 ## ❌ Skipped
 
+- **Ads/IAP/monetization (2026-10-29)**: owner loại khỏi phạm vi; không đề xuất hay triển khai trừ khi owner mở lại rõ ràng.
+- **TalkBack — A11Y-002/A11Y-003 (2026-10-29)**: owner từ chối, không hỏi lại hay triển khai trừ khi owner mở lại rõ ràng. Giữ accessibility cơ bản của các control hiện có.
 
 ## 💭 Ideas
 

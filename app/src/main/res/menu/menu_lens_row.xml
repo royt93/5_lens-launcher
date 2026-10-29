@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
+        android:id="@+id/menuLensSettings"
+        android:icon="@drawable/ic_settings_24dp"
+        android:title="@string/tab_settings" />
+    <item
         android:id="@+id/menuLensRename"
         android:icon="@drawable/ic_edit_24dp"
         android:title="@string/lens_rename" />

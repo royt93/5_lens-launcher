@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | new |
-| Status | todo |
+| Status | done 2026-10-29 — audit 9.1/10, `doc/task/AUDIT_UI-033_2026-10-29.md` (chưa push) |
 | Priority | P3 |
 | Evidence | idea |
 | Epic | Lens manager |
@@ -21,10 +21,10 @@ Là người nhiều lens, tôi muốn một nơi chỉnh mọi thứ của mộ
 
 ## Acceptance criteria
 
-- [ ] Mở từ hàng lens trong `LensManagementActivity`.
-- [ ] Gom icon size, distortion, Smart Focus, scope, freeze, hidden.
-- [ ] Dùng đúng key `_<lensId>` hiện có, không đổi schema.
-- [ ] Widget test + a11y.
+- [x] Mở từ hàng lens trong `LensManagementActivity` (mục Settings của menu hàng).
+- [x] Gom icon size, distortion, Smart Focus, scope, freeze, hidden.
+- [x] Dùng đúng key `_<lensId>` hiện có, không đổi schema.
+- [x] Widget test 6 + entry test; a11y: giữ nhãn chuẩn của control, không thêm hành động TalkBack mới (owner đã loại phạm vi này, 2026-10-29).
 
 ## Implementation notes
 
@@ -32,13 +32,13 @@ Thiết kế UI qua brainstorm trước khi làm.
 
 ## Verification and Definition of Done
 
-- [ ] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
-- [ ] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
-- [ ] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
-- [ ] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
-- [ ] No new lint/build failures.
-- [ ] A post-change audit record scores the round `> 9.0/10` before push.
-- [ ] Evidence and status are updated before moving this file to `done`.
+- [x] Unit tests: `LensFreezeEditorTest` 2 + `LensSettingsSliderValueTest` 1; full 1.310/1.310. Cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
+- [x] Widget: 6 + manager 33/33 trên TECNO. Cover visible behavior, accessibility and lifecycle where applicable.
+- [x] Integration: backup import 21/21, migration 5/5, freeze DB cô lập lens trên máy thật. Cover subsystem boundaries and persistence/SDK contracts where applicable.
+- [x] Smoke TECNO KJ7 Android 14, APK `92b3c198…`, 2026-10-29 12:05–12:11; dữ liệu khôi phục 1.189/1.189. Smoke pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
+- [x] Lint/build xanh; chưa so số cảnh báo lint với baseline.
+- [x] Audit 9.1/10, chưa push. A post-change audit record scores the round `> 9.0/10` before push.
+- [x] Evidence và status cập nhật. Evidence and status are updated before moving this file to `done`.
 
 If a test layer is not applicable, replace its checkbox with a reviewed rationale; do not silently omit it.
 

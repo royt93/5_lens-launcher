@@ -263,6 +263,7 @@ class LensManagementActivity : ActBase() {
         menu.setForceShowIcon(true)
         menu.setOnMenuItemClickListener { item ->
             when (item.itemId) {
+                R.id.menuLensSettings -> { openLensSettings(lens); true }
                 R.id.menuLensRename -> { showRenameLensDialog(lens); true }
                 R.id.menuLensDelete -> { showDeleteLensDialog(lens); true }
                 else -> false
@@ -271,6 +272,13 @@ class LensManagementActivity : ActBase() {
         menu.setOnDismissListener { if (lensRowMenuForTest === menu) lensRowMenuForTest = null }
         lensRowMenuForTest = menu
         menu.show()
+    }
+
+    private fun openLensSettings(lens: LensWorkspace) {
+        startActivity(
+            android.content.Intent(this, LensSettingsActivity::class.java)
+                .putExtra(LensSettingsActivity.EXTRA_LENS_ID, lens.id)
+        )
     }
 
     private fun showRenameLensDialog(lens: LensWorkspace, draftText: String? = null) {

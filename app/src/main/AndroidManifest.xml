@@ -224,6 +224,13 @@
             android:theme="@style/AppTheme.NoActionBar" />
 
         <activity
+            android:name=".ui.LensSettingsActivity"
+            android:exported="false"
+            android:parentActivityName=".ui.LensManagementActivity"
+            android:taskAffinity=""
+            android:theme="@style/AppTheme.NoActionBar" />
+
+        <activity
             android:name=".feature.vip.ActVipManagement"
             android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize"
             android:exported="false"

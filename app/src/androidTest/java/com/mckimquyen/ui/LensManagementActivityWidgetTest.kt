@@ -254,6 +254,32 @@ class LensManagementActivityWidgetTest {
     }
 
     @Test
+    fun rowSettingsOpensLensSettingsForThatLensOnly() {
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+        val monitor = instrumentation.addMonitor(LensSettingsActivity::class.java.name, null, false)
+        try {
+            ActivityScenario.launch(LensManagementActivity::class.java).use { scenario ->
+                awaitActivity(scenario, "all fixture rows must load") {
+                    (it.findViewById<RecyclerView>(R.id.rvLensGroups).adapter?.itemCount ?: 0) >= 6
+                }
+                val before = UtilSettings(context).getString(UtilSettings.KEY_ACTIVE_LENS_ID)
+                scenario.onActivity { activity ->
+                    activity.findViewById<RecyclerView>(R.id.rvLensGroups)
+                        .findViewHolderForAdapterPosition(5)!!.itemView.findViewById<View>(R.id.btLensGroupMore).performClick()
+                    assertTrue(activity.lensRowMenuForTest!!.menu.performIdentifierAction(R.id.menuLensSettings, 0))
+                }
+                val started = monitor.waitForActivityWithTimeout(8_000L)
+                assertNotNull("Settings entry must open LensSettingsActivity", started)
+                assertEquals("work", started.intent.getStringExtra(LensSettingsActivity.EXTRA_LENS_ID))
+                assertEquals(before, UtilSettings(context).getString(UtilSettings.KEY_ACTIVE_LENS_ID))
+                instrumentation.runOnMainSync { started.finish() }
+            }
+        } finally {
+            instrumentation.removeMonitor(monitor)
+        }
+    }
+
+    @Test
     fun rowRenameUsesExistingLensNameDialogAndPersistsName() {
         ActivityScenario.launch(LensManagementActivity::class.java).use { scenario ->
             InstrumentationRegistry.getInstrumentation().waitForIdleSync()
