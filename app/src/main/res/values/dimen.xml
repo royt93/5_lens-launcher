@@ -38,4 +38,5 @@
 
     <dimen name="dialog_text_padding">24dp</dimen>
     <dimen name="dialog_text_padding_vertical">8dp</dimen>
+    <dimen name="ad_open_app_logo_size">240dp</dimen>
 </resources>

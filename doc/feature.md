@@ -123,7 +123,7 @@ Thứ tự owner chọn 2026-10-29; từng bước cần smoke thật trên TECN
 
 ✅ **FISH-027 — Profile hình dạng lens (2026-10-29)**: ba profile Fisheye (mặc định, công thức cũ), Anamorphic (chỉ méo ngang) và Cylindrical (chỉ méo dọc), chọn theo lens trong trang cài đặt lens; lưu key riêng, có trong nhân bản, xóa và backup. Unit 1.330, integration LensView 7/7, widget 7/7, mutation 8/8, smoke TECNO KJ7 thấy đúng ba hình dạng, dữ liệu khôi phục 1.189/1.189. Audit `doc/task/AUDIT_FISH-027_2026-10-29.md` (9,1/10), chưa push.
 
-1. **BUILD-005 — Icon launcher và density assets**: sau FISH-027, giữ branding hiện có.
+✅ **BUILD-005 — Icon launcher và density assets (2026-10-29)**: ba PNG lớn sang WebP lossless nodpi (0 điểm ảnh lệch), hai shortcut thành vector, logo cố 240dp; lint 12 → 10, APK −288 KB. SplashAct và 5 `IconLauncherShape` giữ nguyên (owner). Audit `doc/task/AUDIT_BUILD-005_2026-10-29.md` (8,6/10 — chưa push, thiếu smoke bằng mắt).
 
 FISH-022 đã chuyển Implemented; không còn nằm trong Picked.
 

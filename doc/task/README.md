@@ -312,7 +312,7 @@ Giới hạn: agent audit ui chưa đọc hết `LensView.kt`, `ActAbout.java`, 
 
 | ID | P | SP | Story |
 |---|---|---|---|
-| `BUILD-005` | P3 | 5 | [Icon launcher vector và dọn density lệch (5 IconLauncherShape, IconLocation, IconMissingDensityFolder)](todo/p3-build-build-005-vector-launcher-icon-and-density-assets.md) |
+| `BUILD-005` ✅ done 2026-10-29 (audit 8,6/10, TECNO KJ7, chưa push — thiếu smoke bằng mắt) | P3 | 5 | [Icon launcher vector và dọn density lệch](done/p3-build-build-005-vector-launcher-icon-and-density-assets.md) |
 | `FEAT-013` ✅ done 2026-10-27 | P3 | 2 | [Quick action 'app vừa cài' dựa trên installDate](done/p3-feat-feat-013-recent-install-quick-action.md) |
 | `FISH-027` ✅ done 2026-10-29 (audit 9,1/10, TECNO KJ7, chưa push) | P3 | 5 | [Profile độ cong lens (fisheye / anamorphic / cylindrical)](done/p3-fish-fish-027-lens-profiles-curve-shapes.md) |
 | `FISH-028` | P3 | 3 | [Bán kính ảnh hưởng của lens (lens hood)](todo/p3-fish-fish-028-lens-hood-bounded-radius.md) |

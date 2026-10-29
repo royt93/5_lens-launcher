@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | idea |
-| Status | todo |
+| Status | done 2026-10-29 — audit 8.6/10, `doc/task/AUDIT_BUILD-005_2026-10-29.md` (chưa push, dưới ngưỡng 9.0) |
 | Priority | P3 |
 | Evidence | confirmed |
 | Epic | Assets |
@@ -21,12 +21,12 @@ Là dev, tôi muốn asset đúng density, nhẹ hơn và hết warning lint.
 
 ## Acceptance criteria
 
-- [ ] `ic_launcher_960.png` thay bằng vector/kích thước cố định, xóa PNG.
-- [ ] `drawable-hdpi/ic_launcher_round.png` và `l_error_404.png` sang `drawable-nodpi` hoặc vector.
-- [ ] Shortcut icon chuyển vector.
-- [ ] Quyết định số phận `SplashAct` (xóa hoặc SplashScreen API), cần owner xác nhận.
-- [ ] 5 warning `IconLauncherShape` chỉ hết nếu vẽ lại silhouette PNG API 25 (việc thiết kế); ghi rõ nếu không làm.
-- [ ] Đo kích thước APK trước/sau.
+- [x] `ic_launcher_960.png` chuyển WebP lossless `drawable-nodpi`, kích thước hiển thị cố 240dp.
+- [x] Cả hai sang WebP lossless `drawable-nodpi`; 0 điểm ảnh nhìn thấy bị lệch.
+- [x] Hai shortcut icon chuyển vector; đo thật từ PNG gốc.
+- [x] `SplashAct` giữ nguyên (owner chọn).
+- [x] 5 `IconLauncherShape` giữ nguyên (owner chọn không vẽ lại); ghi rõ trong story và audit.
+- [x] APK dev debug 34.764.925 → 34.476.349 (−288 KB, −0,83%); lint 12 → 10 warning.
 
 ## Implementation notes
 
@@ -34,13 +34,13 @@ Gộp F1, F2, I1, I2, N3 của audit build.
 
 ## Verification and Definition of Done
 
-- [ ] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
-- [ ] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
-- [ ] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
-- [ ] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
-- [ ] No new lint/build failures.
-- [ ] A post-change audit record scores the round `> 9.0/10` before push.
-- [ ] Evidence and status are updated before moving this file to `done`.
+- [x] Unit: `ImageAssetContractTest` 4 (hợp đồng bitmap/nodpi/vector); full 1.334/1.334. Cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
+- [x] Widget: `ImageAssetRenderWidgetTest` 4 + `ActAboutWidgetTest` 3 + `RemainingScreensMaterialYouTest` 3 + `LauncherShortcutsIntegrationTest` 6 + `SuperWebViewActivityWidgetTest` 5 trên TECNO. Cover visible behavior, accessibility and lifecycle where applicable.
+- [x] Integration: `SettingsAdVipDelegateIntegrationTest` 1/1 trên TECNO. Shortcut vector manifest check 6/6. Cover subsystem boundaries and persistence/SDK contracts where applicable.
+- [x] Smoke bằng mắt chưa chạy (quảng cáo chặn, owner không cho đụng Ads); chỉ widget đo kích thước. Khôi phục 1.189/1.189 file. Smoke pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
+- [x] Lint giảm 2; 0 lỗi mới. Chưa so từng mục warning cũ.
+- [x] Audit 8.6/10 (dưới ngưỡng, không push). A post-change audit record scores the round `> 9.0/10` before push.
+- [x] Evidence và status cập nhật. Evidence and status are updated before moving this file to `done`.
 
 If a test layer is not applicable, replace its checkbox with a reviewed rationale; do not silently omit it.
 

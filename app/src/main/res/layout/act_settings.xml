@@ -144,9 +144,11 @@
                 android:layout_weight="1"
                 android:orientation="vertical">
 
+                <!-- BUILD-005: ic_launcher_960 is now density-independent (drawable-nodpi); wrap_content would
+                     draw it at 960 px on every phone, so the size is fixed in dp instead. -->
                 <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="@dimen/ad_open_app_logo_size"
+                    android:layout_height="@dimen/ad_open_app_logo_size"
                     android:layout_gravity="center"
                     android:contentDescription="@string/app_name"
                     android:scaleType="centerInside"
