@@ -284,6 +284,7 @@ Giới hạn: agent audit ui chưa đọc hết `LensView.kt`, `ActAbout.java`, 
 | `PERF-007` ✅ done 2026-10-23 | P2 | 2 | [Scan PackageManager gây N+1 truy vấn Room và ghi từng app](done/p2-perf-perf-007-scan-n-plus-one-room.md) |
 | `UI-030` ✅ done 2026-10-23 | P2 | 3 | [Ẩn/khóa app ở list mode trên Home không phát broadcast, lưới không đồng bộ](done/p2-ui-ui-030-home-list-mode-broadcast-sync.md) |
 | `UI-032` ✅ done 2026-10-25 | P2 | 2 | [LensManagementActivity mất state dialog sau process death và đọc prefs trên main thread](done/p2-ui-ui-032-lens-manager-process-death.md) |
+| `FISH-022` ✅ done 2026-10-28 (nhóm lens + dialog Material You dùng chung; audit 8,7/10, chưa push; smoke tay chưa chạy do consent chưa được chấp thuận) | P2 | 8 | [Nhóm lens và manager](done/p2-fish-fish-022-lens-groups.md) |
 | `ARCH-002` ✅ done 2026-10-28 (cụm 1-4, bỏ cụm 5; ActHome 2.454→1.054) | P3 | 8 | [Tách ActHome thành các bộ điều khiển nhỏ](done/p3-arch-arch-002-split-act-home-god-class.md) |
 | `BUILD-004` ✅ done 2026-10-26 | P3 | 3 | [Baseline/startup profile lệch mục tiêu và comment R8 sai](done/p3-build-build-004-r8-and-baseline-profile-accuracy.md) |
 | `CORE-006` ✅ done 2026-10-25 | P3 | 1 | [Đổi ngôn ngữ không làm mới nhãn app và thứ tự A-Z](done/p3-core-core-006-refresh-on-locale-change.md) |
