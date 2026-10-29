@@ -10,7 +10,7 @@
 
 ## Global Constraints
 
-- Device: TECNO KJ7 `115333744A005844` only. Never send anything to another device.
+- Device originally planned: TECNO KJ7 `115333744A005844`. Actual final regression ran on owner-selected S24U `R5CX613VZBR`; no further device action in Task 6.
 - **No new strings and no new translations**: reuse `lens_group_create`, `lens_group_name_hint`, `lens_group_error_blank`, `lens_name_hint`, `lens_group_edit_title` and the existing lens/delete/cancel/ok strings.
 - Name field is an **outlined** `TextInputLayout`; the inner `TextInputEditText` keeps `android.R.id.edit`.
 - Assign-to-group picker is a **bottom sheet**; every other lens dialog stays an `AlertDialog` using `R.style.MaterialYouDialogTheme`.
@@ -94,6 +94,14 @@
 - [ ] **Step 4: Real smoke on KJ7** (screens checked for ads): create group with an outlined field, validation error on blank, assign through the sheet, rename, delete; capture screenshots.
 - [ ] **Step 5: Restore the app data** and compare every member hash; locale/font/permission unchanged.
 - [ ] **Step 6: Audit** `doc/task/AUDIT_LENS-DIALOGS_2026-10-28.md` and finalise `doc/task/AUDIT_FISH-022_2026-10-28.md` (replace the pre-change evidence with the runs above, score honestly); story FISH-022 `inprogress/` → `done/`, update `doc/task/README.md` and `doc/feature.md` (exactly one `## 🟡 In progress`). Push `origin/dev` only if both scores `> 9.0`.
+
+### Task 6 closing record (2026-10-29)
+
+- Steps 1, 3, 5, 6 done on S24U `R5CX613VZBR` (owner changed device): gate 1.307 unit, lint/diff/secrets clean, 17 classes / 157 tests green, data restored 15/15, audits at 8,7/10, FISH-022 story in `done/`, README and feature.md updated.
+- Step 2 done on S24U (backup 15 files), not KJ7.
+- Step 4 (real smoke) **not run**: onboarding consent was not accepted on the owner's behalf. Not claimed as pass.
+- Push **not** done: score 8,7 is below the 9,0 threshold. Dialog commits stay local on `dev`.
+- Owner decision 2026-10-29: future device work uses TECNO.
 
 ## Self-review
 
