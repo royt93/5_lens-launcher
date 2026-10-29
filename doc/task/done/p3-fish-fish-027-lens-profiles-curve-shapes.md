@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | idea |
-| Status | todo |
+| Status | done 2026-10-29 — audit 9.1/10, `doc/task/AUDIT_FISH-027_2026-10-29.md` (chưa push) |
 | Priority | P3 |
 | Evidence | idea |
 | Epic | Fisheye Smart |
@@ -21,10 +21,10 @@ Là người dùng, tôi muốn chọn hình dạng méo của lens như chọn 
 
 ## Acceptance criteria
 
-- [ ] Enum `LensProfile` + hàm thuần cho mỗi profile.
-- [ ] Profile theo lens (key `_<lensId>`), mặc định giữ hành vi cũ.
-- [ ] Hit-test dùng đúng rect đã tính.
-- [ ] Test thuần từng công thức + gate reduced-motion.
+- [x] Enum `LensProfile` + hàm thuần cho mỗi profile (Fisheye, Anamorphic, Cylindrical).
+- [x] Profile theo lens (key `lens_profile_<lensId>`, không kế thừa), mặc định Fisheye giữ hành vi cũ.
+- [x] Hit-test dùng đúng rect đã vẽ (integration test trên TECNO).
+- [x] Test thuần từng công thức; lens rảnh vẽ đúng lưới gốc ở mọi profile kể cả reduced-motion.
 
 ## Implementation notes
 
@@ -32,13 +32,13 @@ Nền cho FISH-028 và FISH-032.
 
 ## Verification and Definition of Done
 
-- [ ] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
-- [ ] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
-- [ ] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
-- [ ] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
-- [ ] No new lint/build failures.
-- [ ] A post-change audit record scores the round `> 9.0/10` before push.
-- [ ] Evidence and status are updated before moving this file to `done`.
+- [x] Unit: `LensProfileTest`, `LensProfileSettingsTest`; full 1.330/1.330. Cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
+- [x] Widget: `LensSettingsActivityWidgetTest` 7/7 trên TECNO. Cover visible behavior, accessibility and lifecycle where applicable.
+- [x] Integration: `LensViewProfileIntegrationTest` 7/7, backup import 21/21, migration 5/5. Cover subsystem boundaries and persistence/SDK contracts where applicable.
+- [x] Smoke TECNO KJ7 Android 14, 2026-10-29 13:08–13:12; dữ liệu khôi phục 1.189/1.189. Smoke pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
+- [x] Lint/build xanh; chưa so số cảnh báo lint với baseline.
+- [x] Audit 9.1/10, chưa push. A post-change audit record scores the round `> 9.0/10` before push.
+- [x] Evidence và status cập nhật. Evidence and status are updated before moving this file to `done`.
 
 If a test layer is not applicable, replace its checkbox with a reviewed rationale; do not silently omit it.
 

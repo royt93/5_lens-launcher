@@ -280,4 +280,9 @@
     <string name="toast_permission_prompts_nothing">ບໍ່ມີການຂໍສິດໃຫ້ຣີເຊັດ</string>
     <string name="layout_import_workspace_recovered">ການນຳເຂົ້າພື້ນທີ່ເຮັດວຽກລົ້ມເຫຼວ ແລະ ການຍ້ອນກັບອັດຕະໂນມັດບໍ່ສົມບູນ ແຕ່ພື້ນທີ່ເຮັດວຽກຂອງທ່ານຖືກກູ້ຄືນຈາກສຳຮອງທີ່ເຮັດກ່ອນນຳເຂົ້າ.</string>
     <string name="reset_undo_failed">ບໍ່ສາມາດຍົກເລີກການຣີເຊັດໄດ້. ລອງອີກຄັ້ງ.</string>
+    <string name="lens_profile_title">ໂປຣໄຟລ໌ເລນ</string>
+    <string name="lens_profile_fisheye">ຕາປາ</string>
+    <string name="lens_profile_anamorphic">ອະນາມໍຟິກ</string>
+    <string name="lens_profile_cylindrical">ຮູບທໍ່</string>
+    <string name="lens_profile_hint">ຕາປາບິດທັງສອງແກນ; ອະນາມໍຟິກບິດສະເພາະແນວນອນ; ຮູບທໍ່ບິດສະເພາະແນວຕັ້ງ</string>
 </resources>

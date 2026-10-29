@@ -290,4 +290,9 @@
     <string name="toast_permission_prompts_nothing">Nessuna richiesta di permessi da reimpostare</string>
     <string name="layout_import_workspace_recovered">L\'importazione dello spazio di lavoro non è riuscita e il ripristino automatico era incompleto, ma lo spazio di lavoro è stato ripristinato dal backup creato subito prima dell\'importazione.</string>
     <string name="reset_undo_failed">Impossibile annullare il ripristino. Riprova.</string>
+    <string name="lens_profile_title">Profilo obiettivo</string>
+    <string name="lens_profile_fisheye">Occhio di pesce</string>
+    <string name="lens_profile_anamorphic">Anamorfico</string>
+    <string name="lens_profile_cylindrical">Cilindrico</string>
+    <string name="lens_profile_hint">Fisheye deforma entrambi gli assi; anamorfico solo quello orizzontale; cilindrico solo quello verticale</string>
 </resources>

@@ -130,13 +130,16 @@ data class LensPhysicsBackup(
     val distortionFactor: Float? = null,
     val iconSize: Float? = null,
     val customDistortionFactor: Float? = null,
-    val smartFocusBias: Boolean? = null
+    val smartFocusBias: Boolean? = null,
+    /** FISH-027: [com.mckimquyen.util.LensProfile] name; null = no stored profile. */
+    val lensProfile: String? = null
 ) {
     fun toJson(): JSONObject = JSONObject().apply {
         distortionFactor?.let { put(KEY_DISTORTION_FACTOR, it.toDouble()) }
         iconSize?.let { put(KEY_ICON_SIZE, it.toDouble()) }
         customDistortionFactor?.let { put(KEY_CUSTOM_DISTORTION_FACTOR, it.toDouble()) }
         smartFocusBias?.let { put(KEY_SMART_FOCUS_BIAS, it) }
+        lensProfile?.let { put(KEY_LENS_PROFILE, it) }
     }
 
     companion object {
@@ -144,6 +147,7 @@ data class LensPhysicsBackup(
         private const val KEY_ICON_SIZE = "iconSize"
         private const val KEY_CUSTOM_DISTORTION_FACTOR = "customDistortionFactor"
         private const val KEY_SMART_FOCUS_BIAS = "smartFocusBias"
+        private const val KEY_LENS_PROFILE = "lensProfile"
 
         private const val DISTORTION_MIN = UtilSettings.MIN_DISTORTION_FACTOR
         private const val DISTORTION_MAX = UtilSettings.MAX_DISTORTION_FACTOR / 2f + UtilSettings.MIN_DISTORTION_FACTOR
@@ -169,11 +173,19 @@ data class LensPhysicsBackup(
                 if (raw !is Boolean) invalid = true
                 return raw as? Boolean
             }
+            fun JSONObject.knownProfile(key: String): String? {
+                val raw = opt(key)
+                if (raw == null || raw == JSONObject.NULL) return null
+                val name = raw as? String
+                if (name == null || com.mckimquyen.util.LensProfile.entries.none { it.name == name }) invalid = true
+                return name
+            }
             val result = LensPhysicsBackup(
                 distortionFactor = json.boundedFloat(KEY_DISTORTION_FACTOR, DISTORTION_MIN, DISTORTION_MAX),
                 iconSize = json.boundedFloat(KEY_ICON_SIZE, ICON_SIZE_MIN, ICON_SIZE_MAX),
                 customDistortionFactor = json.boundedFloat(KEY_CUSTOM_DISTORTION_FACTOR, DISTORTION_MIN, DISTORTION_MAX),
-                smartFocusBias = json.optionalBoolean(KEY_SMART_FOCUS_BIAS)
+                smartFocusBias = json.optionalBoolean(KEY_SMART_FOCUS_BIAS),
+                lensProfile = json.knownProfile(KEY_LENS_PROFILE)
             )
             return result.takeUnless { invalid }
         }

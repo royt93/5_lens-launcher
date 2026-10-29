@@ -44,6 +44,7 @@ import com.mckimquyen.services.BroadcastReceivers
 import com.mckimquyen.util.HapticIntensity
 import com.mckimquyen.util.LensOverscrollPhysics
 import com.mckimquyen.util.LensPhysicsPolicy
+import com.mckimquyen.util.LensProfile
 import com.mckimquyen.util.SmartFocusArranger
 import com.mckimquyen.util.UtilApp
 import com.mckimquyen.util.UtilCalculator
@@ -608,6 +609,12 @@ class LensView : View {
     internal fun touchCoordinatesForTest(): Pair<Float, Float> = Pair(mTouchX, mTouchY)
 
     private var mDrawType: DrawType? = null
+
+    /** FISH-027: last frame's warped icon rects, for tests only. Reused across frames, no per-frame allocation. */
+    private var mDrawnRectsForTest: Array<RectF> = emptyArray()
+
+    @androidx.annotation.VisibleForTesting
+    internal fun drawnRectsForTest(): List<RectF> = mDrawnRectsForTest.map { RectF(it) }
     fun setDrawType(drawType: DrawType?) {
         mDrawType = drawType
         invalidate()
@@ -1451,6 +1458,8 @@ class LensView : View {
         val us = mUtilSettings ?: return
         val iconSizeDp = us.getIconSize(lensId)
         val distortionFactor = liveDistortionFactor ?: us.getDistortionFactor(lensId)
+        // FISH-027: one profile read per frame, not per cell.
+        val lensProfile = us.getLensProfile(lensId)
         val scaleFactor = us.getFloat(UtilSettings.KEY_SCALE_FACTOR)
         // UI-024: one setting read per frame, not per cell - drawAppIcon() is called once per
         // visible icon inside the loop below, which runs continuously while dragging.
@@ -1471,6 +1480,7 @@ class LensView : View {
             applySmartFocusArrangement()
         }
         val baseRects = mGridCache.baseRects
+        if (mDrawnRectsForTest.size != baseRects.size) mDrawnRectsForTest = Array(baseRects.size) { RectF() }
         mInsideRect = false
         var selectIndex = -1
         mRectToSelect = null
@@ -1501,21 +1511,21 @@ class LensView : View {
             mScratchRect.set(baseRect)
             val rect = mScratchRect
             if (hasActiveTouch) {
-                val shiftedCenterX = UtilCalculator.shiftPoint(
+                val shiftedCenterX = lensProfile.shiftX(
                     mTouchX,
                     baseRect.centerX(),
                     width.toFloat(),
                     animationMultiplier,
                     distortionFactor
                 )
-                val shiftedCenterY = UtilCalculator.shiftPoint(
+                val shiftedCenterY = lensProfile.shiftY(
                     mTouchY,
                     baseRect.centerY(),
                     height.toFloat(),
                     animationMultiplier,
                     distortionFactor
                 )
-                val scaledCenterX = UtilCalculator.scalePoint(
+                val scaledCenterX = lensProfile.scaleX(
                     mTouchX,
                     baseRect.centerX(),
                     baseRect.width(),
@@ -1524,7 +1534,7 @@ class LensView : View {
                     scaleFactor,
                     distortionFactor
                 )
-                val scaledCenterY = UtilCalculator.scalePoint(
+                val scaledCenterY = lensProfile.scaleY(
                     mTouchY,
                     baseRect.centerY(),
                     baseRect.height(),
@@ -1533,7 +1543,8 @@ class LensView : View {
                     scaleFactor,
                     distortionFactor
                 )
-                val newSize = UtilCalculator.calculateSquareScaledSize(
+                val newSize = LensProfile.sizeFor(
+                    lensProfile,
                     scaledCenterX,
                     shiftedCenterX,
                     scaledCenterY,
@@ -1551,6 +1562,7 @@ class LensView : View {
                     mRectToSelect = RectF(rect)
                 }
             }
+            if (currentIndex < mDrawnRectsForTest.size) mDrawnRectsForTest[currentIndex].set(rect)
             if (mDrawType == DrawType.APPS) {
                 // FISH-007: blur only picks the target canvas/alpha - rect and hit-test above are untouched.
                 val dofIntensity = if (dofMode == DepthOfField.Mode.OFF) 0f else DepthOfField.intensity(

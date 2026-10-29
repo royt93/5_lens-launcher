@@ -290,4 +290,9 @@
     <string name="toast_permission_prompts_nothing">Aucune demande d\'autorisation à réinitialiser</string>
     <string name="layout_import_workspace_recovered">L\'importation de l\'espace de travail a échoué et le retour arrière automatique était incomplet, mais votre espace de travail a été restauré à partir de la sauvegarde faite juste avant l\'importation.</string>
     <string name="reset_undo_failed">Impossible d’annuler la réinitialisation. Réessayez.</string>
+    <string name="lens_profile_title">Profil de l’objectif</string>
+    <string name="lens_profile_fisheye">Œil de poisson</string>
+    <string name="lens_profile_anamorphic">Anamorphique</string>
+    <string name="lens_profile_cylindrical">Cylindrique</string>
+    <string name="lens_profile_hint">Œil de poisson déforme les deux axes ; anamorphique seulement l’horizontal ; cylindrique seulement le vertical</string>
 </resources>

@@ -144,6 +144,8 @@ class UtilSettings(context: Context) {
         const val KEY_LENS_ELASTIC_OVERSCROLL = "lens_elastic_overscroll"
         // FISH-006: Smart Focus Lite toggle
         const val KEY_SMART_FOCUS_BIAS = "smart_focus_bias"
+        /** FISH-027: per-lens warp profile, stored by enum name; never inherited. */
+        const val KEY_LENS_PROFILE = "lens_profile"
         // Clean the Lens minimalist mode
         const val DEFAULT_CLEAN_LENS_MODE = false
         const val KEY_CLEAN_LENS_MODE = "clean_lens_mode"
@@ -651,7 +653,9 @@ class UtilSettings(context: Context) {
             iconSize = rawFloat(KEY_ICON_SIZE),
             customDistortionFactor = rawFloat(KEY_CUSTOM_DISTORTION_FACTOR),
             smartFocusBias = lensKey(KEY_SMART_FOCUS_BIAS, lensId).takeIf(prefs::contains)
-                ?.let { prefs.getBoolean(it, false) }
+                ?.let { prefs.getBoolean(it, false) },
+            lensProfile = lensKey(KEY_LENS_PROFILE, lensId).takeIf(prefs::contains)
+                ?.let { runCatching { prefs.getString(it, null) }.getOrNull() }
         )
     }
 
@@ -671,11 +675,14 @@ class UtilSettings(context: Context) {
         val biasKey = lensKey(KEY_SMART_FOCUS_BIAS, lensId)
         if (physics.smartFocusBias != null) editor.putBoolean(biasKey, physics.smartFocusBias)
         else if (!isDefault) editor.remove(biasKey)
+        val profileKey = lensKey(KEY_LENS_PROFILE, lensId)
+        if (physics.lensProfile != null) editor.putString(profileKey, physics.lensProfile)
+        else if (!isDefault) editor.remove(profileKey)
     }
 
     // Deliberately separate from isWorkspacePreferenceKey: a legacy import must not wipe physics.
     private fun isLensPhysicsKey(key: String): Boolean =
-        listOf(KEY_DISTORTION_FACTOR, KEY_ICON_SIZE, KEY_CUSTOM_DISTORTION_FACTOR, KEY_SMART_FOCUS_BIAS)
+        listOf(KEY_DISTORTION_FACTOR, KEY_ICON_SIZE, KEY_CUSTOM_DISTORTION_FACTOR, KEY_SMART_FOCUS_BIAS, KEY_LENS_PROFILE)
             .any { key == it || key.startsWith("${it}_") }
 
     private fun isWorkspacePreferenceKey(key: String): Boolean =
@@ -738,12 +745,24 @@ class UtilSettings(context: Context) {
         save(lensKey(KEY_SMART_FOCUS_BIAS, lensId), value)
     }
 
+    // FISH-027: unlike distortion/icon size this never falls back to the shared key - the default lens
+    // owns the unsuffixed key, so a fallback would copy its profile into every new lens.
+    fun getLensProfile(lensId: String?): LensProfile =
+        runCatching { prefs.getString(lensKey(KEY_LENS_PROFILE, lensId), null) }
+            .getOrNull()
+            .let(LensProfile::fromStored)
+
+    fun saveLensProfile(lensId: String?, profile: LensProfile) {
+        save(lensKey(KEY_LENS_PROFILE, lensId), profile.name)
+    }
+
     /** Materializes [fromLensId]'s effective values onto [toLensId], inherited ones included. */
     fun duplicateLensSettings(fromLensId: String, toLensId: String) {
         val distortion = getDistortionFactor(fromLensId)
         val smartFocus = isSmartFocusBias(fromLensId)
         saveDistortionFactor(toLensId, distortion)
         saveSmartFocusBias(toLensId, smartFocus)
+        saveLensProfile(toLensId, getLensProfile(fromLensId))
         saveIconSize(toLensId, getIconSize(fromLensId))
         saveLensAppScope(toLensId, getLensAppScope(fromLensId))
         saveLensAppSelection(toLensId, getLensAppSelection(fromLensId))
@@ -765,6 +784,7 @@ class UtilSettings(context: Context) {
             prefs.edit {
                 remove("${KEY_DISTORTION_FACTOR}_$lensId")
                 remove("${KEY_SMART_FOCUS_BIAS}_$lensId")
+                remove("${KEY_LENS_PROFILE}_$lensId")
                 remove("${KEY_ICON_SIZE}_$lensId")
                 remove("${KEY_LENS_APP_SCOPE}_$lensId")
                 remove("${KEY_LENS_APP_SELECTION}_$lensId")

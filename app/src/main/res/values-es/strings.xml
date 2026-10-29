@@ -290,4 +290,9 @@
     <string name="toast_permission_prompts_nothing">No hay solicitudes de permisos que restablecer</string>
     <string name="layout_import_workspace_recovered">La importación del espacio de trabajo falló y la reversión automática quedó incompleta, pero tu espacio de trabajo se restauró desde la copia hecha justo antes de importar.</string>
     <string name="reset_undo_failed">No se pudo deshacer el restablecimiento. Inténtalo de nuevo.</string>
+    <string name="lens_profile_title">Perfil de lente</string>
+    <string name="lens_profile_fisheye">Ojo de pez</string>
+    <string name="lens_profile_anamorphic">Anamórfico</string>
+    <string name="lens_profile_cylindrical">Cilíndrico</string>
+    <string name="lens_profile_hint">Ojo de pez deforma ambos ejes; anamórfico solo el horizontal; cilíndrico solo el vertical</string>
 </resources>

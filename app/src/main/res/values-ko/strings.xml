@@ -280,4 +280,9 @@
     <string name="toast_permission_prompts_nothing">초기화할 권한 요청이 없습니다</string>
     <string name="layout_import_workspace_recovered">작업 공간 가져오기에 실패했고 자동 롤백도 완전하지 않았지만, 가져오기 직전에 만든 백업에서 작업 공간을 복원했습니다.</string>
     <string name="reset_undo_failed">재설정을 실행 취소할 수 없습니다. 다시 시도하세요.</string>
+    <string name="lens_profile_title">렌즈 프로파일</string>
+    <string name="lens_profile_fisheye">어안</string>
+    <string name="lens_profile_anamorphic">아나모픽</string>
+    <string name="lens_profile_cylindrical">원통형</string>
+    <string name="lens_profile_hint">어안은 두 축을 모두 왜곡하고, 아나모픽은 가로만, 원통형은 세로만 왜곡합니다</string>
 </resources>

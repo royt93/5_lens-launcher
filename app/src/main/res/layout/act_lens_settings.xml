@@ -85,6 +85,57 @@
                 android:valueTo="5.0"
                 android:stepSize="0.1" />
 
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="@string/lens_profile_title"
+                android:textAppearance="?attr/textAppearanceBodyLarge"
+                android:textColor="?attr/colorOnSurface" />
+
+            <com.google.android.material.button.MaterialButtonToggleGroup
+                android:id="@+id/tgLensSettingsProfile"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="vertical"
+                app:checkedButton="@+id/btLensProfileFisheye"
+                app:selectionRequired="true"
+                app:singleSelection="true">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btLensProfileFisheye"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="48dp"
+                    android:text="@string/lens_profile_fisheye" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btLensProfileAnamorphic"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="48dp"
+                    android:text="@string/lens_profile_anamorphic" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btLensProfileCylindrical"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="48dp"
+                    android:text="@string/lens_profile_cylindrical" />
+            </com.google.android.material.button.MaterialButtonToggleGroup>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/lens_profile_hint"
+                android:textAppearance="?attr/textAppearanceBodySmall"
+                android:textColor="?attr/colorOnSurfaceVariant" />
+
             <com.google.android.material.materialswitch.MaterialSwitch
                 android:id="@+id/swLensSettingsSmartFocus"
                 android:layout_width="match_parent"

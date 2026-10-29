@@ -311,4 +311,9 @@
     <string name="toast_permission_prompts_nothing">لا توجد طلبات أذونات لإعادة ضبطها</string>
     <string name="layout_import_workspace_recovered">فشل استيراد مساحة العمل ولم يكتمل التراجع التلقائي، لكن تمت استعادة مساحة العمل من النسخة الاحتياطية التي أُخذت قبل الاستيراد مباشرة.</string>
     <string name="reset_undo_failed">تعذر التراجع عن إعادة التعيين. حاول مرة أخرى.</string>
+    <string name="lens_profile_title">شكل العدسة</string>
+    <string name="lens_profile_fisheye">عين السمكة</string>
+    <string name="lens_profile_anamorphic">أنامورفيك</string>
+    <string name="lens_profile_cylindrical">أسطواني</string>
+    <string name="lens_profile_hint">عين السمكة تشوّه المحورين؛ أنامورفيك أفقيًا فقط؛ الأسطواني رأسيًا فقط</string>
 </resources>

@@ -295,4 +295,9 @@
     <string name="toast_permission_prompts_nothing">Нет запросов разрешений для сброса</string>
     <string name="layout_import_workspace_recovered">Не удалось импортировать рабочее пространство, а автоматический откат был неполным, но пространство восстановлено из резервной копии, сделанной непосредственно перед импортом.</string>
     <string name="reset_undo_failed">Не удалось отменить сброс. Попробуйте ещё раз.</string>
+    <string name="lens_profile_title">Профиль линзы</string>
+    <string name="lens_profile_fisheye">Рыбий глаз</string>
+    <string name="lens_profile_anamorphic">Анаморфный</string>
+    <string name="lens_profile_cylindrical">Цилиндрический</string>
+    <string name="lens_profile_hint">«Рыбий глаз» искажает обе оси, анаморфный — только горизонтальную, цилиндрический — только вертикальную</string>
 </resources>

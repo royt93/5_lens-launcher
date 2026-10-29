@@ -280,4 +280,9 @@
     <string name="toast_permission_prompts_nothing">没有需要重置的权限请求</string>
     <string name="layout_import_workspace_recovered">工作区导入失败，自动回滚也不完整，但已从导入前刚创建的备份中恢复了您的工作区。</string>
     <string name="reset_undo_failed">无法撤销重置，请重试。</string>
+    <string name="lens_profile_title">镜头类型</string>
+    <string name="lens_profile_fisheye">鱼眼</string>
+    <string name="lens_profile_anamorphic">变形宽银幕</string>
+    <string name="lens_profile_cylindrical">柱面</string>
+    <string name="lens_profile_hint">鱼眼会扭曲两个轴；变形宽银幕仅扭曲水平方向；柱面仅扭曲垂直方向</string>
 </resources>

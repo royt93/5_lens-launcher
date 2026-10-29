@@ -285,4 +285,9 @@
     <string name="toast_permission_prompts_nothing">Keine Berechtigungsabfragen zum Zurücksetzen</string>
     <string name="layout_import_workspace_recovered">Der Import des Arbeitsbereichs ist fehlgeschlagen und das automatische Zurücksetzen war unvollständig, aber Ihr Arbeitsbereich wurde aus der unmittelbar vor dem Import erstellten Sicherung wiederhergestellt.</string>
     <string name="reset_undo_failed">Zurücksetzen konnte nicht rückgängig gemacht werden. Bitte erneut versuchen.</string>
+    <string name="lens_profile_title">Linsenprofil</string>
+    <string name="lens_profile_fisheye">Fischauge</string>
+    <string name="lens_profile_anamorphic">Anamorphotisch</string>
+    <string name="lens_profile_cylindrical">Zylindrisch</string>
+    <string name="lens_profile_hint">Fischauge verzerrt beide Achsen; anamorphotisch nur horizontal; zylindrisch nur vertikal</string>
 </resources>

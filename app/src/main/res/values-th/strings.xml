@@ -280,4 +280,9 @@
     <string name="toast_permission_prompts_nothing">ไม่มีการขอสิทธิ์ที่ต้องรีเซ็ต</string>
     <string name="layout_import_workspace_recovered">นำเข้าพื้นที่ทำงานไม่สำเร็จและการย้อนกลับอัตโนมัติไม่สมบูรณ์ แต่พื้นที่ทำงานของคุณถูกกู้คืนจากข้อมูลสำรองที่สร้างก่อนนำเข้าทันที</string>
     <string name="reset_undo_failed">เลิกทำการรีเซ็ตไม่สำเร็จ โปรดลองอีกครั้ง</string>
+    <string name="lens_profile_title">โปรไฟล์เลนส์</string>
+    <string name="lens_profile_fisheye">ฟิชอาย</string>
+    <string name="lens_profile_anamorphic">อะนามอร์ฟิก</string>
+    <string name="lens_profile_cylindrical">ทรงกระบอก</string>
+    <string name="lens_profile_hint">ฟิชอายบิดทั้งสองแกน อะนามอร์ฟิกบิดเฉพาะแนวนอน ทรงกระบอกบิดเฉพาะแนวตั้ง</string>
 </resources>

@@ -280,4 +280,9 @@
     <string name="toast_permission_prompts_nothing">គ្មានការស្នើសុំការអនុញ្ញាតត្រូវកំណត់ឡើងវិញទេ</string>
     <string name="layout_import_workspace_recovered">ការនាំចូលកន្លែងធ្វើការបរាជ័យ ហើយការត្រឡប់ស្វ័យប្រវត្តិមិនពេញលេញ ប៉ុន្តែកន្លែងធ្វើការរបស់អ្នកត្រូវបានស្ដារពីការបម្រុងទុកដែលបានធ្វើមុនការនាំចូលភ្លាម។</string>
     <string name="reset_undo_failed">មិនអាចមិនធ្វើការកំណត់ឡើងវិញបានទេ។ សូមព្យាយាមម្ដងទៀត។</string>
+    <string name="lens_profile_title">ទម្រង់កែវថត</string>
+    <string name="lens_profile_fisheye">កែវភ្នែកត្រី</string>
+    <string name="lens_profile_anamorphic">អាណាម័រហ្វិក</string>
+    <string name="lens_profile_cylindrical">ស៊ីឡាំង</string>
+    <string name="lens_profile_hint">កែវភ្នែកត្រីបំលែងអ័ក្សទាំងពីរ អាណាម័រហ្វិកបំលែងតែផ្តេក ស៊ីឡាំងបំលែងតែបញ្ឈរ</string>
 </resources>

@@ -280,4 +280,9 @@
     <string name="toast_permission_prompts_nothing">リセットする権限の確認はありません</string>
     <string name="layout_import_workspace_recovered">ワークスペースのインポートに失敗し、自動ロールバックも不完全でしたが、インポート直前に作成したバックアップからワークスペースを復元しました。</string>
     <string name="reset_undo_failed">リセットを元に戻せませんでした。もう一度お試しください。</string>
+    <string name="lens_profile_title">レンズプロファイル</string>
+    <string name="lens_profile_fisheye">魚眼</string>
+    <string name="lens_profile_anamorphic">アナモルフィック</string>
+    <string name="lens_profile_cylindrical">円筒</string>
+    <string name="lens_profile_hint">魚眼は縦横の両方を歪め、アナモルフィックは横方向のみ、円筒は縦方向のみ歪めます</string>
 </resources>

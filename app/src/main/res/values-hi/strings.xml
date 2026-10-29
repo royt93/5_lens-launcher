@@ -285,4 +285,9 @@
     <string name="toast_permission_prompts_nothing">रीसेट करने के लिए कोई अनुमति अनुरोध नहीं</string>
     <string name="layout_import_workspace_recovered">वर्कस्पेस आयात विफल रहा और स्वचालित रोलबैक अधूरा रहा, लेकिन आपका वर्कस्पेस आयात से ठीक पहले लिए गए बैकअप से बहाल कर दिया गया।</string>
     <string name="reset_undo_failed">रीसेट पूर्ववत नहीं हो सका। फिर कोशिश करें।</string>
+    <string name="lens_profile_title">लेंस प्रोफ़ाइल</string>
+    <string name="lens_profile_fisheye">फिशआई</string>
+    <string name="lens_profile_anamorphic">एनामॉर्फिक</string>
+    <string name="lens_profile_cylindrical">बेलनाकार</string>
+    <string name="lens_profile_hint">फिशआई दोनों अक्षों को बिगाड़ता है; एनामॉर्फिक केवल क्षैतिज; बेलनाकार केवल ऊर्ध्वाधर</string>
 </resources>

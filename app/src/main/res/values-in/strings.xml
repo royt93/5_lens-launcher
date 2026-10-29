@@ -280,4 +280,9 @@
     <string name="toast_permission_prompts_nothing">Tidak ada permintaan izin untuk direset</string>
     <string name="layout_import_workspace_recovered">Impor ruang kerja gagal dan pemulihan otomatis tidak lengkap, tetapi ruang kerja Anda dipulihkan dari cadangan yang dibuat tepat sebelum impor.</string>
     <string name="reset_undo_failed">Reset tidak dapat diurungkan. Coba lagi.</string>
+    <string name="lens_profile_title">Profil lensa</string>
+    <string name="lens_profile_fisheye">Mata ikan</string>
+    <string name="lens_profile_anamorphic">Anamorfik</string>
+    <string name="lens_profile_cylindrical">Silindris</string>
+    <string name="lens_profile_hint">Mata ikan melengkungkan kedua sumbu; anamorfik hanya horizontal; silindris hanya vertikal</string>
 </resources>

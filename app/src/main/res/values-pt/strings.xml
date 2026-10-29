@@ -290,4 +290,9 @@
     <string name="toast_permission_prompts_nothing">Nenhum pedido de permissão para redefinir</string>
     <string name="layout_import_workspace_recovered">A importação do espaço de trabalho falhou e a reversão automática ficou incompleta, mas seu espaço de trabalho foi restaurado a partir do backup feito logo antes da importação.</string>
     <string name="reset_undo_failed">Não foi possível desfazer a redefinição. Tente novamente.</string>
+    <string name="lens_profile_title">Perfil da lente</string>
+    <string name="lens_profile_fisheye">Olho de peixe</string>
+    <string name="lens_profile_anamorphic">Anamórfico</string>
+    <string name="lens_profile_cylindrical">Cilíndrico</string>
+    <string name="lens_profile_hint">Olho de peixe distorce os dois eixos; anamórfico só o horizontal; cilíndrico só o vertical</string>
 </resources>

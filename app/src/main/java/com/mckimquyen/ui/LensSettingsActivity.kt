@@ -11,6 +11,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.button.MaterialButtonToggleGroup
 import com.google.android.material.materialswitch.MaterialSwitch
 import com.google.android.material.slider.Slider
 import com.mckimquyen.R
@@ -25,6 +26,7 @@ import com.mckimquyen.adt.LensAppChoiceAdapter
 import com.mckimquyen.util.LensAppScope
 import com.mckimquyen.util.LensAppScopeEditor
 import com.mckimquyen.util.LensFreezeEditor
+import com.mckimquyen.util.LensProfile
 import com.mckimquyen.util.SmartFocusArranger
 import com.mckimquyen.util.UtilApp
 import com.mckimquyen.util.UtilCalculator
@@ -118,6 +120,11 @@ class LensSettingsActivity : ActBase() {
             if (ready && !restoring) targetId?.let { utilSettings?.saveSmartFocusBias(it, checked) }
         }
         findViewById<MaterialSwitch>(R.id.swLensSettingsSmartFocus).setOnCheckedChangeListener(smartFocusListener)
+        findViewById<MaterialButtonToggleGroup>(R.id.tgLensSettingsProfile).addOnButtonCheckedListener { _, checkedId, isChecked ->
+            if (isChecked && ready && !restoring) {
+                targetId?.let { utilSettings?.saveLensProfile(it, profileForButton(checkedId)) }
+            }
+        }
         findViewById<View>(R.id.btLensSettingsApps).setOnClickListener { showApps(false) }
         findViewById<View>(R.id.btLensSettingsHidden).setOnClickListener { showApps(true) }
         findViewById<View>(R.id.btLensSettingsFreeze).setOnClickListener {
@@ -175,6 +182,7 @@ class LensSettingsActivity : ActBase() {
         findViewById<TextView>(R.id.tvLensSettingsDistortion).text = String.format(java.util.Locale.getDefault(), "%.1f",
             findViewById<Slider>(R.id.sbLensSettingsDistortion).value)
         findViewById<MaterialSwitch>(R.id.swLensSettingsSmartFocus).isChecked = settings.isSmartFocusBias(id)
+        findViewById<MaterialButtonToggleGroup>(R.id.tgLensSettingsProfile).check(buttonForProfile(settings.getLensProfile(id)))
         restoring = false
         findViewById<MaterialButton>(R.id.btLensSettingsFreeze).setText(
             if (settings.isLensFrozen(id)) R.string.lens_unfreeze_positions else R.string.lens_freeze_positions
@@ -183,6 +191,7 @@ class LensSettingsActivity : ActBase() {
 
     private fun setEnabled(enabled: Boolean) {
         intArrayOf(R.id.sbLensSettingsIconSize, R.id.sbLensSettingsDistortion, R.id.swLensSettingsSmartFocus,
+            R.id.tgLensSettingsProfile, R.id.btLensProfileFisheye, R.id.btLensProfileAnamorphic, R.id.btLensProfileCylindrical,
             R.id.btLensSettingsApps, R.id.btLensSettingsFreeze, R.id.btLensSettingsHidden)
             .forEach { findViewById<View>(it).isEnabled = enabled }
     }
@@ -287,6 +296,18 @@ class LensSettingsActivity : ActBase() {
             }
         }
         super.onSaveInstanceState(outState)
+    }
+
+    private fun profileForButton(id: Int): LensProfile = when (id) {
+        R.id.btLensProfileAnamorphic -> LensProfile.ANAMORPHIC
+        R.id.btLensProfileCylindrical -> LensProfile.CYLINDRICAL
+        else -> LensProfile.FISHEYE
+    }
+
+    private fun buttonForProfile(profile: LensProfile): Int = when (profile) {
+        LensProfile.ANAMORPHIC -> R.id.btLensProfileAnamorphic
+        LensProfile.CYLINDRICAL -> R.id.btLensProfileCylindrical
+        LensProfile.FISHEYE -> R.id.btLensProfileFisheye
     }
 
     private fun showFailure() = Toast.makeText(this, R.string.error_save_failed, Toast.LENGTH_LONG).show()

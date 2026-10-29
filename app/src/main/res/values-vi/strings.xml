@@ -287,4 +287,9 @@
     <string name="toast_permission_prompts_nothing">Không có yêu cầu quyền nào để đặt lại</string>
     <string name="layout_import_workspace_recovered">Nhập không gian làm việc thất bại và tự khôi phục chưa hoàn tất, nhưng không gian làm việc của bạn đã được phục hồi từ bản sao lưu tạo ngay trước khi nhập.</string>
     <string name="reset_undo_failed">Không thể hoàn tác đặt lại. Hãy thử lại.</string>
+    <string name="lens_profile_title">Kiểu thấu kính</string>
+    <string name="lens_profile_fisheye">Mắt cá</string>
+    <string name="lens_profile_anamorphic">Biến dạng ngang</string>
+    <string name="lens_profile_cylindrical">Hình trụ</string>
+    <string name="lens_profile_hint">Mắt cá méo cả hai trục; Anamorphic chỉ méo chiều ngang; Hình trụ chỉ méo chiều dọc</string>
 </resources>

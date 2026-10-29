@@ -121,8 +121,9 @@ Thứ tự owner chọn 2026-10-29; từng bước cần smoke thật trên TECN
 
 ✅ **UI-033 — Trang cài đặt theo lens (2026-10-29)**: trang riêng mở từ menu hàng lens (icon size, độ cong, Smart Focus, scope, freeze, app ẩn), dùng key `_<lensId>` có sẵn; freeze lens không active ghi DB riêng, không đụng snapshot lens đang hiển thị. Unit 1.310, widget 6 + manager 33, mutation 8/8, smoke TECNO KJ7 thật, dữ liệu khôi phục 1.189/1.189. Audit `doc/task/AUDIT_UI-033_2026-10-29.md` (9,1/10), chưa push.
 
-1. **FISH-027 — Profile hình dạng lens**: thiết kế công thức sau UI-033, mặc định giữ fisheye cũ.
-2. **BUILD-005 — Icon launcher và density assets**: sau FISH-027, giữ branding hiện có.
+✅ **FISH-027 — Profile hình dạng lens (2026-10-29)**: ba profile Fisheye (mặc định, công thức cũ), Anamorphic (chỉ méo ngang) và Cylindrical (chỉ méo dọc), chọn theo lens trong trang cài đặt lens; lưu key riêng, có trong nhân bản, xóa và backup. Unit 1.330, integration LensView 7/7, widget 7/7, mutation 8/8, smoke TECNO KJ7 thấy đúng ba hình dạng, dữ liệu khôi phục 1.189/1.189. Audit `doc/task/AUDIT_FISH-027_2026-10-29.md` (9,1/10), chưa push.
+
+1. **BUILD-005 — Icon launcher và density assets**: sau FISH-027, giữ branding hiện có.
 
 FISH-022 đã chuyển Implemented; không còn nằm trong Picked.
 

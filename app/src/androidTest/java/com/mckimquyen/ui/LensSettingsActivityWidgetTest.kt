@@ -159,6 +159,31 @@ class LensSettingsActivityWidgetTest {
         }
     }
 
+    @Test fun profileButtonsOnlyWriteTheTargetLensAndRestoreOnRecreate() {
+        val settings = UtilSettings(context)
+        runBlocking { AppDatabase.getInstance().lensWorkspaceDao().insertOrUpdate(LensWorkspace(TARGET, "Work")) }
+        settings.saveLensProfile(TARGET, com.mckimquyen.util.LensProfile.FISHEYE)
+        settings.saveLensProfile(LensWorkspace.DEFAULT_LENS_ID, com.mckimquyen.util.LensProfile.FISHEYE)
+        try {
+            launch(TARGET).use { scenario ->
+                awaitReady(scenario)
+                scenario.onActivity { it.findViewById<android.view.View>(R.id.btLensProfileAnamorphic).performClick() }
+                waitUntil { settings.getLensProfile(TARGET) == com.mckimquyen.util.LensProfile.ANAMORPHIC }
+                assertEquals(com.mckimquyen.util.LensProfile.FISHEYE, settings.getLensProfile(LensWorkspace.DEFAULT_LENS_ID))
+                scenario.recreate()
+                awaitReady(scenario)
+                var checked = 0
+                scenario.onActivity {
+                    checked = it.findViewById<com.google.android.material.button.MaterialButtonToggleGroup>(R.id.tgLensSettingsProfile).checkedButtonId
+                }
+                assertEquals(R.id.btLensProfileAnamorphic, checked)
+                assertEquals("recreate must not rewrite the stored profile", com.mckimquyen.util.LensProfile.ANAMORPHIC, settings.getLensProfile(TARGET))
+            }
+        } finally {
+            settings.deleteLensSettings(TARGET)
+        }
+    }
+
     private fun waitUntil(condition: () -> Boolean) {
         val deadline = System.currentTimeMillis() + WAIT_MS
         while (!condition() && System.currentTimeMillis() < deadline) Thread.sleep(POLL_MS)

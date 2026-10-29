@@ -330,4 +330,9 @@
     <string name="toast_permission_prompts_reset">Permission prompts reset</string>
     <string name="toast_permission_prompts_nothing">No permission prompts to reset</string>
     <string name="layout_import_workspace_recovered">Workspace import failed and the automatic rollback was incomplete, but your workspace was restored from the backup taken just before the import.</string>
+    <string name="lens_profile_title">Lens profile</string>
+    <string name="lens_profile_fisheye">Fisheye</string>
+    <string name="lens_profile_anamorphic">Anamorphic</string>
+    <string name="lens_profile_cylindrical">Cylindrical</string>
+    <string name="lens_profile_hint">Fisheye warps both axes; Anamorphic stretches only horizontally; Cylindrical only vertically</string>
 </resources>
