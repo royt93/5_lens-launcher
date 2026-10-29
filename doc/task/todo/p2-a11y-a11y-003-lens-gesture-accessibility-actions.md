@@ -3,13 +3,17 @@
 | Field | Value |
 |---|---|
 | Type | enhance |
-| Status | todo |
+| Status | declined by owner (2026-10-29; no TalkBack work; do not re-propose unless explicitly reopened) |
 | Priority | P2 |
 | Evidence | confirmed |
 | Epic | Accessibility |
 | Estimate | 3 SP |
 | Risk | Medium |
 | Dependencies | None |
+
+## Owner decision — 2026-10-29
+
+Owner declined TalkBack/accessibility work for now. Keep this story as historical backlog; do not propose or implement unless the owner explicitly reopens this scope.
 
 ## Context and evidence
 
