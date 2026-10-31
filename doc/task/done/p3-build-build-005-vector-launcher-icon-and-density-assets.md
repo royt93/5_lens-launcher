@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | idea |
-| Status | done 2026-10-29 — audit 8.6/10, `doc/task/AUDIT_BUILD-005_2026-10-29.md` (chưa push, dưới ngưỡng 9.0) |
+| Status | done 2026-10-29 — audit 8.9/10, `doc/task/AUDIT_BUILD-005_2026-10-29.md` (chưa push, dưới ngưỡng 9.0) |
 | Priority | P3 |
 | Evidence | confirmed |
 | Epic | Assets |
@@ -37,9 +37,9 @@ Gộp F1, F2, I1, I2, N3 của audit build.
 - [x] Unit: `ImageAssetContractTest` 4 (hợp đồng bitmap/nodpi/vector); full 1.334/1.334. Cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
 - [x] Widget: `ImageAssetRenderWidgetTest` 4 + `ActAboutWidgetTest` 3 + `RemainingScreensMaterialYouTest` 3 + `LauncherShortcutsIntegrationTest` 6 + `SuperWebViewActivityWidgetTest` 5 trên TECNO. Cover visible behavior, accessibility and lifecycle where applicable.
 - [x] Integration: `SettingsAdVipDelegateIntegrationTest` 1/1 trên TECNO. Shortcut vector manifest check 6/6. Cover subsystem boundaries and persistence/SDK contracts where applicable.
-- [x] Smoke bằng mắt chưa chạy (quảng cáo chặn, owner không cho đụng Ads); chỉ widget đo kích thước. Khôi phục 1.189/1.189 file. Smoke pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
+- [x] Smoke 2026-10-31 trên TECNO: icon launcher đúng, vector render thật khớp PNG, About và lớp phủ chụp đúng kích thước; shortcut không hiện trên launcher của máy, trang 404 chưa chụp. Khôi phục 1.191/1.191 file. Smoke pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
 - [x] Lint giảm 2; 0 lỗi mới. Chưa so từng mục warning cũ.
-- [x] Audit 8.6/10 (dưới ngưỡng, không push). A post-change audit record scores the round `> 9.0/10` before push.
+- [x] Audit 8.9/10 (dưới ngưỡng, không push). A post-change audit record scores the round `> 9.0/10` before push.
 - [x] Evidence và status cập nhật. Evidence and status are updated before moving this file to `done`.
 
 If a test layer is not applicable, replace its checkbox with a reviewed rationale; do not silently omit it.
