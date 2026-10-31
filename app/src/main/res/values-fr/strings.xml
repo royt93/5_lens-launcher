@@ -295,4 +295,7 @@
     <string name="lens_profile_anamorphic">Anamorphique</string>
     <string name="lens_profile_cylindrical">Cylindrique</string>
     <string name="lens_profile_hint">Œil de poisson déforme les deux axes ; anamorphique seulement l’horizontal ; cylindrique seulement le vertical</string>
+    <string name="lens_hood_title">Pare-soleil de l’objectif</string>
+    <string name="lens_hood_hint">Limite la portée de la déformation. Complet utilise tout l’écran ; un pare-soleil plus petit laisse les icônes extérieures immobiles.</string>
+    <string name="lens_hood_value_format">%1$d %%</string>
 </resources>

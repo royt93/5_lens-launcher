@@ -116,6 +116,8 @@ Source of truth for implementation choices in this session. Detailed acceptance 
 ## 📋 Picked
 
 Thứ tự owner chọn 2026-10-29; từng bước cần smoke thật trên TECNO KJ7 `115333744A005844`:
+✅ **FISH-028 — Bán kính ảnh hưởng của lens hood (2026-10-31)**: giới hạn bán kính méo theo tỷ lệ tầm với qua smoothstep falloff, icon ngoài hood đứng yên; slider Lens hood trong trang cài đặt lens, mặc định 100% giữ hành vi cũ. Unit 1.364, hồi quy 20 lớp trên TECNO, mutation 9/9, smoke ảnh TECNO KJ7 (35% vs 100%), dữ liệu khôi phục 1.192/1.192 file. Giới hạn đã biết (owner chọn giữ): hood nhỏ + distortion cao có thể đảo thứ tự dưới ~1 px ở mép hood. Audit `doc/task/AUDIT_FISH-028_2026-10-31.md` (9,2/10), chưa push.
+
 
 ✅ **UI-028 — Xác minh lifecycle dialog (2026-10-29)**: 12/12 instrumentation pass trên TECNO KJ7; smoke mở Home, Rename và Choose apps, hủy đúng cách, không thấy quảng cáo/crash; backup restore 1.189/1.189 file. Audit `doc/task/AUDIT_UI-028_2026-10-29.md` (9,1/10).
 

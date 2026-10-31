@@ -292,4 +292,7 @@
     <string name="lens_profile_anamorphic">Biến dạng ngang</string>
     <string name="lens_profile_cylindrical">Hình trụ</string>
     <string name="lens_profile_hint">Mắt cá méo cả hai trục; Anamorphic chỉ méo chiều ngang; Hình trụ chỉ méo chiều dọc</string>
+    <string name="lens_hood_title">Loa che thấu kính</string>
+    <string name="lens_hood_hint">Giới hạn tầm ảnh hưởng của độ méo. Đầy đủ là cả màn hình; loa che nhỏ hơn giữ yên các biểu tượng bên ngoài.</string>
+    <string name="lens_hood_value_format">%1$d%%</string>
 </resources>

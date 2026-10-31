@@ -295,4 +295,7 @@
     <string name="lens_profile_anamorphic">Anamorfico</string>
     <string name="lens_profile_cylindrical">Cilindrico</string>
     <string name="lens_profile_hint">Fisheye deforma entrambi gli assi; anamorfico solo quello orizzontale; cilindrico solo quello verticale</string>
+    <string name="lens_hood_title">Paraluce dell’obiettivo</string>
+    <string name="lens_hood_hint">Limita la portata della deformazione. Completo usa tutto lo schermo; un paraluce più piccolo lascia ferme le icone all’esterno.</string>
+    <string name="lens_hood_value_format">%1$d%%</string>
 </resources>

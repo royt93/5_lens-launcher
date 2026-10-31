@@ -316,4 +316,7 @@
     <string name="lens_profile_anamorphic">أنامورفيك</string>
     <string name="lens_profile_cylindrical">أسطواني</string>
     <string name="lens_profile_hint">عين السمكة تشوّه المحورين؛ أنامورفيك أفقيًا فقط؛ الأسطواني رأسيًا فقط</string>
+    <string name="lens_hood_title">غطاء العدسة</string>
+    <string name="lens_hood_hint">يحدّ مدى وصول التشويه. الكامل يستخدم الشاشة كلها؛ الغطاء الأصغر يترك الأيقونات خارجه ثابتة.</string>
+    <string name="lens_hood_value_format">%1$d%%</string>
 </resources>

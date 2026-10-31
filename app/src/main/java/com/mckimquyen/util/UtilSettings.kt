@@ -146,6 +146,8 @@ class UtilSettings(context: Context) {
         const val KEY_SMART_FOCUS_BIAS = "smart_focus_bias"
         /** FISH-027: per-lens warp profile, stored by enum name; never inherited. */
         const val KEY_LENS_PROFILE = "lens_profile"
+        /** FISH-028: per-lens radius as a fraction of the legacy screen reach. */
+        const val KEY_LENS_HOOD = "lens_hood"
         // Clean the Lens minimalist mode
         const val DEFAULT_CLEAN_LENS_MODE = false
         const val KEY_CLEAN_LENS_MODE = "clean_lens_mode"
@@ -655,7 +657,9 @@ class UtilSettings(context: Context) {
             smartFocusBias = lensKey(KEY_SMART_FOCUS_BIAS, lensId).takeIf(prefs::contains)
                 ?.let { prefs.getBoolean(it, false) },
             lensProfile = lensKey(KEY_LENS_PROFILE, lensId).takeIf(prefs::contains)
-                ?.let { runCatching { prefs.getString(it, null) }.getOrNull() }
+                ?.let { runCatching { prefs.getString(it, null) }.getOrNull() },
+            lensHood = lensKey(KEY_LENS_HOOD, lensId).takeIf(prefs::contains)
+                ?.let { runCatching { prefs.getFloat(it, LensHood.FULL) }.getOrNull() }
         )
     }
 
@@ -678,11 +682,14 @@ class UtilSettings(context: Context) {
         val profileKey = lensKey(KEY_LENS_PROFILE, lensId)
         if (physics.lensProfile != null) editor.putString(profileKey, physics.lensProfile)
         else if (!isDefault) editor.remove(profileKey)
+        val hoodKey = lensKey(KEY_LENS_HOOD, lensId)
+        if (physics.lensHood != null) editor.putFloat(hoodKey, LensHood.clamp(physics.lensHood))
+        else if (!isDefault) editor.remove(hoodKey)
     }
 
     // Deliberately separate from isWorkspacePreferenceKey: a legacy import must not wipe physics.
     private fun isLensPhysicsKey(key: String): Boolean =
-        listOf(KEY_DISTORTION_FACTOR, KEY_ICON_SIZE, KEY_CUSTOM_DISTORTION_FACTOR, KEY_SMART_FOCUS_BIAS, KEY_LENS_PROFILE)
+        listOf(KEY_DISTORTION_FACTOR, KEY_ICON_SIZE, KEY_CUSTOM_DISTORTION_FACTOR, KEY_SMART_FOCUS_BIAS, KEY_LENS_PROFILE, KEY_LENS_HOOD)
             .any { key == it || key.startsWith("${it}_") }
 
     private fun isWorkspacePreferenceKey(key: String): Boolean =
@@ -756,6 +763,17 @@ class UtilSettings(context: Context) {
         save(lensKey(KEY_LENS_PROFILE, lensId), profile.name)
     }
 
+    /** FISH-028: hood never inherits another lens; missing or malformed values mean FULL. */
+    fun getLensHood(lensId: String?): Float {
+        val key = lensKey(KEY_LENS_HOOD, lensId)
+        if (!prefs.contains(key)) return LensHood.FULL
+        return runCatching { LensHood.clamp(prefs.getFloat(key, LensHood.FULL)) }.getOrDefault(LensHood.FULL)
+    }
+
+    fun saveLensHood(lensId: String?, value: Float) {
+        save(lensKey(KEY_LENS_HOOD, lensId), LensHood.clamp(value))
+    }
+
     /** Materializes [fromLensId]'s effective values onto [toLensId], inherited ones included. */
     fun duplicateLensSettings(fromLensId: String, toLensId: String) {
         val distortion = getDistortionFactor(fromLensId)
@@ -763,6 +781,9 @@ class UtilSettings(context: Context) {
         saveDistortionFactor(toLensId, distortion)
         saveSmartFocusBias(toLensId, smartFocus)
         saveLensProfile(toLensId, getLensProfile(fromLensId))
+        lensKey(KEY_LENS_HOOD, fromLensId).takeIf(prefs::contains)?.let {
+            saveLensHood(toLensId, runCatching { prefs.getFloat(it, LensHood.FULL) }.getOrDefault(LensHood.FULL))
+        }
         saveIconSize(toLensId, getIconSize(fromLensId))
         saveLensAppScope(toLensId, getLensAppScope(fromLensId))
         saveLensAppSelection(toLensId, getLensAppSelection(fromLensId))
@@ -785,6 +806,7 @@ class UtilSettings(context: Context) {
                 remove("${KEY_DISTORTION_FACTOR}_$lensId")
                 remove("${KEY_SMART_FOCUS_BIAS}_$lensId")
                 remove("${KEY_LENS_PROFILE}_$lensId")
+                remove("${KEY_LENS_HOOD}_$lensId")
                 remove("${KEY_ICON_SIZE}_$lensId")
                 remove("${KEY_LENS_APP_SCOPE}_$lensId")
                 remove("${KEY_LENS_APP_SELECTION}_$lensId")

@@ -10,19 +10,21 @@ enum class LensProfile(private val warpsX: Boolean, private val warpsY: Boolean)
     ANAMORPHIC(warpsX = true, warpsY = false),
     CYLINDRICAL(warpsX = false, warpsY = true);
 
-    fun shiftX(lens: Float, item: Float, boundary: Float, multiplier: Float, distortion: Float): Float =
-        if (warpsX) UtilCalculator.shiftPoint(lens, item, boundary, multiplier, distortion) else item
+    fun shiftX(lens: Float, item: Float, boundary: Float, multiplier: Float, distortion: Float, hood: Float = LensHood.FULL): Float =
+        if (warpsX) UtilCalculator.shiftPoint(lens, item, boundary, multiplier, distortion, hood) else item
 
-    fun shiftY(lens: Float, item: Float, boundary: Float, multiplier: Float, distortion: Float): Float =
-        if (warpsY) UtilCalculator.shiftPoint(lens, item, boundary, multiplier, distortion) else item
+    fun shiftY(lens: Float, item: Float, boundary: Float, multiplier: Float, distortion: Float, hood: Float = LensHood.FULL): Float =
+        if (warpsY) UtilCalculator.shiftPoint(lens, item, boundary, multiplier, distortion, hood) else item
 
     fun scaleX(
-        lens: Float, item: Float, itemSize: Float, boundary: Float, multiplier: Float, scale: Float, distortion: Float
-    ): Float = if (warpsX) UtilCalculator.scalePoint(lens, item, itemSize, boundary, multiplier, scale, distortion) else item
+        lens: Float, item: Float, itemSize: Float, boundary: Float, multiplier: Float, scale: Float, distortion: Float,
+        hood: Float = LensHood.FULL
+    ): Float = if (warpsX) UtilCalculator.scalePoint(lens, item, itemSize, boundary, multiplier, scale, distortion, hood) else item
 
     fun scaleY(
-        lens: Float, item: Float, itemSize: Float, boundary: Float, multiplier: Float, scale: Float, distortion: Float
-    ): Float = if (warpsY) UtilCalculator.scalePoint(lens, item, itemSize, boundary, multiplier, scale, distortion) else item
+        lens: Float, item: Float, itemSize: Float, boundary: Float, multiplier: Float, scale: Float, distortion: Float,
+        hood: Float = LensHood.FULL
+    ): Float = if (warpsY) UtilCalculator.scalePoint(lens, item, itemSize, boundary, multiplier, scale, distortion, hood) else item
 
     companion object {
         /** Persisted by name; unknown or missing values mean the original behavior. */

@@ -285,4 +285,7 @@
     <string name="lens_profile_anamorphic">อะนามอร์ฟิก</string>
     <string name="lens_profile_cylindrical">ทรงกระบอก</string>
     <string name="lens_profile_hint">ฟิชอายบิดทั้งสองแกน อะนามอร์ฟิกบิดเฉพาะแนวนอน ทรงกระบอกบิดเฉพาะแนวตั้ง</string>
+    <string name="lens_hood_title">ฮูดเลนส์</string>
+    <string name="lens_hood_hint">จำกัดระยะที่การบิดเบือนไปถึง เต็มคือทั้งหน้าจอ ฮูดที่เล็กกว่าจะทำให้ไอคอนด้านนอกอยู่นิ่ง</string>
+    <string name="lens_hood_value_format">%1$d%%</string>
 </resources>

@@ -96,6 +96,14 @@ public class UtilCalculator {
      * Graphical Fisheye Lens algorithm for shifting item position
      */
     public static float shiftPoint(float lensPosition, float itemPosition, float boundary, float multiplier, float distortionFactor) {
+        return shiftPoint(lensPosition, itemPosition, boundary, multiplier, distortionFactor, LensHood.FULL);
+    }
+
+    /**
+     * FISH-028: same warp, limited to a hood. The warp is blended back to the item's own position by
+     * {@link LensHood#falloff}, so an item beyond the hood stays exactly where it was.
+     */
+    public static float shiftPoint(float lensPosition, float itemPosition, float boundary, float multiplier, float distortionFactor, float hood) {
         // FISH-026: live overscroll may be negative; only the idle sentinel means no lens.
         if (lensPosition == -Float.MAX_VALUE) return itemPosition;
 
@@ -106,15 +114,26 @@ public class UtilCalculator {
         float y = ((1.0f + d) * x) / (1.0f + (d * x));
         float newDistanceFromCenter = b * y;
 
-        return (lensPosition >= itemPosition)
+        float warped = (lensPosition >= itemPosition)
                 ? lensPosition - newDistanceFromCenter
                 : lensPosition + newDistanceFromCenter;
+        if (hood >= LensHood.FULL) return warped;
+        float weight = LensHood.falloff(a, b, hood);
+        return itemPosition + (warped - itemPosition) * weight;
     }
 
     /**
      * Graphical Fisheye Lens algorithm for scaling
      */
     public static float scalePoint(float lensPosition, float itemPosition, float itemSize, float boundary, float multiplier, float scaleFactor, float distortionFactor) {
+        return scalePoint(lensPosition, itemPosition, itemSize, boundary, multiplier, scaleFactor, distortionFactor, LensHood.FULL);
+    }
+
+    /**
+     * FISH-028: the scaled point shares the shift's hood. Outside it both collapse to the item's own
+     * position, so {@code 2 * |scaled - shifted|} equals the icon's own size and nothing is magnified.
+     */
+    public static float scalePoint(float lensPosition, float itemPosition, float itemSize, float boundary, float multiplier, float scaleFactor, float distortionFactor, float hood) {
         if (lensPosition == -Float.MAX_VALUE) return itemSize;
 
         float scaleDifference = scaleFactor - UtilSettings.MIN_SCALE_FACTOR;
@@ -124,7 +143,20 @@ public class UtilCalculator {
                 ? itemPosition - d * (itemSize / 2.0f)
                 : itemPosition + d * (itemSize / 2.0f);
 
-        return shiftPoint(lensPosition, adjustedPosition, boundary, multiplier, distortionFactor);
+        if (hood >= LensHood.FULL) {
+            return shiftPoint(lensPosition, adjustedPosition, boundary, multiplier, distortionFactor, hood);
+        }
+        // Weight by the CENTRE's falloff so position and size fade out together: an icon whose centre
+        // is outside the hood is neither moved nor magnified (scaled - shifted == itemSize / 2).
+        float weight = LensHood.falloff(Math.abs(lensPosition - itemPosition),
+                Math.max(lensPosition, boundary - lensPosition), hood);
+        float itemShift = shiftPoint(lensPosition, itemPosition, boundary, multiplier, distortionFactor, LensHood.FULL);
+        float fullWarp = shiftPoint(lensPosition, adjustedPosition, boundary, multiplier, distortionFactor, LensHood.FULL);
+        float hoodedCentre = itemPosition + (itemShift - itemPosition) * weight;
+        float side = (lensPosition >= itemPosition) ? -1.0f : 1.0f;
+        float legacyHalf = Math.abs(fullWarp - itemShift);
+        float ownHalf = itemSize / 2.0f;
+        return hoodedCentre + side * (ownHalf + (legacyHalf - ownHalf) * weight);
     }
 
     /**

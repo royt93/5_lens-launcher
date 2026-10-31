@@ -285,4 +285,7 @@
     <string name="lens_profile_anamorphic">អាណាម័រហ្វិក</string>
     <string name="lens_profile_cylindrical">ស៊ីឡាំង</string>
     <string name="lens_profile_hint">កែវភ្នែកត្រីបំលែងអ័ក្សទាំងពីរ អាណាម័រហ្វិកបំលែងតែផ្តេក ស៊ីឡាំងបំលែងតែបញ្ឈរ</string>
+    <string name="lens_hood_title">ក្រប់កែវថត</string>
+    <string name="lens_hood_hint">កំណត់ចម្ងាយដែលការបំលែងឈានដល់។ ពេញ ប្រើអេក្រង់ទាំងមូល ក្រប់តូចជាងទុកអាយ៉ុងខាងក្រៅឲ្យនៅស្ងៀម។</string>
+    <string name="lens_hood_value_format">%1$d%%</string>
 </resources>

@@ -88,7 +88,10 @@ class LensStringTranslationTest {
         // too, not a copy-paste - both intentionally match the English source.
         // "lens_group_header_description" is only placeholders ("%1$s, %2$s, %3$s"); the translated
         // lens count now arrives pre-formatted from the lens_group_lens_count plural.
-        val allowedToMatch = setOf("lens_new_name_template", "lens_share_caption_via", "lens_group_header_description")
+        // "lens_hood_value_format" is only "%1$d%%": a number and a percent sign, with no words to translate.
+        val allowedToMatch = setOf(
+            "lens_new_name_template", "lens_share_caption_via", "lens_group_header_description", "lens_hood_value_format"
+        )
 
         val untranslated = localeDirectories().flatMap { directory ->
             lensStrings(File(directory, "strings.xml"))

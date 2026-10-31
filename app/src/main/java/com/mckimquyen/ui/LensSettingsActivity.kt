@@ -26,6 +26,7 @@ import com.mckimquyen.adt.LensAppChoiceAdapter
 import com.mckimquyen.util.LensAppScope
 import com.mckimquyen.util.LensAppScopeEditor
 import com.mckimquyen.util.LensFreezeEditor
+import com.mckimquyen.util.LensHood
 import com.mckimquyen.util.LensProfile
 import com.mckimquyen.util.SmartFocusArranger
 import com.mckimquyen.util.UtilApp
@@ -112,6 +113,11 @@ class LensSettingsActivity : ActBase() {
             findViewById<TextView>(R.id.tvLensSettingsIconSize).text = getString(R.string.unit_dp_format, value.toInt())
             if (fromUser && ready) targetId?.let { utilSettings?.saveIconSize(it, value) }
         }
+        findViewById<Slider>(R.id.sbLensSettingsHood).addOnChangeListener { _, value, fromUser ->
+            val percent = Math.round(value * 100)
+            findViewById<TextView>(R.id.tvLensSettingsHood).text = getString(R.string.lens_hood_value_format, percent)
+            if (fromUser && ready) targetId?.let { utilSettings?.saveLensHood(it, value) }
+        }
         findViewById<Slider>(R.id.sbLensSettingsDistortion).addOnChangeListener { _, value, fromUser ->
             findViewById<TextView>(R.id.tvLensSettingsDistortion).text = String.format(java.util.Locale.getDefault(), "%.1f", value)
             if (fromUser && ready) targetId?.let { utilSettings?.saveDistortionFactor(it, value) }
@@ -181,6 +187,10 @@ class LensSettingsActivity : ActBase() {
             findViewById<Slider>(R.id.sbLensSettingsIconSize).value.toInt())
         findViewById<TextView>(R.id.tvLensSettingsDistortion).text = String.format(java.util.Locale.getDefault(), "%.1f",
             findViewById<Slider>(R.id.sbLensSettingsDistortion).value)
+        val hood = LensHood.snap(settings.getLensHood(id))
+        findViewById<Slider>(R.id.sbLensSettingsHood).value = hood
+        findViewById<TextView>(R.id.tvLensSettingsHood).text = getString(
+            R.string.lens_hood_value_format, Math.round(hood * 100))
         findViewById<MaterialSwitch>(R.id.swLensSettingsSmartFocus).isChecked = settings.isSmartFocusBias(id)
         findViewById<MaterialButtonToggleGroup>(R.id.tgLensSettingsProfile).check(buttonForProfile(settings.getLensProfile(id)))
         restoring = false
@@ -190,7 +200,7 @@ class LensSettingsActivity : ActBase() {
     }
 
     private fun setEnabled(enabled: Boolean) {
-        intArrayOf(R.id.sbLensSettingsIconSize, R.id.sbLensSettingsDistortion, R.id.swLensSettingsSmartFocus,
+        intArrayOf(R.id.sbLensSettingsIconSize, R.id.sbLensSettingsDistortion, R.id.sbLensSettingsHood, R.id.swLensSettingsSmartFocus,
             R.id.tgLensSettingsProfile, R.id.btLensProfileFisheye, R.id.btLensProfileAnamorphic, R.id.btLensProfileCylindrical,
             R.id.btLensSettingsApps, R.id.btLensSettingsFreeze, R.id.btLensSettingsHidden)
             .forEach { findViewById<View>(it).isEnabled = enabled }

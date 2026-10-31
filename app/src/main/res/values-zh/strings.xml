@@ -285,4 +285,7 @@
     <string name="lens_profile_anamorphic">变形宽银幕</string>
     <string name="lens_profile_cylindrical">柱面</string>
     <string name="lens_profile_hint">鱼眼会扭曲两个轴；变形宽银幕仅扭曲水平方向；柱面仅扭曲垂直方向</string>
+    <string name="lens_hood_title">镜头遮光罩</string>
+    <string name="lens_hood_hint">限制扭曲的作用范围。“完整”覆盖整个屏幕；较小的遮光罩会让范围外的图标保持不动。</string>
+    <string name="lens_hood_value_format">%1$d%%</string>
 </resources>

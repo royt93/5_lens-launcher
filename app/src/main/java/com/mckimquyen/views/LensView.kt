@@ -1460,6 +1460,8 @@ class LensView : View {
         val distortionFactor = liveDistortionFactor ?: us.getDistortionFactor(lensId)
         // FISH-027: one profile read per frame, not per cell.
         val lensProfile = us.getLensProfile(lensId)
+        // FISH-028: one hood read per frame as well.
+        val lensHood = us.getLensHood(lensId)
         val scaleFactor = us.getFloat(UtilSettings.KEY_SCALE_FACTOR)
         // UI-024: one setting read per frame, not per cell - drawAppIcon() is called once per
         // visible icon inside the loop below, which runs continuously while dragging.
@@ -1516,14 +1518,16 @@ class LensView : View {
                     baseRect.centerX(),
                     width.toFloat(),
                     animationMultiplier,
-                    distortionFactor
+                    distortionFactor,
+                    lensHood
                 )
                 val shiftedCenterY = lensProfile.shiftY(
                     mTouchY,
                     baseRect.centerY(),
                     height.toFloat(),
                     animationMultiplier,
-                    distortionFactor
+                    distortionFactor,
+                    lensHood
                 )
                 val scaledCenterX = lensProfile.scaleX(
                     mTouchX,
@@ -1532,7 +1536,8 @@ class LensView : View {
                     width.toFloat(),
                     animationMultiplier,
                     scaleFactor,
-                    distortionFactor
+                    distortionFactor,
+                    lensHood
                 )
                 val scaledCenterY = lensProfile.scaleY(
                     mTouchY,
@@ -1541,7 +1546,8 @@ class LensView : View {
                     height.toFloat(),
                     animationMultiplier,
                     scaleFactor,
-                    distortionFactor
+                    distortionFactor,
+                    lensHood
                 )
                 val newSize = LensProfile.sizeFor(
                     lensProfile,

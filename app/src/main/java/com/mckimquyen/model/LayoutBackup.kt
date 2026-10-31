@@ -132,7 +132,9 @@ data class LensPhysicsBackup(
     val customDistortionFactor: Float? = null,
     val smartFocusBias: Boolean? = null,
     /** FISH-027: [com.mckimquyen.util.LensProfile] name; null = no stored profile. */
-    val lensProfile: String? = null
+    val lensProfile: String? = null,
+    /** FISH-028: radius fraction in [LensHood.MIN, LensHood.FULL]; null means no stored override. */
+    val lensHood: Float? = null
 ) {
     fun toJson(): JSONObject = JSONObject().apply {
         distortionFactor?.let { put(KEY_DISTORTION_FACTOR, it.toDouble()) }
@@ -140,6 +142,7 @@ data class LensPhysicsBackup(
         customDistortionFactor?.let { put(KEY_CUSTOM_DISTORTION_FACTOR, it.toDouble()) }
         smartFocusBias?.let { put(KEY_SMART_FOCUS_BIAS, it) }
         lensProfile?.let { put(KEY_LENS_PROFILE, it) }
+        lensHood?.let { put(KEY_LENS_HOOD, it.toDouble()) }
     }
 
     companion object {
@@ -148,6 +151,7 @@ data class LensPhysicsBackup(
         private const val KEY_CUSTOM_DISTORTION_FACTOR = "customDistortionFactor"
         private const val KEY_SMART_FOCUS_BIAS = "smartFocusBias"
         private const val KEY_LENS_PROFILE = "lensProfile"
+        private const val KEY_LENS_HOOD = "lensHood"
 
         private const val DISTORTION_MIN = UtilSettings.MIN_DISTORTION_FACTOR
         private const val DISTORTION_MAX = UtilSettings.MAX_DISTORTION_FACTOR / 2f + UtilSettings.MIN_DISTORTION_FACTOR
@@ -185,7 +189,8 @@ data class LensPhysicsBackup(
                 iconSize = json.boundedFloat(KEY_ICON_SIZE, ICON_SIZE_MIN, ICON_SIZE_MAX),
                 customDistortionFactor = json.boundedFloat(KEY_CUSTOM_DISTORTION_FACTOR, DISTORTION_MIN, DISTORTION_MAX),
                 smartFocusBias = json.optionalBoolean(KEY_SMART_FOCUS_BIAS),
-                lensProfile = json.knownProfile(KEY_LENS_PROFILE)
+                lensProfile = json.knownProfile(KEY_LENS_PROFILE),
+                lensHood = json.boundedFloat(KEY_LENS_HOOD, com.mckimquyen.util.LensHood.MIN, com.mckimquyen.util.LensHood.FULL)
             )
             return result.takeUnless { invalid }
         }

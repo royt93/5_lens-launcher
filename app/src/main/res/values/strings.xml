@@ -335,4 +335,7 @@
     <string name="lens_profile_anamorphic">Anamorphic</string>
     <string name="lens_profile_cylindrical">Cylindrical</string>
     <string name="lens_profile_hint">Fisheye warps both axes; Anamorphic stretches only horizontally; Cylindrical only vertically</string>
+    <string name="lens_hood_title">Lens hood</string>
+    <string name="lens_hood_hint">Limits how far the warp reaches. Full uses the whole screen; a smaller hood leaves icons outside it still.</string>
+    <string name="lens_hood_value_format">%1$d%%</string>
 </resources>

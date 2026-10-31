@@ -184,6 +184,46 @@ class LensSettingsActivityWidgetTest {
         }
     }
 
+    @Test fun hoodSliderOnlyWritesTheTargetLensAndRestoresOnRecreate() {
+        val settings = UtilSettings(context)
+        runBlocking { AppDatabase.getInstance().lensWorkspaceDao().insertOrUpdate(LensWorkspace(TARGET, "Work")) }
+        settings.deleteLensSettings(TARGET)
+        try {
+            launch(TARGET).use { scenario ->
+                awaitReady(scenario)
+                var slider: com.google.android.material.slider.Slider? = null
+                scenario.onActivity { slider = it.findViewById(R.id.sbLensSettingsHood) }
+                InstrumentationRegistry.getInstrumentation().runOnMainSync { slider!!.value = 0.45f }
+                // setValue is programmatic (fromUser = false); a real drag is what persists
+                assertEquals("a programmatic bind must not write", com.mckimquyen.util.LensHood.FULL, settings.getLensHood(TARGET), 0f)
+                // A full DOWN / MOVE / UP sequence is the only way a Slider reports fromUser = true.
+                InstrumentationRegistry.getInstrumentation().runOnMainSync {
+                    slider!!.dispatchTouchEvent(touch(slider!!, android.view.MotionEvent.ACTION_DOWN, 0.9f))
+                    slider!!.dispatchTouchEvent(touch(slider!!, android.view.MotionEvent.ACTION_MOVE, 0.3f))
+                    slider!!.dispatchTouchEvent(touch(slider!!, android.view.MotionEvent.ACTION_UP, 0.3f))
+                }
+                waitUntil { settings.getLensHood(TARGET) < com.mckimquyen.util.LensHood.FULL }
+                val stored = settings.getLensHood(TARGET)
+                assertEquals(com.mckimquyen.util.LensHood.FULL, settings.getLensHood(LensWorkspace.DEFAULT_LENS_ID), 0f)
+                scenario.recreate()
+                awaitReady(scenario)
+                var shown = -1f
+                scenario.onActivity { shown = it.findViewById<com.google.android.material.slider.Slider>(R.id.sbLensSettingsHood).value }
+                assertEquals("the slider must show the stored hood after recreate", com.mckimquyen.util.LensHood.snap(stored), shown, 0.0001f)
+                assertEquals("recreate must not rewrite the hood", stored, settings.getLensHood(TARGET), 0f)
+            }
+        } finally {
+            settings.deleteLensSettings(TARGET)
+        }
+    }
+
+    private val touchDownTime = android.os.SystemClock.uptimeMillis()
+
+    private fun touch(slider: android.view.View, action: Int, fraction: Float): android.view.MotionEvent {
+        val x = slider.paddingLeft + (slider.width - slider.paddingLeft - slider.paddingRight) * fraction
+        return android.view.MotionEvent.obtain(touchDownTime, android.os.SystemClock.uptimeMillis(), action, x, slider.height / 2f, 0)
+    }
+
     private fun waitUntil(condition: () -> Boolean) {
         val deadline = System.currentTimeMillis() + WAIT_MS
         while (!condition() && System.currentTimeMillis() < deadline) Thread.sleep(POLL_MS)
