@@ -115,6 +115,8 @@ Source of truth for implementation choices in this session. Detailed acceptance 
 
 🟡 **FISH-031 — Focus Ring Quick Shortcuts (2026-11-01)**: giữ icon hiện tối đa 3 chip shortcut thật quanh icon; trượt vào chip và thả chạy shortcut, thả ngoài chip mở menu app cũ. Gate 1.392 unit xanh, tích hợp 8/8, mutation 16/16, smoke thật trên TECNO BG6 (Chrome: Incognito/New tab). Audit 8,9/10 (`doc/task/AUDIT_FISH-031_2026-11-01.md`), chưa push; OPPO chưa khôi phục.
 
+🟡 **FISH-037 — Polaroid Optical Caption & Contact Sheet (2026-11-01)**: thêm thông số quang học dòng 2, contact sheet 2 cột tối đa 6 lens khi có từ 2 lens. Đang triển khai.
+
 ## 📋 Picked
 
 Thứ tự owner chọn 2026-10-29; từng bước cần smoke thật trên TECNO KJ7 `115333744A005844`:
