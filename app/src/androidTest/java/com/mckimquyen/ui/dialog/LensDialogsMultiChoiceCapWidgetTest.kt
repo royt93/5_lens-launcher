@@ -69,6 +69,31 @@ class LensDialogsMultiChoiceCapWidgetTest {
     }
 
     @Test
+    fun limitMessageIsFormattedWithTheCapNotShownAsARawPlaceholder() = withActivity { activity ->
+        val messages = ArrayList<CharSequence>()
+        LensDialogs.limitMessageSink = { messages.add(it) }
+        try {
+            val dialog = onMain {
+                LensDialogs.multiChoice(
+                    activity, R.string.lens_choose_apps, adapter(activity), setOf(0, 1),
+                    android.R.string.ok, {}, null,
+                    maxSelected = 2, limitMessageRes = R.string.lens_share_limit_message
+                ).also { it.show() }
+            }
+            instrumentation.waitForIdleSync()
+            onMain {
+                val list = dialog.listView
+                list.performItemClick(list.getChildAt(2), 2, list.adapter.getItemId(2))
+            }
+            assertEquals(listOf<CharSequence>(activity.getString(R.string.lens_share_limit_message, 2)), messages)
+            assertFalse("no unformatted placeholder: ${messages.single()}", messages.single().contains("%"))
+            onMain { dialog.dismiss() }
+        } finally {
+            LensDialogs.limitMessageSink = null
+        }
+    }
+
+    @Test
     fun requireSelectionDisablesConfirmUntilAnItemIsChecked() = withActivity { activity ->
         val dialog = onMain {
             LensDialogs.multiChoice(

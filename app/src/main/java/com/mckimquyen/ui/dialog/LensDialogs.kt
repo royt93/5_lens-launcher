@@ -123,6 +123,16 @@ object LensDialogs {
      * ticking one more row un-ticks it again and shows [limitMessageRes] (if non-zero). With
      * [requireSelection] the positive button stays disabled while nothing is ticked.
      */
+    /** Test seam: receives the already formatted limit message instead of a Toast (same idea as ActHome.lensShareLauncher). */
+    @androidx.annotation.VisibleForTesting
+    @Volatile
+    internal var limitMessageSink: ((CharSequence) -> Unit)? = null
+
+    private fun showLimitMessage(context: Context, message: CharSequence) {
+        limitMessageSink?.let { it(message); return }
+        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+    }
+
     @JvmStatic
     @JvmOverloads
     fun <T> multiChoice(
@@ -157,7 +167,7 @@ object LensDialogs {
                 if (list.isItemChecked(position)) {
                     if (selected.size >= maxSelected) {
                         list.setItemChecked(position, false)
-                        if (limitMessageRes != 0) Toast.makeText(context, limitMessageRes, Toast.LENGTH_SHORT).show()
+                        if (limitMessageRes != 0) showLimitMessage(context, context.getString(limitMessageRes, maxSelected))
                     } else {
                         selected.add(position)
                     }
