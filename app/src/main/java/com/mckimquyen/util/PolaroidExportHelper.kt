@@ -6,12 +6,15 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.Rect
 import android.graphics.Typeface
 import android.net.Uri
+import android.view.View
 import androidx.core.content.FileProvider
 import androidx.core.graphics.createBitmap
 import com.mckimquyen.R
 import com.mckimquyen.app.ApplicationScope
+import com.mckimquyen.model.App
 import com.mckimquyen.views.LensView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -43,10 +46,16 @@ object PolaroidExportHelper {
     private const val CAPTION_LINE3_EXTRA_PX = 52
     private const val CAPTION_LINE_GAP_PX = 16
     private const val CAPTION_LINES_WITH_OPTICAL = 3
+    private const val SHEET_FILE_NAME = "lenses"
+    private const val SHEET_FOOTER_TEXT_SIZE_PX = 34f
+    private const val SHEET_FOOTER_BASELINE_FROM_BOTTOM_PX = 36
     private const val MAX_LENS_NAME_LENGTH = 24
     private val UNSAFE_FILENAME_CHARS = Regex("[^A-Za-z0-9_-]+")
 
     data class CaptionLines(val line1: String, val line2: String, val line3: String = "")
+
+    /** One lens of a contact sheet: [optical] is the pre-formatted [PolaroidCaptionFormatter.opticalLine]. */
+    data class LensExportSpec(val lensId: String, val lensName: String, val optical: String)
 
     data class PolaroidLayout(
         val outerWidth: Int,
@@ -221,5 +230,135 @@ object PolaroidExportHelper {
             }
             withContext(Dispatchers.Main) { onDone(uri) }
         }
+    }
+
+    /**
+     * FISH-037: up to [PolaroidContactSheetLayout.MAX_LENSES] lenses as one sheet, each a miniature polaroid
+     * with its own name and optical line, "via <app>" printed once in the footer. Main thread only: pages are
+     * captured one at a time (the lens in [liveView]/[liveLensId] from the live view, every other lens from a
+     * temporary LensView that is never attached to a window), drawn into the sheet and recycled at once.
+     * Only compress and file write run on [Dispatchers.IO]. Delivers `null` on any failure.
+     * ponytail: the sheet is always written to cache/polaroid/lenses.png, so a new export replaces the last one.
+     * ponytail: the page/cell `recycle()` calls bound peak memory but change no pixel, so no test can see them
+     * (mutation "skip recycle" survives by design); the 6-lens and 64 MB caps are what the tests pin.
+     */
+    @JvmStatic
+    fun exportContactSheetAsync(
+        context: Context,
+        host: View,
+        specs: List<LensExportSpec>,
+        liveView: LensView?,
+        liveLensId: String?,
+        appsForLens: (String) -> ArrayList<App>,
+        onDone: (Uri?) -> Unit
+    ) {
+        val chosen = specs.take(PolaroidContactSheetLayout.MAX_LENSES)
+        val live = liveView?.takeIf { it.width > 0 && it.height > 0 }
+        val pageWidth = live?.width ?: host.width
+        val pageHeight = live?.height ?: host.height
+        if (chosen.isEmpty() || pageWidth <= 0 || pageHeight <= 0) {
+            onDone(null)
+            return
+        }
+        val appContext = context.applicationContext
+        val frame = calculatePolaroidLayout(pageWidth, pageHeight)
+        val sheetLayout = PolaroidContactSheetLayout.compute(chosen.size, frame.outerWidth, frame.outerHeight)
+        val sheet = try {
+            createBitmap(sheetLayout.width, sheetLayout.height, Bitmap.Config.ARGB_8888)
+        } catch (error: OutOfMemoryError) {
+            Logger.e("PolaroidExportHelper: sheet alloc failed", error)
+            onDone(null)
+            return
+        }
+        val appName = appContext.getString(R.string.app_name)
+        val via = appContext.getString(R.string.lens_share_caption_via, appName)
+        val drawn = try {
+            val canvas = Canvas(sheet)
+            canvas.drawColor(Color.WHITE)
+            val scalePaint = Paint(Paint.FILTER_BITMAP_FLAG)
+            chosen.forEachIndexed { index, spec ->
+                val page = capturePage(appContext, spec, live, liveLensId, pageWidth, pageHeight, appsForLens)
+                val framed = try {
+                    renderFrame(page, frame, CaptionLines(buildCaptionLine1(spec.lensName, appName), spec.optical))
+                } finally {
+                    page.recycle()
+                }
+                try {
+                    val cell = sheetLayout.cells[index]
+                    canvas.drawBitmap(
+                        framed, null,
+                        Rect(cell.left, cell.top, cell.left + cell.width, cell.top + cell.height),
+                        scalePaint
+                    )
+                } finally {
+                    framed.recycle()
+                }
+            }
+            drawSheetFooter(canvas, sheetLayout, via)
+            true
+        } catch (error: OutOfMemoryError) {
+            Logger.e("PolaroidExportHelper: sheet composite out of memory", error)
+            false
+        } catch (error: Exception) {
+            Logger.e("PolaroidExportHelper: sheet composite failed", error)
+            false
+        }
+        if (!drawn) {
+            sheet.recycle()
+            onDone(null)
+            return
+        }
+        ApplicationScope.scope.launch(Dispatchers.IO) {
+            var file: File? = null
+            val uri = try {
+                file = writeToCache(appContext, sheet, SHEET_FILE_NAME)
+                FileProvider.getUriForFile(appContext, "${appContext.packageName}.fileprovider", file)
+            } catch (error: Exception) {
+                Logger.e("PolaroidExportHelper: sheet export failed", error)
+                file?.delete()
+                null
+            } finally {
+                sheet.recycle()
+            }
+            withContext(Dispatchers.Main) { onDone(uri) }
+        }
+    }
+
+    private fun capturePage(
+        context: Context,
+        spec: LensExportSpec,
+        live: LensView?,
+        liveLensId: String?,
+        width: Int,
+        height: Int,
+        appsForLens: (String) -> ArrayList<App>
+    ): Bitmap {
+        val view = if (live != null && spec.lensId == liveLensId) {
+            live
+        } else {
+            LensView(context).apply {
+                // lensId first: its setter re-arranges Smart Focus, so setting it after setApps would do it twice.
+                lensId = spec.lensId
+                setApps(appsForLens(spec.lensId))
+                setHasOtherLenses(false)
+                measure(
+                    View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.EXACTLY),
+                    View.MeasureSpec.makeMeasureSpec(height, View.MeasureSpec.EXACTLY)
+                )
+                layout(0, 0, width, height)
+            }
+        }
+        view.resetToIdleForExport()
+        return createBitmap(width, height, Bitmap.Config.ARGB_8888).also { view.draw(Canvas(it)) }
+    }
+
+    private fun drawSheetFooter(canvas: Canvas, layout: SheetLayout, via: String) {
+        val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Color.GRAY
+            textSize = SHEET_FOOTER_TEXT_SIZE_PX
+            textAlign = Paint.Align.CENTER
+            typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.ITALIC)
+        }
+        canvas.drawText(via, layout.width / 2f, (layout.height - SHEET_FOOTER_BASELINE_FROM_BOTTOM_PX).toFloat(), paint)
     }
 }
