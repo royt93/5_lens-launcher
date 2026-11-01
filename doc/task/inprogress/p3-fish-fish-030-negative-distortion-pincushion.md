@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | idea |
-| Status | in progress (profile PINCUSHION per-lens; positive distortion; xem AUDIT_FISH-030_2026-10-31.md) |
+| Status | in progress (profile PINCUSHION per-lens; positive distortion; audit 8,8/10, xem AUDIT_FISH-030_2026-10-31.md; còn thiếu smoke UI bằng ngón thật) |
 | Priority | P3 |
 | Evidence | idea |
 | Epic | Fisheye Smart |
