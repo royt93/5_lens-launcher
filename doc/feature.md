@@ -113,7 +113,7 @@ Source of truth for implementation choices in this session. Detailed acceptance 
 
 - **REL-2026.10.07 — Chuẩn bị release store (07/10/2026)**: audit tĩnh xong; code-side đã bump version, thêm backup rules (`BackupRulesTest` 3/3), R8 release build + 16 KB zipalign OK, unit 725/725. Owner quyết (07/10): giữ rewarded ID test, skip consent ADS-001, giữ 3 permission nhạy cảm, dùng key hiện tại (SEC-001 để sau). Còn lại: smoke TECNO + audit >9. Xem `doc/task/RELEASE_OWNER_CHECKLIST.md`.
 
-🟡 **FISH-031 — Focus Ring Quick Shortcuts (2026-11-01)**: đang thiết kế/plan và triển khai; vòng chip trên icon held dùng `LauncherApps` shortcut, giữ menu app hiện tại làm fallback. Ads/IAP và TalkBack mới ngoài phạm vi.
+🟡 **FISH-031 — Focus Ring Quick Shortcuts (2026-11-01)**: giữ icon hiện tối đa 3 chip shortcut thật quanh icon; trượt vào chip và thả chạy shortcut, thả ngoài chip mở menu app cũ. Gate 1.392 unit xanh, tích hợp 8/8, mutation 16/16, smoke thật trên TECNO BG6 (Chrome: Incognito/New tab). Audit 8,9/10 (`doc/task/AUDIT_FISH-031_2026-11-01.md`), chưa push; OPPO chưa khôi phục.
 
 ## 📋 Picked
 

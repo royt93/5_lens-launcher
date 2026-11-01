@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | exclusive |
-| Status | in progress (approved design and implementation plan 2026-11-01) |
+| Status | in progress: implemented and smoked on TECNO BG6, audit 8,9/10 (xem AUDIT_FISH-031_2026-11-01.md), chưa push |
 | Priority | P3 |
 | Evidence | idea |
 | Epic | Fisheye Smart |
@@ -21,10 +21,10 @@ Là người dùng, tôi muốn giữ icon để lens phóng thêm và hiện sh
 
 ## Acceptance criteria
 
-- [ ] Giữ lâu phóng thêm một bậc và hiện shortcut trong vòng.
-- [ ] Gate reduced-motion, có đường thay thế a11y.
-- [ ] Không phá pan/pinch.
-- [ ] Test + smoke + đo frame.
+- [x] Giữ lâu phóng thêm một bậc và hiện shortcut trong vòng (BG6: Chrome hiện Incognito/New tab, chạy được).
+- [x] Reduced-motion bỏ bước phóng thêm; đường thay thế là menu app cũ (TalkBack mới ngoài phạm vi theo owner).
+- [x] Không phá pan/pinch (pinch 12/12, drag 5/5, widget 18/18 trên BG6).
+- [x] Test + smoke thật + đo thời gian vẽ nanoTime (vòng bật 1,86 ms mean, p95 2,61 ms).
 
 ## Implementation notes
 
