@@ -329,7 +329,7 @@ Giới hạn: agent audit ui chưa đọc hết `LensView.kt`, `ActAbout.java`, 
 
 | ID | P | SP | Story |
 |---|---|---|---|
-| `FISH-031` | P3 | 5 | [Vòng tiêu điểm đa lớp: giữ lâu mở shortcut ngay trong vòng](todo/p3-fish-fish-031-focus-ring-quick-shortcuts.md) |
+| `FISH-031` 🟡 in progress 2026-11-01 | P3 | 5 | [Vòng tiêu điểm đa lớp: giữ lâu mở shortcut ngay trong vòng](inprogress/p3-fish-fish-031-focus-ring-quick-shortcuts.md) |
 | `FISH-032` | P3 | 3 | [Khẩu độ tự động: độ cong mặc định theo số app của lens](todo/p3-fish-fish-032-auto-aperture-by-app-count.md) |
 | `FISH-033` | P3 | 5 | [Thấu kính nghiêng theo cảm biến (tilt parallax)](todo/p3-fish-fish-033-gyro-tilt-parallax.md) |
 | `FISH-034` | P3 | 3 | [Vignette và sai sắc ở mép lens theo độ méo](todo/p3-fish-fish-034-chromatic-vignette-rim.md) |
