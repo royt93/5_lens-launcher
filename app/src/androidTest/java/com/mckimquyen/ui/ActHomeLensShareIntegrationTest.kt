@@ -69,6 +69,15 @@ class ActHomeLensShareIntegrationTest {
             }
             activity.onLensMenuItemSelected(5, 1)
         }
+        idle()
+        // FISH-037: with two lenses Share opens a picker that has the viewed (second) lens ticked,
+        // so confirming it unchanged must still export exactly that lens.
+        scenario.onActivity { activity ->
+            val picker = requireNotNull(activity.lensDialog) { "two lenses must open the share picker" }
+            assertTrue("the viewed lens is pre-ticked", picker.listView.isItemChecked(1))
+            assertTrue("the other lens is not", !picker.listView.isItemChecked(0))
+            picker.getButton(android.content.DialogInterface.BUTTON_POSITIVE).performClick()
+        }
         assertTrue("share export must complete", latch.await(5, TimeUnit.SECONDS))
         assertNotNull("sharing the second lens must still launch a chooser", captured)
 

@@ -3,9 +3,11 @@ package com.mckimquyen.ui.home;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -26,14 +28,19 @@ import com.mckimquyen.ui.dialog.LensDialogs;
 import com.mckimquyen.util.ApertureRevealHelper;
 import com.mckimquyen.util.LensAppScope;
 import com.mckimquyen.util.LensAppScopeEditor;
+import com.mckimquyen.util.LensProfile;
+import com.mckimquyen.util.PolaroidCaptionFormatter;
+import com.mckimquyen.util.PolaroidContactSheetLayout;
 import com.mckimquyen.util.PolaroidExportHelper;
 import com.mckimquyen.util.UtilSettings;
 import com.mckimquyen.views.LensView;
 import com.mckimquyen.views.PointAnchor;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import kotlin.Unit;
@@ -409,8 +416,9 @@ public final class LensMenuCoordinator {
             return;
         }
         String activeLensId = view.getLensId();
+        List<LensWorkspace> allLenses = host.lenses().currentLenses();
         LensWorkspace matched = null;
-        for (LensWorkspace lens : host.lenses().currentLenses()) {
+        for (LensWorkspace lens : allLenses) {
             if (lens.getId().equals(activeLensId)) {
                 matched = lens;
                 break;
@@ -422,28 +430,106 @@ public final class LensMenuCoordinator {
             clearPendingAutoExportLensAndNotifyFailure();
             return;
         }
-        String lensName = matched.getName();
-        PolaroidExportHelper.INSTANCE.exportAsync(view, lensName, activity, uri -> {
-            // FISH-013: only clear the durable pending flag once export has actually reached a
-            // terminal outcome (success or failure) - never at request time - so a process kill
-            // mid-export still resurrects the request on next launch instead of losing it.
-            UtilSettings settings = host.settings();
-            if (settings != null) {
-                settings.clearPendingAutoExportLens();
-            }
-            if (uri != null) {
-                try {
-                    host.launchShare(Intent.createChooser(
-                            PolaroidExportHelper.INSTANCE.buildShareIntent(uri),
-                            activity.getString(R.string.share_via)));
-                } catch (Exception e) {
-                    Toast.makeText(activity, R.string.error_lens_share_failed, Toast.LENGTH_SHORT).show();
-                }
-            } else {
+        // FISH-037: one lens goes straight through; two or more let the user pick which to share.
+        if (allLenses.size() <= 1) {
+            exportSingleLens(view, matched, activity);
+        } else {
+            showLensSharePicker(activity, view, matched, allLenses);
+        }
+    }
+
+    private void exportSingleLens(LensView liveView, LensWorkspace lens, Activity activity) {
+        String optical = buildOpticalCaption(host.settings(), lens.getId(), activity);
+        PolaroidExportHelper.INSTANCE.exportAsync(liveView, lens.getName(), optical, activity, this::onExportDone);
+    }
+
+    private void showLensSharePicker(Activity activity, LensView liveView, LensWorkspace activeLens,
+                                     List<LensWorkspace> allLenses) {
+        dismissLensDialog();
+        Set<Integer> initiallyChecked = new HashSet<>();
+        int activeIndex = allLenses.indexOf(activeLens);
+        if (activeIndex >= 0) initiallyChecked.add(activeIndex);
+        List<String> names = new ArrayList<>();
+        for (LensWorkspace lens : allLenses) names.add(lens.getName());
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                activity, android.R.layout.simple_list_item_multiple_choice, names);
+        final boolean[] confirmed = {false};
+        AlertDialog dialog = LensDialogs.multiChoice(activity, R.string.lens_share_pick_title, adapter,
+                initiallyChecked, android.R.string.ok,
+                indexes -> {
+                    confirmed[0] = true;
+                    exportPickedLenses(indexes, allLenses, liveView, activeLens.getId(), activity);
+                    return Unit.INSTANCE;
+                },
+                // Only cancellation is terminal now. Confirm dismisses the picker before the async
+                // export starts; retain the durable FISH-013 flag until onExportDone.
+                () -> { if (!confirmed[0]) clearPendingAutoExportLens(); },
+                PolaroidContactSheetLayout.MAX_LENSES, true, R.string.lens_share_limit_message);
+        host.setDialog(dialog);
+        dialog.show();
+    }
+
+    private void clearPendingAutoExportLens() {
+        UtilSettings settings = host.settings();
+        if (settings != null) settings.clearPendingAutoExportLens();
+    }
+
+    private void exportPickedLenses(Set<Integer> indexes, List<LensWorkspace> allLenses, LensView liveView,
+                                    String activeLensId, Activity activity) {
+        List<PolaroidExportHelper.LensExportSpec> specs = new ArrayList<>();
+        LensWorkspace onlyPicked = null;
+        for (int i = 0; i < allLenses.size(); i++) {
+            if (!indexes.contains(i)) continue;
+            LensWorkspace lens = allLenses.get(i);
+            onlyPicked = lens;
+            specs.add(new PolaroidExportHelper.LensExportSpec(
+                    lens.getId(), lens.getName(), buildOpticalCaption(host.settings(), lens.getId(), activity)));
+        }
+        if (specs.isEmpty()) {
+            clearPendingAutoExportLensAndNotifyFailure();
+            return;
+        }
+        if (specs.size() == 1 && onlyPicked.getId().equals(activeLensId)) {
+            exportSingleLens(liveView, onlyPicked, activity);
+            return;
+        }
+        // Two or more lenses, or one lens that is not the viewed page: the sheet path renders any lens.
+        PolaroidExportHelper.exportContactSheetAsync(activity, liveView, specs, liveView, activeLensId,
+                lensId -> LensAppScope.forLens(host.apps(), host.settings(), lensId), this::onExportDone);
+    }
+
+    private Unit onExportDone(Uri uri) {
+        // FISH-013: only clear the durable pending flag once export has actually reached a
+        // terminal outcome (success or failure) - never at request time - so a process kill
+        // mid-export still resurrects the request on next launch instead of losing it.
+        clearPendingAutoExportLens();
+        Activity activity = host.activity();
+        if (uri != null) {
+            try {
+                host.launchShare(Intent.createChooser(
+                        PolaroidExportHelper.INSTANCE.buildShareIntent(uri),
+                        activity.getString(R.string.share_via)));
+            } catch (Exception e) {
                 Toast.makeText(activity, R.string.error_lens_share_failed, Toast.LENGTH_SHORT).show();
             }
-            return Unit.INSTANCE;
-        });
+        } else {
+            Toast.makeText(activity, R.string.error_lens_share_failed, Toast.LENGTH_SHORT).show();
+        }
+        return Unit.INSTANCE;
+    }
+
+    private static String buildOpticalCaption(UtilSettings settings, String lensId, Activity activity) {
+        if (settings == null) return "";
+        int profileRes;
+        switch (settings.getLensProfile(lensId)) {
+            case ANAMORPHIC: profileRes = R.string.lens_profile_anamorphic; break;
+            case CYLINDRICAL: profileRes = R.string.lens_profile_cylindrical; break;
+            case PINCUSHION: profileRes = R.string.lens_profile_pincushion; break;
+            default: profileRes = R.string.lens_profile_fisheye; break;
+        }
+        return PolaroidCaptionFormatter.opticalLine(activity.getString(profileRes),
+                settings.getDistortionFactor(lensId), settings.getFloat(UtilSettings.KEY_SCALE_FACTOR),
+                settings.getLensHood(lensId), Locale.getDefault());
     }
 
     /** FISH-013: shared terminal-failure path for exportActiveLensImage's unrecoverable cases -
