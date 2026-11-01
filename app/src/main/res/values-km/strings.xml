@@ -178,6 +178,8 @@
     <string name="lens_smart_focus_enable">បើកការផ្ដោតឆ្លាតវៃ</string>
     <string name="lens_smart_focus_disable">បិទការផ្ដោតឆ្លាតវៃ</string>
     <string name="lens_share_caption_via">តាមរយៈ %1$s</string>
+    <string name="lens_share_pick_title">ជ្រើសរើសកញ្ចក់ដើម្បីចែករំលែក</string>
+    <string name="lens_share_limit_message">អ្នកអាចចែករំលែកកញ្ចក់បានអតិបរមា %1$d ក្នុងពេលតែមួយ</string>
     <string name="lens_share_image">ចែករំលែករូបភាពកែវពង្រីក</string>
     <string name="error_lens_share_failed">មិនអាចចែករំលែករូបភាពកែវពង្រីកបានទេ</string>
     <string name="setting_clean_lens_mode">ធ្វើឲ្យកែវថតស្អាត (របៀបសាមញ្ញ)</string>

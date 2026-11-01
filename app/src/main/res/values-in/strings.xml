@@ -178,6 +178,8 @@
     <string name="lens_smart_focus_enable">Aktifkan Fokus Pintar</string>
     <string name="lens_smart_focus_disable">Nonaktifkan Fokus Pintar</string>
     <string name="lens_share_caption_via">melalui %1$s</string>
+    <string name="lens_share_pick_title">Pilih lensa untuk dibagikan</string>
+    <string name="lens_share_limit_message">Anda dapat membagikan hingga %1$d lensa sekaligus</string>
     <string name="lens_share_image">Bagikan gambar lensa</string>
     <string name="error_lens_share_failed">Gagal membagikan gambar lensa</string>
     <string name="setting_clean_lens_mode">Bersihkan lensa (mode minimalis)</string>

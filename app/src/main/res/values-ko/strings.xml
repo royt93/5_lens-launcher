@@ -178,6 +178,8 @@
     <string name="lens_smart_focus_enable">스마트 포커스 켜기</string>
     <string name="lens_smart_focus_disable">스마트 포커스 끄기</string>
     <string name="lens_share_caption_via">%1$s 제공</string>
+    <string name="lens_share_pick_title">공유할 렌즈 선택</string>
+    <string name="lens_share_limit_message">한 번에 최대 %1$d개의 렌즈를 공유할 수 있습니다</string>
     <string name="lens_share_image">렌즈 이미지 공유</string>
     <string name="error_lens_share_failed">렌즈 이미지를 공유할 수 없습니다</string>
     <string name="setting_clean_lens_mode">렌즈 깔끔하게 (미니멀 모드)</string>

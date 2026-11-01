@@ -178,6 +178,8 @@
     <string name="lens_smart_focus_enable">เปิดสมาร์ทโฟกัส</string>
     <string name="lens_smart_focus_disable">ปิดสมาร์ทโฟกัส</string>
     <string name="lens_share_caption_via">ผ่าน %1$s</string>
+    <string name="lens_share_pick_title">เลือกเลนส์ที่จะแชร์</string>
+    <string name="lens_share_limit_message">แชร์ได้สูงสุด %1$d เลนส์พร้อมกัน</string>
     <string name="lens_share_image">แชร์ภาพเลนส์</string>
     <string name="error_lens_share_failed">ไม่สามารถแชร์ภาพเลนส์ได้</string>
     <string name="setting_clean_lens_mode">เลนส์สะอาดตา (โหมดมินิมอล)</string>

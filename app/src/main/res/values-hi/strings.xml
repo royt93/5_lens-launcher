@@ -178,6 +178,8 @@
     <string name="lens_smart_focus_enable">स्मार्ट फ़ोकस चालू करें</string>
     <string name="lens_smart_focus_disable">स्मार्ट फ़ोकस बंद करें</string>
     <string name="lens_share_caption_via">%1$s के माध्यम से</string>
+    <string name="lens_share_pick_title">साझा करने के लिए लेंस चुनें</string>
+    <string name="lens_share_limit_message">आप एक बार में अधिकतम %1$d लेंस साझा कर सकते हैं</string>
     <string name="lens_share_image">लेंस छवि साझा करें</string>
     <string name="error_lens_share_failed">लेंस छवि साझा नहीं की जा सकी</string>
     <string name="setting_clean_lens_mode">लेंस को साफ़ रखें (मिनिमलिस्ट मोड)</string>

@@ -103,6 +103,16 @@ class LensStringTranslationTest {
     }
 
     @Test
+    fun `the share limit message formats the maximum lens count in every locale`() {
+        val base = baseStrings
+        assertEquals(listOf("%1\$d"), placeholders(base.getValue("lens_share_limit_message")))
+        localeDirectories().forEach { directory ->
+            val value = lensStrings(File(directory, "strings.xml")).getValue("lens_share_limit_message")
+            assertEquals("${directory.name} must keep the single %1\$d", listOf("%1\$d"), placeholders(value))
+        }
+    }
+
+    @Test
     fun `the base lens strings no longer suppress MissingTranslation`() {
         val stringsXml = File(resDirectory(), "values/strings.xml")
         val nodes = documentBuilder.parse(stringsXml).getElementsByTagName("string")

@@ -178,6 +178,8 @@
     <string name="lens_smart_focus_enable">ເປີດໂຟກັສອັດສະລິຍະ</string>
     <string name="lens_smart_focus_disable">ປິດໂຟກັສອັດສະລິຍະ</string>
     <string name="lens_share_caption_via">ຜ່ານ %1$s</string>
+    <string name="lens_share_pick_title">ເລືອກເລນເພື່ອແບ່ງປັນ</string>
+    <string name="lens_share_limit_message">ທ່ານສາມາດແບ່ງປັນເລນໄດ້ສູງສຸດ %1$d ອັນພ້ອມກັນ</string>
     <string name="lens_share_image">ແບ່ງປັນຮູບພາບເລນ</string>
     <string name="error_lens_share_failed">ບໍ່ສາມາດແບ່ງປັນຮູບພາບເລນໄດ້</string>
     <string name="setting_clean_lens_mode">ເຮັດໃຫ້ເລນສະອາດ (ໂໝດນ້ອຍທີ່ສຸດ)</string>

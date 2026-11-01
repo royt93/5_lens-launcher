@@ -178,6 +178,8 @@
     <string name="lens_smart_focus_enable">Smart Focus einschalten</string>
     <string name="lens_smart_focus_disable">Smart Focus ausschalten</string>
     <string name="lens_share_caption_via">über %1$s</string>
+    <string name="lens_share_pick_title">Linsen zum Teilen auswählen</string>
+    <string name="lens_share_limit_message">Es lassen sich höchstens %1$d Linsen gleichzeitig teilen</string>
     <string name="lens_share_image">Linsenbild teilen</string>
     <string name="error_lens_share_failed">Linsenbild konnte nicht geteilt werden</string>
     <string name="setting_clean_lens_mode">Linse aufräumen (Minimalmodus)</string>

@@ -178,6 +178,8 @@
     <string name="lens_smart_focus_enable">Включить умный фокус</string>
     <string name="lens_smart_focus_disable">Выключить умный фокус</string>
     <string name="lens_share_caption_via">через %1$s</string>
+    <string name="lens_share_pick_title">Выберите линзы для отправки</string>
+    <string name="lens_share_limit_message">Можно поделиться не более чем %1$d линзами одновременно</string>
     <string name="lens_share_image">Поделиться изображением объектива</string>
     <string name="error_lens_share_failed">Не удалось поделиться изображением объектива</string>
     <string name="setting_clean_lens_mode">Чистая линза (минималистичный режим)</string>

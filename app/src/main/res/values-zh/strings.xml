@@ -178,6 +178,8 @@
     <string name="lens_smart_focus_enable">开启智能焦点</string>
     <string name="lens_smart_focus_disable">关闭智能焦点</string>
     <string name="lens_share_caption_via">来自 %1$s</string>
+    <string name="lens_share_pick_title">选择要分享的镜头</string>
+    <string name="lens_share_limit_message">一次最多可分享 %1$d 个镜头</string>
     <string name="lens_share_image">分享镜头图片</string>
     <string name="error_lens_share_failed">无法分享镜头图片</string>
     <string name="setting_clean_lens_mode">清爽镜头（极简模式）</string>

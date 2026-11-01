@@ -269,6 +269,8 @@
     <!-- FISH-EXPORT (polaroid lens export, 2026-09-28 brainstorm): translated into all 16
          locales in the same pass as lens_share_image / error_lens_share_failed below. -->
     <string name="lens_share_caption_via">via %1$s</string>
+    <string name="lens_share_pick_title">Choose lenses to share</string>
+    <string name="lens_share_limit_message">You can share up to %1$d lenses at once</string>
     <string name="lens_share_image">Share lens image</string>
     <string name="error_lens_share_failed">Couldn\'t share lens image</string>
     <string name="setting_clean_lens_mode">Clean the lens (Minimalist mode)</string>

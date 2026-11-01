@@ -204,6 +204,8 @@
     <string name="lens_smart_focus_enable">Bật Tiêu điểm thông minh</string>
     <string name="lens_smart_focus_disable">Tắt Tiêu điểm thông minh</string>
     <string name="lens_share_caption_via">qua %1$s</string>
+    <string name="lens_share_pick_title">Chọn thấu kính để chia sẻ</string>
+    <string name="lens_share_limit_message">Bạn có thể chia sẻ tối đa %1$d thấu kính cùng lúc</string>
     <string name="lens_share_image">Chia sẻ ảnh lens</string>
     <string name="error_lens_share_failed">Không thể chia sẻ ảnh lens</string>
     <string name="setting_clean_lens_mode">Làm sạch lens (chế độ tối giản)</string>

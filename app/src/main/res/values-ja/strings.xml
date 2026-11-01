@@ -178,6 +178,8 @@
     <string name="lens_smart_focus_enable">スマートフォーカスをオンにする</string>
     <string name="lens_smart_focus_disable">スマートフォーカスをオフにする</string>
     <string name="lens_share_caption_via">%1$s より</string>
+    <string name="lens_share_pick_title">共有するレンズを選択</string>
+    <string name="lens_share_limit_message">一度に共有できるレンズは最大%1$d個です</string>
     <string name="lens_share_image">レンズ画像を共有</string>
     <string name="error_lens_share_failed">レンズ画像を共有できませんでした</string>
     <string name="setting_clean_lens_mode">レンズをすっきり表示（ミニマルモード）</string>

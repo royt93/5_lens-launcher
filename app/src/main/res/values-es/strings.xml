@@ -178,6 +178,8 @@
     <string name="lens_smart_focus_enable">Activar el enfoque inteligente</string>
     <string name="lens_smart_focus_disable">Desactivar el enfoque inteligente</string>
     <string name="lens_share_caption_via">vía %1$s</string>
+    <string name="lens_share_pick_title">Elegir lentes para compartir</string>
+    <string name="lens_share_limit_message">Puedes compartir hasta %1$d lentes a la vez</string>
     <string name="lens_share_image">Compartir imagen de la lente</string>
     <string name="error_lens_share_failed">No se pudo compartir la imagen de la lente</string>
     <string name="setting_clean_lens_mode">Limpiar la lente (modo minimalista)</string>
