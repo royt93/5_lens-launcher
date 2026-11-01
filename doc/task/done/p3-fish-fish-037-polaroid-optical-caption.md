@@ -3,9 +3,9 @@
 | Field | Value |
 |---|---|
 | Type | exclusive |
-| Status | in progress (2026-11-01) |
+| Status | done (2026-11-01) |
 | Priority | P3 |
-| Evidence | implementation + tests + TECNO BG6 smoke; audit 8.3/10, blocked on class-level integration hang |
+| Evidence | implementation + tests + TECNO BG6 smoke; audit 9.1/10 (`doc/task/AUDIT_FISH-037_2026-11-01.md`), not pushed |
 | Epic | Fisheye Smart |
 | Estimate | 3 SP |
 | Risk | Low |
@@ -24,7 +24,7 @@ Là người dùng, tôi muốn ảnh chia sẻ nói rõ thông số lens và gh
 - [x] Caption in distortion/scale/profile.
 - [x] Tùy chọn ghép nhiều lens thành một tấm.
 - [x] Giới hạn kích thước ảnh/bộ nhớ (cạnh ≤ 4096 px, ≤ 64 MB; trần 6 lens).
-- [ ] Test dựng bitmap + smoke: smoke BG6 đạt cho 1 và 2 lens; `PolaroidContactSheetIntegrationTest` chạy riêng từng test xanh nhưng cả class kẹt trên BG6 chưa rõ gốc (xem `doc/task/AUDIT_FISH-037_2026-11-01.md`).
+- [x] Test dựng bitmap + smoke: smoke BG6 đạt cho 1, 2 và 6 lens, trần 6, hủy picker; `PolaroidContactSheetIntegrationTest` xanh cả class (Activity foreground giữ test khỏi bị Hiber đóng băng).
 
 ## Implementation notes
 
@@ -32,13 +32,13 @@ Gộp X2 (audit lens) và EXC-3 (audit ui).
 
 ## Verification and Definition of Done
 
-- [ ] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
-- [ ] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
-- [ ] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
-- [ ] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
-- [ ] No new lint/build failures.
-- [ ] A post-change audit record scores the round `> 9.0/10` before push.
-- [ ] Evidence and status are updated before moving this file to `done`.
+- [x] Unit tests cover pure logic, state transitions and failure branches (formatter, layout, caption, `forLens`, strings; 1.414 unit, 0 fail).
+- [x] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable (picker, `multiChoice` cap, export helper; accessibility: reuses native checkable list rows, no custom a11y work per owner scope).
+- [x] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable (`PolaroidContactSheetIntegrationTest` 8, FISH-013 pending-flag tests).
+- [x] Smoke tests pass on the device locked for the session (TECNO BG6, Android 13, APK sha256 `607d8358…`, 2026-11-01); device restored, 85/85 data hashes match.
+- [x] No new lint/build failures.
+- [x] A post-change audit record scores the round `> 9.0/10` before push (9.1/10). Push itself is pending an explicit owner request.
+- [x] Evidence and status are updated before moving this file to `done`.
 
 If a test layer is not applicable, replace its checkbox with a reviewed rationale; do not silently omit it.
 

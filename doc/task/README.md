@@ -335,4 +335,4 @@ Giới hạn: agent audit ui chưa đọc hết `LensView.kt`, `ActAbout.java`, 
 | `FISH-034` | P3 | 3 | [Vignette và sai sắc ở mép lens theo độ méo](todo/p3-fish-fish-034-chromatic-vignette-rim.md) |
 | `FISH-035` | P3 | 5 | [Vòng lấy nét: xoay một ngón quanh tâm để quay vòng thứ tự app](todo/p3-fish-fish-035-rotate-ring-reorder.md) |
 | `FISH-036` | P3 | 5 | [Chia sẻ 'lens profile' (cấu hình quang học) qua file](todo/p3-fish-fish-036-lens-profile-share-file.md) |
-| `FISH-037` 🟡 in progress 2026-11-01 (audit 8,3/10, chưa đóng) | P3 | 3 | [Polaroid export có chú thích quang học và contact-sheet nhiều lens](inprogress/p3-fish-fish-037-polaroid-optical-caption.md) |
+| `FISH-037` ✅ done 2026-11-01 (audit 9,1/10, TECNO BG6, chưa push) | P3 | 3 | [Polaroid export có chú thích quang học và contact-sheet nhiều lens](done/p3-fish-fish-037-polaroid-optical-caption.md) |
