@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.view.Gravity
 import android.widget.ArrayAdapter
 import android.widget.ListView
+import android.widget.Toast
 import android.widget.LinearLayout
 import android.widget.FrameLayout
 import android.widget.TextView
@@ -117,7 +118,13 @@ object LensDialogs {
         return dialog
     }
 
+    /**
+     * [maxSelected] caps the ticked rows: an initial set above the cap is cut to its lowest indexes, and
+     * ticking one more row un-ticks it again and shows [limitMessageRes] (if non-zero). With
+     * [requireSelection] the positive button stays disabled while nothing is ticked.
+     */
     @JvmStatic
+    @JvmOverloads
     fun <T> multiChoice(
         context: Context,
         @StringRes titleRes: Int,
@@ -126,8 +133,12 @@ object LensDialogs {
         @StringRes positiveRes: Int,
         onConfirm: (Set<Int>) -> Unit,
         onDismiss: Runnable?,
+        maxSelected: Int = Int.MAX_VALUE,
+        requireSelection: Boolean = false,
+        @StringRes limitMessageRes: Int = 0,
     ): AlertDialog {
-        val selected = initiallyChecked.toMutableSet()
+        val seed = initiallyChecked.sorted().take(maxSelected.coerceAtLeast(0))
+        val selected = seed.toMutableSet()
         val dialog = MaterialAlertDialogBuilder(context, R.style.MaterialYouDialogTheme)
             .setTitle(titleRes)
             .setAdapter(adapter, null)
@@ -138,11 +149,24 @@ object LensDialogs {
         dialog.setOnShowListener {
             val list = dialog.listView
             list.choiceMode = ListView.CHOICE_MODE_MULTIPLE
-            initiallyChecked.forEach { if (it in 0 until list.count) list.setItemChecked(it, true) }
+            val positive = dialog.getButton(DialogInterface.BUTTON_POSITIVE)
+            fun refreshPositive() { positive.isEnabled = !requireSelection || selected.isNotEmpty() }
+            seed.forEach { if (it in 0 until list.count) list.setItemChecked(it, true) }
+            refreshPositive()
             list.setOnItemClickListener { _, _, position, _ ->
-                if (list.isItemChecked(position)) selected.add(position) else selected.remove(position)
+                if (list.isItemChecked(position)) {
+                    if (selected.size >= maxSelected) {
+                        list.setItemChecked(position, false)
+                        if (limitMessageRes != 0) Toast.makeText(context, limitMessageRes, Toast.LENGTH_SHORT).show()
+                    } else {
+                        selected.add(position)
+                    }
+                } else {
+                    selected.remove(position)
+                }
+                refreshPositive()
             }
-            dialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener {
+            positive.setOnClickListener {
                 val result = selected.toSet()
                 dialog.dismiss()
                 onConfirm(result)
