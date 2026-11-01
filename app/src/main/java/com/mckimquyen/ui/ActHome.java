@@ -899,9 +899,7 @@ public class ActHome extends ActBase implements LensViewHolderHost, HomeQuickAct
     /** FISH-021: {@code listApp} narrowed by one lens's scope. Search keeps using the full {@code listApp}. */
     private ArrayList<App> scopedApps(String lensId) {
         if (listApp == null || utilSettings == null) return listApp;
-        return LensAppScope.filter(listApp,
-                utilSettings.getLensAppScope(lensId), utilSettings.getLensAppSelection(lensId),
-                utilSettings.getLensHiddenAppIds(lensId));
+        return LensAppScope.forLens(listApp, utilSettings, lensId);
     }
 
     /** FEAT-011: only a lens emptied by temporary hiding gets the recovery button. */

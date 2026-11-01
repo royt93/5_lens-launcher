@@ -97,4 +97,32 @@ class LensAppScopeTest {
         val result = LensAppScope.filter(listOf(a, b), LensAppScope.SELECTED, setOf(LensAppScope.identifierOf(a)))
         assertEquals(listOf(a), result)
     }
+
+    private fun settings() = UtilSettings(androidx.test.core.app.ApplicationProvider.getApplicationContext())
+
+    @Test
+    fun `forLens with scope ALL excludes the lens's hidden ids`() {
+        val settings = settings()
+        settings.saveLensAppScope("work", LensAppScope.ALL)
+        settings.saveLensHiddenAppIds("work", setOf(LensAppScope.identifierOf(mail)))
+        assertEquals(listOf(chat), LensAppScope.forLens(apps, settings, "work"))
+    }
+
+    @Test
+    fun `forLens with scope SELECTED keeps only the selection minus hidden ids`() {
+        val settings = settings()
+        settings.saveLensAppScope("work", LensAppScope.SELECTED)
+        settings.saveLensAppSelection("work", setOf(LensAppScope.identifierOf(mail), LensAppScope.identifierOf(chat)))
+        settings.saveLensHiddenAppIds("work", setOf(LensAppScope.identifierOf(mail)))
+        assertEquals(listOf(chat), LensAppScope.forLens(apps, settings, "work"))
+    }
+
+    @Test
+    fun `forLens reads each lens's own settings and an unknown lens shows every app`() {
+        val settings = settings()
+        settings.saveLensAppScope("work", LensAppScope.SELECTED)
+        settings.saveLensAppSelection("work", setOf(LensAppScope.identifierOf(mail)))
+        assertEquals(listOf(mail), LensAppScope.forLens(apps, settings, "work"))
+        assertEquals(apps, LensAppScope.forLens(apps, settings, "never-configured"))
+    }
 }

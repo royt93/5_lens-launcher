@@ -24,5 +24,15 @@ enum class LensAppScope {
                 val id = identifierOf(it)
                 (scope == ALL || id in selection) && id !in hiddenIds
             })
+
+        /** The apps one lens shows, from its own saved scope, selection and temporary-hidden ids. */
+        @JvmStatic
+        fun forLens(apps: List<App>, settings: UtilSettings, lensId: String): ArrayList<App> =
+            filter(
+                apps,
+                settings.getLensAppScope(lensId),
+                settings.getLensAppSelection(lensId),
+                settings.getLensHiddenAppIds(lensId)
+            )
     }
 }
