@@ -39,4 +39,8 @@
     <dimen name="dialog_text_padding">24dp</dimen>
     <dimen name="dialog_text_padding_vertical">8dp</dimen>
     <dimen name="ad_open_app_logo_size">240dp</dimen>
+    <!-- FISH-031: shortcut chips around the held icon -->
+    <dimen name="focus_ring_chip_radius">20dp</dimen>
+    <dimen name="focus_ring_gap">10dp</dimen>
+    <dimen name="focus_ring_chip_stroke">2dp</dimen>
 </resources>

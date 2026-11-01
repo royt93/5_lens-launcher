@@ -42,4 +42,7 @@
     <color name="colorAppTint">@color/colorOnSurfaceVariant</color>
     <color name="background">@color/colorSurface</color>
     <color name="searchSurface">#F2FFF8F6</color>
+    <!-- FISH-031 -->
+    <color name="focus_ring_chip_bg">#E6F2EDEA</color>
+    <color name="focus_ring_chip_bg_active">#FFFFD9D4</color>
 </resources>
