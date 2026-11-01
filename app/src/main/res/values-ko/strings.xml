@@ -284,7 +284,8 @@
     <string name="lens_profile_fisheye">어안</string>
     <string name="lens_profile_anamorphic">아나모픽</string>
     <string name="lens_profile_cylindrical">원통형</string>
-    <string name="lens_profile_hint">어안은 두 축을 모두 왜곡하고, 아나모픽은 가로만, 원통형은 세로만 왜곡합니다</string>
+    <string name="lens_profile_pincushion">핀쿠션</string>
+    <string name="lens_profile_hint">어안은 두 축을 모두 왜곡하고, 아나모픽은 가로, 원통형은 세로, 핀쿠션은 두 축의 변위를 반전합니다</string>
     <string name="lens_hood_title">렌즈 후드</string>
     <string name="lens_hood_hint">왜곡이 미치는 범위를 제한합니다. 전체는 화면 전체, 더 작은 후드는 바깥 아이콘을 고정합니다.</string>
     <string name="lens_hood_value_format">%1$d%%</string>

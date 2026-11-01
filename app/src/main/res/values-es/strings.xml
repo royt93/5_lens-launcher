@@ -294,7 +294,8 @@
     <string name="lens_profile_fisheye">Ojo de pez</string>
     <string name="lens_profile_anamorphic">Anamórfico</string>
     <string name="lens_profile_cylindrical">Cilíndrico</string>
-    <string name="lens_profile_hint">Ojo de pez deforma ambos ejes; anamórfico solo el horizontal; cilíndrico solo el vertical</string>
+    <string name="lens_profile_pincushion">Almohadilla</string>
+    <string name="lens_profile_hint">Ojo de pez deforma ambos ejes; anamórfico horizontal; cilíndrico vertical; almohadilla invierte el desplazamiento</string>
     <string name="lens_hood_title">Parasol de la lente</string>
     <string name="lens_hood_hint">Limita hasta dónde llega la deformación. Completo usa toda la pantalla; un parasol menor deja quietos los iconos fuera de él.</string>
     <string name="lens_hood_value_format">%1$d %%</string>

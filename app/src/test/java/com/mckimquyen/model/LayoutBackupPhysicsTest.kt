@@ -66,6 +66,22 @@ class LayoutBackupPhysicsTest {
     }
 
     @Test
+    fun pincushionProfileRoundTripsWithoutChangingPositiveDistortionBounds() {
+        val physics = LensPhysicsBackup(distortionFactor = 2.5f, lensProfile = "PINCUSHION")
+        assertEquals(physics, LayoutBackupLens.fromJson(lensWith(physics).toJson())?.physics)
+        val json = lensWith(LensPhysicsBackup(lensProfile = "NOT_A_PROFILE")).toJson()
+        assertNull("unknown profile must reject this physics block", LayoutBackupLens.fromJson(json)?.physics)
+    }
+
+    @Test
+    fun oldFisheyePhysicsWithoutProfileStillRoundTrips() {
+        val oldJson = lensWith(LensPhysicsBackup(distortionFactor = 2.5f)).toJson()
+        val parsed = LayoutBackupLens.fromJson(oldJson)?.physics
+        assertEquals(2.5f, parsed?.distortionFactor)
+        assertNull(parsed?.lensProfile)
+    }
+
+    @Test
     fun lensWithoutPhysicsOmitsTheKeyAndParsesBackAsNull() {
         val json = lensWith(null).toJson()
         assertFalse(json.has("physics"))

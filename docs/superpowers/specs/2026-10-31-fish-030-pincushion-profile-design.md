@@ -11,7 +11,7 @@ FISH-027 added per-lens Fisheye, Anamorphic, and Cylindrical profiles, using exi
 
 - Add `PINCUSHION` as a fourth per-lens profile in the existing Lens Settings profile control.
 - Fisheye remains default for every existing lens and keeps current pixel output exactly.
-- Pincushion reflects the Fisheye displacement around the lens point: if `f` is the existing shifted coordinate and `L` is lens position, reverse result is `L - (f - L)`. The same transform applies to shifted and scaled centers, so generated rectangle and hit-test remain identical.
+- Pincushion reverses the Fisheye displacement relative to the item position: if `f` is the existing shifted coordinate and `i` is item position, reverse result is `i - (f - i)` = `2i - f`. The same transform applies to shifted and scaled centers, so generated rectangle and hit-test remain identical, and zero-animation multiplier / unwarped axis leave icons in their rest position.
 - Profile axis policies remain unchanged: Fisheye and Pincushion warp both axes, Anamorphic only X, Cylindrical only Y. Hood falloff applies after computing the profile's directed displacement, keeping the zero-distance edge and out-of-hood identity behavior.
 - Distortion remains a positive magnitude in existing `KEY_DISTORTION_FACTOR` bounds. Do not allow negative values, add a separate Pincushion strength, or add another physics preset.
 

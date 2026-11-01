@@ -284,7 +284,8 @@
     <string name="lens_profile_fisheye">ຕາປາ</string>
     <string name="lens_profile_anamorphic">ອະນາມໍຟິກ</string>
     <string name="lens_profile_cylindrical">ຮູບທໍ່</string>
-    <string name="lens_profile_hint">ຕາປາບິດທັງສອງແກນ; ອະນາມໍຟິກບິດສະເພາະແນວນອນ; ຮູບທໍ່ບິດສະເພາະແນວຕັ້ງ</string>
+    <string name="lens_profile_pincushion">ໝອນປັກເຂັມ</string>
+    <string name="lens_profile_hint">ຕາປາບິດທັງສອງແກນ; ອະນາມໍຟິກແນວນອນ; ຮູບທໍ່ແນວຕັ້ງ; ໝອນປັກເຂັມປີ້ນການຍ້າຍທັງສອງແກນ</string>
     <string name="lens_hood_title">ຝາຄອບເລນ</string>
     <string name="lens_hood_hint">ຈຳກັດໄລຍະທີ່ການບິດໄປເຖິງ. ເຕັມໃຊ້ທັງໜ້າຈໍ; ຝາຄອບນ້ອຍກວ່າຈະໃຫ້ໄອຄອນຂ້າງນອກຢູ່ກັບທີ່.</string>
     <string name="lens_hood_value_format">%1$d%%</string>

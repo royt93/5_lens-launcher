@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | idea |
-| Status | todo |
+| Status | in progress (profile PINCUSHION per-lens; positive distortion; xem AUDIT_FISH-030_2026-10-31.md) |
 | Priority | P3 |
 | Evidence | idea |
 | Epic | Fisheye Smart |
@@ -21,8 +21,8 @@ Là người dùng, tôi muốn chế độ ngắm rìa đẩy icon ra biên.
 
 ## Acceptance criteria
 
-- [ ] Mở biên dưới + clamp + preset riêng.
-- [ ] Test hit-test vùng tâm giãn.
+- [x] Thay "mở biên dưới" bằng profile PINCUSHION riêng per-lens, độ méo giữ dương (owner chốt 2026-10-31); không preset mới.
+- [x] Test hit-test: rect đã vẽ = rect hit-test cho mọi profile (`LensViewProfileIntegrationTest`).
 - [ ] Độc lập FISH-026/FISH-009.
 
 ## Implementation notes

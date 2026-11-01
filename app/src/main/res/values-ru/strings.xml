@@ -299,7 +299,8 @@
     <string name="lens_profile_fisheye">Рыбий глаз</string>
     <string name="lens_profile_anamorphic">Анаморфный</string>
     <string name="lens_profile_cylindrical">Цилиндрический</string>
-    <string name="lens_profile_hint">«Рыбий глаз» искажает обе оси, анаморфный — только горизонтальную, цилиндрический — только вертикальную</string>
+    <string name="lens_profile_pincushion">Подушка</string>
+    <string name="lens_profile_hint">«Рыбий глаз» искажает обе оси; анаморфный — по горизонтали; цилиндрический — по вертикали; «подушка» обращает смещение</string>
     <string name="lens_hood_title">Бленда объектива</string>
     <string name="lens_hood_hint">Ограничивает дальность искажения. «Полная» — весь экран; меньшая бленда оставляет значки снаружи неподвижными.</string>
     <string name="lens_hood_value_format">%1$d%%</string>

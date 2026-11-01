@@ -289,7 +289,8 @@
     <string name="lens_profile_fisheye">फिशआई</string>
     <string name="lens_profile_anamorphic">एनामॉर्फिक</string>
     <string name="lens_profile_cylindrical">बेलनाकार</string>
-    <string name="lens_profile_hint">फिशआई दोनों अक्षों को बिगाड़ता है; एनामॉर्फिक केवल क्षैतिज; बेलनाकार केवल ऊर्ध्वाधर</string>
+    <string name="lens_profile_pincushion">पिनकुशन</string>
+    <string name="lens_profile_hint">फिशआई दोनों अक्षों को विकृत करता है; एनामॉर्फिक क्षैतिज; बेलनाकार ऊर्ध्वाधर; पिनकुशन दोनों अक्षों पर विस्थापन को उलट देता है</string>
     <string name="lens_hood_title">लेंस हुड</string>
     <string name="lens_hood_hint">बताता है कि विकृति कितनी दूर तक जाए। पूर्ण का अर्थ पूरी स्क्रीन; छोटा हुड बाहर के आइकन स्थिर रखता है।</string>
     <string name="lens_hood_value_format">%1$d%%</string>

@@ -5,26 +5,35 @@ package com.mckimquyen.util
  * with no stored profile behaves exactly as before. A pinned axis returns the item's own base
  * position, which keeps rows (ANAMORPHIC) or columns (CYLINDRICAL) straight.
  */
-enum class LensProfile(private val warpsX: Boolean, private val warpsY: Boolean) {
+enum class LensProfile(
+    private val warpsX: Boolean,
+    private val warpsY: Boolean,
+    private val reverseDirection: Boolean = false
+) {
     FISHEYE(warpsX = true, warpsY = true),
     ANAMORPHIC(warpsX = true, warpsY = false),
-    CYLINDRICAL(warpsX = false, warpsY = true);
+    CYLINDRICAL(warpsX = false, warpsY = true),
+    /** FISH-030: pincushion warps both axes, reflecting Fisheye displacement around lens center. */
+    PINCUSHION(warpsX = true, warpsY = true, reverseDirection = true);
+
+    private fun applyDirection(item: Float, warped: Float): Float =
+        if (reverseDirection && item != -Float.MAX_VALUE) item - (warped - item) else warped
 
     fun shiftX(lens: Float, item: Float, boundary: Float, multiplier: Float, distortion: Float, hood: Float = LensHood.FULL): Float =
-        if (warpsX) UtilCalculator.shiftPoint(lens, item, boundary, multiplier, distortion, hood) else item
+        if (warpsX) applyDirection(item, UtilCalculator.shiftPoint(lens, item, boundary, multiplier, distortion, hood)) else item
 
     fun shiftY(lens: Float, item: Float, boundary: Float, multiplier: Float, distortion: Float, hood: Float = LensHood.FULL): Float =
-        if (warpsY) UtilCalculator.shiftPoint(lens, item, boundary, multiplier, distortion, hood) else item
+        if (warpsY) applyDirection(item, UtilCalculator.shiftPoint(lens, item, boundary, multiplier, distortion, hood)) else item
 
     fun scaleX(
         lens: Float, item: Float, itemSize: Float, boundary: Float, multiplier: Float, scale: Float, distortion: Float,
         hood: Float = LensHood.FULL
-    ): Float = if (warpsX) UtilCalculator.scalePoint(lens, item, itemSize, boundary, multiplier, scale, distortion, hood) else item
+    ): Float = if (warpsX) applyDirection(item, UtilCalculator.scalePoint(lens, item, itemSize, boundary, multiplier, scale, distortion, hood)) else item
 
     fun scaleY(
         lens: Float, item: Float, itemSize: Float, boundary: Float, multiplier: Float, scale: Float, distortion: Float,
         hood: Float = LensHood.FULL
-    ): Float = if (warpsY) UtilCalculator.scalePoint(lens, item, itemSize, boundary, multiplier, scale, distortion, hood) else item
+    ): Float = if (warpsY) applyDirection(item, UtilCalculator.scalePoint(lens, item, itemSize, boundary, multiplier, scale, distortion, hood)) else item
 
     companion object {
         /** Persisted by name; unknown or missing values mean the original behavior. */

@@ -201,7 +201,7 @@ class LensSettingsActivity : ActBase() {
 
     private fun setEnabled(enabled: Boolean) {
         intArrayOf(R.id.sbLensSettingsIconSize, R.id.sbLensSettingsDistortion, R.id.sbLensSettingsHood, R.id.swLensSettingsSmartFocus,
-            R.id.tgLensSettingsProfile, R.id.btLensProfileFisheye, R.id.btLensProfileAnamorphic, R.id.btLensProfileCylindrical,
+            R.id.tgLensSettingsProfile, R.id.btLensProfileFisheye, R.id.btLensProfileAnamorphic, R.id.btLensProfileCylindrical, R.id.btLensProfilePincushion,
             R.id.btLensSettingsApps, R.id.btLensSettingsFreeze, R.id.btLensSettingsHidden)
             .forEach { findViewById<View>(it).isEnabled = enabled }
     }
@@ -311,12 +311,14 @@ class LensSettingsActivity : ActBase() {
     private fun profileForButton(id: Int): LensProfile = when (id) {
         R.id.btLensProfileAnamorphic -> LensProfile.ANAMORPHIC
         R.id.btLensProfileCylindrical -> LensProfile.CYLINDRICAL
+        R.id.btLensProfilePincushion -> LensProfile.PINCUSHION
         else -> LensProfile.FISHEYE
     }
 
     private fun buttonForProfile(profile: LensProfile): Int = when (profile) {
         LensProfile.ANAMORPHIC -> R.id.btLensProfileAnamorphic
         LensProfile.CYLINDRICAL -> R.id.btLensProfileCylindrical
+        LensProfile.PINCUSHION -> R.id.btLensProfilePincushion
         LensProfile.FISHEYE -> R.id.btLensProfileFisheye
     }
 

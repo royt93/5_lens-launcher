@@ -284,7 +284,8 @@
     <string name="lens_profile_fisheye">Mata ikan</string>
     <string name="lens_profile_anamorphic">Anamorfik</string>
     <string name="lens_profile_cylindrical">Silindris</string>
-    <string name="lens_profile_hint">Mata ikan melengkungkan kedua sumbu; anamorfik hanya horizontal; silindris hanya vertikal</string>
+    <string name="lens_profile_pincushion">Bantalan jarum</string>
+    <string name="lens_profile_hint">Mata ikan melengkungkan kedua sumbu; anamorfik horizontal; silindris vertikal; bantalan jarum membalikkan pergeseran</string>
     <string name="lens_hood_title">Tudung lensa</string>
     <string name="lens_hood_hint">Membatasi jangkauan distorsi. Penuh memakai seluruh layar; tudung lebih kecil membuat ikon di luarnya diam.</string>
     <string name="lens_hood_value_format">%1$d%%</string>

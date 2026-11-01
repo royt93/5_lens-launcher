@@ -289,7 +289,8 @@
     <string name="lens_profile_fisheye">Fischauge</string>
     <string name="lens_profile_anamorphic">Anamorphotisch</string>
     <string name="lens_profile_cylindrical">Zylindrisch</string>
-    <string name="lens_profile_hint">Fischauge verzerrt beide Achsen; anamorphotisch nur horizontal; zylindrisch nur vertikal</string>
+    <string name="lens_profile_pincushion">Kissenverzerrung</string>
+    <string name="lens_profile_hint">Fischauge verzerrt beide Achsen; anamorphotisch horizontal; zylindrisch vertikal; Kissenverzerrung kehrt die Verschiebung um</string>
     <string name="lens_hood_title">Gegenlichtblende</string>
     <string name="lens_hood_hint">Begrenzt die Reichweite der Verzerrung. Voll nutzt den ganzen Bildschirm; eine kleinere Blende lässt Symbole außerhalb unverändert.</string>
     <string name="lens_hood_value_format">%1$d %%</string>

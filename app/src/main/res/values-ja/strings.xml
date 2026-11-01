@@ -284,7 +284,8 @@
     <string name="lens_profile_fisheye">魚眼</string>
     <string name="lens_profile_anamorphic">アナモルフィック</string>
     <string name="lens_profile_cylindrical">円筒</string>
-    <string name="lens_profile_hint">魚眼は縦横の両方を歪め、アナモルフィックは横方向のみ、円筒は縦方向のみ歪めます</string>
+    <string name="lens_profile_pincushion">糸巻き型</string>
+    <string name="lens_profile_hint">魚眼は縦横の両方を歪め、アナモルフィックは横、円筒は縦、糸巻き型は両軸の変位を反転します</string>
     <string name="lens_hood_title">レンズフード</string>
     <string name="lens_hood_hint">歪みが届く範囲を制限します。「全体」は画面全体、小さいフードでは外側のアイコンは動きません。</string>
     <string name="lens_hood_value_format">%1$d%%</string>

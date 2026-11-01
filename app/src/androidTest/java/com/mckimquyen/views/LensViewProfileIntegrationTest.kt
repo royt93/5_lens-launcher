@@ -190,6 +190,31 @@ class LensViewProfileIntegrationTest {
             drawn.any { it == chosen } && chosen.contains(x, y))
     }
 
+    @Test fun pincushionMovesIconsOppositeFisheyeOnBothAxes() {
+        val base = idleRects()
+        val finger = base[12]
+        settings.saveLensProfile(lensId, LensProfile.FISHEYE)
+        settings.saveLensHood(lensId, com.mckimquyen.util.LensHood.FULL)
+        val fisheye = drawnRects(finger.centerX() + FINGER_OFFSET_PX, finger.centerY() + FINGER_OFFSET_PX)
+        settings.saveLensProfile(lensId, LensProfile.PINCUSHION)
+        val pincushion = drawnRects(finger.centerX() + FINGER_OFFSET_PX, finger.centerY() + FINGER_OFFSET_PX)
+        val sample = 4
+        val basePos = base[sample]
+        val fishPos = fisheye[sample]
+        val pinPos = pincushion[sample]
+        // Displacements relative to base position must have opposite signs on both axes.
+        val fishDx = fishPos.centerX() - basePos.centerX()
+        val pinDx = pinPos.centerX() - basePos.centerX()
+        val fishDy = fishPos.centerY() - basePos.centerY()
+        val pinDy = pinPos.centerY() - basePos.centerY()
+        assertTrue("fisheye must displace horizontally ($fishDx)", Math.abs(fishDx) > 1f)
+        assertTrue("pincushion must displace horizontally ($pinDx)", Math.abs(pinDx) > 1f)
+        assertTrue("horizontal displacement must be opposite sign", fishDx * pinDx < 0f)
+        assertTrue("fisheye must displace vertically ($fishDy)", Math.abs(fishDy) > 1f)
+        assertTrue("pincushion must displace vertically ($pinDy)", Math.abs(pinDy) > 1f)
+        assertTrue("vertical displacement must be opposite sign", fishDy * pinDy < 0f)
+    }
+
     @Test fun everyProfileHonoursTheHood() {
         settings.saveLensHood(lensId, 0.2f)
         val base = idleRects()

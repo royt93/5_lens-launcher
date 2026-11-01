@@ -158,6 +158,14 @@
                     android:layout_height="wrap_content"
                     android:minHeight="48dp"
                     android:text="@string/lens_profile_cylindrical" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btLensProfilePincushion"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="48dp"
+                    android:text="@string/lens_profile_pincushion" />
             </com.google.android.material.button.MaterialButtonToggleGroup>
 
             <TextView

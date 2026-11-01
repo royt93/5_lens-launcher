@@ -294,7 +294,8 @@
     <string name="lens_profile_fisheye">Olho de peixe</string>
     <string name="lens_profile_anamorphic">Anamórfico</string>
     <string name="lens_profile_cylindrical">Cilíndrico</string>
-    <string name="lens_profile_hint">Olho de peixe distorce os dois eixos; anamórfico só o horizontal; cilíndrico só o vertical</string>
+    <string name="lens_profile_pincushion">Almofada</string>
+    <string name="lens_profile_hint">Olho de peixe distorce os dois eixos; anamórfico horizontal; cilíndrico vertical; almofada inverte o deslocamento</string>
     <string name="lens_hood_title">Para-sol da lente</string>
     <string name="lens_hood_hint">Limita até onde a distorção chega. Completo usa a tela toda; um para-sol menor mantém parados os ícones fora dele.</string>
     <string name="lens_hood_value_format">%1$d%%</string>

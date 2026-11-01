@@ -1,6 +1,7 @@
 package com.mckimquyen.ui
 
 import android.content.Intent
+import android.view.View
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -20,14 +21,19 @@ class LensSettingsActivityWidgetTest {
     @get:org.junit.Rule val deviceStateGuard = com.mckimquyen.testing.DeviceStateGuard()
     private val context get() = InstrumentationRegistry.getInstrumentation().targetContext
 
+    private fun productPrefsSnapshot(): Map<String, *> =
+        androidx.preference.PreferenceManager.getDefaultSharedPreferences(context).all
+            .filterKeys { it != FRAMEWORK_LOCALE_MIGRATED_KEY }
+
     private fun launch(id: String): ActivityScenario<LensSettingsActivity> = ActivityScenario.launch(
         Intent(context, LensSettingsActivity::class.java).putExtra(LensSettingsActivity.EXTRA_LENS_ID, id)
     )
 
     @Test fun bindingAndRecreationDoNotWritePreferencesOrChangeActiveLens() {
         val settings = UtilSettings(context)
+        settings.sortType // Seeds the legacy default sort pref once before snapshotting
         runBlocking { AppDatabase.getInstance().lensWorkspaceDao().insertOrUpdate(LensWorkspace(TARGET, "Work")) }
-        val before = androidx.preference.PreferenceManager.getDefaultSharedPreferences(context).all.toMap()
+        val before = productPrefsSnapshot()
         launch(TARGET).use { scenario ->
             awaitReady(scenario)
             scenario.onActivity {
@@ -38,7 +44,7 @@ class LensSettingsActivityWidgetTest {
             scenario.recreate()
             awaitReady(scenario)
         }
-        assertEquals(before, androidx.preference.PreferenceManager.getDefaultSharedPreferences(context).all)
+        assertEquals(before, productPrefsSnapshot())
     }
 
     @Test fun smartFocusOnlyWritesTheTargetLens() {
@@ -58,7 +64,7 @@ class LensSettingsActivityWidgetTest {
 
     @Test fun missingLensClosesWithoutWritingPreferences() {
         val prefs = androidx.preference.PreferenceManager.getDefaultSharedPreferences(context)
-        val before = prefs.all.toMap()
+        val before = productPrefsSnapshot()
         ActivityScenario.launch<LensSettingsActivity>(
             Intent(context, LensSettingsActivity::class.java).putExtra(LensSettingsActivity.EXTRA_LENS_ID, "missing-ui033")
         ).use { scenario ->
@@ -66,7 +72,7 @@ class LensSettingsActivityWidgetTest {
             while (scenario.state != androidx.lifecycle.Lifecycle.State.DESTROYED && System.currentTimeMillis() < deadline) Thread.sleep(POLL_MS)
             assertEquals(androidx.lifecycle.Lifecycle.State.DESTROYED, scenario.state)
         }
-        assertEquals(before, prefs.all)
+        assertEquals(before, productPrefsSnapshot())
     }
 
     @Test fun freezeAndUnfreezeNonActiveLensWriteOnlyTargetOrder() {
@@ -184,6 +190,31 @@ class LensSettingsActivityWidgetTest {
         }
     }
 
+    @Test fun pincushionButtonOnlyWritesTheTargetLensAndRestoresOnRecreate() {
+        val settings = UtilSettings(context)
+        runBlocking { AppDatabase.getInstance().lensWorkspaceDao().insertOrUpdate(LensWorkspace(TARGET, "Work")) }
+        settings.saveLensProfile(TARGET, com.mckimquyen.util.LensProfile.FISHEYE)
+        settings.saveLensProfile(LensWorkspace.DEFAULT_LENS_ID, com.mckimquyen.util.LensProfile.FISHEYE)
+        try {
+            launch(TARGET).use { scenario ->
+                awaitReady(scenario)
+                scenario.onActivity { it.findViewById<android.view.View>(R.id.btLensProfilePincushion).performClick() }
+                waitUntil { settings.getLensProfile(TARGET) == com.mckimquyen.util.LensProfile.PINCUSHION }
+                assertEquals(com.mckimquyen.util.LensProfile.FISHEYE, settings.getLensProfile(LensWorkspace.DEFAULT_LENS_ID))
+                scenario.recreate()
+                awaitReady(scenario)
+                var checked = 0
+                scenario.onActivity {
+                    checked = it.findViewById<com.google.android.material.button.MaterialButtonToggleGroup>(R.id.tgLensSettingsProfile).checkedButtonId
+                }
+                assertEquals(R.id.btLensProfilePincushion, checked)
+                assertEquals("recreate must not rewrite the stored profile", com.mckimquyen.util.LensProfile.PINCUSHION, settings.getLensProfile(TARGET))
+            }
+        } finally {
+            settings.deleteLensSettings(TARGET)
+        }
+    }
+
     @Test fun hoodSliderOnlyWritesTheTargetLensAndRestoresOnRecreate() {
         val settings = UtilSettings(context)
         runBlocking { AppDatabase.getInstance().lensWorkspaceDao().insertOrUpdate(LensWorkspace(TARGET, "Work")) }
@@ -242,6 +273,7 @@ class LensSettingsActivityWidgetTest {
     }
 
     private companion object {
+        const val FRAMEWORK_LOCALE_MIGRATED_KEY = "Locale.Helper.Framework.Migrated"
         const val TARGET = "ui033-widget"
         const val WAIT_MS = 8_000L
         const val POLL_MS = 50L

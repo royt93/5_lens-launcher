@@ -56,26 +56,35 @@ class LensProfileSettingsTest {
     }
 
     @Test fun duplicatingALensCopiesItsProfile() {
-        settings.saveLensProfile(work, LensProfile.CYLINDRICAL)
+        settings.saveLensProfile(work, LensProfile.PINCUSHION)
         settings.duplicateLensSettings(work, personal)
-        assertEquals(LensProfile.CYLINDRICAL, settings.getLensProfile(personal))
+        assertEquals(LensProfile.PINCUSHION, settings.getLensProfile(personal))
     }
 
     @Test fun deletingALensRemovesItsProfileKey() {
-        settings.saveLensProfile(work, LensProfile.ANAMORPHIC)
+        settings.saveLensProfile(work, LensProfile.PINCUSHION)
         settings.deleteLensSettings(work)
         assertFalse(raw().contains("lens_profile_$work"))
     }
 
     @Test fun backupExportsOnlyAStoredProfile() {
         assertNull(settings.getLensPhysicsBackup(work).lensProfile)
-        settings.saveLensProfile(work, LensProfile.ANAMORPHIC)
-        assertEquals("ANAMORPHIC", settings.getLensPhysicsBackup(work).lensProfile)
+        settings.saveLensProfile(work, LensProfile.PINCUSHION)
+        assertEquals("PINCUSHION", settings.getLensPhysicsBackup(work).lensProfile)
     }
 
     @Test fun backupJsonRoundTripsAndRejectsUnknownNames() {
-        val physics = LensPhysicsBackup(lensProfile = "CYLINDRICAL")
+        val physics = LensPhysicsBackup(lensProfile = "PINCUSHION")
         assertEquals(physics, LensPhysicsBackup.fromJson(physics.toJson()))
+        val legacy = LensPhysicsBackup(distortionFactor = 2.5f)
+        assertEquals(legacy, LensPhysicsBackup.fromJson(legacy.toJson()))
+        val olderJson = org.json.JSONObject().put("distortionFactor", 2.5)
+        assertEquals(legacy, LensPhysicsBackup.fromJson(olderJson))
+        val wrongCase = org.json.JSONObject().put("lensProfile", "pincushion")
+        assertNull("stored enum names remain case-sensitive", LensPhysicsBackup.fromJson(wrongCase))
+        val existing = LensPhysicsBackup(lensProfile = "CYLINDRICAL")
+        assertEquals(existing, LensPhysicsBackup.fromJson(existing.toJson()))
+
         val bad = org.json.JSONObject().put("lensProfile", "WIDE")
         assertNull("an unknown profile name must reject the physics block", LensPhysicsBackup.fromJson(bad))
         val wrongType = org.json.JSONObject().put("lensProfile", 3)
@@ -93,8 +102,8 @@ class LensProfileSettingsTest {
 
     @Test fun importingABackupWritesTheProfile() {
         settings.saveLensProfile(work, LensProfile.CYLINDRICAL)
-        importLens(work to LensPhysicsBackup(lensProfile = "ANAMORPHIC"))
-        assertEquals(LensProfile.ANAMORPHIC, settings.getLensProfile(work))
+        importLens(work to LensPhysicsBackup(distortionFactor = 2.5f, lensProfile = "PINCUSHION"))
+        assertEquals(LensProfile.PINCUSHION, settings.getLensProfile(work))
     }
 
     @Test fun importingABackupWithoutTheFieldClearsASecondaryLensProfile() {
@@ -104,8 +113,8 @@ class LensProfileSettingsTest {
     }
 
     @Test fun importingALegacyBackupWithoutPhysicsKeepsTheProfile() {
-        settings.saveLensProfile(work, LensProfile.CYLINDRICAL)
+        settings.saveLensProfile(work, LensProfile.PINCUSHION)
         importLens(work to null)
-        assertEquals(LensProfile.CYLINDRICAL, settings.getLensProfile(work))
+        assertEquals(LensProfile.PINCUSHION, settings.getLensProfile(work))
     }
 }
