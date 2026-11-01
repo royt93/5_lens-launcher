@@ -32,7 +32,6 @@ class LensViewFocusHaloWidgetTest {
     private companion object {
         const val WIDTH_PX = 1080
         const val HEIGHT_PX = 1920
-        const val SCAN_STEP_PX = 40
     }
 
     private val instrumentation = InstrumentationRegistry.getInstrumentation()
@@ -60,29 +59,37 @@ class LensViewFocusHaloWidgetTest {
         PreferenceManager.getDefaultSharedPreferences(context).edit().clear().commit()
     }
 
-    /** Touches every scan point and draws a frame; true if the halo was drawn at least once. */
-    private fun haloDrawnWhileHoveringAnywhere(): Boolean {
+    /**
+     * Touches the centre of the one laid-out icon and draws a frame; true if the halo was drawn.
+     * The old version scanned the view in 40px steps, but the default 18dp icon is only 36px at
+     * density 2.0, so the scan could step over it: the positive test was red on TECNO BG6 and the two
+     * "never drawn" tests passed without ever touching an icon. The icon's real rect comes from the
+     * production test hook, so the coordinates cannot drift from the layout.
+     */
+    private fun haloDrawnWhileHoveringTheIcon(): Boolean {
+        var iconCenter: Pair<Float, Float>? = null
+        instrumentation.runOnMainSync {
+            lensView.draw(Canvas())
+            iconCenter = lensView.drawnRectsForTest().firstOrNull()?.let { it.centerX() to it.centerY() }
+        }
+        val (x, y) = requireNotNull(iconCenter) { "the lens must have laid out its icon" }
         val before = lensView.focusHaloDrawCallCount
         instrumentation.runOnMainSync {
             val downTime = SystemClock.uptimeMillis()
-            for (y in 0 until HEIGHT_PX step SCAN_STEP_PX) {
-                for (x in 0 until WIDTH_PX step SCAN_STEP_PX) {
-                    val down = MotionEvent.obtain(downTime, downTime, MotionEvent.ACTION_DOWN, x.toFloat(), y.toFloat(), 0)
-                    lensView.dispatchTouchEvent(down)
-                    down.recycle()
-                    lensView.draw(Canvas())
-                    val cancel = MotionEvent.obtain(downTime, downTime, MotionEvent.ACTION_CANCEL, x.toFloat(), y.toFloat(), 0)
-                    lensView.dispatchTouchEvent(cancel)
-                    cancel.recycle()
-                }
-            }
+            val down = MotionEvent.obtain(downTime, downTime, MotionEvent.ACTION_DOWN, x, y, 0)
+            lensView.dispatchTouchEvent(down)
+            down.recycle()
+            lensView.draw(Canvas())
+            val cancel = MotionEvent.obtain(downTime, downTime, MotionEvent.ACTION_CANCEL, x, y, 0)
+            lensView.dispatchTouchEvent(cancel)
+            cancel.recycle()
         }
         return lensView.focusHaloDrawCallCount > before
     }
 
     @Test
     fun defaultSettings_haloIsDrawnForHoveredApp() {
-        assertTrue("halo must draw by default (setting defaults to on)", haloDrawnWhileHoveringAnywhere())
+        assertTrue("halo must draw by default (setting defaults to on)", haloDrawnWhileHoveringTheIcon())
     }
 
     @Test
@@ -90,7 +97,7 @@ class LensViewFocusHaloWidgetTest {
         settings.save(UtilSettings.KEY_SHOW_FOCUS_HALO, false)
         val before = lensView.focusHaloDrawCallCount
 
-        haloDrawnWhileHoveringAnywhere()
+        haloDrawnWhileHoveringTheIcon()
 
         assertEquals("disabled setting must suppress the halo", before, lensView.focusHaloDrawCallCount)
     }
@@ -100,7 +107,7 @@ class LensViewFocusHaloWidgetTest {
         settings.save(UtilSettings.KEY_CLEAN_LENS_MODE, true)
         val before = lensView.focusHaloDrawCallCount
 
-        haloDrawnWhileHoveringAnywhere()
+        haloDrawnWhileHoveringTheIcon()
 
         assertEquals("clean mode must suppress the halo", before, lensView.focusHaloDrawCallCount)
     }

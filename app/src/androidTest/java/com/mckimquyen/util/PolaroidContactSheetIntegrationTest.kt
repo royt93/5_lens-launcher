@@ -1,12 +1,15 @@
 package com.mckimquyen.util
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.view.View
+import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.mckimquyen.app.RAppsSingleton
+import com.mckimquyen.feature.organization.OrganizationHarnessActivity
 import com.mckimquyen.model.App
 import com.mckimquyen.views.LensView
 import org.junit.After
@@ -39,6 +42,10 @@ class PolaroidContactSheetIntegrationTest {
 
     private val instrumentation = InstrumentationRegistry.getInstrumentation()
     private val context = instrumentation.targetContext
+    // Kept resumed for the whole test. Without a foreground Activity the TECNO "Hiber" freezer puts the
+    // instrumented process into FrozenState a few seconds in, and the whole class hangs on that device.
+    private var scenario: ActivityScenario<OrganizationHarnessActivity>? = null
+    private var uiContext: Context = context
     private val iconBitmap = Bitmap.createBitmap(ICON_PX, ICON_PX, Bitmap.Config.ARGB_8888).apply { eraseColor(Color.RED) }
     private val apps = ArrayList((0 until APP_COUNT).map { i ->
         App(id = i, packageName = "com.sheet.app$i", name = "App$i", label = "App $i", iconCacheKey = "sheet#$i")
@@ -50,12 +57,18 @@ class PolaroidContactSheetIntegrationTest {
     @Before
     fun setUp() {
         apps.forEach { RAppsSingleton.instance.setAppIcon(it.iconCacheKey, iconBitmap) }
-        instrumentation.runOnMainSync { host = View(context).apply { layout(0, 0, PAGE_W, PAGE_H) } }
+        val launched = ActivityScenario.launch(OrganizationHarnessActivity::class.java)
+        scenario = launched
+        launched.onActivity { uiContext = it }
+        instrumentation.waitForIdleSync()
+        instrumentation.runOnMainSync { host = View(uiContext).apply { layout(0, 0, PAGE_W, PAGE_H) } }
         sheetFile().delete()
     }
 
     @After
     fun tearDown() {
+        scenario?.close()
+        scenario = null
         BitmapCache.clear()
         File(context.cacheDir, "polaroid").listFiles()?.forEach { it.delete() }
     }
@@ -72,7 +85,7 @@ class PolaroidContactSheetIntegrationTest {
         var result: android.net.Uri? = null
         val latch = CountDownLatch(1)
         instrumentation.runOnMainSync {
-            PolaroidExportHelper.exportContactSheetAsync(context, host, specs, liveView, liveLensId, appsForLens) {
+            PolaroidExportHelper.exportContactSheetAsync(uiContext, host, specs, liveView, liveLensId, appsForLens) {
                 result = it
                 latch.countDown()
             }
@@ -138,7 +151,7 @@ class PolaroidContactSheetIntegrationTest {
         val seen = ArrayList<String>()
         var live: LensView? = null
         instrumentation.runOnMainSync {
-            live = LensView(context).apply { lensId = "lens0"; layout(0, 0, PAGE_W, PAGE_H); setApps(ArrayList(apps)) }
+            live = LensView(uiContext).apply { lensId = "lens0"; layout(0, 0, PAGE_W, PAGE_H); setApps(ArrayList(apps)) }
         }
         assertNotNull(export(specs(2), live, "lens0") { id -> seen.add(id); ArrayList(apps) })
         assertEquals("only the non-live lens asks for its apps", listOf("lens1"), seen)
@@ -168,7 +181,7 @@ class PolaroidContactSheetIntegrationTest {
 
     @Test
     fun anUnlaidOutHostReturnsNullWithoutWritingAFile() {
-        instrumentation.runOnMainSync { host = View(context) }
+        instrumentation.runOnMainSync { host = View(uiContext) }
         assertNull(export(specs(2)))
         assertFalse(sheetFile().exists())
     }
