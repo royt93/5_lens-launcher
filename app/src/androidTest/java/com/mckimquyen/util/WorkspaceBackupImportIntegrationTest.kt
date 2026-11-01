@@ -34,9 +34,13 @@ class WorkspaceBackupImportIntegrationTest {
     private val database get() = AppDatabase.getInstance()
     private val settings get() = UtilSettings(context)
     private var originalApps: ArrayList<App>? = null
+    // Kept resumed for the whole test: without a foreground Activity the TECNO "Hiber" freezer puts the
+    // instrumented process into FrozenState a few seconds in, and the class hangs on that device.
+    private var scenario: androidx.test.core.app.ActivityScenario<com.mckimquyen.feature.organization.OrganizationHarnessActivity>? = null
 
     @Before
     fun setup() {
+        scenario = androidx.test.core.app.ActivityScenario.launch(com.mckimquyen.feature.organization.OrganizationHarnessActivity::class.java)
         AppDatabase.init(context)
         PreferenceManager.getDefaultSharedPreferences(context).edit().clear().commit()
         originalApps = RAppsSingleton.instance.apps
@@ -52,6 +56,8 @@ class WorkspaceBackupImportIntegrationTest {
 
     @After
     fun tearDown() {
+        scenario?.close()
+        scenario = null
         resetWorkspace()
         PreferenceManager.getDefaultSharedPreferences(context).edit().clear().commit()
         RAppsSingleton.instance.apps = originalApps
