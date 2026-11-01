@@ -3,9 +3,9 @@
 | Field | Value |
 |---|---|
 | Type | exclusive |
-| Status | in progress: implemented and smoked on TECNO BG6, audit 8,9/10 (xem AUDIT_FISH-031_2026-11-01.md), chưa push |
+| Status | done (2026-11-01): implemented, smoked on TECNO BG6, audit re-scored 9,1/10 (xem AUDIT_FISH-031_2026-11-01.md), chưa push |
 | Priority | P3 |
-| Evidence | idea |
+| Evidence | implementation + tests + TECNO BG6 smoke; audit 9.1/10, not pushed |
 | Epic | Fisheye Smart |
 | Estimate | 5 SP |
 | Risk | Medium |
@@ -32,13 +32,13 @@ Là người dùng, tôi muốn giữ icon để lens phóng thêm và hiện sh
 
 ## Verification and Definition of Done
 
-- [ ] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
-- [ ] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
-- [ ] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
-- [ ] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
-- [ ] No new lint/build failures.
-- [ ] A post-change audit record scores the round `> 9.0/10` before push.
-- [ ] Evidence and status are updated before moving this file to `done`.
+- [x] Unit tests cover pure logic, state transitions and failure branches (layout, policy, resources; 1.418 unit, 0 fail).
+- [x] Widget/UI tests cover visible behavior and lifecycle (LensView widget 18, pinch 12, drag/profile/smart focus). Accessibility: TalkBack is out of scope by owner decision; the old app menu stays the non-touch alternative.
+- [x] Integration tests cover subsystem boundaries (`LensViewFocusRingIntegrationTest` 9, incl. second finger tears the ring down).
+- [x] Smoke tests pass on the device locked for the session (TECNO BG6, Android 13, APK sha256 `ea709f26...`, 2026-11-01); HOME role switched with owner permission and restored; device data restored, 85/85 hashes match.
+- [x] No new lint/build failures.
+- [x] A post-change audit record scores the round `> 9.0/10` before push (9.1/10). Push itself is pending an explicit owner request.
+- [x] Evidence and status are updated before moving this file to `done`.
 
 If a test layer is not applicable, replace its checkbox with a reviewed rationale; do not silently omit it.
 
