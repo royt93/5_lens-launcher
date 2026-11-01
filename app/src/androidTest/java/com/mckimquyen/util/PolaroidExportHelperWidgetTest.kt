@@ -29,6 +29,9 @@ class PolaroidExportHelperWidgetTest {
         const val SIZE_PX = 400
         const val APP_COUNT = 12
         const val ICON_PX = 48
+        const val LINE3_GLYPH_HEIGHT_PX = 24
+        const val MAX_CHANNEL = 255
+        const val MAX_READABLE_RED = 0xA0
     }
 
     private val instrumentation = InstrumentationRegistry.getInstrumentation()
@@ -131,6 +134,27 @@ class PolaroidExportHelperWidgetTest {
         val captionRowY = layout.captionLine1BaselineY - 10
         val captionRowHasInk = (0 until decoded.width).any { x -> decoded.getPixel(x, captionRowY) != Color.WHITE }
         assertTrue("the caption row must contain non-white pixels (rendered text)", captionRowHasInk)
+    }
+
+    @Test
+    fun exportAsync_withOpticalTextPrintsAReadableThirdLine() {
+        val latch = CountDownLatch(1)
+        instrumentation.runOnMainSync {
+            PolaroidExportHelper.exportAsync(lensView, "Optical", "Fisheye · d=2.5 · s=1.0 · hood=100%", context) { latch.countDown() }
+        }
+        assertTrue("export must complete", latch.await(5, TimeUnit.SECONDS))
+        val decoded = BitmapFactory.decodeFile(File(File(context.cacheDir, "polaroid"), "Optical.png").absolutePath)
+        assertNotNull(decoded)
+        val layout = PolaroidExportHelper.calculatePolaroidLayout(SIZE_PX, SIZE_PX, captionLines = 3)
+        assertEquals("three caption lines make the frame taller", layout.outerHeight, decoded!!.height)
+        val rowTop = layout.captionLine3BaselineY - LINE3_GLYPH_HEIGHT_PX
+        var darkest = MAX_CHANNEL
+        for (y in rowTop..layout.captionLine3BaselineY) for (x in 0 until decoded.width) {
+            val pixel = decoded.getPixel(x, y)
+            darkest = minOf(darkest, Color.red(pixel))
+        }
+        assertTrue("line 3 must have ink (darkest red=$darkest)", darkest < MAX_CHANNEL)
+        assertTrue("line 3 must stay readable on white, not pale (darkest red=$darkest)", darkest <= MAX_READABLE_RED)
     }
 
     @Test

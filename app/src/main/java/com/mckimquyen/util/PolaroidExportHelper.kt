@@ -151,7 +151,7 @@ object PolaroidExportHelper {
             typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.ITALIC)
         }
         val line3Paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.LTGRAY
+            color = Color.GRAY
             textSize = CAPTION_LINE3_TEXT_SIZE_PX
             textAlign = Paint.Align.CENTER
             typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.ITALIC)
