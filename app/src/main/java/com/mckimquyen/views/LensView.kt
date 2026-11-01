@@ -1370,6 +1370,9 @@ class LensView : View {
                         parent?.requestDisallowInterceptTouchEvent(true)
                         mLongPressArmed = false
                         mLongPressHandler.removeCallbacks(mLongPressRunnable)
+                        // FISH-031: a ring raised just before the second finger landed must not stay drawn
+                        // (or runnable) through the pinch.
+                        resetFocusRing()
                         mSelectIndex = -1
                         mRectToSelect = null
                         invalidate()

@@ -20,6 +20,11 @@ import java.io.FileOutputStream
 class LensViewFocusHaloLiveVisualSmokeTest {
     @get:org.junit.Rule val deviceStateGuard = com.mckimquyen.testing.DeviceStateGuard()
 
+    private companion object {
+        // Extra pixels past the touch slop, so the move is unambiguously a pan yet stays on the icon.
+        const val MOVE_MARGIN_PX = 2
+    }
+
 
     @Test
     fun captureLiveHoverWithHalo() {
@@ -52,8 +57,12 @@ class LensViewFocusHaloLiveVisualSmokeTest {
                 lensView.dispatchTouchEvent(down)
                 down.recycle()
 
-                // move a tiny bit past touch slop so it enters PANNING / hovering
-                val move = MotionEvent.obtain(downTime, downTime + 50, MotionEvent.ACTION_MOVE, cx + 25f, cy + 25f, 0)
+                // Move just past touch slop while staying inside the icon. A fixed 25px diagonal
+                // move exits the default 36px icon from its centre on TECNO BG6, so hover clears.
+                val touchSlop = android.view.ViewConfiguration.get(lensView.context).scaledTouchSlop
+                val moveDelta = (touchSlop / kotlin.math.sqrt(2f)).toInt() + MOVE_MARGIN_PX
+                assertTrue("move must cross touch slop but stay inside icon", moveDelta * 2 < minOf(bounds.width(), bounds.height()))
+                val move = MotionEvent.obtain(downTime, downTime + 50, MotionEvent.ACTION_MOVE, cx + moveDelta, cy + moveDelta, 0)
                 lensView.dispatchTouchEvent(move)
                 move.recycle()
 

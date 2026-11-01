@@ -37,6 +37,7 @@ class LensViewFocusRingIntegrationTest {
         const val SETTLE_MS = 600L
         const val POLL_MS = 25L
         const val WAIT_MS = 4_000L
+        const val PINCH_SECOND_FINGER_OFFSET_PX = 200f
     }
 
     private val instrumentation = InstrumentationRegistry.getInstrumentation()
@@ -180,6 +181,33 @@ class LensViewFocusRingIntegrationTest {
         assertFalse(view.isFocusRingActiveForTest())
         assertTrue(launched.isEmpty())
         assertTrue(menuOpened.isEmpty())
+    }
+
+    @Test fun aSecondFingerLandingWhileTheRingIsUpTearsTheRingDown() = runTest { _, view ->
+        val (cx, cy, down) = holdIcon(view)
+        assertTrue(awaitRing(view))
+        instrumentation.runOnMainSync {
+            val props = arrayOf(
+                MotionEvent.PointerProperties().apply { id = 0; toolType = MotionEvent.TOOL_TYPE_FINGER },
+                MotionEvent.PointerProperties().apply { id = 1; toolType = MotionEvent.TOOL_TYPE_FINGER }
+            )
+            val coords = arrayOf(
+                MotionEvent.PointerCoords().apply { x = cx; y = cy },
+                MotionEvent.PointerCoords().apply { x = cx + PINCH_SECOND_FINGER_OFFSET_PX; y = cy }
+            )
+            val second = MotionEvent.obtain(
+                down, SystemClock.uptimeMillis(),
+                MotionEvent.ACTION_POINTER_DOWN or (1 shl MotionEvent.ACTION_POINTER_INDEX_SHIFT),
+                2, props, coords, 0, 0, 1f, 1f, 0, 0, android.view.InputDevice.SOURCE_TOUCHSCREEN, 0
+            )
+            view.dispatchTouchEvent(second)
+            second.recycle()
+        }
+        assertEquals(LensGestureState.PINCHING, view.gestureState)
+        assertFalse("a ring must not stay drawn through a pinch", view.isFocusRingActiveForTest())
+        assertTrue(view.focusRingSlotsForTest().isEmpty())
+        assertTrue("a pinch must run no shortcut and open no menu", launched.isEmpty() && menuOpened.isEmpty())
+        send(view, down, MotionEvent.ACTION_CANCEL, 0f, 0f)
     }
 
     @Test fun releasingBeforeTheShortcutsLoadNeverRaisesALateRing() = runTest { _, view ->
