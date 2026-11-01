@@ -39,11 +39,14 @@ object PolaroidExportHelper {
     private const val CAPTION_HEIGHT_PX = 180
     private const val CAPTION_LINE1_TEXT_SIZE_PX = 56f
     private const val CAPTION_LINE2_TEXT_SIZE_PX = 34f
+    private const val CAPTION_LINE3_TEXT_SIZE_PX = 28f
+    private const val CAPTION_LINE3_EXTRA_PX = 52
     private const val CAPTION_LINE_GAP_PX = 16
+    private const val CAPTION_LINES_WITH_OPTICAL = 3
     private const val MAX_LENS_NAME_LENGTH = 24
     private val UNSAFE_FILENAME_CHARS = Regex("[^A-Za-z0-9_-]+")
 
-    data class CaptionLines(val line1: String, val line2: String)
+    data class CaptionLines(val line1: String, val line2: String, val line3: String = "")
 
     data class PolaroidLayout(
         val outerWidth: Int,
@@ -51,7 +54,9 @@ object PolaroidExportHelper {
         val contentLeft: Int,
         val contentTop: Int,
         val captionLine1BaselineY: Int,
-        val captionLine2BaselineY: Int
+        val captionLine2BaselineY: Int,
+        /** 0 when the caption has two lines. */
+        val captionLine3BaselineY: Int = 0
     )
 
     /** Pure: the lens name, truncated if very long, falling back to [fallbackName] (the caller's
@@ -64,6 +69,15 @@ object PolaroidExportHelper {
         return if (base.length > MAX_LENS_NAME_LENGTH) base.take(MAX_LENS_NAME_LENGTH - 1) + "…" else base
     }
 
+    /** Pure: with an [optical] line the caption is name / optical / via; without one it stays the old
+     *  name / via pair (line 3 empty), so callers that have no optical data render as before. */
+    @JvmStatic
+    fun buildCaptionLines(lensName: String, fallbackName: String, optical: String, via: String): CaptionLines {
+        val line1 = buildCaptionLine1(lensName, fallbackName)
+        val opticalText = optical.trim()
+        return if (opticalText.isEmpty()) CaptionLines(line1, via) else CaptionLines(line1, opticalText, via)
+    }
+
     /** Strips characters unsafe for a filesystem path component; never returns an empty string.
      *  ponytail: Different names with identical sanitized text share one cache file; add a stable
      *  lensId suffix if a real concurrent/collision report makes per-lens uniqueness necessary. */
@@ -74,13 +88,16 @@ object PolaroidExportHelper {
     }
 
     /** Pure geometry: a white polaroid frame around [contentWidthPx]x[contentHeightPx], with a
-     *  caption band below it. No Android Context/view dependency. */
+     *  caption band below it ([captionLines] >= 3 adds room for a third, smaller line). No Android
+     *  Context/view dependency. */
     @JvmStatic
-    fun calculatePolaroidLayout(contentWidthPx: Int, contentHeightPx: Int): PolaroidLayout {
+    @JvmOverloads
+    fun calculatePolaroidLayout(contentWidthPx: Int, contentHeightPx: Int, captionLines: Int = 2): PolaroidLayout {
         val w = contentWidthPx.coerceAtLeast(1)
         val h = contentHeightPx.coerceAtLeast(1)
         val outerWidth = w + BORDER_PX * 2
-        val outerHeight = h + BORDER_PX * 2 + CAPTION_HEIGHT_PX
+        val hasLine3 = captionLines >= CAPTION_LINES_WITH_OPTICAL
+        val outerHeight = h + BORDER_PX * 2 + CAPTION_HEIGHT_PX + if (hasLine3) CAPTION_LINE3_EXTRA_PX else 0
         val captionTop = BORDER_PX + h + BORDER_PX
         val line1Baseline = captionTop + CAPTION_LINE1_TEXT_SIZE_PX.toInt()
         val line2Baseline = line1Baseline + CAPTION_LINE2_TEXT_SIZE_PX.toInt() + CAPTION_LINE_GAP_PX
@@ -90,7 +107,8 @@ object PolaroidExportHelper {
             contentLeft = BORDER_PX,
             contentTop = BORDER_PX,
             captionLine1BaselineY = line1Baseline,
-            captionLine2BaselineY = line2Baseline
+            captionLine2BaselineY = line2Baseline,
+            captionLine3BaselineY = if (hasLine3) line2Baseline + CAPTION_LINE3_TEXT_SIZE_PX.toInt() + CAPTION_LINE_GAP_PX else 0
         )
     }
 
@@ -123,9 +141,18 @@ object PolaroidExportHelper {
             textAlign = Paint.Align.CENTER
             typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.ITALIC)
         }
+        val line3Paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Color.LTGRAY
+            textSize = CAPTION_LINE3_TEXT_SIZE_PX
+            textAlign = Paint.Align.CENTER
+            typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.ITALIC)
+        }
         val centerX = layout.outerWidth / 2f
         canvas.drawText(caption.line1, centerX, layout.captionLine1BaselineY.toFloat(), line1Paint)
         canvas.drawText(caption.line2, centerX, layout.captionLine2BaselineY.toFloat(), line2Paint)
+        if (caption.line3.isNotEmpty()) {
+            canvas.drawText(caption.line3, centerX, layout.captionLine3BaselineY.toFloat(), line3Paint)
+        }
         return framed
     }
 
@@ -146,7 +173,12 @@ object PolaroidExportHelper {
      * I/O/FileProvider failure.
      */
     @JvmStatic
-    fun exportAsync(lensView: LensView, lensName: String, context: Context, onDone: (Uri?) -> Unit) {
+    fun exportAsync(lensView: LensView, lensName: String, context: Context, onDone: (Uri?) -> Unit) =
+        exportAsync(lensView, lensName, "", context, onDone)
+
+    /** [optical] is the pre-formatted optical line ([PolaroidCaptionFormatter.opticalLine]); blank keeps the old caption. */
+    @JvmStatic
+    fun exportAsync(lensView: LensView, lensName: String, optical: String, context: Context, onDone: (Uri?) -> Unit) {
         val width = lensView.width
         val height = lensView.height
         if (width <= 0 || height <= 0) {
@@ -166,14 +198,17 @@ object PolaroidExportHelper {
 
         val appContext = context.applicationContext
         val appName = appContext.getString(R.string.app_name)
-        val caption = CaptionLines(
-            line1 = buildCaptionLine1(lensName, appName),
-            line2 = appContext.getString(R.string.lens_share_caption_via, appName)
+        val caption = buildCaptionLines(
+            lensName, appName, optical, appContext.getString(R.string.lens_share_caption_via, appName)
         )
         val fileName = sanitizeFileName(lensName)
         ApplicationScope.scope.launch(Dispatchers.IO) {
             val uri = try {
-                val layout = calculatePolaroidLayout(contentBitmap.width, contentBitmap.height)
+                val layout = calculatePolaroidLayout(
+                    contentBitmap.width,
+                    contentBitmap.height,
+                    if (caption.line3.isEmpty()) 2 else CAPTION_LINES_WITH_OPTICAL
+                )
                 val framed = renderFrame(contentBitmap, layout, caption)
                 val file = writeToCache(appContext, framed, fileName)
                 framed.recycle()

@@ -95,6 +95,49 @@ class PolaroidExportHelperTest {
         assertEquals(261, layout.outerHeight)
     }
 
+    @Test
+    fun `caption puts optical on line two and via on line three`() {
+        val c = PolaroidExportHelper.buildCaptionLines(
+            "Work", "Fisheye Launcher", "Fisheye · d=2.5 · s=1.0 · hood=100%", "via Fisheye Launcher"
+        )
+        assertEquals("Work", c.line1)
+        assertEquals("Fisheye · d=2.5 · s=1.0 · hood=100%", c.line2)
+        assertEquals("via Fisheye Launcher", c.line3)
+    }
+
+    @Test
+    fun `without optical text the old two line caption is kept`() {
+        val c = PolaroidExportHelper.buildCaptionLines("Work", "Fisheye Launcher", "", "via Fisheye Launcher")
+        assertEquals("Work", c.line1)
+        assertEquals("via Fisheye Launcher", c.line2)
+        assertEquals("", c.line3)
+    }
+
+    @Test
+    fun `a blank optical text counts as no optical text`() {
+        val c = PolaroidExportHelper.buildCaptionLines("Work", "Fisheye Launcher", "   ", "via Fisheye Launcher")
+        assertEquals("via Fisheye Launcher", c.line2)
+        assertEquals("", c.line3)
+    }
+
+    @Test
+    fun `the layout leaves room for three caption lines`() {
+        val three = PolaroidExportHelper.calculatePolaroidLayout(1080, 1944, captionLines = 3)
+        val two = PolaroidExportHelper.calculatePolaroidLayout(1080, 1944)
+        assertTrue(three.outerHeight > two.outerHeight)
+        assertTrue(three.captionLine3BaselineY > three.captionLine2BaselineY)
+        assertTrue("line 3 must sit inside the frame", three.captionLine3BaselineY < three.outerHeight)
+        assertEquals(two.outerWidth, three.outerWidth)
+        assertEquals(two.captionLine2BaselineY, three.captionLine2BaselineY)
+    }
+
+    @Test
+    fun `two caption lines keep the old height and have no line three`() {
+        val two = PolaroidExportHelper.calculatePolaroidLayout(800, 800, captionLines = 2)
+        assertEquals(1060, two.outerHeight)
+        assertEquals(0, two.captionLine3BaselineY)
+    }
+
     @Suppress("DEPRECATION")
     @Test
     fun `buildShareIntent targets an image share with the given uri and read permission`() {
