@@ -40,6 +40,8 @@ import com.mckimquyen.model.AppPersistent
 import com.mckimquyen.model.EdgeSwipeMode
 import com.mckimquyen.model.LensWorkspace
 import com.mckimquyen.model.PinnedZone
+import com.mckimquyen.search.AppShortcutsProvider
+import com.mckimquyen.search.QuickShortcut
 import com.mckimquyen.services.BroadcastReceivers
 import com.mckimquyen.util.HapticIntensity
 import com.mckimquyen.util.LensOverscrollPhysics
@@ -123,6 +125,9 @@ enum class LensGestureState {
 class LensView : View {
 
     companion object {
+        /** FISH-031: share of a chip's radius left as padding around its shortcut icon. */
+        private const val CHIP_ICON_INSET_FRACTION = 0.3f
+
         /** FISH-038: every lens except the one being viewed. */
         internal fun moveTargets(lenses: List<LensWorkspace>, currentLensId: String): List<LensWorkspace> =
             lenses.filter { it.id != currentLensId }
@@ -428,6 +433,28 @@ class LensView : View {
     private var mHoldIndex = -1
     private var mDragStarted = false
 
+    // FISH-031: shortcut ring shown around a held icon. Loaded off the main thread; the generation
+    // counter lets release/cancel/detach/new-touch invalidate an in-flight load so it can never raise
+    // a ring late.
+    private var mFocusRingShortcuts: List<QuickShortcut> = emptyList()
+    private var mFocusRingSlots: List<FocusChipSlot> = emptyList()
+    private var mActiveFocusChipIndex = -1
+    private var mFocusRingActive = false
+    private var mFocusRingGeneration = 0
+    private var mFocusRingExecutor: java.util.concurrent.ExecutorService? = null
+    private var mFocusRingHeldRect: RectF? = null
+    private val mScratchChipRect = RectF()
+    private var mPaintFocusChip: Paint? = null
+    private var mPaintFocusChipStroke: Paint? = null
+
+    /** Test seams: the shortcut source and the launcher; null in production. */
+    internal var shortcutProviderForTest: ((Context, String) -> List<QuickShortcut>)? = null
+    internal var shortcutLauncherForTest: ((Context, QuickShortcut, Rect?) -> Boolean)? = null
+
+    internal fun isFocusRingActiveForTest(): Boolean = mFocusRingActive
+    internal fun activeFocusChipIndexForTest(): Int = mActiveFocusChipIndex
+    internal fun focusRingSlotsForTest(): List<FocusChipSlot> = mFocusRingSlots
+
     /** FISH-038b: told when a drag begins so the host can show the drop strip. Null means no strip. */
     var onAppDragStartListener: OnAppDragStartListener? = null
 
@@ -480,11 +507,10 @@ class LensView : View {
             if (mGestureReduceMotion != true) {
                 performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
             }
-            if (LensDragPolicy.shouldOpenMenuOnTimeout(mHasOtherLenses)) {
-                showAppOptionsAtIndex(mSelectIndex)
-            } else {
-                mHoldIndex = mSelectIndex
-            }
+            // FISH-031: the hold index is always recorded; the shortcut load decides whether a ring
+            // is raised or (single lens) the menu opens at once as before.
+            mHoldIndex = mSelectIndex
+            beginFocusRingLoad(mSelectIndex)
         } else if (onEmptySpaceLongPressListener != null
             && shouldTriggerEmptySpaceLongPress(mLongPressArmed, mMoving, mSelectIndex)
         ) {
@@ -827,6 +853,114 @@ class LensView : View {
     }
 
     /**
+     * FISH-031: asks for the held app's shortcuts off the main thread. The result is applied only if
+     * this load is still the current one (no release/cancel/detach/new touch since). With no ring the
+     * old behaviour stands: a single lens opens the app menu now; with other lenses the menu opens on
+     * release.
+     */
+    private fun beginFocusRingLoad(index: Int) {
+        val app = mApps?.getOrNull(index)
+        if (app == null) {
+            if (LensDragPolicy.shouldOpenMenuOnTimeout(mHasOtherLenses)) showAppOptionsAtIndex(index)
+            return
+        }
+        val packageName = app.packageName.toString()
+        val generation = ++mFocusRingGeneration
+        val executor = mFocusRingExecutor
+            ?: java.util.concurrent.Executors.newSingleThreadExecutor().also { mFocusRingExecutor = it }
+        executor.execute {
+            val shortcuts = try {
+                shortcutProviderForTest?.invoke(context, packageName)
+                    ?: AppShortcutsProvider.shortcutsFor(context, packageName)
+            } catch (e: Exception) {
+                emptyList()
+            }
+            // Handler, not View.post: a view that is not attached yet only queues View.post until attach, so
+            // the pre-FISH-031 "menu right after the hold" would never fire there. A real detach is guarded by
+            // the generation (resetFocusRing runs on detach) and mIsDetachingFromWindow.
+            mLongPressHandler.post {
+                if (generation != mFocusRingGeneration || !mLongPressTriggered || mIsDetachingFromWindow) return@post
+                val clean = mUtilSettings?.getBoolean(UtilSettings.KEY_CLEAN_LENS_MODE) == true
+                if (FocusRingPolicy.shouldShowRing(clean, shortcuts.size)) {
+                    raiseFocusRing(index, shortcuts)
+                } else if (LensDragPolicy.shouldOpenMenuOnTimeout(mHasOtherLenses)) {
+                    showAppOptionsAtIndex(index)
+                }
+            }
+        }
+    }
+
+    private fun raiseFocusRing(index: Int, shortcuts: List<QuickShortcut>) {
+        val held = mGridCache.baseRects.getOrNull(index) ?: return
+        val reduce = mGestureReduceMotion == true
+        val scale = if (FocusRingPolicy.shouldSuppressExtraScale(reduce)) 1f else FocusRingLayout.EXTRA_MAGNIFICATION
+        // The held icon is drawn where the lens put it; fall back to its base cell if the lens is idle.
+        val source = mRectToSelect?.takeIf { it.width() > 0f } ?: held
+        val half = source.width() / 2f * scale
+        mFocusRingHeldRect = RectF(source.centerX() - half, source.centerY() - half, source.centerX() + half, source.centerY() + half)
+        mFocusRingShortcuts = shortcuts
+        mFocusRingSlots = FocusRingLayout.computeSlots(
+            source.centerX(), source.centerY(), half, shortcuts.size,
+            resources.getDimension(R.dimen.focus_ring_chip_radius),
+            resources.getDimension(R.dimen.focus_ring_gap),
+            width.toFloat(), height.toFloat()
+        )
+        mActiveFocusChipIndex = -1
+        mFocusRingActive = true
+        invalidate()
+    }
+
+    private fun runFocusRingShortcut(shortcut: QuickShortcut, rect: RectF?) {
+        val bounds = rect?.let { Rect(it.left.toInt(), it.top.toInt(), it.right.toInt(), it.bottom.toInt()) }
+        val started = shortcutLauncherForTest?.invoke(context, shortcut, bounds)
+            ?: AppShortcutsProvider.startShortcut(context, shortcut, bounds)
+        if (!started) Toast.makeText(context, R.string.error_app_not_found, Toast.LENGTH_SHORT).show()
+    }
+
+    /** Drops the ring and invalidates any in-flight load. Safe to call at any time. */
+    private fun resetFocusRing() {
+        mFocusRingGeneration++
+        mFocusRingActive = false
+        mFocusRingShortcuts = emptyList()
+        mFocusRingSlots = emptyList()
+        mActiveFocusChipIndex = -1
+        mFocusRingHeldRect = null
+    }
+
+    private fun drawFocusRing(canvas: Canvas) {
+        if (!mFocusRingActive) return
+        val chipPaint = mPaintFocusChip ?: Paint(Paint.ANTI_ALIAS_FLAG).also { mPaintFocusChip = it }
+        val strokePaint = mPaintFocusChipStroke ?: Paint(Paint.ANTI_ALIAS_FLAG).also {
+            it.style = Paint.Style.STROKE
+            it.strokeWidth = resources.getDimension(R.dimen.focus_ring_chip_stroke)
+            mPaintFocusChipStroke = it
+        }
+        strokePaint.color = mUtilSettings?.highlightColorInt() ?: Color.WHITE
+        mFocusRingHeldRect?.let { held ->
+            canvas.drawCircle(held.centerX(), held.centerY(), held.width() / 2f + resources.getDimension(R.dimen.padding_focus_halo), strokePaint)
+        }
+        for (slot in mFocusRingSlots) {
+            val active = slot.index == mActiveFocusChipIndex
+            chipPaint.color = ContextCompat.getColor(
+                context, if (active) R.color.focus_ring_chip_bg_active else R.color.focus_ring_chip_bg
+            )
+            mScratchChipRect.set(slot.rect)
+            val r = mScratchChipRect.width() / 2f
+            canvas.drawCircle(mScratchChipRect.centerX(), mScratchChipRect.centerY(), r, chipPaint)
+            canvas.drawCircle(mScratchChipRect.centerX(), mScratchChipRect.centerY(), r, strokePaint)
+            val icon = mFocusRingShortcuts.getOrNull(slot.index)?.icon
+            if (icon != null) {
+                val inset = (r * CHIP_ICON_INSET_FRACTION).toInt()
+                icon.setBounds(
+                    (mScratchChipRect.left).toInt() + inset, (mScratchChipRect.top).toInt() + inset,
+                    (mScratchChipRect.right).toInt() - inset, (mScratchChipRect.bottom).toInt() - inset
+                )
+                icon.draw(canvas)
+            }
+        }
+    }
+
+    /**
      * FISH-038b: a held icon that moved past touch slop becomes a system drag. The system then owns
      * the touch stream, so the pager, pan, pinch and edge-swipe cannot compete with it. If the system
      * refuses, the hold falls back to the menu so it never silently does nothing.
@@ -836,6 +970,8 @@ class LensView : View {
         val list = mApps ?: return
         if (mDragStarted || index !in list.indices) return
         if (!LensDragPolicy.shouldStartDrag(true, mHasOtherLenses, exceedsTouchSlop(dx, dy, mTouchSlop))) return
+        // FISH-031: a finger on a chip is choosing it, not dragging the app away.
+        if (!FocusRingPolicy.shouldAllowDragStart(mHasOtherLenses, mActiveFocusChipIndex, true)) return
         val app = list[index]
         val payload = LensDragPayload(this, app, lensId)
         val clip = ClipData.newPlainText(app.label, LensAppScope.identifierOf(app))
@@ -1208,6 +1344,7 @@ class LensView : View {
                 mLongPressTriggered = false
                 mHoldIndex = -1
                 mDragStarted = false
+                resetFocusRing()
                 mLongPressArmed = true
                 mLongPressHandler.removeCallbacks(mLongPressRunnable)
                 mLongPressHandler.postDelayed(
@@ -1247,6 +1384,13 @@ class LensView : View {
                     return true
                 }
                 if (mLongPressTriggered) {
+                    if (mFocusRingActive) {
+                        val chip = FocusRingLayout.chipAt(mFocusRingSlots, event.x, event.y)
+                        if (chip != mActiveFocusChipIndex) {
+                            mActiveFocusChipIndex = chip
+                            invalidate()
+                        }
+                    }
                     maybeStartDrag(event.x - mTouchDownX, event.y - mTouchDownY)
                     return true
                 }
@@ -1391,11 +1535,19 @@ class LensView : View {
                 if (mLongPressTriggered) {
                     mLongPressTriggered = false
                     val heldIndex = mHoldIndex
-                    val openMenu = heldIndex >= 0 &&
-                        LensDragPolicy.shouldOpenMenuOnRelease(true, mDragStarted, mHasOtherLenses)
+                    val ringWasActive = mFocusRingActive
+                    val action = FocusRingPolicy.resolveRelease(ringWasActive, mActiveFocusChipIndex, mDragStarted)
+                    val shortcut = (action as? FocusRingReleaseAction.RunShortcut)?.let { mFocusRingShortcuts.getOrNull(it.index) }
+                    val slotRect = (action as? FocusRingReleaseAction.RunShortcut)?.let { mFocusRingSlots.getOrNull(it.index)?.rect }
+                    // Old rule kept for a hold with no ring; with a ring, an off-chip release opens the menu on any lens count.
+                    val openMenu = action == FocusRingReleaseAction.OpenAppMenu && heldIndex >= 0 &&
+                        (ringWasActive || LensDragPolicy.shouldOpenMenuOnRelease(true, mDragStarted, mHasOtherLenses))
+                    resetFocusRing()
                     mHoldIndex = -1
                     mDragStarted = false
-                    if (openMenu) showAppOptionsAtIndex(heldIndex)
+                    if (shortcut != null) runFocusRingShortcut(shortcut, slotRect)
+                    else if (openMenu) showAppOptionsAtIndex(heldIndex)
+                    invalidate()
                     return true
                 }
                 performLaunchVibration()
@@ -1415,6 +1567,7 @@ class LensView : View {
                 mLongPressTriggered = false
                 mHoldIndex = -1
                 mDragStarted = false
+                resetFocusRing()
                 mLongPressHandler.removeCallbacks(mLongPressRunnable)
                 resetSearchSwipeState()
                 gestureState = LensGestureState.IDLE
@@ -1612,6 +1765,7 @@ class LensView : View {
             drawFocusHalo(canvas, mRectToSelect)
             drawAppName(canvas, mRectToSelect)
         }
+        drawFocusRing(canvas)
     }
 
     /** FISH-024: thin accent ring around the magnified icon; reuses one Paint, no per-frame allocation. */
@@ -1913,6 +2067,9 @@ class LensView : View {
             // UI-022: a pending long-press Runnable must never fire (and show a PopupMenu) after
             // this view is detached/destroyed.
             mLongPressHandler.removeCallbacks(mLongPressRunnable)
+            resetFocusRing()
+            mFocusRingExecutor?.shutdownNow()
+            mFocusRingExecutor = null
             resetSearchSwipeState()
             // UI-025: an open icon menu is a window owned by this view; it and its anchor must not
             // outlive the view (rotation, page recycle, Activity destroy).

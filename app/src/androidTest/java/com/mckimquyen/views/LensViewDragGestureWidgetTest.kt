@@ -27,6 +27,11 @@ class LensViewDragGestureWidgetTest {
     private val instrumentation get() = InstrumentationRegistry.getInstrumentation()
     private lateinit var context: Context
     private lateinit var lensView: LensView
+    private companion object {
+        const val MENU_WAIT_MS = 2_000L
+        const val MENU_POLL_MS = 25L
+    }
+
     private val menuRequests = ArrayList<Int>()
     private val dragRequests = ArrayList<LensDragPayload>()
     private var dragAccepted = true
@@ -217,8 +222,12 @@ class LensViewDragGestureWidgetTest {
     fun singleLens_holdOpensMenuAtTimeout_andNeverDrags() {
         val point = pressIcon(hasOtherLenses = false)
         waitPastLongPress()
+        // FISH-031: the shortcut lookup runs off the main thread, so the menu now opens a beat after
+        // the timeout instead of inside it. Poll with a bound; it must still open exactly once.
+        val deadline = System.currentTimeMillis() + MENU_WAIT_MS
+        while (menuRequests.isEmpty() && System.currentTimeMillis() < deadline) Thread.sleep(MENU_POLL_MS)
         instrumentation.runOnMainSync {
-            assertEquals("a single-lens hold opens the menu at the timeout, as before", listOf(0), menuRequests)
+            assertEquals("a single-lens hold opens the menu right after the timeout", listOf(0), menuRequests)
             touch(MotionEvent.ACTION_MOVE, point.first + slop() + 40f, point.second)
             touch(MotionEvent.ACTION_UP, point.first, point.second)
         }
