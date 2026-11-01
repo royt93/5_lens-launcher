@@ -5,7 +5,7 @@
 | Type | exclusive |
 | Status | in progress (2026-11-01) |
 | Priority | P3 |
-| Evidence | idea |
+| Evidence | implementation + tests + TECNO BG6 smoke; audit 8.3/10, blocked on class-level integration hang |
 | Epic | Fisheye Smart |
 | Estimate | 3 SP |
 | Risk | Low |
@@ -21,10 +21,10 @@ Là người dùng, tôi muốn ảnh chia sẻ nói rõ thông số lens và gh
 
 ## Acceptance criteria
 
-- [ ] Caption in distortion/scale/profile.
-- [ ] Tùy chọn ghép nhiều lens thành một tấm.
-- [ ] Giới hạn kích thước ảnh/bộ nhớ.
-- [ ] Test dựng bitmap + smoke.
+- [x] Caption in distortion/scale/profile.
+- [x] Tùy chọn ghép nhiều lens thành một tấm.
+- [x] Giới hạn kích thước ảnh/bộ nhớ (cạnh ≤ 4096 px, ≤ 64 MB; trần 6 lens).
+- [ ] Test dựng bitmap + smoke: smoke BG6 đạt cho 1 và 2 lens; `PolaroidContactSheetIntegrationTest` chạy riêng từng test xanh nhưng cả class kẹt trên BG6 chưa rõ gốc (xem `doc/task/AUDIT_FISH-037_2026-11-01.md`).
 
 ## Implementation notes
 
