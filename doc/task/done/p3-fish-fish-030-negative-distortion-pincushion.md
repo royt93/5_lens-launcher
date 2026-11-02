@@ -3,9 +3,9 @@
 | Field | Value |
 |---|---|
 | Type | idea |
-| Status | in progress (profile PINCUSHION per-lens; positive distortion; audit 9,0/10, xem AUDIT_FISH-030_2026-10-31.md; smoke UI thật trên KJ7 đã có, đúng ngưỡng nên chưa đóng) |
+| Status | done (2026-11-02): audit 9,2/10 (xem AUDIT_FISH-030_2026-10-31.md), smoke UI thật và cặp ảnh Fisheye/Pincushion trên TECNO KJ7, chưa push |
 | Priority | P3 |
-| Evidence | idea |
+| Evidence | implementation + tests + TECNO KJ7 UI smoke + paired render; audit 9.2/10, not pushed |
 | Epic | Fisheye Smart |
 | Estimate | 3 SP |
 | Risk | Medium |
@@ -23,7 +23,7 @@ Là người dùng, tôi muốn chế độ ngắm rìa đẩy icon ra biên.
 
 - [x] Thay "mở biên dưới" bằng profile PINCUSHION riêng per-lens, độ méo giữ dương (owner chốt 2026-10-31); không preset mới.
 - [x] Test hit-test: rect đã vẽ = rect hit-test cho mọi profile (`LensViewProfileIntegrationTest`).
-- [ ] Độc lập FISH-026/FISH-009.
+- [x] Độc lập FISH-026/FISH-009 (pinch 12/12, widget 18/18, smart focus 9/9 xanh trên BG6; không đổi đường đàn hồi/pinch).
 
 ## Implementation notes
 
@@ -31,13 +31,13 @@ Rủi ro hit-test; viết test thuần trước.
 
 ## Verification and Definition of Done
 
-- [ ] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
-- [ ] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
-- [ ] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
-- [ ] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
-- [ ] No new lint/build failures.
-- [ ] A post-change audit record scores the round `> 9.0/10` before push.
-- [ ] Evidence and status are updated before moving this file to `done`.
+- [x] Unit tests cover pure logic, state transitions and failure branches (`LensProfileTest` 13, `LensProfileSettingsTest`, `LayoutBackupPhysicsTest` 11; 1.418 unit, 0 fail).
+- [x] Widget/UI tests cover visible behavior and lifecycle (`LensSettingsActivityWidgetTest` 9). TalkBack/A11Y ngoài phạm vi theo owner; nút profile dùng control Material chuẩn.
+- [x] Integration tests cover subsystem boundaries and persistence (`LensViewProfileIntegrationTest` 13, `WorkspaceBackupImportIntegrationTest` 21).
+- [x] Smoke tests pass on the device locked for the session (TECNO KJ7, Android 14, APK sha256 `ea709f26...`, 2026-11-02); device restored, 1.192/1.192 file hashes match.
+- [x] No new lint/build failures.
+- [x] A post-change audit record scores the round `> 9.0/10` before push (9.2/10). Push itself is pending an explicit owner request.
+- [x] Evidence and status are updated before moving this file to `done`.
 
 If a test layer is not applicable, replace its checkbox with a reviewed rationale; do not silently omit it.
 

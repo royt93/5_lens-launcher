@@ -318,7 +318,7 @@ Giới hạn: agent audit ui chưa đọc hết `LensView.kt`, `ActAbout.java`, 
 | `FISH-027` ✅ done 2026-10-29 (audit 9,1/10, TECNO KJ7, chưa push) | P3 | 5 | [Profile độ cong lens (fisheye / anamorphic / cylindrical)](done/p3-fish-fish-027-lens-profiles-curve-shapes.md) |
 | `FISH-028` ✅ done 2026-10-31 (audit 9,2/10, TECNO KJ7, chưa push) | P3 | 3 | [Bán kính ảnh hưởng của lens (lens hood)](done/p3-fish-fish-028-lens-hood-bounded-radius.md) |
 | `FISH-029` | P3 | 3 | [Khóa tiêu điểm (macro mode) bằng double-tap](todo/p3-fish-fish-029-focus-lock-macro-mode.md) |
-| `FISH-030` 🟡 in progress 2026-11-02 (audit 9,0/10, đúng ngưỡng nên chưa đóng; smoke UI thật trên KJ7, chưa push) | P3 | 3 | [Chế độ ống kính đảo (pincushion)](inprogress/p3-fish-fish-030-negative-distortion-pincushion.md) |
+| `FISH-030` ✅ done 2026-11-02 (audit 9,2/10, TECNO KJ7, chưa push) | P3 | 3 | [Chế độ ống kính đảo (pincushion)](done/p3-fish-fish-030-negative-distortion-pincushion.md) |
 | `FISH-038` ✅ done 2026-10-27 (một phần: menu chuyển lens + hoàn tác + TalkBack) | P3 | 8 | [Kéo thả app giữa các lens](done/p3-fish-fish-038-drag-apps-between-lenses.md) |
 | `FISH-038b` ✅ done 2026-10-28 | P3 | 5 | [Kéo thả app giữa các lens (phần kéo thả thật)](done/p3-fish-fish-038b-drag-apps-between-lenses.md) |
 | `FISH-039` | P3 | 2 | [Focus peaking cho người thị lực kém](todo/p3-fish-fish-039-focus-peaking-low-vision.md) |
