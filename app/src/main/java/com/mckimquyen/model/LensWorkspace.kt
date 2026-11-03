@@ -9,6 +9,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+data class CreatedLens(val lens: LensWorkspace, val copiedAppCount: Int)
+
 /**
  * FISH-008: Represents an independent Lens workspace (e.g. "Lens 1", "Work", "Personal").
  * Each workspace owns its own app organization layout (pinned zones, custom order, visibility,
@@ -76,15 +78,16 @@ data class LensWorkspace(
         /** Owner decision (FISH-008 Phase 2): a new lens starts as a copy of [copyFromLensId]'s
          *  layout, not empty. */
         @JvmStatic
-        fun createLens(name: String, copyFromLensId: String, onDone: (List<LensWorkspace>) -> Unit) {
+        fun createLens(name: String, copyFromLensId: String, onDone: (List<LensWorkspace>, CreatedLens) -> Unit) {
             ApplicationScope.scope.launch(Dispatchers.Main.immediate) {
-                withContext(Dispatchers.IO) { createLensNow(name, copyFromLensId) }
-                notifyLensesChanged(onDone)
+                val created = withContext(Dispatchers.IO) { createLensNow(name, copyFromLensId) }
+                val lenses = withContext(Dispatchers.IO) { dao().getAll() }
+                onDone(lenses, created)
             }
         }
 
         /** The DB work of [createLens], split out so it can be tested without Main/Application scopes. */
-        internal suspend fun createLensNow(name: String, copyFromLensId: String): LensWorkspace {
+        internal suspend fun createLensNow(name: String, copyFromLensId: String): CreatedLens {
             val existing = dao().getAll()
             val newLens = LensWorkspace(
                 id = java.util.UUID.randomUUID().toString(),
@@ -94,9 +97,9 @@ data class LensWorkspace(
                 groupName = existing.firstOrNull { it.id == copyFromLensId }?.groupName
             )
             dao().insertOrUpdate(newLens)
-            AppDatabase.getInstance().appPersistentDao()
+            val copiedAppCount = AppDatabase.getInstance().appPersistentDao()
                 .duplicateLensLayout(copyFromLensId, newLens.id)
-            return newLens
+            return CreatedLens(newLens, copiedAppCount)
         }
 
         @JvmStatic

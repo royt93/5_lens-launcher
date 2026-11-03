@@ -63,6 +63,35 @@ class LensWorkspaceDaoTest {
     }
 
     @Test
+    fun `createLensNow returns the created lens and exact copied app row count`() = runBlocking {
+        dao.insertOrUpdate(LensWorkspace.createDefault())
+        apps.insertAll((0 until 25).map { index ->
+            AppPersistent(
+                packageName = "copied.$index",
+                name = "Activity$index",
+                identifier = "copied.$index-Activity$index",
+                lensId = LensWorkspace.DEFAULT_LENS_ID
+            )
+        })
+
+        val created = LensWorkspace.createLensNow("Copy", LensWorkspace.DEFAULT_LENS_ID)
+
+        assertEquals("Copy", created.lens.name)
+        assertEquals(25, created.copiedAppCount)
+        assertEquals(25, apps.getAllForLens(created.lens.id).size)
+    }
+
+    @Test
+    fun `createLensNow returns zero copied rows for an empty source layout`() = runBlocking {
+        dao.insertOrUpdate(LensWorkspace.createDefault())
+
+        val created = LensWorkspace.createLensNow("Empty copy", LensWorkspace.DEFAULT_LENS_ID)
+
+        assertEquals(0, created.copiedAppCount)
+        assertEquals(0, apps.getAllForLens(created.lens.id).size)
+    }
+
+    @Test
     fun `insertIfAbsent seeds the default lens once and is a no-op afterwards`() = runBlocking {
         dao.insertIfAbsent(LensWorkspace.createDefault())
         dao.insertIfAbsent(LensWorkspace(LensWorkspace.DEFAULT_LENS_ID, "Renamed by mistake"))
@@ -119,12 +148,12 @@ class LensWorkspaceDaoTest {
     @Test
     fun `creating a lens after deleting a middle one never reuses an orderIndex`() = runBlocking {
         dao.insertOrUpdate(LensWorkspace.createDefault())
-        val a = LensWorkspace.createLensNow("A", LensWorkspace.DEFAULT_LENS_ID)
-        val b = LensWorkspace.createLensNow("B", LensWorkspace.DEFAULT_LENS_ID)
+        val a = LensWorkspace.createLensNow("A", LensWorkspace.DEFAULT_LENS_ID).lens
+        val b = LensWorkspace.createLensNow("B", LensWorkspace.DEFAULT_LENS_ID).lens
         assertEquals(listOf(0, 1, 2), dao.getAll().map { it.orderIndex })
 
         assertEquals(true, dao.deleteLensIfMoreThanOne(a.id))
-        val c = LensWorkspace.createLensNow("C", LensWorkspace.DEFAULT_LENS_ID)
+        val c = LensWorkspace.createLensNow("C", LensWorkspace.DEFAULT_LENS_ID).lens
 
         val indices = dao.getAll().map { it.orderIndex }
         assertEquals("orderIndex must be unique: $indices", indices.toSet().size, indices.size)
@@ -135,7 +164,7 @@ class LensWorkspaceDaoTest {
     @Test
     fun `export after create and delete churn parses back as a valid backup`() = runBlocking {
         dao.insertOrUpdate(LensWorkspace.createDefault())
-        val ids = (1..4).map { LensWorkspace.createLensNow("L$it", LensWorkspace.DEFAULT_LENS_ID).id }
+        val ids = (1..4).map { LensWorkspace.createLensNow("L$it", LensWorkspace.DEFAULT_LENS_ID).lens.id }
         dao.deleteLensIfMoreThanOne(ids[1])
         dao.deleteLensIfMoreThanOne(ids[0])
         LensWorkspace.createLensNow("Late", LensWorkspace.DEFAULT_LENS_ID)
@@ -249,20 +278,21 @@ class LensWorkspaceDaoTest {
         runBlocking {
             dao.insertOrUpdate(LensWorkspace.createDefault().copy(groupName = "Work"))
         }
-        var delivered: List<LensWorkspace>? = null
+        var delivered: Pair<List<LensWorkspace>, CreatedLens>? = null
 
-        LensWorkspace.createLens("Copy", LensWorkspace.DEFAULT_LENS_ID) { delivered = it }
+        LensWorkspace.createLens("Copy", LensWorkspace.DEFAULT_LENS_ID) { lenses, created -> delivered = lenses to created }
         // Room work runs on Dispatchers.IO (real threads); pump the main looper until it posts back.
         val deadline = System.currentTimeMillis() + 5_000L
         while (delivered == null && System.currentTimeMillis() < deadline) {
             org.robolectric.shadows.ShadowLooper.idleMainLooper()
             Thread.sleep(20)
         }
-        val created = requireNotNull(delivered) { "createLens must finish" }
+        val (lenses, created) = requireNotNull(delivered) { "createLens must finish" }
 
-        val copy = created.single { it.name == "Copy" }
+        val copy = lenses.single { it.name == "Copy" }
+        assertEquals(copy.id, created.lens.id)
         assertEquals("Work", copy.groupName)
-        assertEquals("Work", created.single { it.id == LensWorkspace.DEFAULT_LENS_ID }.groupName)
+        assertEquals("Work", lenses.single { it.id == LensWorkspace.DEFAULT_LENS_ID }.groupName)
     }
 
     @Test

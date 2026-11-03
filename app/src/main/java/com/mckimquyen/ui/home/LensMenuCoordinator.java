@@ -548,17 +548,11 @@ public final class LensMenuCoordinator {
         String defaultName = host.activity().getString(
                 R.string.lens_new_name_template, holder.currentLenses().size() + 1);
         showLensNameDialog(R.string.lens_add, defaultName, name ->
-                LensWorkspace.createLens(name, copyFromLensId, lenses -> {
-                    // FISH-008 Phase 3: the new lens copies its source's curvature/Smart Focus
-                    // too, not just its layout. createLens() doesn't return the new id, so find
-                    // the one lens that wasn't there before.
+                LensWorkspace.createLens(name, copyFromLensId, (lenses, created) -> {
+                    // Materialize settings only after the Room layout copy has completed.
                     UtilSettings settings = host.settings();
                     if (settings != null) {
-                        for (LensWorkspace lens : lenses) {
-                            if (!containsLens(holder.currentLenses(), lens.getId())) {
-                                settings.duplicateLensSettings(copyFromLensId, lens.getId());
-                            }
-                        }
+                        settings.duplicateLensSettings(copyFromLensId, created.getLens().getId());
                     }
                     adoptLenses(lenses);
                     return Unit.INSTANCE;
