@@ -3,9 +3,9 @@
 | Field | Value |
 |---|---|
 | Type | exclusive |
-| Status | todo |
+| Status | in progress (2026-11-03, design approved; implementation not started) |
 | Priority | P3 |
-| Evidence | idea |
+| Evidence | approved design: `docs/superpowers/specs/2026-11-03-fish-032-auto-aperture-design.md` |
 | Epic | Fisheye Smart |
 | Estimate | 3 SP |
 | Risk | Low |
