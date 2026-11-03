@@ -54,6 +54,15 @@ class ActHomeLensManagementWidgetTest {
     private val itemToggleCleanLens = 8
     private val itemManageCurrentLensGroup = ActHome.MENU_ID_MANAGE_CURRENT_LENS_GROUP
 
+    private companion object {
+        const val TEST_SMALL_SOURCE_ID = "test-f032-small-source"
+        const val TEST_MEDIUM_SOURCE_ID = "test-f032-medium-source"
+        const val TEST_LARGE_SOURCE_ID = "test-f032-large-source"
+        const val TEST_SMALL_ROW_COUNT = 10
+        const val TEST_MEDIUM_ROW_COUNT = 25
+        const val TEST_LARGE_ROW_COUNT = 100
+    }
+
     @Before
     fun setup() {
         cleanDb()
@@ -62,19 +71,33 @@ class ActHomeLensManagementWidgetTest {
 
     @After
     fun tearDown() {
-        cleanDb()
+        cleanupTestAutoApertureData()
         clearLensPrefs()
     }
 
     /** Two lenses so the indicator is visible and long-pressable; second is the active page. */
-    private fun cleanDb(): Unit = runBlocking {
-        val context = InstrumentationRegistry.getInstrumentation().targetContext
-        AppDatabase.init(context)
-        dao.getAll().forEach { dao.delete(it) }
-        // APP_PERSISTENT has no cascade: auto-aperture tests seed and copy layout rows, so remove them too.
-        AppDatabase.getInstance().appPersistentDao().deleteAllRows()
-        dao.insertOrUpdate(LensWorkspace.createDefault())
-        Unit
+    private data class WorkspaceSnapshot(
+        val lenses: List<LensWorkspace>,
+        val appRows: List<com.mckimquyen.model.AppPersistent>
+    )
+
+    private var originalWorkspace: WorkspaceSnapshot? = null
+
+    private fun cleanDb() = runBlocking {
+        AppDatabase.init(InstrumentationRegistry.getInstrumentation().targetContext)
+        val database = AppDatabase.getInstance()
+        originalWorkspace = WorkspaceSnapshot(
+            lenses = database.lensWorkspaceDao().getAll(),
+            appRows = database.appPersistentDao().getAllRows()
+        )
+    }
+
+    private fun cleanupTestAutoApertureData() = runBlocking {
+        val database = AppDatabase.getInstance()
+        val snapshot = requireNotNull(originalWorkspace)
+        database.lensWorkspaceDao().replaceWorkspace(snapshot.lenses, snapshot.appRows)
+        listOf(TEST_SMALL_SOURCE_ID, TEST_MEDIUM_SOURCE_ID, TEST_LARGE_SOURCE_ID).forEach(settings::deleteLensSettings)
+        originalWorkspace = null
     }
 
     /** FISH-008 Phase 3: per-lens prefs outlive the DB rows, so they need their own reset. */
@@ -668,29 +691,51 @@ class ActHomeLensManagementWidgetTest {
     // ---- FISH-008 Phase 2 regression coverage ----
 
     @Test
-    fun addLens_usesCopiedRowCountForTheMediumApertureBand() = runBlocking {
-        val appDao = AppDatabase.getInstance().appPersistentDao()
-        appDao.insertAll((0 until 25).map { index ->
-            com.mckimquyen.model.AppPersistent(
-                packageName = "com.auto.aperture.$index",
-                name = "Activity$index",
-                identifier = "com.auto.aperture.$index-Activity$index",
-                lensId = LensWorkspace.DEFAULT_LENS_ID
+    fun addLens_usesCopiedRowCountForAllApertureBandsAndPreservesSources() = runBlocking {
+        val database = AppDatabase.getInstance()
+        val appDao = database.appPersistentDao()
+        val sources = listOf(
+            TEST_SMALL_SOURCE_ID to TEST_SMALL_ROW_COUNT,
+            TEST_MEDIUM_SOURCE_ID to TEST_MEDIUM_ROW_COUNT,
+            TEST_LARGE_SOURCE_ID to TEST_LARGE_ROW_COUNT
+        )
+        sources.forEachIndexed { index, (id, count) ->
+            database.lensWorkspaceDao().insertOrUpdate(
+                LensWorkspace(id = id, name = "Auto source $index", orderIndex = 100 + index)
             )
-        })
-        settings.saveDistortionFactor(LensWorkspace.DEFAULT_LENS_ID, 4.4f)
+            appDao.insertAll((0 until count).map { row ->
+                com.mckimquyen.model.AppPersistent(
+                    packageName = "com.auto.aperture.$index.$row",
+                    name = "Activity$row",
+                    identifier = "com.auto.aperture.$index.$row-Activity$row",
+                    lensId = id
+                )
+            })
+            settings.saveDistortionFactor(id, 4.4f)
+        }
 
+        val expected = listOf(3.5f, 2.5f, 1.8f)
         ActivityScenario.launch(ActHome::class.java).use { scenario ->
             idle()
-            openMenuAndSelect(scenario, itemAdd, position = 0)
-            confirmNameDialog(scenario, "Auto medium")
+            sources.forEachIndexed { index, (sourceId, rowCount) ->
+                val position = dao.getAll().indexOfFirst { it.id == sourceId }
+                assertTrue("test source lens must be present", position >= 0)
+                openMenuAndSelect(scenario, itemAdd, position)
+                confirmNameDialog(scenario, "Auto copy $index")
 
-            val created = dao.getAll().single { it.name == "Auto medium" }
-            assertEquals("layout rows are copied", 25, appDao.getAllForLens(created.id).size)
-            assertEquals("25 copied rows select the medium aperture", 2.5f, settings.getDistortionFactor(created.id), 0.001f)
-            assertEquals("source's manual distortion is not changed", 4.4f, settings.getDistortionFactor(LensWorkspace.DEFAULT_LENS_ID), 0.001f)
-            settings.saveDistortionFactor(created.id, 4.1f)
-            assertEquals("a later user override wins", 4.1f, settings.getDistortionFactor(created.id), 0.001f)
+                val created = dao.getAll().single { it.name == "Auto copy $index" }
+                try {
+                    assertEquals("layout rows are copied", rowCount, appDao.getAllForLens(created.id).size)
+                    assertEquals("copied row count chooses the aperture", expected[index], settings.getDistortionFactor(created.id), 0.001f)
+                    assertEquals("source manual distortion is unchanged", 4.4f, settings.getDistortionFactor(sourceId), 0.001f)
+                    settings.saveDistortionFactor(created.id, 4.1f)
+                    assertEquals("a later user value wins", 4.1f, settings.getDistortionFactor(created.id), 0.001f)
+                } finally {
+                    appDao.deleteForLens(created.id)
+                    dao.deleteLensIfMoreThanOne(created.id)
+                    settings.deleteLensSettings(created.id)
+                }
+            }
         }
     }
 
