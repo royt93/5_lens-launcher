@@ -200,9 +200,11 @@ class UtilSettingsPerLensTest {
         settings.duplicateLensSettings(work, personal, copiedAppCount = 10)
         settings.saveDistortionFactor(personal, 4.1f)
         settings.duplicateLensSettings(work, "another", copiedAppCount = 140)
+        settings.duplicateLensSettings(personal, "third", copiedAppCount = 25)
 
         assertEquals("a later user write wins and is not recomputed", 4.1f, settings.getDistortionFactor(personal), 0.001f)
         assertEquals("an existing lens is never rewritten", 4.3f, settings.getDistortionFactor(work), 0.001f)
+        assertEquals("later lens creation never recalculates existing lenses", 4.1f, settings.getDistortionFactor(personal), 0.001f)
     }
 
     @Test

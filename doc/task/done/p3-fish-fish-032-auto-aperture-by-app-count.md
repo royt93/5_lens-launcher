@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | exclusive |
-| Status | in progress (2026-11-03, design approved; implementation not started) |
+| Status | done (2026-11-03, audit 9.35/10; Pixel 7 Pro smoke + full host gate pass) |
 | Priority | P3 |
 | Evidence | approved design: `docs/superpowers/specs/2026-11-03-fish-032-auto-aperture-design.md` |
 | Epic | Fisheye Smart |
@@ -21,9 +21,9 @@ Là người dùng, tôi muốn lens mới tạo có độ cong hợp lý ngay.
 
 ## Acceptance criteria
 
-- [ ] Ánh xạ số app → distortion mặc định (hằng số có tên).
-- [ ] Người dùng ghi đè bằng pinch vẫn thắng.
-- [ ] Test thuần ánh xạ + migration không đổi lens cũ.
+- [x] Ánh xạ số hàng layout thực copy → distortion mặc định bằng named constants: `0..24 → 3.5f`, `25..99 → 2.5f`, `>=100 → 1.8f`.
+- [x] Người dùng ghi đè bằng pinch vẫn thắng; không tự tính lại khi count thay đổi.
+- [x] Lens cũ không đổi; mapper, settings và production Add lens flow được test.
 
 ## Implementation notes
 
@@ -31,15 +31,16 @@ Không đổi `LensGridCache`.
 
 ## Verification and Definition of Done
 
-- [ ] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
-- [ ] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
-- [ ] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
-- [ ] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
-- [ ] No new lint/build failures.
-- [ ] A post-change audit record scores the round `> 9.0/10` before push.
-- [ ] Evidence and status are updated before moving this file to `done`.
+- [x] Unit tests cover pure mapping, per-lens state transitions, override, and all mapping boundaries; TDD RED/GREEN recorded in commit history.
+- [x] Widget/production flow test covers Add lens count bands and preserved settings.
+- [x] Integration tests cover DAO copied-count propagation, Home lens creation, pinch/profile, and backup/import boundaries.
+- [x] Pixel 7 Pro smoke passed; APK SHA, device info, timestamp, backup/restore checks and resulting state are in `doc/task/AUDIT_FISH-032_2026-11-03.md`.
+- [x] Host gate, lint, diff check and secret scan pass; no new failure.
+- [x] Audit score `9.35/10` (>9.0), recorded in `doc/task/AUDIT_FISH-032_2026-11-03.md`.
+- [x] Evidence/status updated before moving to `done`.
+- [ ] Push: intentionally not performed; no current explicit push authorization.
 
-If a test layer is not applicable, replace its checkbox with a reviewed rationale; do not silently omit it.
+No additional accessibility control or UI was introduced; existing menu semantics remain unchanged.
 
 ## Prompt để chạy loop
 
