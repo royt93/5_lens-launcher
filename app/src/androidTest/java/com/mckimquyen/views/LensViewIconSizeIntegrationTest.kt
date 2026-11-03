@@ -152,7 +152,7 @@ class LensViewIconSizeIntegrationTest {
     fun aDuplicatedLens_keepsTheSourceSizeEvenAfterTheSharedValueChanges() {
         settings.save(UtilSettings.KEY_ICON_SIZE, SMALL_DP)
         settings.saveIconSize(OTHER_LENS, LARGE_DP)
-        settings.duplicateLensSettings(OTHER_LENS, THIRD_LENS)
+        settings.duplicateLensSettings(OTHER_LENS, THIRD_LENS, copiedAppCount = 0)
 
         val source = cellWidth(laidOutView(OTHER_LENS))
         val copy = cellWidth(laidOutView(THIRD_LENS))

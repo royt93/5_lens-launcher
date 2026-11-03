@@ -57,7 +57,7 @@ class LensProfileSettingsTest {
 
     @Test fun duplicatingALensCopiesItsProfile() {
         settings.saveLensProfile(work, LensProfile.PINCUSHION)
-        settings.duplicateLensSettings(work, personal)
+        settings.duplicateLensSettings(work, personal, copiedAppCount = 0)
         assertEquals(LensProfile.PINCUSHION, settings.getLensProfile(personal))
     }
 

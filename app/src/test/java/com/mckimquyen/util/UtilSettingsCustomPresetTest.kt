@@ -141,7 +141,7 @@ class UtilSettingsCustomPresetTest {
         settings.saveCustomDistortionFactor(work, 4.5f)
         settings.saveCustomScaleFactor(1.2f)
 
-        settings.duplicateLensSettings(work, personal)
+        settings.duplicateLensSettings(work, personal, copiedAppCount = 0)
 
         assertEquals(4.5f, settings.getCustomDistortionFactor(personal), 0.001f)
     }
@@ -151,7 +151,7 @@ class UtilSettingsCustomPresetTest {
         settings.saveCustomDistortionFactor(LensWorkspace.DEFAULT_LENS_ID, 3.0f)
         settings.saveCustomScaleFactor(1.2f)
 
-        settings.duplicateLensSettings(work, personal)
+        settings.duplicateLensSettings(work, personal, copiedAppCount = 0)
 
         assertEquals(
             "work never saved its own override, so it inherits the base custom value - " +
@@ -167,7 +167,7 @@ class UtilSettingsCustomPresetTest {
         // Neither lens has ever saved a Custom preset - hasCustomPreset() must stay false, and
         // the new lens must not receive a phantom per-lens override for a feature that doesn't
         // exist yet.
-        settings.duplicateLensSettings(work, personal)
+        settings.duplicateLensSettings(work, personal, copiedAppCount = 0)
 
         assertFalse(
             "Duplicating before any Custom preset exists must not silently create one",
@@ -184,7 +184,7 @@ class UtilSettingsCustomPresetTest {
     @Test
     fun `a pre-custom duplicate does not go stale once a real custom preset is saved afterward`() {
         // work is duplicated to personal before anyone has ever saved a Custom preset.
-        settings.duplicateLensSettings(work, personal)
+        settings.duplicateLensSettings(work, personal, copiedAppCount = 0)
 
         // Later, a real Custom preset is saved on the default lens.
         settings.saveCustomDistortionFactor(LensWorkspace.DEFAULT_LENS_ID, 4.0f)

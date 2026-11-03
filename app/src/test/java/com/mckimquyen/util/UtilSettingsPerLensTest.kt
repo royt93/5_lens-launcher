@@ -155,28 +155,75 @@ class UtilSettingsPerLensTest {
     // ---- Create / delete lifecycle ----
 
     @Test
-    fun `duplicate copies both values onto the new lens`() {
+    fun `duplicate gives the new lens the aperture for its copied app count and copies Smart Focus`() {
         settings.saveDistortionFactor(work, 4.5f)
         settings.saveSmartFocusBias(work, true)
 
-        settings.duplicateLensSettings(work, personal)
+        settings.duplicateLensSettings(work, personal, copiedAppCount = 10)
 
-        assertEquals(4.5f, settings.getDistortionFactor(personal), 0.001f)
+        assertEquals("FISH-032: the new lens uses the small-lens aperture", 3.5f, settings.getDistortionFactor(personal), 0.001f)
+        assertEquals("The source keeps its hand-set value", 4.5f, settings.getDistortionFactor(work), 0.001f)
         assertTrue(settings.isSmartFocusBias(personal))
     }
 
     @Test
-    fun `duplicating from a lens that only inherits materializes the inherited values`() {
+    fun `duplicate maps each app-count band to its aperture`() {
+        settings.saveDistortionFactor(work, 4.5f)
+
+        settings.duplicateLensSettings(work, "small", copiedAppCount = 24)
+        settings.duplicateLensSettings(work, "medium", copiedAppCount = 60)
+        settings.duplicateLensSettings(work, "large", copiedAppCount = 140)
+
+        assertEquals(3.5f, settings.getDistortionFactor("small"), 0.001f)
+        assertEquals(2.5f, settings.getDistortionFactor("medium"), 0.001f)
+        assertEquals(1.8f, settings.getDistortionFactor("large"), 0.001f)
+    }
+
+    @Test
+    fun `duplicating from a lens that only inherits still materializes the app-count aperture as its own value`() {
         settings.save(UtilSettings.KEY_DISTORTION_FACTOR, 3.0f)
         settings.save(UtilSettings.KEY_SMART_FOCUS_BIAS, true)
 
-        settings.duplicateLensSettings(LensWorkspace.DEFAULT_LENS_ID, work)
+        settings.duplicateLensSettings(LensWorkspace.DEFAULT_LENS_ID, work, copiedAppCount = 60)
 
-        assertEquals(3.0f, settings.getDistortionFactor(work), 0.001f)
+        assertEquals(2.5f, settings.getDistortionFactor(work), 0.001f)
         assertTrue(settings.isSmartFocusBias(work))
         // And it really is this lens's own value now, not a live link to the global one.
         settings.save(UtilSettings.KEY_DISTORTION_FACTOR, 1.0f)
-        assertEquals(3.0f, settings.getDistortionFactor(work), 0.001f)
+        assertEquals(2.5f, settings.getDistortionFactor(work), 0.001f)
+    }
+
+    @Test
+    fun `a duplicate keeps the user's later pinch value and leaves existing lenses untouched`() {
+        settings.saveDistortionFactor(work, 4.3f)
+
+        settings.duplicateLensSettings(work, personal, copiedAppCount = 10)
+        settings.saveDistortionFactor(personal, 4.1f)
+        settings.duplicateLensSettings(work, "another", copiedAppCount = 140)
+
+        assertEquals("a later user write wins and is not recomputed", 4.1f, settings.getDistortionFactor(personal), 0.001f)
+        assertEquals("an existing lens is never rewritten", 4.3f, settings.getDistortionFactor(work), 0.001f)
+    }
+
+    @Test
+    fun `duplicate still copies every other lens setting from the source`() {
+        settings.saveLensProfile(work, LensProfile.PINCUSHION)
+        settings.saveLensHood(work, 0.4f)
+        settings.saveIconSize(work, 22f)
+        settings.saveLensAppScope(work, LensAppScope.SELECTED)
+        settings.saveLensAppSelection(work, setOf("a-Main"))
+        settings.saveLensHiddenAppIds(work, setOf("b-Main"))
+        settings.saveLensFrozen(work, true)
+
+        settings.duplicateLensSettings(work, personal, copiedAppCount = 10)
+
+        assertEquals(LensProfile.PINCUSHION, settings.getLensProfile(personal))
+        assertEquals(0.4f, settings.getLensHood(personal), 0.001f)
+        assertEquals(22f, settings.getIconSize(personal), 0.001f)
+        assertEquals(LensAppScope.SELECTED, settings.getLensAppScope(personal))
+        assertEquals(setOf("a-Main"), settings.getLensAppSelection(personal))
+        assertEquals(setOf("b-Main"), settings.getLensHiddenAppIds(personal))
+        assertTrue(settings.isLensFrozen(personal))
     }
 
     @Test

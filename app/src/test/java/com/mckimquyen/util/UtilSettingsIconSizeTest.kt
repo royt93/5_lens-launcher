@@ -124,7 +124,7 @@ class UtilSettingsIconSizeTest {
     @Test
     fun `duplicate copies the effective value of an inherited source`() {
         settings.save(UtilSettings.KEY_ICON_SIZE, 44f)
-        settings.duplicateLensSettings(work, personal)
+        settings.duplicateLensSettings(work, personal, copiedAppCount = 0)
 
         assertEquals(44f, rawPrefs().getFloat("${UtilSettings.KEY_ICON_SIZE}_$personal", -1f), 0.001f)
         // Materialized: a later change of the shared value no longer moves the copy.
@@ -136,7 +136,7 @@ class UtilSettingsIconSizeTest {
     fun `duplicate copies an explicit source override`() {
         settings.save(UtilSettings.KEY_ICON_SIZE, 44f)
         settings.saveIconSize(work, 52f)
-        settings.duplicateLensSettings(work, personal)
+        settings.duplicateLensSettings(work, personal, copiedAppCount = 0)
         assertEquals(52f, settings.getIconSize(personal), 0.001f)
     }
 

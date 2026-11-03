@@ -70,10 +70,10 @@ class LensHoodSettingsTest {
     }
 
     @Test fun duplicatingALensCopiesItsHoodOnlyWhenOneIsStored() {
-        settings.duplicateLensSettings(work, personal)
+        settings.duplicateLensSettings(work, personal, copiedAppCount = 0)
         assertFalse("an unset hood must stay unset on the copy", raw().contains("lens_hood_$personal"))
         settings.saveLensHood(work, 0.45f)
-        settings.duplicateLensSettings(work, personal)
+        settings.duplicateLensSettings(work, personal, copiedAppCount = 0)
         assertEquals(0.45f, settings.getLensHood(personal), 0f)
     }
 

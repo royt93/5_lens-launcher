@@ -774,11 +774,10 @@ class UtilSettings(context: Context) {
         save(lensKey(KEY_LENS_HOOD, lensId), LensHood.clamp(value))
     }
 
-    /** Materializes [fromLensId]'s effective values onto [toLensId], inherited ones included. */
-    fun duplicateLensSettings(fromLensId: String, toLensId: String) {
-        val distortion = getDistortionFactor(fromLensId)
+    /** Materializes copied lens settings onto [toLensId]; distortion starts from copied app count. */
+    fun duplicateLensSettings(fromLensId: String, toLensId: String, copiedAppCount: Int) {
         val smartFocus = isSmartFocusBias(fromLensId)
-        saveDistortionFactor(toLensId, distortion)
+        saveDistortionFactor(toLensId, ApertureAutoDefault.forAppCount(copiedAppCount))
         saveSmartFocusBias(toLensId, smartFocus)
         saveLensProfile(toLensId, getLensProfile(fromLensId))
         lensKey(KEY_LENS_HOOD, fromLensId).takeIf(prefs::contains)?.let {

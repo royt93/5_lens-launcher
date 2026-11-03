@@ -552,7 +552,8 @@ public final class LensMenuCoordinator {
                     // Materialize settings only after the Room layout copy has completed.
                     UtilSettings settings = host.settings();
                     if (settings != null) {
-                        settings.duplicateLensSettings(copyFromLensId, created.getLens().getId());
+                        settings.duplicateLensSettings(
+                                copyFromLensId, created.getLens().getId(), created.getCopiedAppCount());
                     }
                     adoptLenses(lenses);
                     return Unit.INSTANCE;

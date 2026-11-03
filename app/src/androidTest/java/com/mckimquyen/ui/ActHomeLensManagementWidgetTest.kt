@@ -71,6 +71,8 @@ class ActHomeLensManagementWidgetTest {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         AppDatabase.init(context)
         dao.getAll().forEach { dao.delete(it) }
+        // APP_PERSISTENT has no cascade: auto-aperture tests seed and copy layout rows, so remove them too.
+        AppDatabase.getInstance().appPersistentDao().deleteAllRows()
         dao.insertOrUpdate(LensWorkspace.createDefault())
         Unit
     }
@@ -204,7 +206,7 @@ class ActHomeLensManagementWidgetTest {
     }
 
     @Test
-    fun addLens_copiesTheSourceLensSettingsNotJustItsLayout() {
+    fun addLens_copiesOtherSourceSettingsButUsesAutoApertureFromCopiedRowCount() {
         seedSecondLens()
         settings.saveDistortionFactor("second", 4.5f)
         settings.saveSmartFocusBias("second", true)
@@ -223,11 +225,12 @@ class ActHomeLensManagementWidgetTest {
             val created = runBlocking { dao.getAll() }.find { it.name == "Copy" }
             assertNotNull("The new lens must exist", created)
             assertEquals(
-                "The new lens must inherit its source's curvature",
-                4.5f,
+                "The new lens auto-selects aperture from the copied row count (default source is empty)",
+                3.5f,
                 settings.getDistortionFactor(created!!.id),
                 0.001f
             )
+            assertEquals("The source's hand-set curvature stays unchanged", 4.5f, settings.getDistortionFactor("second"), 0.001f)
             assertTrue(
                 "The new lens must inherit its source's Smart Focus state",
                 settings.isSmartFocusBias(created.id)
@@ -663,6 +666,33 @@ class ActHomeLensManagementWidgetTest {
     }
 
     // ---- FISH-008 Phase 2 regression coverage ----
+
+    @Test
+    fun addLens_usesCopiedRowCountForTheMediumApertureBand() = runBlocking {
+        val appDao = AppDatabase.getInstance().appPersistentDao()
+        appDao.insertAll((0 until 25).map { index ->
+            com.mckimquyen.model.AppPersistent(
+                packageName = "com.auto.aperture.$index",
+                name = "Activity$index",
+                identifier = "com.auto.aperture.$index-Activity$index",
+                lensId = LensWorkspace.DEFAULT_LENS_ID
+            )
+        })
+        settings.saveDistortionFactor(LensWorkspace.DEFAULT_LENS_ID, 4.4f)
+
+        ActivityScenario.launch(ActHome::class.java).use { scenario ->
+            idle()
+            openMenuAndSelect(scenario, itemAdd, position = 0)
+            confirmNameDialog(scenario, "Auto medium")
+
+            val created = dao.getAll().single { it.name == "Auto medium" }
+            assertEquals("layout rows are copied", 25, appDao.getAllForLens(created.id).size)
+            assertEquals("25 copied rows select the medium aperture", 2.5f, settings.getDistortionFactor(created.id), 0.001f)
+            assertEquals("source's manual distortion is not changed", 4.4f, settings.getDistortionFactor(LensWorkspace.DEFAULT_LENS_ID), 0.001f)
+            settings.saveDistortionFactor(created.id, 4.1f)
+            assertEquals("a later user override wins", 4.1f, settings.getDistortionFactor(created.id), 0.001f)
+        }
+    }
 
     @Test
     fun addLens_createsNewWorkspaceWithCopiedLayout() {

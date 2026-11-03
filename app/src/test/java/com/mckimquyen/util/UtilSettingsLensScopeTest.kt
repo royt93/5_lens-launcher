@@ -115,7 +115,7 @@ class UtilSettingsLensScopeTest {
         settings.saveLensAppSelection(work, setOf("com.mail-Main"))
         assertEquals(setOf("com.mail-Main", "missing-Activity"), UtilSettings(context).getLensHiddenAppIds(work))
         assertEquals(emptySet<String>(), settings.getLensHiddenAppIds(personal))
-        settings.duplicateLensSettings(work, personal)
+        settings.duplicateLensSettings(work, personal, copiedAppCount = 0)
         assertEquals(settings.getLensHiddenAppIds(work), settings.getLensHiddenAppIds(personal))
         settings.deleteLensSettings(personal)
         assertEquals(emptySet<String>(), settings.getLensHiddenAppIds(personal))
@@ -217,7 +217,7 @@ class UtilSettingsLensScopeTest {
         settings.saveLensAppSelection(work, setOf("a-A"))
         settings.saveLensFrozen(work, true)
 
-        settings.duplicateLensSettings(work, personal)
+        settings.duplicateLensSettings(work, personal, copiedAppCount = 0)
 
         assertEquals(LensAppScope.SELECTED, settings.getLensAppScope(personal))
         assertEquals(setOf("a-A"), settings.getLensAppSelection(personal))
