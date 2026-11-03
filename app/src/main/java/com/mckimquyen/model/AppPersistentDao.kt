@@ -135,13 +135,15 @@ interface AppPersistentDao {
         insertDefaultLensRows(rows)
     }
 
+    /** Copies [sourceLensId]'s rows to [targetLensId] and returns how many rows were copied. */
     @Transaction
-    suspend fun duplicateLensLayout(sourceLensId: String, targetLensId: String) {
+    suspend fun duplicateLensLayout(sourceLensId: String, targetLensId: String): Int {
         val sourceApps = getAllForLens(sourceLensId)
         sourceApps.forEach { app ->
             val copy = app.copy(id = null, lensId = targetLensId)
             insert(copy)
         }
+        return sourceApps.size
     }
 
     /**

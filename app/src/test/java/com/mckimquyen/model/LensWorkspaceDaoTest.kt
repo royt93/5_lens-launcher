@@ -44,6 +44,25 @@ class LensWorkspaceDaoTest {
     }
 
     @Test
+    fun `duplicateLensLayout returns exactly the number of copied rows`() = runBlocking {
+        val sourceId = "source"
+        val targetId = "target"
+        val sourceRows = (0 until 25).map { index ->
+            AppPersistent(
+                packageName = "pkg.$index",
+                name = "Activity$index",
+                identifier = "pkg.$index-Activity$index",
+                lensId = sourceId
+            )
+        }
+        apps.insertAll(sourceRows)
+
+        assertEquals(25, apps.duplicateLensLayout(sourceId, targetId))
+        assertEquals(sourceRows.map { it.identifier }.toSet(), apps.getAllForLens(targetId).map { it.identifier }.toSet())
+        assertEquals(0, apps.duplicateLensLayout("empty", "empty-copy"))
+    }
+
+    @Test
     fun `insertIfAbsent seeds the default lens once and is a no-op afterwards`() = runBlocking {
         dao.insertIfAbsent(LensWorkspace.createDefault())
         dao.insertIfAbsent(LensWorkspace(LensWorkspace.DEFAULT_LENS_ID, "Renamed by mistake"))
