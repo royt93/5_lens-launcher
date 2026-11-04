@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | exclusive |
-| Status | done (2026-11-03, audit 9.35/10; Pixel 7 Pro smoke + full host gate pass) |
+| Status | done (2026-11-03, audit 9.35/10; final committed-state host gate + Pixel 7 Pro smoke pass) |
 | Priority | P3 |
 | Evidence | approved design: `docs/superpowers/specs/2026-11-03-fish-032-auto-aperture-design.md` |
 | Epic | Fisheye Smart |

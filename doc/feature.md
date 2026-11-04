@@ -119,6 +119,8 @@ Source of truth for implementation choices in this session. Detailed acceptance 
 
 ## 📋 Picked
 
+- **FISH-036 — Chia sẻ lens profile qua file (quyết định 2026-11-03, tiếp tục thiết kế 2026-11-04)**: xuất/nhập bộ quang học đầy đủ từ `LensSettingsActivity`: profile, distortion, scale, icon size, animation time, hood, Smart Focus và Custom preset. Nhập vào lens đang mở trong trang cài đặt; field per-lens ghi đúng lens đích, scale/animation và Custom scale/time giữ phạm vi global hiện có. Preview tách rõ tác động per-lens/global trước xác nhận; Cancel không ghi. Từ chối toàn file nếu sai cấu trúc/kiểu/range hoặc số không hữu hạn. Không mang layout/app list. Chưa duyệt thiết kế cuối, chưa viết code. Thứ tự còn lại: FISH-036 → FISH-033 → UI-035. Chỉ test trên Pixel.
+
 Thứ tự owner chọn 2026-10-29; từng bước cần smoke thật trên TECNO KJ7 `115333744A005844`:
 ✅ **FISH-028 — Bán kính ảnh hưởng của lens hood (2026-10-31)**: giới hạn bán kính méo theo tỷ lệ tầm với qua smoothstep falloff, icon ngoài hood đứng yên; slider Lens hood trong trang cài đặt lens, mặc định 100% giữ hành vi cũ. Unit 1.364, hồi quy 20 lớp trên TECNO, mutation 9/9, smoke ảnh TECNO KJ7 (35% vs 100%), dữ liệu khôi phục 1.192/1.192 file. Giới hạn đã biết (owner chọn giữ): hood nhỏ + distortion cao có thể đảo thứ tự dưới ~1 px ở mép hood. Audit `doc/task/AUDIT_FISH-028_2026-10-31.md` (9,2/10), chưa push.
 

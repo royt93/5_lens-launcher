@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | exclusive |
-| Status | todo |
+| Status | picked — đang thiết kế 2026-11-04; chưa triển khai |
 | Priority | P3 |
 | Evidence | idea |
 | Epic | Fisheye Smart |
@@ -13,7 +13,12 @@
 
 ## Context and evidence
 
-Tái dùng `LayoutBackupIo` + `PolaroidExportHelper`. Vật thể chia sẻ là cấu hình quang học (profile, distortion, scale, icon size, animation time), không phải layout.
+- `LensSettingsActivity` đã giữ `EXTRA_LENS_ID`, validate lens tồn tại trong Room qua `loadTarget()`, và có lifecycle-aware Activity class phù hợp cho SAF launchers.
+- `LayoutBackupIo` cung cấp mẫu callback + `ApplicationScope` cho SAF, nhưng workspace import thay Room/layout; không tái dùng write path cho profile.
+- `LensPhysicsBackup` trong `model/LayoutBackup.kt` strict-parses per-lens distortion/icon/custom distortion/Smart Focus/profile/hood. Nó không bao gồm các global `scale_factor`, `animation_time`, custom scale/time.
+- `UtilSettings` lưu scale/animation và custom preset scale/time global; profile, distortion, icon size, hood, Smart Focus và custom distortion theo lens. Target import là lens đang mở trong `LensSettingsActivity`.
+- Owner quyết định 2026-11-03/04: profile file chứa bộ quang học đầy đủ (profile, distortion, scale, icon size, animation time, hood, Smart Focus, Custom preset); import áp global fields đúng scope global hiện có; preview phân tách global/per-lens field và chỉ ghi sau xác nhận; file có field sai kiểu, thiếu field bắt buộc, số non-finite hoặc ngoài range bị từ chối toàn bộ; entry point đặt trong `LensSettingsActivity`.
+- Không chứa Room layout/app rows, không tạo lens tự động, không mở rộng thành workspace backup.
 
 ## User story
 
