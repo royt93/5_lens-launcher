@@ -331,7 +331,7 @@ Giới hạn: agent audit ui chưa đọc hết `LensView.kt`, `ActAbout.java`, 
 |---|---|---|---|
 | `FISH-031` ✅ done 2026-11-01 (audit 9,1/10, TECNO BG6, chưa push; OPPO chưa khôi phục) | P3 | 5 | [Vòng tiêu điểm đa lớp: giữ lâu mở shortcut ngay trong vòng](done/p3-fish-fish-031-focus-ring-quick-shortcuts.md) |
 | `FISH-032` ✅ done 2026-11-03 (audit 9,35/10, final host gate + Pixel 7 Pro, chưa push) | P3 | 3 | [Khẩu độ tự động: độ cong mặc định theo số app của lens](done/p3-fish-fish-032-auto-aperture-by-app-count.md) |
-| `FISH-033` 🟡 picked, thiết kế duyệt 2026-11-04 | P3 | 5 | [Thấu kính nghiêng theo cảm biến (tilt parallax)](todo/p3-fish-fish-033-gyro-tilt-parallax.md) |
+| `FISH-033` 🟡 in progress 2026-11-04 (Inline TDD, TECNO-only) | P3 | 5 | [Thấu kính nghiêng theo cảm biến (tilt parallax)](inprogress/p3-fish-fish-033-gyro-tilt-parallax.md) |
 | `FISH-034` | P3 | 3 | [Vignette và sai sắc ở mép lens theo độ méo](todo/p3-fish-fish-034-chromatic-vignette-rim.md) |
 | `FISH-035` | P3 | 5 | [Vòng lấy nét: xoay một ngón quanh tâm để quay vòng thứ tự app](todo/p3-fish-fish-035-rotate-ring-reorder.md) |
 | `FISH-036` ✅ done 2026-11-04 (audit 9,2/10, TECNO KJ7, chưa push) | P3 | 5 | [Chia sẻ 'lens profile' (cấu hình quang học) qua file](done/p3-fish-fish-036-lens-profile-share-file.md) |

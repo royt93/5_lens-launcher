@@ -107,6 +107,8 @@ internal fun clearTiltOffset()
 
 ## Task 1 — Toán TiltParallax (TDD)
 
+Tiến độ 2026-11-04: RED thiếu `TiltParallax` (`/tmp/f033-t1-red.log`); GREEN `TiltParallaxTest` 13/13. Mutation (`/tmp/f033-mutate.py`): bỏ vùng chết, bỏ clamp, đảo dấu ngang, bỏ xoay màn hình, bỏ tham chiếu, bỏ làm mịn đều KILLED. Lần đầu 3 mutant sống: đảo dấu ngang và bỏ làm mịn là lỗ hổng test thật, đã thêm hai test (hướng nghiêng, bước đầu chỉ bằng `SMOOTHING_FACTOR` của đích) rồi cả hai bị bắt. Mutant bỏ guard NaN của quaternion SỐNG và là tương đương: guard thứ hai trên góc đã chặn, hành vi quan sát được y hệt; không thêm test giả. Quy ước dấu: nghiêng phải → tâm trôi phải; đầu máy lên → trôi lên.
+
 **Files:** `util/TiltParallax.kt`, `TiltParallaxTest.kt`. **Produces:** `TiltParallax.Filter`, `TiltParallax.anglesOf`.
 
 - [ ] **1. RED:** viết test trước.

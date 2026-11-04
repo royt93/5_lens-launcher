@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | exclusive |
-| Status | picked — thiết kế duyệt 2026-11-04; spec chờ owner đọc lại, chưa triển khai |
+| Status | in progress 2026-11-04 — spec/plan duyệt, triển khai Inline; Task 1 TDD; chỉ TECNO |
 | Priority | P3 |
 | Evidence | idea |
 | Epic | Fisheye Smart |
