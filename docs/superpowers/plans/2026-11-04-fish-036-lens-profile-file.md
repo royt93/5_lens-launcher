@@ -212,6 +212,8 @@ Write require value valid, serialize/encode ≤ MAX_BYTES, `openOutputStream(uri
 
 ## Task 3 — Non-writing capture và one-batch settings application (TDD)
 
+Tiến độ 2026-11-04: RED thiếu `captureOpticalProfile`/`opticalProfileKeys`/`applyOpticalProfile`; GREEN `UtilSettingsOpticalProfileTest` 12/12, full JVM 1467/1467, lint xanh. Capture đọc raw prefs, apply dùng một editor và một commit khi thành công; commit false thì restore đúng key đã chạm.
+
 **Files:** `UtilSettings.kt`, new settings tests. **Consumes:** typed payload; `snapshotKeys`/`restoreKeys`. **Produces:** capture, touched keys, apply result.
 
 - [ ] **1. RED:** capture does not mutate raw prefs, effective inheritance, target/global keys and omitted Custom.

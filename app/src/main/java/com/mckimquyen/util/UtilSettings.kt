@@ -10,8 +10,10 @@ import com.mckimquyen.BuildConfig
 import com.mckimquyen.enums.BackgroundMode
 import com.mckimquyen.enums.LauncherMode
 import com.mckimquyen.enums.SortType
+import com.mckimquyen.model.LensOpticalProfile
 import com.mckimquyen.model.LensPhysicsBackup
 import com.mckimquyen.model.LensWorkspace
+import com.mckimquyen.model.OpticalCustomPreset
 import com.mckimquyen.model.EdgeSwipeMode
 import com.mckimquyen.ui.settings.ResetSnapshot
 import kotlin.math.roundToInt
@@ -30,6 +32,9 @@ data class LensAppSettingsBackup(
     /** DB-007: null = legacy backup, leave device physics untouched. */
     val physics: LensPhysicsBackup? = null
 )
+
+/** FISH-036: kết quả áp một optical profile vào SharedPreferences. */
+enum class OpticalProfileApplyResult { APPLIED, FAILED_RESTORED, RESTORE_FAILED }
 
 data class WorkspacePreferencesSnapshot(
     val values: Map<String, Any>,
@@ -796,6 +801,111 @@ class UtilSettings(context: Context) {
         if (hasCustomPreset()) {
             saveCustomDistortionFactor(toLensId, getCustomDistortionFactor(fromLensId))
         }
+    }
+
+    /**
+     * FISH-036: giá trị hiệu lực của [lensId] để xuất, đọc thẳng từ prefs mà không gọi getter có
+     * clamp-và-ghi. Null nếu có giá trị sai kiểu, không hữu hạn hoặc ngoài range đang hỗ trợ.
+     */
+    fun captureOpticalProfile(lensId: String): LensOpticalProfile? {
+        if (lensId.isBlank()) return null
+        val all = prefs.all
+        fun floatOf(key: String, default: Float): Float? = when (val raw = all[key]) {
+            null -> default
+            is Float -> raw.takeIf { it.isFinite() }
+            else -> null
+        }
+        fun inheritedKey(base: String): String = lensKey(base, lensId).takeIf(all::containsKey) ?: base
+        val distortion = floatOf(inheritedKey(KEY_DISTORTION_FACTOR), DEFAULT_DISTORTION_FACTOR) ?: return null
+        val icon = floatOf(inheritedKey(KEY_ICON_SIZE), autoDefaultIconSize) ?: return null
+        val scale = floatOf(KEY_SCALE_FACTOR, DEFAULT_SCALE_FACTOR) ?: return null
+        val hood = floatOf(lensKey(KEY_LENS_HOOD, lensId), LensHood.FULL) ?: return null
+        val animation = when (val raw = all[KEY_ANIMATION_TIME]) {
+            null -> DEFAULT_ANIMATION_TIME
+            is Long -> raw
+            else -> return null
+        }
+        val smartFocus = when (val raw = all[inheritedKey(KEY_SMART_FOCUS_BIAS)]) {
+            null -> DEFAULT_SMART_FOCUS_BIAS
+            is Boolean -> raw
+            else -> return null
+        }
+        val profile = when (val raw = all[lensKey(KEY_LENS_PROFILE, lensId)]) {
+            null -> LensProfile.FISHEYE
+            is String -> LensProfile.fromStored(raw)
+            else -> return null
+        }
+        val custom = if (all.containsKey(KEY_CUSTOM_SCALE_FACTOR)) {
+            val customDistortion = floatOf(
+                lensKey(KEY_CUSTOM_DISTORTION_FACTOR, lensId).takeIf(all::containsKey) ?: KEY_CUSTOM_DISTORTION_FACTOR.takeIf(all::containsKey)
+                    ?: inheritedKey(KEY_DISTORTION_FACTOR),
+                distortion
+            ) ?: return null
+            val customScale = floatOf(KEY_CUSTOM_SCALE_FACTOR, DEFAULT_SCALE_FACTOR) ?: return null
+            val customTime = when (val raw = all[KEY_CUSTOM_ANIMATION_TIME]) {
+                null -> DEFAULT_ANIMATION_TIME
+                is Long -> raw
+                else -> return null
+            }
+            OpticalCustomPreset(customDistortion, customScale, customTime)
+        } else null
+        return LensOpticalProfile(profile, distortion, scale, icon, animation, hood, smartFocus, custom)
+            .takeIf(LensOpticalProfile::isValid)
+    }
+
+    /** FISH-036: đúng tập key một lần import chạm vào; Custom chỉ có khi file mang Custom. */
+    fun opticalProfileKeys(lensId: String, includesCustom: Boolean): Set<String> = buildSet {
+        add(lensKey(KEY_DISTORTION_FACTOR, lensId))
+        add(lensKey(KEY_ICON_SIZE, lensId))
+        add(lensKey(KEY_SMART_FOCUS_BIAS, lensId))
+        add(lensKey(KEY_LENS_PROFILE, lensId))
+        add(lensKey(KEY_LENS_HOOD, lensId))
+        add(lensKey(KEY_PENDING_DISTORTION_FACTOR, lensId))
+        add(KEY_SCALE_FACTOR)
+        add(KEY_ANIMATION_TIME)
+        if (includesCustom) {
+            add(lensKey(KEY_CUSTOM_DISTORTION_FACTOR, lensId))
+            add(KEY_CUSTOM_SCALE_FACTOR)
+            add(KEY_CUSTOM_ANIMATION_TIME)
+        }
+    }
+
+    /**
+     * FISH-036: ghi cả bộ quang học bằng một commit đồng bộ. Commit lỗi thì khôi phục đúng các key
+     * đã chạm. Gọi trên IO; Room không nằm trong transaction này nên caller tự kiểm lens đích.
+     */
+    @Suppress("UseKtx") // Cần kết quả đồng bộ của commit() để quyết định rollback.
+    fun applyOpticalProfile(lensId: String, profile: LensOpticalProfile): OpticalProfileApplyResult {
+        if (lensId.isBlank() || !profile.isValid()) return OpticalProfileApplyResult.FAILED_RESTORED
+        val snapshot = snapshotKeys(opticalProfileKeys(lensId, profile.custom != null))
+        val committed = try {
+            val editor = prefs.edit()
+            editor.putString(lensKey(KEY_LENS_PROFILE, lensId), profile.profile.name)
+            editor.putFloat(lensKey(KEY_DISTORTION_FACTOR, lensId), profile.distortionFactor)
+            editor.putFloat(lensKey(KEY_ICON_SIZE, lensId), profile.iconSize)
+            editor.putBoolean(lensKey(KEY_SMART_FOCUS_BIAS, lensId), profile.smartFocusBias)
+            editor.putFloat(lensKey(KEY_LENS_HOOD, lensId), profile.hood)
+            editor.putFloat(KEY_SCALE_FACTOR, profile.scaleFactor)
+            editor.putLong(KEY_ANIMATION_TIME, profile.animationTimeMs)
+            editor.remove(lensKey(KEY_PENDING_DISTORTION_FACTOR, lensId))
+            profile.custom?.let { saved ->
+                editor.putFloat(lensKey(KEY_CUSTOM_DISTORTION_FACTOR, lensId), saved.distortionFactor)
+                editor.putFloat(KEY_CUSTOM_SCALE_FACTOR, saved.scaleFactor)
+                editor.putLong(KEY_CUSTOM_ANIMATION_TIME, saved.animationTimeMs)
+            }
+            editor.commit()
+        } catch (error: RuntimeException) {
+            Logger.e("UtilSettings: optical profile commit failed", error)
+            false
+        }
+        if (committed) return OpticalProfileApplyResult.APPLIED
+        val restored = try {
+            restoreKeys(snapshot)
+        } catch (error: RuntimeException) {
+            Logger.e("UtilSettings: optical profile restore failed", error)
+            false
+        }
+        return if (restored) OpticalProfileApplyResult.FAILED_RESTORED else OpticalProfileApplyResult.RESTORE_FAILED
     }
 
     fun deleteLensSettings(lensId: String) {

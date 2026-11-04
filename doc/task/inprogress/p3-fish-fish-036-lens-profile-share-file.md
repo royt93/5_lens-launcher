@@ -36,7 +36,7 @@ Là người dùng, tôi muốn gửi bạn cấu hình lens của tôi.
 
 FISH-027 và DB-007 đã done. Owner duyệt spec/plan và chọn Inline 2026-11-04. Spec: `docs/superpowers/specs/2026-11-04-fish-036-lens-profile-file-design.md`; plan: `docs/superpowers/plans/2026-11-04-fish-036-lens-profile-file.md`. Không dùng workspace import path; SAF ở LensSettingsActivity, JSON riêng, apply một batch prefs. Chính sách mới nhất: chỉ TECNO mọi phiên, khóa KJ7 `115333744A005844`; không chạm Pixel/Samsung/OPPO.
 
-Task 1: RED thiếu model/API, GREEN `LensOpticalProfileTest` 15 tests trên Robolectric sdk 28. Parser strict schema, key trùng/lạ, types, decimal ranges trước Float, malformed/trailing JSON và Custom có/vắng. Task 2: RED thiếu IO API, GREEN IO 12/12; đọc tối đa 16 KiB + 1 byte, UTF-8 strict, cancellation/close failure và ghi file được test; full JVM 1455/1455 và lint xanh. Chưa chạy UI/device test; chưa coi feature hoàn tất.
+Task 1: RED thiếu model/API, GREEN `LensOpticalProfileTest` 15 tests trên Robolectric sdk 28. Parser strict schema, key trùng/lạ, types, decimal ranges trước Float, malformed/trailing JSON và Custom có/vắng. Task 2: RED thiếu IO API, GREEN IO 12/12; đọc tối đa 16 KiB + 1 byte, UTF-8 strict, cancellation/close failure và ghi file được test; full JVM 1455/1455 và lint xanh. Task 3: capture không ghi, touched-key set, apply một batch và rollback đúng key đã chạm; settings test 12/12, full JVM 1467/1467, lint xanh. Chưa chạy UI/device test; chưa coi feature hoàn tất.
 
 ## Verification and Definition of Done
 
