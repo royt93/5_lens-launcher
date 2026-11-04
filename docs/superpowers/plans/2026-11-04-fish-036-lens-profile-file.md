@@ -171,6 +171,8 @@ Dùng named constants cho tất cả key strings, format, version, range. `isVal
 
 ## Task 2 — Bounded UTF-8 SAF IO (TDD)
 
+Tiến độ 2026-11-04: RED thiếu `LensOpticalProfileIo`/`OpticalProfileReadResult` (`/tmp/f036-task2-red.log`); GREEN `LensOpticalProfileIoTest` 12/12 + parser 15/15, full JVM 1455/1455, lint thành công. Read result đặt trong `util/LensOpticalProfileIo.kt` cùng IO object; model chỉ giữ parse result.
+
 **Files:** IO object và IO tests. **Consumes:** model/parser, MAX_BYTES. **Produces:** read/write APIs cố định.
 
 - [ ] **1. RED:** test bounded read/UTF8 và stream closure trước khi code.
