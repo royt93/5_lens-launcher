@@ -301,4 +301,26 @@
     <string name="lens_hood_title">Parasol de la lente</string>
     <string name="lens_hood_hint">Limita hasta dónde llega la deformación. Completo usa toda la pantalla; un parasol menor deja quietos los iconos fuera de él.</string>
     <string name="lens_hood_value_format">%1$d %%</string>
+    <string name="lens_optical_export">Exportar perfil de lente</string>
+    <string name="lens_optical_import">Importar perfil de lente</string>
+    <string name="lens_optical_preview_title">¿Importar perfil de lente?</string>
+    <string name="lens_optical_target_group">Esta lente</string>
+    <string name="lens_optical_global_group">Todas las lentes</string>
+    <string name="lens_optical_custom_group">Ajuste personalizado</string>
+    <string name="lens_optical_change_format">%1$s: %2$s → %3$s</string>
+    <string name="lens_optical_global_warning">La escala y la duración de la animación se aplican a todas las lentes.</string>
+    <string name="lens_optical_inheritance_warning">Es la lente predeterminada: la distorsión, el tamaño de iconos y Smart Focus también pueden cambiar en lentes que heredan valores compartidos.</string>
+    <string name="lens_optical_custom_unchanged">El archivo no tiene ajuste personalizado; el actual se mantiene sin cambios.</string>
+    <string name="lens_optical_export_success">Perfil de lente exportado</string>
+    <string name="lens_optical_export_failed">No se pudo exportar el perfil de lente</string>
+    <string name="lens_optical_invalid">Este archivo no es un perfil de lente válido</string>
+    <string name="lens_optical_unsupported">Este perfil de lente se creó con una versión más reciente de la app</string>
+    <string name="lens_optical_too_large">Este archivo es demasiado grande para ser un perfil de lente</string>
+    <string name="lens_optical_read_failed">No se pudo leer el archivo</string>
+    <string name="lens_optical_target_missing">Esta lente ya no existe</string>
+    <string name="lens_optical_import_success">Perfil de lente importado</string>
+    <string name="lens_optical_import_failed">No se pudo importar el perfil de lente. Se restauraron tus ajustes.</string>
+    <string name="lens_optical_restore_failed">La importación falló y los ajustes no se restauraron por completo. Revisa los ajustes de la lente.</string>
+    <string name="lens_optical_smart_on">Activado</string>
+    <string name="lens_optical_smart_off">Desactivado</string>
 </resources>

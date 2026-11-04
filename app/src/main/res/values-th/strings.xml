@@ -291,4 +291,26 @@
     <string name="lens_hood_title">ฮูดเลนส์</string>
     <string name="lens_hood_hint">จำกัดระยะที่การบิดเบือนไปถึง เต็มคือทั้งหน้าจอ ฮูดที่เล็กกว่าจะทำให้ไอคอนด้านนอกอยู่นิ่ง</string>
     <string name="lens_hood_value_format">%1$d%%</string>
+    <string name="lens_optical_export">ส่งออกโปรไฟล์เลนส์</string>
+    <string name="lens_optical_import">นำเข้าโปรไฟล์เลนส์</string>
+    <string name="lens_optical_preview_title">นำเข้าโปรไฟล์เลนส์หรือไม่</string>
+    <string name="lens_optical_target_group">เลนส์นี้</string>
+    <string name="lens_optical_global_group">เลนส์ทั้งหมด</string>
+    <string name="lens_optical_custom_group">พรีเซ็ตกำหนดเอง</string>
+    <string name="lens_optical_change_format">%1$s: %2$s → %3$s</string>
+    <string name="lens_optical_global_warning">สเกลและเวลาแอนิเมชันมีผลกับเลนส์ทั้งหมด</string>
+    <string name="lens_optical_inheritance_warning">นี่คือเลนส์เริ่มต้น: ความบิดเบี้ยว ขนาดไอคอน และ Smart Focus อาจเปลี่ยนเลนส์ที่รับค่าร่วมด้วย</string>
+    <string name="lens_optical_custom_unchanged">ไฟล์ไม่มีพรีเซ็ตกำหนดเอง พรีเซ็ตกำหนดเองปัจจุบันของคุณจะไม่เปลี่ยน</string>
+    <string name="lens_optical_export_success">ส่งออกโปรไฟล์เลนส์แล้ว</string>
+    <string name="lens_optical_export_failed">ส่งออกโปรไฟล์เลนส์ไม่ได้</string>
+    <string name="lens_optical_invalid">ไฟล์นี้ไม่ใช่โปรไฟล์เลนส์ที่ถูกต้อง</string>
+    <string name="lens_optical_unsupported">โปรไฟล์เลนส์นี้สร้างโดยแอปเวอร์ชันใหม่กว่า</string>
+    <string name="lens_optical_too_large">ไฟล์นี้ใหญ่เกินไปสำหรับโปรไฟล์เลนส์</string>
+    <string name="lens_optical_read_failed">อ่านไฟล์ไม่ได้</string>
+    <string name="lens_optical_target_missing">เลนส์นี้ไม่มีอยู่แล้ว</string>
+    <string name="lens_optical_import_success">นำเข้าโปรไฟล์เลนส์แล้ว</string>
+    <string name="lens_optical_import_failed">นำเข้าโปรไฟล์เลนส์ไม่ได้ กู้คืนการตั้งค่าของคุณแล้ว</string>
+    <string name="lens_optical_restore_failed">นำเข้าไม่สำเร็จและกู้คืนการตั้งค่าไม่ครบ โปรดตรวจสอบการตั้งค่าเลนส์</string>
+    <string name="lens_optical_smart_on">เปิด</string>
+    <string name="lens_optical_smart_off">ปิด</string>
 </resources>

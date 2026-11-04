@@ -341,4 +341,26 @@
     <string name="lens_hood_title">Lens hood</string>
     <string name="lens_hood_hint">Limits how far the warp reaches. Full uses the whole screen; a smaller hood leaves icons outside it still.</string>
     <string name="lens_hood_value_format">%1$d%%</string>
+    <string name="lens_optical_export">Export lens profile</string>
+    <string name="lens_optical_import">Import lens profile</string>
+    <string name="lens_optical_preview_title">Import lens profile?</string>
+    <string name="lens_optical_target_group">This lens</string>
+    <string name="lens_optical_global_group">All lenses</string>
+    <string name="lens_optical_custom_group">Custom preset</string>
+    <string name="lens_optical_change_format">%1$s: %2$s → %3$s</string>
+    <string name="lens_optical_global_warning">Scale and animation time apply to every lens.</string>
+    <string name="lens_optical_inheritance_warning">This is the default lens: distortion, icon size and Smart Focus can also change lenses that inherit shared values.</string>
+    <string name="lens_optical_custom_unchanged">The file has no Custom preset; your current Custom preset stays unchanged.</string>
+    <string name="lens_optical_export_success">Lens profile exported</string>
+    <string name="lens_optical_export_failed">Couldn\'t export the lens profile</string>
+    <string name="lens_optical_invalid">This file is not a valid lens profile</string>
+    <string name="lens_optical_unsupported">This lens profile was made by a newer app version</string>
+    <string name="lens_optical_too_large">This file is too large to be a lens profile</string>
+    <string name="lens_optical_read_failed">Couldn\'t read the file</string>
+    <string name="lens_optical_target_missing">This lens no longer exists</string>
+    <string name="lens_optical_import_success">Lens profile imported</string>
+    <string name="lens_optical_import_failed">Couldn\'t import the lens profile. Your settings were restored.</string>
+    <string name="lens_optical_restore_failed">Import failed and settings could not be fully restored. Check your lens settings.</string>
+    <string name="lens_optical_smart_on">On</string>
+    <string name="lens_optical_smart_off">Off</string>
 </resources>

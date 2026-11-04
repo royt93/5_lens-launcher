@@ -296,4 +296,26 @@
     <string name="lens_hood_title">लेंस हुड</string>
     <string name="lens_hood_hint">बताता है कि विकृति कितनी दूर तक जाए। पूर्ण का अर्थ पूरी स्क्रीन; छोटा हुड बाहर के आइकन स्थिर रखता है।</string>
     <string name="lens_hood_value_format">%1$d%%</string>
+    <string name="lens_optical_export">लेंस प्रोफ़ाइल निर्यात करें</string>
+    <string name="lens_optical_import">लेंस प्रोफ़ाइल आयात करें</string>
+    <string name="lens_optical_preview_title">लेंस प्रोफ़ाइल आयात करें?</string>
+    <string name="lens_optical_target_group">यह लेंस</string>
+    <string name="lens_optical_global_group">सभी लेंस</string>
+    <string name="lens_optical_custom_group">कस्टम प्रीसेट</string>
+    <string name="lens_optical_change_format">%1$s: %2$s → %3$s</string>
+    <string name="lens_optical_global_warning">स्केल और एनिमेशन समय सभी लेंस पर लागू होते हैं।</string>
+    <string name="lens_optical_inheritance_warning">यह डिफ़ॉल्ट लेंस है: विकृति, आइकन आकार और Smart Focus साझा मान अपनाने वाले लेंस भी बदल सकते हैं।</string>
+    <string name="lens_optical_custom_unchanged">फ़ाइल में कस्टम प्रीसेट नहीं है; आपका मौजूदा कस्टम प्रीसेट वैसा ही रहेगा।</string>
+    <string name="lens_optical_export_success">लेंस प्रोफ़ाइल निर्यात हुई</string>
+    <string name="lens_optical_export_failed">लेंस प्रोफ़ाइल निर्यात नहीं हो सकी</string>
+    <string name="lens_optical_invalid">यह फ़ाइल मान्य लेंस प्रोफ़ाइल नहीं है</string>
+    <string name="lens_optical_unsupported">यह लेंस प्रोफ़ाइल ऐप के नए संस्करण से बनी है</string>
+    <string name="lens_optical_too_large">यह फ़ाइल लेंस प्रोफ़ाइल के लिए बहुत बड़ी है</string>
+    <string name="lens_optical_read_failed">फ़ाइल पढ़ी नहीं जा सकी</string>
+    <string name="lens_optical_target_missing">यह लेंस अब मौजूद नहीं है</string>
+    <string name="lens_optical_import_success">लेंस प्रोफ़ाइल आयात हुई</string>
+    <string name="lens_optical_import_failed">लेंस प्रोफ़ाइल आयात नहीं हो सकी। आपकी सेटिंग वापस कर दी गई।</string>
+    <string name="lens_optical_restore_failed">आयात विफल रहा और सेटिंग पूरी तरह वापस नहीं हो सकी। लेंस सेटिंग जाँचें।</string>
+    <string name="lens_optical_smart_on">चालू</string>
+    <string name="lens_optical_smart_off">बंद</string>
 </resources>

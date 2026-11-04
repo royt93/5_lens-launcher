@@ -322,4 +322,26 @@
     <string name="lens_hood_title">غطاء العدسة</string>
     <string name="lens_hood_hint">يحدّ مدى وصول التشويه. الكامل يستخدم الشاشة كلها؛ الغطاء الأصغر يترك الأيقونات خارجه ثابتة.</string>
     <string name="lens_hood_value_format">%1$d%%</string>
+    <string name="lens_optical_export">تصدير ملف العدسة</string>
+    <string name="lens_optical_import">استيراد ملف العدسة</string>
+    <string name="lens_optical_preview_title">استيراد ملف العدسة؟</string>
+    <string name="lens_optical_target_group">هذه العدسة</string>
+    <string name="lens_optical_global_group">كل العدسات</string>
+    <string name="lens_optical_custom_group">الإعداد المخصص</string>
+    <string name="lens_optical_change_format">%1$s: %2$s → %3$s</string>
+    <string name="lens_optical_global_warning">يُطبَّق مقياس التكبير ومدة الحركة على كل العدسات.</string>
+    <string name="lens_optical_inheritance_warning">هذه هي العدسة الافتراضية: قد يتغير التشويه وحجم الأيقونات وSmart Focus أيضًا في العدسات التي ترث القيم المشتركة.</string>
+    <string name="lens_optical_custom_unchanged">لا يحتوي الملف على إعداد مخصص؛ يبقى الإعداد المخصص الحالي دون تغيير.</string>
+    <string name="lens_optical_export_success">تم تصدير ملف العدسة</string>
+    <string name="lens_optical_export_failed">تعذر تصدير ملف العدسة</string>
+    <string name="lens_optical_invalid">هذا الملف ليس ملف عدسة صالحًا</string>
+    <string name="lens_optical_unsupported">تم إنشاء ملف العدسة هذا بإصدار أحدث من التطبيق</string>
+    <string name="lens_optical_too_large">هذا الملف كبير جدًا ليكون ملف عدسة</string>
+    <string name="lens_optical_read_failed">تعذرت قراءة الملف</string>
+    <string name="lens_optical_target_missing">لم تعد هذه العدسة موجودة</string>
+    <string name="lens_optical_import_success">تم استيراد ملف العدسة</string>
+    <string name="lens_optical_import_failed">تعذر استيراد ملف العدسة. تمت استعادة إعداداتك.</string>
+    <string name="lens_optical_restore_failed">فشل الاستيراد ولم تتم استعادة الإعدادات بالكامل. تحقق من إعدادات العدسة.</string>
+    <string name="lens_optical_smart_on">تشغيل</string>
+    <string name="lens_optical_smart_off">إيقاف</string>
 </resources>

@@ -291,4 +291,26 @@
     <string name="lens_hood_title">Tudung lensa</string>
     <string name="lens_hood_hint">Membatasi jangkauan distorsi. Penuh memakai seluruh layar; tudung lebih kecil membuat ikon di luarnya diam.</string>
     <string name="lens_hood_value_format">%1$d%%</string>
+    <string name="lens_optical_export">Ekspor profil lensa</string>
+    <string name="lens_optical_import">Impor profil lensa</string>
+    <string name="lens_optical_preview_title">Impor profil lensa?</string>
+    <string name="lens_optical_target_group">Lensa ini</string>
+    <string name="lens_optical_global_group">Semua lensa</string>
+    <string name="lens_optical_custom_group">Preset kustom</string>
+    <string name="lens_optical_change_format">%1$s: %2$s → %3$s</string>
+    <string name="lens_optical_global_warning">Skala dan waktu animasi berlaku untuk semua lensa.</string>
+    <string name="lens_optical_inheritance_warning">Ini lensa default: distorsi, ukuran ikon, dan Smart Focus juga dapat mengubah lensa yang mewarisi nilai bersama.</string>
+    <string name="lens_optical_custom_unchanged">File tidak memiliki preset kustom; preset kustom Anda saat ini tidak berubah.</string>
+    <string name="lens_optical_export_success">Profil lensa diekspor</string>
+    <string name="lens_optical_export_failed">Tidak dapat mengekspor profil lensa</string>
+    <string name="lens_optical_invalid">File ini bukan profil lensa yang valid</string>
+    <string name="lens_optical_unsupported">Profil lensa ini dibuat oleh versi aplikasi yang lebih baru</string>
+    <string name="lens_optical_too_large">File ini terlalu besar untuk profil lensa</string>
+    <string name="lens_optical_read_failed">Tidak dapat membaca file</string>
+    <string name="lens_optical_target_missing">Lensa ini sudah tidak ada</string>
+    <string name="lens_optical_import_success">Profil lensa diimpor</string>
+    <string name="lens_optical_import_failed">Tidak dapat mengimpor profil lensa. Pengaturan Anda dipulihkan.</string>
+    <string name="lens_optical_restore_failed">Impor gagal dan pengaturan belum sepenuhnya dipulihkan. Periksa pengaturan lensa.</string>
+    <string name="lens_optical_smart_on">Aktif</string>
+    <string name="lens_optical_smart_off">Nonaktif</string>
 </resources>

@@ -298,4 +298,26 @@
     <string name="lens_hood_title">Loa che thấu kính</string>
     <string name="lens_hood_hint">Giới hạn tầm ảnh hưởng của độ méo. Đầy đủ là cả màn hình; loa che nhỏ hơn giữ yên các biểu tượng bên ngoài.</string>
     <string name="lens_hood_value_format">%1$d%%</string>
+    <string name="lens_optical_export">Xuất hồ sơ thấu kính</string>
+    <string name="lens_optical_import">Nhập hồ sơ thấu kính</string>
+    <string name="lens_optical_preview_title">Nhập hồ sơ thấu kính?</string>
+    <string name="lens_optical_target_group">Thấu kính này</string>
+    <string name="lens_optical_global_group">Mọi thấu kính</string>
+    <string name="lens_optical_custom_group">Cấu hình tùy chỉnh</string>
+    <string name="lens_optical_change_format">%1$s: %2$s → %3$s</string>
+    <string name="lens_optical_global_warning">Tỷ lệ phóng và thời gian hiệu ứng áp dụng cho mọi thấu kính.</string>
+    <string name="lens_optical_inheritance_warning">Đây là thấu kính mặc định: độ méo, cỡ biểu tượng và Smart Focus cũng có thể đổi ở các thấu kính đang kế thừa giá trị chung.</string>
+    <string name="lens_optical_custom_unchanged">Tệp không có cấu hình tùy chỉnh; cấu hình tùy chỉnh hiện tại được giữ nguyên.</string>
+    <string name="lens_optical_export_success">Đã xuất hồ sơ thấu kính</string>
+    <string name="lens_optical_export_failed">Không thể xuất hồ sơ thấu kính</string>
+    <string name="lens_optical_invalid">Tệp này không phải hồ sơ thấu kính hợp lệ</string>
+    <string name="lens_optical_unsupported">Hồ sơ thấu kính này được tạo bởi phiên bản ứng dụng mới hơn</string>
+    <string name="lens_optical_too_large">Tệp quá lớn để là hồ sơ thấu kính</string>
+    <string name="lens_optical_read_failed">Không thể đọc tệp</string>
+    <string name="lens_optical_target_missing">Thấu kính này không còn tồn tại</string>
+    <string name="lens_optical_import_success">Đã nhập hồ sơ thấu kính</string>
+    <string name="lens_optical_import_failed">Không thể nhập hồ sơ thấu kính. Cài đặt đã được khôi phục.</string>
+    <string name="lens_optical_restore_failed">Nhập thất bại và cài đặt chưa khôi phục đầy đủ. Hãy kiểm tra lại cài đặt thấu kính.</string>
+    <string name="lens_optical_smart_on">Bật</string>
+    <string name="lens_optical_smart_off">Tắt</string>
 </resources>

@@ -1,6 +1,8 @@
 package com.mckimquyen.ui
 
+import android.net.Uri
 import android.os.Bundle
+import androidx.activity.result.contract.ActivityResultContracts
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
@@ -19,7 +21,9 @@ import com.mckimquyen.app.RApplication
 import com.mckimquyen.app.RAppsSingleton
 import com.mckimquyen.model.App
 import com.mckimquyen.model.AppDatabase
+import com.mckimquyen.model.LensOpticalProfile
 import com.mckimquyen.model.LensWorkspace
+import com.mckimquyen.model.OpticalProfileParseResult
 import com.mckimquyen.services.AppEventManager
 import com.mckimquyen.ui.dialog.LensDialogs
 import com.mckimquyen.adt.LensAppChoiceAdapter
@@ -27,6 +31,9 @@ import com.mckimquyen.util.LensAppScope
 import com.mckimquyen.util.LensAppScopeEditor
 import com.mckimquyen.util.LensFreezeEditor
 import com.mckimquyen.util.LensHood
+import com.mckimquyen.util.LensOpticalProfileIo
+import com.mckimquyen.util.OpticalProfileApplyResult
+import com.mckimquyen.util.OpticalProfileReadResult
 import com.mckimquyen.util.LensProfile
 import com.mckimquyen.util.SmartFocusArranger
 import com.mckimquyen.util.UtilApp
@@ -46,6 +53,10 @@ class LensSettingsActivity : ActBase() {
         private const val DIALOG_APPS = "apps"
         private const val DIALOG_HIDDEN = "hidden"
         private const val DIALOG_UNFREEZE = "unfreeze"
+        private const val DIALOG_OPTICAL = "optical"
+        private const val STATE_OPTICAL_PREVIEW = "lensSettingsOpticalPreview"
+        private const val STATE_OPTICAL_EXPORT = "lensSettingsOpticalExport"
+        private const val PERCENT = 100
         private const val DISTORTION_MAX = 5f
         private const val ICON_STEP = 1f
         private const val LIGHT_SURFACE_LUMINANCE = 0.5f
@@ -68,6 +79,16 @@ class LensSettingsActivity : ActBase() {
     private var smartFocusListener: android.widget.CompoundButton.OnCheckedChangeListener? = null
     private var restoring = false
     private var targetApps: List<App> = emptyList()
+    private var pendingOpticalPreview: String? = null
+    private var pendingOpticalExport: String? = null
+
+    // Launcher phải đăng ký trước STARTED; target luôn là EXTRA_LENS_ID, không phải active lens.
+    private val exportOpticalLauncher = registerForActivityResult(
+        ActivityResultContracts.CreateDocument(LensOpticalProfile.MIME_TYPE)
+    ) { uri -> onOpticalExportPicked(uri) }
+    private val importOpticalLauncher = registerForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri -> onOpticalImportPicked(uri) }
 
     @androidx.annotation.VisibleForTesting
     internal val dialogForTest: AlertDialog? get() = dialog
@@ -88,6 +109,8 @@ class LensSettingsActivity : ActBase() {
         if (targetId == null) { finish(); return }
         pendingDialog = savedInstanceState?.getString(STATE_DIALOG)
         pendingChecked = savedInstanceState?.getStringArrayList(STATE_CHECKED)?.toSet()
+        pendingOpticalPreview = savedInstanceState?.getString(STATE_OPTICAL_PREVIEW)
+        pendingOpticalExport = savedInstanceState?.getString(STATE_OPTICAL_EXPORT)
         findViewById<MaterialToolbar>(R.id.tbLensSettings).apply {
             setNavigationContentDescription(androidx.appcompat.R.string.abc_action_bar_up_description)
             setNavigationOnClickListener { finish() }
@@ -131,6 +154,8 @@ class LensSettingsActivity : ActBase() {
                 targetId?.let { utilSettings?.saveLensProfile(it, profileForButton(checkedId)) }
             }
         }
+        findViewById<View>(R.id.btLensSettingsExportProfile).setOnClickListener { startOpticalExport() }
+        findViewById<View>(R.id.btLensSettingsImportProfile).setOnClickListener { startOpticalImport() }
         findViewById<View>(R.id.btLensSettingsApps).setOnClickListener { showApps(false) }
         findViewById<View>(R.id.btLensSettingsHidden).setOnClickListener { showApps(true) }
         findViewById<View>(R.id.btLensSettingsFreeze).setOnClickListener {
@@ -164,6 +189,7 @@ class LensSettingsActivity : ActBase() {
                         DIALOG_APPS -> showApps(false, pendingChecked)
                         DIALOG_HIDDEN -> showApps(true, pendingChecked)
                         DIALOG_UNFREEZE -> showUnfreeze()
+                        DIALOG_OPTICAL -> restoreOpticalPreview()
                     }
                     pendingChecked = null
                 }
@@ -202,7 +228,8 @@ class LensSettingsActivity : ActBase() {
     private fun setEnabled(enabled: Boolean) {
         intArrayOf(R.id.sbLensSettingsIconSize, R.id.sbLensSettingsDistortion, R.id.sbLensSettingsHood, R.id.swLensSettingsSmartFocus,
             R.id.tgLensSettingsProfile, R.id.btLensProfileFisheye, R.id.btLensProfileAnamorphic, R.id.btLensProfileCylindrical, R.id.btLensProfilePincushion,
-            R.id.btLensSettingsApps, R.id.btLensSettingsFreeze, R.id.btLensSettingsHidden)
+            R.id.btLensSettingsApps, R.id.btLensSettingsFreeze, R.id.btLensSettingsHidden,
+            R.id.btLensSettingsExportProfile, R.id.btLensSettingsImportProfile)
             .forEach { findViewById<View>(it).isEnabled = enabled }
     }
 
@@ -294,7 +321,159 @@ class LensSettingsActivity : ActBase() {
         return SmartFocusArranger.arrange(visible, grid.itemCountHorizontal, grid.itemCountVertical, true)
     }
 
+    private fun startOpticalExport() {
+        val id = targetId ?: return
+        val settings = utilSettings ?: return
+        if (!ready || busy) return
+        val snapshot = settings.captureOpticalProfile(id)
+        if (snapshot == null) { toast(R.string.lens_optical_export_failed); return }
+        pendingOpticalExport = snapshot.toJson()
+        exportOpticalLauncher.launch(LensOpticalProfile.FILE_NAME)
+    }
+
+    private fun onOpticalExportPicked(uri: Uri?) {
+        val json = pendingOpticalExport
+        pendingOpticalExport = null
+        if (uri == null || json == null) return
+        val profile = (LensOpticalProfile.parse(json) as? OpticalProfileParseResult.Success)?.value
+        if (profile == null) { toast(R.string.lens_optical_export_failed); return }
+        setBusy(true)
+        lifecycleScope.launch {
+            try {
+                val ok = LensOpticalProfileIo.write(contentResolver, uri, profile)
+                toast(if (ok) R.string.lens_optical_export_success else R.string.lens_optical_export_failed)
+            } finally { setBusy(false) }
+        }
+    }
+
+    private fun startOpticalImport() {
+        if (!ready || busy) return
+        importOpticalLauncher.launch(arrayOf(LensOpticalProfile.MIME_TYPE))
+    }
+
+    private fun onOpticalImportPicked(uri: Uri?) {
+        if (uri == null) return
+        setBusy(true)
+        lifecycleScope.launch {
+            try {
+                when (val result = LensOpticalProfileIo.read(contentResolver, uri)) {
+                    is OpticalProfileReadResult.Success -> {
+                        if (targetExists()) showOpticalPreview(result.value) else toast(R.string.lens_optical_target_missing)
+                    }
+                    OpticalProfileReadResult.Malformed -> toast(R.string.lens_optical_invalid)
+                    OpticalProfileReadResult.UnsupportedVersion -> toast(R.string.lens_optical_unsupported)
+                    OpticalProfileReadResult.TooLarge -> toast(R.string.lens_optical_too_large)
+                    OpticalProfileReadResult.IoFailure -> toast(R.string.lens_optical_read_failed)
+                }
+            } finally { setBusy(false) }
+        }
+    }
+
+    private suspend fun targetExists(): Boolean {
+        val id = targetId ?: return false
+        return withContext(Dispatchers.IO) { AppDatabase.getInstance().lensWorkspaceDao().findById(id) != null }
+    }
+
+    private fun restoreOpticalPreview() {
+        val saved = pendingOpticalPreview
+        pendingOpticalPreview = null
+        val profile = (saved?.let(LensOpticalProfile::parse) as? OpticalProfileParseResult.Success)?.value ?: return
+        showOpticalPreview(profile)
+    }
+
+    private fun showOpticalPreview(profile: LensOpticalProfile) {
+        val id = targetId ?: return
+        val settings = utilSettings ?: return
+        val current = settings.captureOpticalProfile(id)
+        if (current == null) { toast(R.string.lens_optical_read_failed); return }
+        showDialog(LensDialogs.confirm(this, R.string.lens_optical_preview_title,
+            opticalPreviewText(id, current, profile), R.string.lens_optical_import, false,
+            { applyOptical(profile) }, null), DIALOG_OPTICAL)
+        previewProfile = profile
+    }
+
+    private var previewProfile: LensOpticalProfile? = null
+
+    private fun opticalPreviewText(id: String, current: LensOpticalProfile, incoming: LensOpticalProfile): String {
+        fun change(label: Int, from: String, to: String) = getString(R.string.lens_optical_change_format, getString(label), from, to)
+        fun profileName(p: com.mckimquyen.util.LensProfile) = getString(when (p) {
+            com.mckimquyen.util.LensProfile.ANAMORPHIC -> R.string.lens_profile_anamorphic
+            com.mckimquyen.util.LensProfile.CYLINDRICAL -> R.string.lens_profile_cylindrical
+            com.mckimquyen.util.LensProfile.PINCUSHION -> R.string.lens_profile_pincushion
+            com.mckimquyen.util.LensProfile.FISHEYE -> R.string.lens_profile_fisheye
+        })
+        fun number(v: Float) = String.format(java.util.Locale.getDefault(), "%.2f", v)
+        fun percent(v: Float) = getString(R.string.lens_hood_value_format, Math.round(v * PERCENT))
+        fun onOff(v: Boolean) = getString(if (v) R.string.lens_optical_smart_on else R.string.lens_optical_smart_off)
+        val lines = mutableListOf<String>()
+        lines += getString(R.string.lens_optical_target_group)
+        lines += change(R.string.lens_profile_title, profileName(current.profile), profileName(incoming.profile))
+        lines += change(R.string.setting_distortion_factor, number(current.distortionFactor), number(incoming.distortionFactor))
+        lines += change(R.string.setting_min_icon_size, number(current.iconSize), number(incoming.iconSize))
+        lines += change(R.string.lens_hood_title, percent(current.hood), percent(incoming.hood))
+        lines += change(R.string.setting_smart_focus, onOff(current.smartFocusBias), onOff(incoming.smartFocusBias))
+        lines += ""
+        lines += getString(R.string.lens_optical_global_group)
+        lines += change(R.string.setting_scale_factor, number(current.scaleFactor), number(incoming.scaleFactor))
+        lines += change(R.string.setting_animation_time, getString(R.string.unit_ms_format, current.animationTimeMs.toInt()),
+            getString(R.string.unit_ms_format, incoming.animationTimeMs.toInt()))
+        lines += getString(R.string.lens_optical_global_warning)
+        lines += ""
+        lines += getString(R.string.lens_optical_custom_group)
+        incoming.custom?.let { saved ->
+            val old = current.custom
+            lines += change(R.string.setting_distortion_factor, old?.distortionFactor?.let(::number) ?: "-", number(saved.distortionFactor))
+            lines += change(R.string.setting_scale_factor, old?.scaleFactor?.let(::number) ?: "-", number(saved.scaleFactor))
+            lines += change(R.string.setting_animation_time, old?.let { getString(R.string.unit_ms_format, it.animationTimeMs.toInt()) } ?: "-",
+                getString(R.string.unit_ms_format, saved.animationTimeMs.toInt()))
+        } ?: run { lines += getString(R.string.lens_optical_custom_unchanged) }
+        if (id == LensWorkspace.DEFAULT_LENS_ID) { lines += ""; lines += getString(R.string.lens_optical_inheritance_warning) }
+        return lines.joinToString("\n")
+    }
+
+    private fun applyOptical(profile: LensOpticalProfile) {
+        val id = targetId ?: return
+        val settings = utilSettings ?: return
+        if (busy) return
+        pendingOpticalPreview = null
+        setBusy(true)
+        lifecycleScope.launch {
+            try {
+                // Phần ghi cục bộ không bị hủy giữa chừng để không để lại batch dở dang.
+                val outcome = withContext(kotlinx.coroutines.NonCancellable + Dispatchers.IO) {
+                    val dao = AppDatabase.getInstance().lensWorkspaceDao()
+                    if (dao.findById(id) == null) return@withContext null
+                    val result = settings.applyOpticalProfile(id, profile)
+                    if (result == OpticalProfileApplyResult.APPLIED && dao.findById(id) == null) {
+                        settings.deleteLensSettings(id)
+                        null
+                    } else result
+                }
+                when (outcome) {
+                    null -> toast(R.string.lens_optical_target_missing)
+                    OpticalProfileApplyResult.APPLIED -> {
+                        AppEventManager.notifyLensScopeChanged(id)
+                        toast(R.string.lens_optical_import_success)
+                        ready = false; bind(); ready = true
+                    }
+                    OpticalProfileApplyResult.FAILED_RESTORED -> toast(R.string.lens_optical_import_failed)
+                    OpticalProfileApplyResult.RESTORE_FAILED -> toast(R.string.lens_optical_restore_failed)
+                }
+            } catch (cancelled: CancellationException) { throw cancelled
+            } finally { setBusy(false) }
+        }
+    }
+
+    private fun setBusy(value: Boolean) {
+        busy = value
+        setEnabled(ready && !busy)
+    }
+
+    private fun toast(res: Int) = Toast.makeText(this, res, Toast.LENGTH_LONG).show()
+
     override fun onSaveInstanceState(outState: Bundle) {
+        pendingOpticalExport?.let { outState.putString(STATE_OPTICAL_EXPORT, it) }
+        if (dialogKind == DIALOG_OPTICAL) previewProfile?.let { outState.putString(STATE_OPTICAL_PREVIEW, it.toJson()) }
         dialogKind?.let { kind ->
             outState.putString(STATE_DIALOG, kind)
             if (kind == DIALOG_APPS || kind == DIALOG_HIDDEN) {

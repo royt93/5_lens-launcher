@@ -291,4 +291,26 @@
     <string name="lens_hood_title">ຝາຄອບເລນ</string>
     <string name="lens_hood_hint">ຈຳກັດໄລຍະທີ່ການບິດໄປເຖິງ. ເຕັມໃຊ້ທັງໜ້າຈໍ; ຝາຄອບນ້ອຍກວ່າຈະໃຫ້ໄອຄອນຂ້າງນອກຢູ່ກັບທີ່.</string>
     <string name="lens_hood_value_format">%1$d%%</string>
+    <string name="lens_optical_export">ສົ່ງອອກໂປຣໄຟລ໌ເລນ</string>
+    <string name="lens_optical_import">ນຳເຂົ້າໂປຣໄຟລ໌ເລນ</string>
+    <string name="lens_optical_preview_title">ນຳເຂົ້າໂປຣໄຟລ໌ເລນບໍ?</string>
+    <string name="lens_optical_target_group">ເລນນີ້</string>
+    <string name="lens_optical_global_group">ເລນທັງໝົດ</string>
+    <string name="lens_optical_custom_group">ຄ່າທີ່ກຳນົດເອງ</string>
+    <string name="lens_optical_change_format">%1$s: %2$s → %3$s</string>
+    <string name="lens_optical_global_warning">ສະເກນ ແລະ ເວລາແອນິເມຊັນໃຊ້ກັບທຸກເລນ.</string>
+    <string name="lens_optical_inheritance_warning">ນີ້ແມ່ນເລນເລີ່ມຕົ້ນ: ການບິດເບືອນ, ຂະໜາດໄອຄອນ ແລະ Smart Focus ອາດປ່ຽນເລນທີ່ສືບທອດຄ່າຮ່ວມນຳ.</string>
+    <string name="lens_optical_custom_unchanged">ໄຟລ໌ບໍ່ມີຄ່າທີ່ກຳນົດເອງ; ຄ່າທີ່ກຳນົດເອງປັດຈຸບັນຂອງທ່ານບໍ່ປ່ຽນ.</string>
+    <string name="lens_optical_export_success">ສົ່ງອອກໂປຣໄຟລ໌ເລນແລ້ວ</string>
+    <string name="lens_optical_export_failed">ບໍ່ສາມາດສົ່ງອອກໂປຣໄຟລ໌ເລນໄດ້</string>
+    <string name="lens_optical_invalid">ໄຟລ໌ນີ້ບໍ່ແມ່ນໂປຣໄຟລ໌ເລນທີ່ຖືກຕ້ອງ</string>
+    <string name="lens_optical_unsupported">ໂປຣໄຟລ໌ເລນນີ້ສ້າງໂດຍແອັບເວີຊັນໃໝ່ກວ່າ</string>
+    <string name="lens_optical_too_large">ໄຟລ໌ນີ້ໃຫຍ່ເກີນໄປສຳລັບໂປຣໄຟລ໌ເລນ</string>
+    <string name="lens_optical_read_failed">ບໍ່ສາມາດອ່ານໄຟລ໌ໄດ້</string>
+    <string name="lens_optical_target_missing">ເລນນີ້ບໍ່ມີອີກແລ້ວ</string>
+    <string name="lens_optical_import_success">ນຳເຂົ້າໂປຣໄຟລ໌ເລນແລ້ວ</string>
+    <string name="lens_optical_import_failed">ບໍ່ສາມາດນຳເຂົ້າໂປຣໄຟລ໌ເລນໄດ້. ການຕັ້ງຄ່າຂອງທ່ານຖືກກູ້ຄືນແລ້ວ.</string>
+    <string name="lens_optical_restore_failed">ການນຳເຂົ້າບໍ່ສຳເລັດ ແລະ ການຕັ້ງຄ່າບໍ່ໄດ້ກູ້ຄືນຄົບ. ກະລຸນາກວດການຕັ້ງຄ່າເລນ.</string>
+    <string name="lens_optical_smart_on">ເປີດ</string>
+    <string name="lens_optical_smart_off">ປິດ</string>
 </resources>

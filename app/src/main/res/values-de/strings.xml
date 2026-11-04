@@ -296,4 +296,26 @@
     <string name="lens_hood_title">Gegenlichtblende</string>
     <string name="lens_hood_hint">Begrenzt die Reichweite der Verzerrung. Voll nutzt den ganzen Bildschirm; eine kleinere Blende lässt Symbole außerhalb unverändert.</string>
     <string name="lens_hood_value_format">%1$d %%</string>
+    <string name="lens_optical_export">Linsenprofil exportieren</string>
+    <string name="lens_optical_import">Linsenprofil importieren</string>
+    <string name="lens_optical_preview_title">Linsenprofil importieren?</string>
+    <string name="lens_optical_target_group">Diese Linse</string>
+    <string name="lens_optical_global_group">Alle Linsen</string>
+    <string name="lens_optical_custom_group">Benutzerdefinierte Voreinstellung</string>
+    <string name="lens_optical_change_format">%1$s: %2$s → %3$s</string>
+    <string name="lens_optical_global_warning">Skalierung und Animationsdauer gelten für alle Linsen.</string>
+    <string name="lens_optical_inheritance_warning">Dies ist die Standardlinse: Verzerrung, Symbolgröße und Smart Focus können auch Linsen ändern, die gemeinsame Werte erben.</string>
+    <string name="lens_optical_custom_unchanged">Die Datei enthält keine benutzerdefinierte Voreinstellung; Ihre aktuelle bleibt unverändert.</string>
+    <string name="lens_optical_export_success">Linsenprofil exportiert</string>
+    <string name="lens_optical_export_failed">Linsenprofil konnte nicht exportiert werden</string>
+    <string name="lens_optical_invalid">Diese Datei ist kein gültiges Linsenprofil</string>
+    <string name="lens_optical_unsupported">Dieses Linsenprofil stammt aus einer neueren App-Version</string>
+    <string name="lens_optical_too_large">Diese Datei ist zu groß für ein Linsenprofil</string>
+    <string name="lens_optical_read_failed">Datei konnte nicht gelesen werden</string>
+    <string name="lens_optical_target_missing">Diese Linse existiert nicht mehr</string>
+    <string name="lens_optical_import_success">Linsenprofil importiert</string>
+    <string name="lens_optical_import_failed">Linsenprofil konnte nicht importiert werden. Ihre Einstellungen wurden wiederhergestellt.</string>
+    <string name="lens_optical_restore_failed">Import fehlgeschlagen, Einstellungen wurden nicht vollständig wiederhergestellt. Prüfen Sie Ihre Linseneinstellungen.</string>
+    <string name="lens_optical_smart_on">An</string>
+    <string name="lens_optical_smart_off">Aus</string>
 </resources>

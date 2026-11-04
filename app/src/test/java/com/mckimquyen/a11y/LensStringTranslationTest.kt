@@ -89,8 +89,11 @@ class LensStringTranslationTest {
         // "lens_group_header_description" is only placeholders ("%1$s, %2$s, %3$s"); the translated
         // lens count now arrives pre-formatted from the lens_group_lens_count plural.
         // "lens_hood_value_format" is only "%1$d%%": a number and a percent sign, with no words to translate.
+        // "lens_optical_change_format" (FISH-036) is "%1$s: %2$s → %3$s": placeholders and punctuation only.
+        // French and Japanese legitimately differ in the colon, and the other locales keep the same pattern.
         val allowedToMatch = setOf(
-            "lens_new_name_template", "lens_share_caption_via", "lens_group_header_description", "lens_hood_value_format"
+            "lens_new_name_template", "lens_share_caption_via", "lens_group_header_description", "lens_hood_value_format",
+            "lens_optical_change_format"
         )
 
         val untranslated = localeDirectories().flatMap { directory ->

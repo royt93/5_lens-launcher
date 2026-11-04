@@ -291,4 +291,26 @@
     <string name="lens_hood_title">ក្រប់កែវថត</string>
     <string name="lens_hood_hint">កំណត់ចម្ងាយដែលការបំលែងឈានដល់។ ពេញ ប្រើអេក្រង់ទាំងមូល ក្រប់តូចជាងទុកអាយ៉ុងខាងក្រៅឲ្យនៅស្ងៀម។</string>
     <string name="lens_hood_value_format">%1$d%%</string>
+    <string name="lens_optical_export">នាំចេញប្រូហ្វាល់កែវ</string>
+    <string name="lens_optical_import">នាំចូលប្រូហ្វាល់កែវ</string>
+    <string name="lens_optical_preview_title">នាំចូលប្រូហ្វាល់កែវឬ?</string>
+    <string name="lens_optical_target_group">កែវនេះ</string>
+    <string name="lens_optical_global_group">កែវទាំងអស់</string>
+    <string name="lens_optical_custom_group">ការកំណត់ផ្ទាល់ខ្លួន</string>
+    <string name="lens_optical_change_format">%1$s: %2$s → %3$s</string>
+    <string name="lens_optical_global_warning">មាត្រដ្ឋាន និងរយៈពេលចលនាអនុវត្តចំពោះកែវទាំងអស់។</string>
+    <string name="lens_optical_inheritance_warning">នេះជាកែវលំនាំដើម៖ ការបង្ខូច ទំហំរូបតំណាង និង Smart Focus អាចប្តូរកែវដែលទទួលមរតកតម្លៃរួមផងដែរ។</string>
+    <string name="lens_optical_custom_unchanged">ឯកសារមិនមានការកំណត់ផ្ទាល់ខ្លួនទេ ការកំណត់ផ្ទាល់ខ្លួនបច្ចុប្បន្នរបស់អ្នកមិនប្តូរទេ។</string>
+    <string name="lens_optical_export_success">បាននាំចេញប្រូហ្វាល់កែវ</string>
+    <string name="lens_optical_export_failed">មិនអាចនាំចេញប្រូហ្វាល់កែវបានទេ</string>
+    <string name="lens_optical_invalid">ឯកសារនេះមិនមែនជាប្រូហ្វាល់កែវត្រឹមត្រូវទេ</string>
+    <string name="lens_optical_unsupported">ប្រូហ្វាល់កែវនេះបង្កើតដោយកំណែកម្មវិធីថ្មីជាង</string>
+    <string name="lens_optical_too_large">ឯកសារនេះធំពេកសម្រាប់ប្រូហ្វាល់កែវ</string>
+    <string name="lens_optical_read_failed">មិនអាចអានឯកសារបានទេ</string>
+    <string name="lens_optical_target_missing">កែវនេះលែងមានទៀតហើយ</string>
+    <string name="lens_optical_import_success">បាននាំចូលប្រូហ្វាល់កែវ</string>
+    <string name="lens_optical_import_failed">មិនអាចនាំចូលប្រូហ្វាល់កែវបានទេ។ ការកំណត់របស់អ្នកត្រូវបានស្ដារ។</string>
+    <string name="lens_optical_restore_failed">ការនាំចូលបរាជ័យ ហើយការកំណត់មិនត្រូវបានស្ដារពេញលេញទេ។ សូមពិនិត្យការកំណត់កែវ។</string>
+    <string name="lens_optical_smart_on">បើក</string>
+    <string name="lens_optical_smart_off">បិទ</string>
 </resources>

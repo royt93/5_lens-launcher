@@ -184,6 +184,24 @@
                 android:text="@string/setting_smart_focus"
                 android:textAppearance="?attr/textAppearanceBodyLarge" />
 
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btLensSettingsExportProfile"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:minHeight="56dp"
+                android:text="@string/lens_optical_export" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btLensSettingsImportProfile"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:minHeight="56dp"
+                android:text="@string/lens_optical_import" />
+
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

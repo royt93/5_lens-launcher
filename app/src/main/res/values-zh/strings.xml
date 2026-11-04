@@ -291,4 +291,26 @@
     <string name="lens_hood_title">镜头遮光罩</string>
     <string name="lens_hood_hint">限制扭曲的作用范围。“完整”覆盖整个屏幕；较小的遮光罩会让范围外的图标保持不动。</string>
     <string name="lens_hood_value_format">%1$d%%</string>
+    <string name="lens_optical_export">导出镜头配置</string>
+    <string name="lens_optical_import">导入镜头配置</string>
+    <string name="lens_optical_preview_title">导入镜头配置？</string>
+    <string name="lens_optical_target_group">此镜头</string>
+    <string name="lens_optical_global_group">所有镜头</string>
+    <string name="lens_optical_custom_group">自定义预设</string>
+    <string name="lens_optical_change_format">%1$s：%2$s → %3$s</string>
+    <string name="lens_optical_global_warning">缩放和动画时间适用于所有镜头。</string>
+    <string name="lens_optical_inheritance_warning">这是默认镜头：失真、图标大小和 Smart Focus 也可能改变继承共享值的镜头。</string>
+    <string name="lens_optical_custom_unchanged">文件中没有自定义预设，当前自定义预设保持不变。</string>
+    <string name="lens_optical_export_success">已导出镜头配置</string>
+    <string name="lens_optical_export_failed">无法导出镜头配置</string>
+    <string name="lens_optical_invalid">此文件不是有效的镜头配置</string>
+    <string name="lens_optical_unsupported">此镜头配置由更新版本的应用创建</string>
+    <string name="lens_optical_too_large">文件过大，不是镜头配置</string>
+    <string name="lens_optical_read_failed">无法读取文件</string>
+    <string name="lens_optical_target_missing">此镜头已不存在</string>
+    <string name="lens_optical_import_success">已导入镜头配置</string>
+    <string name="lens_optical_import_failed">无法导入镜头配置。设置已恢复。</string>
+    <string name="lens_optical_restore_failed">导入失败，设置未能完全恢复。请检查镜头设置。</string>
+    <string name="lens_optical_smart_on">开</string>
+    <string name="lens_optical_smart_off">关</string>
 </resources>

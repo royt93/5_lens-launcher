@@ -301,4 +301,26 @@
     <string name="lens_hood_title">Pare-soleil de l’objectif</string>
     <string name="lens_hood_hint">Limite la portée de la déformation. Complet utilise tout l’écran ; un pare-soleil plus petit laisse les icônes extérieures immobiles.</string>
     <string name="lens_hood_value_format">%1$d %%</string>
+    <string name="lens_optical_export">Exporter le profil d\'objectif</string>
+    <string name="lens_optical_import">Importer un profil d\'objectif</string>
+    <string name="lens_optical_preview_title">Importer le profil d\'objectif ?</string>
+    <string name="lens_optical_target_group">Cet objectif</string>
+    <string name="lens_optical_global_group">Tous les objectifs</string>
+    <string name="lens_optical_custom_group">Préréglage personnalisé</string>
+    <string name="lens_optical_change_format">%1$s : %2$s → %3$s</string>
+    <string name="lens_optical_global_warning">L\'échelle et la durée d\'animation s\'appliquent à tous les objectifs.</string>
+    <string name="lens_optical_inheritance_warning">Il s\'agit de l\'objectif par défaut : la distorsion, la taille des icônes et Smart Focus peuvent aussi changer les objectifs qui héritent des valeurs partagées.</string>
+    <string name="lens_optical_custom_unchanged">Le fichier n\'a pas de préréglage personnalisé ; le vôtre reste inchangé.</string>
+    <string name="lens_optical_export_success">Profil d\'objectif exporté</string>
+    <string name="lens_optical_export_failed">Impossible d\'exporter le profil d\'objectif</string>
+    <string name="lens_optical_invalid">Ce fichier n\'est pas un profil d\'objectif valide</string>
+    <string name="lens_optical_unsupported">Ce profil d\'objectif a été créé par une version plus récente de l\'app</string>
+    <string name="lens_optical_too_large">Ce fichier est trop volumineux pour être un profil d\'objectif</string>
+    <string name="lens_optical_read_failed">Impossible de lire le fichier</string>
+    <string name="lens_optical_target_missing">Cet objectif n\'existe plus</string>
+    <string name="lens_optical_import_success">Profil d\'objectif importé</string>
+    <string name="lens_optical_import_failed">Impossible d\'importer le profil d\'objectif. Vos réglages ont été restaurés.</string>
+    <string name="lens_optical_restore_failed">Échec de l\'importation et réglages non entièrement restaurés. Vérifiez les réglages de l\'objectif.</string>
+    <string name="lens_optical_smart_on">Activé</string>
+    <string name="lens_optical_smart_off">Désactivé</string>
 </resources>

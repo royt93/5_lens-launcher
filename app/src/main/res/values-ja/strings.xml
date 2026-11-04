@@ -291,4 +291,26 @@
     <string name="lens_hood_title">レンズフード</string>
     <string name="lens_hood_hint">歪みが届く範囲を制限します。「全体」は画面全体、小さいフードでは外側のアイコンは動きません。</string>
     <string name="lens_hood_value_format">%1$d%%</string>
+    <string name="lens_optical_export">レンズプロファイルを書き出す</string>
+    <string name="lens_optical_import">レンズプロファイルを読み込む</string>
+    <string name="lens_optical_preview_title">レンズプロファイルを読み込みますか？</string>
+    <string name="lens_optical_target_group">このレンズ</string>
+    <string name="lens_optical_global_group">すべてのレンズ</string>
+    <string name="lens_optical_custom_group">カスタムプリセット</string>
+    <string name="lens_optical_change_format">%1$s：%2$s → %3$s</string>
+    <string name="lens_optical_global_warning">スケールとアニメーション時間はすべてのレンズに適用されます。</string>
+    <string name="lens_optical_inheritance_warning">これは既定のレンズです。共有値を継承しているレンズの歪み、アイコンサイズ、Smart Focus も変わる場合があります。</string>
+    <string name="lens_optical_custom_unchanged">ファイルにカスタムプリセットがないため、現在のカスタムプリセットは変更されません。</string>
+    <string name="lens_optical_export_success">レンズプロファイルを書き出しました</string>
+    <string name="lens_optical_export_failed">レンズプロファイルを書き出せませんでした</string>
+    <string name="lens_optical_invalid">このファイルは有効なレンズプロファイルではありません</string>
+    <string name="lens_optical_unsupported">このレンズプロファイルは新しいバージョンのアプリで作成されています</string>
+    <string name="lens_optical_too_large">ファイルが大きすぎてレンズプロファイルではありません</string>
+    <string name="lens_optical_read_failed">ファイルを読み取れませんでした</string>
+    <string name="lens_optical_target_missing">このレンズは存在しません</string>
+    <string name="lens_optical_import_success">レンズプロファイルを読み込みました</string>
+    <string name="lens_optical_import_failed">レンズプロファイルを読み込めませんでした。設定は元に戻りました。</string>
+    <string name="lens_optical_restore_failed">読み込みに失敗し、設定を完全には復元できませんでした。レンズ設定を確認してください。</string>
+    <string name="lens_optical_smart_on">オン</string>
+    <string name="lens_optical_smart_off">オフ</string>
 </resources>

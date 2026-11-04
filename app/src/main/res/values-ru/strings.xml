@@ -306,4 +306,26 @@
     <string name="lens_hood_title">Бленда объектива</string>
     <string name="lens_hood_hint">Ограничивает дальность искажения. «Полная» — весь экран; меньшая бленда оставляет значки снаружи неподвижными.</string>
     <string name="lens_hood_value_format">%1$d%%</string>
+    <string name="lens_optical_export">Экспортировать профиль линзы</string>
+    <string name="lens_optical_import">Импортировать профиль линзы</string>
+    <string name="lens_optical_preview_title">Импортировать профиль линзы?</string>
+    <string name="lens_optical_target_group">Эта линза</string>
+    <string name="lens_optical_global_group">Все линзы</string>
+    <string name="lens_optical_custom_group">Пользовательский пресет</string>
+    <string name="lens_optical_change_format">%1$s: %2$s → %3$s</string>
+    <string name="lens_optical_global_warning">Масштаб и время анимации применяются ко всем линзам.</string>
+    <string name="lens_optical_inheritance_warning">Это линза по умолчанию: искажение, размер значков и Smart Focus могут измениться и у линз, наследующих общие значения.</string>
+    <string name="lens_optical_custom_unchanged">В файле нет пользовательского пресета; текущий пользовательский пресет не изменится.</string>
+    <string name="lens_optical_export_success">Профиль линзы экспортирован</string>
+    <string name="lens_optical_export_failed">Не удалось экспортировать профиль линзы</string>
+    <string name="lens_optical_invalid">Этот файл не является допустимым профилем линзы</string>
+    <string name="lens_optical_unsupported">Этот профиль линзы создан в более новой версии приложения</string>
+    <string name="lens_optical_too_large">Файл слишком велик для профиля линзы</string>
+    <string name="lens_optical_read_failed">Не удалось прочитать файл</string>
+    <string name="lens_optical_target_missing">Этой линзы больше нет</string>
+    <string name="lens_optical_import_success">Профиль линзы импортирован</string>
+    <string name="lens_optical_import_failed">Не удалось импортировать профиль линзы. Настройки восстановлены.</string>
+    <string name="lens_optical_restore_failed">Импорт не удался, настройки восстановлены не полностью. Проверьте настройки линзы.</string>
+    <string name="lens_optical_smart_on">Вкл.</string>
+    <string name="lens_optical_smart_off">Выкл.</string>
 </resources>
