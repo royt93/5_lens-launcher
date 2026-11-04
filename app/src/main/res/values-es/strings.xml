@@ -323,4 +323,6 @@
     <string name="lens_optical_restore_failed">La importación falló y los ajustes no se restauraron por completo. Revisa los ajustes de la lente.</string>
     <string name="lens_optical_smart_on">Activado</string>
     <string name="lens_optical_smart_off">Desactivado</string>
+    <string name="setting_tilt_parallax">Lente que sigue la inclinación</string>
+    <string name="setting_tilt_parallax_desc">La lente en reposo se desplaza ligeramente al inclinar el dispositivo. Desactivado por defecto. Puede causar mareo o náuseas en personas sensibles al movimiento y gasta algo más de batería. Se apaga solo con el ahorro de batería, alta temperatura o movimiento reducido.</string>
 </resources>

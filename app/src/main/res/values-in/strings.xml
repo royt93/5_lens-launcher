@@ -313,4 +313,6 @@
     <string name="lens_optical_restore_failed">Impor gagal dan pengaturan belum sepenuhnya dipulihkan. Periksa pengaturan lensa.</string>
     <string name="lens_optical_smart_on">Aktif</string>
     <string name="lens_optical_smart_off">Nonaktif</string>
+    <string name="setting_tilt_parallax">Lensa mengikuti kemiringan</string>
+    <string name="setting_tilt_parallax_desc">Lensa yang diam bergeser sedikit saat perangkat dimiringkan. Nonaktif secara default. Dapat menyebabkan pusing atau mual pada orang yang sensitif terhadap gerakan dan sedikit lebih boros baterai. Mati otomatis saat penghemat baterai, suhu tinggi, atau gerakan dikurangi.</string>
 </resources>

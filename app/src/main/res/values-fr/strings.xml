@@ -323,4 +323,6 @@
     <string name="lens_optical_restore_failed">Échec de l\'importation et réglages non entièrement restaurés. Vérifiez les réglages de l\'objectif.</string>
     <string name="lens_optical_smart_on">Activé</string>
     <string name="lens_optical_smart_off">Désactivé</string>
+    <string name="setting_tilt_parallax">Objectif suivant l\'inclinaison</string>
+    <string name="setting_tilt_parallax_desc">L\'objectif au repos dérive légèrement quand vous inclinez l\'appareil. Désactivé par défaut. Peut provoquer vertiges ou nausées chez les personnes sensibles au mouvement et consomme un peu plus de batterie. S\'éteint seul avec l\'économiseur de batterie, une température élevée ou le mouvement réduit.</string>
 </resources>

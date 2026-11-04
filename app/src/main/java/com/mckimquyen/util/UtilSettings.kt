@@ -84,6 +84,8 @@ class UtilSettings(context: Context) {
         const val DEFAULT_DEPTH_OF_FIELD = false
         // FISH-026: damped lens overscroll is enabled by default.
         const val DEFAULT_LENS_ELASTIC_OVERSCROLL = true
+        // FISH-033: tilt parallax is opt-in (motion sickness and battery risk), off by default.
+        const val DEFAULT_TILT_PARALLAX = false
         // FISH-006: Smart Focus Lite is opt-in, off by default.
         const val DEFAULT_SMART_FOCUS_BIAS = false
         // UI-012: each SEARCH-002 quick-action type can be individually toggled off; all on by
@@ -147,6 +149,8 @@ class UtilSettings(context: Context) {
         const val KEY_KEEP_SCREEN_ON = "keep_screen_on"
         const val KEY_DEPTH_OF_FIELD = "depth_of_field_blur"
         const val KEY_LENS_ELASTIC_OVERSCROLL = "lens_elastic_overscroll"
+        /** FISH-033: global (not per-lens) toggle for the idle lens centre drifting with device tilt. */
+        const val KEY_TILT_PARALLAX = "tilt_parallax"
         // FISH-006: Smart Focus Lite toggle
         const val KEY_SMART_FOCUS_BIAS = "smart_focus_bias"
         /** FISH-027: per-lens warp profile, stored by enum name; never inherited. */
@@ -353,6 +357,7 @@ class UtilSettings(context: Context) {
         KEY_KEEP_SCREEN_ON -> prefs.getBoolean(name, DEFAULT_KEEP_SCREEN_ON)
         KEY_DEPTH_OF_FIELD -> prefs.getBoolean(name, DEFAULT_DEPTH_OF_FIELD)
         KEY_LENS_ELASTIC_OVERSCROLL -> prefs.getBoolean(name, DEFAULT_LENS_ELASTIC_OVERSCROLL)
+        KEY_TILT_PARALLAX -> prefs.getBoolean(name, DEFAULT_TILT_PARALLAX)
         KEY_SMART_FOCUS_BIAS -> prefs.getBoolean(name, DEFAULT_SMART_FOCUS_BIAS)
         KEY_CLEAN_LENS_MODE -> prefs.getBoolean(name, DEFAULT_CLEAN_LENS_MODE)
         KEY_SHOW_FOCUS_HALO -> prefs.getBoolean(name, DEFAULT_SHOW_FOCUS_HALO)
@@ -437,6 +442,13 @@ class UtilSettings(context: Context) {
 
     fun saveLensElasticOverscroll(value: Boolean) {
         save(KEY_LENS_ELASTIC_OVERSCROLL, value)
+    }
+
+    fun getTiltParallax(): Boolean =
+        getBoolean(KEY_TILT_PARALLAX)
+
+    fun saveTiltParallax(value: Boolean) {
+        save(KEY_TILT_PARALLAX, value)
     }
 
     fun setLauncherMode(mode: LauncherMode) {

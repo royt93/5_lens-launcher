@@ -313,4 +313,6 @@
     <string name="lens_optical_restore_failed">导入失败，设置未能完全恢复。请检查镜头设置。</string>
     <string name="lens_optical_smart_on">开</string>
     <string name="lens_optical_smart_off">关</string>
+    <string name="setting_tilt_parallax">镜头随设备倾斜</string>
+    <string name="setting_tilt_parallax_desc">不触摸时，倾斜设备会让镜头轻微漂移。默认关闭。对运动敏感的人可能引起头晕或恶心，并会多耗一点电量。开启省电模式、温度过高或减少动态效果时会自动关闭。</string>
 </resources>

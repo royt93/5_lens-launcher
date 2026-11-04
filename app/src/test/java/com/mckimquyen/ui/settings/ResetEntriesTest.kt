@@ -29,13 +29,13 @@ class ResetEntriesTest {
     }
 
     @Test
-    fun `lens tab writes exactly its five keys using the active lens suffix`() {
+    fun `lens tab writes exactly its six keys using the active lens suffix`() {
         assertEquals(
-            setOf("min_icon_size", "distortion_factor", "scale_factor", "animation_time", "lens_elastic_overscroll"),
+            setOf("min_icon_size", "distortion_factor", "scale_factor", "animation_time", "lens_elastic_overscroll", "tilt_parallax"),
             ResetEntries.lens(settings, defaultLens).map { it.key }.toSet()
         )
         assertEquals(
-            setOf("min_icon_size_work", "distortion_factor_work", "scale_factor", "animation_time", "lens_elastic_overscroll"),
+            setOf("min_icon_size_work", "distortion_factor_work", "scale_factor", "animation_time", "lens_elastic_overscroll", "tilt_parallax"),
             ResetEntries.lens(settings, workLens).map { it.key }.toSet()
         )
     }

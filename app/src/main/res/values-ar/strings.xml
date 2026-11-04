@@ -344,4 +344,6 @@
     <string name="lens_optical_restore_failed">فشل الاستيراد ولم تتم استعادة الإعدادات بالكامل. تحقق من إعدادات العدسة.</string>
     <string name="lens_optical_smart_on">تشغيل</string>
     <string name="lens_optical_smart_off">إيقاف</string>
+    <string name="setting_tilt_parallax">إمالة العدسة مع الجهاز</string>
+    <string name="setting_tilt_parallax_desc">تنجرف العدسة قليلًا عند إمالة الجهاز أثناء عدم اللمس. متوقف افتراضيًا. قد يسبب الدوار أو الغثيان لدى الحساسين للحركة ويستهلك قدرًا أكبر قليلًا من البطارية. يتوقف تلقائيًا مع توفير الطاقة أو ارتفاع الحرارة أو تقليل الحركة.</string>
 </resources>

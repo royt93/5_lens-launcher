@@ -363,4 +363,6 @@
     <string name="lens_optical_restore_failed">Import failed and settings could not be fully restored. Check your lens settings.</string>
     <string name="lens_optical_smart_on">On</string>
     <string name="lens_optical_smart_off">Off</string>
+    <string name="setting_tilt_parallax">Tilt parallax</string>
+    <string name="setting_tilt_parallax_desc">The idle lens drifts slightly as you tilt the device. Off by default. Can cause dizziness or nausea in people sensitive to motion, and uses a little more battery. Turns itself off with battery saver, high temperature or reduced motion.</string>
 </resources>

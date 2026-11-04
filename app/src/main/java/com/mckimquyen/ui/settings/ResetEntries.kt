@@ -29,6 +29,10 @@ object ResetEntries {
         ResetEntry(
             UtilSettings.KEY_LENS_ELASTIC_OVERSCROLL, R.string.setting_lens_elastic_overscroll,
             UtilSettings.DEFAULT_LENS_ELASTIC_OVERSCROLL, us.getLensElasticOverscroll()
+        ),
+        ResetEntry(
+            UtilSettings.KEY_TILT_PARALLAX, R.string.setting_tilt_parallax,
+            UtilSettings.DEFAULT_TILT_PARALLAX, us.getTiltParallax()
         )
     )
 

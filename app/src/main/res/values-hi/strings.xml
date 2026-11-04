@@ -318,4 +318,6 @@
     <string name="lens_optical_restore_failed">आयात विफल रहा और सेटिंग पूरी तरह वापस नहीं हो सकी। लेंस सेटिंग जाँचें।</string>
     <string name="lens_optical_smart_on">चालू</string>
     <string name="lens_optical_smart_off">बंद</string>
+    <string name="setting_tilt_parallax">झुकाव के साथ लेंस</string>
+    <string name="setting_tilt_parallax_desc">जब आप छूते नहीं, डिवाइस झुकाने पर लेंस थोड़ा खिसकता है। डिफ़ॉल्ट रूप से बंद। गति के प्रति संवेदनशील लोगों में चक्कर या मतली हो सकती है और बैटरी थोड़ी ज़्यादा खर्च होती है। बैटरी सेवर, ज़्यादा तापमान या कम गति पर अपने आप बंद हो जाता है।</string>
 </resources>

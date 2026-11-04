@@ -313,4 +313,6 @@
     <string name="lens_optical_restore_failed">ການນຳເຂົ້າບໍ່ສຳເລັດ ແລະ ການຕັ້ງຄ່າບໍ່ໄດ້ກູ້ຄືນຄົບ. ກະລຸນາກວດການຕັ້ງຄ່າເລນ.</string>
     <string name="lens_optical_smart_on">ເປີດ</string>
     <string name="lens_optical_smart_off">ປິດ</string>
+    <string name="setting_tilt_parallax">ເລນຕາມການເອຽງເຄື່ອງ</string>
+    <string name="setting_tilt_parallax_desc">ເມື່ອບໍ່ແຕະ ເລນຈະເລື່ອນໜ້ອຍໜຶ່ງຕາມການເອຽງຂອງອຸປະກອນ. ປິດໄວ້ເປັນຄ່າເລີ່ມຕົ້ນ. ອາດເຮັດໃຫ້ວິນຫົວ ຫຼື ຄັນໄສ້ໃນຄົນທີ່ໄວຕໍ່ການເຄື່ອນໄຫວ ແລະ ໃຊ້ແບັດເຕີຣີຫຼາຍຂຶ້ນເລັກນ້ອຍ. ປິດເອງເມື່ອປະຢັດແບັດເຕີຣີ, ອຸນຫະພູມສູງ ຫຼື ຫຼຸດການເຄື່ອນໄຫວ.</string>
 </resources>

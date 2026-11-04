@@ -313,4 +313,6 @@
     <string name="lens_optical_restore_failed">นำเข้าไม่สำเร็จและกู้คืนการตั้งค่าไม่ครบ โปรดตรวจสอบการตั้งค่าเลนส์</string>
     <string name="lens_optical_smart_on">เปิด</string>
     <string name="lens_optical_smart_off">ปิด</string>
+    <string name="setting_tilt_parallax">เลนส์เอียงตามเครื่อง</string>
+    <string name="setting_tilt_parallax_desc">เมื่อไม่ได้แตะ เลนส์จะเลื่อนเล็กน้อยตามการเอียงของอุปกรณ์ ปิดอยู่เป็นค่าเริ่มต้น อาจทำให้เวียนศีรษะหรือคลื่นไส้ในผู้ที่ไวต่อการเคลื่อนไหว และใช้แบตเตอรี่เพิ่มขึ้นเล็กน้อย ปิดเองเมื่อเปิดโหมดประหยัดแบตเตอรี่ อุณหภูมิสูง หรือลดการเคลื่อนไหว</string>
 </resources>

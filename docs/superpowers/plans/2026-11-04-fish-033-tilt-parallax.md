@@ -234,6 +234,8 @@ class TiltParallaxTest {
 
 ## Task 2 — Công tắc, gate và reset (TDD)
 
+Tiến độ 2026-11-04: RED thiếu `TiltGate`/`DEFAULT_TILT_PARALLAX`/`getTiltParallax` (`/tmp/f033-t2-red.log`); GREEN gate (2 test, quét đủ 64 tổ hợp), settings 4, `ResetEntriesTest` cập nhật sáu key; full JVM 1486/1486. Chuỗi `setting_tilt_parallax` và `_desc` đã thêm đủ 17 locale ngay trong task này (để `ResetEntries` biên dịch và `AllStringsTranslationTest` xanh), nên Task 6 chỉ còn gắn layout/UI. Mutation: 5 mutant gate + mặc định bật đều KILLED; mutant bỏ nhánh `getBoolean` SỐNG và tương đương (nhánh `else` trả `prefs.getBoolean(name, false)` mà default cũng false). Lint 0 error, 13 warning: một warning mới `UnusedResources` cho `setting_tilt_parallax_desc` sẽ hết ở Task 6. Bản dịch chưa được người bản xứ rà.
+
 **Files:** `UtilSettings.kt`, `TiltGate.kt`, `ResetEntries.kt`, tests `UtilSettingsTiltParallaxTest.kt`, `TiltGateTest.kt`, `ResetEntriesTest.kt`.
 
 - [ ] **1. RED:** test `UtilSettings` (mặc định false; `saveTiltParallax(true)` đọc lại true; không động key khác), `TiltGate.shouldRun` đủ bảng 2^6 tổ hợp chỉ `true` khi `enabled && !reduceMotion && resumed && !searchShowing && !listMode && sensorAvailable`, và `ResetEntriesTest` mong đợi tập key lens có thêm `tilt_parallax`.

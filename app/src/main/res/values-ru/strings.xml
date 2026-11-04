@@ -328,4 +328,6 @@
     <string name="lens_optical_restore_failed">Импорт не удался, настройки восстановлены не полностью. Проверьте настройки линзы.</string>
     <string name="lens_optical_smart_on">Вкл.</string>
     <string name="lens_optical_smart_off">Выкл.</string>
+    <string name="setting_tilt_parallax">Линза следует за наклоном</string>
+    <string name="setting_tilt_parallax_desc">Когда вы не касаетесь экрана, линза немного смещается при наклоне устройства. По умолчанию выключено. Может вызвать головокружение или тошноту у людей, чувствительных к движению, и немного увеличивает расход заряда. Отключается само при экономии заряда, высокой температуре или уменьшении движения.</string>
 </resources>

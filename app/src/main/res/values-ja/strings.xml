@@ -313,4 +313,6 @@
     <string name="lens_optical_restore_failed">読み込みに失敗し、設定を完全には復元できませんでした。レンズ設定を確認してください。</string>
     <string name="lens_optical_smart_on">オン</string>
     <string name="lens_optical_smart_off">オフ</string>
+    <string name="setting_tilt_parallax">端末の傾きに追従するレンズ</string>
+    <string name="setting_tilt_parallax_desc">触れていないとき、端末を傾けるとレンズがわずかに動きます。初期設定はオフです。動きに敏感な方はめまいや吐き気を感じることがあり、電池も少し多く消費します。バッテリーセーバー、高温、モーション低減のときは自動的にオフになります。</string>
 </resources>

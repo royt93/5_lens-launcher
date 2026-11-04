@@ -313,4 +313,6 @@
     <string name="lens_optical_restore_failed">ការនាំចូលបរាជ័យ ហើយការកំណត់មិនត្រូវបានស្ដារពេញលេញទេ។ សូមពិនិត្យការកំណត់កែវ។</string>
     <string name="lens_optical_smart_on">បើក</string>
     <string name="lens_optical_smart_off">បិទ</string>
+    <string name="setting_tilt_parallax">កែវតាមការផ្អៀងឧបករណ៍</string>
+    <string name="setting_tilt_parallax_desc">នៅពេលមិនប៉ះ កែវរសាត់បន្តិចតាមការផ្អៀងឧបករណ៍។ បិទតាមលំនាំដើម។ អាចធ្វើឱ្យវិលមុខ ឬចង្អោរចំពោះអ្នកងាយប្រតិកម្មនឹងចលនា ហើយប្រើថ្មច្រើនជាងបន្តិច។ បិទដោយខ្លួនឯងពេលសន្សំថ្ម កម្តៅខ្ពស់ ឬកាត់បន្ថយចលនា។</string>
 </resources>
