@@ -282,6 +282,8 @@ Tiến độ 2026-11-04: RED thiếu id/strings (`/tmp/f036-task4-red.log`); GRE
 
 ## Task 5 — Real URI and Home integration (TDD)
 
+Tiến độ 2026-11-04: `LensOpticalProfileIntegrationTest` 7/7 trên TECNO KJ7 `115333744A005844`. Dùng `ContentResolver` thật trên file URI (không cần ContentProvider test riêng, nên bỏ hạng mục provider/androidTest manifest trong plan), kiểm: round-trip đủ 4 profile × Custom có/vắng, file không chứa layout/định danh, ngưỡng đúng 16 KiB / +1 byte / UTF-8 hỏng / format lạ, nguồn thiếu/thư mục/đích không ghi được, `LensView` thật vẽ theo profile vừa nhập (Anamorphic không méo Y, lens đối chứng vẫn méo Y), giá trị bền qua `UtilSettings` mới và lens khác giữ nguyên, file hỏng không đổi prefs. Test không dùng Room nên không chạm lens/app row; prefs do `DeviceStateGuard` khôi phục. Sau chạy: lens, 75 app row và prefs khớp backup. Giới hạn: không qua picker hệ thống thật (đó là Task 6 smoke tay) và không kiểm failed-commit trên máy (đã có unit seam Task 3).
+
 **Files:** `LensOpticalProfileIntegrationTest.kt`; optional test-only provider/manifest.
 
 - [ ] **1. RED tests before integration fixes:** all four enums and optional Custom roundtrip through actual ContentResolver stream; null/throwing streams; exact byte ceiling, malformed UTF8; close exceptions; no Room changes; import target deleted between picker and confirm.
