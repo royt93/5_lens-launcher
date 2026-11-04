@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | exclusive |
-| Status | picked — đang thiết kế 2026-11-04; chưa triển khai |
+| Status | in progress 2026-11-04 — spec/plan đã duyệt, triển khai Inline; Task 1 TDD |
 | Priority | P3 |
 | Evidence | idea |
 | Epic | Fisheye Smart |
@@ -30,11 +30,13 @@ Là người dùng, tôi muốn gửi bạn cấu hình lens của tôi.
 - [ ] Validate strict theo format/version/types/ranges/finite-number; từ chối toàn file, không clamp/partial import.
 - [ ] Preview tách per-lens/global/Custom impact; cancel không ghi; import target theo EXTRA_LENS_ID.
 - [ ] Test malformed/oversized/UTF-8 lỗi, target bị xóa, global inheritance, Custom vắng và failed commit/rollback.
-- [ ] Pixel-only SAF smoke, backup/restore state và audit >9.0.
+- [ ] TECNO-only SAF smoke theo quyết định mới nhất 2026-11-04, backup/restore state và audit >9.0.
 
 ## Implementation notes
 
-FISH-027 và DB-007 đã done. Thiết kế duyệt trong hội thoại 2026-11-04; spec: `docs/superpowers/specs/2026-11-04-fish-036-lens-profile-file-design.md`, chờ owner đọc lại trước lập plan. Không dùng workspace import path; SAF ở LensSettingsActivity, JSON riêng, apply một batch prefs.
+FISH-027 và DB-007 đã done. Owner duyệt spec/plan và chọn Inline 2026-11-04. Spec: `docs/superpowers/specs/2026-11-04-fish-036-lens-profile-file-design.md`; plan: `docs/superpowers/plans/2026-11-04-fish-036-lens-profile-file.md`. Không dùng workspace import path; SAF ở LensSettingsActivity, JSON riêng, apply một batch prefs. Chính sách mới nhất: chỉ TECNO mọi phiên, khóa KJ7 `115333744A005844`; không chạm Pixel/Samsung/OPPO.
+
+Task 1: RED thiếu model/API, GREEN `LensOpticalProfileTest` 15 tests trên Robolectric sdk 28. Parser strict schema, key trùng/lạ, types, decimal ranges trước Float, malformed/trailing JSON và Custom có/vắng. Chưa chạy UI/device test; chưa coi feature hoàn tất.
 
 ## Verification and Definition of Done
 

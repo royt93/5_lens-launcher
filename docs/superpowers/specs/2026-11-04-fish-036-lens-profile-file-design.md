@@ -14,7 +14,7 @@ Xuất/nhập cảm giác quang học của một lens qua JSON riêng, không m
 - Scale/animation và Custom scale/time giữ scope global hiện có. Preview phân tách ảnh hưởng lens đích, global, Custom và cảnh báo kế thừa từ default lens.
 - Sai kiểu/cấu trúc/range, thiếu trường bắt buộc hoặc số không hữu hạn: từ chối toàn file. Không clamp hoặc nhập từng phần.
 - JSON riêng; tái dùng mẫu SAF, không mở rộng workspace backup hoặc gọi Room layout replacement.
-- Không dependency/schema/key settings mới; không mở rộng Ads/IAP/TalkBack. Chỉ Pixel cho device verification. Không push khi chưa có yêu cầu hiện hành.
+- Không dependency/schema/key settings mới; không mở rộng Ads/IAP/TalkBack. Quyết định mới nhất 2026-11-04: chỉ TECNO cho mọi phiên, thay Pixel. Không push khi chưa có yêu cầu hiện hành.
 
 ## Kiến trúc đã kiểm chứng
 
@@ -116,5 +116,5 @@ IO dùng `lifecycleScope`, không giữ Activity callback trong `ApplicationScop
 - Integration: provider stream thật/test provider, SAF callback tới preview/apply, provider lỗi, target bị xóa, Home reload, parse lỗi không đổi prefs hoặc Room.
 - Test fixture phải backup/restore Room, prefs và snapshot app, không dùng workspace import rollback để dọn fixture vì API đó có thể giữ stats từ fixture. Không chạy test phá DB trên máy thật.
 - Host gate: `./gradlew testDevDebugUnitTest lintDevDebug assembleDevDebug assembleDevDebugAndroidTest --rerun-tasks`, `git diff --check`, `bash scripts/check-secrets.sh`.
-- Pixel-only: xác minh `adb devices -l`, dùng serial khóa; backup APK/data/prefs/system state + hash trước test. SAF smoke xuất/nhập/cancel/file lỗi, kiểm Home và restore từng file. Gặp ad/consent trong screenshot thì dừng chờ owner `done`.
+- TECNO-only: xác minh `adb devices -l`, dùng serial khóa; backup APK/data/prefs/system state + hash trước test. SAF smoke xuất/nhập/cancel/file lỗi, kiểm Home và restore từng file. Gặp ad/consent trong screenshot thì dừng chờ owner `done`.
 - Mutation validate/target/global/confirm guard; audit >9.0 mới được đóng story. Commit local được phép theo plan sau duyệt; không push tự động.
