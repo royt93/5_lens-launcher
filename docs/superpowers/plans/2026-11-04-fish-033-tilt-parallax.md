@@ -257,6 +257,8 @@ Tiến độ 2026-11-04: RED thiếu `TiltGate`/`DEFAULT_TILT_PARALLAX`/`getTilt
 
 ## Task 3 — TiltSensorSource (TDD)
 
+Tiến độ 2026-11-04: RED thiếu `TiltSensorSource` (`/tmp/f033-t3-red.log`); GREEN `TiltSensorSourceTest` 10/10; full JVM + lint xanh. Mutation 9/9 KILLED: không hủy đăng ký, start không idempotent, giữ listener sau stop, sai SENSOR_DELAY, đăng ký thất bại vẫn coi là chạy, mẫu NaN, mẫu ngắn, căn âm không clamp, sai loại sensor. Sensor nhận `Listener` chứ không giữ Activity; `stop()` bỏ cả listener lẫn đăng ký.
+
 **Files:** `TiltSensorSource.kt`, `TiltSensorSourceTest.kt` (Mockito `SensorManager`/`Sensor`).
 
 - [ ] **1. RED:** test: `available` false khi `manager == null` hoặc `getDefaultSensor(TYPE_GAME_ROTATION_VECTOR)` null; `start` đăng ký đúng một lần với `SENSOR_DELAY_UI` dù gọi hai lần; `stop` gọi `unregisterListener` đúng một lần và idempotent; `start` sau `stop` đăng ký lại; mẫu có `values.size < 4` suy `w` bằng `sqrt(1 - x²-y²-z²)` an toàn (clamp âm về 0) hoặc bỏ nếu không hữu hạn; mẫu `accuracy == SENSOR_STATUS_UNRELIABLE` bị bỏ; không gọi listener sau `stop`; `registerListener` trả false thì `isRunning` false.
