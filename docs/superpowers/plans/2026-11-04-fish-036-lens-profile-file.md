@@ -295,6 +295,11 @@ Tiến độ 2026-11-04: `LensOpticalProfileIntegrationTest` 7/7 trên TECNO KJ7
 
 ## Task 6 — Mutation, final gate, TECNO SAF smoke, audit
 
+Mutation 2026-11-04 (script `/tmp/f036-mutate.py`, mỗi lần một mutant, source hoàn nguyên ngay, `git diff` rỗng sau cùng): 13 mutant, 12 KILLED bằng assertion (không phải lỗi biên dịch), 1 SỐNG.
+- KILLED: M1 version nhận mọi giá trị (2 test đỏ), M2b bỏ lớp kiểm decimal range (3), M2c bỏ range trong `isValid` (2), M3 cho phép key trùng (2), M4 ép chuỗi số thành số (3), M5 đọc không giới hạn byte (2), M7 nuốt CancellationException (2), M8 ghi scale vào key theo lens (3), M9 không xóa pending pinch (2), M10 luôn ghi đè Custom khi file không có (2), M11 bỏ rollback (4), M12 ghi distortion vào key dùng chung của lens không phải default (3).
+- M2 (chỉ bỏ range ở `isValid` cho distortion) ban đầu SỐNG vì `boundedFloat` vẫn chặn trước; bỏ riêng từng lớp thì đều bị bắt, nên đây là hai lớp phòng thủ chồng nhau chứ không phải lỗ hổng test. M2b/M2c chứng minh từng lớp được test.
+- M6 (decoder UTF-8 `REPORT` thành `REPLACE`) SỐNG và là mutant tương đương: mọi chuỗi trong file đều bị so khớp với tập cố định (key, `format`, tên profile) nên `U+FFFD` luôn bị parser từ chối dù decoder chọn chế độ nào. Đã thử ba test khác nhau không phân biệt được; không thêm test giả. Giữ `REPORT` làm phòng thủ nhiều lớp, test `rejectsMalformedUtf8InsteadOfReplacingBytes` vẫn đúng cho kết quả `Malformed`.
+
 **Files:** story/tracker/README and `doc/task/AUDIT_FISH-036_2026-11-04.md` (use actual finish date if later).
 
 - [ ] **1. Host gate:** run exact full command in constraints; preserve log, count XML test totals with failures/errors/skips, parse lint counts, hash app/test APK. No concurrent source mutations during builds.

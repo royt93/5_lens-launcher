@@ -387,7 +387,7 @@ class LensSettingsActivity : ActBase() {
         val current = settings.captureOpticalProfile(id)
         if (current == null) { toast(R.string.lens_optical_read_failed); return }
         showDialog(LensDialogs.confirm(this, R.string.lens_optical_preview_title,
-            opticalPreviewText(id, current, profile), R.string.lens_optical_import, false,
+            opticalPreviewText(id, current, profile), android.R.string.ok, false,
             { applyOptical(profile) }, null), DIALOG_OPTICAL)
         previewProfile = profile
     }

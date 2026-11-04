@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | exclusive |
-| Status | in progress 2026-11-04 — spec/plan đã duyệt, triển khai Inline; Task 1 TDD |
+| Status | done 2026-11-04 — audit 9.2/10, `doc/task/AUDIT_FISH-036_2026-11-04.md` (chưa push) |
 | Priority | P3 |
 | Evidence | idea |
 | Epic | Fisheye Smart |
@@ -26,11 +26,11 @@ Là người dùng, tôi muốn gửi bạn cấu hình lens của tôi.
 
 ## Acceptance criteria
 
-- [ ] Xuất/nhập standalone optical JSON qua SAF; không chứa layout/app rows.
-- [ ] Validate strict theo format/version/types/ranges/finite-number; từ chối toàn file, không clamp/partial import.
-- [ ] Preview tách per-lens/global/Custom impact; cancel không ghi; import target theo EXTRA_LENS_ID.
-- [ ] Test malformed/oversized/UTF-8 lỗi, target bị xóa, global inheritance, Custom vắng và failed commit/rollback.
-- [ ] TECNO-only SAF smoke theo quyết định mới nhất 2026-11-04, backup/restore state và audit >9.0.
+- [x] Xuất/nhập standalone optical JSON qua SAF; không chứa layout/app rows.
+- [x] Validate strict theo format/version/types/ranges/finite-number; từ chối toàn file, không clamp/partial import.
+- [x] Preview tách per-lens/global/Custom impact; cancel không ghi; import target theo EXTRA_LENS_ID.
+- [x] Test malformed/oversized/UTF-8 lỗi, target bị xóa, global inheritance, Custom vắng và failed commit/rollback.
+- [x] TECNO-only SAF smoke theo quyết định mới nhất 2026-11-04, backup/restore state và audit >9.0.
 
 ## Implementation notes
 
@@ -40,13 +40,13 @@ Task 1: RED thiếu model/API, GREEN `LensOpticalProfileTest` 15 tests trên Rob
 
 ## Verification and Definition of Done
 
-- [ ] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
-- [ ] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
-- [ ] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
-- [ ] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
-- [ ] No new lint/build failures.
-- [ ] A post-change audit record scores the round `> 9.0/10` before push.
-- [ ] Evidence and status are updated before moving this file to `done`.
+- [x] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
+- [x] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
+- [x] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
+- [x] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
+- [x] No new lint/build failures.
+- [x] A post-change audit record scores the round `> 9.0/10` before push.
+- [x] Evidence and status are updated before moving this file to `done`.
 
 If a test layer is not applicable, replace its checkbox with a reviewed rationale; do not silently omit it.
 
