@@ -26,14 +26,15 @@ Là người dùng, tôi muốn gửi bạn cấu hình lens của tôi.
 
 ## Acceptance criteria
 
-- [ ] Xuất/nhập qua SAF, validate chặt khi nhập (trust boundary).
-- [ ] Giá trị ngoài phạm vi bị clamp/từ chối.
-- [ ] Test file hỏng/độc.
-- [ ] Smoke.
+- [ ] Xuất/nhập standalone optical JSON qua SAF; không chứa layout/app rows.
+- [ ] Validate strict theo format/version/types/ranges/finite-number; từ chối toàn file, không clamp/partial import.
+- [ ] Preview tách per-lens/global/Custom impact; cancel không ghi; import target theo EXTRA_LENS_ID.
+- [ ] Test malformed/oversized/UTF-8 lỗi, target bị xóa, global inheritance, Custom vắng và failed commit/rollback.
+- [ ] Pixel-only SAF smoke, backup/restore state và audit >9.0.
 
 ## Implementation notes
 
-Làm sau FISH-027 và DB-007.
+FISH-027 và DB-007 đã done. Thiết kế duyệt trong hội thoại 2026-11-04; spec: `docs/superpowers/specs/2026-11-04-fish-036-lens-profile-file-design.md`, chờ owner đọc lại trước lập plan. Không dùng workspace import path; SAF ở LensSettingsActivity, JSON riêng, apply một batch prefs.
 
 ## Verification and Definition of Done
 
