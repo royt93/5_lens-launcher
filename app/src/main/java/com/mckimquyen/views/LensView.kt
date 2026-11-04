@@ -53,6 +53,7 @@ import com.mckimquyen.util.UtilCalculator
 import com.mckimquyen.util.LensAppScope
 import com.mckimquyen.util.LensAppScopeEditor
 import com.mckimquyen.util.LensMoveApplier
+import com.mckimquyen.util.TiltParallax
 import com.mckimquyen.util.UtilSettings
 import kotlinx.coroutines.launch
 import java.util.Locale
@@ -322,6 +323,12 @@ class LensView : View {
     private var mTouchX = -Float.MAX_VALUE
     private var mTouchY = -Float.MAX_VALUE
     private var mInsideRect = false
+
+    // FISH-033: virtual lens centre drift while idle. Deliberately separate from mTouchX/mTouchY: those drive
+    // hit-testing, depth of field, hover haptics and the touch ring, none of which tilt may ever trigger.
+    private var mTiltX = 0f
+    private var mTiltY = 0f
+    private var mTiltActive = false
     private var mShowNotificationBadgesThisFrame = false
     private var mRectToSelect: RectF? = RectF(0f, 0f, 0f, 0f)
     private var mMustVibrate = true
@@ -592,6 +599,26 @@ class LensView : View {
     @androidx.annotation.VisibleForTesting
     internal val dofBandCounts = IntArray(DepthOfField.BLUR_BAND_COUNT + 1)
 
+    /**
+     * FISH-033: offset (px) of the idle lens centre from the grid centre; main thread. Ignored while a finger
+     * is down, so the finger always wins. Cleared on detach and export by [resetTouchState].
+     */
+    internal fun setTiltOffset(x: Float, y: Float) {
+        if (!x.isFinite() || !y.isFinite()) return
+        mTiltX = x
+        mTiltY = y
+        mTiltActive = true
+        invalidate()
+    }
+
+    internal fun clearTiltOffset() {
+        if (!mTiltActive) return
+        mTiltActive = false
+        mTiltX = 0f
+        mTiltY = 0f
+        invalidate()
+    }
+
     /** Puts the lens in a given drag state without driving the (unattached-view-unfriendly) Animation. */
     @androidx.annotation.VisibleForTesting
     internal fun setLensStateForTest(touchX: Float, touchY: Float, animationMultiplier: Float, reduceMotion: Boolean) {
@@ -616,6 +643,9 @@ class LensView : View {
     private fun resetTouchState() {
         mTouchX = -Float.MAX_VALUE
         mTouchY = -Float.MAX_VALUE
+        mTiltActive = false
+        mTiltX = 0f
+        mTiltY = 0f
         gestureState = LensGestureState.IDLE
         mSelectIndex = -1
         mRectToSelect = null
@@ -1650,6 +1680,12 @@ class LensView : View {
         // FISH-007: one mode/transition decision per frame; per-cell work below is arithmetic only.
         val dofTransition = DepthOfField.transition(animationMultiplier, mReduceMotion)
         val hasActiveTouch = mTouchX != -Float.MAX_VALUE && mTouchY != -Float.MAX_VALUE
+        // FISH-033: an idle lens may be warped around a virtual centre; a real touch always wins.
+        val useTilt = !hasActiveTouch && mTiltActive && mDrawType == DrawType.APPS
+        val lensCenterX = if (hasActiveTouch) mTouchX else if (useTilt) width / 2f + mTiltX else -Float.MAX_VALUE
+        val lensCenterY = if (hasActiveTouch) mTouchY else if (useTilt) height / 2f + mTiltY else -Float.MAX_VALUE
+        val warpMultiplier = if (useTilt) TiltParallax.ANIMATION_MULTIPLIER else animationMultiplier
+        val hasLensCenter = hasActiveTouch || useTilt
         val dofMode = DepthOfField.renderMode(
             depthOfFieldEnabled,
             mDrawType == DrawType.APPS && hasActiveTouch && dofTransition > 0f,
@@ -1668,39 +1704,39 @@ class LensView : View {
             val baseRect = baseRects[currentIndex]
             mScratchRect.set(baseRect)
             val rect = mScratchRect
-            if (hasActiveTouch) {
+            if (hasLensCenter) {
                 val shiftedCenterX = lensProfile.shiftX(
-                    mTouchX,
+                    lensCenterX,
                     baseRect.centerX(),
                     width.toFloat(),
-                    animationMultiplier,
+                    warpMultiplier,
                     distortionFactor,
                     lensHood
                 )
                 val shiftedCenterY = lensProfile.shiftY(
-                    mTouchY,
+                    lensCenterY,
                     baseRect.centerY(),
                     height.toFloat(),
-                    animationMultiplier,
+                    warpMultiplier,
                     distortionFactor,
                     lensHood
                 )
                 val scaledCenterX = lensProfile.scaleX(
-                    mTouchX,
+                    lensCenterX,
                     baseRect.centerX(),
                     baseRect.width(),
                     width.toFloat(),
-                    animationMultiplier,
+                    warpMultiplier,
                     scaleFactor,
                     distortionFactor,
                     lensHood
                 )
                 val scaledCenterY = lensProfile.scaleY(
-                    mTouchY,
+                    lensCenterY,
                     baseRect.centerY(),
                     baseRect.height(),
                     height.toFloat(),
-                    animationMultiplier,
+                    warpMultiplier,
                     scaleFactor,
                     distortionFactor,
                     lensHood
@@ -1718,7 +1754,7 @@ class LensView : View {
                     UtilCalculator.calculateRect(mScratchRect, shiftedCenterX, shiftedCenterY, baseRect.width())
                 }
 
-                if (UtilCalculator.isInsideRect(mTouchX, mTouchY, rect)) {
+                if (hasActiveTouch && UtilCalculator.isInsideRect(mTouchX, mTouchY, rect)) {
                     mInsideRect = true
                     selectIndex = currentIndex
                     mRectToSelect = RectF(rect)

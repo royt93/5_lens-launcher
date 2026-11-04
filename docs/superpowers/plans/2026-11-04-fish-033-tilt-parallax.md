@@ -267,6 +267,9 @@ Tiến độ 2026-11-04: RED thiếu `TiltSensorSource` (`/tmp/f033-t3-red.log`)
 
 ## Task 4 — LensView dùng tâm ảo khi rảnh (TDD, thiết bị)
 
+Tiến độ 2026-11-04: RED thiếu `setTiltOffset` (`/tmp/f033-t4-red.log`); GREEN `LensViewTiltIntegrationTest` 9/9 trên TECNO KJ7 `115333744A005844`; hồi quy `LensViewProfileIntegrationTest` 13/13, `LensViewPinchIntegrationTest` 12/12, `LensViewIconSizeIntegrationTest` 8/8; JVM 1496/1496, lint 0 error/13 warning. Backup `/tmp/f033-tecno-20261104-134255/` (1192 file, hash từng file) rồi khôi phục 1192/1192 giống hệt. Triển khai khác plan một chút: hit-test giờ viết `hasActiveTouch && isInsideRect(mTouchX, mTouchY, rect)` (trước đây dựa vào `hasActiveTouch` bao ngoài), `DepthOfField` và `drawTouchSelection` giữ nguyên `mTouchX/Y`; tâm ảo chỉ vào bốn lời gọi warp. Dùng harness `OrganizationHarnessActivity` (có sẵn ở `src/debug`) để gắn/gỡ view qua đường detach thật thay vì gọi hàm nội bộ.
+Mutation trên máy (`/tmp/f033-dev-mut.py`, mỗi lần build + cài + chạy lớp rồi hoàn nguyên): V2 áp tilt khi có ngón tay, V4 `clearTiltOffset` vô hiệu, V5 dùng multiplier đầy đủ, V6 bỏ offset đều KILLED. V1 (tilt lọt vào hit-test) lúc đầu SỐNG: test cũ chỉ đặt tâm ảo ở nơi không trùng icon nên không phân biệt được. Đã viết lại test (tâm ảo đặt đúng giữa một icon, và kiểm 5 khung liên tiếp) → V1 KILLED. V3 (detach giữ offset) patch lần đầu sai chuỗi, sửa rồi KILLED.
+
 **Files:** `LensView.kt`, `LensViewTiltIntegrationTest.kt`.
 
 - [ ] **1. RED (androidTest, dùng mẫu `LensViewProfileIntegrationTest` + `setLensStateForTest`/`drawnRectsForTest`):**
