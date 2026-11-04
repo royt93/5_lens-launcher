@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | exclusive |
-| Status | in progress 2026-11-04 — code/UI/test xong, audit 9,20/10, TECNO smoke sensor→render đạt; Pixel fallback thử touch bị ad chặn Settings, swipe mô phỏng mở lens menu nên touch override chưa xác minh; chưa đo A/B pin/frame, giữ in progress |
+| Status | in progress 2026-11-04 — code/UI/test xong, audit 9,30/10, TECNO smoke sensor→render và touch override đạt; chưa đo A/B pin/frame, giữ in progress |
 | Priority | P3 |
 | Evidence | idea |
 | Epic | Fisheye Smart |
