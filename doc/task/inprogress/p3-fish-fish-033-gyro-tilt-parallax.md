@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | exclusive |
-| Status | in progress 2026-11-04 — Tasks 1–5 done; Task 6 UI + Task 7 smoke/audit pending |
+| Status | in progress 2026-11-04 — code/UI/test xong, audit 8,75/10, smoke tay chưa đạt (language chooser chặn); chưa đóng |
 | Priority | P3 |
 | Evidence | idea |
 | Epic | Fisheye Smart |
@@ -61,7 +61,8 @@ Làm story FISH-033 (Thấu kính nghiêng theo cảm biến (tilt parallax)) tr
 - Task 2 gate/setting/reset: full unit regression 1486/1486, lint 0 errors; 5 gate + default-on mutations bị bắt.
 - Task 3 `TiltSensorSource`: 10 unit test; 9 lifecycle/sensor mutations bị bắt.
 - Task 4 `LensViewTiltIntegrationTest` 9/9; Task 5 `ActHomeTiltWidgetTest` 9/9 + `ActHomeMultiLensWidgetTest` 4/4 + `ActHomeLensManagementWidgetTest` 29/29 trên TECNO KJ7. Một ActHome onDestroy-only mutant equivalent do onPause luôn stop.
-- TECNO đã khôi phục 1192/1192 regular files; pending Task 6 hoàn tất UI/17 locale, gate, smoke cảm biến, mutation/audit.
+- Task 6 UI: `FrmLensTiltWidgetTest` 3/3, 17 locale, full gate 1496/1496, lint 0 error/12 warning; TECNO khôi phục 1191/1191.
+- Audit `doc/task/AUDIT_FISH-033_2026-11-04.md`: 8,75/10, chưa đạt gate. Smoke tay dừng ở màn Select Language (không chọn locale/không bấm quảng cáo), chưa chứng minh sensor thật và chưa đo pin/frame.
 
 ### Tín hiệu kết thúc loop
 
