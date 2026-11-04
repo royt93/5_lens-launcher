@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | exclusive |
-| Status | todo |
+| Status | picked — thiết kế duyệt 2026-11-04; spec chờ owner đọc lại, chưa triển khai |
 | Priority | P3 |
 | Evidence | idea |
 | Epic | Fisheye Smart |
@@ -29,6 +29,8 @@ Là người dùng, tôi muốn lens nghiêng nhẹ theo máy như ống kính t
 ## Implementation notes
 
 Rủi ro pin và say chuyển động; đặt mặc định tắt.
+
+Spec: `docs/superpowers/specs/2026-11-04-fish-033-tilt-parallax-design.md`. Đã chốt: tilt chỉ lúc rảnh (chạm thì nhường), công tắc chung mặc định tắt, biên độ cố định nhỏ không slider, gate bằng `shouldReduceLensMotion` + vòng đời, `ActHome` sở hữu sensor, chỉ TECNO.
 
 ## Verification and Definition of Done
 
