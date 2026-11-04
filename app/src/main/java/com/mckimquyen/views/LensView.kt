@@ -603,7 +603,7 @@ class LensView : View {
      * FISH-033: offset (px) of the idle lens centre from the grid centre; main thread. Ignored while a finger
      * is down, so the finger always wins. Cleared on detach and export by [resetTouchState].
      */
-    internal fun setTiltOffset(x: Float, y: Float) {
+    fun setTiltOffset(x: Float, y: Float) {
         if (!x.isFinite() || !y.isFinite()) return
         mTiltX = x
         mTiltY = y
@@ -611,7 +611,7 @@ class LensView : View {
         invalidate()
     }
 
-    internal fun clearTiltOffset() {
+    fun clearTiltOffset() {
         if (!mTiltActive) return
         mTiltActive = false
         mTiltX = 0f

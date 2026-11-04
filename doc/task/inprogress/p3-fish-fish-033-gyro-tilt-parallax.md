@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | exclusive |
-| Status | in progress 2026-11-04 — spec/plan duyệt, triển khai Inline; Task 1 TDD; chỉ TECNO |
+| Status | in progress 2026-11-04 — Tasks 1–5 done; Task 6 UI + Task 7 smoke/audit pending |
 | Priority | P3 |
 | Evidence | idea |
 | Epic | Fisheye Smart |
@@ -54,6 +54,14 @@ Làm story FISH-033 (Thấu kính nghiêng theo cảm biến (tilt parallax)) tr
 4. Tuân thủ R3 (hỏi device 1 lần rồi khóa), R4 (gặp quảng cáo che UI thì dừng chờ "done"), R5 (không magic number, tránh late/!, dispose listener/timer).
 5. Lặp lại cho tới khi gặp tín hiệu kết thúc bên dưới.
 ```
+
+### Tiến độ 2026-11-04
+
+- Task 1 `TiltParallax`: 13 unit test; mutation clamp/dead-zone/sign/rotation/reference/smoothing đều bị bắt, NaN guard mutant equivalent.
+- Task 2 gate/setting/reset: full unit regression 1486/1486, lint 0 errors; 5 gate + default-on mutations bị bắt.
+- Task 3 `TiltSensorSource`: 10 unit test; 9 lifecycle/sensor mutations bị bắt.
+- Task 4 `LensViewTiltIntegrationTest` 9/9; Task 5 `ActHomeTiltWidgetTest` 9/9 + `ActHomeMultiLensWidgetTest` 4/4 + `ActHomeLensManagementWidgetTest` 29/29 trên TECNO KJ7. Một ActHome onDestroy-only mutant equivalent do onPause luôn stop.
+- TECNO đã khôi phục 1192/1192 regular files; pending Task 6 hoàn tất UI/17 locale, gate, smoke cảm biến, mutation/audit.
 
 ### Tín hiệu kết thúc loop
 

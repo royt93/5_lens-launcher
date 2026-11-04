@@ -89,6 +89,10 @@ import com.mckimquyen.util.LensLabelResolver;
 import com.mckimquyen.util.LensShortcuts;
 import com.mckimquyen.util.Logger;
 import com.mckimquyen.util.PolaroidExportHelper;
+import com.mckimquyen.util.LensPhysicsPolicy;
+import com.mckimquyen.util.TiltGate;
+import com.mckimquyen.util.TiltParallax;
+import com.mckimquyen.util.TiltSensorSource;
 import com.mckimquyen.util.UIUtils;
 import com.mckimquyen.util.UtilCalculator;
 import com.mckimquyen.services.AppEventManager;
@@ -271,6 +275,24 @@ public class ActHome extends ActBase implements LensViewHolderHost, HomeQuickAct
         }
     }
 
+    /** FISH-033: test seam; returns the sensor source the Activity should use instead of the real one. */
+    @androidx.annotation.VisibleForTesting
+    static kotlin.jvm.functions.Function0<TiltSensorSource> tiltSensorSourceFactoryForTest = null;
+
+    /** FISH-033: the one sensor registration, owned here and tied to the Activity lifecycle. */
+    private TiltSensorSource tiltSensor;
+    private final TiltParallax.Filter tiltFilter = new TiltParallax.Filter();
+    private boolean tiltResumed;
+    private final TiltSensorSource.Listener tiltListener = (qx, qy, qz, qw) -> {
+        LensView view = lensViews;
+        if (view == null || view.getWidth() <= 0 || view.getHeight() <= 0) return;
+        int rotation = getWindowManager().getDefaultDisplay().getRotation();
+        float area = Math.min(view.getWidth(), view.getHeight());
+        if (tiltFilter.update(qx, qy, qz, qw, rotation, area)) {
+            view.setTiltOffset(tiltFilter.getOffsetX(), tiltFilter.getOffsetY());
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -279,6 +301,9 @@ public class ActHome extends ActBase implements LensViewHolderHost, HomeQuickAct
         setupViews();
         applyHomeColumnInsets(findViewById(R.id.rootLayout));
         setupSearch();
+        tiltSensor = tiltSensorSourceFactoryForTest != null
+                ? tiltSensorSourceFactoryForTest.invoke()
+                : new TiltSensorSource((android.hardware.SensorManager) getSystemService(Context.SENSOR_SERVICE));
         // updateColor();
         consumeAutoExportExtra(getIntent());
         // FISH-021: a lens shortcut's target becomes the saved active lens before the list loads,
@@ -521,9 +546,16 @@ public class ActHome extends ActBase implements LensViewHolderHost, HomeQuickAct
                 }
             }
             @Override public void refreshSearchBarVisibility() { updateSearchBarVisibility(); }
-            @Override public void refreshHiddenRecovery() { updateHiddenRecoveryButton(); }
+            @Override public void refreshHiddenRecovery() {
+                updateHiddenRecoveryButton();
+                // Search is SHOWING here: FISH-033 tilt must stop while the overlay covers the lens.
+                updateTiltParallax();
+            }
             @Override public void hideHomeAppList() { if (rvHomeAppList != null) rvHomeAppList.setVisibility(View.GONE); }
-            @Override public void refreshModeVisibility() { updateModeVisibility(); }
+            @Override public void refreshModeVisibility() {
+                updateModeVisibility();
+                updateTiltParallax();
+            }
         });
         quickActions.attach();
 
@@ -712,6 +744,8 @@ public class ActHome extends ActBase implements LensViewHolderHost, HomeQuickAct
     protected void onResume() {
         super.onResume();
         Log.d("roy93~", "onResume");
+        tiltResumed = true;
+        updateTiltParallax();
         updateColor();
         updateSearchBarVisibility();
         if (lensViews != null) {
@@ -1063,7 +1097,10 @@ public class ActHome extends ActBase implements LensViewHolderHost, HomeQuickAct
     void dropStripEndForTest(View chip) {
         if (dropStrip != null) dropStrip.endForTest(chip);
     }
-    @Override public void setActiveLensView(LensView view) { lensViews = view; }
+    @Override public void setActiveLensView(LensView view) {
+        if (lensViews != null && lensViews != view) lensViews.clearTiltOffset();
+        lensViews = view;
+    }
     @Override public LensView activeLensView() { return lensViews; }
     @Override public void setLensTabMediator(TabLayoutMediator mediator) { lensTabMediator = mediator; }
     @Override public TabLayoutMediator lensTabMediator() { return lensTabMediator; }
@@ -1074,7 +1111,43 @@ public class ActHome extends ActBase implements LensViewHolderHost, HomeQuickAct
     @Override public void refreshWebSearchFallback() { updateWebSearchFallback(); }
 
     @Override
+    protected void onPause() {
+        tiltResumed = false;
+        updateTiltParallax();
+        super.onPause();
+    }
+
+    /**
+     * FISH-033: start or stop the single tilt sensor from the pure gate. Safe to call from any lifecycle point;
+     * stopping also clears the offset so a stale tilt never survives pause, search, page change or list mode.
+     */
+    void updateTiltParallax() {
+        if (tiltSensor == null) return;
+        UtilSettings settings = utilSettings;
+        boolean run = settings != null && TiltGate.INSTANCE.shouldRun(
+                settings.getTiltParallax(),
+                LensPhysicsPolicy.INSTANCE.shouldReduceLensMotion(this),
+                tiltResumed,
+                searchView != null && searchView.isShowing(),
+                settings.isListMode(),
+                tiltSensor.getAvailable());
+        if (run) {
+            if (!tiltSensor.isRunning()) tiltFilter.reset();
+            tiltSensor.start(tiltListener);
+        } else {
+            tiltSensor.stop();
+            tiltFilter.reset();
+            if (lensViews != null) lensViews.clearTiltOffset();
+        }
+    }
+
+    @Override
     protected void onDestroy() {
+        tiltResumed = false;
+        if (tiltSensor != null) {
+            tiltSensor.stop();
+            tiltSensor = null;
+        }
         if (dropStrip != null) {
             dropStrip.onDestroy();
             dropStrip = null;

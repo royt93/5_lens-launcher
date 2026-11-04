@@ -44,6 +44,8 @@ class FrmLens : Fragment(), LensInterface {
     private var btnPresetCustom: MaterialButton? = null
     private var btnSaveCustomPreset: MaterialButton? = null
     private var swLensElasticOverscroll: MaterialSwitch? = null
+    private var swLensTiltParallax: MaterialSwitch? = null
+    private var tiltParallaxListener: android.widget.CompoundButton.OnCheckedChangeListener? = null
     private var btnShareLens: MaterialButton? = null
     private var utilSettings: UtilSettings? = null
     private var activeLensId: String = LensWorkspace.DEFAULT_LENS_ID
@@ -104,6 +106,7 @@ class FrmLens : Fragment(), LensInterface {
         btnPresetCustom = view.findViewById(R.id.btnPresetCustom)
         btnSaveCustomPreset = view.findViewById(R.id.btnSaveCustomPreset)
         swLensElasticOverscroll = view.findViewById(R.id.swLensElasticOverscroll)
+        swLensTiltParallax = view.findViewById(R.id.swLensTiltParallax)
 
         // Empty click listeners to prevent parent click events
         view.findViewById<View>(R.id.sbMinIconSizeParent).setOnClickListener(null)
@@ -178,6 +181,10 @@ class FrmLens : Fragment(), LensInterface {
         swLensElasticOverscroll?.setOnCheckedChangeListener { _, checked ->
             utilSettings?.saveLensElasticOverscroll(checked)
         }
+        tiltParallaxListener = android.widget.CompoundButton.OnCheckedChangeListener { _, checked ->
+            utilSettings?.saveTiltParallax(checked)
+        }
+        swLensTiltParallax?.setOnCheckedChangeListener(tiltParallaxListener)
         btnShareLens = view.findViewById(R.id.btnShareLens)
         btnShareLens?.setOnClickListener { shareLensImage() }
     }
@@ -257,6 +264,7 @@ class FrmLens : Fragment(), LensInterface {
             sbAnimationTime?.value = validAnim
             tvValueAnimationTime?.text = getString(R.string.unit_ms_format, validAnim.toLong())
             swLensElasticOverscroll?.isChecked = us.getLensElasticOverscroll()
+            swLensTiltParallax?.isChecked = us.getTiltParallax()
         }
         refreshCustomPresetButtonState()
     }
@@ -296,6 +304,9 @@ class FrmLens : Fragment(), LensInterface {
         btnPresetCustom = null
         btnSaveCustomPreset = null
         swLensElasticOverscroll = null
+        swLensTiltParallax?.setOnCheckedChangeListener(null)
+        swLensTiltParallax = null
+        tiltParallaxListener = null
         utilSettings = null
         super.onDestroyView()
     }

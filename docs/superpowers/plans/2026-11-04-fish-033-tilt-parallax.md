@@ -286,6 +286,8 @@ Mutation trên máy (`/tmp/f033-dev-mut.py`, mỗi lần build + cài + chạy l
 
 ## Task 5 — ActHome: đăng ký sensor đúng vòng đời (TDD, thiết bị)
 
+Tiến độ 2026-11-04: RED thiếu `tiltSensorSourceFactoryForTest`; GREEN `ActHomeTiltWidgetTest` 9/9, `LensViewTiltIntegrationTest` 9/9, `ActHomeMultiLensWidgetTest` 4/4 và `ActHomeLensManagementWidgetTest` 29/29 trên TECNO KJ7; full JVM 1496/1496, lint 0 error/13 warning. Mutation `onPause` không stop, search/list/reduced-motion gate bỏ, resumed luôn true, setting bị bỏ đều KILLED. Mutation bỏ stop riêng `onDestroy` SỐNG vì `onPause` luôn stop trước — equivalent với lifecycle đang test, không thêm test giả. Backup `/tmp/f033-tecno-20261104-134255/`; restore cuối 1192/1192 byte khớp, font 1.15, animator 1.0. Hồi quy lens-management sinh `cache/polaroid/Lens_1.png`; đã xóa đúng cache file trước hash cuối.
+
 **Files:** `ActHome.java`, `ActHomeTiltWidgetTest.kt`.
 
 - [ ] **1. RED (androidTest):** thêm seam kiểm thử `internal`/`@VisibleForTesting` trên `ActHome`: `tiltSensorForTest(): TiltSensorSource?` và `tiltSensorFactoryForTest` (cho phép tiêm `SensorManager` giả). Test: công tắc tắt thì `isRunning` false sau resume; công tắc bật + resume thì đăng ký đúng một lần; pause thì hủy; recreate không để listener thừa (đếm register − unregister = số đang chạy ≤ 1); search mở thì hủy; reduced-motion (`animator_duration_scale=0` qua `uiAutomation`, khôi phục) thì không đăng ký; chế độ list thì không đăng ký; destroy hủy hoàn toàn.
@@ -295,6 +297,8 @@ Mutation trên máy (`/tmp/f033-dev-mut.py`, mỗi lần build + cài + chạy l
 - [ ] **5. Commit:** `feat(tilt): drive tilt offset from ActHome lifecycle (FISH-033)`.
 
 ## Task 6 — UI công tắc + 17 locale (TDD)
+
+Tiến độ 2026-11-04: RED thiếu `swLensTiltParallax`/`tvLensTiltParallaxDesc` (`/tmp/f033-t6-red.log`); GREEN `FrmLensTiltWidgetTest` 3/3 trên TECNO KJ7, hồi quy `FrmLensWidgetTest` cũ có 2 fail trước thay đổi này (`tvValueMinIconSize must exist`), không do FISH-033. Full unit 1496/1496, lint 0 error/12 warning. Chuỗi đã có từ Task 2; Task 6 gắn layout/listener/bind/onDestroyView. Mutation: bỏ reset entry KILLED; mutant bỏ nhánh `getBoolean` SỐNG và tương đương (nhánh `else` cũng đọc boolean default false).
 
 **Files:** `FrmLens.kt`, `frm_lens.xml`, 17 `strings.xml`, `FrmLensTiltWidgetTest.kt`, `LensStringTranslationTest.kt` nếu cần.
 

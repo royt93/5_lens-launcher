@@ -11,7 +11,7 @@ import kotlin.math.sqrt
  * [Listener] do chủ sở hữu truyền vào và bỏ nó trong [stop]. Chủ sở hữu (ActHome) gọi [start]/[stop] theo
  * vòng đời; cả hai an toàn khi gọi lặp.
  */
-class TiltSensorSource(private val manager: SensorManager?) {
+open class TiltSensorSource(private val manager: SensorManager?) {
     interface Listener {
         fun onRotation(qx: Float, qy: Float, qz: Float, qw: Float)
     }
@@ -20,12 +20,12 @@ class TiltSensorSource(private val manager: SensorManager?) {
     private var listener: Listener? = null
     private var registered: SensorEventListener? = null
 
-    val available: Boolean get() = sensor != null
+    open val available: Boolean get() = sensor != null
 
-    val isRunning: Boolean get() = registered != null
+    open val isRunning: Boolean get() = registered != null
 
     /** True nếu đang chạy sau khi gọi; false khi máy không có sensor hoặc đăng ký thất bại. */
-    fun start(target: Listener): Boolean {
+    open fun start(target: Listener): Boolean {
         val source = sensor ?: return false
         val sm = manager ?: return false
         listener = target
@@ -42,7 +42,7 @@ class TiltSensorSource(private val manager: SensorManager?) {
         return true
     }
 
-    fun stop() {
+    open fun stop() {
         val current = registered ?: return
         registered = null
         listener = null
