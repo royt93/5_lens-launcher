@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | exclusive |
-| Status | in progress 2026-11-04 — code/UI/test xong, audit 9,10/10, smoke lifecycle đạt trên TECNO; chờ owner xác nhận hiệu ứng nghiêng nên chưa đóng |
+| Status | in progress 2026-11-04 — code/UI/test xong, audit 9,20/10, smoke sensor→render đạt trên TECNO; còn touch override vật lý và A/B pin/frame nên chưa đóng |
 | Priority | P3 |
 | Evidence | idea |
 | Epic | Fisheye Smart |
@@ -62,7 +62,7 @@ Làm story FISH-033 (Thấu kính nghiêng theo cảm biến (tilt parallax)) tr
 - Task 3 `TiltSensorSource`: 10 unit test; 9 lifecycle/sensor mutations bị bắt.
 - Task 4 `LensViewTiltIntegrationTest` 9/9; Task 5 `ActHomeTiltWidgetTest` 9/9 + `ActHomeMultiLensWidgetTest` 4/4 + `ActHomeLensManagementWidgetTest` 29/29 trên TECNO KJ7. Một ActHome onDestroy-only mutant equivalent do onPause luôn stop.
 - Task 6 UI: `FrmLensTiltWidgetTest` 3/3, 17 locale, full gate 1496/1496, lint 0 error/12 warning; TECNO khôi phục 1191/1191.
-- Audit `doc/task/AUDIT_FISH-033_2026-11-04.md`: 9,10/10. Smoke trên TECNO sau khi owner cho phép chọn locale tạm: listener đăng ký/hủy đúng qua pause/search/tắt toggle; owner báo `done` nhưng chưa xác nhận đã thấy hiệu ứng; chưa đo pin/frame A/B; dữ liệu khôi phục 1191/1191.
+- Audit `doc/task/AUDIT_FISH-033_2026-11-04.md`: 9,20/10. Smoke trên TECNO: listener đúng vòng đời; probe tạm chứng minh sensor→filter→setTiltOffset→draw khi nghiêng thật (offset ~130×79 px, ảnh grid biến dạng); lần “chưa thấy” trước chỉ ghi dữ liệu gần pose tham chiếu. Probe đã gỡ; còn touch override vật lý, A/B pin/frame; dữ liệu khôi phục 1191/1191.
 
 ### Tín hiệu kết thúc loop
 
