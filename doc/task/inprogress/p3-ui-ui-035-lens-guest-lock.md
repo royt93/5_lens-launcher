@@ -25,7 +25,7 @@ Là người dùng, tôi muốn đưa máy cho người khác mà không để h
 - [x] Mở khóa bằng system biometric/device credential; API 25–29 dùng các flow tách biệt.
 - [x] Không lưu bí mật; ghi rõ privacy-guard limitation.
 - [x] Unit, widget, integration automation pass; TECNO owner-assisted smoke confirmed lock, blocked pager/Intent, real auth success, and active lens open.
-- [ ] Explicit cancel, unavailable-auth, shortcut activation from launcher, and clean prompt screenshot remain unverified; see audit.
+- [ ] Explicit cancel, unavailable-auth, shortcut activation from launcher, and clean prompt screenshot remain unverified; a second owner-assisted run produced another auth-success proof only; see audit.
 
 ## Implementation notes
 
