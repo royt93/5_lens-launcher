@@ -139,6 +139,8 @@ Thứ tự owner chọn 2026-10-29; từng bước cần smoke thật trên TECN
 
 FISH-022 đã chuyển Implemented; không còn nằm trong Picked.
 
+- **UI-035 — Khóa lens (chế độ khách) (quyết định 2026-11-05)**: owner duyệt thiết kế: mở khóa bằng system `BiometricPrompt` (`BIOMETRIC_STRONG | DEVICE_CREDENTIAL`), lens khóa không chuyển và báo khóa, mọi entry điều hướng đi qua guard trung tâm, unlock xong bỏ cờ vĩnh viễn, active lens bị khóa tự chuyển sang lens không khóa đầu tiên, không cho khóa lens không khóa cuối cùng, điều khiển trong menu quản lý từng lens. Là privacy guard trong app, không thay khóa máy và không chống ADB/root. Spec `docs/superpowers/specs/2026-11-05-ui-035-lens-guest-lock-design.md`; chờ owner review spec trước khi lập plan. Chỉ TECNO KJ7.
+
 ## ⏸️ Deferred
 
 - **FISH-019 — Per-lens icon pack (hoãn sang tháng 11/2026)**: cần đổi cấu trúc `BitmapCache` từ global cache sang namespace theo lens hoặc cấu trúc icon identity độc lập; user chọn làm sau.

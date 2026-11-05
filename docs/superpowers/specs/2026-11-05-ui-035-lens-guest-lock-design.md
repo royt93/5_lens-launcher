@@ -1,0 +1,156 @@
+# UI-035 — Khóa lens (chế độ khách) — Design
+
+Date: 2026-11-05
+Story: `doc/task/todo/p3-ui-ui-035-lens-guest-lock.md`
+Device policy: TECNO KJ7 `115333744A005844` only. No Pixel/Samsung/OPPO. No push.
+
+## Goal
+
+Owner can lock individual lenses before handing the phone to another person. A locked lens cannot be reached
+from Home navigation, management UI, shortcuts or restored state until the owner unlocks it with Android's
+system biometric/device credential prompt.
+
+This is an in-app privacy guard. It is not a security boundary against ADB, root, recents/OS capture, backups or
+someone who already controls the device.
+
+## Decisions
+
+- Unlock method: `BiometricPrompt` with `BIOMETRIC_STRONG | DEVICE_CREDENTIAL`. If neither is available, locking is refused.
+- Locked lens selection: do not navigate; show a short localized message. Unlock only through an explicit owner action.
+- Scope: every entry that can select/display a lens — pager, edge swipe, indicator/tab, lens management selection,
+  lens menu, shortcut/Intent `EXTRA_TARGET_LENS_ID`, saved active-lens restore and Home resume.
+- Unlock persistence: authenticated unlock clears the persistent lock flag. The owner may lock again from the lens menu.
+- Active lens locked at startup/resume: switch to the first unlocked lens before rendering the lens grid.
+- Last unlocked lens cannot be locked; the lock action is disabled with a short explanation.
+- Control location: the existing lens row overflow menu in `LensManagementActivity`; no second settings entry.
+- Storage: boolean `lens_locked_<lensId>` in the existing app preferences through `UtilSettings.lensKey`; default lens keeps
+  the unsuffixed key. The flag contains no PIN, biometric, secret or token.
+- Backup/import: unrelated to PIN or auth. A lock flag copied by backup is data only; import must not make all lenses locked.
+
+## Non-goals
+
+- No replacement for the device lock screen, app lock, task-switcher hiding, ADB/root hardening or screenshot blocking.
+- No password/PIN storage or custom credential UI.
+- No timed relock, grace period, auto-lock, remote lock or per-app locking changes.
+- No change to existing `isLensFrozen` meaning (freeze app positions).
+- No Ads/IAP/TalkBack scope, no CI gates, no `store-assets` work.
+
+## Architecture
+
+### Pure policy
+
+New `LensAccessPolicy` (Kotlin, JVM-testable) owns every rule:
+
+- `isLocked(lensId)` from a stored locked-id set.
+- `canLock(lensId, lenses, lockedIds)`: false for unknown lens, already locked lens, or when locking would leave no unlocked lens.
+- `firstUnlocked(lenses, lockedIds)`: first by current lens ordering.
+- `resolveTarget(requestedId, lenses, lockedIds)`: allowed, blocked-with-message, or fallback target.
+- `resolveActive(savedActiveId, lenses, lockedIds)`: saved active if valid/unlocked, otherwise first unlocked.
+
+No Android context, no UI, no auth in the policy.
+
+### Persistence
+
+`UtilSettings` gains:
+
+- `KEY_LENS_LOCKED = "lens_locked"`.
+- `isLensLocked(lensId)`, `saveLensLocked(lensId, locked)`.
+- `lockedLensIds(validLensIds)` for the guard.
+- Cleanup in `deleteLensSettings`.
+
+Malformed/wrong-type prefs read as unlocked only for that value; the policy still guarantees at least one unlocked lens.
+`duplicateLensSettings` does not copy the lock flag; a new lens starts unlocked.
+
+### Authentication
+
+`LensUnlockAuthenticator` wraps Android `BiometricPrompt` and exposes a seam for tests. It returns:
+`SUCCESS`, `CANCELLED`, `UNAVAILABLE`, `ERROR`. Only `SUCCESS` clears the flag. The prompt strings are localized and do not
+claim the lock is device security.
+
+### Navigation guard
+
+`ActHome` owns the guard and passes it to `LensViewHolder`/menu collaborators:
+
+- `LensViewHolder` pager page selection is validated before changing active lens. A programmatic blocked selection restores
+  the previous page.
+- `onPageSelected` remains a defense layer: if the selected lens is locked, return to the last unlocked page and show the message.
+- Edge-swipe and lens switch paths call the same guard before `setCurrentItem`.
+- `applyTargetLensExtra`/`handleTargetLensIntent` resolve an Intent/shortcut target through the same policy. A locked target does not
+  write `KEY_ACTIVE_LENS_ID` and never opens that lens.
+- `refreshLensList`, startup and `onResume` use `resolveActive` before the saved page is applied.
+- `LensManagementActivity.selectLens` refuses a locked row; owner unlocks it from the row menu.
+
+### Menu
+
+`menu_lens_row.xml` gains one entry. Label depends on lens state:
+
+- Unlocked: **Lock lens**. Writes the flag immediately, no authentication required, then Home falls back if that lens is active.
+- Locked: **Unlock lens**. Opens system auth, then clears the flag on success.
+- Disabled when the lens is the last unlocked lens, with a message: “Keep at least one lens unlocked.”
+- Disabled/refused when no system biometric/device credential is configured.
+
+Rows show a lock state in the content description/subtitle and may use the existing lock icon tinted from theme tokens.
+
+### Strings and docs
+
+New strings are added for every supported locale (`values` + 16 locale folders). Explanations must say it is an in-app privacy guard
+and does not replace the device lock, ADB/root protection or screen security.
+
+## Data flow
+
+1. Owner chooses Lock on lens row → check `LensAccessPolicy.canLock` and credential availability → write flag → notify list/Home.
+2. Home guard receives the changed lock set → if active lens is locked, select first unlocked lens and update `KEY_ACTIVE_LENS_ID`/pipeline.
+3. Guest taps/swipes/uses shortcut to a locked lens → policy returns blocked → page/target unchanged → message.
+4. Owner chooses Unlock on a locked row → system prompt → success clears flag; cancel/error leaves lock.
+
+## Error handling and failure modes
+
+- Missing or deleted lens: ignore flag; stale locked ids cannot block unlocked lenses.
+- Process death: flag is persistent; startup applies fallback before binding/restoring the locked page.
+- Recreate/rotate: active selection comes from `resolveActive`; no locked page should briefly bind as active.
+- Prompt cancel/error: no change, no data loss.
+- Race between lock and navigation: final guard check occurs at page-selected/set-active boundary.
+- Multiple lenses with all but one locked: last unlocked is protected from locking.
+- Backup/import/delete/duplicate cannot create an all-locked workspace.
+
+## Security notes to ship in the audit and UI copy
+
+Known bypass/limitation areas: Recents screenshot/thumbnail, ADB/root/backups, notifications or apps launched elsewhere,
+another launcher, device owner/user with unlock credentials. The feature only prevents in-app lens navigation and Home display
+for locked lenses.
+
+## Testing
+
+### Unit (RED before code)
+
+- `LensAccessPolicyTest`: lock refusal for last unlocked, unknown/stale ids, all resolve cases, first-unlocked order, fallback active, no mutation.
+- `UtilSettingsLensLockTest`: default/legacy key, per-lens suffix, wrong-type read, delete cleanup, duplicate does not copy.
+- Authenticator unit seam test: success/cancel/unavailable/error outcomes and only success clears flag.
+- Backup/import regression: locked flags never create all-locked state and do not touch auth.
+
+### Widget / UI
+
+- Lens row menu shows Lock/Unlock correctly, disabled for last unlocked and no-credential state.
+- Locked row cannot select/open; unlock prompt seam success/cancel/error.
+- Home pager/edge-swipe/menu/indicator cannot switch to locked lens.
+- Active lens locked at resume/recreate falls back before binding grid.
+- Shortcut/Intent to locked lens does not write active id and shows blocked message.
+- Light/dark/RTL/font-scale smoke for the changed row/menu state where practical.
+
+### Integration
+
+- Real Room + prefs with multiple lenses: lock/unlock persists across recreate/process-like reload.
+- Delete locked lens, duplicate lens and import/export preserve invariants.
+- Dedicated bypass test list: pager, edge-swipe, selection from management, shortcut extra, saved active id, recreation.
+
+### Device smoke (TECNO only)
+
+Backup/hash before testing. Verify lock one lens, attempt every in-app entry, active lens fallback, unlock with owner-provided
+system prompt, relaunch/process kill, restore backup. If an ad covers UI, stop and wait for owner `done`.
+
+## Delivery gate
+
+Audit file `doc/task/AUDIT_UI-035_<date>.md` must score `> 9.0/10`; list real bypass limits; run
+`./gradlew testDevDebugUnitTest lintDevDebug assembleDevDebug assembleDevDebugAndroidTest`, `git diff --check`,
+`scripts/check-secrets.sh`; update `doc/feature.md`, `doc/task/README.md`, story status after each decision. Push only if the
+current owner request authorizes it and score > 9.
