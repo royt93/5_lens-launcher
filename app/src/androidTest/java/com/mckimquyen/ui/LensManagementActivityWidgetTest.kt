@@ -177,6 +177,38 @@ class LensManagementActivityWidgetTest {
     }
 
     @Test
+    fun lockedLensUnlockKeepsFlagOnCancelledUnavailableAndErrorResults() {
+        val store = com.mckimquyen.util.LensLockStore(context)
+        store.saveLocked("work", true)
+        listOf(
+            com.mckimquyen.util.LensUnlockResult.CANCELLED,
+            com.mckimquyen.util.LensUnlockResult.UNAVAILABLE,
+            com.mckimquyen.util.LensUnlockResult.ERROR
+        ).forEach { outcome ->
+            ActivityScenario.launch(LensManagementActivity::class.java).use { scenario ->
+                awaitActivity(scenario, "lens rows must load for $outcome") {
+                    it.findViewById<RecyclerView>(R.id.rvLensGroups).adapter?.itemCount == 7
+                }
+                scenario.onActivity { activity ->
+                    activity.lensUnlockAuthenticatorForTest = object : com.mckimquyen.util.LensUnlockAuthenticator {
+                        override fun isAvailable(context: android.content.Context) = outcome != com.mckimquyen.util.LensUnlockResult.UNAVAILABLE
+                        override fun authenticate(
+                            activity: androidx.appcompat.app.AppCompatActivity,
+                            lensName: String,
+                            callback: (com.mckimquyen.util.LensUnlockResult) -> Unit
+                        ) { callback(outcome) }
+                    }
+                    activity.findViewById<RecyclerView>(R.id.rvLensGroups)
+                        .findViewHolderForAdapterPosition(5)!!.itemView.findViewById<View>(R.id.btLensGroupMore).performClick()
+                    requireNotNull(activity.lensRowMenuForTest).menu.performIdentifierAction(R.id.menuLensLockToggle, 0)
+                    assertTrue("$outcome must keep Work locked", store.isLocked("work"))
+                    assertTrue("$outcome must not unlock travel", !store.isLocked("travel"))
+                }
+            }
+        }
+    }
+
+    @Test
     fun lockedLensUnlockDoesNotClearFlagWithoutAuthentication() {
         com.mckimquyen.util.LensLockStore(context).saveLocked("work", true)
         ActivityScenario.launch(LensManagementActivity::class.java).use { scenario ->

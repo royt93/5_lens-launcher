@@ -25,7 +25,8 @@ Là người dùng, tôi muốn đưa máy cho người khác mà không để h
 - [x] Mở khóa bằng system biometric/device credential; API 25–29 dùng các flow tách biệt.
 - [x] Không lưu bí mật; ghi rõ privacy-guard limitation.
 - [x] Unit, widget, integration automation pass; TECNO owner-assisted smoke confirmed lock, blocked pager/Intent, real auth success, and active lens open.
-- [ ] Explicit cancel, unavailable-auth, shortcut activation from launcher, and clean prompt screenshot remain unverified; a second owner-assisted run produced another auth-success proof only; see audit.
+- [x] Cancel/unavailable/error handling covered by TECNO widget test (40/40 class).
+- [ ] Human OS-prompt Cancel/unavailable screenshot and launcher shortcut activation remain unverified; see audit.
 
 ## Implementation notes
 
@@ -36,9 +37,9 @@ Liên quan bảo mật: audit riêng về cách bypass (recents, ADB).
 - [x] Unit tests cover pure logic, state transitions and failure branches (TDD RED/GREEN).
 - [x] Widget/UI tests cover menu behavior, pager prefetch, locked target and list mode; AndroidX accessibility warnings only.
 - [x] Integration tests cover storage/backup/auth/navigation boundaries.
-- [ ] Manual smoke is partial: TECNO owner-assisted lock, blocked pager/Intent and real unlock success pass; explicit cancel/unavailable-auth and shortcut activation remain unverified. Device APK/data/settings restored and hashes match.
+- [ ] Manual smoke is partial: TECNO owner-assisted lock, blocked pager/Intent and real unlock success pass; explicit OS-prompt cancel/unavailable-auth and shortcut activation remain unverified. App-level cancel/unavailable/error outcomes have instrumentation coverage. Device APK/data/settings restored and hashes match.
 - [x] No lint/build failures: 0 lint errors, 15 warnings; JVM 1515/1515.
-- [x] Audit recorded at `doc/task/AUDIT_UI-035_2026-11-05.md`, score 9.1/10; remaining manual cases block closure/push.
+- [x] Audit recorded at `doc/task/AUDIT_UI-035_2026-11-05.md`, score 9.2/10; remaining manual cases block closure/push.
 - [x] Evidence/status updated; story remains inprogress until remaining manual evidence is obtained.
 
 If a test layer is not applicable, replace its checkbox with a reviewed rationale; do not silently omit it.
