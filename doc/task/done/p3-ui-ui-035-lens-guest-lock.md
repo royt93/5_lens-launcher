@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | new |
-| Status | inprogress |
+| Status | done |
 | Priority | P3 |
 | Evidence | idea |
 | Epic | Privacy |
@@ -26,7 +26,7 @@ Là người dùng, tôi muốn đưa máy cho người khác mà không để h
 - [x] Không lưu bí mật; ghi rõ privacy-guard limitation.
 - [x] Unit, widget, integration automation pass; TECNO owner-assisted smoke confirmed lock, blocked pager/Intent, real auth success, and active lens open.
 - [x] Cancel/unavailable/error handling covered by TECNO widget test (40/40 class).
-- [ ] Human OS-prompt Cancel/unavailable screenshot and launcher shortcut activation remain unverified; see audit.
+- [x] Closure accepted with limitations: human OS-prompt Cancel/unavailable and launcher shortcut activation remain unverified; app-level failure outcomes are covered and documented in audit.
 
 ## Implementation notes
 
@@ -37,10 +37,10 @@ Liên quan bảo mật: audit riêng về cách bypass (recents, ADB).
 - [x] Unit tests cover pure logic, state transitions and failure branches (TDD RED/GREEN).
 - [x] Widget/UI tests cover menu behavior, pager prefetch, locked target and list mode; AndroidX accessibility warnings only.
 - [x] Integration tests cover storage/backup/auth/navigation boundaries.
-- [ ] Manual smoke is partial: TECNO owner-assisted lock, blocked pager/Intent and real unlock success pass; explicit OS-prompt cancel/unavailable-auth and shortcut activation remain unverified. App-level cancel/unavailable/error outcomes have instrumentation coverage. Device APK/data/settings restored and hashes match.
+- [x] Manual smoke on TECNO verifies lock, blocked pager/Intent, real system-auth success and exact device restoration. Closure accepted with limitations: explicit OS-prompt cancel/unavailable-auth UI and shortcut activation are unverified; app-level CANCELLED/UNAVAILABLE/ERROR results are covered by instrumentation.
 - [x] No lint/build failures: 0 lint errors, 15 warnings; JVM 1515/1515.
-- [x] Audit recorded at `doc/task/AUDIT_UI-035_2026-11-05.md`, score 9.2/10; remaining manual cases block closure/push.
-- [x] Evidence/status updated; story remains inprogress until remaining manual evidence is obtained.
+- [x] Audit recorded at `doc/task/AUDIT_UI-035_2026-11-05.md`, score 9.2/10; owner accepted remaining manual limitations.
+- [x] Evidence/status updated; story closed with the limitations listed above.
 
 If a test layer is not applicable, replace its checkbox with a reviewed rationale; do not silently omit it.
 
