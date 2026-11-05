@@ -327,4 +327,10 @@
     <string name="setting_tilt_parallax_desc">A lente em repouso se desloca um pouco quando você inclina o dispositivo. Desativado por padrão. Pode causar tontura ou enjoo em pessoas sensíveis a movimento e gasta um pouco mais de bateria. Desliga sozinho com economia de bateria, temperatura alta ou movimento reduzido.</string>
     <string name="lens_unlock_description">Confirme sua identidade para desbloquear “%1$s”.</string>
     <string name="lens_unlock_use_device_credential">Usar PIN do dispositivo</string>
+    <string name="lens_lock">Bloquear lente</string>
+    <string name="lens_unlock">Desbloquear lente</string>
+    <string name="lens_locked_message">Esta lente está bloqueada. Desbloqueie-a no menu de lentes.</string>
+    <string name="lens_lock_last_unlocked">Mantenha pelo menos uma lente desbloqueada.</string>
+    <string name="lens_lock_no_auth">Configure primeiro um bloqueio de tela ou biometria. É apenas uma proteção de privacidade no app e não substitui o bloqueio do dispositivo.</string>
+    <string name="lens_delete_last_unlocked">Não é possível excluir a última lente desbloqueada.</string>
 </resources>

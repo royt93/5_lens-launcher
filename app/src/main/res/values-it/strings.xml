@@ -327,4 +327,10 @@
     <string name="setting_tilt_parallax_desc">L\'obiettivo a riposo si sposta leggermente quando inclini il dispositivo. Disattivato per impostazione predefinita. Può causare vertigini o nausea in chi è sensibile al movimento e consuma un po\' più di batteria. Si spegne da solo con il risparmio energetico, alte temperature o movimento ridotto.</string>
     <string name="lens_unlock_description">Conferma la tua identità per sbloccare «%1$s».</string>
     <string name="lens_unlock_use_device_credential">Usa il PIN del dispositivo</string>
+    <string name="lens_lock">Blocca lente</string>
+    <string name="lens_unlock">Sblocca lente</string>
+    <string name="lens_locked_message">Questa lente è bloccata. Sbloccala dal menu delle lenti.</string>
+    <string name="lens_lock_last_unlocked">Mantieni almeno una lente sbloccata.</string>
+    <string name="lens_lock_no_auth">Imposta prima un blocco schermo o la biometria. È solo una protezione della privacy nell’app e non sostituisce il blocco del dispositivo.</string>
+    <string name="lens_delete_last_unlocked">Impossibile eliminare l’ultima lente sbloccata.</string>
 </resources>

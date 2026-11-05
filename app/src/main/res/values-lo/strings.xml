@@ -317,4 +317,10 @@
     <string name="setting_tilt_parallax_desc">ເມື່ອບໍ່ແຕະ ເລນຈະເລື່ອນໜ້ອຍໜຶ່ງຕາມການເອຽງຂອງອຸປະກອນ. ປິດໄວ້ເປັນຄ່າເລີ່ມຕົ້ນ. ອາດເຮັດໃຫ້ວິນຫົວ ຫຼື ຄັນໄສ້ໃນຄົນທີ່ໄວຕໍ່ການເຄື່ອນໄຫວ ແລະ ໃຊ້ແບັດເຕີຣີຫຼາຍຂຶ້ນເລັກນ້ອຍ. ປິດເອງເມື່ອປະຢັດແບັດເຕີຣີ, ອຸນຫະພູມສູງ ຫຼື ຫຼຸດການເຄື່ອນໄຫວ.</string>
     <string name="lens_unlock_description">ຢືນຢັນຕົວຕົນຂອງທ່ານເພື່ອປົດລັອກ “%1$s”.</string>
     <string name="lens_unlock_use_device_credential">ໃຊ້ PIN ຂອງອຸປະກອນ</string>
+    <string name="lens_lock">ລັອກເລນ</string>
+    <string name="lens_unlock">ປົດລັອກເລນ</string>
+    <string name="lens_locked_message">ເລນນີ້ຖືກລັອກ. ປົດລັອກຈາກເມນູເລນ.</string>
+    <string name="lens_lock_last_unlocked">ກະລຸນາເກັບເລນທີ່ບໍ່ລັອກຢ່າງໜ້ອຍໜຶ່ງອັນ.</string>
+    <string name="lens_lock_no_auth">ກະລຸນາຕັ້ງລັອກໜ້າຈໍ ຫຼື ຊີວະມາດຕະກ່ອນ. ນີ້ເປັນພຽງການປ້ອງກັນຄວາມເປັນສ່ວນຕົວໃນແອັບ ບໍ່ແທນການລັອກອຸປະກອນ.</string>
+    <string name="lens_delete_last_unlocked">ບໍ່ສາມາດລຶບເລນສຸດທ້າຍທີ່ບໍ່ລັອກໄດ້.</string>
 </resources>

@@ -348,4 +348,10 @@
     <string name="setting_tilt_parallax_desc">تنجرف العدسة قليلًا عند إمالة الجهاز أثناء عدم اللمس. متوقف افتراضيًا. قد يسبب الدوار أو الغثيان لدى الحساسين للحركة ويستهلك قدرًا أكبر قليلًا من البطارية. يتوقف تلقائيًا مع توفير الطاقة أو ارتفاع الحرارة أو تقليل الحركة.</string>
     <string name="lens_unlock_description">أكّد هويتك لفتح «%1$s».</string>
     <string name="lens_unlock_use_device_credential">استخدام رمز الجهاز</string>
+    <string name="lens_lock">قفل العدسة</string>
+    <string name="lens_unlock">فتح قفل العدسة</string>
+    <string name="lens_locked_message">هذه العدسة مقفلة. افتح قفلها من قائمة العدسات.</string>
+    <string name="lens_lock_last_unlocked">أبقِ عدسة واحدة على الأقل غير مقفلة.</string>
+    <string name="lens_lock_no_auth">فعّل قفل الشاشة أو القياسات الحيوية على الجهاز أولاً. هذه حماية خصوصية داخل التطبيق فقط ولا تغني عن قفل الجهاز.</string>
+    <string name="lens_delete_last_unlocked">لا يمكن حذف آخر عدسة غير مقفلة.</string>
 </resources>

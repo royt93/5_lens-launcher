@@ -367,4 +367,10 @@
     <string name="setting_tilt_parallax_desc">The idle lens drifts slightly as you tilt the device. Off by default. Can cause dizziness or nausea in people sensitive to motion, and uses a little more battery. Turns itself off with battery saver, high temperature or reduced motion.</string>
     <string name="lens_unlock_description">Confirm it is you to unlock “%1$s”.</string>
     <string name="lens_unlock_use_device_credential">Use device PIN</string>
+    <string name="lens_lock">Lock lens</string>
+    <string name="lens_unlock">Unlock lens</string>
+    <string name="lens_locked_message">This lens is locked. Unlock it from the lens menu.</string>
+    <string name="lens_lock_last_unlocked">Keep at least one lens unlocked.</string>
+    <string name="lens_lock_no_auth">Set a screen lock or biometric on this device first. This is an in-app privacy guard only; it does not replace your device lock.</string>
+    <string name="lens_delete_last_unlocked">Can\'t delete the last unlocked lens.</string>
 </resources>

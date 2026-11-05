@@ -138,6 +138,31 @@ class DeviceStateGuardTest {
     }
 
     @Test
+    fun dedicatedLensAccessPreferencesAreRestored() {
+        val lockPrefs = context.getSharedPreferences("lens_access_prefs", android.content.Context.MODE_PRIVATE)
+        val original = lockPrefs.all.toMap()
+        try {
+            underGuard {
+                lockPrefs.edit().clear().putBoolean("lens_locked_t005", true).commit()
+            }
+            assertEquals("device-local lock prefs must be restored", original, lockPrefs.all)
+        } finally {
+            lockPrefs.edit().clear().apply {
+                original.forEach { (key, value) ->
+                    when (value) {
+                        is String -> putString(key, value)
+                        is Boolean -> putBoolean(key, value)
+                        is Int -> putInt(key, value)
+                        is Long -> putLong(key, value)
+                        is Float -> putFloat(key, value)
+                        is Set<*> -> putStringSet(key, value.filterIsInstance<String>().toSet())
+                    }
+                }
+            }.commit()
+        }
+    }
+
+    @Test
     fun aSecondGuardAfterTheFirstSeesTheRestoredState() {
         check(prefs.edit().putString(sentinelChanged, "v1").commit())
         try {

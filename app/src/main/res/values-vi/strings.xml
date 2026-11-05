@@ -324,4 +324,10 @@
     <string name="setting_tilt_parallax_desc">Khi không chạm, thấu kính trôi nhẹ theo độ nghiêng của máy. Mặc định tắt. Có thể gây chóng mặt hoặc buồn nôn với người nhạy cảm với chuyển động và tốn thêm một chút pin. Tự tắt khi bật tiết kiệm pin, máy nóng hoặc giảm chuyển động.</string>
     <string name="lens_unlock_description">Xác minh danh tính để mở khóa “%1$s”.</string>
     <string name="lens_unlock_use_device_credential">Dùng mã PIN thiết bị</string>
+    <string name="lens_lock">Khóa thấu kính</string>
+    <string name="lens_unlock">Mở khóa thấu kính</string>
+    <string name="lens_locked_message">Thấu kính này đang bị khóa. Hãy mở khóa trong menu thấu kính.</string>
+    <string name="lens_lock_last_unlocked">Giữ ít nhất một thấu kính không bị khóa.</string>
+    <string name="lens_lock_no_auth">Hãy cài khóa màn hình hoặc sinh trắc học trên máy trước. Đây chỉ là lớp bảo vệ riêng tư trong ứng dụng, không thay thế khóa thiết bị.</string>
+    <string name="lens_delete_last_unlocked">Không thể xóa thấu kính chưa khóa cuối cùng.</string>
 </resources>

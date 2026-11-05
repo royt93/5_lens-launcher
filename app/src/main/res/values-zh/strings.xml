@@ -317,4 +317,10 @@
     <string name="setting_tilt_parallax_desc">不触摸时，倾斜设备会让镜头轻微漂移。默认关闭。对运动敏感的人可能引起头晕或恶心，并会多耗一点电量。开启省电模式、温度过高或减少动态效果时会自动关闭。</string>
     <string name="lens_unlock_description">请验证身份以解锁“%1$s”。</string>
     <string name="lens_unlock_use_device_credential">使用设备 PIN</string>
+    <string name="lens_lock">锁定镜头</string>
+    <string name="lens_unlock">解锁镜头</string>
+    <string name="lens_locked_message">此镜头已锁定，请在镜头菜单中解锁。</string>
+    <string name="lens_lock_last_unlocked">请至少保留一个未锁定的镜头。</string>
+    <string name="lens_lock_no_auth">请先在此设备上设置屏幕锁或生物识别。这只是应用内的隐私保护，不能替代设备锁。</string>
+    <string name="lens_delete_last_unlocked">无法删除最后一个未锁定的镜头。</string>
 </resources>

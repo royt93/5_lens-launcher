@@ -317,4 +317,10 @@
     <string name="setting_tilt_parallax_desc">触れていないとき、端末を傾けるとレンズがわずかに動きます。初期設定はオフです。動きに敏感な方はめまいや吐き気を感じることがあり、電池も少し多く消費します。バッテリーセーバー、高温、モーション低減のときは自動的にオフになります。</string>
     <string name="lens_unlock_description">「%1$s」のロックを解除するには本人確認が必要です。</string>
     <string name="lens_unlock_use_device_credential">デバイスのPINを使用</string>
+    <string name="lens_lock">レンズをロック</string>
+    <string name="lens_unlock">レンズのロックを解除</string>
+    <string name="lens_locked_message">このレンズはロックされています。レンズメニューから解除してください。</string>
+    <string name="lens_lock_last_unlocked">少なくとも1つのレンズはロック解除のままにしてください。</string>
+    <string name="lens_lock_no_auth">先にこの端末で画面ロックまたは生体認証を設定してください。これはアプリ内のプライバシー保護であり、端末のロックの代わりにはなりません。</string>
+    <string name="lens_delete_last_unlocked">ロック解除された最後のレンズは削除できません。</string>
 </resources>

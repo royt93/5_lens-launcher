@@ -31,7 +31,8 @@ class DeviceStateGuard : ExternalResource() {
             PreferenceManager.getDefaultSharedPreferences(context),
             context.getSharedPreferences(SEARCH_PREFERENCES, Context.MODE_PRIVATE),
             context.getSharedPreferences(VIP_PREFERENCES, Context.MODE_PRIVATE),
-            context.getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE)
+            context.getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE),
+            context.getSharedPreferences(LENS_ACCESS_PREFERENCES, Context.MODE_PRIVATE)
         )
         savedPrefs = stores.map { prefs ->
             prefs to prefs.all.mapValues { (_, value) -> if (value is Set<*>) value.toSet() else value }
@@ -135,6 +136,7 @@ class DeviceStateGuard : ExternalResource() {
         const val VIP_PREFERENCES = "vip_screen_prefs"
         const val APP_PREFERENCES = "app_preferences"
         const val SEARCH_PREFERENCES = "app_search_history"
+        const val LENS_ACCESS_PREFERENCES = "lens_access_prefs"
         val SETTING_KEYS = listOf(
             SYSTEM to Settings.System.FONT_SCALE,
             GLOBAL to Settings.Global.ANIMATOR_DURATION_SCALE,

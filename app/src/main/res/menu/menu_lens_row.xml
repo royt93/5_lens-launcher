@@ -5,6 +5,10 @@
         android:icon="@drawable/ic_settings_24dp"
         android:title="@string/tab_settings" />
     <item
+        android:id="@+id/menuLensLockToggle"
+        android:icon="@drawable/ic_lock_24dp"
+        android:title="@string/lens_lock" />
+    <item
         android:id="@+id/menuLensRename"
         android:icon="@drawable/ic_edit_24dp"
         android:title="@string/lens_rename" />

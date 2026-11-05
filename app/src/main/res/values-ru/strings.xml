@@ -332,4 +332,10 @@
     <string name="setting_tilt_parallax_desc">Когда вы не касаетесь экрана, линза немного смещается при наклоне устройства. По умолчанию выключено. Может вызвать головокружение или тошноту у людей, чувствительных к движению, и немного увеличивает расход заряда. Отключается само при экономии заряда, высокой температуре или уменьшении движения.</string>
     <string name="lens_unlock_description">Подтвердите личность, чтобы разблокировать «%1$s».</string>
     <string name="lens_unlock_use_device_credential">Использовать PIN-код устройства</string>
+    <string name="lens_lock">Заблокировать линзу</string>
+    <string name="lens_unlock">Разблокировать линзу</string>
+    <string name="lens_locked_message">Эта линза заблокирована. Разблокируйте её в меню линз.</string>
+    <string name="lens_lock_last_unlocked">Оставьте хотя бы одну линзу разблокированной.</string>
+    <string name="lens_lock_no_auth">Сначала настройте блокировку экрана или биометрию. Это лишь защита приватности внутри приложения, она не заменяет блокировку устройства.</string>
+    <string name="lens_delete_last_unlocked">Нельзя удалить последнюю разблокированную линзу.</string>
 </resources>

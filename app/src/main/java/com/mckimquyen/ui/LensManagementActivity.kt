@@ -14,8 +14,12 @@ import com.mckimquyen.R
 import com.mckimquyen.model.AppDatabase
 import com.mckimquyen.model.LensWorkspace
 import com.mckimquyen.model.LensWorkspaceDao
+import com.mckimquyen.util.LensAccessPolicy
 import com.mckimquyen.util.LensGroupPolicy
+import com.mckimquyen.util.LensLockStore
 import com.mckimquyen.util.LensPhysicsPolicy
+import com.mckimquyen.util.LensUnlockResult
+import com.mckimquyen.util.SystemLensUnlockAuthenticator
 import com.mckimquyen.util.UtilSettings
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -65,6 +69,20 @@ class LensManagementActivity : ActBase() {
     private var originalLightStatusBars = false
     private var originalLightNavigationBars = false
     private var activeLensId: String? = null
+    private val lensLockStore by lazy { LensLockStore(this) }
+    private val systemLensUnlockAuthenticator: SystemLensUnlockAuthenticator by lazy {
+        SystemLensUnlockAuthenticator().also { authenticator ->
+            authenticator.credentialLauncher = { intent -> credentialLauncher.launch(intent) }
+        }
+    }
+    @androidx.annotation.VisibleForTesting
+    var lensUnlockAuthenticatorForTest: com.mckimquyen.util.LensUnlockAuthenticator? = null
+    private val lensUnlockAuthenticator: com.mckimquyen.util.LensUnlockAuthenticator
+        get() = lensUnlockAuthenticatorForTest ?: systemLensUnlockAuthenticator
+    // Registered in the field initializer, before onStart(), as the Activity Result API requires.
+    private val credentialLauncher: androidx.activity.result.ActivityResultLauncher<Intent> = registerForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult()
+    ) { result -> systemLensUnlockAuthenticator.onCredentialResult(result.resultCode == RESULT_OK) }
 
     @androidx.annotation.VisibleForTesting
     var groupPickerFailureForTest: Throwable? = null
@@ -255,7 +273,18 @@ class LensManagementActivity : ActBase() {
         val themed = androidx.appcompat.view.ContextThemeWrapper(this, R.style.PopupMenuTheme)
         val menu = androidx.appcompat.widget.PopupMenu(themed, anchor)
         menu.menuInflater.inflate(R.menu.menu_lens_row, menu.menu)
-        menu.menu.findItem(R.id.menuLensDelete).isEnabled = LensWorkspace.canDelete(lens.id, adapter.lensCount())
+        val lenses = adapter.lenses()
+        val locked = lensLockStore.lockedLensIds(lenses.mapTo(mutableSetOf()) { it.id })
+        val isLocked = lens.id in locked
+        menu.menu.findItem(R.id.menuLensDelete).isEnabled = LensWorkspace.canDelete(lens.id, adapter.lensCount()) &&
+            LensAccessPolicy.canDelete(lens.id, lenses, locked)
+        menu.menu.findItem(R.id.menuLensLockToggle).apply {
+            setTitle(if (isLocked) R.string.lens_unlock else R.string.lens_lock)
+            setIcon(if (isLocked) R.drawable.ic_lock_open_24dp else R.drawable.ic_lock_24dp)
+            // A locked lens may always be unlocked; locking needs auth capability and another open lens.
+            isEnabled = isLocked || (lensUnlockAuthenticator.isAvailable(this@LensManagementActivity) &&
+                LensAccessPolicy.canLock(lens.id, lenses, locked))
+        }
         val onSurface = com.google.android.material.color.MaterialColors.getColor(
             themed, com.google.android.material.R.attr.colorOnSurface, android.graphics.Color.BLACK
         )
@@ -264,6 +293,7 @@ class LensManagementActivity : ActBase() {
         menu.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 R.id.menuLensSettings -> { openLensSettings(lens); true }
+                R.id.menuLensLockToggle -> { toggleLensLock(lens); true }
                 R.id.menuLensRename -> { showRenameLensDialog(lens); true }
                 R.id.menuLensDelete -> { showDeleteLensDialog(lens); true }
                 else -> false
@@ -272,6 +302,26 @@ class LensManagementActivity : ActBase() {
         menu.setOnDismissListener { if (lensRowMenuForTest === menu) lensRowMenuForTest = null }
         lensRowMenuForTest = menu
         menu.show()
+    }
+
+    private fun toggleLensLock(lens: LensWorkspace) {
+        val lenses = adapter.lenses()
+        val locked = lensLockStore.lockedLensIds(lenses.mapTo(mutableSetOf()) { it.id })
+        if (lens.id in locked) {
+            lensUnlockAuthenticator.authenticate(this, lens.name) { result ->
+                if (result == LensUnlockResult.SUCCESS && !isFinishing && !isDestroyed) {
+                    lensLockStore.saveLocked(lens.id, false)
+                    Toast.makeText(this, R.string.lens_unlock, Toast.LENGTH_SHORT).show()
+                } else if (result == LensUnlockResult.UNAVAILABLE) {
+                    Toast.makeText(this, R.string.lens_lock_no_auth, Toast.LENGTH_LONG).show()
+                }
+            }
+        } else if (LensAccessPolicy.canLock(lens.id, lenses, locked)) {
+            lensLockStore.saveLocked(lens.id, true)
+            Toast.makeText(this, R.string.lens_lock, Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(this, R.string.lens_lock_last_unlocked, Toast.LENGTH_LONG).show()
+        }
     }
 
     private fun openLensSettings(lens: LensWorkspace) {
@@ -306,6 +356,12 @@ class LensManagementActivity : ActBase() {
     }
 
     private fun showDeleteLensDialog(lens: LensWorkspace) {
+        val lenses = adapter.lenses()
+        val locked = lensLockStore.lockedLensIds(lenses.mapTo(mutableSetOf()) { it.id })
+        if (!LensAccessPolicy.canDelete(lens.id, lenses, locked)) {
+            Toast.makeText(this, R.string.lens_delete_last_unlocked, Toast.LENGTH_LONG).show()
+            return
+        }
         activeDialogKind = DIALOG_KIND_DELETE
         activeDialogLensId = lens.id
         val dialog = com.mckimquyen.ui.dialog.LensDialogs.confirm(
@@ -632,6 +688,10 @@ class LensManagementActivity : ActBase() {
         get() = selectedLensIds.toSet()
 
     private fun selectLens(lensId: String) {
+        if (lensLockStore.isLocked(lensId)) {
+            Toast.makeText(this, R.string.lens_locked_message, Toast.LENGTH_LONG).show()
+            return
+        }
         val intent = Intent(this, ActHome::class.java)
             .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
             .putExtra(ActHome.EXTRA_TARGET_LENS_ID, lensId)

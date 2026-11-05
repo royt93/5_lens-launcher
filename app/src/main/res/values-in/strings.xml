@@ -317,4 +317,10 @@
     <string name="setting_tilt_parallax_desc">Lensa yang diam bergeser sedikit saat perangkat dimiringkan. Nonaktif secara default. Dapat menyebabkan pusing atau mual pada orang yang sensitif terhadap gerakan dan sedikit lebih boros baterai. Mati otomatis saat penghemat baterai, suhu tinggi, atau gerakan dikurangi.</string>
     <string name="lens_unlock_description">Konfirmasi identitas Anda untuk membuka “%1$s”.</string>
     <string name="lens_unlock_use_device_credential">Gunakan PIN perangkat</string>
+    <string name="lens_lock">Kunci lensa</string>
+    <string name="lens_unlock">Buka kunci lensa</string>
+    <string name="lens_locked_message">Lensa ini terkunci. Buka kuncinya dari menu lensa.</string>
+    <string name="lens_lock_last_unlocked">Sisakan setidaknya satu lensa tidak terkunci.</string>
+    <string name="lens_lock_no_auth">Atur kunci layar atau biometrik di perangkat ini dahulu. Ini hanya perlindungan privasi dalam aplikasi dan tidak menggantikan kunci perangkat.</string>
+    <string name="lens_delete_last_unlocked">Lensa terakhir yang tidak terkunci tidak dapat dihapus.</string>
 </resources>

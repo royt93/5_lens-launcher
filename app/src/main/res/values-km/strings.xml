@@ -317,4 +317,10 @@
     <string name="setting_tilt_parallax_desc">នៅពេលមិនប៉ះ កែវរសាត់បន្តិចតាមការផ្អៀងឧបករណ៍។ បិទតាមលំនាំដើម។ អាចធ្វើឱ្យវិលមុខ ឬចង្អោរចំពោះអ្នកងាយប្រតិកម្មនឹងចលនា ហើយប្រើថ្មច្រើនជាងបន្តិច។ បិទដោយខ្លួនឯងពេលសន្សំថ្ម កម្តៅខ្ពស់ ឬកាត់បន្ថយចលនា។</string>
     <string name="lens_unlock_description">ផ្ទៀងផ្ទាត់អត្តសញ្ញាណរបស់អ្នកដើម្បីដោះសោ “%1$s”។</string>
     <string name="lens_unlock_use_device_credential">ប្រើកូដ PIN ឧបករណ៍</string>
+    <string name="lens_lock">ចាក់សោកែវ</string>
+    <string name="lens_unlock">ដោះសោកែវ</string>
+    <string name="lens_locked_message">កែវនេះត្រូវបានចាក់សោ។ សូមដោះសោពីម៉ឺនុយកែវ។</string>
+    <string name="lens_lock_last_unlocked">សូមទុកកែវយ៉ាងហោចណាស់មួយមិនចាក់សោ។</string>
+    <string name="lens_lock_no_auth">សូមកំណត់ការចាក់សោអេក្រង់ ឬជីវមាត្រលើឧបករណ៍នេះជាមុនសិន។ នេះគ្រាន់តែជាការការពារភាពឯកជនក្នុងកម្មវិធី មិនជំនួសការចាក់សោឧបករណ៍ទេ។</string>
+    <string name="lens_delete_last_unlocked">មិនអាចលុបកែវចុងក្រោយដែលមិនចាក់សោបានទេ។</string>
 </resources>

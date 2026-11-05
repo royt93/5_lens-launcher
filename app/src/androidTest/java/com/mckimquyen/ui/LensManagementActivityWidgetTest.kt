@@ -35,12 +35,14 @@ class LensManagementActivityWidgetTest {
     private var originalPrefs: Map<String, Any?> = emptyMap()
 
     @Before
-    fun setUp() = runBlocking {
+    fun setUp() {
+        runBlocking {
         AppDatabase.init(context)
         // This test forces English; snapshot the device's own language keys so tearDown can put
         // them back (an earlier version left the owner's phone switched to English).
         val prefs = androidx.preference.PreferenceManager.getDefaultSharedPreferences(context)
         originalPrefs = LOCALE_PREF_KEYS.associateWith { prefs.all[it] }
+        context.getSharedPreferences("lens_access_prefs", android.content.Context.MODE_PRIVATE).edit().clear().commit()
         LocaleHelper.setLocale(context, "en")
         androidx.test.core.app.ApplicationProvider.getApplicationContext<android.content.Context>()
             .resources.configuration.setLocale(java.util.Locale.ENGLISH)
@@ -54,6 +56,7 @@ class LensManagementActivityWidgetTest {
             )
         )
         UtilSettings(context).save(UtilSettings.KEY_ACTIVE_LENS_ID, LensWorkspace.DEFAULT_LENS_ID)
+        }
     }
 
     @After
@@ -67,10 +70,142 @@ class LensManagementActivityWidgetTest {
             }
         }
         editor.commit()
+        context.getSharedPreferences("lens_access_prefs", android.content.Context.MODE_PRIVATE)
+            .edit().clear().commit()
         dao.deleteAll()
         dao.insertIfAbsent(LensWorkspace.createDefault())
         UtilSettings(context).save(UtilSettings.KEY_ACTIVE_LENS_ID, LensWorkspace.DEFAULT_LENS_ID)
         UtilSettings(context).saveCollapsedLensGroups(emptySet())
+    }
+
+    @Test
+    fun lensOverflowMenuShowsLockForUnlockedLensAndStoresOnlyTarget() {
+        ActivityScenario.launch(LensManagementActivity::class.java).use { scenario ->
+            awaitActivity(scenario, "lens rows must load") {
+                it.findViewById<RecyclerView>(R.id.rvLensGroups).adapter?.itemCount == 7
+            }
+            scenario.onActivity { activity ->
+                activity.findViewById<RecyclerView>(R.id.rvLensGroups)
+                    .findViewHolderForAdapterPosition(5)!!.itemView.findViewById<View>(R.id.btLensGroupMore).performClick()
+                val menu = requireNotNull(activity.lensRowMenuForTest).menu
+                val toggle = requireNotNull(menu.findItem(R.id.menuLensLockToggle))
+                assertEquals(activity.getString(R.string.lens_lock), toggle.title.toString())
+                assertTrue(toggle.isEnabled)
+                menu.performIdentifierAction(R.id.menuLensLockToggle, 0)
+                assertTrue(com.mckimquyen.util.LensLockStore(context).isLocked("work"))
+                assertTrue(!com.mckimquyen.util.LensLockStore(context).isLocked("travel"))
+            }
+        }
+    }
+
+    @Test
+    fun lastUnlockedLensCannotBeLockedOrDeleted() {
+        val store = com.mckimquyen.util.LensLockStore(context)
+        store.saveLocked("work", true)
+        store.saveLocked("travel", true)
+        store.saveLocked("ungrouped", true)
+        ActivityScenario.launch(LensManagementActivity::class.java).use { scenario ->
+            awaitActivity(scenario, "lens rows must load") {
+                it.findViewById<RecyclerView>(R.id.rvLensGroups).adapter?.itemCount == 7
+            }
+            scenario.onActivity { activity ->
+                val list = activity.findViewById<RecyclerView>(R.id.rvLensGroups)
+                list.findViewHolderForAdapterPosition(3)!!.itemView.findViewById<View>(R.id.btLensGroupMore).performClick()
+                val menu = requireNotNull(activity.lensRowMenuForTest).menu
+                assertTrue(!menu.findItem(R.id.menuLensLockToggle).isEnabled)
+                assertTrue(!menu.findItem(R.id.menuLensDelete).isEnabled)
+            }
+        }
+    }
+
+    @Test
+    fun deletingLockedLensClearsItsLockFlag() {
+        val store = com.mckimquyen.util.LensLockStore(context)
+        store.saveLocked("work", true)
+        ActivityScenario.launch(LensManagementActivity::class.java).use { scenario ->
+            awaitActivity(scenario, "lens rows must load") {
+                it.findViewById<RecyclerView>(R.id.rvLensGroups).adapter?.itemCount == 7
+            }
+            scenario.onActivity { activity ->
+                activity.findViewById<RecyclerView>(R.id.rvLensGroups)
+                    .findViewHolderForAdapterPosition(5)!!.itemView.findViewById<View>(R.id.btLensGroupMore).performClick()
+                requireNotNull(activity.lensRowMenuForTest).menu.performIdentifierAction(R.id.menuLensDelete, 0)
+            }
+            awaitLensGroupDialog(scenario)
+            scenario.onActivity { activity ->
+                (activity.lensGroupDialogForTest as androidx.appcompat.app.AlertDialog)
+                    .getButton(android.content.DialogInterface.BUTTON_POSITIVE).performClick()
+            }
+            awaitActivity(scenario, "deleted lens must leave Room") { runBlocking { dao.findById("work") == null } }
+            assertTrue(!com.mckimquyen.util.LensLockStore(context).isLocked("work"))
+        }
+    }
+
+    @Test
+    fun lockedLensUnlockClearsFlagOnlyOnAuthenticationSuccess() {
+        val store = com.mckimquyen.util.LensLockStore(context)
+        store.saveLocked("work", true)
+        var result = com.mckimquyen.util.LensUnlockResult.CANCELLED
+        ActivityScenario.launch(LensManagementActivity::class.java).use { scenario ->
+            awaitActivity(scenario, "lens rows must load") {
+                it.findViewById<RecyclerView>(R.id.rvLensGroups).adapter?.itemCount == 7
+            }
+            scenario.onActivity { activity ->
+                activity.lensUnlockAuthenticatorForTest = object : com.mckimquyen.util.LensUnlockAuthenticator {
+                    override fun isAvailable(context: android.content.Context) = true
+                    override fun authenticate(
+                        activity: androidx.appcompat.app.AppCompatActivity,
+                        lensName: String,
+                        callback: (com.mckimquyen.util.LensUnlockResult) -> Unit
+                    ) { callback(result) }
+                }
+                activity.findViewById<RecyclerView>(R.id.rvLensGroups)
+                    .findViewHolderForAdapterPosition(5)!!.itemView.findViewById<View>(R.id.btLensGroupMore).performClick()
+                requireNotNull(activity.lensRowMenuForTest).menu.performIdentifierAction(R.id.menuLensLockToggle, 0)
+                assertTrue("cancel must keep lock", store.isLocked("work"))
+                result = com.mckimquyen.util.LensUnlockResult.SUCCESS
+                activity.findViewById<RecyclerView>(R.id.rvLensGroups)
+                    .findViewHolderForAdapterPosition(5)!!.itemView.findViewById<View>(R.id.btLensGroupMore).performClick()
+                requireNotNull(activity.lensRowMenuForTest).menu.performIdentifierAction(R.id.menuLensLockToggle, 0)
+                assertTrue("success clears only target lock", !store.isLocked("work"))
+                assertTrue(!store.isLocked("travel"))
+            }
+        }
+    }
+
+    @Test
+    fun lockedLensUnlockDoesNotClearFlagWithoutAuthentication() {
+        com.mckimquyen.util.LensLockStore(context).saveLocked("work", true)
+        ActivityScenario.launch(LensManagementActivity::class.java).use { scenario ->
+            awaitActivity(scenario, "lens rows must load") {
+                it.findViewById<RecyclerView>(R.id.rvLensGroups).adapter?.itemCount == 7
+            }
+            scenario.onActivity { activity ->
+                activity.findViewById<RecyclerView>(R.id.rvLensGroups)
+                    .findViewHolderForAdapterPosition(5)!!.itemView.findViewById<View>(R.id.btLensGroupMore).performClick()
+                val menu = requireNotNull(activity.lensRowMenuForTest).menu
+                assertEquals(activity.getString(R.string.lens_unlock), menu.findItem(R.id.menuLensLockToggle).title.toString())
+            }
+        }
+        assertTrue(com.mckimquyen.util.LensLockStore(context).isLocked("work"))
+    }
+
+    @Test
+    fun lockedLensRowDoesNotStartHome() {
+        com.mckimquyen.util.LensLockStore(context).saveLocked("work", true)
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+        val monitor = instrumentation.addMonitor(ActHome::class.java.name, null, false)
+        try {
+            ActivityScenario.launch(LensManagementActivity::class.java).use { scenario ->
+                awaitActivity(scenario, "lens rows must load") {
+                    it.findViewById<RecyclerView>(R.id.rvLensGroups).adapter?.itemCount == 7
+                }
+                scenario.onActivity { it.selectLensForTest("work") }
+                assertEquals(null, monitor.waitForActivityWithTimeout(500))
+            }
+        } finally {
+            instrumentation.removeMonitor(monitor)
+        }
     }
 
     @Test

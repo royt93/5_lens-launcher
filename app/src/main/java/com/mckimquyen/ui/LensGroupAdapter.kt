@@ -119,6 +119,8 @@ internal class LensGroupAdapter(
 
     fun lensCount(): Int = lenses.size
 
+    fun lenses(): List<LensWorkspace> = lenses.toList()
+
     fun submit(lenses: List<LensWorkspace>, collapsedNames: Set<String>, activeLensId: String? = this.activeLensId) {
         this.lenses.clear()
         this.lenses.addAll(lenses)

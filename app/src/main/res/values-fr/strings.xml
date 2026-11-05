@@ -327,4 +327,10 @@
     <string name="setting_tilt_parallax_desc">L\'objectif au repos dérive légèrement quand vous inclinez l\'appareil. Désactivé par défaut. Peut provoquer vertiges ou nausées chez les personnes sensibles au mouvement et consomme un peu plus de batterie. S\'éteint seul avec l\'économiseur de batterie, une température élevée ou le mouvement réduit.</string>
     <string name="lens_unlock_description">Confirmez votre identité pour déverrouiller « %1$s ».</string>
     <string name="lens_unlock_use_device_credential">Utiliser le code de l’appareil</string>
+    <string name="lens_lock">Verrouiller la lentille</string>
+    <string name="lens_unlock">Déverrouiller la lentille</string>
+    <string name="lens_locked_message">Cette lentille est verrouillée. Déverrouillez-la depuis le menu des lentilles.</string>
+    <string name="lens_lock_last_unlocked">Gardez au moins une lentille déverrouillée.</string>
+    <string name="lens_lock_no_auth">Configurez d’abord un verrouillage d’écran ou la biométrie. Ce n’est qu’une protection de confidentialité dans l’appli et ne remplace pas le verrouillage de l’appareil.</string>
+    <string name="lens_delete_last_unlocked">Impossible de supprimer la dernière lentille déverrouillée.</string>
 </resources>
