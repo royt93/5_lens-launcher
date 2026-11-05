@@ -330,4 +330,6 @@
     <string name="lens_optical_smart_off">Выкл.</string>
     <string name="setting_tilt_parallax">Линза следует за наклоном</string>
     <string name="setting_tilt_parallax_desc">Когда вы не касаетесь экрана, линза немного смещается при наклоне устройства. По умолчанию выключено. Может вызвать головокружение или тошноту у людей, чувствительных к движению, и немного увеличивает расход заряда. Отключается само при экономии заряда, высокой температуре или уменьшении движения.</string>
+    <string name="lens_unlock_description">Подтвердите личность, чтобы разблокировать «%1$s».</string>
+    <string name="lens_unlock_use_device_credential">Использовать PIN-код устройства</string>
 </resources>

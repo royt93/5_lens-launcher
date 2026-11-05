@@ -320,4 +320,6 @@
     <string name="lens_optical_smart_off">Aus</string>
     <string name="setting_tilt_parallax">Linsenneigung nach Geräteneigung</string>
     <string name="setting_tilt_parallax_desc">Die ruhende Linse driftet leicht mit, wenn Sie das Gerät neigen. Standardmäßig aus. Kann bei bewegungsempfindlichen Personen Schwindel oder Übelkeit auslösen und verbraucht etwas mehr Akku. Schaltet sich bei Energiesparmodus, hoher Temperatur oder reduzierter Bewegung selbst aus.</string>
+    <string name="lens_unlock_description">Bestätige deine Identität, um „%1$s“ zu entsperren.</string>
+    <string name="lens_unlock_use_device_credential">Geräte-PIN verwenden</string>
 </resources>

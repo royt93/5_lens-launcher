@@ -315,4 +315,6 @@
     <string name="lens_optical_smart_off">オフ</string>
     <string name="setting_tilt_parallax">端末の傾きに追従するレンズ</string>
     <string name="setting_tilt_parallax_desc">触れていないとき、端末を傾けるとレンズがわずかに動きます。初期設定はオフです。動きに敏感な方はめまいや吐き気を感じることがあり、電池も少し多く消費します。バッテリーセーバー、高温、モーション低減のときは自動的にオフになります。</string>
+    <string name="lens_unlock_description">「%1$s」のロックを解除するには本人確認が必要です。</string>
+    <string name="lens_unlock_use_device_credential">デバイスのPINを使用</string>
 </resources>

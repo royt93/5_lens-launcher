@@ -346,4 +346,6 @@
     <string name="lens_optical_smart_off">إيقاف</string>
     <string name="setting_tilt_parallax">إمالة العدسة مع الجهاز</string>
     <string name="setting_tilt_parallax_desc">تنجرف العدسة قليلًا عند إمالة الجهاز أثناء عدم اللمس. متوقف افتراضيًا. قد يسبب الدوار أو الغثيان لدى الحساسين للحركة ويستهلك قدرًا أكبر قليلًا من البطارية. يتوقف تلقائيًا مع توفير الطاقة أو ارتفاع الحرارة أو تقليل الحركة.</string>
+    <string name="lens_unlock_description">أكّد هويتك لفتح «%1$s».</string>
+    <string name="lens_unlock_use_device_credential">استخدام رمز الجهاز</string>
 </resources>

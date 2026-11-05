@@ -365,4 +365,6 @@
     <string name="lens_optical_smart_off">Off</string>
     <string name="setting_tilt_parallax">Tilt parallax</string>
     <string name="setting_tilt_parallax_desc">The idle lens drifts slightly as you tilt the device. Off by default. Can cause dizziness or nausea in people sensitive to motion, and uses a little more battery. Turns itself off with battery saver, high temperature or reduced motion.</string>
+    <string name="lens_unlock_description">Confirm it is you to unlock “%1$s”.</string>
+    <string name="lens_unlock_use_device_credential">Use device PIN</string>
 </resources>

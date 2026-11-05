@@ -315,4 +315,6 @@
     <string name="lens_optical_smart_off">꺼짐</string>
     <string name="setting_tilt_parallax">기울기를 따르는 렌즈</string>
     <string name="setting_tilt_parallax_desc">만지지 않을 때 기기를 기울이면 렌즈가 살짝 움직입니다. 기본값은 꺼짐입니다. 움직임에 민감한 사람은 어지럼증이나 메스꺼움을 느낄 수 있고 배터리를 조금 더 사용합니다. 절전 모드, 고온, 모션 줄이기일 때는 자동으로 꺼집니다.</string>
+    <string name="lens_unlock_description">“%1$s” 잠금을 해제하려면 본인 확인을 하세요.</string>
+    <string name="lens_unlock_use_device_credential">기기 PIN 사용</string>
 </resources>

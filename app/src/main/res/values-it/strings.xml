@@ -325,4 +325,6 @@
     <string name="lens_optical_smart_off">Disattivo</string>
     <string name="setting_tilt_parallax">Obiettivo che segue l\'inclinazione</string>
     <string name="setting_tilt_parallax_desc">L\'obiettivo a riposo si sposta leggermente quando inclini il dispositivo. Disattivato per impostazione predefinita. Può causare vertigini o nausea in chi è sensibile al movimento e consuma un po\' più di batteria. Si spegne da solo con il risparmio energetico, alte temperature o movimento ridotto.</string>
+    <string name="lens_unlock_description">Conferma la tua identità per sbloccare «%1$s».</string>
+    <string name="lens_unlock_use_device_credential">Usa il PIN del dispositivo</string>
 </resources>

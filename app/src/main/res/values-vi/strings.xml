@@ -322,4 +322,6 @@
     <string name="lens_optical_smart_off">Tắt</string>
     <string name="setting_tilt_parallax">Thấu kính nghiêng theo máy</string>
     <string name="setting_tilt_parallax_desc">Khi không chạm, thấu kính trôi nhẹ theo độ nghiêng của máy. Mặc định tắt. Có thể gây chóng mặt hoặc buồn nôn với người nhạy cảm với chuyển động và tốn thêm một chút pin. Tự tắt khi bật tiết kiệm pin, máy nóng hoặc giảm chuyển động.</string>
+    <string name="lens_unlock_description">Xác minh danh tính để mở khóa “%1$s”.</string>
+    <string name="lens_unlock_use_device_credential">Dùng mã PIN thiết bị</string>
 </resources>

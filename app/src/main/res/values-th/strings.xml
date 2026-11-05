@@ -315,4 +315,6 @@
     <string name="lens_optical_smart_off">ปิด</string>
     <string name="setting_tilt_parallax">เลนส์เอียงตามเครื่อง</string>
     <string name="setting_tilt_parallax_desc">เมื่อไม่ได้แตะ เลนส์จะเลื่อนเล็กน้อยตามการเอียงของอุปกรณ์ ปิดอยู่เป็นค่าเริ่มต้น อาจทำให้เวียนศีรษะหรือคลื่นไส้ในผู้ที่ไวต่อการเคลื่อนไหว และใช้แบตเตอรี่เพิ่มขึ้นเล็กน้อย ปิดเองเมื่อเปิดโหมดประหยัดแบตเตอรี่ อุณหภูมิสูง หรือลดการเคลื่อนไหว</string>
+    <string name="lens_unlock_description">ยืนยันตัวตนเพื่อปลดล็อก “%1$s”</string>
+    <string name="lens_unlock_use_device_credential">ใช้ PIN ของอุปกรณ์</string>
 </resources>
