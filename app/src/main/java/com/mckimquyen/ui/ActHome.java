@@ -412,6 +412,9 @@ public class ActHome extends ActBase implements LensViewHolderHost, HomeQuickAct
         LensShortcuts.refresh(getApplicationContext(), lenses);
         String active = utilSettings != null ? utilSettings.getString(UtilSettings.KEY_ACTIVE_LENS_ID) : null;
         if (active != null && isLensLocked(active)) {
+            if (utilSettings != null && utilSettings.isListMode() && homeAppAdapter != null) {
+                homeAppAdapter.updateApps(new ArrayList<>());
+            }
             com.mckimquyen.util.LensTargetResolution fallback = com.mckimquyen.util.LensAccessPolicy.INSTANCE
                     .resolveActive(active, lenses, locked);
             if (fallback.getLensId() != null) {

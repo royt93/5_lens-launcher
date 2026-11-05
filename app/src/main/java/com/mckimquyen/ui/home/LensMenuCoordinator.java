@@ -708,13 +708,20 @@ public final class LensMenuCoordinator {
                         adoptLenses(lenses);
                         if (!lenses.isEmpty()) {
                             LensViewHolder holder = host.lenses();
-                            int targetPos = Math.min(holder.pager().getCurrentItem(), lenses.size() - 1);
-                            holder.pager().setCurrentItem(targetPos, false);
-                            LensWorkspace targetLens = lenses.get(targetPos);
-                            if (settings != null) settings.save(UtilSettings.KEY_ACTIVE_LENS_ID, targetLens.getId());
-                            Object app = activity.getApplication();
-                            if (app instanceof RApplication) {
-                                ((RApplication) app).getAppRefreshPipeline().switchLens(targetLens.getId());
+                            java.util.Set<String> remainingLocks = new com.mckimquyen.util.LensLockStore(activity)
+                                    .lockedLensIds(lenses.stream().map(LensWorkspace::getId)
+                                            .collect(java.util.stream.Collectors.toSet()));
+                            String fallbackId = com.mckimquyen.util.LensAccessPolicy.INSTANCE
+                                    .firstUnlocked(lenses, remainingLocks);
+                            if (fallbackId != null) {
+                                int targetPos = 0;
+                                while (targetPos < lenses.size() && !lenses.get(targetPos).getId().equals(fallbackId)) targetPos++;
+                                if (targetPos < lenses.size()) holder.pager().setCurrentItem(targetPos, false);
+                                if (settings != null) settings.save(UtilSettings.KEY_ACTIVE_LENS_ID, fallbackId);
+                                Object app = activity.getApplication();
+                                if (app instanceof RApplication) {
+                                    ((RApplication) app).getAppRefreshPipeline().switchLens(fallbackId);
+                                }
                             }
                         }
                         return Unit.INSTANCE;

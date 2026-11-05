@@ -391,10 +391,13 @@ class LensManagementActivity : ActBase() {
         settings.deleteLensSettings(deletedId)
         com.mckimquyen.util.LensShortcuts.refresh(applicationContext, lenses)
         if (activeLensId == deletedId && lenses.isNotEmpty()) {
-            val fallback = lenses.first()
-            activeLensId = fallback.id
-            settings.save(UtilSettings.KEY_ACTIVE_LENS_ID, fallback.id)
-            (application as? com.mckimquyen.app.RApplication)?.appRefreshPipeline?.switchLens(fallback.id)
+            val locked = lensLockStore.lockedLensIds(lenses.mapTo(mutableSetOf()) { it.id })
+            val fallbackId = LensAccessPolicy.firstUnlocked(lenses, locked)
+            if (fallbackId != null) {
+                activeLensId = fallbackId
+                settings.save(UtilSettings.KEY_ACTIVE_LENS_ID, fallbackId)
+                (application as? com.mckimquyen.app.RApplication)?.appRefreshPipeline?.switchLens(fallbackId)
+            }
         }
         refreshAfterLensChange(lenses)
         confirmHaptic(lensOperationFeedback())

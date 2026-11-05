@@ -114,6 +114,32 @@ class ActHomeListModeToggleWidgetTest {
     }
 
     @Test
+    fun relockingActiveLensClearsListModeRowsImmediately() {
+        val store = com.mckimquyen.util.LensLockStore(context)
+        val dao = com.mckimquyen.model.AppDatabase.getInstance().lensWorkspaceDao()
+        kotlinx.coroutines.runBlocking {
+            if (dao.findById("ui035-list-fallback") == null) {
+                dao.insertOrUpdate(LensWorkspace("ui035-list-fallback", "UI-035 fallback", 1))
+            }
+        }
+        store.delete(lensId)
+        try {
+            ActivityScenario.launch(ActHome::class.java).use { scenario ->
+                assertEquals("Home list must load fixture", fixture.size, awaitHomeRows(scenario))
+                scenario.onActivity { activity ->
+                    store.saveLocked(lensId, true)
+                    activity.onLensAccessChanged()
+                    val rows = activity.findViewById<RecyclerView>(R.id.rvHomeAppList).adapter?.itemCount ?: -1
+                    assertEquals("locking active lens must clear its list immediately", 0, rows)
+                }
+            }
+        } finally {
+            store.delete(lensId)
+            kotlinx.coroutines.runBlocking { dao.deleteLensIfMoreThanOne("ui035-list-fallback") }
+        }
+    }
+
+    @Test
     fun hidingAnAppFromHomeListModeEmitsVisibilityChangedAndUpdatesSnapshot() {
         ActivityScenario.launch(ActHome::class.java).use { scenario ->
             assertEquals("Home list mode phải hiển thị đủ hàng fixture", fixture.size, awaitHomeRows(scenario))

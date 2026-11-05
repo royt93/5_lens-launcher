@@ -820,6 +820,49 @@ class ActHomeLensManagementWidgetTest {
     }
 
     @Test
+    fun deletingActiveLensFallsBackToFirstUnlockedInsteadOfLockedNeighbor() {
+        runBlocking {
+            dao.insertOrUpdate(LensWorkspace("locked-first", "Locked first", 0))
+            dao.insertOrUpdate(LensWorkspace("delete-active", "Delete active", 1))
+            dao.insertOrUpdate(LensWorkspace("open-last", "Open last", 2))
+        }
+        val locks = com.mckimquyen.util.LensLockStore(InstrumentationRegistry.getInstrumentation().targetContext)
+        locks.saveLocked("locked-first", true)
+        settings.save(UtilSettings.KEY_ACTIVE_LENS_ID, "delete-active")
+
+        try {
+            ActivityScenario.launch(ActHome::class.java).use { scenario ->
+                idle()
+                val activePosition = runBlocking { dao.getAll().indexOfFirst { it.id == "delete-active" } }
+                openMenuAndSelect(scenario, itemDelete, activePosition)
+                confirmDialog(scenario)
+                val deadline = SystemClock.uptimeMillis() + 5_000L
+                while (runBlocking { dao.findById("delete-active") != null } && SystemClock.uptimeMillis() < deadline) {
+                    SystemClock.sleep(50)
+                }
+                val remaining = runBlocking { dao.getAll() }
+                val expectedFallback = com.mckimquyen.util.LensAccessPolicy.firstUnlocked(
+                    remaining,
+                    locks.lockedLensIds(remaining.mapTo(mutableSetOf()) { it.id })
+                )
+                assertEquals("fallback must use first unlocked lens in workspace order", expectedFallback,
+                    settings.getString(UtilSettings.KEY_ACTIVE_LENS_ID))
+                assertTrue("a locked lens must never be persisted active",
+                    settings.getString(UtilSettings.KEY_ACTIVE_LENS_ID) != "locked-first")
+            }
+        } finally {
+            locks.delete("locked-first")
+            runBlocking {
+                listOf("locked-first", "delete-active", "open-last").forEach { id ->
+                    dao.deleteLensIfMoreThanOne(id)
+                    settings.deleteLensSettings(id)
+                }
+                settings.save(UtilSettings.KEY_ACTIVE_LENS_ID, LensWorkspace.DEFAULT_LENS_ID)
+            }
+        }
+    }
+
+    @Test
     fun deleteMenu_isEnabledForANonDefaultLens() {
         seedSecondLens()
 

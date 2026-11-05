@@ -136,7 +136,10 @@ class LensManagementActivityWidgetTest {
                 (activity.lensGroupDialogForTest as androidx.appcompat.app.AlertDialog)
                     .getButton(android.content.DialogInterface.BUTTON_POSITIVE).performClick()
             }
-            awaitActivity(scenario, "deleted lens must leave Room") { runBlocking { dao.findById("work") == null } }
+            awaitActivity(scenario, "deleted lens and lock flag must be cleaned") {
+                runBlocking { dao.findById("work") == null } &&
+                    !com.mckimquyen.util.LensLockStore(context).isLocked("work")
+            }
             assertTrue(!com.mckimquyen.util.LensLockStore(context).isLocked("work"))
         }
     }
