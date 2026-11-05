@@ -15,17 +15,18 @@ someone who already controls the device.
 
 ## Decisions
 
-- Unlock method: `BiometricPrompt` with `BIOMETRIC_STRONG | DEVICE_CREDENTIAL`. If neither is available, locking is refused.
-- Locked lens selection: do not navigate; show a short localized message. Unlock only through an explicit owner action.
-- Scope: every entry that can select/display a lens — pager, edge swipe, indicator/tab, lens management selection,
+- Unlock method uses only system-owned authentication, no secret storage. API 30+: `BiometricPrompt` with `BIOMETRIC_STRONG | DEVICE_CREDENTIAL`. API 25–29: retain the same choice through separate system biometric and `KeyguardManager.createConfirmDeviceCredentialIntent` paths; do not pass the combined authenticator flags on API 28–29 because AndroidX Biometric does not support that combination there. Check biometric availability with `BiometricManager`; check credential availability with `KeyguardManager.isDeviceSecure()`. If neither is available, locking is refused. On API 25–29 credential confirmation is an OS activity and may not be cancellable once launched; document and test result handling.
+- Locked lens selection: do not expose its app grid; show a localized locked placeholder/message. Unlock only through an explicit owner action.
+- Scope: every entry that can select/display a lens — pager drag, edge swipe, indicator/tab, lens management selection,
   lens menu, shortcut/Intent `EXTRA_TARGET_LENS_ID`, saved active-lens restore and Home resume.
+- A ViewPager callback alone is too late to guarantee no frame of private content: `LensPagerAdapter.onBindViewHolder`/the `LensViewHolder` bind path must not pass app data to a locked page. If a drag temporarily reveals that page, it shows only locked placeholder until the pager returns to the last allowed page. Any restore/startup path resolves an unlocked target before binding app data.
 - Unlock persistence: authenticated unlock clears the persistent lock flag. The owner may lock again from the lens menu.
 - Active lens locked at startup/resume: switch to the first unlocked lens before rendering the lens grid.
 - Last unlocked lens cannot be locked; the lock action is disabled with a short explanation.
 - Control location: the existing lens row overflow menu in `LensManagementActivity`; no second settings entry.
 - Storage: boolean `lens_locked_<lensId>` in the existing app preferences through `UtilSettings.lensKey`; default lens keeps
   the unsuffixed key. The flag contains no PIN, biometric, secret or token.
-- Backup/import: unrelated to PIN or auth. A lock flag copied by backup is data only; import must not make all lenses locked.
+- Lock state is device-local and is excluded from workspace/layout/profile export/import. Importing a layout neither adds nor removes lock flags; deleting a lens removes its flag; duplicating a lens always creates it unlocked.
 
 ## Non-goals
 
@@ -63,22 +64,25 @@ Malformed/wrong-type prefs read as unlocked only for that value; the policy stil
 
 ### Authentication
 
-`LensUnlockAuthenticator` wraps Android `BiometricPrompt` and exposes a seam for tests. It returns:
-`SUCCESS`, `CANCELLED`, `UNAVAILABLE`, `ERROR`. Only `SUCCESS` clears the flag. The prompt strings are localized and do not
-claim the lock is device security.
+`LensUnlockAuthenticator` wraps system authentication behind an injectable launcher and returns `SUCCESS`, `CANCELLED`, `UNAVAILABLE`,
+`ERROR`. Only `SUCCESS` clears the flag. API 30+ uses one `BiometricPrompt` with `BIOMETRIC_STRONG | DEVICE_CREDENTIAL`; do not call
+`setNegativeButtonText` in this mode. API 25–29 offers the supported strong-biometric prompt (with a negative action to fall back) and,
+when needed, `KeyguardManager.createConfirmDeviceCredentialIntent`; the credential screen is system-owned. Check `isDeviceSecure()`
+before offering credential auth. The prompt strings are localized and do not claim the in-app lock is device security.
 
 ### Navigation guard
 
 `ActHome` owns the guard and passes it to `LensViewHolder`/menu collaborators:
 
-- `LensViewHolder` pager page selection is validated before changing active lens. A programmatic blocked selection restores
-  the previous page.
-- `onPageSelected` remains a defense layer: if the selected lens is locked, return to the last unlocked page and show the message.
-- Edge-swipe and lens switch paths call the same guard before `setCurrentItem`.
+- Keep `lastAllowedLensId` in Activity memory; never persist a locked lens as `KEY_ACTIVE_LENS_ID`.
+- Before applying a target Intent or restored active id, validate/fallback to an unlocked workspace.
+- `LensViewHolder.bindLensView` must know the lock set before setting apps. A locked page receives no app list (empty list/placeholder state); this prevents ViewPager2's adjacent-page pre-bind from exposing icons before `onPageSelected` can reject navigation.
+- User swipes can begin before `onPageSelected`; if ViewPager2 temporarily displays a locked page, it remains content-free and is returned to `lastAllowedLensId`. Disable/fence a locked indicator tab where possible; `onPageSelected` remains final defense.
+- Edge-swipe, indicator/tab, menu switch, management selection and shortcut/Intent call the same `resolveTarget` policy before changing active lens.
 - `applyTargetLensExtra`/`handleTargetLensIntent` resolve an Intent/shortcut target through the same policy. A locked target does not
-  write `KEY_ACTIVE_LENS_ID` and never opens that lens.
+  write `KEY_ACTIVE_LENS_ID` and never binds apps for that lens.
 - `refreshLensList`, startup and `onResume` use `resolveActive` before the saved page is applied.
-- `LensManagementActivity.selectLens` refuses a locked row; owner unlocks it from the row menu.
+- `LensManagementActivity.selectLens` refuses a locked row; owner unlocks it from the row menu. Management list can still show lens names and lock state; it never displays the locked grid content.
 
 ### Menu
 
