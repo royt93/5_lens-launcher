@@ -22,11 +22,10 @@ someone who already controls the device.
 - A ViewPager callback alone is too late to guarantee no frame of private content: `LensPagerAdapter.onBindViewHolder`/the `LensViewHolder` bind path must not pass app data to a locked page. If a drag temporarily reveals that page, it shows only locked placeholder until the pager returns to the last allowed page. Any restore/startup path resolves an unlocked target before binding app data.
 - Unlock persistence: authenticated unlock clears the persistent lock flag. The owner may lock again from the lens menu.
 - Active lens locked at startup/resume: switch to the first unlocked lens before rendering the lens grid.
-- Last unlocked lens cannot be locked; the lock action is disabled with a short explanation.
+- Last unlocked lens cannot be locked or deleted while any other lens remains locked; both actions are disabled/refused with a short explanation. If deleting a lens would leave only locked lenses, deletion is refused.
 - Control location: the existing lens row overflow menu in `LensManagementActivity`; no second settings entry.
-- Storage: boolean `lens_locked_<lensId>` in the existing app preferences through `UtilSettings.lensKey`; default lens keeps
-  the unsuffixed key. The flag contains no PIN, biometric, secret or token.
-- Lock state is device-local and is excluded from workspace/layout/profile export/import. Importing a layout neither adds nor removes lock flags; deleting a lens removes its flag; duplicating a lens always creates it unlocked.
+- Storage: use a dedicated private preferences file `lens_access_prefs` with boolean key `lens_locked_<lensId>` (including the literal `default` id); do not store it in `PreferenceManager.getDefaultSharedPreferences()` because that entire XML file is backed up. The flag contains no PIN, biometric, secret or token.
+- Lock state is device-local: exclude `lens_access_prefs.xml` from Android Auto Backup and device transfer in both `backup_rules.xml` and `data_extraction_rules.xml`, and exclude it from workspace/layout/profile export/import. Importing a layout neither adds nor removes lock flags; deleting a lens removes its flag; duplicating a lens always creates it unlocked.
 
 ## Non-goals
 
@@ -52,15 +51,12 @@ No Android context, no UI, no auth in the policy.
 
 ### Persistence
 
-`UtilSettings` gains:
+Create `LensLockStore` backed by `context.getSharedPreferences("lens_access_prefs", MODE_PRIVATE)`; keep this store separate from general `UtilSettings` so the lock XML can be excluded from OS backup without excluding all launcher preferences.
 
-- `KEY_LENS_LOCKED = "lens_locked"`.
-- `isLensLocked(lensId)`, `saveLensLocked(lensId, locked)`.
-- `lockedLensIds(validLensIds)` for the guard.
-- Cleanup in `deleteLensSettings`.
-
-Malformed/wrong-type prefs read as unlocked only for that value; the policy still guarantees at least one unlocked lens.
-`duplicateLensSettings` does not copy the lock flag; a new lens starts unlocked.
+- `isLocked(lensId)`, `saveLocked(lensId, locked)`, `lockedLensIds(validLensIds)`, and `delete(lensId)`.
+- Wrong-type or malformed individual flags are treated as unlocked; stale IDs are ignored by `lockedLensIds`.
+- Lens creation/duplication never copies a lock flag. Lens deletion clears it. Store is never consulted by workspace/profile export/import.
+- Startup and lock mutations use `LensAccessPolicy` to guarantee an unlocked destination; if state corruption leaves all existing lenses locked, fail closed by showing no app grid and require an owner unlock path rather than silently unlocking a lens.
 
 ### Authentication
 
@@ -114,8 +110,8 @@ and does not replace the device lock, ADB/root protection or screen security.
 - Recreate/rotate: active selection comes from `resolveActive`; no locked page should briefly bind as active.
 - Prompt cancel/error: no change, no data loss.
 - Race between lock and navigation: final guard check occurs at page-selected/set-active boundary.
-- Multiple lenses with all but one locked: last unlocked is protected from locking.
-- Backup/import/delete/duplicate cannot create an all-locked workspace.
+- Multiple lenses with all but one locked: last unlocked is protected from locking and deleting.
+- Backup/import cannot alter device-local lock flags; deletion/duplication cannot create an all-locked reachable workspace.
 
 ## Security notes to ship in the audit and UI copy
 
