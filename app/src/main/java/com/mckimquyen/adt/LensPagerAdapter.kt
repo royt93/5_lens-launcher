@@ -24,6 +24,16 @@ class LensPagerAdapter(
 ) : RecyclerView.Adapter<LensPagerAdapter.PageHolder>() {
 
     private var lenses: List<LensWorkspace> = emptyList()
+    private var lockedLensIds: Set<String> = emptySet()
+
+    fun setLockedLensIds(ids: Set<String>) {
+        if (lockedLensIds == ids) return
+        lockedLensIds = ids.toSet()
+        notifyDataSetChanged()
+    }
+
+    @androidx.annotation.VisibleForTesting
+    fun lockedLensIdsForTest(): Set<String> = lockedLensIds
 
     init {
         setHasStableIds(true)
@@ -44,7 +54,21 @@ class LensPagerAdapter(
     }
 
     override fun onBindViewHolder(holder: PageHolder, position: Int) {
-        onBindPage(holder.lensView, lenses[position])
+        val lens = lenses[position]
+        val locked = lens.id in lockedLensIds
+        val placeholder = holder.itemView.findViewById<android.widget.TextView>(R.id.tvLensLockedPlaceholder)
+        if (locked) {
+            holder.lensView.setApps(arrayListOf())
+            holder.lensView.visibility = android.view.View.INVISIBLE
+            placeholder.text = holder.itemView.context.getString(R.string.lens_locked_message)
+            placeholder.visibility = android.view.View.VISIBLE
+            holder.itemView.contentDescription = placeholder.text
+            return
+        }
+        placeholder.visibility = android.view.View.GONE
+        holder.lensView.visibility = android.view.View.VISIBLE
+        holder.itemView.contentDescription = null
+        onBindPage(holder.lensView, lens)
     }
 
     /** Diffs by id so an unrelated create/rename/delete doesn't reset scroll/page position. */

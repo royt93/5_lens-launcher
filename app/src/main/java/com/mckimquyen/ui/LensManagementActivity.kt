@@ -311,6 +311,7 @@ class LensManagementActivity : ActBase() {
             lensUnlockAuthenticator.authenticate(this, lens.name) { result ->
                 if (result == LensUnlockResult.SUCCESS && !isFinishing && !isDestroyed) {
                     lensLockStore.saveLocked(lens.id, false)
+                    com.mckimquyen.util.LensShortcuts.refresh(applicationContext, lenses)
                     Toast.makeText(this, R.string.lens_unlock, Toast.LENGTH_SHORT).show()
                 } else if (result == LensUnlockResult.UNAVAILABLE) {
                     Toast.makeText(this, R.string.lens_lock_no_auth, Toast.LENGTH_LONG).show()
@@ -318,6 +319,7 @@ class LensManagementActivity : ActBase() {
             }
         } else if (LensAccessPolicy.canLock(lens.id, lenses, locked)) {
             lensLockStore.saveLocked(lens.id, true)
+            com.mckimquyen.util.LensShortcuts.refresh(applicationContext, lenses)
             Toast.makeText(this, R.string.lens_lock, Toast.LENGTH_SHORT).show()
         } else {
             Toast.makeText(this, R.string.lens_lock_last_unlocked, Toast.LENGTH_LONG).show()

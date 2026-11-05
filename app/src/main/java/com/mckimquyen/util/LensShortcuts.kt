@@ -26,9 +26,13 @@ object LensShortcuts {
         }
 
     @JvmStatic
-    fun pick(lenses: List<LensWorkspace>, maxPerActivity: Int): List<LensWorkspace> {
+    fun pick(
+        lenses: List<LensWorkspace>,
+        maxPerActivity: Int,
+        lockedLensIds: Set<String> = emptySet()
+    ): List<LensWorkspace> {
         val room = (maxPerActivity - STATIC_SHORTCUT_COUNT).coerceAtLeast(0)
-        return lenses.sortedBy { it.orderIndex }.take(room)
+        return lenses.asSequence().filterNot { it.id in lockedLensIds }.sortedBy { it.orderIndex }.take(room).toList()
     }
 
     /**
@@ -45,7 +49,8 @@ object LensShortcuts {
     @JvmStatic
     fun refresh(context: Context, lenses: List<LensWorkspace>) {
         runCatching {
-            val picked = pick(lenses, ShortcutManagerCompat.getMaxShortcutCountPerActivity(context))
+            val locked = LensLockStore(context).lockedLensIds(lenses.mapTo(mutableSetOf()) { it.id })
+            val picked = pick(lenses, ShortcutManagerCompat.getMaxShortcutCountPerActivity(context), locked)
             val shortcuts = picked.map { lens ->
                 ShortcutInfoCompat.Builder(context, shortcutIdFor(lens.id))
                     .setShortLabel(lens.name)

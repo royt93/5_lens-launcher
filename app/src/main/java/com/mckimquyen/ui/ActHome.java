@@ -237,6 +237,8 @@ public class ActHome extends ActBase implements LensViewHolderHost, HomeQuickAct
     private RecyclerView rvHomeAppList;
     private AppAdapter homeAppAdapter;
     private UtilSettings utilSettings;
+    private com.mckimquyen.util.LensLockStore lensLockStore;
+    private String lastAllowedLensId = LensWorkspace.DEFAULT_LENS_ID;
     CircularProgressIndicator progressBarHome;
     private ArrayList<App> listApp;
     private boolean hasReportedFullyDrawn = false;
@@ -363,9 +365,73 @@ public class ActHome extends ActBase implements LensViewHolderHost, HomeQuickAct
         if (target == null) return false;
         intent.removeExtra(EXTRA_TARGET_LENS_ID);
         if (target.isEmpty()) return false;
+        if (isLensLocked(target)) {
+            onLensBlocked(target);
+            return false;
+        }
         utilSettings.save(UtilSettings.KEY_ACTIVE_LENS_ID, target);
+        lastAllowedLensId = target;
         LensShortcuts.reportUsed(getApplicationContext(), target);
         return true;
+    }
+
+    @Override
+    public boolean isLensLocked(String lensId) {
+        return lensLockStore != null && lensLockStore.isLocked(lensId);
+    }
+
+    @Override
+    public java.util.Set<String> lockedLensIds(java.util.List<LensWorkspace> lenses) {
+        return lensLockStore == null ? java.util.Collections.emptySet()
+                : lensLockStore.lockedLensIds(lenses.stream().map(LensWorkspace::getId)
+                        .collect(java.util.stream.Collectors.toSet()));
+    }
+
+    @Override
+    public com.mckimquyen.util.LensTargetResolution resolveLensTarget(String requestedLensId) {
+        java.util.List<LensWorkspace> lenses = lensHolder.currentLenses();
+        return com.mckimquyen.util.LensAccessPolicy.INSTANCE.resolveTarget(
+                requestedLensId,
+                lenses,
+                lensLockStore == null ? java.util.Collections.emptySet()
+                        : lensLockStore.lockedLensIds(lenses.stream().map(LensWorkspace::getId)
+                                .collect(java.util.stream.Collectors.toSet())));
+    }
+
+    @Override
+    public void onLensBlocked(String lensId) {
+        Toast.makeText(this, R.string.lens_locked_message, Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void onLensAccessChanged() {
+        if (lensLockStore == null || lensHolder.adapter() == null) return;
+        java.util.List<LensWorkspace> lenses = lensHolder.currentLenses();
+        java.util.Set<String> locked = lockedLensIds(lenses);
+        lensHolder.adapter().setLockedLensIds(locked);
+        LensShortcuts.refresh(getApplicationContext(), lenses);
+        String active = utilSettings != null ? utilSettings.getString(UtilSettings.KEY_ACTIVE_LENS_ID) : null;
+        if (active != null && isLensLocked(active)) {
+            com.mckimquyen.util.LensTargetResolution fallback = com.mckimquyen.util.LensAccessPolicy.INSTANCE
+                    .resolveActive(active, lenses, locked);
+            if (fallback.getLensId() != null) {
+                utilSettings.save(UtilSettings.KEY_ACTIVE_LENS_ID, fallback.getLensId());
+                lastAllowedLensId = fallback.getLensId();
+                if (lensHolder.pager() != null) {
+                    int index = 0;
+                    while (index < lenses.size() && !lenses.get(index).getId().equals(fallback.getLensId())) index++;
+                    if (index < lenses.size()) lensHolder.pager().setCurrentItem(index, false);
+                }
+                Object application = getApplication();
+                if (application instanceof RApplication) {
+                    ((RApplication) application).getAppRefreshPipeline().switchLens(fallback.getLensId());
+                }
+            }
+        }
+        if (lensViews != null) {
+            lensViews.setApps(isLensLocked(lensViews.getLensId())
+                    ? new ArrayList<>() : appsForLens(lensViews.getLensId()));
+        }
     }
 
     @androidx.annotation.VisibleForTesting
@@ -511,6 +577,7 @@ public class ActHome extends ActBase implements LensViewHolderHost, HomeQuickAct
         lensHolder.attach();
         rvHomeAppList = findViewById(R.id.rvHomeAppList);
         utilSettings = new UtilSettings(this);
+        lensLockStore = new com.mckimquyen.util.LensLockStore(this);
         homeAppAdapter = new AppAdapter(this, new ArrayList<>());
         rvHomeAppList.setLayoutManager(new LinearLayoutManager(this));
         rvHomeAppList.setAdapter(homeAppAdapter);
@@ -744,6 +811,7 @@ public class ActHome extends ActBase implements LensViewHolderHost, HomeQuickAct
     protected void onResume() {
         super.onResume();
         Log.d("roy93~", "onResume");
+        if (lensHolder.adapter() != null) onLensAccessChanged();
         tiltResumed = true;
         updateTiltParallax();
         updateColor();
@@ -962,7 +1030,7 @@ public class ActHome extends ActBase implements LensViewHolderHost, HomeQuickAct
         for (int i = 0; i < lensHolder.currentLenses().size(); i++) {
             LensView page = lensHolder.lensViewAt(i);
             if (page != null) {
-                page.setApps(scopedApps(page.getLensId()));
+                page.setApps(isLensLocked(page.getLensId()) ? new ArrayList<>() : scopedApps(page.getLensId()));
             }
         }
         updateHiddenRecoveryButton();
@@ -1012,7 +1080,7 @@ public class ActHome extends ActBase implements LensViewHolderHost, HomeQuickAct
         listApp = visibleApps;
         Logger.d("ActHome: Setting " + listApp.size() + " apps to lensViews and homeAppAdapter");
         if (lensViews != null) {
-            lensViews.setApps(scopedApps(lensViews.getLensId()));
+            lensViews.setApps(isLensLocked(lensViews.getLensId()) ? new ArrayList<>() : scopedApps(lensViews.getLensId()));
         }
         if (homeAppAdapter != null) {
             homeAppAdapter.updateApps(listApp);

@@ -12,4 +12,14 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:hapticFeedbackEnabled="true" />
+
+    <TextView
+        android:id="@+id/tvLensLockedPlaceholder"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:padding="24dp"
+        android:text="@string/lens_locked_message"
+        android:textAppearance="?attr/textAppearanceBodyLarge"
+        android:visibility="gone" />
 </FrameLayout>

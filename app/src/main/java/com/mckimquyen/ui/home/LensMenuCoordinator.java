@@ -226,10 +226,15 @@ public final class LensMenuCoordinator {
         int position = lenses.pager().getCurrentItem();
         addLensMenuItem(menu, themed, 1, R.string.lens_add, R.drawable.ic_add_24dp, true);
         addLensMenuItem(menu, themed, 2, R.string.lens_rename, R.drawable.ic_edit_24dp, true);
+        List<LensWorkspace> currentLenses = lenses.currentLenses();
+        String activeLensId = position >= 0 && position < currentLenses.size()
+                ? currentLenses.get(position).getId() : "";
+        java.util.Set<String> lockedLensIds = new com.mckimquyen.util.LensLockStore(host.activity())
+                .lockedLensIds(currentLenses.stream().map(LensWorkspace::getId).collect(java.util.stream.Collectors.toSet()));
         addLensMenuItem(menu, themed, 3, R.string.lens_delete, R.drawable.ic_delete_outline_24dp,
-                deleteEnabled(position, lenses.currentLenses().size(),
-                        position >= 0 && position < lenses.currentLenses().size()
-                                ? lenses.currentLenses().get(position).getId() : ""));
+                deleteEnabled(position, currentLenses.size(), activeLensId)
+                        && com.mckimquyen.util.LensAccessPolicy.INSTANCE.canDelete(
+                                activeLensId, currentLenses, lockedLensIds));
         // FISH-008 Phase 3: Smart Focus is per-lens, so it gets a quick toggle right here on the
         // lens it applies to (FrmSettings' own switch covers the same lens from Settings). The
         // label states the action rather than using a checkable item.
@@ -684,6 +689,14 @@ public final class LensMenuCoordinator {
 
     private void confirmDeleteLensDialog(LensWorkspace lens) {
         Activity activity = host.activity();
+        List<LensWorkspace> current = host.lenses().currentLenses();
+        java.util.Set<String> locked = new com.mckimquyen.util.LensLockStore(activity).lockedLensIds(
+                new java.util.HashSet<>(java.util.stream.Stream.of(current.toArray(new LensWorkspace[0]))
+                        .map(LensWorkspace::getId).collect(java.util.stream.Collectors.toSet())));
+        if (!com.mckimquyen.util.LensAccessPolicy.INSTANCE.canDelete(lens.getId(), current, locked)) {
+            android.widget.Toast.makeText(activity, R.string.lens_delete_last_unlocked, android.widget.Toast.LENGTH_LONG).show();
+            return;
+        }
         String message = activity.getString(R.string.lens_delete_confirm_message, lens.getName());
         dismissLensDialog();
         final AlertDialog[] dialogHolder = new AlertDialog[1];

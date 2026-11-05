@@ -107,6 +107,21 @@ public final class LensViewHolder {
         return !cleanMode && !listMode && !searchShowing && lensCount > 1;
     }
 
+    private int indexOfLens(String lensId) {
+        if (lensId == null) return -1;
+        for (int i = 0; i < currentLenses.size(); i++) {
+            if (lensId.equals(currentLenses.get(i).getId())) return i;
+        }
+        return -1;
+    }
+
+    private int firstUnlockedIndex() {
+        for (int i = 0; i < currentLenses.size(); i++) {
+            if (!host.isLensLocked(currentLenses.get(i).getId())) return i;
+        }
+        return -1;
+    }
+
     /** True when [position] indexes into a list of [size] lenses. */
     public static boolean isValidPosition(int position, int size) {
         return position >= 0 && position < size;
@@ -125,11 +140,25 @@ public final class LensViewHolder {
     private final ViewPager2.OnPageChangeCallback lensPageChangeCallback = new ViewPager2.OnPageChangeCallback() {
         @Override
         public void onPageSelected(int position) {
+            if (isValidPosition(position, currentLenses.size())) {
+                String requested = currentLenses.get(position).getId();
+                if (host.isLensLocked(requested)) {
+                    host.onLensBlocked(requested);
+                    String saved = utilSettings() != null
+                            ? utilSettings().getString(UtilSettings.KEY_ACTIVE_LENS_ID) : null;
+                    int fallback = indexOfLens(saved);
+                    if (fallback < 0 || host.isLensLocked(saved)) fallback = firstUnlockedIndex();
+                    if (fallback >= 0 && lensPager.getCurrentItem() != fallback) {
+                        lensPager.setCurrentItem(fallback, false);
+                    }
+                    return;
+                }
+            }
             LensView view = lensViewAt(position);
             if (view != null) {
                 host.setActiveLensView(view);
                 if (host.listApp() != null) {
-                    view.setApps(host.appsForLens(view.getLensId()));
+                    view.setApps(host.isLensLocked(view.getLensId()) ? new java.util.ArrayList<>() : host.appsForLens(view.getLensId()));
                 }
             }
             if (isValidPosition(position, currentLenses.size())) {
@@ -193,13 +222,21 @@ public final class LensViewHolder {
     public void refreshLensList() {
         LensWorkspace.loadAll(lenses -> {
             onLensesChanged(lenses);
+            java.util.Set<String> locked = host.lockedLensIds(lenses);
+            lensPagerAdapter.setLockedLensIds(locked);
+            String saved = utilSettings() != null
+                    ? utilSettings().getString(UtilSettings.KEY_ACTIVE_LENS_ID) : null;
+            com.mckimquyen.util.LensTargetResolution active =
+                    com.mckimquyen.util.LensAccessPolicy.INSTANCE.resolveActive(saved, lenses, locked);
+            if (active.getLensId() == null) return Unit.INSTANCE;
+            if (utilSettings() != null) utilSettings().save(UtilSettings.KEY_ACTIVE_LENS_ID, active.getLensId());
             lensPagerAdapter.submitLenses(lenses);
             updateLensNavigationChrome();
             if (lensManagementReturnTargetId != null) {
                 String targetId = lensManagementReturnTargetId;
                 lensManagementReturnTargetId = null;
                 for (int index = 0; index < lenses.size(); index++) {
-                    if (lenses.get(index).getId().equals(targetId)) {
+                    if (lenses.get(index).getId().equals(targetId) && !locked.contains(targetId)) {
                         int targetIndex = index;
                         lensPager.post(() -> {
                             if (lensPager != null && lensPager.getCurrentItem() != targetIndex) {
@@ -218,7 +255,7 @@ public final class LensViewHolder {
                 utilSettings().reconcileActiveLens(validLensIds);
                 String savedActive = utilSettings().getString(UtilSettings.KEY_ACTIVE_LENS_ID);
                 for (int i = 0; i < lenses.size(); i++) {
-                    if (lenses.get(i).getId().equals(savedActive)) {
+                    if (lenses.get(i).getId().equals(savedActive) && !locked.contains(savedActive)) {
                         final int targetIndex = i;
                         // ViewPager2 needs a layout tick after adapter update to accept target position
                         lensPager.post(() -> {
@@ -263,6 +300,12 @@ public final class LensViewHolder {
      *             the only reliable way to tell "this is the page the user is looking at".
      */
     public void bindLensView(LensView view, LensWorkspace lens) {
+        if (lens != null && host.isLensLocked(lens.getId())) {
+            view.setApps(new java.util.ArrayList<>());
+            view.setVisibility(View.INVISIBLE);
+            return;
+        }
+        view.setVisibility(View.VISIBLE);
         view.setPackageManager(host.activity().getPackageManager());
         // FISH-038: "Move to lens" needs a second lens; the Undo snackbar is owned here, not by the view.
         view.setHasOtherLenses(currentLenses != null && currentLenses.size() > 1);
@@ -318,6 +361,11 @@ public final class LensViewHolder {
                 target = current + 1;
             }
             if (target != current) {
+                LensWorkspace targetLens = currentLenses.get(target);
+                if (host.isLensLocked(targetLens.getId())) {
+                    host.onLensBlocked(targetLens.getId());
+                    return;
+                }
                 lensPager.setCurrentItem(target, true);
                 view.performHapticFeedback(android.view.HapticFeedbackConstants.VIRTUAL_KEY);
             }
@@ -400,6 +448,7 @@ public final class LensViewHolder {
     public void onLensesChanged(List<LensWorkspace> lenses) {
         currentLenses = lenses;
         LensShortcuts.refresh(host.activity().getApplicationContext(), lenses);
+        if (lensPagerAdapter != null) lensPagerAdapter.setLockedLensIds(host.lockedLensIds(lenses));
         // FISH-038: pages bound before the list changed must learn whether a move target exists now.
         if (lensPagerAdapter != null) {
             for (int i = 0; i < lensPagerAdapter.getItemCount(); i++) {

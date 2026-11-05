@@ -22,6 +22,16 @@ public interface LensViewHolderHost {
 
     ArrayList<App> appsForLens(String lensId);
 
+    boolean isLensLocked(String lensId);
+
+    java.util.Set<String> lockedLensIds(java.util.List<com.mckimquyen.model.LensWorkspace> lenses);
+
+    com.mckimquyen.util.LensTargetResolution resolveLensTarget(String requestedLensId);
+
+    void onLensBlocked(String lensId);
+
+    void onLensAccessChanged();
+
     boolean isSearchShowing();
 
     void refreshHiddenRecovery();

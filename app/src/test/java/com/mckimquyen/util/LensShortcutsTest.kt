@@ -38,6 +38,12 @@ class LensShortcutsTest {
     }
 
     @Test
+    fun `locked lenses are omitted before shortcut limit is applied`() {
+        val lenses = listOf(lens("a", 0), lens("b", 1), lens("c", 2))
+        assertEquals(listOf("b", "c"), LensShortcuts.pick(lenses, 4, setOf("a")).map { it.id })
+    }
+
+    @Test
     fun `no lenses yields no shortcuts`() {
         assertEquals(emptyList<LensWorkspace>(), LensShortcuts.pick(emptyList(), maxPerActivity = 10))
     }

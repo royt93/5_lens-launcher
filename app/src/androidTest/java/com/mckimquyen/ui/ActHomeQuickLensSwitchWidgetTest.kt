@@ -83,6 +83,73 @@ class ActHomeQuickLensSwitchWidgetTest {
         }
 
     @Test
+    fun lockedStartupLensFallsBackBeforeSelectedPageGetsApps() {
+        runBlocking { dao.insertOrUpdate(LensWorkspace(id = "private", name = "Private", orderIndex = 1)) }
+        UtilSettings(context).save(UtilSettings.KEY_ACTIVE_LENS_ID, "private")
+        com.mckimquyen.util.LensLockStore(context).saveLocked("private", true)
+        ActivityScenario.launch(ActHome::class.java).use { scenario ->
+            assertEquals("startup must resolve active locked lens to first unlocked", 0, waitForPage(scenario, 0))
+            scenario.onActivity { activity ->
+                assertEquals(LensWorkspace.DEFAULT_LENS_ID,
+                    UtilSettings(context).getString(UtilSettings.KEY_ACTIVE_LENS_ID))
+                val adapter = activity.findViewById<ViewPager2>(R.id.lensPager).adapter as com.mckimquyen.adt.LensPagerAdapter
+                assertTrue("locked lens adapter position must not hold app list",
+                    adapter.lockedLensIdsForTest().contains("private"))
+            }
+        }
+    }
+
+    @Test
+    fun lockedShortcutIntentDoesNotPersistOrReportLockedTarget() {
+        runBlocking { dao.insertOrUpdate(LensWorkspace(id = "private", name = "Private", orderIndex = 1)) }
+        UtilSettings(context).save(UtilSettings.KEY_ACTIVE_LENS_ID, LensWorkspace.DEFAULT_LENS_ID)
+        com.mckimquyen.util.LensLockStore(context).saveLocked("private", true)
+        ActivityScenario.launch(ActHome::class.java).use { scenario ->
+            waitForLensCount(scenario, 3)
+            scenario.onActivity { activity -> activity.handleTargetLensIntent(targetIntent("private")) }
+            assertEquals(0, waitForPage(scenario, 0))
+            assertEquals(LensWorkspace.DEFAULT_LENS_ID,
+                UtilSettings(context).getString(UtilSettings.KEY_ACTIVE_LENS_ID))
+        }
+    }
+
+    @Test
+    fun userCannotSelectLockedPageAndPrefetchedPageGetsNoApps() {
+        runBlocking { dao.insertOrUpdate(LensWorkspace(id = "private", name = "Private", orderIndex = 2)) }
+        com.mckimquyen.util.LensLockStore(context).saveLocked("private", true)
+        ActivityScenario.launch(ActHome::class.java).use { scenario ->
+            waitForLensCount(scenario, 3)
+            scenario.onActivity { activity ->
+                val pager = activity.findViewById<ViewPager2>(R.id.lensPager)
+                pager.setCurrentItem(2, false)
+            }
+            assertEquals(0, waitForPage(scenario, 0))
+            scenario.onActivity { activity ->
+                val pager = activity.findViewById<ViewPager2>(R.id.lensPager)
+                val recycler = pager.getChildAt(0) as androidx.recyclerview.widget.RecyclerView
+                val holder = recycler.findViewHolderForAdapterPosition(2) as? com.mckimquyen.adt.LensPagerAdapter.PageHolder
+                if (holder != null) assertTrue(holder.lensView.displayedApps.isEmpty())
+                assertEquals(LensWorkspace.DEFAULT_LENS_ID,
+                    UtilSettings(context).getString(UtilSettings.KEY_ACTIVE_LENS_ID))
+            }
+        }
+    }
+
+    @Test
+    fun lockingVisibleLensImmediatelyFallsBackToFirstUnlockedLens() {
+        UtilSettings(context).save(UtilSettings.KEY_ACTIVE_LENS_ID, secondId)
+        ActivityScenario.launch(ActHome::class.java).use { scenario ->
+            waitForLensCount(scenario, 2)
+            assertEquals(1, waitForPage(scenario, 1))
+            com.mckimquyen.util.LensLockStore(context).saveLocked(secondId, true)
+            scenario.onActivity { it.onLensAccessChanged() }
+            assertEquals(0, waitForPage(scenario, 0))
+            assertEquals(LensWorkspace.DEFAULT_LENS_ID,
+                UtilSettings(context).getString(UtilSettings.KEY_ACTIVE_LENS_ID))
+        }
+    }
+
+    @Test
     fun coldStartWithATargetLensOpensThatLens() {
         ActivityScenario.launch<ActHome>(targetIntent(secondId)).use { scenario ->
             assertEquals(1, waitForPage(scenario, expected = 1))
