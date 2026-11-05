@@ -139,7 +139,7 @@ Thứ tự owner chọn 2026-10-29; từng bước cần smoke thật trên TECN
 
 FISH-022 đã chuyển Implemented; không còn nằm trong Picked.
 
-- **UI-035 — Khóa lens (chế độ khách) (quyết định 2026-11-05)**: owner duyệt thiết kế: mở khóa bằng system `BiometricPrompt` (`BIOMETRIC_STRONG | DEVICE_CREDENTIAL`), lens khóa không chuyển và báo khóa, mọi entry điều hướng đi qua guard trung tâm, unlock xong bỏ cờ vĩnh viễn, active lens bị khóa tự chuyển sang lens không khóa đầu tiên, không cho khóa lens không khóa cuối cùng, điều khiển trong menu quản lý từng lens. Là privacy guard trong app, không thay khóa máy và không chống ADB/root. Spec `docs/superpowers/specs/2026-11-05-ui-035-lens-guest-lock-design.md` (reviewed 2026-11-05; API 25–29 auth split and device-local lock storage specified); plan `docs/superpowers/plans/2026-11-05-ui-035-lens-guest-lock.md`. Chỉ TECNO KJ7.
+- **UI-035 — Khóa lens (chế độ khách) (in progress, audit 8,8/10 ngày 2026-11-05)**: Implemented local lock store, system auth, management Lock/Unlock menu, locked-page prefetch guard, startup/shortcut/pager/list-mode fallback and locked-shortcut filtering. Review fixed two gaps: relocking active lens left list rows visible until async refresh; deletion could select a locked lens as fallback. Tests: JVM 1515/1515; TECNO KJ7 Android 14, 102/102 across 7 classes; lint 0 errors/15 warnings; app-data 18/18 file hashes and APK hashes restored exactly. **Manual owner smoke with actual biometric/PIN/cancel/unavailable remains pending**; no push, story not done. Audit: `doc/task/AUDIT_UI-035_2026-11-05.md` (8.8/10). Spec `docs/superpowers/specs/2026-11-05-ui-035-lens-guest-lock-design.md`; plan `docs/superpowers/plans/2026-11-05-ui-035-lens-guest-lock.md`. TECNO KJ7 only.
 
 ## ⏸️ Deferred
 

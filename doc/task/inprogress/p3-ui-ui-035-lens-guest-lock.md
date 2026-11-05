@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | new |
-| Status | todo |
+| Status | inprogress |
 | Priority | P3 |
 | Evidence | idea |
 | Epic | Privacy |
@@ -21,10 +21,10 @@ Là người dùng, tôi muốn đưa máy cho người khác mà không để h
 
 ## Acceptance criteria
 
-- [ ] Cờ `lens_locked_<lensId>` chặn edge-swipe (`ActHome.java:735`) và menu quản lý (`:916`).
-- [ ] Mở khóa bằng sinh trắc/PIN hệ thống.
-- [ ] Không lưu bí mật trong prefs; ghi rõ giới hạn bảo mật (không thay cho khóa máy).
-- [ ] Test + smoke.
+- [x] Cờ `lens_locked_<lensId>` chặn pager/edge-swipe/shortcut/management/list mode và bind page.
+- [x] Mở khóa bằng system biometric/device credential; API 25–29 dùng các flow tách biệt.
+- [x] Không lưu bí mật; ghi rõ privacy-guard limitation.
+- [x] Unit, widget, integration automation pass; manual owner smoke còn thiếu.
 
 ## Implementation notes
 
@@ -32,13 +32,13 @@ Liên quan bảo mật: audit riêng về cách bypass (recents, ADB).
 
 ## Verification and Definition of Done
 
-- [ ] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
-- [ ] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
-- [ ] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
-- [ ] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
-- [ ] No new lint/build failures.
-- [ ] A post-change audit record scores the round `> 9.0/10` before push.
-- [ ] Evidence and status are updated before moving this file to `done`.
+- [x] Unit tests cover pure logic, state transitions and failure branches (TDD RED/GREEN).
+- [x] Widget/UI tests cover menu behavior, pager prefetch, locked target and list mode; AndroidX accessibility warnings only.
+- [x] Integration tests cover storage/backup/auth/navigation boundaries.
+- [ ] Manual owner smoke on TECNO with real biometric/PIN and cancel/unavailable cases; record evidence and restore device state (automated test restore is verified).
+- [x] No new lint/build failures: 0 lint errors, 15 warnings.
+- [ ] Audit `doc/task/AUDIT_UI-035_2026-11-05.md` scores 8.8/10; needs manual smoke and re-audit above 9.0 before push.
+- [ ] Evidence/status updated before moving file to `done`.
 
 If a test layer is not applicable, replace its checkbox with a reviewed rationale; do not silently omit it.
 
