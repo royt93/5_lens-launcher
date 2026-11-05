@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | exclusive |
-| Status | in progress 2026-11-04 — code/UI/test xong, audit 9,30/10, TECNO smoke sensor→render và touch override đạt; chưa đo A/B pin/frame, giữ in progress |
+| Status | done 2026-11-05 — audit 9,30/10; TECNO smoke sensor→render + touch override đạt; A/B pin/frame chưa đo hợp lệ, bản dịch AI chưa rà |
 | Priority | P3 |
 | Evidence | idea |
 | Epic | Fisheye Smart |
@@ -21,10 +21,10 @@ Là người dùng, tôi muốn lens nghiêng nhẹ theo máy như ống kính t
 
 ## Acceptance criteria
 
-- [ ] Opt-in, tắt khi reduced-motion/pin yếu/nhiệt.
-- [ ] Hủy đăng ký sensor đúng vòng đời (không rò).
-- [ ] Test thuần phép dịch tâm + đo pin/frame.
-- [ ] Có hộp cảnh báo chóng mặt trong mô tả setting.
+- [x] Opt-in, tắt khi reduced-motion/pin yếu/nhiệt.
+- [x] Hủy đăng ký sensor đúng vòng đời (không rò).
+- [x] Test thuần phép dịch tâm. **Giới hạn đã chấp nhận:** đo pin/frame A/B chưa có phép đo hợp lệ (`gfxinfo` idle 0 frame; USB cấp nguồn nên pin không đo).
+- [x] Có hộp cảnh báo chóng mặt trong mô tả setting. Bản dịch 16 locale do AI viết, chưa người bản xứ rà.
 
 ## Implementation notes
 
@@ -34,13 +34,13 @@ Spec: `docs/superpowers/specs/2026-11-04-fish-033-tilt-parallax-design.md`. Đã
 
 ## Verification and Definition of Done
 
-- [ ] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
-- [ ] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
-- [ ] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
-- [ ] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
-- [ ] No new lint/build failures.
-- [ ] A post-change audit record scores the round `> 9.0/10` before push.
-- [ ] Evidence and status are updated before moving this file to `done`.
+- [x] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
+- [x] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
+- [x] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
+- [x] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
+- [x] No new lint/build failures.
+- [x] A post-change audit record scores the round `> 9.0/10` before push (9,30/10).
+- [x] Evidence and status are updated before moving this file to `done`.
 
 If a test layer is not applicable, replace its checkbox with a reviewed rationale; do not silently omit it.
 
@@ -62,7 +62,8 @@ Làm story FISH-033 (Thấu kính nghiêng theo cảm biến (tilt parallax)) tr
 - Task 3 `TiltSensorSource`: 10 unit test; 9 lifecycle/sensor mutations bị bắt.
 - Task 4 `LensViewTiltIntegrationTest` 9/9; Task 5 `ActHomeTiltWidgetTest` 9/9 + `ActHomeMultiLensWidgetTest` 4/4 + `ActHomeLensManagementWidgetTest` 29/29 trên TECNO KJ7. Một ActHome onDestroy-only mutant equivalent do onPause luôn stop.
 - Task 6 UI: `FrmLensTiltWidgetTest` 3/3, 17 locale, full gate 1496/1496, lint 0 error/12 warning; TECNO khôi phục 1191/1191.
-- Audit `doc/task/AUDIT_FISH-033_2026-11-04.md`: 9,20/10. Smoke trên TECNO: listener đúng vòng đời; probe tạm chứng minh sensor→filter→setTiltOffset→draw khi nghiêng thật (offset ~130×79 px, ảnh grid biến dạng); lần “chưa thấy” trước chỉ ghi dữ liệu gần pose tham chiếu. Probe đã gỡ; còn touch override vật lý, A/B pin/frame; dữ liệu khôi phục 1191/1191.
+- Audit `doc/task/AUDIT_FISH-033_2026-11-04.md`: 9,30/10. TECNO smoke: listener đúng vòng đời; probe tạm chứng minh sensor→filter→setTiltOffset→draw khi nghiêng thật (offset ~130×79 px, ảnh grid biến dạng); owner xác nhận chạm bằng ngón thì tâm theo ngón. Probe đã gỡ, dữ liệu khôi phục 1191/1191.
+- Đóng 2026-11-05 theo quyết định owner với giới hạn: A/B `gfxinfo` idle 0 frame và pin không đo được vì USB cấp nguồn; bản dịch AI chưa rà; chưa push.
 
 ### Tín hiệu kết thúc loop
 
