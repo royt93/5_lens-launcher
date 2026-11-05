@@ -307,7 +307,7 @@ Giới hạn: agent audit ui chưa đọc hết `LensView.kt`, `ActAbout.java`, 
 | `SEARCH-016` ✅ done 2026-10-26 | P3 | 2 | [Search history có thời hạn lưu](done/p3-search-search-016-search-history-ttl.md) |
 | `UI-033` ✅ done 2026-10-29 (audit 9,1/10, TECNO KJ7, chưa push) | P3 | 5 | [Trang gom mọi cài đặt theo từng lens](done/p3-ui-ui-033-per-lens-settings-page.md) |
 | `UI-034` ✅ done 2026-10-27 | P3 | 3 | [Xem trước và hoàn tác khi reset về mặc định](done/p3-ui-ui-034-reset-undo-preview.md) |
-| `UI-035` 📋 picked 2026-11-05 (spec đã ghi; chờ owner review trước plan; TECNO-only) | P3 | 5 | [Khóa một lens (chế độ khách)](todo/p3-ui-ui-035-lens-guest-lock.md) |
+| `UI-035` 📋 picked 2026-11-05 (spec đã review; plan sẵn sàng; TECNO-only) | P3 | 5 | [Khóa một lens (chế độ khách)](todo/p3-ui-ui-035-lens-guest-lock.md) |
 
 ### IDEA (giả thuyết cần owner chọn)
 
