@@ -921,6 +921,7 @@ class UtilSettings(context: Context) {
     }
 
     fun deleteLensSettings(lensId: String) {
+        if (lensId.isNotEmpty()) LensLockStore(appContext).delete(lensId)
         if (lensId.isNotEmpty()) prefs.edit { remove(lensKey(KEY_LENS_HIDDEN_APP_IDS, lensId)) }
         if (lensId.isNotEmpty() && lensId != LensWorkspace.DEFAULT_LENS_ID) {
             prefs.edit {

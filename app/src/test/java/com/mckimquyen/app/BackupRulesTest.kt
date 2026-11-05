@@ -21,7 +21,7 @@ class BackupRulesTest {
     private fun parse(path: String) =
         DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(File(appDir, path)).documentElement
 
-    private val excludedPrefs = setOf(VIP_PREFS, SEARCH_HISTORY_PREFS, APP_PREFS)
+    private val excludedPrefs = setOf(VIP_PREFS, SEARCH_HISTORY_PREFS, APP_PREFS, LENS_ACCESS_PREFS)
 
     private fun excludes(root: org.w3c.dom.Element, domain: String): Set<String> {
         val nodes = root.getElementsByTagName("exclude")
@@ -78,5 +78,6 @@ class BackupRulesTest {
         const val VIP_PREFS = "vip_screen_prefs"
         const val SEARCH_HISTORY_PREFS = "app_search_history"
         const val APP_PREFS = "app_preferences"
+        const val LENS_ACCESS_PREFS = "lens_access_prefs"
     }
 }
