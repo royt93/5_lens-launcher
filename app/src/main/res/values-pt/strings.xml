@@ -341,4 +341,6 @@
     <string name="lens_rotate_forward_action">Girar ordem para frente</string>
     <string name="lens_rotate_back_action">Girar ordem para trás</string>
     <string name="lens_rotate_announcement">Ordem girada. Primeiro app: %1$s</string>
+    <string name="setting_focus_peaking">Realce de foco</string>
+    <string name="setting_focus_peaking_hint">Contorna ícones na área nítida ao tocar ou fixar o foco. Usa a cor de destaque. Desativado por padrão.</string>
 </resources>

@@ -331,4 +331,6 @@
     <string name="lens_rotate_forward_action">順序を前へ回転</string>
     <string name="lens_rotate_back_action">順序を後ろへ回転</string>
     <string name="lens_rotate_announcement">順序を回転しました。先頭のアプリ: %1$s</string>
+    <string name="setting_focus_peaking">フォーカスピーキング</string>
+    <string name="setting_focus_peaking_hint">タッチ中またはフォーカス固定中に、ピントの合った領域のアイコンを囲みます。ハイライト色を使用します。初期設定ではオフです。</string>
 </resources>

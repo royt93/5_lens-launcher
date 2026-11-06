@@ -331,4 +331,6 @@
     <string name="lens_rotate_forward_action">បង្វិលលំដាប់ទៅមុខ</string>
     <string name="lens_rotate_back_action">បង្វិលលំដាប់ថយក្រោយ</string>
     <string name="lens_rotate_announcement">បានបង្វិលលំដាប់។ កម្មវិធីដំបូង៖ %1$s</string>
+    <string name="setting_focus_peaking">ការបន្លិចតំបន់ច្បាស់</string>
+    <string name="setting_focus_peaking_hint">គូសស៊ុមរូបតំណាងក្នុងតំបន់ច្បាស់ ពេលប៉ះ ឬចាក់សោការផ្ដោត។ ប្រើពណ៌រំលេច។ បិទតាមលំនាំដើម។</string>
 </resources>

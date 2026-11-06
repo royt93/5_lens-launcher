@@ -65,6 +65,7 @@ class FrmSettings : Fragment(), SettingsInterface {
     private var tvShowSearchBarDependencyHint: TextView? = null
     private var swDepthOfField: SwitchCompat? = null
     private var swLensVignette: SwitchCompat? = null
+    private var swFocusPeaking: SwitchCompat? = null
     private var swSmartFocus: SwitchCompat? = null
     private var tvSelectedSearchHint: TextView? = null
     private var swEnableT9SearchKeypad: SwitchCompat? = null
@@ -149,6 +150,7 @@ class FrmSettings : Fragment(), SettingsInterface {
         tvShowSearchBarDependencyHint = view.findViewById(R.id.tvShowSearchBarDependencyHint)
         swDepthOfField = view.findViewById(R.id.swDepthOfField)
         swLensVignette = view.findViewById(R.id.swLensVignette)
+        swFocusPeaking = view.findViewById(R.id.swFocusPeaking)
         swSmartFocus = view.findViewById(R.id.swSmartFocus)
         tvSelectedSearchHint = view.findViewById(R.id.tvSelectedSearchHint)
         swEnableT9SearchKeypad = view.findViewById(R.id.swEnableT9SearchKeypad)
@@ -221,6 +223,7 @@ class FrmSettings : Fragment(), SettingsInterface {
         view.findViewById<View>(R.id.rlSwitchKeepScreenOnParent).setOnClickListener(null)
         view.findViewById<View>(R.id.rlSwitchDepthOfFieldParent).setOnClickListener(null)
         view.findViewById<View>(R.id.rlSwitchLensVignetteParent).setOnClickListener(null)
+        view.findViewById<View>(R.id.rlSwitchFocusPeakingParent).setOnClickListener(null)
         view.findViewById<View>(R.id.rlSwitchSmartFocusParent).setOnClickListener(null)
         view.findViewById<View>(R.id.rlSwitchQuickActionCalculatorParent).setOnClickListener(null)
         view.findViewById<View>(R.id.rlSwitchQuickActionUnitParent).setOnClickListener(null)
@@ -288,6 +291,9 @@ class FrmSettings : Fragment(), SettingsInterface {
         }
         swLensVignette?.setOnCheckedChangeListener { _, isChecked ->
             utilSettings?.save(UtilSettings.KEY_LENS_VIGNETTE, isChecked)
+        }
+        swFocusPeaking?.setOnCheckedChangeListener { _, isChecked ->
+            utilSettings?.save(UtilSettings.KEY_FOCUS_PEAKING, isChecked)
         }
         swSmartFocus?.setOnCheckedChangeListener { _, isChecked ->
             utilSettings?.saveSmartFocusBias(activeLensId, isChecked)
@@ -434,6 +440,7 @@ class FrmSettings : Fragment(), SettingsInterface {
             updateSearchBarDependencyUi(cleanMode)
             swDepthOfField?.isChecked = us.getBoolean(UtilSettings.KEY_DEPTH_OF_FIELD)
             swLensVignette?.isChecked = us.getBoolean(UtilSettings.KEY_LENS_VIGNETTE)
+            swFocusPeaking?.isChecked = us.getBoolean(UtilSettings.KEY_FOCUS_PEAKING)
             activeLensId = us.getString(UtilSettings.KEY_ACTIVE_LENS_ID) ?: LensWorkspace.DEFAULT_LENS_ID
             swSmartFocus?.isChecked = us.isSmartFocusBias(activeLensId)
             swQuickActionCalculator?.isChecked = us.getBoolean(UtilSettings.KEY_QUICK_ACTION_CALCULATOR)
@@ -637,6 +644,7 @@ class FrmSettings : Fragment(), SettingsInterface {
         tvShowSearchBarDependencyHint = null
         swDepthOfField = null
         swLensVignette = null
+        swFocusPeaking = null
         swSmartFocus = null
         tvSelectedSearchHint = null
         swEnableT9SearchKeypad = null

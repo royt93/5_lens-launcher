@@ -331,4 +331,6 @@
     <string name="lens_rotate_forward_action">ໝູນລຳດັບໄປໜ້າ</string>
     <string name="lens_rotate_back_action">ໝູນລຳດັບຖອຍຫຼັງ</string>
     <string name="lens_rotate_announcement">ໝູນລຳດັບແລ້ວ. ແອັບທຳອິດ: %1$s</string>
+    <string name="setting_focus_peaking">ການເນັ້ນຈຸດໂຟກັດ</string>
+    <string name="setting_focus_peaking_hint">ຂີດຂອບໄອຄອນໃນບໍລິເວນຊັດເມື່ອແຕະ ຫຼື ລັອກໂຟກັດ. ໃຊ້ສີເນັ້ນ. ປິດໄວ້ໂດຍຄ່າເລີ່ມຕົ້ນ.</string>
 </resources>

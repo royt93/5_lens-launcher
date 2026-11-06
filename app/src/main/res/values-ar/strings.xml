@@ -362,4 +362,6 @@
     <string name="lens_rotate_forward_action">تدوير الترتيب للأمام</string>
     <string name="lens_rotate_back_action">تدوير الترتيب للخلف</string>
     <string name="lens_rotate_announcement">تم تدوير الترتيب. أول تطبيق: %1$s</string>
+    <string name="setting_focus_peaking">تحديد الحواف البؤرية</string>
+    <string name="setting_focus_peaking_hint">يحدد الأيقونات في منطقة التركيز الحادة أثناء اللمس أو تثبيت التركيز. يستخدم لون التمييز. معطل افتراضياً.</string>
 </resources>

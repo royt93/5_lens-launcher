@@ -381,4 +381,6 @@
     <string name="lens_rotate_forward_action">Rotate order forward</string>
     <string name="lens_rotate_back_action">Rotate order back</string>
     <string name="lens_rotate_announcement">Order rotated. First app: %1$s</string>
+    <string name="setting_focus_peaking">Focus peaking</string>
+    <string name="setting_focus_peaking_hint">Outlines icons in the sharp focus area while touching or focus is pinned. Uses the highlight colour. Off by default.</string>
 </resources>

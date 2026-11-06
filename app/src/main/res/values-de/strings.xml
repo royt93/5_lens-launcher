@@ -336,4 +336,6 @@
     <string name="lens_rotate_forward_action">Reihenfolge vorwärts drehen</string>
     <string name="lens_rotate_back_action">Reihenfolge rückwärts drehen</string>
     <string name="lens_rotate_announcement">Reihenfolge gedreht. Erste App: %1$s</string>
+    <string name="setting_focus_peaking">Fokus-Peaking</string>
+    <string name="setting_focus_peaking_hint">Umrandet Symbole im scharfen Fokusbereich bei Berührung oder fixiertem Fokus. Verwendet die Hervorhebungsfarbe. Standardmäßig aus.</string>
 </resources>

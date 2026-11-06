@@ -64,6 +64,7 @@ object ResetEntries {
             flag(UtilSettings.KEY_CLEAN_LENS_MODE, R.string.setting_clean_lens_mode, UtilSettings.DEFAULT_CLEAN_LENS_MODE),
             flag(UtilSettings.KEY_DEPTH_OF_FIELD, R.string.setting_depth_of_field, UtilSettings.DEFAULT_DEPTH_OF_FIELD),
             flag(UtilSettings.KEY_LENS_VIGNETTE, R.string.setting_lens_vignette, UtilSettings.DEFAULT_LENS_VIGNETTE),
+            flag(UtilSettings.KEY_FOCUS_PEAKING, R.string.setting_focus_peaking, UtilSettings.DEFAULT_FOCUS_PEAKING),
             ResetEntry(
                 us.lensKey(UtilSettings.KEY_SMART_FOCUS_BIAS, lensId), R.string.setting_smart_focus,
                 UtilSettings.DEFAULT_SMART_FOCUS_BIAS, us.isSmartFocusBias(lensId)

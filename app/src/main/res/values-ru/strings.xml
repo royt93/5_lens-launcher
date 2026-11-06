@@ -346,4 +346,6 @@
     <string name="lens_rotate_forward_action">Повернуть порядок вперёд</string>
     <string name="lens_rotate_back_action">Повернуть порядок назад</string>
     <string name="lens_rotate_announcement">Порядок повёрнут. Первое приложение: %1$s</string>
+    <string name="setting_focus_peaking">Выделение резкой области</string>
+    <string name="setting_focus_peaking_hint">Обводит значки в резкой области при касании или фиксации фокуса. Использует цвет выделения. По умолчанию выключено.</string>
 </resources>

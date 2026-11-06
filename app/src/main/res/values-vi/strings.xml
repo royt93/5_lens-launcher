@@ -338,4 +338,6 @@
     <string name="lens_rotate_forward_action">Xoay thứ tự tới</string>
     <string name="lens_rotate_back_action">Xoay thứ tự lui</string>
     <string name="lens_rotate_announcement">Đã xoay thứ tự. Ứng dụng đầu tiên: %1$s</string>
+    <string name="setting_focus_peaking">Viền vùng nét</string>
+    <string name="setting_focus_peaking_hint">Viền biểu tượng trong vùng nét khi chạm hoặc ghim tiêu điểm. Dùng màu nhấn. Mặc định tắt.</string>
 </resources>

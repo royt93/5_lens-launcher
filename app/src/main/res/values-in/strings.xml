@@ -331,4 +331,6 @@
     <string name="lens_rotate_forward_action">Putar urutan maju</string>
     <string name="lens_rotate_back_action">Putar urutan mundur</string>
     <string name="lens_rotate_announcement">Urutan diputar. Aplikasi pertama: %1$s</string>
+    <string name="setting_focus_peaking">Penajaman fokus</string>
+    <string name="setting_focus_peaking_hint">Menggarisbawahi ikon di area fokus tajam saat disentuh atau fokus dikunci. Menggunakan warna sorotan. Nonaktif secara default.</string>
 </resources>

@@ -341,4 +341,6 @@
     <string name="lens_rotate_forward_action">Ruota ordine in avanti</string>
     <string name="lens_rotate_back_action">Ruota ordine indietro</string>
     <string name="lens_rotate_announcement">Ordine ruotato. Prima app: %1$s</string>
+    <string name="setting_focus_peaking">Focus peaking</string>
+    <string name="setting_focus_peaking_hint">Delinea le icone nell\'area nitida quando tocchi o blocchi il fuoco. Usa il colore evidenziato. Disattivato per impostazione predefinita.</string>
 </resources>
