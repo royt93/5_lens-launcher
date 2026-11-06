@@ -43,6 +43,29 @@ class LensViewGestureStateTest {
         assertTrue(LensView.exceedsTouchSlop(dx = 3f, dy = 4f, touchSlop = 4.9f))
     }
 
+    @Test
+    fun `visual focus centre prefers live touch then pinned focus then idle`() {
+        assertEquals(VisualFocusCenter(10f, 20f), LensView.resolveVisualFocusCenter(
+            touchActive = true, touchX = 10f, touchY = 20f,
+            focusPinned = true, focusX = 30f, focusY = 40f
+        ))
+        assertEquals(VisualFocusCenter(30f, 40f), LensView.resolveVisualFocusCenter(
+            touchActive = false, touchX = 10f, touchY = 20f,
+            focusPinned = true, focusX = 30f, focusY = 40f
+        ))
+        assertEquals(null, LensView.resolveVisualFocusCenter(
+            touchActive = false, touchX = 10f, touchY = 20f,
+            focusPinned = false, focusX = 30f, focusY = 40f
+        ))
+    }
+
+    @Test
+    fun `visual focus resolver does not mutate real touch coordinates`() {
+        val touch = 15f to 25f
+        LensView.resolveVisualFocusCenter(false, touch.first, touch.second, true, 70f, 80f)
+        assertEquals(15f to 25f, touch)
+    }
+
     // ==================================================================== shouldTriggerLongPress
 
     @Test

@@ -44,6 +44,7 @@ import com.mckimquyen.search.AppShortcutsProvider
 import com.mckimquyen.search.QuickShortcut
 import com.mckimquyen.services.BroadcastReceivers
 import com.mckimquyen.util.HapticIntensity
+import com.mckimquyen.util.FocusLockTapPolicy
 import com.mckimquyen.util.LensOverscrollPhysics
 import com.mckimquyen.util.LensPhysicsPolicy
 import com.mckimquyen.util.LensProfile
@@ -123,11 +124,14 @@ enum class LensGestureState {
     PINCH_RELEASE
 }
 
+data class VisualFocusCenter(val x: Float, val y: Float)
+
 class LensView : View {
 
     companion object {
         /** FISH-031: share of a chip's radius left as padding around its shortcut icon. */
         private const val CHIP_ICON_INSET_FRACTION = 0.3f
+        private const val FOCUS_LOCK_WARP_MULTIPLIER = 1f
 
         /** FISH-038: every lens except the one being viewed. */
         internal fun moveTargets(lenses: List<LensWorkspace>, currentLensId: String): List<LensWorkspace> =
@@ -143,6 +147,20 @@ class LensView : View {
         // UI-022: pure gesture-disambiguation predicates, extracted so the exact logic
         // `onTouchEvent` runs is also directly unit-testable without a Context/Robolectric
         // (same pattern as AppAdapter's `lockIconResFor`/`AppAdapterSelectionStateTest`).
+
+        @androidx.annotation.VisibleForTesting
+        internal fun resolveVisualFocusCenter(
+            touchActive: Boolean,
+            touchX: Float,
+            touchY: Float,
+            focusPinned: Boolean,
+            focusX: Float,
+            focusY: Float
+        ): VisualFocusCenter? = when {
+            touchActive -> VisualFocusCenter(touchX, touchY)
+            focusPinned -> VisualFocusCenter(focusX, focusY)
+            else -> null
+        }
 
         /** Has the touch moved far enough from its down-point to count as a real pan? */
         @androidx.annotation.VisibleForTesting
@@ -323,6 +341,48 @@ class LensView : View {
     private var mTouchX = -Float.MAX_VALUE
     private var mTouchY = -Float.MAX_VALUE
     private var mInsideRect = false
+
+    // FISH-029: pinned visual centre is independent from touch/hit-test coordinates.
+    private var mFocusLockPinned = false
+    private var mFocusLockX = 0f
+    private var mFocusLockY = 0f
+    private var mFirstEmptyTap: com.mckimquyen.util.EmptyTapSample? = null
+    private var mCurrentTapEligible = false
+    private var mCurrentTapSecond = false
+
+    @VisibleForTesting
+    internal fun isFocusPinnedForTest(): Boolean = mFocusLockPinned
+
+    @VisibleForTesting
+    internal fun pinnedFocusForTest(): Pair<Float, Float>? =
+        if (mFocusLockPinned) mFocusLockX to mFocusLockY else null
+
+    @VisibleForTesting
+    internal fun clearFocusLock() {
+        mFocusLockPinned = false
+        mFocusLockX = 0f
+        mFocusLockY = 0f
+        mFirstEmptyTap = null
+        mCurrentTapEligible = false
+        mCurrentTapSecond = false
+        invalidate()
+    }
+
+    @VisibleForTesting
+    internal fun toggleFocusLockAt(x: Float, y: Float): Boolean {
+        if (!isAttachedToWindow || width <= 0 || height <= 0 || !x.isFinite() || !y.isFinite() ||
+            x < 0f || y < 0f || x >= width || y >= height
+        ) return false
+        if (mFocusLockPinned) {
+            clearFocusLock()
+        } else {
+            mFocusLockPinned = true
+            mFocusLockX = x
+            mFocusLockY = y
+            invalidate()
+        }
+        return true
+    }
 
     // FISH-033: virtual lens centre drift while idle. Deliberately separate from mTouchX/mTouchY: those drive
     // hit-testing, depth of field, hover haptics and the touch ring, none of which tilt may ever trigger.
@@ -510,6 +570,8 @@ class LensView : View {
     private val mLongPressHandler = Handler(Looper.getMainLooper())
     private val mLongPressRunnable = Runnable {
         if (shouldTriggerLongPress(mLongPressArmed, mMoving, mSelectIndex)) {
+            mFirstEmptyTap = null
+            mCurrentTapEligible = false
             mLongPressTriggered = true
             if (mGestureReduceMotion != true) {
                 performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
@@ -521,6 +583,8 @@ class LensView : View {
         } else if (onEmptySpaceLongPressListener != null
             && shouldTriggerEmptySpaceLongPress(mLongPressArmed, mMoving, mSelectIndex)
         ) {
+            mFirstEmptyTap = null
+            mCurrentTapEligible = false
             mLongPressTriggered = true
             if (mGestureReduceMotion != true) {
                 performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
@@ -641,6 +705,7 @@ class LensView : View {
      *  for the next attach of this SAME instance (pager recycles rather than recreating views) —
      *  otherwise a re-attached page can redraw mid-gesture or with a stale selected cell highlighted. */
     private fun resetTouchState() {
+        clearFocusLock()
         mTouchX = -Float.MAX_VALUE
         mTouchY = -Float.MAX_VALUE
         mTiltActive = false
@@ -1375,6 +1440,27 @@ class LensView : View {
                 mHoldIndex = -1
                 mDragStarted = false
                 resetFocusRing()
+                mCurrentTapEligible = FocusLockTapPolicy.acceptsEmptyTap(
+                    armed = true,
+                    moving = false,
+                    longPressTriggered = false,
+                    pointerCount = event.pointerCount,
+                    selectedIndex = mSelectIndex,
+                    x = event.x,
+                    y = event.y,
+                    width = width,
+                    height = height
+                )
+                val previousTap = mFirstEmptyTap
+                val doubleTapTimeout = ViewConfiguration.getDoubleTapTimeout().toLong()
+                val doubleTapSlop = ViewConfiguration.get(context).scaledDoubleTapSlop.toFloat()
+                mCurrentTapSecond = mCurrentTapEligible && FocusLockTapPolicy.isDoubleTap(
+                    previousTap,
+                    com.mckimquyen.util.EmptyTapSample(event.x, event.y, event.eventTime),
+                    doubleTapTimeout,
+                    doubleTapSlop
+                )
+                if (previousTap != null && !mCurrentTapSecond) mFirstEmptyTap = null
                 mLongPressArmed = true
                 mLongPressHandler.removeCallbacks(mLongPressRunnable)
                 mLongPressHandler.postDelayed(
@@ -1386,11 +1472,17 @@ class LensView : View {
             }
 
             MotionEvent.ACTION_POINTER_DOWN -> {
+                mFirstEmptyTap = null
+                mCurrentTapEligible = false
+                mCurrentTapSecond = false
                 // A second finger before the trigger means pinch; once search has triggered, the
                 // release must still be ours, so a late second finger cannot launch an app.
                 if (!mSearchSwipeTriggered) {
                     mSearchSwipeStartedInActivationZone = false
                 }
+                mFirstEmptyTap = null
+                mCurrentTapEligible = false
+                mCurrentTapSecond = false
                 if (!reduceMotion) {
                     val nextState = resolvePointerDown(gestureState, event.pointerCount)
                     if (nextState == LensGestureState.PINCHING) {
@@ -1417,6 +1509,8 @@ class LensView : View {
                     return true
                 }
                 if (mLongPressTriggered) {
+                    mCurrentTapEligible = false
+                    mCurrentTapSecond = false
                     if (mFocusRingActive) {
                         val chip = FocusRingLayout.chipAt(mFocusRingSlots, event.x, event.y)
                         if (chip != mActiveFocusChipIndex) {
@@ -1445,6 +1539,9 @@ class LensView : View {
                         isSearchActivationZone = mSearchSwipeStartedInActivationZone
                     )
                     if (direction != EdgeSwipeDirection.NONE) {
+                        mFirstEmptyTap = null
+                        mCurrentTapEligible = false
+                        mCurrentTapSecond = false
                         mEdgeSwipeTriggered = true
                         parent?.requestDisallowInterceptTouchEvent(true)
                         mLongPressArmed = false
@@ -1464,6 +1561,9 @@ class LensView : View {
                         mTouchSlop, mSearchSwipeTriggered
                     )
                 ) {
+                    mFirstEmptyTap = null
+                    mCurrentTapEligible = false
+                    mCurrentTapSecond = false
                     mSearchSwipeTriggered = true
                     mLongPressArmed = false
                     mLongPressHandler.removeCallbacks(mLongPressRunnable)
@@ -1485,12 +1585,18 @@ class LensView : View {
                 // FISH-008 Phase 2: before a pan is confirmed, an unambiguously horizontal drag is
                 // a lens page-swipe - release the gesture so the ViewPager2 ancestor can take it.
                 if (!mMoving && isHorizontalSwipeIntent(dx, dy, mTouchSlop)) {
+                    mFirstEmptyTap = null
+                    mCurrentTapEligible = false
+                    mCurrentTapSecond = false
                     mLongPressArmed = false
                     mLongPressHandler.removeCallbacks(mLongPressRunnable)
                     parent?.requestDisallowInterceptTouchEvent(false)
                     return false
                 }
                 if (!mMoving && exceedsTouchSlop(dx, dy, mTouchSlop)) {
+                    mFirstEmptyTap = null
+                    mCurrentTapEligible = false
+                    mCurrentTapSecond = false
                     mMoving = true
                     gestureState = LensGestureState.PANNING
                     // FISH-008 Phase 2: only claim the gesture once a pan is actually confirmed -
@@ -1544,6 +1650,9 @@ class LensView : View {
                 val edgeTriggered = mEdgeSwipeTriggered
                 resetSearchSwipeState()
                 if (searchTriggered || edgeTriggered) {
+                    mFirstEmptyTap = null
+                    mCurrentTapEligible = false
+                    mCurrentTapSecond = false
                     gestureState = LensGestureState.IDLE
                     mSelectIndex = -1
                     mTouchX = -Float.MAX_VALUE
@@ -1565,6 +1674,26 @@ class LensView : View {
                     return true
                 }
                 gestureState = LensGestureState.IDLE
+                val tapEligible = mCurrentTapEligible && !mMoving && !mLongPressTriggered && mSelectIndex < 0
+                val secondTap = mCurrentTapSecond
+                mCurrentTapEligible = false
+                mCurrentTapSecond = false
+                if (tapEligible) {
+                    if (secondTap) {
+                        mFirstEmptyTap = null
+                        toggleFocusLockAt(event.x, event.y)
+                        if (!mMoving) {
+                            mTouchX = -Float.MAX_VALUE
+                            mTouchY = -Float.MAX_VALUE
+                            mSelectIndex = -1
+                            mRectToSelect = null
+                        }
+                    } else {
+                        mFirstEmptyTap = com.mckimquyen.util.EmptyTapSample(event.x, event.y, event.eventTime)
+                    }
+                } else {
+                    mFirstEmptyTap = null
+                }
                 if (mLongPressTriggered) {
                     mLongPressTriggered = false
                     val heldIndex = mHoldIndex
@@ -1595,6 +1724,9 @@ class LensView : View {
             }
 
             MotionEvent.ACTION_CANCEL -> {
+                mFirstEmptyTap = null
+                mCurrentTapEligible = false
+                mCurrentTapSecond = false
                 parent?.requestDisallowInterceptTouchEvent(false)
                 mLongPressArmed = false
                 mLongPressTriggered = false
@@ -1681,11 +1813,23 @@ class LensView : View {
         val dofTransition = DepthOfField.transition(animationMultiplier, mReduceMotion)
         val hasActiveTouch = mTouchX != -Float.MAX_VALUE && mTouchY != -Float.MAX_VALUE
         // FISH-033: an idle lens may be warped around a virtual centre; a real touch always wins.
-        val useTilt = !hasActiveTouch && mTiltActive && mDrawType == DrawType.APPS
-        val lensCenterX = if (hasActiveTouch) mTouchX else if (useTilt) width / 2f + mTiltX else -Float.MAX_VALUE
-        val lensCenterY = if (hasActiveTouch) mTouchY else if (useTilt) height / 2f + mTiltY else -Float.MAX_VALUE
-        val warpMultiplier = if (useTilt) TiltParallax.ANIMATION_MULTIPLIER else animationMultiplier
-        val hasLensCenter = hasActiveTouch || useTilt
+        val focusCenter = resolveVisualFocusCenter(
+            touchActive = hasActiveTouch,
+            touchX = mTouchX,
+            touchY = mTouchY,
+            focusPinned = mFocusLockPinned && mDrawType == DrawType.APPS,
+            focusX = mFocusLockX,
+            focusY = mFocusLockY
+        )
+        val useTilt = focusCenter == null && mTiltActive && mDrawType == DrawType.APPS
+        val lensCenterX = focusCenter?.x ?: if (useTilt) width / 2f + mTiltX else -Float.MAX_VALUE
+        val lensCenterY = focusCenter?.y ?: if (useTilt) height / 2f + mTiltY else -Float.MAX_VALUE
+        val warpMultiplier = when {
+            useTilt -> TiltParallax.ANIMATION_MULTIPLIER
+            focusCenter != null && !hasActiveTouch && mFocusLockPinned -> FOCUS_LOCK_WARP_MULTIPLIER
+            else -> animationMultiplier
+        }
+        val hasLensCenter = focusCenter != null || useTilt
         val dofMode = DepthOfField.renderMode(
             depthOfFieldEnabled,
             mDrawType == DrawType.APPS && hasActiveTouch && dofTransition > 0f,
