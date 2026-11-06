@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | exclusive |
-| Status | inprogress |
+| Status | done |
 | Priority | P3 |
 | Evidence | idea |
 | Epic | Fisheye Smart |
@@ -21,24 +21,25 @@ Là người dùng, tôi muốn độ cong có cảm giác quang học thật.
 
 ## Acceptance criteria
 
-- [ ] Opt-in, gate reduced-motion.
-- [ ] Không đổi geometry/hit-test.
-- [ ] Đo frame 120Hz trước/sau như FISH-007.
-- [ ] Fallback API < 31.
+- [x] Opt-in, gate reduced-motion (reduced motion làm transition snap, không tắt hiệu ứng).
+- [x] Không đổi geometry/hit-test (49 điểm thăm dò giống hệt bật/tắt; `LensGridCache` không recompute).
+- [x] Đo frame 120Hz trước/sau như FISH-007: p50/p90 6 ms cả tắt lẫn bật (1689 vs 1688 frame).
+- [x] Fallback API < 31: không cần `RenderEffect`, một đường code bằng `Paint.alpha` cho mọi API (chỉ phủ bằng canvas phần mềm, chưa đo máy API < 31).
+- [x] Phạm vi thu hẹp theo owner: chỉ vignette; sai sắc tách thành `FISH-040`.
 
 ## Implementation notes
 
-Gộp N4 (audit lens) và EX-4 (audit model). Owner chọn 2026-11-06: **chỉ vignette** trong story này (giảm alpha icon theo khoảng cách, chỉ khi lens đang phóng); phần **sai sắc (chromatic aberration)** tách thành story riêng. Spec: `docs/superpowers/specs/2026-11-06-fish-034-vignette-rim-design.md`; plan: `docs/superpowers/plans/2026-11-06-fish-034-vignette-rim.md`.
+Gộp N4 (audit lens) và EX-4 (audit model). Owner chọn 2026-11-06: **chỉ vignette** trong story này (giảm alpha icon theo khoảng cách, chỉ khi lens đang phóng); phần **sai sắc (chromatic aberration)** tách thành story riêng. Spec: `docs/superpowers/specs/2026-11-06-fish-034-vignette-rim-design.md`; plan: `docs/superpowers/plans/2026-11-06-fish-034-vignette-rim.md`; audit `doc/task/AUDIT_FISH-034_2026-11-06.md` (9,1/10).
 
 ## Verification and Definition of Done
 
-- [ ] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
-- [ ] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
-- [ ] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
-- [ ] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
-- [ ] No new lint/build failures.
-- [ ] A post-change audit record scores the round `> 9.0/10` before push.
-- [ ] Evidence and status are updated before moving this file to `done`.
+- [x] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
+- [x] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
+- [x] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
+- [x] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
+- [x] No new lint/build failures.
+- [x] A post-change audit record scores the round `> 9.0/10` before push.
+- [x] Evidence and status are updated before moving this file to `done`.
 
 If a test layer is not applicable, replace its checkbox with a reviewed rationale; do not silently omit it.
 
