@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | exclusive |
-| Status | inprogress |
+| Status | done |
 | Priority | P3 |
 | Evidence | idea |
 | Epic | Fisheye Smart |
@@ -21,10 +21,10 @@ Là người dùng một tay, tôi muốn xoay vòng tròn để sắp xếp l�
 
 ## Acceptance criteria
 
-- [ ] Cử chỉ nhận diện rõ, không nhầm pan/pinch.
-- [ ] Chốt bằng `setAppOrderBatch`, tôn trọng frozen.
-- [ ] Test state machine + smoke.
-- [ ] Có đường thay thế a11y.
+- [x] Cử chỉ nhận diện rõ, không nhầm pan/pinch. (tracker sweep + bán kính + độ cong; đường thẳng/tiếp tuyến không thành xoay trong mô phỏng và test)
+- [x] Chốt có xác nhận bằng `AppPersistent.commitAppOrderBatch` (additive; `setAppOrderBatch` giữ nguyên), frozen chỉ lưu sau khi ghi DB thành công; lens đã frozen vẫn xoay được.
+- [x] Test state machine + smoke. (smoke máy thật bằng luồng MotionEvent liên tục qua UiAutomation; adb `input` không tạo được cung)
+- [x] Có đường thay thế a11y. (hai action host Rotate forward/back, ngoại lệ TalkBack owner duyệt)
 
 ## Implementation notes
 
@@ -32,13 +32,13 @@ Cần chạy sau CORE-004 để tránh sort ghi đè thứ tự vừa chốt.
 
 ## Verification and Definition of Done
 
-- [ ] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
-- [ ] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
-- [ ] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
-- [ ] Smoke tests pass on Pixel 7 Pro `2B051FDH3006MU` locked by the owner for this story; record model, Android version, build SHA and timestamp; restore device state.
-- [ ] No new lint/build failures.
-- [ ] A post-change audit record scores the round `> 9.0/10` before push.
-- [ ] Evidence and status are updated before moving this file to `done`.
+- [x] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
+- [x] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
+- [x] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
+- [x] Smoke tests pass on Pixel 7 Pro `2B051FDH3006MU` locked by the owner for this story; record model, Android version, build SHA and timestamp; restore device state.
+- [x] No new lint/build failures.
+- [x] A post-change audit record scores the round `> 9.0/10` before push.
+- [x] Evidence and status are updated before moving this file to `done`.
 
 If a test layer is not applicable, replace its checkbox with a reviewed rationale; do not silently omit it.
 
@@ -62,3 +62,7 @@ Chỉ dừng loop khi TẤT CẢ đúng:
 - Smoke test lên device đã khóa trong phiên để chứng minh (ghi model, Android, build SHA, thời điểm, ảnh/log); khôi phục đúng state thiết bị.
 - `./gradlew testDevDebugUnitTest lintDevDebug assembleDevDebug assembleDevDebugAndroidTest` xanh, `git diff --check` sạch, `scripts/check-secrets.sh` sạch.
 - Nếu work và điểm > 9/10 thì push code lên `origin/dev` (không commit `.idea`); nếu <= 9 thì sửa tiếp rồi audit lại.
+
+## Kết quả
+
+Đóng 2026-11-06, audit 9,1/10 (`doc/task/AUDIT_FISH-035_2026-11-06.md`), thiết bị Pixel 7 Pro `2B051FDH3006MU` (owner đổi target từ TECNO). Chấp nhận giới hạn: ngưỡng (30°, 300 ms) chỉ chỉnh bằng sự kiện tổng hợp, owner chưa xoay tay, TalkBack thật chưa chạy, bản dịch AI, pan khi ghim chậm tối đa 300 ms, xoay theo từng nhóm pinned/favorite. Chưa push.
