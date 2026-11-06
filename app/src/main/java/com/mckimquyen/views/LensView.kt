@@ -368,6 +368,12 @@ class LensView : View {
         invalidate()
     }
 
+    /** FISH-029: Home pause hook (Java caller in ActHome); same reset as detach. */
+    fun clearFocusLockForPause() = clearFocusLock()
+
+    @VisibleForTesting
+    internal fun toggleFocusLockAtForTest(x: Float, y: Float): Boolean = toggleFocusLockAt(x, y)
+
     @VisibleForTesting
     internal fun toggleFocusLockAt(x: Float, y: Float): Boolean {
         if (!isAttachedToWindow || width <= 0 || height <= 0 || !x.isFinite() || !y.isFinite() ||
