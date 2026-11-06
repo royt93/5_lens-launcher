@@ -287,7 +287,7 @@ object RingRotation {
 }
 ```
 
-- [ ] **Step 5: Verify GREEN.** Rerun the class; every test in `RingRotationTest` passes (11 tests).
+- [ ] **Step 5: Verify GREEN.** Rerun the class; every test in `RingRotationTest` passes (12 tests; the tracker class has 14).
 - [ ] **Step 6: RED (tracker).** Create `app/src/test/java/com/mckimquyen/util/RingGestureTrackerTest.kt`. The generators are deterministic (seeded `java.util.Random`), 8 ms apart, density 3:
 
 ```kotlin
