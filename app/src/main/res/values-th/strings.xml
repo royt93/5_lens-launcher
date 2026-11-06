@@ -323,4 +323,7 @@
     <string name="lens_lock_last_unlocked">ต้องเหลือเลนส์ที่ไม่ล็อกอย่างน้อยหนึ่งอัน</string>
     <string name="lens_lock_no_auth">โปรดตั้งค่าล็อกหน้าจอหรือไบโอเมทริกซ์ในอุปกรณ์ก่อน นี่เป็นเพียงการป้องกันความเป็นส่วนตัวในแอป ไม่ได้แทนที่ล็อกของอุปกรณ์</string>
     <string name="lens_delete_last_unlocked">ไม่สามารถลบเลนส์ที่ไม่ล็อกอันสุดท้ายได้</string>
+    <string name="lens_focus_lock_action">สลับการล็อกโฟกัส</string>
+    <string name="lens_focus_locked">ล็อกโฟกัสแล้ว</string>
+    <string name="lens_focus_unlocked">ปลดล็อกโฟกัสแล้ว</string>
 </resources>

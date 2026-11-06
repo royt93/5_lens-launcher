@@ -323,4 +323,7 @@
     <string name="lens_lock_last_unlocked">잠기지 않은 렌즈를 하나 이상 남겨 두세요.</string>
     <string name="lens_lock_no_auth">먼저 이 기기에 화면 잠금이나 생체 인식을 설정하세요. 앱 내 개인정보 보호 기능일 뿐 기기 잠금을 대체하지 않습니다.</string>
     <string name="lens_delete_last_unlocked">잠기지 않은 마지막 렌즈는 삭제할 수 없습니다.</string>
+    <string name="lens_focus_lock_action">초점 고정 전환</string>
+    <string name="lens_focus_locked">초점 고정됨</string>
+    <string name="lens_focus_unlocked">초점 고정 해제됨</string>
 </resources>

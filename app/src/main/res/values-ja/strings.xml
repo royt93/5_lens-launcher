@@ -323,4 +323,7 @@
     <string name="lens_lock_last_unlocked">少なくとも1つのレンズはロック解除のままにしてください。</string>
     <string name="lens_lock_no_auth">先にこの端末で画面ロックまたは生体認証を設定してください。これはアプリ内のプライバシー保護であり、端末のロックの代わりにはなりません。</string>
     <string name="lens_delete_last_unlocked">ロック解除された最後のレンズは削除できません。</string>
+    <string name="lens_focus_lock_action">フォーカスロックを切り替え</string>
+    <string name="lens_focus_locked">フォーカスをロック中</string>
+    <string name="lens_focus_unlocked">フォーカスを解除</string>
 </resources>

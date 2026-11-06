@@ -333,4 +333,7 @@
     <string name="lens_lock_last_unlocked">Mantén al menos una lente desbloqueada.</string>
     <string name="lens_lock_no_auth">Configura primero un bloqueo de pantalla o biometría. Es solo una protección de privacidad dentro de la app y no sustituye el bloqueo del dispositivo.</string>
     <string name="lens_delete_last_unlocked">No se puede eliminar la última lente desbloqueada.</string>
+    <string name="lens_focus_lock_action">Alternar bloqueo de enfoque</string>
+    <string name="lens_focus_locked">Enfoque bloqueado</string>
+    <string name="lens_focus_unlocked">Enfoque liberado</string>
 </resources>

@@ -328,4 +328,7 @@
     <string name="lens_lock_last_unlocked">Mindestens eine Linse muss entsperrt bleiben.</string>
     <string name="lens_lock_no_auth">Richte zuerst eine Displaysperre oder Biometrie ein. Dies ist nur ein Datenschutz in der App und ersetzt nicht die Gerätesperre.</string>
     <string name="lens_delete_last_unlocked">Die letzte entsperrte Linse kann nicht gelöscht werden.</string>
+    <string name="lens_focus_lock_action">Fokussperre umschalten</string>
+    <string name="lens_focus_locked">Fokus gesperrt</string>
+    <string name="lens_focus_unlocked">Fokus freigegeben</string>
 </resources>

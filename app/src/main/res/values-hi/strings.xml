@@ -328,4 +328,7 @@
     <string name="lens_lock_last_unlocked">कम से कम एक लेंस अनलॉक रखें।</string>
     <string name="lens_lock_no_auth">पहले इस डिवाइस पर स्क्रीन लॉक या बायोमेट्रिक सेट करें। यह केवल ऐप के अंदर की गोपनीयता सुरक्षा है, डिवाइस लॉक का विकल्प नहीं।</string>
     <string name="lens_delete_last_unlocked">आखिरी अनलॉक लेंस हटाया नहीं जा सकता।</string>
+    <string name="lens_focus_lock_action">फ़ोकस लॉक टॉगल करें</string>
+    <string name="lens_focus_locked">फ़ोकस लॉक है</string>
+    <string name="lens_focus_unlocked">फ़ोकस मुक्त है</string>
 </resources>

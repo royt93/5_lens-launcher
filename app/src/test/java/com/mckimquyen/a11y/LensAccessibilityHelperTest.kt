@@ -40,7 +40,13 @@ class LensAccessibilityHelperTest {
     fun setup() {
         context = ApplicationProvider.getApplicationContext()
         mockLensView = mock(LensView::class.java)
-        `when`(mockLensView.context).thenReturn(context)
+        // Unit tests run without merged Android resources (see FISH-011: enabling them runs the real
+        // RApplication), so the three FISH-029 strings are stubbed on a mocked context.
+        val stringContext = mock(Context::class.java)
+        `when`(stringContext.getString(com.mckimquyen.R.string.lens_focus_lock_action)).thenReturn(ACTION_TITLE)
+        `when`(stringContext.getString(com.mckimquyen.R.string.lens_focus_locked)).thenReturn(STATE_LOCKED)
+        `when`(stringContext.getString(com.mckimquyen.R.string.lens_focus_unlocked)).thenReturn(STATE_RELEASED)
+        `when`(mockLensView.context).thenReturn(stringContext)
 
         sampleApps = listOf(
             App(id = 1, label = "Calculator", packageName = "com.android.calculator2", name = "CalculatorActivity"),
@@ -56,7 +62,15 @@ class LensAccessibilityHelperTest {
         lastLongClickedIndex = -1
     }
 
-    private fun createHelper(apps: List<App>? = sampleApps, showBadgesSetting: Boolean = false): LensAccessibilityHelper {
+    private var focusPinned = false
+    private var focusToggleCalls = 0
+    private var focusToggleResult = true
+
+    private fun createHelper(
+        apps: List<App>? = sampleApps,
+        showBadgesSetting: Boolean = false,
+        withFocusLock: Boolean = false
+    ): LensAccessibilityHelper {
         return LensAccessibilityHelper(
             host = mockLensView,
             appProvider = { apps },
@@ -74,7 +88,11 @@ class LensAccessibilityHelperTest {
                 lastLongClickedIndex = index
                 true
             },
-            showBadgesSettingProvider = { showBadgesSetting }
+            showBadgesSettingProvider = { showBadgesSetting },
+            focusLockPinnedProvider = { focusPinned },
+            onFocusLockToggle = if (withFocusLock) {
+                { focusToggleCalls++; if (focusToggleResult) focusPinned = !focusPinned; focusToggleResult }
+            } else null
         )
     }
 
@@ -193,5 +211,61 @@ class LensAccessibilityHelperTest {
 
         assertFalse(result)
         assertEquals(-1, lastClickedIndex)
+    }
+
+    // ============================================================ FISH-029 (narrow TalkBack exception)
+
+    @Test
+    fun `host node exposes exactly one toggle focus lock action and app nodes do not`() {
+        val helper = createHelper(withFocusLock = true)
+        val host = AccessibilityNodeInfoCompat.wrap(AccessibilityNodeInfo.obtain())
+        helper.testPopulateNodeForHost(host)
+        val ids = host.actionList.map { it.id }
+        assertEquals(1, ids.count { it == com.mckimquyen.R.id.action_toggle_focus_lock })
+        assertEquals(ACTION_TITLE, host.actionList.first { it.id == com.mckimquyen.R.id.action_toggle_focus_lock }.label)
+
+        val app = AccessibilityNodeInfoCompat.wrap(AccessibilityNodeInfo.obtain())
+        helper.testPopulateNodeForVirtualView(0, app)
+        assertFalse(app.actionList.any { it.id == com.mckimquyen.R.id.action_toggle_focus_lock })
+    }
+
+    @Test
+    fun `host action toggles deterministically and reports state description`() {
+        val helper = createHelper(withFocusLock = true)
+        assertTrue(helper.testPerformActionForHost(com.mckimquyen.R.id.action_toggle_focus_lock))
+        assertTrue(focusPinned)
+        val pinned = AccessibilityNodeInfoCompat.wrap(AccessibilityNodeInfo.obtain())
+        helper.testPopulateNodeForHost(pinned)
+        assertEquals(STATE_LOCKED, pinned.stateDescription)
+
+        assertTrue(helper.testPerformActionForHost(com.mckimquyen.R.id.action_toggle_focus_lock))
+        assertFalse(focusPinned)
+        val released = AccessibilityNodeInfoCompat.wrap(AccessibilityNodeInfo.obtain())
+        helper.testPopulateNodeForHost(released)
+        assertEquals(STATE_RELEASED, released.stateDescription)
+        assertEquals(2, focusToggleCalls)
+    }
+
+    @Test
+    fun `host action reports failure and leaves state unchanged when the view cannot toggle`() {
+        focusToggleResult = false
+        val helper = createHelper(withFocusLock = true)
+        assertFalse(helper.testPerformActionForHost(com.mckimquyen.R.id.action_toggle_focus_lock))
+        assertFalse(focusPinned)
+    }
+
+    @Test
+    fun `no focus lock action without a toggle handler`() {
+        val helper = createHelper(withFocusLock = false)
+        val host = AccessibilityNodeInfoCompat.wrap(AccessibilityNodeInfo.obtain())
+        helper.testPopulateNodeForHost(host)
+        assertFalse(host.actionList.any { it.id == com.mckimquyen.R.id.action_toggle_focus_lock })
+        assertFalse(helper.testPerformActionForHost(com.mckimquyen.R.id.action_toggle_focus_lock))
+    }
+
+    private companion object {
+        const val ACTION_TITLE = "Toggle focus lock"
+        const val STATE_LOCKED = "Focus locked"
+        const val STATE_RELEASED = "Focus released"
     }
 }

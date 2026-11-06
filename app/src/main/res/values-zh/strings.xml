@@ -323,4 +323,7 @@
     <string name="lens_lock_last_unlocked">请至少保留一个未锁定的镜头。</string>
     <string name="lens_lock_no_auth">请先在此设备上设置屏幕锁或生物识别。这只是应用内的隐私保护，不能替代设备锁。</string>
     <string name="lens_delete_last_unlocked">无法删除最后一个未锁定的镜头。</string>
+    <string name="lens_focus_lock_action">切换焦点锁定</string>
+    <string name="lens_focus_locked">焦点已锁定</string>
+    <string name="lens_focus_unlocked">焦点已释放</string>
 </resources>

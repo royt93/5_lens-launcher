@@ -354,4 +354,7 @@
     <string name="lens_lock_last_unlocked">أبقِ عدسة واحدة على الأقل غير مقفلة.</string>
     <string name="lens_lock_no_auth">فعّل قفل الشاشة أو القياسات الحيوية على الجهاز أولاً. هذه حماية خصوصية داخل التطبيق فقط ولا تغني عن قفل الجهاز.</string>
     <string name="lens_delete_last_unlocked">لا يمكن حذف آخر عدسة غير مقفلة.</string>
+    <string name="lens_focus_lock_action">تبديل قفل التركيز</string>
+    <string name="lens_focus_locked">تم قفل التركيز</string>
+    <string name="lens_focus_unlocked">تم إلغاء قفل التركيز</string>
 </resources>

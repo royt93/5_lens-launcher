@@ -373,4 +373,7 @@
     <string name="lens_lock_last_unlocked">Keep at least one lens unlocked.</string>
     <string name="lens_lock_no_auth">Set a screen lock or biometric on this device first. This is an in-app privacy guard only; it does not replace your device lock.</string>
     <string name="lens_delete_last_unlocked">Can\'t delete the last unlocked lens.</string>
+    <string name="lens_focus_lock_action">Toggle focus lock</string>
+    <string name="lens_focus_locked">Focus locked</string>
+    <string name="lens_focus_unlocked">Focus released</string>
 </resources>

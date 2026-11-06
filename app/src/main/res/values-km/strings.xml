@@ -323,4 +323,7 @@
     <string name="lens_lock_last_unlocked">សូមទុកកែវយ៉ាងហោចណាស់មួយមិនចាក់សោ។</string>
     <string name="lens_lock_no_auth">សូមកំណត់ការចាក់សោអេក្រង់ ឬជីវមាត្រលើឧបករណ៍នេះជាមុនសិន។ នេះគ្រាន់តែជាការការពារភាពឯកជនក្នុងកម្មវិធី មិនជំនួសការចាក់សោឧបករណ៍ទេ។</string>
     <string name="lens_delete_last_unlocked">មិនអាចលុបកែវចុងក្រោយដែលមិនចាក់សោបានទេ។</string>
+    <string name="lens_focus_lock_action">បិទ/បើកការចាក់សោកំណត់ចំណុចផ្តោត</string>
+    <string name="lens_focus_locked">បានចាក់សោចំណុចផ្តោត</string>
+    <string name="lens_focus_unlocked">បានដោះសោចំណុចផ្តោត</string>
 </resources>

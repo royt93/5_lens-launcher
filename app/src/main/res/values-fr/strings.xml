@@ -333,4 +333,7 @@
     <string name="lens_lock_last_unlocked">Gardez au moins une lentille déverrouillée.</string>
     <string name="lens_lock_no_auth">Configurez d’abord un verrouillage d’écran ou la biométrie. Ce n’est qu’une protection de confidentialité dans l’appli et ne remplace pas le verrouillage de l’appareil.</string>
     <string name="lens_delete_last_unlocked">Impossible de supprimer la dernière lentille déverrouillée.</string>
+    <string name="lens_focus_lock_action">Basculer le verrouillage de la mise au point</string>
+    <string name="lens_focus_locked">Mise au point verrouillée</string>
+    <string name="lens_focus_unlocked">Mise au point libérée</string>
 </resources>

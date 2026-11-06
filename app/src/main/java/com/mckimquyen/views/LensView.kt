@@ -381,6 +381,9 @@ class LensView : View {
             mFocusLockY = y
             invalidate()
         }
+        announceForAccessibility(context.getString(
+            if (mFocusLockPinned) R.string.lens_focus_locked else R.string.lens_focus_unlocked
+        ))
         return true
     }
 
@@ -1186,6 +1189,8 @@ class LensView : View {
             onAppHidden = { index -> mApps?.getOrNull(index)?.let(::hideFromLens) },
             onAppMoveRequested = { index -> mApps?.getOrNull(index)?.let(::chooseMoveTarget) },
             moveAvailableProvider = { mHasOtherLenses },
+            focusLockPinnedProvider = { mFocusLockPinned },
+            onFocusLockToggle = { toggleFocusLockAt(width / 2f, height / 2f) },
             // UI-024: TalkBack must honor the same toggle the visual badge paths do.
             showBadgesSettingProvider = {
                 mUtilSettings?.let {

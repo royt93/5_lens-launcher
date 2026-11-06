@@ -338,4 +338,7 @@
     <string name="lens_lock_last_unlocked">Оставьте хотя бы одну линзу разблокированной.</string>
     <string name="lens_lock_no_auth">Сначала настройте блокировку экрана или биометрию. Это лишь защита приватности внутри приложения, она не заменяет блокировку устройства.</string>
     <string name="lens_delete_last_unlocked">Нельзя удалить последнюю разблокированную линзу.</string>
+    <string name="lens_focus_lock_action">Переключить фиксацию фокуса</string>
+    <string name="lens_focus_locked">Фокус зафиксирован</string>
+    <string name="lens_focus_unlocked">Фокус освобождён</string>
 </resources>

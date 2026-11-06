@@ -333,4 +333,7 @@
     <string name="lens_lock_last_unlocked">Mantieni almeno una lente sbloccata.</string>
     <string name="lens_lock_no_auth">Imposta prima un blocco schermo o la biometria. È solo una protezione della privacy nell’app e non sostituisce il blocco del dispositivo.</string>
     <string name="lens_delete_last_unlocked">Impossibile eliminare l’ultima lente sbloccata.</string>
+    <string name="lens_focus_lock_action">Attiva/disattiva blocco messa a fuoco</string>
+    <string name="lens_focus_locked">Messa a fuoco bloccata</string>
+    <string name="lens_focus_unlocked">Messa a fuoco rilasciata</string>
 </resources>

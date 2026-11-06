@@ -2,4 +2,5 @@
 <resources>
     <item name="lensGroupChoiceTitle" type="id" />
     <item name="lensGroupChoiceList" type="id" />
+    <item name="action_toggle_focus_lock" type="id" />
 </resources>

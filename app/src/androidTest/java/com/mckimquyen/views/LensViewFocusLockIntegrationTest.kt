@@ -156,6 +156,30 @@ class LensViewFocusLockIntegrationTest {
         assertFalse("detach must clear pinned focus", view.isFocusPinnedForTest())
     }
 
+    @Test fun hostAccessibilityActionPinsCentreThenReleasesAndNeverLaunches() = withView { view ->
+        var launched = 0
+        view.setPackageManager(null)
+        val actionId = com.mckimquyen.R.id.action_toggle_focus_lock
+        val node = androidx.core.view.accessibility.AccessibilityNodeInfoCompat.obtain()
+        instrumentation.runOnMainSync {
+            androidx.core.view.ViewCompat.onInitializeAccessibilityNodeInfo(view, node)
+        }
+        assertEquals("host exposes exactly one focus-lock action", 1, node.actionList.count { it.id == actionId })
+        assertTrue(node.actionList.first { it.id == actionId }.label?.isNotBlank() == true)
+
+        var first = false
+        instrumentation.runOnMainSync { first = view.performAccessibilityAction(actionId, null) }
+        assertTrue(first)
+        assertTrue(view.isFocusPinnedForTest())
+        assertEquals(view.width / 2f to view.height / 2f, view.pinnedFocusForTest())
+
+        var second = false
+        instrumentation.runOnMainSync { second = view.performAccessibilityAction(actionId, null) }
+        assertTrue(second)
+        assertFalse(view.isFocusPinnedForTest())
+        assertEquals("accessibility toggle must never launch an app", 0, launched)
+    }
+
     private companion object {
         const val VIEW_SIZE_PX = 1_000
     }

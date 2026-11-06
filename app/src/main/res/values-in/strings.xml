@@ -323,4 +323,7 @@
     <string name="lens_lock_last_unlocked">Sisakan setidaknya satu lensa tidak terkunci.</string>
     <string name="lens_lock_no_auth">Atur kunci layar atau biometrik di perangkat ini dahulu. Ini hanya perlindungan privasi dalam aplikasi dan tidak menggantikan kunci perangkat.</string>
     <string name="lens_delete_last_unlocked">Lensa terakhir yang tidak terkunci tidak dapat dihapus.</string>
+    <string name="lens_focus_lock_action">Alihkan kunci fokus</string>
+    <string name="lens_focus_locked">Fokus terkunci</string>
+    <string name="lens_focus_unlocked">Fokus dilepas</string>
 </resources>

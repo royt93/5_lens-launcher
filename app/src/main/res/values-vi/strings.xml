@@ -330,4 +330,7 @@
     <string name="lens_lock_last_unlocked">Giữ ít nhất một thấu kính không bị khóa.</string>
     <string name="lens_lock_no_auth">Hãy cài khóa màn hình hoặc sinh trắc học trên máy trước. Đây chỉ là lớp bảo vệ riêng tư trong ứng dụng, không thay thế khóa thiết bị.</string>
     <string name="lens_delete_last_unlocked">Không thể xóa thấu kính chưa khóa cuối cùng.</string>
+    <string name="lens_focus_lock_action">Bật/tắt khóa tiêu điểm</string>
+    <string name="lens_focus_locked">Đã khóa tiêu điểm</string>
+    <string name="lens_focus_unlocked">Đã nhả tiêu điểm</string>
 </resources>
