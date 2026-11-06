@@ -665,6 +665,9 @@ class LensView : View {
         }
     @androidx.annotation.VisibleForTesting
     internal var depthOfFieldEnabled = UtilSettings.DEFAULT_DEPTH_OF_FIELD
+    /** FISH-034: sampled once per lens show/hide in LensAnimation, never per frame. */
+    @androidx.annotation.VisibleForTesting
+    internal var lensVignetteEnabled = UtilSettings.DEFAULT_LENS_VIGNETTE
     @androidx.annotation.VisibleForTesting
     internal var dofLastMode = DepthOfField.Mode.OFF
     @androidx.annotation.VisibleForTesting
@@ -1859,6 +1862,10 @@ class LensView : View {
         )
         dofLastMode = dofMode
         dofLastTransition = dofTransition
+        // FISH-034: same gate shape as depth-of-field; live touch only, so pinned focus/tilt never darken the rim.
+        val vignetteOn = LensVignette.shouldApply(
+            lensVignetteEnabled, mDrawType == DrawType.APPS && hasActiveTouch && dofTransition > 0f
+        )
         dofBandCounts.fill(0)
         val dofLayers = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S && dofMode == DepthOfField.Mode.BLUR) mDofLayers else null
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
@@ -1928,17 +1935,18 @@ class LensView : View {
             if (currentIndex < mDrawnRectsForTest.size) mDrawnRectsForTest[currentIndex].set(rect)
             if (mDrawType == DrawType.APPS) {
                 // FISH-007: blur only picks the target canvas/alpha - rect and hit-test above are untouched.
-                val dofIntensity = if (dofMode == DepthOfField.Mode.OFF) 0f else DepthOfField.intensity(
-                    DepthOfField.focusDistance(
-                        mTouchX, mTouchY, baseRect.centerX(), baseRect.centerY(),
-                        width.toFloat(), height.toFloat()
-                    ),
-                    dofTransition
-                )
+                // FISH-034: the vignette only lowers paint alpha, taking the lower of it and the DoF fallback.
+                val focusDistance = if (dofMode != DepthOfField.Mode.OFF || vignetteOn) DepthOfField.focusDistance(
+                    mTouchX, mTouchY, baseRect.centerX(), baseRect.centerY(),
+                    width.toFloat(), height.toFloat()
+                ) else 0f
+                val dofIntensity = if (dofMode == DepthOfField.Mode.OFF) 0f else DepthOfField.intensity(focusDistance, dofTransition)
                 val dofBand = DepthOfField.band(dofIntensity)
                 dofBandCounts[dofBand]++
-                if (dofMode == DepthOfField.Mode.ALPHA) {
-                    mPaintIcons?.alpha = DepthOfField.fallbackAlpha(dofIntensity)
+                if (dofMode == DepthOfField.Mode.ALPHA || vignetteOn) {
+                    val dofAlpha = if (dofMode == DepthOfField.Mode.ALPHA) DepthOfField.fallbackAlpha(dofIntensity) else DepthOfField.OPAQUE_ALPHA
+                    val vignetteAlpha = if (vignetteOn) LensVignette.alpha(LensVignette.intensity(focusDistance, dofTransition)) else LensVignette.OPAQUE_ALPHA
+                    mPaintIcons?.alpha = LensVignette.combine(dofAlpha, vignetteAlpha)
                 }
                 val iconCanvas = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
                     dofLayers?.canvas(dofBand) ?: canvas
@@ -2202,6 +2210,8 @@ class LensView : View {
             mReduceMotion = mGestureReduceMotion ?: LensPhysicsPolicy.shouldReduceLensMotion(context)
             depthOfFieldEnabled = mUtilSettings?.getBoolean(UtilSettings.KEY_DEPTH_OF_FIELD)
                 ?: UtilSettings.DEFAULT_DEPTH_OF_FIELD
+            lensVignetteEnabled = mUtilSettings?.getBoolean(UtilSettings.KEY_LENS_VIGNETTE)
+                ?: UtilSettings.DEFAULT_LENS_VIGNETTE
             mUtilSettings?.let {
                 duration = if (mReduceMotion) {
                     0L
