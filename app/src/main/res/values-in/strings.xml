@@ -328,4 +328,7 @@
     <string name="lens_focus_unlocked">Fokus dilepas</string>
     <string name="setting_lens_vignette">Vinyet tepi</string>
     <string name="setting_lens_vignette_hint">Meredupkan ikon yang jauh dari jari saat menggeser lensa. Nonaktif secara default.</string>
+    <string name="lens_rotate_forward_action">Putar urutan maju</string>
+    <string name="lens_rotate_back_action">Putar urutan mundur</string>
+    <string name="lens_rotate_announcement">Urutan diputar. Aplikasi pertama: %1$s</string>
 </resources>

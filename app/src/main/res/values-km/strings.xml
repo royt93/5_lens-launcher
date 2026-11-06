@@ -328,4 +328,7 @@
     <string name="lens_focus_unlocked">បានដោះសោចំណុចផ្តោត</string>
     <string name="setting_lens_vignette">ការបន្ថយពន្លឺគែម</string>
     <string name="setting_lens_vignette_hint">បន្ថយពន្លឺរូបតំណាងដែលនៅឆ្ងាយពីម្រាមដៃពេលអូសកញ្ចក់។ បិទតាមលំនាំដើម។</string>
+    <string name="lens_rotate_forward_action">បង្វិលលំដាប់ទៅមុខ</string>
+    <string name="lens_rotate_back_action">បង្វិលលំដាប់ថយក្រោយ</string>
+    <string name="lens_rotate_announcement">បានបង្វិលលំដាប់។ កម្មវិធីដំបូង៖ %1$s</string>
 </resources>

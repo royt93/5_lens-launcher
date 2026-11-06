@@ -338,4 +338,7 @@
     <string name="lens_focus_unlocked">Mise au point libérée</string>
     <string name="setting_lens_vignette">Vignettage des bords</string>
     <string name="setting_lens_vignette_hint">Atténue légèrement les icônes éloignées du doigt pendant le glissement de la lentille. Désactivé par défaut.</string>
+    <string name="lens_rotate_forward_action">Faire pivoter l\'ordre vers l\'avant</string>
+    <string name="lens_rotate_back_action">Faire pivoter l\'ordre vers l\'arrière</string>
+    <string name="lens_rotate_announcement">Ordre pivoté. Première appli : %1$s</string>
 </resources>

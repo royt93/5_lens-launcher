@@ -328,4 +328,7 @@
     <string name="lens_focus_unlocked">ปลดล็อกโฟกัสแล้ว</string>
     <string name="setting_lens_vignette">ขอบมืด</string>
     <string name="setting_lens_vignette_hint">ทำให้ไอคอนที่อยู่ไกลจากนิ้วมืดลงเล็กน้อยขณะลากเลนส์ ปิดไว้เป็นค่าเริ่มต้น</string>
+    <string name="lens_rotate_forward_action">หมุนลำดับไปข้างหน้า</string>
+    <string name="lens_rotate_back_action">หมุนลำดับย้อนกลับ</string>
+    <string name="lens_rotate_announcement">หมุนลำดับแล้ว แอปแรก: %1$s</string>
 </resources>

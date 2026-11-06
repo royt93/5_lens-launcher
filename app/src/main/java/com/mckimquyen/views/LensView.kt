@@ -48,6 +48,8 @@ import com.mckimquyen.util.FocusLockTapPolicy
 import com.mckimquyen.util.LensOverscrollPhysics
 import com.mckimquyen.util.LensPhysicsPolicy
 import com.mckimquyen.util.LensProfile
+import com.mckimquyen.util.RingGestureTracker
+import com.mckimquyen.util.RingRotation
 import com.mckimquyen.util.SmartFocusArranger
 import com.mckimquyen.util.UtilApp
 import com.mckimquyen.util.UtilCalculator
@@ -393,6 +395,162 @@ class LensView : View {
         return true
     }
 
+    // FISH-035: rotate the pinned focus ring to cycle the order inside each pinned/favorite group.
+    private enum class RingPhase { IDLE, WAITING, ROTATING, PAN_DECIDED, ABORTED }
+
+    private class RingPending(
+        val token: Long,
+        val baseSource: ArrayList<App>?,
+        val baseApps: ArrayList<App>?,
+        val preview: ArrayList<App>,
+        val announce: Boolean
+    )
+
+    var onRingRotatedListener: OnRingRotatedListener? = null
+    private var mRingPhase = RingPhase.IDLE
+    private val mRingTracker = RingGestureTracker(resources.displayMetrics.density)
+    private var mRingBaseApps: ArrayList<App>? = null
+    private var mRingAppliedSteps = 0
+    private var mRingPending: RingPending? = null
+    private var mRingNextToken = 0L
+
+    @VisibleForTesting internal fun isRingRotatingForTest(): Boolean = mRingPhase == RingPhase.ROTATING
+    @VisibleForTesting internal fun ringPendingTokenForTest(): Long? = mRingPending?.token
+
+    private fun ringGroupKey(app: App) = RingRotation.groupKeyOf(app.pinnedZone.rank, app.isFavorite)
+
+    private fun sameOrder(a: List<App>, b: List<App>) =
+        a.size == b.size && a.indices.all { a[it].identifier == b[it].identifier }
+
+    private fun canStartRing(pointerCount: Int) =
+        mFocusLockPinned && pointerCount == 1 && mRingPending == null && (mApps?.size ?: 0) >= 2
+
+    /** Restores the pre-gesture list if a preview is on screen, then forgets the gesture. Safe at any time. */
+    private fun cancelRingRotation() {
+        if (mRingPhase == RingPhase.ROTATING) mRingBaseApps?.let { mApps = ArrayList(it) }
+        mRingPhase = RingPhase.IDLE
+        mRingBaseApps = null
+        mRingAppliedSteps = 0
+        mRingTracker.reset()
+        mAccessibilityHelper?.invalidateRoot()
+        invalidate()
+    }
+
+    /** Home pause hook (Java caller in ActHome); a write already in flight is left to resolve. */
+    fun cancelRingRotationForPause() = cancelRingRotation()
+
+    /** Newer data replaced the list the preview was built from: forget the gesture and the pending commit. */
+    private fun dropRing() {
+        mRingPending = null
+        mRingPhase = if (mRingPhase == RingPhase.ROTATING) RingPhase.ABORTED else RingPhase.IDLE
+        mRingBaseApps = null
+        mRingAppliedSteps = 0
+        mRingTracker.reset()
+    }
+
+    @VisibleForTesting
+    internal fun startRingPreviewForTest(steps: Int) {
+        beginRingPreview()
+        val base = mRingBaseApps ?: return
+        mRingAppliedSteps = steps
+        mApps = ArrayList(RingRotation.rotateByGroup(base, steps, ::ringGroupKey))
+    }
+
+    private fun beginRingPreview() {
+        mRingBaseApps = ArrayList(mApps.orEmpty())
+        mRingAppliedSteps = 0
+        mRingPhase = RingPhase.ROTATING
+        mLongPressArmed = false
+        mLongPressHandler.removeCallbacks(mLongPressRunnable)
+        mFirstEmptyTap = null
+        mCurrentTapEligible = false
+        mCurrentTapSecond = false
+        resetFocusRing()
+        parent?.requestDisallowInterceptTouchEvent(true)
+        mTouchX = -Float.MAX_VALUE
+        mTouchY = -Float.MAX_VALUE
+        mSelectIndex = -1
+        mRectToSelect = null
+        if (mMoving) {
+            mMoving = false
+            startAnimation(LensAnimation(false))
+        }
+    }
+
+    private fun updateRingPreview() {
+        val base = mRingBaseApps ?: return
+        val steps = RingRotation.wholeSteps(mRingTracker.sweepRadians)
+        if (steps == mRingAppliedSteps) return
+        mRingAppliedSteps = steps
+        mApps = ArrayList(RingRotation.rotateByGroup(base, steps, ::ringGroupKey))
+        mAccessibilityHelper?.invalidateRoot()
+        invalidate()
+    }
+
+    /** Hands a finished preview to the host, or restores the base when nothing changed or nobody can confirm. */
+    private fun finishRingRotation() {
+        val base = mRingBaseApps
+        val preview = mApps
+        val listener = onRingRotatedListener
+        mRingPhase = RingPhase.IDLE
+        mRingBaseApps = null
+        mRingAppliedSteps = 0
+        mRingTracker.reset()
+        if (base == null || preview == null || listener == null || sameOrder(base, preview)) {
+            if (base != null) mApps = base
+            mAccessibilityHelper?.invalidateRoot()
+            invalidate()
+            return
+        }
+        submitRingRequest(base, preview, announce = false, listener = listener)
+    }
+
+    private fun submitRingRequest(
+        base: ArrayList<App>, preview: ArrayList<App>, announce: Boolean, listener: OnRingRotatedListener
+    ) {
+        val token = ++mRingNextToken
+        mRingPending = RingPending(token, mSourceApps?.let(::ArrayList), base, preview, announce)
+        listener.onRingRotated(RingRotationRequest(token, lensId, ArrayList(preview)))
+    }
+
+    /**
+     * The host's answer for [token]. `true`: the order is stored, so it becomes this view's source order and Smart Focus
+     * (already frozen by the host) keeps it. `false`: the write failed or lost a race, so the pre-gesture list comes back.
+     * Unknown or stale tokens are ignored.
+     */
+    fun resolveRingCommit(token: Long, committed: Boolean) {
+        val pending = mRingPending ?: return
+        if (pending.token != token) return
+        mRingPending = null
+        if (committed) {
+            mSourceApps = ArrayList(pending.preview)
+            applySmartFocusArrangement(force = true)
+            if (pending.announce) announceForAccessibility(context.getString(
+                R.string.lens_rotate_announcement, pending.preview.firstOrNull()?.label?.toString().orEmpty()
+            ))
+        } else {
+            mSourceApps = pending.baseSource
+            mApps = pending.baseApps
+            mAccessibilityHelper?.invalidateRoot()
+            invalidate()
+        }
+    }
+
+    /** TalkBack/host entry: one step (or [steps]) without a gesture. Returns false when nothing would change. */
+    internal fun rotateAndCommit(steps: Int): Boolean {
+        val listener = onRingRotatedListener ?: return false
+        val current = mApps ?: return false
+        if (current.size < 2 || mRingPending != null || mRingPhase == RingPhase.ROTATING) return false
+        val rotated = ArrayList(RingRotation.rotateByGroup(current, steps, ::ringGroupKey))
+        if (sameOrder(current, rotated)) return false
+        val base = ArrayList(current)
+        mApps = rotated
+        mAccessibilityHelper?.invalidateRoot()
+        invalidate()
+        submitRingRequest(base, rotated, announce = true, listener = listener)
+        return true
+    }
+
     // FISH-033: virtual lens centre drift while idle. Deliberately separate from mTouchX/mTouchY: those drive
     // hit-testing, depth of field, hover haptics and the touch ring, none of which tilt may ever trigger.
     private var mTiltX = 0f
@@ -434,6 +592,7 @@ class LensView : View {
         set(value) {
             if (field != value) {
                 field = value
+                dropRing()
                 mSmartFocusCols = -1
                 mSmartFocusRows = -1
                 applySmartFocusArrangement(force = true)
@@ -717,6 +876,7 @@ class LensView : View {
      *  for the next attach of this SAME instance (pager recycles rather than recreating views) —
      *  otherwise a re-attached page can redraw mid-gesture or with a stale selected cell highlighted. */
     private fun resetTouchState() {
+        cancelRingRotation()
         clearFocusLock()
         mTouchX = -Float.MAX_VALUE
         mTouchY = -Float.MAX_VALUE
@@ -774,15 +934,18 @@ class LensView : View {
     internal fun getAccessibilityHelper(): LensAccessibilityHelper? = mAccessibilityHelper
 
     fun setApps(apps: ArrayList<App>?) {
+        dropRing()
         mSourceApps = apps?.let(::ArrayList)
         applySmartFocusArrangement(force = true)
     }
 
     fun refreshSmartFocus() {
+        if (mRingPhase == RingPhase.ROTATING) return
         applySmartFocusArrangement(force = true)
     }
 
     private fun applySmartFocusArrangement(force: Boolean = false) {
+        if (!force && (mRingPhase == RingPhase.ROTATING || mRingPending != null)) return
         val source = mSourceApps ?: arrayListOf()
         val grid = mGridCache.grid
         val cols = grid?.itemCountHorizontal ?: -1
@@ -1462,6 +1625,13 @@ class LensView : View {
                 mHoldIndex = -1
                 mDragStarted = false
                 resetFocusRing()
+                if (mRingPhase == RingPhase.ROTATING) cancelRingRotation()   // a lost UP must not leave a preview behind
+                mRingPhase = RingPhase.IDLE
+                mRingTracker.reset()
+                if (canStartRing(event.pointerCount)) {
+                    mRingTracker.begin(mFocusLockX, mFocusLockY, event.x, event.y, event.eventTime)
+                    mRingPhase = if (mRingTracker.decision == RingRotation.Decision.PAN) RingPhase.PAN_DECIDED else RingPhase.WAITING
+                }
                 mCurrentTapEligible = FocusLockTapPolicy.acceptsEmptyTap(
                     armed = true,
                     moving = false,
@@ -1496,6 +1666,7 @@ class LensView : View {
             }
 
             MotionEvent.ACTION_POINTER_DOWN -> {
+                cancelRingRotation()
                 mFirstEmptyTap = null
                 mCurrentTapEligible = false
                 mCurrentTapSecond = false
@@ -1567,6 +1738,7 @@ class LensView : View {
                         mCurrentTapEligible = false
                         mCurrentTapSecond = false
                         mEdgeSwipeTriggered = true
+                        if (mRingPhase == RingPhase.WAITING) { mRingPhase = RingPhase.IDLE; mRingTracker.reset() }
                         parent?.requestDisallowInterceptTouchEvent(true)
                         mLongPressArmed = false
                         mLongPressHandler.removeCallbacks(mLongPressRunnable)
@@ -1589,6 +1761,7 @@ class LensView : View {
                     mCurrentTapEligible = false
                     mCurrentTapSecond = false
                     mSearchSwipeTriggered = true
+                    if (mRingPhase == RingPhase.WAITING) { mRingPhase = RingPhase.IDLE; mRingTracker.reset() }
                     mLongPressArmed = false
                     mLongPressHandler.removeCallbacks(mLongPressRunnable)
                     mSelectIndex = -1
@@ -1603,6 +1776,18 @@ class LensView : View {
                 }
                 if (searchDy <= 0f || abs(searchDx) >= searchDy) {
                     mSearchSwipeStartedInActivationZone = false
+                }
+                if (mRingPhase == RingPhase.ABORTED) return true
+                if (mRingPhase == RingPhase.WAITING) {
+                    when (mRingTracker.onMove(event.x, event.y, event.eventTime)) {
+                        RingRotation.Decision.ROTATE -> { beginRingPreview(); updateRingPreview(); return true }
+                        RingRotation.Decision.PAN -> mRingPhase = RingPhase.PAN_DECIDED   // old pan code below runs on this very event
+                        RingRotation.Decision.UNDECIDED -> return true
+                    }
+                } else if (mRingPhase == RingPhase.ROTATING) {
+                    mRingTracker.onMove(event.x, event.y, event.eventTime)
+                    updateRingPreview()
+                    return true
                 }
                 val dx = event.x - mTouchX
                 val dy = event.y - mTouchY
@@ -1670,6 +1855,20 @@ class LensView : View {
             MotionEvent.ACTION_UP -> {
                 mLongPressArmed = false
                 mLongPressHandler.removeCallbacks(mLongPressRunnable)
+                val ringPhase = mRingPhase
+                if (ringPhase == RingPhase.ROTATING || ringPhase == RingPhase.ABORTED) {
+                    if (ringPhase == RingPhase.ROTATING) finishRingRotation() else { mRingPhase = RingPhase.IDLE; mRingTracker.reset() }
+                    resetSearchSwipeState()
+                    gestureState = LensGestureState.IDLE
+                    mSelectIndex = -1
+                    mRectToSelect = null
+                    mTouchX = -Float.MAX_VALUE
+                    mTouchY = -Float.MAX_VALUE
+                    invalidate()
+                    return true
+                }
+                mRingPhase = RingPhase.IDLE
+                mRingTracker.reset()
                 val searchTriggered = mSearchSwipeTriggered
                 val edgeTriggered = mEdgeSwipeTriggered
                 resetSearchSwipeState()
@@ -1748,6 +1947,7 @@ class LensView : View {
             }
 
             MotionEvent.ACTION_CANCEL -> {
+                cancelRingRotation()
                 mFirstEmptyTap = null
                 mCurrentTapEligible = false
                 mCurrentTapSecond = false
@@ -2310,6 +2510,8 @@ class LensView : View {
             onSearchSwipeDownListener = null
             onAppMovedToLensListener = null
             onAppDragStartListener = null
+            onRingRotatedListener = null
+            mRingPending = null
             mHoldIndex = -1
             mDragStarted = false
             mApps = null

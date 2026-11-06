@@ -378,4 +378,7 @@
     <string name="lens_focus_unlocked">Focus released</string>
     <string name="setting_lens_vignette">Rim vignette</string>
     <string name="setting_lens_vignette_hint">Softly dims icons far from your finger while dragging the lens. Off by default.</string>
+    <string name="lens_rotate_forward_action">Rotate order forward</string>
+    <string name="lens_rotate_back_action">Rotate order back</string>
+    <string name="lens_rotate_announcement">Order rotated. First app: %1$s</string>
 </resources>

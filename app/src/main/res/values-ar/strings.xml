@@ -359,4 +359,7 @@
     <string name="lens_focus_unlocked">تم إلغاء قفل التركيز</string>
     <string name="setting_lens_vignette">تعتيم الحواف</string>
     <string name="setting_lens_vignette_hint">يخفّت الرموز البعيدة عن إصبعك أثناء سحب العدسة. متوقف افتراضيًا.</string>
+    <string name="lens_rotate_forward_action">تدوير الترتيب للأمام</string>
+    <string name="lens_rotate_back_action">تدوير الترتيب للخلف</string>
+    <string name="lens_rotate_announcement">تم تدوير الترتيب. أول تطبيق: %1$s</string>
 </resources>

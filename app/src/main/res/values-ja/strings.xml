@@ -328,4 +328,7 @@
     <string name="lens_focus_unlocked">フォーカスを解除</string>
     <string name="setting_lens_vignette">周辺減光</string>
     <string name="setting_lens_vignette_hint">レンズをドラッグ中、指から遠いアイコンをわずかに暗くします。初期設定はオフです。</string>
+    <string name="lens_rotate_forward_action">順序を前へ回転</string>
+    <string name="lens_rotate_back_action">順序を後ろへ回転</string>
+    <string name="lens_rotate_announcement">順序を回転しました。先頭のアプリ: %1$s</string>
 </resources>

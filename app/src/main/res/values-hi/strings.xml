@@ -333,4 +333,7 @@
     <string name="lens_focus_unlocked">फ़ोकस मुक्त है</string>
     <string name="setting_lens_vignette">किनारा धुंधलापन</string>
     <string name="setting_lens_vignette_hint">लेंस खींचते समय उंगली से दूर के आइकन हल्के धुंधले करता है। डिफ़ॉल्ट रूप से बंद।</string>
+    <string name="lens_rotate_forward_action">क्रम आगे घुमाएँ</string>
+    <string name="lens_rotate_back_action">क्रम पीछे घुमाएँ</string>
+    <string name="lens_rotate_announcement">क्रम घुमाया गया। पहला ऐप: %1$s</string>
 </resources>

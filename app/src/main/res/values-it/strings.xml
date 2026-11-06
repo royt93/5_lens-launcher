@@ -338,4 +338,7 @@
     <string name="lens_focus_unlocked">Messa a fuoco rilasciata</string>
     <string name="setting_lens_vignette">Vignettatura dei bordi</string>
     <string name="setting_lens_vignette_hint">Attenua leggermente le icone lontane dal dito mentre trascini la lente. Disattivato per impostazione predefinita.</string>
+    <string name="lens_rotate_forward_action">Ruota ordine in avanti</string>
+    <string name="lens_rotate_back_action">Ruota ordine indietro</string>
+    <string name="lens_rotate_announcement">Ordine ruotato. Prima app: %1$s</string>
 </resources>

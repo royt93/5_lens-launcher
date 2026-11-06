@@ -328,4 +328,7 @@
     <string name="lens_focus_unlocked">ປົດລັອກຈຸດໂຟກັດແລ້ວ</string>
     <string name="setting_lens_vignette">ການມືດຂອບ</string>
     <string name="setting_lens_vignette_hint">ເຮັດໃຫ້ໄອຄອນທີ່ຢູ່ໄກນິ້ວມືມືດລົງເລັກນ້ອຍເມື່ອລາກເລນ. ປິດຕາມຄ່າເລີ່ມຕົ້ນ.</string>
+    <string name="lens_rotate_forward_action">ໝູນລຳດັບໄປໜ້າ</string>
+    <string name="lens_rotate_back_action">ໝູນລຳດັບຖອຍຫຼັງ</string>
+    <string name="lens_rotate_announcement">ໝູນລຳດັບແລ້ວ. ແອັບທຳອິດ: %1$s</string>
 </resources>

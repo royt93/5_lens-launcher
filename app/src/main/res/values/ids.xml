@@ -3,4 +3,6 @@
     <item name="lensGroupChoiceTitle" type="id" />
     <item name="lensGroupChoiceList" type="id" />
     <item name="action_toggle_focus_lock" type="id" />
+    <item name="action_rotate_order_forward" type="id" />
+    <item name="action_rotate_order_back" type="id" />
 </resources>

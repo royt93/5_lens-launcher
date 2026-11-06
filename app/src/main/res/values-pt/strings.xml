@@ -338,4 +338,7 @@
     <string name="lens_focus_unlocked">Foco liberado</string>
     <string name="setting_lens_vignette">Vinheta nas bordas</string>
     <string name="setting_lens_vignette_hint">Escurece levemente os ícones longe do dedo ao arrastar a lente. Desativado por padrão.</string>
+    <string name="lens_rotate_forward_action">Girar ordem para frente</string>
+    <string name="lens_rotate_back_action">Girar ordem para trás</string>
+    <string name="lens_rotate_announcement">Ordem girada. Primeiro app: %1$s</string>
 </resources>

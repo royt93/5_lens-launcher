@@ -333,4 +333,7 @@
     <string name="lens_focus_unlocked">Fokus freigegeben</string>
     <string name="setting_lens_vignette">Randvignette</string>
     <string name="setting_lens_vignette_hint">Dunkelt Symbole weit vom Finger beim Ziehen der Linse leicht ab. Standardmäßig aus.</string>
+    <string name="lens_rotate_forward_action">Reihenfolge vorwärts drehen</string>
+    <string name="lens_rotate_back_action">Reihenfolge rückwärts drehen</string>
+    <string name="lens_rotate_announcement">Reihenfolge gedreht. Erste App: %1$s</string>
 </resources>
