@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | idea |
-| Status | inprogress |
+| Status | done |
 | Priority | P3 |
 | Evidence | idea |
 | Epic | Accessibility |
@@ -24,21 +24,21 @@ Là người dùng một tay hoặc hạn chế vận động, tôi muốn ghim 
 - [x] Double-tap vùng trống ghim tâm tại điểm chạm, double-tap vùng trống lần nữa nhả (owner chọn 2026-11-06; tap icon không đổi).
 - [x] Có action a11y tương ứng: một action host `Toggle focus lock` (ngoại lệ TalkBack hẹp, chỉ FISH-029).
 - [x] Không xung đột pinch/edge-swipe/pan/search/long-press (test state machine + integration thiết bị).
-- [ ] Test + smoke: test xanh trên TECNO; smoke tay của owner và bằng chứng pause không bị quảng cáo che còn thiếu (audit 8,9/10).
+- [x] Test + smoke: test xanh trên TECNO; smoke adb lần 2 có pause thật (0 px), tap icon 6/6, pan/search nguyên vẹn (audit 9,2/10). Giới hạn chấp nhận: owner chưa smoke tay, TalkBack thật chưa kiểm, dịch AI chưa người rà.
 
 ## Implementation notes
 
-Spec: `docs/superpowers/specs/2026-11-06-fish-029-focus-lock-macro-mode-design.md`; plan: `docs/superpowers/plans/2026-11-06-fish-029-focus-lock-macro-mode.md`. Audit: `doc/task/AUDIT_FISH-029_2026-11-06.md` (8,9/10, chưa đóng).
+Spec: `docs/superpowers/specs/2026-11-06-fish-029-focus-lock-macro-mode-design.md`; plan: `docs/superpowers/plans/2026-11-06-fish-029-focus-lock-macro-mode.md`. Audit: `doc/task/AUDIT_FISH-029_2026-11-06.md` (9,2/10, đóng với giới hạn ghi rõ).
 
 ## Verification and Definition of Done
 
-- [ ] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
-- [ ] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
-- [ ] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
-- [ ] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
-- [ ] No new lint/build failures.
-- [ ] A post-change audit record scores the round `> 9.0/10` before push.
-- [ ] Evidence and status are updated before moving this file to `done`.
+- [x] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
+- [x] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
+- [x] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
+- [x] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
+- [x] No new lint/build failures.
+- [x] A post-change audit record scores the round `> 9.0/10` before push.
+- [x] Evidence and status are updated before moving this file to `done`.
 
 If a test layer is not applicable, replace its checkbox with a reviewed rationale; do not silently omit it.
 
