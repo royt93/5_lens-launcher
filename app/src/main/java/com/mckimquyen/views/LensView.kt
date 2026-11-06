@@ -387,6 +387,9 @@ class LensView : View {
             mFocusLockPinned = true
             mFocusLockX = x
             mFocusLockY = y
+            // A pin has no lens animation, so the peaking flag is sampled here as well.
+            focusPeakingEnabled = mUtilSettings?.getBoolean(UtilSettings.KEY_FOCUS_PEAKING)
+                ?: UtilSettings.DEFAULT_FOCUS_PEAKING
             invalidate()
         }
         announceForAccessibility(context.getString(
@@ -828,6 +831,30 @@ class LensView : View {
     /** FISH-034: sampled once per lens show/hide in LensAnimation, never per frame. */
     @androidx.annotation.VisibleForTesting
     internal var lensVignetteEnabled = UtilSettings.DEFAULT_LENS_VIGNETTE
+
+    /** FISH-039: sampled in LensAnimation.init (live touch) and in toggleFocusLockAt (a pin has no animation). */
+    @androidx.annotation.VisibleForTesting
+    internal var focusPeakingEnabled = UtilSettings.DEFAULT_FOCUS_PEAKING
+    private var mPaintFocusPeaking: Paint? = null
+    private var mFocusPeakingPaddingPx = 0f
+    private var mFocusPeakingRings = 0
+    private var mFocusPeakingAlpha = 0
+    private var mFocusPeakingRinged = BooleanArray(0)
+
+    /** Rings drawn in the last frame. */
+    @androidx.annotation.VisibleForTesting
+    internal val focusPeakingRingsForTest: Int get() = mFocusPeakingRings
+
+    /** Alpha the rings used in the last frame; 0 when none were drawn. */
+    @androidx.annotation.VisibleForTesting
+    internal val focusPeakingAlphaForTest: Int get() = mFocusPeakingAlpha
+
+    /** One slot per cell: true when that cell was outlined in the last frame. */
+    @androidx.annotation.VisibleForTesting
+    internal val focusPeakingRingedForTest: BooleanArray get() = mFocusPeakingRinged
+
+    @androidx.annotation.VisibleForTesting
+    internal fun focusPeakingStrokePxForTest(): Float = mPaintFocusPeaking?.strokeWidth ?: 0f
     @androidx.annotation.VisibleForTesting
     internal var dofLastMode = DepthOfField.Mode.OFF
     @androidx.annotation.VisibleForTesting
@@ -1484,6 +1511,14 @@ class LensView : View {
             }
         }
 
+        mPaintFocusPeaking = Paint().apply {
+            isAntiAlias = true
+            style = Paint.Style.STROKE
+            strokeWidth = FocusPeaking.STROKE_DP * resources.displayMetrics.density
+            mUtilSettings?.let { color = it.highlightColorInt() }
+        }
+        mFocusPeakingPaddingPx = resources.getDimension(R.dimen.padding_focus_halo)
+
         mPaintText = Paint()
         mPaintText?.apply {
             isAntiAlias = true
@@ -2069,6 +2104,16 @@ class LensView : View {
         val vignetteOn = LensVignette.shouldApply(
             lensVignetteEnabled, mDrawType == DrawType.APPS && hasActiveTouch && dofTransition > 0f
         )
+        // FISH-039: needs a visual focus centre (live touch or pin), so idle and tilt never outline; a pin has no
+        // transition, so it is opaque, while a live touch follows the lens transition (snapping under reduced motion).
+        val peakingOn = FocusPeaking.shouldApply(focusPeakingEnabled, focusCenter != null, mDrawType == DrawType.APPS)
+        val peakingAlpha = if (peakingOn) FocusPeaking.alpha(pinnedOnly = !hasActiveTouch, transition = dofTransition) else 0
+        val peakingDraw = peakingOn && peakingAlpha > 0
+        if (peakingDraw) prepareFocusPeakingPaint(peakingAlpha)
+        mFocusPeakingRings = 0
+        mFocusPeakingAlpha = if (peakingDraw) peakingAlpha else 0
+        if (mFocusPeakingRinged.size != baseRects.size) mFocusPeakingRinged = BooleanArray(baseRects.size)
+        mFocusPeakingRinged.fill(false)
         dofBandCounts.fill(0)
         val dofLayers = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S && dofMode == DepthOfField.Mode.BLUR) mDofLayers else null
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
@@ -2157,6 +2202,17 @@ class LensView : View {
                     canvas
                 }
                 drawAppIcon(iconCanvas, rect, currentIndex)
+                if (peakingDraw && focusCenter != null) {
+                    val peakDistance = DepthOfField.focusDistance(
+                        focusCenter.x, focusCenter.y, baseRect.centerX(), baseRect.centerY(),
+                        width.toFloat(), height.toFloat()
+                    )
+                    if (FocusPeaking.isSharp(peakDistance)) {
+                        drawFocusPeakingRing(iconCanvas, rect)
+                        mFocusPeakingRings++
+                        if (currentIndex < mFocusPeakingRinged.size) mFocusPeakingRinged[currentIndex] = true
+                    }
+                }
             } else if (mDrawType == DrawType.CIRCLES) {
                 drawCircle(canvas, rect)
             }
@@ -2181,6 +2237,19 @@ class LensView : View {
             drawAppName(canvas, mRectToSelect)
         }
         drawFocusRing(canvas)
+    }
+
+    /** FISH-039: one frame's colour and alpha; the colour is the highlight onDraw already resolved this frame. */
+    private fun prepareFocusPeakingPaint(alpha: Int) {
+        val paint = mPaintFocusPeaking ?: return
+        paint.color = mPaintNewAppTag?.color ?: paint.color
+        paint.alpha = alpha
+    }
+
+    /** FISH-039: bold outline around one sharp icon; reuses one Paint, no per-frame allocation. */
+    private fun drawFocusPeakingRing(canvas: Canvas, rect: RectF) {
+        val paint = mPaintFocusPeaking ?: return
+        canvas.drawCircle(rect.centerX(), rect.centerY(), rect.width() / 2f + mFocusPeakingPaddingPx, paint)
     }
 
     /** FISH-024: thin accent ring around the magnified icon; reuses one Paint, no per-frame allocation. */
@@ -2415,6 +2484,8 @@ class LensView : View {
                 ?: UtilSettings.DEFAULT_DEPTH_OF_FIELD
             lensVignetteEnabled = mUtilSettings?.getBoolean(UtilSettings.KEY_LENS_VIGNETTE)
                 ?: UtilSettings.DEFAULT_LENS_VIGNETTE
+            focusPeakingEnabled = mUtilSettings?.getBoolean(UtilSettings.KEY_FOCUS_PEAKING)
+                ?: UtilSettings.DEFAULT_FOCUS_PEAKING
             mUtilSettings?.let {
                 duration = if (mReduceMotion) {
                     0L
@@ -2515,6 +2586,8 @@ class LensView : View {
             onAppDragStartListener = null
             onRingRotatedListener = null
             mRingPending = null
+            mFocusPeakingRings = 0
+            mFocusPeakingAlpha = 0
             mHoldIndex = -1
             mDragStarted = false
             mApps = null
