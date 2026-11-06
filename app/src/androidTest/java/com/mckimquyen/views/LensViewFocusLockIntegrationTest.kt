@@ -45,12 +45,14 @@ class LensViewFocusLockIntegrationTest {
         }
     }
 
-    private fun tap(view: LensView, x: Float, y: Float, downTime: Long = SystemClock.uptimeMillis()) {
+    private fun tap(
+        view: LensView, x: Float, y: Float, downTime: Long = SystemClock.uptimeMillis(), drawBetween: Boolean = true
+    ) {
         instrumentation.runOnMainSync {
             val down = MotionEvent.obtain(downTime, downTime, MotionEvent.ACTION_DOWN, x, y, 0)
             view.dispatchTouchEvent(down)
             down.recycle()
-            view.draw(Canvas())
+            if (drawBetween) view.draw(Canvas())
             val upTime = SystemClock.uptimeMillis()
             val up = MotionEvent.obtain(downTime, upTime, MotionEvent.ACTION_UP, x, y, 0)
             view.dispatchTouchEvent(up)
@@ -178,6 +180,20 @@ class LensViewFocusLockIntegrationTest {
         assertTrue(second)
         assertFalse(view.isFocusPinnedForTest())
         assertEquals("accessibility toggle must never launch an app", 0, launched)
+    }
+
+    /** adb/automation taps have no frame between DOWN and UP, so hit-testing cannot rely on a prior draw. */
+    @Test fun twoInstantTapsOnAnIconNeverPinFocus() = withView { view ->
+        val bounds = Rect()
+        var centre = 0f to 0f
+        instrumentation.runOnMainSync {
+            assertTrue(view.getAppBounds(0, bounds))
+            centre = bounds.exactCenterX() to bounds.exactCenterY()
+        }
+        tap(view, centre.first, centre.second, drawBetween = false)
+        SystemClock.sleep(80)
+        tap(view, centre.first, centre.second, drawBetween = false)
+        assertFalse("an icon is not empty space, even without a frame between DOWN and UP", view.isFocusPinnedForTest())
     }
 
     private companion object {

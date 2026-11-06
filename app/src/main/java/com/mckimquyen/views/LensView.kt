@@ -805,6 +805,14 @@ class LensView : View {
         mPackageManager = packageManager
     }
 
+    /** Index of the app whose resting cell contains the point, or -1 for empty space. */
+    private fun iconIndexAt(x: Float, y: Float): Int {
+        val rects = mGridCache.baseRects
+        val count = minOf(rects.size, mApps?.size ?: 0)
+        for (i in 0 until count) if (rects[i].contains(x, y)) return i
+        return -1
+    }
+
     fun getAppBounds(index: Int, outRect: Rect): Boolean {
         val baseRects = mGridCache.baseRects
         if (index in baseRects.indices) {
@@ -1456,7 +1464,9 @@ class LensView : View {
                     moving = false,
                     longPressTriggered = false,
                     pointerCount = event.pointerCount,
-                    selectedIndex = mSelectIndex,
+                    // mSelectIndex is only refreshed by drawGrid, so a tap that lands before the next frame
+                    // would see a stale -1; hit-test the resting cells directly instead.
+                    selectedIndex = iconIndexAt(event.x, event.y),
                     x = event.x,
                     y = event.y,
                     width = width,
