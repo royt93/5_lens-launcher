@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | exclusive |
-| Status | todo |
+| Status | inprogress |
 | Priority | P3 |
 | Evidence | idea |
 | Epic | Fisheye Smart |
@@ -28,7 +28,7 @@ Là người dùng, tôi muốn độ cong có cảm giác quang học thật.
 
 ## Implementation notes
 
-Gộp N4 (audit lens) và EX-4 (audit model).
+Gộp N4 (audit lens) và EX-4 (audit model). Owner chọn 2026-11-06: **chỉ vignette** trong story này (giảm alpha icon theo khoảng cách, chỉ khi lens đang phóng); phần **sai sắc (chromatic aberration)** tách thành story riêng. Spec: `docs/superpowers/specs/2026-11-06-fish-034-vignette-rim-design.md`; plan: `docs/superpowers/plans/2026-11-06-fish-034-vignette-rim.md`.
 
 ## Verification and Definition of Done
 
