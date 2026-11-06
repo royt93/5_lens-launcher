@@ -376,4 +376,6 @@
     <string name="lens_focus_lock_action">Toggle focus lock</string>
     <string name="lens_focus_locked">Focus locked</string>
     <string name="lens_focus_unlocked">Focus released</string>
+    <string name="setting_lens_vignette">Rim vignette</string>
+    <string name="setting_lens_vignette_hint">Softly dims icons far from your finger while dragging the lens. Off by default.</string>
 </resources>

@@ -331,4 +331,6 @@
     <string name="lens_focus_lock_action">फ़ोकस लॉक टॉगल करें</string>
     <string name="lens_focus_locked">फ़ोकस लॉक है</string>
     <string name="lens_focus_unlocked">फ़ोकस मुक्त है</string>
+    <string name="setting_lens_vignette">किनारा धुंधलापन</string>
+    <string name="setting_lens_vignette_hint">लेंस खींचते समय उंगली से दूर के आइकन हल्के धुंधले करता है। डिफ़ॉल्ट रूप से बंद।</string>
 </resources>

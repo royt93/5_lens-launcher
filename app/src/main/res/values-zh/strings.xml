@@ -326,4 +326,6 @@
     <string name="lens_focus_lock_action">切换焦点锁定</string>
     <string name="lens_focus_locked">焦点已锁定</string>
     <string name="lens_focus_unlocked">焦点已释放</string>
+    <string name="setting_lens_vignette">边缘暗角</string>
+    <string name="setting_lens_vignette_hint">拖动镜头时轻微压暗远离手指的图标。默认关闭。</string>
 </resources>

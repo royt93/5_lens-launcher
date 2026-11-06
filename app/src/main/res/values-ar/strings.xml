@@ -357,4 +357,6 @@
     <string name="lens_focus_lock_action">تبديل قفل التركيز</string>
     <string name="lens_focus_locked">تم قفل التركيز</string>
     <string name="lens_focus_unlocked">تم إلغاء قفل التركيز</string>
+    <string name="setting_lens_vignette">تعتيم الحواف</string>
+    <string name="setting_lens_vignette_hint">يخفّت الرموز البعيدة عن إصبعك أثناء سحب العدسة. متوقف افتراضيًا.</string>
 </resources>

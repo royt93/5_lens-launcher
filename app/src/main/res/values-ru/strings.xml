@@ -341,4 +341,6 @@
     <string name="lens_focus_lock_action">Переключить фиксацию фокуса</string>
     <string name="lens_focus_locked">Фокус зафиксирован</string>
     <string name="lens_focus_unlocked">Фокус освобождён</string>
+    <string name="setting_lens_vignette">Виньетирование краёв</string>
+    <string name="setting_lens_vignette_hint">Слегка затемняет значки вдали от пальца при перетаскивании линзы. По умолчанию выключено.</string>
 </resources>

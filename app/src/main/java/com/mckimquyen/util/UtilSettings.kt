@@ -82,6 +82,8 @@ class UtilSettings(context: Context) {
         const val DEFAULT_KEEP_SCREEN_ON = false
         // FISH-007: depth-of-field blur is opt-in (owner decision), off by default.
         const val DEFAULT_DEPTH_OF_FIELD = false
+        // FISH-034: rim vignette is opt-in, off by default.
+        const val DEFAULT_LENS_VIGNETTE = false
         // FISH-026: damped lens overscroll is enabled by default.
         const val DEFAULT_LENS_ELASTIC_OVERSCROLL = true
         // FISH-033: tilt parallax is opt-in (motion sickness and battery risk), off by default.
@@ -148,6 +150,7 @@ class UtilSettings(context: Context) {
         const val KEY_SHOW_SEARCH_BAR = "show_search_bar"
         const val KEY_KEEP_SCREEN_ON = "keep_screen_on"
         const val KEY_DEPTH_OF_FIELD = "depth_of_field_blur"
+        const val KEY_LENS_VIGNETTE = "lens_vignette"
         const val KEY_LENS_ELASTIC_OVERSCROLL = "lens_elastic_overscroll"
         /** FISH-033: global (not per-lens) toggle for the idle lens centre drifting with device tilt. */
         const val KEY_TILT_PARALLAX = "tilt_parallax"
@@ -356,6 +359,7 @@ class UtilSettings(context: Context) {
         KEY_SHOW_SEARCH_BAR -> prefs.getBoolean(name, DEFAULT_SHOW_SEARCH_BAR)
         KEY_KEEP_SCREEN_ON -> prefs.getBoolean(name, DEFAULT_KEEP_SCREEN_ON)
         KEY_DEPTH_OF_FIELD -> prefs.getBoolean(name, DEFAULT_DEPTH_OF_FIELD)
+        KEY_LENS_VIGNETTE -> prefs.getBoolean(name, DEFAULT_LENS_VIGNETTE)
         KEY_LENS_ELASTIC_OVERSCROLL -> prefs.getBoolean(name, DEFAULT_LENS_ELASTIC_OVERSCROLL)
         KEY_TILT_PARALLAX -> prefs.getBoolean(name, DEFAULT_TILT_PARALLAX)
         KEY_SMART_FOCUS_BIAS -> prefs.getBoolean(name, DEFAULT_SMART_FOCUS_BIAS)

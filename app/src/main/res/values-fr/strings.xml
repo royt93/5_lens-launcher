@@ -336,4 +336,6 @@
     <string name="lens_focus_lock_action">Basculer le verrouillage de la mise au point</string>
     <string name="lens_focus_locked">Mise au point verrouillée</string>
     <string name="lens_focus_unlocked">Mise au point libérée</string>
+    <string name="setting_lens_vignette">Vignettage des bords</string>
+    <string name="setting_lens_vignette_hint">Atténue légèrement les icônes éloignées du doigt pendant le glissement de la lentille. Désactivé par défaut.</string>
 </resources>

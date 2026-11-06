@@ -336,4 +336,6 @@
     <string name="lens_focus_lock_action">Alternar bloqueo de enfoque</string>
     <string name="lens_focus_locked">Enfoque bloqueado</string>
     <string name="lens_focus_unlocked">Enfoque liberado</string>
+    <string name="setting_lens_vignette">Viñeteado de bordes</string>
+    <string name="setting_lens_vignette_hint">Atenúa suavemente los iconos lejos de tu dedo al arrastrar la lente. Desactivado por defecto.</string>
 </resources>

@@ -326,4 +326,6 @@
     <string name="lens_focus_lock_action">สลับการล็อกโฟกัส</string>
     <string name="lens_focus_locked">ล็อกโฟกัสแล้ว</string>
     <string name="lens_focus_unlocked">ปลดล็อกโฟกัสแล้ว</string>
+    <string name="setting_lens_vignette">ขอบมืด</string>
+    <string name="setting_lens_vignette_hint">ทำให้ไอคอนที่อยู่ไกลจากนิ้วมืดลงเล็กน้อยขณะลากเลนส์ ปิดไว้เป็นค่าเริ่มต้น</string>
 </resources>

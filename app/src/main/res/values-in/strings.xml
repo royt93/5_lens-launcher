@@ -326,4 +326,6 @@
     <string name="lens_focus_lock_action">Alihkan kunci fokus</string>
     <string name="lens_focus_locked">Fokus terkunci</string>
     <string name="lens_focus_unlocked">Fokus dilepas</string>
+    <string name="setting_lens_vignette">Vinyet tepi</string>
+    <string name="setting_lens_vignette_hint">Meredupkan ikon yang jauh dari jari saat menggeser lensa. Nonaktif secara default.</string>
 </resources>

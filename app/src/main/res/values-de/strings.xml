@@ -331,4 +331,6 @@
     <string name="lens_focus_lock_action">Fokussperre umschalten</string>
     <string name="lens_focus_locked">Fokus gesperrt</string>
     <string name="lens_focus_unlocked">Fokus freigegeben</string>
+    <string name="setting_lens_vignette">Randvignette</string>
+    <string name="setting_lens_vignette_hint">Dunkelt Symbole weit vom Finger beim Ziehen der Linse leicht ab. Standardmäßig aus.</string>
 </resources>

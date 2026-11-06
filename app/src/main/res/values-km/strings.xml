@@ -326,4 +326,6 @@
     <string name="lens_focus_lock_action">បិទ/បើកការចាក់សោកំណត់ចំណុចផ្តោត</string>
     <string name="lens_focus_locked">បានចាក់សោចំណុចផ្តោត</string>
     <string name="lens_focus_unlocked">បានដោះសោចំណុចផ្តោត</string>
+    <string name="setting_lens_vignette">ការបន្ថយពន្លឺគែម</string>
+    <string name="setting_lens_vignette_hint">បន្ថយពន្លឺរូបតំណាងដែលនៅឆ្ងាយពីម្រាមដៃពេលអូសកញ្ចក់។ បិទតាមលំនាំដើម។</string>
 </resources>

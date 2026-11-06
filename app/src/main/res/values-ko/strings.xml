@@ -326,4 +326,6 @@
     <string name="lens_focus_lock_action">초점 고정 전환</string>
     <string name="lens_focus_locked">초점 고정됨</string>
     <string name="lens_focus_unlocked">초점 고정 해제됨</string>
+    <string name="setting_lens_vignette">가장자리 비네팅</string>
+    <string name="setting_lens_vignette_hint">렌즈를 드래그하는 동안 손가락에서 먼 아이콘을 살짝 어둡게 합니다. 기본값은 꺼짐입니다.</string>
 </resources>

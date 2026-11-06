@@ -336,4 +336,6 @@
     <string name="lens_focus_lock_action">Alternar bloqueio de foco</string>
     <string name="lens_focus_locked">Foco bloqueado</string>
     <string name="lens_focus_unlocked">Foco liberado</string>
+    <string name="setting_lens_vignette">Vinheta nas bordas</string>
+    <string name="setting_lens_vignette_hint">Escurece levemente os ícones longe do dedo ao arrastar a lente. Desativado por padrão.</string>
 </resources>

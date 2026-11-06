@@ -333,4 +333,6 @@
     <string name="lens_focus_lock_action">Bật/tắt khóa tiêu điểm</string>
     <string name="lens_focus_locked">Đã khóa tiêu điểm</string>
     <string name="lens_focus_unlocked">Đã nhả tiêu điểm</string>
+    <string name="setting_lens_vignette">Tối viền ống kính</string>
+    <string name="setting_lens_vignette_hint">Làm tối nhẹ các biểu tượng xa ngón tay khi kéo lens. Mặc định tắt.</string>
 </resources>
