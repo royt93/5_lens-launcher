@@ -14,7 +14,9 @@ import com.google.android.material.tabs.TabLayoutMediator;
 import com.mckimquyen.R;
 import com.mckimquyen.adt.LensPagerAdapter;
 import com.mckimquyen.app.RApplication;
+import com.mckimquyen.model.AppPersistent;
 import com.mckimquyen.model.LensWorkspace;
+import com.mckimquyen.model.OrderCommitOutcome;
 import com.mckimquyen.util.LensLabelResolver;
 import com.mckimquyen.util.LensShortcuts;
 import com.mckimquyen.util.UtilSettings;
@@ -321,6 +323,23 @@ public final class LensViewHolder {
                         }
                     })
                     .show();
+        });
+        // FISH-035: a finished ring rotation is written first; only a confirmed write freezes the lens and is adopted.
+        view.setOnRingRotatedListener(request -> {
+            final LensView source = view;
+            AppPersistent.commitAppOrderBatch(request.getApps(), request.getLensId(), outcome -> {
+                boolean committed = outcome == OrderCommitOutcome.COMMITTED;
+                UtilSettings settings = utilSettings();
+                if (committed && settings != null) {
+                    settings.saveLensFrozen(request.getLensId(), true);
+                    host.activity().sendBroadcast(new android.content.Intent(
+                            host.activity(), com.mckimquyen.services.BroadcastReceivers.AppsEditedReceiver.class));
+                }
+                if (request.getLensId().equals(source.getLensId())) {
+                    source.resolveRingCommit(request.getToken(), committed);
+                }
+                return Unit.INSTANCE;
+            });
         });
         // FISH-038b: a held icon that moved becomes a system drag; the host shows the drop strip.
         view.setOnAppDragStartListener(new com.mckimquyen.views.OnAppDragStartListener() {

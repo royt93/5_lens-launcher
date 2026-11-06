@@ -448,8 +448,9 @@ class LensView : View {
         mRingTracker.reset()
     }
 
+    /** Public (not internal) because ActHome, a Java class, calls it; test-only. */
     @VisibleForTesting
-    internal fun startRingPreviewForTest(steps: Int) {
+    fun startRingPreviewForTest(steps: Int) {
         beginRingPreview()
         val base = mRingBaseApps ?: return
         mRingAppliedSteps = steps

@@ -1187,7 +1187,14 @@ public class ActHome extends ActBase implements LensViewHolderHost, HomeQuickAct
         updateTiltParallax();
         // FISH-029: focus lock is a Home-session visual aid and never outlives a pause.
         if (lensViews != null) lensViews.clearFocusLockForPause();
+        // FISH-035: an unfinished ring-rotation preview never outlives a pause (a write already in flight resolves itself).
+        if (lensViews != null) lensViews.cancelRingRotationForPause();
         super.onPause();
+    }
+
+    @androidx.annotation.VisibleForTesting
+    void startRingPreviewForTest(int steps) {
+        if (lensViews != null) lensViews.startRingPreviewForTest(steps);
     }
 
     /**

@@ -35,7 +35,7 @@ Cần chạy sau CORE-004 để tránh sort ghi đè thứ tự vừa chốt.
 - [ ] Unit tests cover pure logic, state transitions and failure branches (test đỏ trước, xanh sau sửa).
 - [ ] Widget/UI tests cover visible behavior, accessibility and lifecycle where applicable.
 - [ ] Integration tests cover subsystem boundaries and persistence/SDK contracts where applicable.
-- [ ] Smoke tests pass on the device locked for the session; record model, Android version, build SHA and timestamp; restore device state.
+- [ ] Smoke tests pass on Pixel 7 Pro `2B051FDH3006MU` locked by the owner for this story; record model, Android version, build SHA and timestamp; restore device state.
 - [ ] No new lint/build failures.
 - [ ] A post-change audit record scores the round `> 9.0/10` before push.
 - [ ] Evidence and status are updated before moving this file to `done`.

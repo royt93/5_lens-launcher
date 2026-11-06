@@ -19,7 +19,7 @@
 
 ## Global Constraints
 
-- TECNO KJ7 `115333744A005844` only; never Pixel `2B051FDH3006MU`, Samsung or OPPO. No Gradle `connected*`; use `adb -s 115333744A005844 shell am instrument`.
+- Pixel 7 Pro `2B051FDH3006MU` only for this execution (owner explicitly changed target on 2026-11-06); TECNO `2B051FDH3006MU`, Samsung and OPPO are locked out. No Gradle `connected*`; use `adb -s 2B051FDH3006MU shell am instrument`.
 - Before any device install: back up main APK, test APK and `databases shared_prefs` tar; SHA-256 every data member; record font/animator/transition/window scales, app locale and HOME resolver. After device work: restore and compare every hash and setting; stop if restore is not exact.
 - adb smoke uses `input swipe x y x y 80` (hold ≥ 80 ms). **Never `input tap`** on icons (`mSelectIndex` race, `doc/task/AUDIT_FISH-029_2026-11-06.md`). Chained `input swipe` calls are separate gestures and do NOT prove rotation.
 - If `AdActivity` covers the UI: stop and wait for the owner's `done` (R4). Never tap "Start (Ads may appear)".
@@ -1464,7 +1464,7 @@ fun interface OnRingRotatedListener {
   - **ACTION_CANCEL**, first line: `cancelRingRotation()` (restores an uncommitted preview; a pending write is untouched).
   - **`resetTouchState()`** (used by detach and export): add `cancelRingRotation()` as its first line.
   - **`onDetachedFromWindow`**, beside the other nulled listeners: `onRingRotatedListener = null` and `mRingPending = null`.
-- [ ] **Step 9: Verify GREEN (compile, JVM, then device).** `./gradlew testDevDebugUnitTest compileDevDebugAndroidTestKotlin`. After the Task 6 device backup procedure, run on TECNO: `LensViewRingRotateIntegrationTest` and the regression set `LensViewFocusLockIntegrationTest`, `LensViewPinchIntegrationTest`, `LensViewPagerGestureIntegrationTest`, `LensViewFocusRingIntegrationTest`, `LensViewReattachIntegrationTest`, `LensViewWidgetTest`, `LensViewQuickActionsIntegrationTest`, `LensViewVignetteWidgetTest`, `LensViewTiltIntegrationTest` — every class must print `OK (N)` with N > 0. If `aPinnedStraightDragIsAPanThatStartsOnlyAfterTheClassificationWindow` fails on the "still IDLE after 10 frames" assertion, the constants or the DOWN wiring are wrong — do not loosen the assertion.
+- [ ] **Step 9: Verify GREEN (compile, JVM, then device).** `./gradlew testDevDebugUnitTest compileDevDebugAndroidTestKotlin`. After the Task 6 device backup procedure, run on Pixel: `LensViewRingRotateIntegrationTest` and the regression set `LensViewFocusLockIntegrationTest`, `LensViewPinchIntegrationTest`, `LensViewPagerGestureIntegrationTest`, `LensViewFocusRingIntegrationTest`, `LensViewReattachIntegrationTest`, `LensViewWidgetTest`, `LensViewQuickActionsIntegrationTest`, `LensViewVignetteWidgetTest`, `LensViewTiltIntegrationTest` — every class must print `OK (N)` with N > 0. If `aPinnedStraightDragIsAPanThatStartsOnlyAfterTheClassificationWindow` fails on the "still IDLE after 10 frames" assertion, the constants or the DOWN wiring are wrong — do not loosen the assertion.
 - [ ] **Step 10: Commit.** `git add app/src/main/java/com/mckimquyen/views/LensView.kt app/src/main/java/com/mckimquyen/views/RingRotationRequest.kt app/src/androidTest/java/com/mckimquyen/views/LensViewRingRotateIntegrationTest.kt && git commit -m "feat(fish-035): rotate pinned focus ring order with confirmed adoption"` with the trailer.
 
 ---
@@ -1523,7 +1523,7 @@ class ActHomeRingRotateWidgetTest {
     }
 
     private fun storedLabels() = runBlocking { dao.getAllForLens(lensId) }.sortedBy { it.orderNumber }
-        .map { it.packageName.substringAfterLast('.').uppercase() }
+        .map { it.packageName?.substringAfterLast('.')?.uppercase() }
 
     private fun awaitGrid(scenario: ActivityScenario<ActHome>): LensView {
         var view: LensView? = null
@@ -1618,7 +1618,7 @@ class ActHomeRingRotateWidgetTest {
         }
     }
 
-    @Test fun anAnswerForAnotherLensAfterAPageRecycleDoesNotTouchTheView() {
+    @Test fun anAnswerForAnotherLensAfterAPageRecycleNeverResolvesTheRecycledView() {
         ActivityScenario.launch(ActHome::class.java).use { scenario ->
             val view = awaitGrid(scenario)
             val gate = java.util.concurrent.CountDownLatch(1)
@@ -1627,12 +1627,16 @@ class ActHomeRingRotateWidgetTest {
             try {
                 scenario.onActivity { assertTrue(view.rotateAndCommit(1)) }
                 assertTrue(parked.await(WAIT_MS, java.util.concurrent.TimeUnit.MILLISECONDS))
-                val other = ArrayList(fixture.reversed())
-                scenario.onActivity { view.setApps(other) }                       // the pager reused the view
+                val recycledFor = "recycled-for-another-lens"
+                scenario.onActivity { view.lensId = recycledFor }                // the pager reused the view for another lens
+                assertNull("re-binding the view dropped the pending request", view.ringPendingTokenForTest())
                 gate.countDown()
-                waitUntil("write confirmed") { storedLabels() == listOf("F", "E", "D", "B", "C", "A") }
+                waitUntil("the write for the original lens is confirmed and frozen") { UtilSettings(context).isLensFrozen(lensId) }
+                waitUntil("rows rewritten") { storedLabels() == listOf("F", "E", "D", "B", "C", "A") }
                 instrumentation.waitForIdleSync()
-                scenario.onActivity { assertEquals(other.map { it.label.toString() }, labels(view)) }
+                assertFalse("the recycled view's lens must not be frozen by the other lens' answer", UtilSettings(context).isLensFrozen(recycledFor))
+                assertNull(view.ringPendingTokenForTest())
+                scenario.onActivity { view.lensId = lensId }
             } finally {
                 AppPersistent.beforeOrderCommitForTest = null
                 gate.countDown()
@@ -1660,8 +1664,9 @@ class ActHomeRingRotateWidgetTest {
 - [ ] **Step 3: GREEN — seam.** In `LensView.kt` add next to the other ring helpers:
 
 ```kotlin
+    /** Public (not internal) because ActHome, a Java class, calls it; test-only. */
     @VisibleForTesting
-    internal fun startRingPreviewForTest(steps: Int) {
+    fun startRingPreviewForTest(steps: Int) {
         beginRingPreview()
         val base = mRingBaseApps ?: return
         mRingAppliedSteps = steps
@@ -1877,27 +1882,27 @@ class ActHomeRingRotateWidgetTest {
     }
 ```
 
-- [ ] **Step 7: Verify RED, then GREEN (device).** Compile and run the two new tests on TECNO after the Task 6 backup: both must FAIL now (`performAccessibilityAction` returns false because `LensView` passes no `onRotateOrder`, and the host node has only the focus-lock action). Then wire `LensView.installAccessibilityHelper` to pass `onRotateOrder = { steps -> rotateAndCommit(steps) }` after `onFocusLockToggle`, rebuild and rerun: both pass, together with `LensViewAccessibilityWidgetTest` and `AccessibilityActionsIntegrationTest` (no regression in the existing virtual-node actions).
+- [ ] **Step 7: Verify RED, then GREEN (device).** Compile and run the two new tests on Pixel after the Task 6 backup: both must FAIL now (`performAccessibilityAction` returns false because `LensView` passes no `onRotateOrder`, and the host node has only the focus-lock action). Then wire `LensView.installAccessibilityHelper` to pass `onRotateOrder = { steps -> rotateAndCommit(steps) }` after `onFocusLockToggle`, rebuild and rerun: both pass, together with `LensViewAccessibilityWidgetTest` and `AccessibilityActionsIntegrationTest` (no regression in the existing virtual-node actions).
 - [ ] **Step 8: Commit.** `git add app/src/main/java/com/mckimquyen/views/LensAccessibilityHelper.kt app/src/main/java/com/mckimquyen/views/LensView.kt app/src/test/java/com/mckimquyen/a11y/LensAccessibilityHelperTest.kt app/src/androidTest/java/com/mckimquyen/views/LensViewRingRotateIntegrationTest.kt app/src/main/res/values/ids.xml app/src/main/res/values*/strings.xml && git commit -m "feat(fish-035): add rotate-order accessibility actions"` with the trailer.
 
 ---
 
-## Task 6 — Device procedure: backup, regression, smoke, restore (TECNO KJ7 only)
+## Task 6 — Device procedure: backup, regression, smoke, restore (TECNO Pixel 7 Pro only)
 
-Everything uses `adb -s 115333744A005844`. `adb devices -l` currently lists a Pixel `2B051FDH3006MU` too: never address it, and never use bare `adb`, `./gradlew connected*` or `installDevDebug`. Each command below is run on its own and its output file is read afterwards (loop output has been truncated before; a truncated display does not mean the command stopped — check the file).
+Everything uses `adb -s 2B051FDH3006MU`. `adb devices -l` currently lists a Pixel `2B051FDH3006MU` too: never address it, and never use bare `adb`, `./gradlew connected*` or `installDevDebug`. Each command below is run on its own and its output file is read afterwards (loop output has been truncated before; a truncated display does not mean the command stopped — check the file).
 
 - [ ] **Step 1: Lock the device and create the run directory.**
 
 ```bash
-S=115333744A005844
-adb devices -l | grep "$S"                               # must print one line ending in model:TECNO_KJ7
+S=2B051FDH3006MU
+adb devices -l | grep "$S"                               # must print one line ending in model:TECNO_Pixel 7 Pro
 D=/tmp/f035-run-$(date +%Y%m%d-%H%M%S); mkdir -p "$D"; echo "$D" > /tmp/f035-dir
 ```
 
 - [ ] **Step 2: Back up before the first install (APKs, data, hashes, system state).** Fresh backup every run; never reuse an older directory as "the baseline".
 
 ```bash
-D=$(cat /tmp/f035-dir); S=115333744A005844
+D=$(cat /tmp/f035-dir); S=2B051FDH3006MU
 MAIN=$(adb -s $S shell pm path com.mckimquyen.lenslauncher | sed 's/package://' | tr -d '\r')
 TEST=$(adb -s $S shell pm path com.mckimquyen.lenslauncher.test | sed 's/package://' | tr -d '\r')
 adb -s $S pull "$MAIN" "$D/before.apk"
@@ -1920,7 +1925,7 @@ wc -l "$D/before-hashes.txt" "$D/device-state.txt"; cat "$D/apk-hashes.txt"
 - [ ] **Step 6: Restore and prove it.**
 
 ```bash
-D=$(cat /tmp/f035-dir); S=115333744A005844
+D=$(cat /tmp/f035-dir); S=2B051FDH3006MU
 adb -s $S shell am force-stop com.mckimquyen.lenslauncher
 adb -s $S install -r -d "$D/before.apk"
 adb -s $S install -r -d "$D/before-test.apk"
