@@ -615,7 +615,7 @@ class AppPersistentOrderOutcomeTest {
     }
 
     private fun storedOrder() = runBlocking { db.appPersistentDao().getAllForLens(LENS) }
-        .sortedBy { it.orderNumber }.map { it.name + "@" + it.packageName.substringAfterLast('.') }
+        .sortedBy { it.orderNumber }.map { it.name + "@" + it.packageName?.substringAfterLast('.') }
 
     @Test fun aSuccessfulWriteReportsCommittedStoresTheOrderAndUpdatesMemory() {
         val reversed = apps.reversed()

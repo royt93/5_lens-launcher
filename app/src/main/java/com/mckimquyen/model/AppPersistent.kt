@@ -1,9 +1,11 @@
 package com.mckimquyen.model
 
+import androidx.annotation.VisibleForTesting
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import androidx.room.withTransaction
 import com.mckimquyen.app.ApplicationScope
 import com.mckimquyen.app.RAppsSingleton
 import com.mckimquyen.services.AppEventManager
@@ -14,8 +16,12 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicLong
+
+/** FISH-035: what happened to an [AppPersistent.commitAppOrderBatch] write. */
+enum class OrderCommitOutcome { COMMITTED, FAILED, SUPERSEDED }
 
 @Entity(
     tableName = "APP_PERSISTENT",
@@ -207,6 +213,71 @@ data class AppPersistent(
             ) {
                 mutex.withLock {
                     if (revision == revisionCounter.get()) setOrders(rows)
+                }
+            }
+        }
+
+        /** Test seam: runs inside the order mutex just before the revision check. Null in production. */
+        @VisibleForTesting
+        internal var beforeOrderCommitForTest: (() -> Unit)? = null
+
+        /**
+         * FISH-035: writes [apps] as the order of [lensId] and reports the real outcome exactly once, on the main
+         * thread. Unlike [setAppOrderBatch] it is not optimistic: the singleton's order numbers change only after
+         * the Room transaction committed. A write that lost the per-lens revision race is
+         * [OrderCommitOutcome.SUPERSEDED]; a missing lens, an unusable list or any database error is
+         * [OrderCommitOutcome.FAILED].
+         */
+        @JvmStatic
+        fun commitAppOrderBatch(apps: List<App>, lensId: String, onOutcome: (OrderCommitOutcome) -> Unit) {
+            val rows = apps.mapNotNull { app ->
+                val packageName = app.packageName?.toString()
+                val name = app.name?.toString()
+                if (packageName.isNullOrBlank() || name.isNullOrBlank()) null else Triple(packageName, name, app.userId)
+            }
+            if (rows.isEmpty()) {
+                ApplicationScope.scope.launch { onOutcome(OrderCommitOutcome.FAILED) }
+                return
+            }
+            val revisionCounter = orderWriteRevisions.computeIfAbsent(lensId) { AtomicLong(0L) }
+            val revision = revisionCounter.incrementAndGet()
+            val mutex = orderWriteMutexes.computeIfAbsent(lensId) { Mutex() }
+            ApplicationScope.scope.launch(Dispatchers.IO) {
+                val outcome = try {
+                    mutex.withLock {
+                        beforeOrderCommitForTest?.invoke()
+                        if (revision != revisionCounter.get()) {
+                            OrderCommitOutcome.SUPERSEDED
+                        } else {
+                            val database = AppDatabase.getInstance()
+                            database.withTransaction {
+                                if (database.lensWorkspaceDao().findById(lensId) == null) {
+                                    OrderCommitOutcome.FAILED
+                                } else {
+                                    database.appPersistentDao().setOrders(
+                                        rows.mapIndexed { index, (pkg, name, userId) ->
+                                            defaults(pkg, name, lensId, userId).copy(orderNumber = index)
+                                        }
+                                    )
+                                    OrderCommitOutcome.COMMITTED
+                                }
+                            }
+                        }
+                    }
+                } catch (cancelled: CancellationException) {
+                    throw cancelled
+                } catch (error: Throwable) {
+                    Logger.e("AppPersistent: confirmed order write failed", error)
+                    AppEventManager.notifyPersistFailed()
+                    OrderCommitOutcome.FAILED
+                }
+                withContext(Dispatchers.Main) {
+                    if (outcome == OrderCommitOutcome.COMMITTED) {
+                        rows.forEachIndexed { index, (pkg, name, userId) ->
+                            RAppsSingleton.instance.updateAppOrder(pkg, name, index, userId)
+                        }
+                    }
+                    onOutcome(outcome)
                 }
             }
         }
