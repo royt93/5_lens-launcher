@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | idea |
-| Status | todo |
+| Status | inprogress |
 | Priority | P3 |
 | Evidence | idea |
 | Epic | Accessibility |
@@ -21,14 +21,14 @@ Là người dùng một tay hoặc hạn chế vận động, tôi muốn ghim 
 
 ## Acceptance criteria
 
-- [ ] Double-tap ghim, tap lại nhả.
-- [ ] Có action a11y tương ứng.
-- [ ] Không xung đột pinch/edge-swipe (test state machine).
-- [ ] Test + smoke.
+- [x] Double-tap vùng trống ghim tâm tại điểm chạm, double-tap vùng trống lần nữa nhả (owner chọn 2026-11-06; tap icon không đổi).
+- [x] Có action a11y tương ứng: một action host `Toggle focus lock` (ngoại lệ TalkBack hẹp, chỉ FISH-029).
+- [x] Không xung đột pinch/edge-swipe/pan/search/long-press (test state machine + integration thiết bị).
+- [ ] Test + smoke: test xanh trên TECNO; smoke tay của owner và bằng chứng pause không bị quảng cáo che còn thiếu (audit 8,9/10).
 
 ## Implementation notes
 
-Cần nhường `LensGestureState`.
+Spec: `docs/superpowers/specs/2026-11-06-fish-029-focus-lock-macro-mode-design.md`; plan: `docs/superpowers/plans/2026-11-06-fish-029-focus-lock-macro-mode.md`. Audit: `doc/task/AUDIT_FISH-029_2026-11-06.md` (8,9/10, chưa đóng).
 
 ## Verification and Definition of Done
 
