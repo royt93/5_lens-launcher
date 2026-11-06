@@ -31,23 +31,38 @@ class LensAccessibilityHelper(
     private val moveAvailableProvider: () -> Boolean = { false },
     /** FISH-029 (the only owner-approved TalkBack exception): one host-level focus toggle, never per app node. */
     private val focusLockPinnedProvider: () -> Boolean = { false },
-    private val onFocusLockToggle: (() -> Boolean)? = null
+    private val onFocusLockToggle: (() -> Boolean)? = null,
+    /** FISH-035: one list step per call (+1 forward, -1 back); true when the order will change. */
+    private val onRotateOrder: ((steps: Int) -> Boolean)? = null
 ) : ExploreByTouchHelper(host) {
 
     override fun onPopulateNodeForHost(node: AccessibilityNodeInfoCompat) {
         super.onPopulateNodeForHost(node)
-        if (onFocusLockToggle == null) return
-        node.addAction(AccessibilityNodeInfoCompat.AccessibilityActionCompat(
-            R.id.action_toggle_focus_lock, host.context.getString(R.string.lens_focus_lock_action)
-        ))
-        node.stateDescription = host.context.getString(
-            if (focusLockPinnedProvider()) R.string.lens_focus_locked else R.string.lens_focus_unlocked
-        )
+        if (onFocusLockToggle != null) {
+            node.addAction(AccessibilityNodeInfoCompat.AccessibilityActionCompat(
+                R.id.action_toggle_focus_lock, host.context.getString(R.string.lens_focus_lock_action)
+            ))
+            node.stateDescription = host.context.getString(
+                if (focusLockPinnedProvider()) R.string.lens_focus_locked else R.string.lens_focus_unlocked
+            )
+        }
+        // FISH-035 (owner-approved extension): exactly two host-level actions, never on app nodes.
+        if (onRotateOrder != null) {
+            node.addAction(AccessibilityNodeInfoCompat.AccessibilityActionCompat(
+                R.id.action_rotate_order_forward, host.context.getString(R.string.lens_rotate_forward_action)
+            ))
+            node.addAction(AccessibilityNodeInfoCompat.AccessibilityActionCompat(
+                R.id.action_rotate_order_back, host.context.getString(R.string.lens_rotate_back_action)
+            ))
+        }
     }
 
-    override fun performAccessibilityAction(host: android.view.View, action: Int, args: Bundle?): Boolean =
-        if (action == R.id.action_toggle_focus_lock && onFocusLockToggle != null) onFocusLockToggle.invoke()
-        else super.performAccessibilityAction(host, action, args)
+    override fun performAccessibilityAction(host: android.view.View, action: Int, args: Bundle?): Boolean = when {
+        action == R.id.action_toggle_focus_lock && onFocusLockToggle != null -> onFocusLockToggle.invoke()
+        action == R.id.action_rotate_order_forward && onRotateOrder != null -> onRotateOrder.invoke(ROTATE_STEP_FORWARD)
+        action == R.id.action_rotate_order_back && onRotateOrder != null -> onRotateOrder.invoke(ROTATE_STEP_BACK)
+        else -> super.performAccessibilityAction(host, action, args)
+    }
 
     override fun getVirtualViewAt(x: Float, y: Float): Int {
         val apps = appProvider() ?: return INVALID_ID
@@ -181,4 +196,9 @@ class LensAccessibilityHelper(
     @VisibleForTesting
     internal fun testPerformActionForVirtualView(id: Int, action: Int, args: Bundle?) =
         onPerformActionForVirtualView(id, action, args)
+
+    private companion object {
+        const val ROTATE_STEP_FORWARD = 1
+        const val ROTATE_STEP_BACK = -1
+    }
 }

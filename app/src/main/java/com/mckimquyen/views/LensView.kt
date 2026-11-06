@@ -1372,6 +1372,8 @@ class LensView : View {
             moveAvailableProvider = { mHasOtherLenses },
             focusLockPinnedProvider = { mFocusLockPinned },
             onFocusLockToggle = { toggleFocusLockAt(width / 2f, height / 2f) },
+            // FISH-035: same confirmed-commit path as the gesture; needs no pin.
+            onRotateOrder = { steps -> rotateAndCommit(steps) },
             // UI-024: TalkBack must honor the same toggle the visual badge paths do.
             showBadgesSettingProvider = {
                 mUtilSettings?.let {

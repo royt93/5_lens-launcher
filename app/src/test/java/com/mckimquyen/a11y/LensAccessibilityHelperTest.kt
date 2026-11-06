@@ -46,6 +46,8 @@ class LensAccessibilityHelperTest {
         `when`(stringContext.getString(com.mckimquyen.R.string.lens_focus_lock_action)).thenReturn(ACTION_TITLE)
         `when`(stringContext.getString(com.mckimquyen.R.string.lens_focus_locked)).thenReturn(STATE_LOCKED)
         `when`(stringContext.getString(com.mckimquyen.R.string.lens_focus_unlocked)).thenReturn(STATE_RELEASED)
+        `when`(stringContext.getString(com.mckimquyen.R.string.lens_rotate_forward_action)).thenReturn(ROTATE_FORWARD)
+        `when`(stringContext.getString(com.mckimquyen.R.string.lens_rotate_back_action)).thenReturn(ROTATE_BACK)
         `when`(mockLensView.context).thenReturn(stringContext)
 
         sampleApps = listOf(
@@ -60,16 +62,21 @@ class LensAccessibilityHelperTest {
 
         lastClickedIndex = -1
         lastLongClickedIndex = -1
+        rotateCalls = mutableListOf()
+        rotateResult = true
     }
 
     private var focusPinned = false
     private var focusToggleCalls = 0
     private var focusToggleResult = true
+    private var rotateCalls = mutableListOf<Int>()
+    private var rotateResult = true
 
     private fun createHelper(
         apps: List<App>? = sampleApps,
         showBadgesSetting: Boolean = false,
-        withFocusLock: Boolean = false
+        withFocusLock: Boolean = false,
+        withRotate: Boolean = false
     ): LensAccessibilityHelper {
         return LensAccessibilityHelper(
             host = mockLensView,
@@ -92,6 +99,9 @@ class LensAccessibilityHelperTest {
             focusLockPinnedProvider = { focusPinned },
             onFocusLockToggle = if (withFocusLock) {
                 { focusToggleCalls++; if (focusToggleResult) focusPinned = !focusPinned; focusToggleResult }
+            } else null,
+            onRotateOrder = if (withRotate) {
+                { steps -> rotateCalls += steps; rotateResult }
             } else null
         )
     }
@@ -263,7 +273,67 @@ class LensAccessibilityHelperTest {
         assertFalse(helper.testPerformActionForHost(com.mckimquyen.R.id.action_toggle_focus_lock))
     }
 
+    // ============================================================ FISH-035 (owner-approved TalkBack extension)
+
+    @Test
+    fun `host node exposes exactly one forward and one back rotate action and app nodes do not`() {
+        val helper = createHelper(withFocusLock = true, withRotate = true)
+        val host = AccessibilityNodeInfoCompat.wrap(AccessibilityNodeInfo.obtain())
+        helper.testPopulateNodeForHost(host)
+        val forward = com.mckimquyen.R.id.action_rotate_order_forward
+        val back = com.mckimquyen.R.id.action_rotate_order_back
+        assertEquals(1, host.actionList.count { it.id == forward })
+        assertEquals(1, host.actionList.count { it.id == back })
+        assertEquals(ROTATE_FORWARD, host.actionList.first { it.id == forward }.label)
+        assertEquals(ROTATE_BACK, host.actionList.first { it.id == back }.label)
+        assertEquals("focus lock action is unchanged", 1, host.actionList.count { it.id == com.mckimquyen.R.id.action_toggle_focus_lock })
+
+        val app = AccessibilityNodeInfoCompat.wrap(AccessibilityNodeInfo.obtain())
+        helper.testPopulateNodeForVirtualView(0, app)
+        assertFalse(app.actionList.any { it.id == forward || it.id == back })
+    }
+
+    @Test
+    fun `forward performs plus one and back performs minus one`() {
+        val helper = createHelper(withRotate = true)
+        assertTrue(helper.testPerformActionForHost(com.mckimquyen.R.id.action_rotate_order_forward))
+        assertTrue(helper.testPerformActionForHost(com.mckimquyen.R.id.action_rotate_order_back))
+        assertEquals(listOf(1, -1), rotateCalls)
+    }
+
+    @Test
+    fun `rotate actions report failure when the view refuses`() {
+        rotateResult = false
+        val helper = createHelper(withRotate = true)
+        assertFalse(helper.testPerformActionForHost(com.mckimquyen.R.id.action_rotate_order_forward))
+        assertFalse(helper.testPerformActionForHost(com.mckimquyen.R.id.action_rotate_order_back))
+        assertEquals("the handler was asked once per action", listOf(1, -1), rotateCalls)
+    }
+
+    @Test
+    fun `without a rotate handler there are no rotate actions and performing them fails`() {
+        val helper = createHelper(withFocusLock = true, withRotate = false)
+        val host = AccessibilityNodeInfoCompat.wrap(AccessibilityNodeInfo.obtain())
+        helper.testPopulateNodeForHost(host)
+        assertFalse(host.actionList.any { it.id == com.mckimquyen.R.id.action_rotate_order_forward })
+        assertFalse(host.actionList.any { it.id == com.mckimquyen.R.id.action_rotate_order_back })
+        assertTrue("focus lock still present", host.actionList.any { it.id == com.mckimquyen.R.id.action_toggle_focus_lock })
+        assertFalse(helper.testPerformActionForHost(com.mckimquyen.R.id.action_rotate_order_forward))
+        assertTrue(rotateCalls.isEmpty())
+    }
+
+    @Test
+    fun `rotate actions alone do not add a focus lock state description`() {
+        val helper = createHelper(withFocusLock = false, withRotate = true)
+        val host = AccessibilityNodeInfoCompat.wrap(AccessibilityNodeInfo.obtain())
+        helper.testPopulateNodeForHost(host)
+        assertNull(host.stateDescription)
+        assertFalse(host.actionList.any { it.id == com.mckimquyen.R.id.action_toggle_focus_lock })
+    }
+
     private companion object {
+        const val ROTATE_FORWARD = "Rotate order forward"
+        const val ROTATE_BACK = "Rotate order back"
         const val ACTION_TITLE = "Toggle focus lock"
         const val STATE_LOCKED = "Focus locked"
         const val STATE_RELEASED = "Focus released"

@@ -448,6 +448,54 @@ class LensViewRingRotateIntegrationTest {
         assertNull(view.ringPendingTokenForTest())
     }
 
+    @Test fun theHostNodeExposesThreeActionsAndForwardThenBackRoundTripsThroughTheHost() = withView { view ->
+        val base = labels(view.displayedApps)
+        val requests = mutableListOf<RingRotationRequest>()
+        listenerInto(view, requests)
+        val node = androidx.core.view.accessibility.AccessibilityNodeInfoCompat.obtain()
+        onMain { androidx.core.view.ViewCompat.onInitializeAccessibilityNodeInfo(view, node) }
+        val forward = com.mckimquyen.R.id.action_rotate_order_forward
+        val back = com.mckimquyen.R.id.action_rotate_order_back
+        assertEquals(1, node.actionList.count { it.id == forward })
+        assertEquals(1, node.actionList.count { it.id == back })
+        assertEquals(1, node.actionList.count { it.id == com.mckimquyen.R.id.action_toggle_focus_lock })
+        assertTrue(node.actionList.first { it.id == forward }.label?.isNotBlank() == true)
+        assertTrue(node.actionList.first { it.id == back }.label?.isNotBlank() == true)
+
+        var ok = false
+        onMain { ok = view.performAccessibilityAction(forward, null) }
+        assertTrue(ok)
+        assertEquals(listOf("F", "E", "D", "B", "C", "A"), labels(requests.single().apps))
+        onMain { view.resolveRingCommit(requests.single().token, committed = true) }
+        onMain { ok = view.performAccessibilityAction(back, null) }
+        assertTrue(ok)
+        assertEquals("back undoes forward", base, labels(requests.last().apps))
+    }
+
+    @Test fun hostRotateIsRefusedForASingleAppAndWhileACommitIsPending() {
+        withView(apps = listOf(app("solo", PinnedZone.NONE, false))) { view ->
+            val requests = mutableListOf<RingRotationRequest>()
+            listenerInto(view, requests)
+            var ok = true
+            onMain { ok = view.performAccessibilityAction(com.mckimquyen.R.id.action_rotate_order_forward, null) }
+            assertFalse(ok)
+            assertTrue(requests.isEmpty())
+        }
+        withView { view ->
+            val requests = mutableListOf<RingRotationRequest>()
+            listenerInto(view, requests)
+            var first = false
+            var second = true
+            onMain {
+                first = view.performAccessibilityAction(com.mckimquyen.R.id.action_rotate_order_forward, null)
+                second = view.performAccessibilityAction(com.mckimquyen.R.id.action_rotate_order_forward, null)
+            }
+            assertTrue(first)
+            assertFalse("the second request waits for the first answer", second)
+            assertEquals(1, requests.size)
+        }
+    }
+
     private companion object {
         const val VIEW_SIZE_PX = 1_000
         const val CX = 500f
