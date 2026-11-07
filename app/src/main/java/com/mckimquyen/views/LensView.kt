@@ -195,6 +195,7 @@ class LensView : View {
         private const val SEARCH_SWIPE_DISTANCE_MULTIPLIER = 4f
         private const val SEARCH_SWIPE_VERTICAL_DOMINANCE_RATIO = 2f
         private const val MAX_ELASTIC_OVERSCROLL_DP = 28f
+        private const val NANOS_PER_MILLI = 1_000_000f
 
         /** Did the touch land in the top slice of the view that is reserved for pull-down search? */
         @androidx.annotation.VisibleForTesting
@@ -852,6 +853,18 @@ class LensView : View {
     private var mChromaLastAlpha = 0
     private val mChromaDrawnIndices = IntArray(ChromaticAberration.MAX_ICONS)
 
+    /** FISH-041: sampled once per lens show in LensAnimation.init (live touch only), never per frame. */
+    @androidx.annotation.VisibleForTesting
+    internal var lensInertiaEnabled = UtilSettings.DEFAULT_LENS_INERTIA
+    private var mVisualX = -Float.MAX_VALUE
+    private var mVisualY = -Float.MAX_VALUE
+    private var mInertiaLastFrameNanos = 0L
+    private var mInertiaActive = false
+    private var mInertiaTestPanning: Boolean? = null
+    private val mSelectRect = RectF()
+    private var mOpticX = -Float.MAX_VALUE
+    private var mOpticY = -Float.MAX_VALUE
+
     /** Icons fringed in the last frame. */
     @androidx.annotation.VisibleForTesting
     internal val chromaIconsForTest: Int get() = mChromaDrawn
@@ -923,6 +936,20 @@ class LensView : View {
         mReduceMotion = reduceMotion
     }
 
+    /** FISH-041: puts the inertia state in a given shape (setting, pan flag, lagged centre) without driving the Animation. */
+    @androidx.annotation.VisibleForTesting
+    internal fun setInertiaStateForTest(enabled: Boolean, panning: Boolean, visualX: Float, visualY: Float) {
+        lensInertiaEnabled = enabled
+        mInertiaTestPanning = panning
+        mVisualX = visualX
+        mVisualY = visualY
+        mInertiaLastFrameNanos = 0L
+        mInertiaActive = enabled && panning
+    }
+
+    @androidx.annotation.VisibleForTesting
+    internal fun visualCentreForTest(): Pair<Float, Float> = Pair(mVisualX, mVisualY)
+
     /** FISH-EXPORT: called by PolaroidExportHelper.exportAsync right before it draws this view
      *  into an offscreen bitmap, so a live touch/pinch never bakes distortion or the pinch HUD
      *  (drawPinchHud, gated on gestureState) into the exported snapshot. Deliberately narrower
@@ -943,6 +970,7 @@ class LensView : View {
         mTiltActive = false
         mTiltX = 0f
         mTiltY = 0f
+        resetLensInertia()
         gestureState = LensGestureState.IDLE
         mSelectIndex = -1
         mRectToSelect = null
@@ -2146,6 +2174,18 @@ class LensView : View {
         val useTilt = focusCenter == null && mTiltActive && mDrawType == DrawType.APPS
         val lensCenterX = focusCenter?.x ?: if (useTilt) width / 2f + mTiltX else -Float.MAX_VALUE
         val lensCenterY = focusCenter?.y ?: if (useTilt) height / 2f + mTiltY else -Float.MAX_VALUE
+        // FISH-041: the optical effects use a lagged centre while a real pan runs; everything else keeps the finger.
+        val inertiaOn = LensInertia.shouldApply(
+            lensInertiaEnabled && mDrawType == DrawType.APPS && hasActiveTouch && focusCenter != null,
+            mInertiaTestPanning ?: (mMoving && gestureState == LensGestureState.PANNING), mReduceMotion
+        )
+        updateLensInertia(inertiaOn, lensCenterX, lensCenterY)
+        val drawCenterX = if (inertiaOn) mVisualX else lensCenterX
+        val drawCenterY = if (inertiaOn) mVisualY else lensCenterY
+        val inertiaSplit = inertiaOn && !LensInertia.sameCentre(mVisualX, mVisualY, lensCenterX, lensCenterY)
+        // Optical effects (DoF/vignette distance, fringe direction) read this; it is the finger unless inertia lags it.
+        mOpticX = if (inertiaOn) mVisualX else mTouchX
+        mOpticY = if (inertiaOn) mVisualY else mTouchY
         val warpMultiplier = when {
             useTilt -> TiltParallax.ANIMATION_MULTIPLIER
             focusCenter != null && !hasActiveTouch && mFocusLockPinned -> FOCUS_LOCK_WARP_MULTIPLIER
@@ -2190,59 +2230,26 @@ class LensView : View {
             mScratchRect.set(baseRect)
             val rect = mScratchRect
             if (hasLensCenter) {
-                val shiftedCenterX = lensProfile.shiftX(
-                    lensCenterX,
-                    baseRect.centerX(),
-                    width.toFloat(),
-                    warpMultiplier,
-                    distortionFactor,
-                    lensHood
+                calculateWarpedRect(
+                    mScratchRect, baseRect, lensProfile, drawCenterX, drawCenterY, warpMultiplier,
+                    scaleFactor, distortionFactor, lensHood
                 )
-                val shiftedCenterY = lensProfile.shiftY(
-                    lensCenterY,
-                    baseRect.centerY(),
-                    height.toFloat(),
-                    warpMultiplier,
-                    distortionFactor,
-                    lensHood
-                )
-                val scaledCenterX = lensProfile.scaleX(
-                    lensCenterX,
-                    baseRect.centerX(),
-                    baseRect.width(),
-                    width.toFloat(),
-                    warpMultiplier,
-                    scaleFactor,
-                    distortionFactor,
-                    lensHood
-                )
-                val scaledCenterY = lensProfile.scaleY(
-                    lensCenterY,
-                    baseRect.centerY(),
-                    baseRect.height(),
-                    height.toFloat(),
-                    warpMultiplier,
-                    scaleFactor,
-                    distortionFactor,
-                    lensHood
-                )
-                val newSize = LensProfile.sizeFor(
-                    lensProfile,
-                    scaledCenterX,
-                    shiftedCenterX,
-                    scaledCenterY,
-                    shiftedCenterY
-                )
-                if (distortionFactor > 0.0f && scaleFactor > 0.0f) {
-                    UtilCalculator.calculateRect(mScratchRect, shiftedCenterX, shiftedCenterY, newSize)
-                } else if (distortionFactor > 0.0f && scaleFactor == 0.0f) {
-                    UtilCalculator.calculateRect(mScratchRect, shiftedCenterX, shiftedCenterY, baseRect.width())
-                }
-
-                if (hasActiveTouch && UtilCalculator.isInsideRect(mTouchX, mTouchY, rect)) {
-                    mInsideRect = true
-                    selectIndex = currentIndex
-                    mRectToSelect = RectF(rect)
+                if (hasActiveTouch) {
+                    // FISH-041: selection stays on the real finger centre; only the drawn rect lags.
+                    val selectRect = if (inertiaSplit) {
+                        calculateWarpedRect(
+                            mSelectRect.also { it.set(baseRect) }, baseRect, lensProfile, lensCenterX, lensCenterY,
+                            warpMultiplier, scaleFactor, distortionFactor, lensHood
+                        )
+                        mSelectRect
+                    } else {
+                        rect
+                    }
+                    if (UtilCalculator.isInsideRect(mTouchX, mTouchY, selectRect)) {
+                        mInsideRect = true
+                        selectIndex = currentIndex
+                        mRectToSelect = RectF(rect)
+                    }
                 }
             }
             if (currentIndex < mDrawnRectsForTest.size) mDrawnRectsForTest[currentIndex].set(rect)
@@ -2250,7 +2257,7 @@ class LensView : View {
                 // FISH-007: blur only picks the target canvas/alpha - rect and hit-test above are untouched.
                 // FISH-034: the vignette only lowers paint alpha, taking the lower of it and the DoF fallback.
                 val focusDistance = if (dofMode != DepthOfField.Mode.OFF || vignetteOn || chromaOn) DepthOfField.focusDistance(
-                    mTouchX, mTouchY, baseRect.centerX(), baseRect.centerY(),
+                    mOpticX, mOpticY, baseRect.centerX(), baseRect.centerY(),
                     width.toFloat(), height.toFloat()
                 ) else 0f
                 val dofIntensity = if (dofMode == DepthOfField.Mode.OFF) 0f else DepthOfField.intensity(focusDistance, dofTransition)
@@ -2279,7 +2286,8 @@ class LensView : View {
                 }
                 if (peakingDraw && focusCenter != null) {
                     val peakDistance = DepthOfField.focusDistance(
-                        focusCenter.x, focusCenter.y, baseRect.centerX(), baseRect.centerY(),
+                        if (inertiaOn) mVisualX else focusCenter.x, if (inertiaOn) mVisualY else focusCenter.y,
+                        baseRect.centerX(), baseRect.centerY(),
                         width.toFloat(), height.toFloat()
                     )
                     if (FocusPeaking.isSharp(peakDistance)) {
@@ -2313,6 +2321,69 @@ class LensView : View {
             drawAppName(canvas, mRectToSelect)
         }
         drawFocusRing(canvas)
+        // FISH-041: the lagged centre needs frames after the finger stops; one request per frame until it settles.
+        if (inertiaOn && !LensInertia.isSettled(mVisualX, mVisualY, lensCenterX, lensCenterY)) postInvalidateOnAnimation()
+    }
+
+    /**
+     * FISH-041: one exponential step of the lagged centre towards the finger, or a snap onto it when inertia is off,
+     * so the first inertia frame of a pan starts from the finger and a release leaves nothing behind. No allocation.
+     */
+    private fun updateLensInertia(on: Boolean, fingerX: Float, fingerY: Float) {
+        if (!on) {
+            mVisualX = fingerX
+            mVisualY = fingerY
+            mInertiaActive = false
+            mInertiaLastFrameNanos = 0L
+            return
+        }
+        val now = System.nanoTime()
+        if (!mInertiaActive) {
+            mVisualX = fingerX
+            mVisualY = fingerY
+            mInertiaActive = true
+        } else if (mInertiaLastFrameNanos != 0L) {
+            val dtMs = (now - mInertiaLastFrameNanos) / NANOS_PER_MILLI
+            mVisualX = LensInertia.step(mVisualX, fingerX, dtMs)
+            mVisualY = LensInertia.step(mVisualY, fingerY, dtMs)
+        }
+        mInertiaLastFrameNanos = now
+    }
+
+    private fun resetLensInertia() {
+        mVisualX = -Float.MAX_VALUE
+        mVisualY = -Float.MAX_VALUE
+        mInertiaLastFrameNanos = 0L
+        mInertiaActive = false
+        mInertiaTestPanning = null
+    }
+
+    /** The per-cell warp: writes the rect of [baseRect] warped around the lens centre into [out]. No allocation. */
+    private fun calculateWarpedRect(
+        out: RectF,
+        baseRect: RectF,
+        lensProfile: LensProfile,
+        centerX: Float,
+        centerY: Float,
+        warpMultiplier: Float,
+        scaleFactor: Float,
+        distortionFactor: Float,
+        lensHood: Float
+    ) {
+        val shiftedCenterX = lensProfile.shiftX(centerX, baseRect.centerX(), width.toFloat(), warpMultiplier, distortionFactor, lensHood)
+        val shiftedCenterY = lensProfile.shiftY(centerY, baseRect.centerY(), height.toFloat(), warpMultiplier, distortionFactor, lensHood)
+        val scaledCenterX = lensProfile.scaleX(
+            centerX, baseRect.centerX(), baseRect.width(), width.toFloat(), warpMultiplier, scaleFactor, distortionFactor, lensHood
+        )
+        val scaledCenterY = lensProfile.scaleY(
+            centerY, baseRect.centerY(), baseRect.height(), height.toFloat(), warpMultiplier, scaleFactor, distortionFactor, lensHood
+        )
+        val newSize = LensProfile.sizeFor(lensProfile, scaledCenterX, shiftedCenterX, scaledCenterY, shiftedCenterY)
+        if (distortionFactor > 0.0f && scaleFactor > 0.0f) {
+            UtilCalculator.calculateRect(out, shiftedCenterX, shiftedCenterY, newSize)
+        } else if (distortionFactor > 0.0f && scaleFactor == 0.0f) {
+            UtilCalculator.calculateRect(out, shiftedCenterX, shiftedCenterY, baseRect.width())
+        }
     }
 
     /** FISH-039: one frame's colour and alpha; the colour is the highlight onDraw already resolved this frame. */
@@ -2346,7 +2417,7 @@ class LensView : View {
             val offset = ChromaticAberration.offsetPx(mChromaDistances[slot], transition, density)
             if (offset <= 0f) continue
             val rect = mChromaRects[slot]
-            ChromaticAberration.direction(mTouchX, mTouchY, rect.centerX(), rect.centerY(), mChromaDirection)
+            ChromaticAberration.direction(mOpticX, mOpticY, rect.centerX(), rect.centerY(), mChromaDirection)
             val dx = mChromaDirection[0] * offset
             val dy = mChromaDirection[1] * offset
             mScratchIconSourceRect.set(0, 0, bitmap.width, bitmap.height)
@@ -2605,6 +2676,8 @@ class LensView : View {
                 ?: UtilSettings.DEFAULT_LENS_VIGNETTE
             chromaticAberrationEnabled = mUtilSettings?.getBoolean(UtilSettings.KEY_CHROMATIC_ABERRATION)
                 ?: UtilSettings.DEFAULT_CHROMATIC_ABERRATION
+            lensInertiaEnabled = mUtilSettings?.getBoolean(UtilSettings.KEY_LENS_INERTIA)
+                ?: UtilSettings.DEFAULT_LENS_INERTIA
             focusPeakingEnabled = mUtilSettings?.getBoolean(UtilSettings.KEY_FOCUS_PEAKING)
                 ?: UtilSettings.DEFAULT_FOCUS_PEAKING
             mUtilSettings?.let {
