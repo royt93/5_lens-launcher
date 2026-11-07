@@ -335,4 +335,6 @@
     <string name="setting_focus_peaking_hint">แสดงเส้นขอบไอคอนในบริเวณที่คมชัดเมื่อแตะหรือล็อกโฟกัส ใช้สีไฮไลต์ ปิดไว้โดยค่าเริ่มต้น</string>
     <string name="setting_chromatic_aberration">ความคลาดสี</string>
     <string name="setting_chromatic_aberration_hint">เพิ่มขอบสีแดง/น้ำเงินบางๆ ให้ไอคอนที่อยู่ไกลบางรายการขณะลากเลนส์ ปิดไว้โดยค่าเริ่มต้น</string>
+    <string name="setting_lens_inertia">แรงเฉื่อยเลนส์</string>
+    <string name="setting_lens_inertia_hint">เอฟเฟกต์เลนส์จะตามนิ้วด้วยความหน่วงสั้น ๆ ขณะลาก ปิดไว้เป็นค่าเริ่มต้น</string>
 </resources>

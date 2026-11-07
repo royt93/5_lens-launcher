@@ -366,4 +366,6 @@
     <string name="setting_focus_peaking_hint">يحدد الأيقونات في منطقة التركيز الحادة أثناء اللمس أو تثبيت التركيز. يستخدم لون التمييز. معطل افتراضياً.</string>
     <string name="setting_chromatic_aberration">الانحراف اللوني</string>
     <string name="setting_chromatic_aberration_hint">يضيف حواف لونية حمراء وزرقاء خفيفة إلى بعض الأيقونات البعيدة أثناء سحب العدسة. معطل افتراضياً.</string>
+    <string name="setting_lens_inertia">قصور العدسة</string>
+    <string name="setting_lens_inertia_hint">تتبع تأثيرات العدسة إصبعك بتأخر قصير أثناء السحب. متوقفة افتراضيًا.</string>
 </resources>

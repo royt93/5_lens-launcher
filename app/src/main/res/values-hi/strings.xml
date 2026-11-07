@@ -340,4 +340,6 @@
     <string name="setting_focus_peaking_hint">स्पर्श या फ़ोकस लॉक होने पर तीखे फ़ोकस क्षेत्र के आइकन की रूपरेखा दिखाता है। हाइलाइट रंग का उपयोग करता है। डिफ़ॉल्ट रूप से बंद।</string>
     <string name="setting_chromatic_aberration">रंगीन विपथन</string>
     <string name="setting_chromatic_aberration_hint">लेंस खींचते समय कुछ दूर के आइकन में हल्की लाल/नीली रंगीन किनारियाँ जोड़ता है। डिफ़ॉल्ट रूप से बंद।</string>
+    <string name="setting_lens_inertia">लेंस जड़त्व</string>
+    <string name="setting_lens_inertia_hint">खींचते समय लेंस के प्रभाव थोड़ी देरी से आपकी उंगली का पीछा करते हैं। डिफ़ॉल्ट रूप से बंद।</string>
 </resources>

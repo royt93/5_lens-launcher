@@ -350,4 +350,6 @@
     <string name="setting_focus_peaking_hint">Обводит значки в резкой области при касании или фиксации фокуса. Использует цвет выделения. По умолчанию выключено.</string>
     <string name="setting_chromatic_aberration">Хроматическая аберрация</string>
     <string name="setting_chromatic_aberration_hint">Добавляет лёгкие красно-синие цветные каймы нескольким дальним значкам при перетаскивании линзы. По умолчанию выключена.</string>
+    <string name="setting_lens_inertia">Инерция линзы</string>
+    <string name="setting_lens_inertia_hint">Эффекты линзы следуют за пальцем с небольшой задержкой при перетаскивании. По умолчанию выключено.</string>
 </resources>

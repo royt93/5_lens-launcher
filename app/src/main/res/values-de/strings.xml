@@ -340,4 +340,6 @@
     <string name="setting_focus_peaking_hint">Umrandet Symbole im scharfen Fokusbereich bei Berührung oder fixiertem Fokus. Verwendet die Hervorhebungsfarbe. Standardmäßig aus.</string>
     <string name="setting_chromatic_aberration">Chromatische Aberration</string>
     <string name="setting_chromatic_aberration_hint">Fügt beim Ziehen der Linse einigen entfernten Symbolen dezente rote und blaue Farbsäume hinzu. Standardmäßig aus.</string>
+    <string name="setting_lens_inertia">Linsenträgheit</string>
+    <string name="setting_lens_inertia_hint">Lässt die Linseneffekte beim Ziehen mit kurzer Verzögerung dem Finger folgen. Standardmäßig aus.</string>
 </resources>

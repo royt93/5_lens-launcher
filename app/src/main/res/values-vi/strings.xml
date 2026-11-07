@@ -342,4 +342,6 @@
     <string name="setting_focus_peaking_hint">Viền biểu tượng trong vùng nét khi chạm hoặc ghim tiêu điểm. Dùng màu nhấn. Mặc định tắt.</string>
     <string name="setting_chromatic_aberration">Sai sắc</string>
     <string name="setting_chromatic_aberration_hint">Thêm viền đỏ/xanh nhẹ cho một số biểu tượng xa khi kéo lens. Mặc định tắt.</string>
+    <string name="setting_lens_inertia">Quán tính lens</string>
+    <string name="setting_lens_inertia_hint">Hiệu ứng lens đuổi theo ngón tay với độ trễ ngắn khi kéo. Mặc định tắt.</string>
 </resources>

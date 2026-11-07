@@ -385,4 +385,6 @@
     <string name="setting_focus_peaking_hint">Outlines icons in the sharp focus area while touching or focus is pinned. Uses the highlight colour. Off by default.</string>
     <string name="setting_chromatic_aberration">Chromatic aberration</string>
     <string name="setting_chromatic_aberration_hint">Adds subtle red/blue colour fringes to a few distant icons while dragging the lens. Off by default.</string>
+    <string name="setting_lens_inertia">Lens inertia</string>
+    <string name="setting_lens_inertia_hint">Makes the lens effects follow your finger with a short lag while dragging. Off by default.</string>
 </resources>

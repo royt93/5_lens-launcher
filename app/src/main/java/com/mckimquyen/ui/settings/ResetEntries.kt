@@ -66,6 +66,7 @@ object ResetEntries {
             flag(UtilSettings.KEY_LENS_VIGNETTE, R.string.setting_lens_vignette, UtilSettings.DEFAULT_LENS_VIGNETTE),
             flag(UtilSettings.KEY_FOCUS_PEAKING, R.string.setting_focus_peaking, UtilSettings.DEFAULT_FOCUS_PEAKING),
             flag(UtilSettings.KEY_CHROMATIC_ABERRATION, R.string.setting_chromatic_aberration, UtilSettings.DEFAULT_CHROMATIC_ABERRATION),
+            flag(UtilSettings.KEY_LENS_INERTIA, R.string.setting_lens_inertia, UtilSettings.DEFAULT_LENS_INERTIA),
             ResetEntry(
                 us.lensKey(UtilSettings.KEY_SMART_FOCUS_BIAS, lensId), R.string.setting_smart_focus,
                 UtilSettings.DEFAULT_SMART_FOCUS_BIAS, us.isSmartFocusBias(lensId)

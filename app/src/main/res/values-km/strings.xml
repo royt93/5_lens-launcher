@@ -335,4 +335,6 @@
     <string name="setting_focus_peaking_hint">គូសស៊ុមរូបតំណាងក្នុងតំបន់ច្បាស់ ពេលប៉ះ ឬចាក់សោការផ្ដោត។ ប្រើពណ៌រំលេច។ បិទតាមលំនាំដើម។</string>
     <string name="setting_chromatic_aberration">ភាពខុសពណ៌</string>
     <string name="setting_chromatic_aberration_hint">បន្ថែមគែមពណ៌ក្រហម/ខៀវស្រាលៗលើរូបតំណាងឆ្ងាយមួយចំនួនពេលអូសកែវ។ បិទតាមលំនាំដើម។</string>
+    <string name="setting_lens_inertia">និចលភាពកែវថត</string>
+    <string name="setting_lens_inertia_hint">ឥទ្ធិពលកែវថតដើរតាមម្រាមដៃដោយយឺតបន្តិចពេលអូស។ បិទតាមលំនាំដើម។</string>
 </resources>

@@ -67,6 +67,7 @@ class FrmSettings : Fragment(), SettingsInterface {
     private var swLensVignette: SwitchCompat? = null
     private var swFocusPeaking: SwitchCompat? = null
     private var swChromaticAberration: SwitchCompat? = null
+    private var swLensInertia: SwitchCompat? = null
     private var swSmartFocus: SwitchCompat? = null
     private var tvSelectedSearchHint: TextView? = null
     private var swEnableT9SearchKeypad: SwitchCompat? = null
@@ -153,6 +154,7 @@ class FrmSettings : Fragment(), SettingsInterface {
         swLensVignette = view.findViewById(R.id.swLensVignette)
         swFocusPeaking = view.findViewById(R.id.swFocusPeaking)
         swChromaticAberration = view.findViewById(R.id.swChromaticAberration)
+        swLensInertia = view.findViewById(R.id.swLensInertia)
         swSmartFocus = view.findViewById(R.id.swSmartFocus)
         tvSelectedSearchHint = view.findViewById(R.id.tvSelectedSearchHint)
         swEnableT9SearchKeypad = view.findViewById(R.id.swEnableT9SearchKeypad)
@@ -227,6 +229,7 @@ class FrmSettings : Fragment(), SettingsInterface {
         view.findViewById<View>(R.id.rlSwitchLensVignetteParent).setOnClickListener(null)
         view.findViewById<View>(R.id.rlSwitchFocusPeakingParent).setOnClickListener(null)
         view.findViewById<View>(R.id.rlSwitchChromaticAberrationParent).setOnClickListener(null)
+        view.findViewById<View>(R.id.rlSwitchLensInertiaParent).setOnClickListener(null)
         view.findViewById<View>(R.id.rlSwitchSmartFocusParent).setOnClickListener(null)
         view.findViewById<View>(R.id.rlSwitchQuickActionCalculatorParent).setOnClickListener(null)
         view.findViewById<View>(R.id.rlSwitchQuickActionUnitParent).setOnClickListener(null)
@@ -300,6 +303,9 @@ class FrmSettings : Fragment(), SettingsInterface {
         }
         swChromaticAberration?.setOnCheckedChangeListener { _, isChecked ->
             utilSettings?.save(UtilSettings.KEY_CHROMATIC_ABERRATION, isChecked)
+        }
+        swLensInertia?.setOnCheckedChangeListener { _, isChecked ->
+            utilSettings?.save(UtilSettings.KEY_LENS_INERTIA, isChecked)
         }
         swSmartFocus?.setOnCheckedChangeListener { _, isChecked ->
             utilSettings?.saveSmartFocusBias(activeLensId, isChecked)
@@ -448,6 +454,7 @@ class FrmSettings : Fragment(), SettingsInterface {
             swLensVignette?.isChecked = us.getBoolean(UtilSettings.KEY_LENS_VIGNETTE)
             swFocusPeaking?.isChecked = us.getBoolean(UtilSettings.KEY_FOCUS_PEAKING)
             swChromaticAberration?.isChecked = us.getBoolean(UtilSettings.KEY_CHROMATIC_ABERRATION)
+            swLensInertia?.isChecked = us.getBoolean(UtilSettings.KEY_LENS_INERTIA)
             activeLensId = us.getString(UtilSettings.KEY_ACTIVE_LENS_ID) ?: LensWorkspace.DEFAULT_LENS_ID
             swSmartFocus?.isChecked = us.isSmartFocusBias(activeLensId)
             swQuickActionCalculator?.isChecked = us.getBoolean(UtilSettings.KEY_QUICK_ACTION_CALCULATOR)
@@ -653,6 +660,7 @@ class FrmSettings : Fragment(), SettingsInterface {
         swLensVignette = null
         swFocusPeaking = null
         swChromaticAberration = null
+        swLensInertia = null
         swSmartFocus = null
         tvSelectedSearchHint = null
         swEnableT9SearchKeypad = null

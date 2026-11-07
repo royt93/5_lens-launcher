@@ -335,4 +335,6 @@
     <string name="setting_focus_peaking_hint">터치하거나 초점을 고정할 때 선명한 초점 영역의 아이콘을 둘러쌉니다. 강조 색상을 사용합니다. 기본값은 꺼짐입니다.</string>
     <string name="setting_chromatic_aberration">색수차</string>
     <string name="setting_chromatic_aberration_hint">렌즈를 드래그할 때 멀리 있는 일부 아이콘에 은은한 빨강/파랑 색 테두리를 추가합니다. 기본값은 꺼짐입니다.</string>
+    <string name="setting_lens_inertia">렌즈 관성</string>
+    <string name="setting_lens_inertia_hint">드래그하는 동안 렌즈 효과가 짧은 지연으로 손가락을 따라갑니다. 기본값은 꺼짐입니다.</string>
 </resources>

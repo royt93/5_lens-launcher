@@ -335,4 +335,6 @@
     <string name="setting_focus_peaking_hint">Menggarisbawahi ikon di area fokus tajam saat disentuh atau fokus dikunci. Menggunakan warna sorotan. Nonaktif secara default.</string>
     <string name="setting_chromatic_aberration">Aberasi kromatik</string>
     <string name="setting_chromatic_aberration_hint">Menambahkan pinggiran merah/biru halus pada beberapa ikon yang jauh saat lensa digeser. Nonaktif secara default.</string>
+    <string name="setting_lens_inertia">Inersia lensa</string>
+    <string name="setting_lens_inertia_hint">Efek lensa mengikuti jari dengan jeda singkat saat menggeser. Nonaktif secara default.</string>
 </resources>

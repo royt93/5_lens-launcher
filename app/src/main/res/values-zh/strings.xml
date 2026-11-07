@@ -335,4 +335,6 @@
     <string name="setting_focus_peaking_hint">触摸或锁定焦点时，为清晰对焦区域中的图标添加轮廓。使用高亮颜色。默认关闭。</string>
     <string name="setting_chromatic_aberration">色差</string>
     <string name="setting_chromatic_aberration_hint">拖动镜头时，为少数较远的图标添加淡淡的红蓝色边缘。默认关闭。</string>
+    <string name="setting_lens_inertia">镜头惯性</string>
+    <string name="setting_lens_inertia_hint">拖动时，镜头效果会以短暂延迟跟随手指。默认关闭。</string>
 </resources>

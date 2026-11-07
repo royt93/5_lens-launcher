@@ -345,4 +345,6 @@
     <string name="setting_focus_peaking_hint">Contorna ícones na área nítida ao tocar ou fixar o foco. Usa a cor de destaque. Desativado por padrão.</string>
     <string name="setting_chromatic_aberration">Aberração cromática</string>
     <string name="setting_chromatic_aberration_hint">Adiciona franjas vermelhas e azuis sutis a alguns ícones distantes ao arrastar a lente. Desativada por padrão.</string>
+    <string name="setting_lens_inertia">Inércia da lente</string>
+    <string name="setting_lens_inertia_hint">Os efeitos da lente seguem o dedo com um breve atraso ao arrastar. Desativado por padrão.</string>
 </resources>
