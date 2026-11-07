@@ -10,7 +10,8 @@ import kotlin.math.hypot
  */
 object ChromaticAberration {
     /** At most this many icons per frame get fringes: the farthest ones. Worst case 2 * MAX_ICONS extra bitmap draws. */
-    const val MAX_ICONS = 8
+    // 4, not 8: on the S24U (120 Hz) cap 8 cost +0.54 ms mean frame time, cap 4 +0.14 ms (FISH-040 frame budget).
+    const val MAX_ICONS = 4
     const val MIN_OFFSET_DP = 1f
     const val MAX_OFFSET_DP = 3f
     const val OPAQUE_ALPHA = DepthOfField.OPAQUE_ALPHA

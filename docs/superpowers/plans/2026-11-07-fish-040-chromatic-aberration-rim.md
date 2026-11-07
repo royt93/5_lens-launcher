@@ -1409,3 +1409,10 @@ diff "$D/device-state.txt" "$D/restored-state.txt" && echo STATE_IDENTICAL
 **Known risks the executor must watch:** (1) the frame budget is the real risk: up to 16 extra `drawBitmap` per frame with a colour filter and `ADD` blend; if the S24U shows p50 or p90 above 8.3 ms the cap fallback in Task 6 Step 6 applies and the owner decides, no silent pass. (2) `ColorMatrixColorFilter` + `PorterDuff.Mode.ADD` behaviour with software-canvas bitmaps differs from the hardware canvas, so the pixel tests prove the software path and the real-`ActHome` test plus the screenshots prove the hardware path. (3) The S24U needs `--user 0` on every command and has no main app at the start. (4) `LensView` is already large: do not extract the ring/fringe code in this story. (5) No push without the owner's request.
 
 **Execution handoff** (after the plan commit): ask the owner with `AskUserQuestion` — subagent-driven vs inline (FISH-029/034/035/039 were inline) — and do not start Task 1 before they answer.
+
+
+---
+
+## Execution note (2026-11-07): cap lowered 8 -> 4
+
+Task 6 Step 5 on the Samsung S24 Ultra (120 Hz, charging on AC, 2400+ frames per run, interleaved off/on): cap 8 raised the mean frame bin from 8.06 ms (off, 4 runs) to 8.60 ms (on, 3 runs) and p50 from 8 to 9 ms, so the 8.3 ms p50/p90 criterion was not met (p90 was 10 ms in every state, off included, so the absolute criterion was already unreachable by the baseline). Step 6 applied: `ChromaticAberration.MAX_ICONS` 8 -> 4; cap 4 measured mean 8.20 ms, p50 9/8/8 ms, p90 10 ms. The owner chose the cap-4 fallback. The cap tests (`theCapIsFourAndTheOffsetRangeIsOneToThreeDp`, `withTheSettingOnAtMostFourFarthestOutsideZoneIconsAreFringed`) were changed first and watched fail (RED) before the constant changed. Text above that says 8 describes the first design; the constant is 4.

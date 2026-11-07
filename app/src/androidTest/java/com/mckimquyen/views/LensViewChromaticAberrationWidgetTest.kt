@@ -111,7 +111,7 @@ class LensViewChromaticAberrationWidgetTest {
         assertFalse(lensView.chromaticAberrationEnabled)
     }
 
-    @Test fun withTheSettingOnAtMostEightFarthestOutsideZoneIconsAreFringed() {
+    @Test fun withTheSettingOnAtMostFourFarthestOutsideZoneIconsAreFringed() {
         lensView.chromaticAberrationEnabled = true
         touchAtCell(0)
         render().recycle()
@@ -147,7 +147,7 @@ class LensViewChromaticAberrationWidgetTest {
         touchAt(x, y)
         render().recycle()
         assertTrue("the far second icon should be fringed", lensView.chromaIconsForTest >= 1)
-        assertFalse("sharp cell 0 must not be fringed even though the 8-slot cap has room", 0 in lensView.chromaIndicesForTest)
+        assertFalse("sharp cell 0 must not be fringed even though the 4-slot cap has room", 0 in lensView.chromaIndicesForTest)
         assertTrue("the cap has unused capacity", lensView.chromaIconsForTest < ChromaticAberration.MAX_ICONS)
     }
 

@@ -11,8 +11,8 @@ class ChromaticAberrationTest {
     private val density = 3f
     private val zone = DepthOfField.FOCUS_ZONE
 
-    @Test fun theCapIsEightAndTheOffsetRangeIsOneToThreeDp() {
-        assertEquals(8, ChromaticAberration.MAX_ICONS)
+    @Test fun theCapIsFourAndTheOffsetRangeIsOneToThreeDp() {
+        assertEquals(4, ChromaticAberration.MAX_ICONS)
         assertEquals(1f, ChromaticAberration.MIN_OFFSET_DP, 0f)
         assertEquals(3f, ChromaticAberration.MAX_OFFSET_DP, 0f)
     }
