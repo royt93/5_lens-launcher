@@ -35,3 +35,7 @@ Là người dùng, tôi muốn lens có cảm giác có khối lượng: hiệu
 - [ ] Smoke tests on the locked device (TECNO KJ7 only); record model, Android version, build SHA and timestamp; restore device state.
 - [ ] No new lint/build failures.
 - [ ] A post-change audit record scores the round `> 9.0/10` before push.
+
+## Trạng thái (2026-11-07)
+
+Code, test, mutation và smoke xong; **chưa đóng**: audit 8,6/10 (< 9,0) vì frame budget TB sáu lần chênh +0,62 ms so với tiêu chí +0,5 ms của spec, hai ngoại lai chưa giải thích, phương án lùi chưa áp. Chi tiết: `doc/task/AUDIT_FISH-041_2026-11-07.md`.
