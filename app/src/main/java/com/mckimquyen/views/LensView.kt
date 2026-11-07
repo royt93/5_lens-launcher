@@ -835,6 +835,38 @@ class LensView : View {
     /** FISH-039: sampled in LensAnimation.init (live touch) and in toggleFocusLockAt (a pin has no animation). */
     @androidx.annotation.VisibleForTesting
     internal var focusPeakingEnabled = UtilSettings.DEFAULT_FOCUS_PEAKING
+
+    /** FISH-040: sampled once per lens show in LensAnimation.init (live touch only), never per frame. */
+    @androidx.annotation.VisibleForTesting
+    internal var chromaticAberrationEnabled = UtilSettings.DEFAULT_CHROMATIC_ABERRATION
+    private var mPaintChromaRed: Paint? = null
+    private var mPaintChromaBlue: Paint? = null
+    private val mChromaTop = ChromaticAberration.TopFarthest(ChromaticAberration.MAX_ICONS)
+    private val mChromaRects = Array(ChromaticAberration.MAX_ICONS) { RectF() }
+    private val mChromaDistances = FloatArray(ChromaticAberration.MAX_ICONS)
+    private val mChromaAlphas = IntArray(ChromaticAberration.MAX_ICONS)
+    private val mChromaDirection = FloatArray(2)
+    private val mScratchChromaRect = RectF()
+    private var mChromaOffsetPx = 0f
+    private var mChromaDrawn = 0
+    private var mChromaLastAlpha = 0
+    private val mChromaDrawnIndices = IntArray(ChromaticAberration.MAX_ICONS)
+
+    /** Icons fringed in the last frame. */
+    @androidx.annotation.VisibleForTesting
+    internal val chromaIconsForTest: Int get() = mChromaDrawn
+
+    /** Cell indices fringed in the last frame (a copy, [chromaIconsForTest] long). */
+    @androidx.annotation.VisibleForTesting
+    internal val chromaIndicesForTest: IntArray get() = mChromaDrawnIndices.copyOf(mChromaDrawn)
+
+    /** Largest offset (px) used in the last frame; 0 when no icon was fringed. */
+    @androidx.annotation.VisibleForTesting
+    internal val chromaOffsetPxForTest: Float get() = if (mChromaDrawn > 0) mChromaOffsetPx else 0f
+
+    /** Alpha of the fringes in the last frame; 0 when none. */
+    @androidx.annotation.VisibleForTesting
+    internal val chromaAlphaForTest: Int get() = if (mChromaDrawn > 0) mChromaLastAlpha else 0
     private var mPaintFocusPeaking: Paint? = null
     private var mFocusPeakingPaddingPx = 0f
     private var mFocusPeakingRings = 0
@@ -1519,6 +1551,34 @@ class LensView : View {
         }
         mFocusPeakingPaddingPx = resources.getDimension(R.dimen.padding_focus_halo)
 
+        // FISH-040: one colour channel each, added onto the canvas; built once, only alpha changes per frame.
+        mPaintChromaRed = Paint().apply {
+            isAntiAlias = true
+            isFilterBitmap = true
+            colorFilter = android.graphics.ColorMatrixColorFilter(
+                floatArrayOf(
+                    1f, 0f, 0f, 0f, 0f,
+                    0f, 0f, 0f, 0f, 0f,
+                    0f, 0f, 0f, 0f, 0f,
+                    0f, 0f, 0f, 1f, 0f
+                )
+            )
+            xfermode = android.graphics.PorterDuffXfermode(android.graphics.PorterDuff.Mode.ADD)
+        }
+        mPaintChromaBlue = Paint().apply {
+            isAntiAlias = true
+            isFilterBitmap = true
+            colorFilter = android.graphics.ColorMatrixColorFilter(
+                floatArrayOf(
+                    0f, 0f, 0f, 0f, 0f,
+                    0f, 0f, 0f, 0f, 0f,
+                    0f, 0f, 1f, 0f, 0f,
+                    0f, 0f, 0f, 1f, 0f
+                )
+            )
+            xfermode = android.graphics.PorterDuffXfermode(android.graphics.PorterDuff.Mode.ADD)
+        }
+
         mPaintText = Paint()
         mPaintText?.apply {
             isAntiAlias = true
@@ -2114,6 +2174,11 @@ class LensView : View {
         mFocusPeakingAlpha = if (peakingDraw) peakingAlpha else 0
         if (mFocusPeakingRinged.size != baseRects.size) mFocusPeakingRinged = BooleanArray(baseRects.size)
         mFocusPeakingRinged.fill(false)
+        // FISH-040: the vignette's live-touch gate exactly (no pin, tilt or idle); it reuses the per-cell focus distance.
+        val chromaOn = ChromaticAberration.shouldApply(
+            chromaticAberrationEnabled, mDrawType == DrawType.APPS && hasActiveTouch && dofTransition > 0f
+        )
+        prepareChromaticAberration()
         dofBandCounts.fill(0)
         val dofLayers = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S && dofMode == DepthOfField.Mode.BLUR) mDofLayers else null
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
@@ -2184,17 +2249,19 @@ class LensView : View {
             if (mDrawType == DrawType.APPS) {
                 // FISH-007: blur only picks the target canvas/alpha - rect and hit-test above are untouched.
                 // FISH-034: the vignette only lowers paint alpha, taking the lower of it and the DoF fallback.
-                val focusDistance = if (dofMode != DepthOfField.Mode.OFF || vignetteOn) DepthOfField.focusDistance(
+                val focusDistance = if (dofMode != DepthOfField.Mode.OFF || vignetteOn || chromaOn) DepthOfField.focusDistance(
                     mTouchX, mTouchY, baseRect.centerX(), baseRect.centerY(),
                     width.toFloat(), height.toFloat()
                 ) else 0f
                 val dofIntensity = if (dofMode == DepthOfField.Mode.OFF) 0f else DepthOfField.intensity(focusDistance, dofTransition)
                 val dofBand = DepthOfField.band(dofIntensity)
                 dofBandCounts[dofBand]++
+                var iconAlpha = DepthOfField.OPAQUE_ALPHA
                 if (dofMode == DepthOfField.Mode.ALPHA || vignetteOn) {
                     val dofAlpha = if (dofMode == DepthOfField.Mode.ALPHA) DepthOfField.fallbackAlpha(dofIntensity) else DepthOfField.OPAQUE_ALPHA
                     val vignetteAlpha = if (vignetteOn) LensVignette.alpha(LensVignette.intensity(focusDistance, dofTransition)) else LensVignette.OPAQUE_ALPHA
-                    mPaintIcons?.alpha = LensVignette.combine(dofAlpha, vignetteAlpha)
+                    iconAlpha = LensVignette.combine(dofAlpha, vignetteAlpha)
+                    mPaintIcons?.alpha = iconAlpha
                 }
                 val iconCanvas = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
                     dofLayers?.canvas(dofBand) ?: canvas
@@ -2202,6 +2269,14 @@ class LensView : View {
                     canvas
                 }
                 drawAppIcon(iconCanvas, rect, currentIndex)
+                if (chromaOn && ChromaticAberration.isFringed(focusDistance, dofBand)) {
+                    val slot = mChromaTop.offer(focusDistance, currentIndex)
+                    if (slot >= 0) {
+                        mChromaRects[slot].set(rect)
+                        mChromaDistances[slot] = focusDistance
+                        mChromaAlphas[slot] = iconAlpha
+                    }
+                }
                 if (peakingDraw && focusCenter != null) {
                     val peakDistance = DepthOfField.focusDistance(
                         focusCenter.x, focusCenter.y, baseRect.centerX(), baseRect.centerY(),
@@ -2220,6 +2295,7 @@ class LensView : View {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
             dofLayers?.endAndDraw(canvas)
         }
+        if (chromaOn) drawChromaticFringes(canvas, resources.displayMetrics.density, dofTransition)
         mPaintIcons?.alpha = DepthOfField.OPAQUE_ALPHA
         mMustVibrate = if (selectIndex >= 0) {
             selectIndex != mSelectIndex
@@ -2244,6 +2320,49 @@ class LensView : View {
         val paint = mPaintFocusPeaking ?: return
         paint.color = mPaintNewAppTag?.color ?: paint.color
         paint.alpha = alpha
+    }
+
+    /** FISH-040: per-frame reset of the selector and the probes; allocates nothing. */
+    private fun prepareChromaticAberration() {
+        mChromaTop.reset()
+        mChromaDrawn = 0
+        mChromaOffsetPx = 0f
+        mChromaLastAlpha = 0
+    }
+
+    /**
+     * FISH-040: second pass after the icon loop. For each selected (farthest) icon draw a red-only copy shifted outward
+     * from the touch and a blue-only copy shifted inward, both added onto the canvas. Uses only view-owned objects.
+     */
+    private fun drawChromaticFringes(canvas: Canvas, density: Float, transition: Float) {
+        val red = mPaintChromaRed ?: return
+        val blue = mPaintChromaBlue ?: return
+        val list = mApps ?: return
+        for (slot in 0 until mChromaTop.count) {
+            val cell = mChromaTop.indexAt(slot)
+            val app = list.getOrNull(cell) ?: continue
+            val bitmap = com.mckimquyen.app.RAppsSingleton.instance.getAppIcon(app.iconCacheKey)
+            if (bitmap == null || bitmap.isRecycled) continue
+            val offset = ChromaticAberration.offsetPx(mChromaDistances[slot], transition, density)
+            if (offset <= 0f) continue
+            val rect = mChromaRects[slot]
+            ChromaticAberration.direction(mTouchX, mTouchY, rect.centerX(), rect.centerY(), mChromaDirection)
+            val dx = mChromaDirection[0] * offset
+            val dy = mChromaDirection[1] * offset
+            mScratchIconSourceRect.set(0, 0, bitmap.width, bitmap.height)
+            red.alpha = mChromaAlphas[slot]
+            mScratchChromaRect.set(rect)
+            mScratchChromaRect.offset(dx, dy)
+            canvas.drawBitmap(bitmap, mScratchIconSourceRect, mScratchChromaRect, red)
+            blue.alpha = mChromaAlphas[slot]
+            mScratchChromaRect.set(rect)
+            mScratchChromaRect.offset(-dx, -dy)
+            canvas.drawBitmap(bitmap, mScratchIconSourceRect, mScratchChromaRect, blue)
+            if (offset > mChromaOffsetPx) mChromaOffsetPx = offset
+            mChromaLastAlpha = mChromaAlphas[slot]
+            if (mChromaDrawn < mChromaDrawnIndices.size) mChromaDrawnIndices[mChromaDrawn] = cell
+            mChromaDrawn++
+        }
     }
 
     /** FISH-039: bold outline around one sharp icon; reuses one Paint, no per-frame allocation. */
@@ -2484,6 +2603,8 @@ class LensView : View {
                 ?: UtilSettings.DEFAULT_DEPTH_OF_FIELD
             lensVignetteEnabled = mUtilSettings?.getBoolean(UtilSettings.KEY_LENS_VIGNETTE)
                 ?: UtilSettings.DEFAULT_LENS_VIGNETTE
+            chromaticAberrationEnabled = mUtilSettings?.getBoolean(UtilSettings.KEY_CHROMATIC_ABERRATION)
+                ?: UtilSettings.DEFAULT_CHROMATIC_ABERRATION
             focusPeakingEnabled = mUtilSettings?.getBoolean(UtilSettings.KEY_FOCUS_PEAKING)
                 ?: UtilSettings.DEFAULT_FOCUS_PEAKING
             mUtilSettings?.let {
@@ -2588,6 +2709,8 @@ class LensView : View {
             mRingPending = null
             mFocusPeakingRings = 0
             mFocusPeakingAlpha = 0
+            mChromaDrawn = 0
+            mChromaTop.reset()
             mHoldIndex = -1
             mDragStarted = false
             mApps = null
