@@ -132,9 +132,14 @@ class LensViewChromaticAberrationIntegrationTest {
     @SdkSuppress(minSdkVersion = Build.VERSION_CODES.S)
     @Test fun onTheRealHomeWithTheHardwareBlurPathFringesStillDrawForTheFarIcons() {
         val prefs = androidx.preference.PreferenceManager.getDefaultSharedPreferences(context)
-        RAppsSingleton.instance.apps = ArrayList((0 until APP_COUNT).map { i ->
-            App(id = i, packageName = "com.fish040.home$i", name = "Home$i", label = "Home $i")
+        // The fringe pass skips an app without a cached bitmap and an earlier test in this class clears the cache, so
+        // seed one icon per app here or this test only passes when it runs alone.
+        val icon = Bitmap.createBitmap(ICON_PX, ICON_PX, Bitmap.Config.ARGB_8888).apply { eraseColor(Color.WHITE) }
+        val homeApps = ArrayList((0 until APP_COUNT).map { i ->
+            App(id = i, packageName = "com.fish040.home$i", name = "Home$i", label = "Home $i", iconCacheKey = "fish040home#$i")
         })
+        homeApps.forEach { RAppsSingleton.instance.setAppIcon(it.iconCacheKey, icon) }
+        RAppsSingleton.instance.apps = homeApps
         UtilSettings(context).save(UtilSettings.KEY_DEPTH_OF_FIELD, true)
         UtilSettings(context).save(UtilSettings.KEY_CHROMATIC_ABERRATION, true)
         try {
