@@ -38,4 +38,4 @@ Là người dùng, tôi muốn lens có cảm giác có khối lượng: hiệu
 
 ## Kết quả
 
-Audit: `doc/task/AUDIT_FISH-041_2026-11-07.md` (8,7/10, dưới ngưỡng 9,0; owner đóng với giới hạn). Raw gfxinfo: `doc/task/evidence/fish-041/`. Giới hạn chính: ngoại lai frame trên KJ7 chưa giải thích và chưa chụp được Perfetto A/B (KJ7 rớt adb); owner chưa thử tay; 100 ms là hằng số đoán; bản dịch AI. Commit: `3cdaf706`, `e165606b`, `9dc3c5ad`, `1fef33aa`, `a488a708`, `5780b76d`, `fa975e2a`.
+Audit: `doc/task/AUDIT_FISH-041_2026-11-07.md` (8,7/10, dưới ngưỡng 9,0; owner đóng với giới hạn). Raw gfxinfo: `doc/task/evidence/fish-041/`. Giới hạn chính: ngoại lai frame trên KJ7 chưa giải thích và chưa chụp được Perfetto A/B (KJ7 rớt adb); owner chưa thử trực tiếp; smoke tự động trên A50s với animator gốc 0 không kích hoạt pan (`LensAnimation` duration=0), gap 0; tạm bật animator 1.0 thì integration 6/6 và smoke 2/2 xanh, rồi khôi phục 0. Hành vi tay chưa được chứng minh; 100 ms là hằng số đoán; bản dịch AI. Commit: `3cdaf706`, `e165606b`, `9dc3c5ad`, `1fef33aa`, `a488a708`, `5780b76d`, `fa975e2a`.
