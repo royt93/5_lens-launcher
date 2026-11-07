@@ -853,6 +853,10 @@ class LensView : View {
     private var mChromaLastAlpha = 0
     private val mChromaDrawnIndices = IntArray(ChromaticAberration.MAX_ICONS)
 
+    /** FISH-042: focus-boundary haptic detector, allocated once, reset per gesture. */
+    private val mBoundaryTracker = FocusBoundaryHaptics.Tracker()
+    private var mBoundaryHapticFired = false
+
     /** FISH-041: sampled once per lens show in LensAnimation.init (live touch only), never per frame. */
     @androidx.annotation.VisibleForTesting
     internal var lensInertiaEnabled = UtilSettings.DEFAULT_LENS_INERTIA
@@ -948,6 +952,9 @@ class LensView : View {
     }
 
     @androidx.annotation.VisibleForTesting
+    internal val boundaryHapticFiredForTest: Boolean get() = mBoundaryHapticFired
+
+    @androidx.annotation.VisibleForTesting
     internal fun visualCentreForTest(): Pair<Float, Float> = Pair(mVisualX, mVisualY)
 
     /** FISH-EXPORT: called by PolaroidExportHelper.exportAsync right before it draws this view
@@ -971,6 +978,7 @@ class LensView : View {
         mTiltX = 0f
         mTiltY = 0f
         resetLensInertia()
+        mBoundaryTracker.reset()
         gestureState = LensGestureState.IDLE
         mSelectIndex = -1
         mRectToSelect = null
@@ -2219,6 +2227,7 @@ class LensView : View {
             chromaticAberrationEnabled, mDrawType == DrawType.APPS && hasActiveTouch && dofTransition > 0f
         )
         prepareChromaticAberration()
+        mBoundaryHapticFired = false
         dofBandCounts.fill(0)
         val dofLayers = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S && dofMode == DepthOfField.Mode.BLUR) mDofLayers else null
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
@@ -2305,6 +2314,24 @@ class LensView : View {
         }
         if (chromaOn) drawChromaticFringes(canvas, resources.displayMetrics.density, dofTransition)
         mPaintIcons?.alpha = DepthOfField.OPAQUE_ALPHA
+        // FISH-042: focus-boundary haptic (before hover haptic so it can suppress it).
+        if (selectIndex >= 0 && hasActiveTouch && mMoving
+            && mUtilSettings?.getBoolean(UtilSettings.KEY_VIBRATE_APP_HOVER) == true
+            && !(mGestureReduceMotion ?: LensPhysicsPolicy.shouldReduceLensMotion(context))
+        ) {
+            val bdApp = mApps?.getOrNull(selectIndex)
+            val bdKey = bdApp?.identifier ?: ""
+            val bdDist = DepthOfField.focusDistance(
+                mTouchX, mTouchY,
+                mGridCache.baseRects.getOrNull(selectIndex)?.centerX() ?: 0f,
+                mGridCache.baseRects.getOrNull(selectIndex)?.centerY() ?: 0f,
+                width.toFloat(), height.toFloat()
+            )
+            if (mBoundaryTracker.observe(bdKey, bdDist)) {
+                performLightHaptic()
+                mBoundaryHapticFired = true
+            }
+        }
         mMustVibrate = if (selectIndex >= 0) {
             selectIndex != mSelectIndex
         } else {
@@ -2621,6 +2648,26 @@ class LensView : View {
         }
     }
 
+    /** FISH-042: fixed LIGHT pulse, independent of the user's chosen haptic level. */
+    private fun performLightHaptic() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val vibrator = vibratorProvider?.invoke()
+                ?: context.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
+            if (vibrator != null && vibrator.hasVibrator()) {
+                try {
+                    val effect = VibrationEffect.createOneShot(
+                        HapticIntensity.LIGHT.duration, HapticIntensity.LIGHT.amplitude
+                    )
+                    vibrator.vibrate(effect)
+                    onHapticPerformed?.invoke(HapticIntensity.LIGHT.amplitude)
+                } catch (_: Exception) {}
+            }
+        } else {
+            performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+            onHapticPerformed?.invoke(HapticFeedbackConstants.VIRTUAL_KEY)
+        }
+    }
+
     private fun performHoverVibration() {
         if (mInsideRect) {
             if (mMustVibrate) {
@@ -2629,7 +2676,7 @@ class LensView : View {
                         && !mAnimationHiding
                         && !(mGestureReduceMotion ?: LensPhysicsPolicy.shouldReduceLensMotion(context))
                     ) {
-                        performIntensityHaptic()
+                        if (!mBoundaryHapticFired) performIntensityHaptic()
                     }
                 }
                 mMustVibrate = false
