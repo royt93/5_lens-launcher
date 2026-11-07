@@ -333,4 +333,6 @@
     <string name="lens_rotate_announcement">หมุนลำดับแล้ว แอปแรก: %1$s</string>
     <string name="setting_focus_peaking">โฟกัสพีกกิง</string>
     <string name="setting_focus_peaking_hint">แสดงเส้นขอบไอคอนในบริเวณที่คมชัดเมื่อแตะหรือล็อกโฟกัส ใช้สีไฮไลต์ ปิดไว้โดยค่าเริ่มต้น</string>
+    <string name="setting_chromatic_aberration">ความคลาดสี</string>
+    <string name="setting_chromatic_aberration_hint">เพิ่มขอบสีแดง/น้ำเงินบางๆ ให้ไอคอนที่อยู่ไกลบางรายการขณะลากเลนส์ ปิดไว้โดยค่าเริ่มต้น</string>
 </resources>

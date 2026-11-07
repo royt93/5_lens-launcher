@@ -333,4 +333,6 @@
     <string name="lens_rotate_announcement">順序を回転しました。先頭のアプリ: %1$s</string>
     <string name="setting_focus_peaking">フォーカスピーキング</string>
     <string name="setting_focus_peaking_hint">タッチ中またはフォーカス固定中に、ピントの合った領域のアイコンを囲みます。ハイライト色を使用します。初期設定ではオフです。</string>
+    <string name="setting_chromatic_aberration">色収差</string>
+    <string name="setting_chromatic_aberration_hint">レンズをドラッグ中、遠くの一部のアイコンに赤と青の薄い色縁を追加します。初期設定ではオフです。</string>
 </resources>

@@ -343,4 +343,6 @@
     <string name="lens_rotate_announcement">Orden rotado. Primera app: %1$s</string>
     <string name="setting_focus_peaking">Resalte de enfoque</string>
     <string name="setting_focus_peaking_hint">Delinea los iconos del área nítida al tocar o fijar el enfoque. Usa el color de resaltado. Desactivado de forma predeterminada.</string>
+    <string name="setting_chromatic_aberration">Aberración cromática</string>
+    <string name="setting_chromatic_aberration_hint">Añade sutiles franjas rojas y azules a algunos iconos lejanos al arrastrar la lente. Desactivado de forma predeterminada.</string>
 </resources>

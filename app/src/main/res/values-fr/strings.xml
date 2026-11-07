@@ -343,4 +343,6 @@
     <string name="lens_rotate_announcement">Ordre pivoté. Première appli : %1$s</string>
     <string name="setting_focus_peaking">Accentuation de mise au point</string>
     <string name="setting_focus_peaking_hint">Entoure les icônes de la zone nette pendant le toucher ou lorsque la mise au point est verrouillée. Utilise la couleur de surbrillance. Désactivé par défaut.</string>
+    <string name="setting_chromatic_aberration">Aberration chromatique</string>
+    <string name="setting_chromatic_aberration_hint">Ajoute de légères franges rouges et bleues à quelques icônes éloignées pendant le déplacement de la loupe. Désactivé par défaut.</string>
 </resources>

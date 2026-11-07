@@ -343,4 +343,6 @@
     <string name="lens_rotate_announcement">Ordine ruotato. Prima app: %1$s</string>
     <string name="setting_focus_peaking">Focus peaking</string>
     <string name="setting_focus_peaking_hint">Delinea le icone nell\'area nitida quando tocchi o blocchi il fuoco. Usa il colore evidenziato. Disattivato per impostazione predefinita.</string>
+    <string name="setting_chromatic_aberration">Aberrazione cromatica</string>
+    <string name="setting_chromatic_aberration_hint">Aggiunge sottili frange rosse e blu ad alcune icone lontane mentre trascini la lente. Disattivata per impostazione predefinita.</string>
 </resources>

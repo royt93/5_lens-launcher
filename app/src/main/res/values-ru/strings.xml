@@ -348,4 +348,6 @@
     <string name="lens_rotate_announcement">Порядок повёрнут. Первое приложение: %1$s</string>
     <string name="setting_focus_peaking">Выделение резкой области</string>
     <string name="setting_focus_peaking_hint">Обводит значки в резкой области при касании или фиксации фокуса. Использует цвет выделения. По умолчанию выключено.</string>
+    <string name="setting_chromatic_aberration">Хроматическая аберрация</string>
+    <string name="setting_chromatic_aberration_hint">Добавляет лёгкие красно-синие цветные каймы нескольким дальним значкам при перетаскивании линзы. По умолчанию выключена.</string>
 </resources>

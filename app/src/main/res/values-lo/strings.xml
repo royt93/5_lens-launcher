@@ -333,4 +333,6 @@
     <string name="lens_rotate_announcement">ໝູນລຳດັບແລ້ວ. ແອັບທຳອິດ: %1$s</string>
     <string name="setting_focus_peaking">ການເນັ້ນຈຸດໂຟກັດ</string>
     <string name="setting_focus_peaking_hint">ຂີດຂອບໄອຄອນໃນບໍລິເວນຊັດເມື່ອແຕະ ຫຼື ລັອກໂຟກັດ. ໃຊ້ສີເນັ້ນ. ປິດໄວ້ໂດຍຄ່າເລີ່ມຕົ້ນ.</string>
+    <string name="setting_chromatic_aberration">ຄວາມຄາດເຄື່ອນຂອງສີ</string>
+    <string name="setting_chromatic_aberration_hint">ເພີ່ມຂອບສີແດງ/ຟ້າບາງໆໃຫ້ບາງໄອຄອນທີ່ໄກ ເມື່ອລາກເລນ. ປິດໄວ້ໂດຍຄ່າເລີ່ມຕົ້ນ.</string>
 </resources>
