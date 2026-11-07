@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | exclusive |
-| Status | todo |
+| Status | inprogress |
 | Priority | P3 |
 | Evidence | idea |
 | Epic | Fisheye Smart |

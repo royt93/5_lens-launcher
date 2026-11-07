@@ -334,6 +334,6 @@ Giới hạn: agent audit ui chưa đọc hết `LensView.kt`, `ActAbout.java`, 
 | `FISH-033` ✅ done 2026-11-05 (audit 9,30/10; TECNO sensor→render + touch override; A/B pin/frame chưa đo hợp lệ, dịch AI chưa rà; chưa push) | P3 | 5 | [Thấu kính nghiêng theo cảm biến (tilt parallax)](done/p3-fish-fish-033-gyro-tilt-parallax.md) |
 | `FISH-034` ✅ done 2026-11-06 (audit 9,1/10; chỉ vignette, sai sắc tách thành FISH-040; TECNO KJ7; chưa push) | P3 | 3 | [Vignette và sai sắc ở mép lens theo độ méo](done/p3-fish-fish-034-chromatic-vignette-rim.md) |
 | `FISH-035` ✅ done 2026-11-06 (audit 9,1/10; Pixel 7 Pro `2B051FDH3006MU`; smoke cung liên tục qua UiAutomation; chưa push) | P3 | 5 | [Vòng lấy nét: xoay một ngón quanh tâm để quay vòng thứ tự app](done/p3-fish-fish-035-rotate-ring-reorder.md) |
-| `FISH-040` | P3 | 5 | [Sai sắc (chromatic aberration) ở mép lens, tách từ FISH-034](todo/p3-fish-fish-040-chromatic-aberration-rim.md) |
+| `FISH-040` | P3 | 5 | [Sai sắc (chromatic aberration) ở mép lens, tách từ FISH-034](inprogress/p3-fish-fish-040-chromatic-aberration-rim.md) |
 | `FISH-036` ✅ done 2026-11-04 (audit 9,2/10, TECNO KJ7, chưa push) | P3 | 5 | [Chia sẻ 'lens profile' (cấu hình quang học) qua file](done/p3-fish-fish-036-lens-profile-share-file.md) |
 | `FISH-037` ✅ done 2026-11-01 (audit 9,1/10, TECNO BG6, chưa push) | P3 | 3 | [Polaroid export có chú thích quang học và contact-sheet nhiều lens](done/p3-fish-fish-037-polaroid-optical-caption.md) |
