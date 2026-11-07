@@ -38,4 +38,4 @@ Là người dùng, tôi muốn lens có cảm giác có khối lượng: hiệu
 
 ## Trạng thái (2026-11-07)
 
-Code, test, mutation và smoke xong; **chưa đóng**: audit 8,6/10 (< 9,0) vì frame budget TB sáu lần chênh +0,62 ms so với tiêu chí +0,5 ms của spec, hai ngoại lai chưa giải thích, phương án lùi chưa áp. Chi tiết: `doc/task/AUDIT_FISH-041_2026-11-07.md`.
+Code, test, mutation và smoke xong; **chưa đóng**: audit 8,7/10 (< 9,0): trên 18 cặp frame budget mean +0,51 ms (tiêu chí spec +0,5 ms), median +0,18 ms, 6/18 lần bật có ngoại lai > 6,2 ms (0/18 lần tắt) chưa giải thích; chẩn đoán cho thấy phương án lùi của spec không nhắm đúng nguồn chi phí nên không áp. Chi tiết: `doc/task/AUDIT_FISH-041_2026-11-07.md`.
