@@ -154,39 +154,38 @@ class LensViewFocusBoundaryHapticWidgetTest {
         assertFalse("no boundary crossing, no pulse", lensView.boundaryHapticFiredForTest)
     }
 
-    @Test fun withTheHoverSwitchOffNoPulseFires() {
-        UtilSettings(context).save(UtilSettings.KEY_VIBRATE_APP_HOVER, false)
+    /** Every "no pulse" gate below opens the other gates and primes a REAL crossing, so only the gate under test can stop it. */
+    private fun primedCrossingFrame(reduceMotion: Boolean = false, pan: Boolean = true) {
         val (cx, cy) = cellCentre(0)
-        touchAt(cx, cy)
-        startPan()
-        render()
+        touchAt(cx, cy, reduceMotion)
+        if (pan) startPan()
+        lensView.primeBoundaryTrackerForTest(index = 0, insideSharp = false)
         haptics.clear()
-        touchAt(SIZE_PX / 2f, SIZE_PX / 2f)
         render()
+    }
+
+    @Test fun withTheHoverSwitchOffNoPulseFiresEvenOnARealCrossing() {
+        UtilSettings(context).save(UtilSettings.KEY_VIBRATE_APP_HOVER, false)
+        primedCrossingFrame()
         assertFalse("the switch is off", lensView.boundaryHapticFiredForTest)
         assertTrue("no haptics at all", haptics.isEmpty())
     }
 
-    @Test fun reducedMotionSuppressesBoundaryPulse() {
-        val (cx, cy) = cellCentre(0)
-        touchAt(cx, cy, reduceMotion = true)
-        startPan()
-        render()
-        haptics.clear()
-        touchAt(SIZE_PX / 2f, SIZE_PX / 2f, reduceMotion = true)
-        render()
-        assertFalse(lensView.boundaryHapticFiredForTest)
+    @Test fun reducedMotionSuppressesBoundaryPulseEvenOnARealCrossing() {
+        // The gate reads the per-gesture flag, so set exactly that one through the production field.
+        val gesture = LensView::class.java.getDeclaredField("mGestureReduceMotion").apply { isAccessible = true }
+        gesture.set(lensView, true)
+        primedCrossingFrame(reduceMotion = true)
+        assertFalse("reduced motion suppresses the pulse", lensView.boundaryHapticFiredForTest)
+        assertTrue("no haptics at all", haptics.isEmpty())
     }
 
-    @Test fun withoutAPanNoPulseFires() {
-        val (cx, cy) = cellCentre(0)
-        touchAt(cx, cy)
-        render()
-        haptics.clear()
-        touchAt(SIZE_PX / 2f, SIZE_PX / 2f)
-        render()
+    @Test fun withoutAPanNoPulseFiresEvenOnARealCrossing() {
+        primedCrossingFrame(pan = false)
         assertFalse("no pan = no boundary haptic", lensView.boundaryHapticFiredForTest)
     }
+
+
 
     @Test fun actionUpResetsTrackerSoNewGestureStartsAsFreshBaseline() {
         // Step 1: Touch down on cell 0, drag to far position, render (insideSharp=false, key=app0)
