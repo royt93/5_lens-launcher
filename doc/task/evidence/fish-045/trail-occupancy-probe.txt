@@ -1,0 +1,9 @@
+FISH-045 Focus Trail geometry probe (host/Robolectric, 1080x2436 @480dpi, icon 18dp, sweep of 400 steps at 16 ms = 6.4 s, diagonal finger path, trail window 300 ms).
+Counts icons that LEAVE the sharp zone (FocusPeaking.isSharp, focus distance <= 0.2) and how many are inside a 300 ms trail window at once.
+
+geometry: 1080x2436px, density=3.0
+apps=40 cells=40 sweep=400steps/6.4s enters=14 exits=11 maxTrailActive=2 framesWith>3=0 meanActive=0.52 finalActive=0
+apps=120 cells=120 sweep=400steps/6.4s enters=42 exits=33 maxTrailActive=4 framesWith>3=17 meanActive=1.54 finalActive=1
+apps=270 cells=270 sweep=400steps/6.4s enters=92 exits=73 maxTrailActive=7 framesWith>3=201 meanActive=3.38 finalActive=4
+
+Caveat: finger path and speed are one synthetic diagonal sweep (~245 dp/s average, above the FISH-044 snap threshold), not human data.
