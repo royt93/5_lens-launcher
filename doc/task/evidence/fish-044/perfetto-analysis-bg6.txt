@@ -1,0 +1,30 @@
+FISH-044 Perfetto SurfaceFlinger FrameTimeline analysis on TECNO BG6 (Android 13, 720x1612 @320dpi)
+Swipe 150,1200 -> 560,560 over 6000 ms. 3 runs with all 7 optical effects enabled vs 2 valid runs with all effects disabled.
+
+SurfaceFlinger FrameTimeline (layer: com.mckimquyen.lenslauncher):
+All 7 ON:
+- true-1: 552 frames, mean 13.88 ms, p90 14.96 ms, p99 20.19 ms, jank 551 (99.82%), types: Buffer Stuffing 547, App Deadline Missed 1, Prediction Error 1, App Deadline Missed + Buffer Stuffing 2
+- true-2: 550 frames, mean 13.57 ms, p90 14.77 ms, p99 19.56 ms, jank 549 (99.82%), types: Buffer Stuffing 547, App Deadline Missed 1, Prediction Error 1
+- true-3: 551 frames, mean 13.38 ms, p90 14.51 ms, p99 18.40 ms, jank 550 (99.82%), types: Buffer Stuffing 548, App Deadline Missed 1, Prediction Error 1
+
+All 7 OFF:
+- false-1: 550 frames, mean 11.27 ms, p90 12.33 ms, p99 13.84 ms, jank 1 (0.18%), types: Buffer Stuffing 1
+- false-2: no frames captured
+- false-3: 551 frames, mean 11.35 ms, p90 12.38 ms, p99 13.83 ms, jank 1 (0.18%), types: Buffer Stuffing 1
+
+App-internal slice breakdown:
+- UI Thread (Choreographer#doFrame):
+  ON:  mean 5.42 ms, p90 6.45 ms, p99 8.60 ms, max 25 ms
+  OFF: mean 5.22 ms, p90 6.30 ms, p99 7.62 ms, max 8 ms
+  Delta UI thread: +0.20 ms mean
+
+- RenderThread (DrawFrame):
+  ON:  mean 6.42 ms, p90 7.27 ms, max 27 ms
+  OFF: mean 6.33 ms, p90 7.12 ms, max 13 ms
+  Delta RenderThread: +0.09 ms mean
+
+Key finding:
+The +2.3 ms gap in SurfaceFlinger FrameTimeline is NOT CPU/GPU bottleneck (UI+RenderThread delta is only +0.29 ms).
+Instead, 99.8% of frames with all effects on are flagged as "Buffer Stuffing" by SurfaceFlinger.
+This occurs because postInvalidateOnAnimation() (from inertia / snap) and ACTION_MOVE invalidate() submit buffers faster than SurfaceFlinger's latch cadence, causing buffers to queue up.
+True jank (App Deadline Missed) is only 1-2 frames out of 550 (< 0.4%), confirming the app does not drop frames.
