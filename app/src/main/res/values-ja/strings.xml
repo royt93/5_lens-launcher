@@ -337,4 +337,6 @@
     <string name="setting_chromatic_aberration_hint">レンズをドラッグ中、遠くの一部のアイコンに赤と青の薄い色縁を追加します。初期設定ではオフです。</string>
     <string name="setting_lens_inertia">レンズの慣性</string>
     <string name="setting_lens_inertia_hint">ドラッグ中、レンズの効果が少し遅れて指に追従します。初期設定ではオフです。</string>
+    <string name="setting_focus_snap">フォーカススナップ</string>
+    <string name="setting_focus_snap_hint">ゆっくりドラッグすると、レンズの焦点が最も近いアイコンへ穏やかに引き寄せられます。初期設定ではオフです。</string>
 </resources>

@@ -352,4 +352,6 @@
     <string name="setting_chromatic_aberration_hint">Добавляет лёгкие красно-синие цветные каймы нескольким дальним значкам при перетаскивании линзы. По умолчанию выключена.</string>
     <string name="setting_lens_inertia">Инерция линзы</string>
     <string name="setting_lens_inertia_hint">Эффекты линзы следуют за пальцем с небольшой задержкой при перетаскивании. По умолчанию выключено.</string>
+    <string name="setting_focus_snap">Притяжение фокуса</string>
+    <string name="setting_focus_snap_hint">Мягко притягивает фокус линзы к ближайшему значку при медленном перетаскивании. По умолчанию выключено.</string>
 </resources>

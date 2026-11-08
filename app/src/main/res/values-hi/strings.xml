@@ -342,4 +342,6 @@
     <string name="setting_chromatic_aberration_hint">लेंस खींचते समय कुछ दूर के आइकन में हल्की लाल/नीली रंगीन किनारियाँ जोड़ता है। डिफ़ॉल्ट रूप से बंद।</string>
     <string name="setting_lens_inertia">लेंस जड़त्व</string>
     <string name="setting_lens_inertia_hint">खींचते समय लेंस के प्रभाव थोड़ी देरी से आपकी उंगली का पीछा करते हैं। डिफ़ॉल्ट रूप से बंद।</string>
+    <string name="setting_focus_snap">फोकस स्नैप</string>
+    <string name="setting_focus_snap_hint">धीरे खींचते समय लेंस के फोकस को नज़दीकी आइकन की ओर हल्के से खींचता है। डिफ़ॉल्ट रूप से बंद।</string>
 </resources>

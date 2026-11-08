@@ -9,6 +9,7 @@ import android.graphics.*
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
 import android.os.Vibrator
 import android.os.VibrationEffect
 import android.util.AttributeSet
@@ -870,6 +871,14 @@ class LensView : View {
     private var mOpticX = -Float.MAX_VALUE
     private var mOpticY = -Float.MAX_VALUE
 
+    /** FISH-044: focus snap-to-icon. Sampled once per lens show in LensAnimation.init (live touch only). */
+    @androidx.annotation.VisibleForTesting
+    internal var focusSnapEnabled = UtilSettings.DEFAULT_FOCUS_SNAP
+    private val mSnapTracker = FocusSnap.Tracker()
+    private val mSnapPull = FloatArray(2)
+    private var mSnapTestPanning: Boolean? = null
+    private var mSnapTestSpeedDpPerS: Float? = null
+
     /** Icons fringed in the last frame. */
     @androidx.annotation.VisibleForTesting
     internal val chromaIconsForTest: Int get() = mChromaDrawn
@@ -962,6 +971,21 @@ class LensView : View {
     @androidx.annotation.VisibleForTesting
     internal fun visualCentreForTest(): Pair<Float, Float> = Pair(mVisualX, mVisualY)
 
+    /** FISH-044: the centre the optical effects used in the last frame (finger, lagged, or snapped). */
+    @androidx.annotation.VisibleForTesting
+    internal fun opticalCentreForTest(): Pair<Float, Float> = Pair(mOpticX, mOpticY)
+
+    @androidx.annotation.VisibleForTesting
+    internal fun baseRectsForTest(): Array<RectF> = Array(mGridCache.baseRects.size) { RectF(mGridCache.baseRects[it]) }
+
+    /** FISH-044: forces the setting, the pan flag and the finger speed without driving real events. */
+    @androidx.annotation.VisibleForTesting
+    internal fun setSnapStateForTest(enabled: Boolean, panning: Boolean, speedDpPerS: Float) {
+        focusSnapEnabled = enabled
+        mSnapTestPanning = panning
+        mSnapTestSpeedDpPerS = speedDpPerS
+    }
+
     /** FISH-EXPORT: called by PolaroidExportHelper.exportAsync right before it draws this view
      *  into an offscreen bitmap, so a live touch/pinch never bakes distortion or the pinch HUD
      *  (drawPinchHud, gated on gestureState) into the exported snapshot. Deliberately narrower
@@ -984,6 +1008,7 @@ class LensView : View {
         mTiltY = 0f
         resetLensInertia()
         mClusterTracker.reset()
+        resetFocusSnap()
         gestureState = LensGestureState.IDLE
         mSelectIndex = -1
         mRectToSelect = null
@@ -1755,6 +1780,7 @@ class LensView : View {
                 mTouchY = event.y.coerceAtLeast(0.0f)
                 mTouchDownX = event.x
                 mTouchDownY = event.y
+                mSnapTracker.reset()
                 mSearchSwipeStartedInActivationZone = isInSearchSwipeActivationZone(event.y, height)
                 mSearchSwipeTriggered = false
                 mEdgeSwipeTriggered = false
@@ -1960,6 +1986,8 @@ class LensView : View {
                 if (!mMoving) {
                     return true
                 }
+                // FISH-044: raw finger samples (before the elastic overscroll mapping) give the speed.
+                mSnapTracker.onMove(event.x, event.y, event.eventTime, resources.displayMetrics.density)
                 val maxOverscrollPx = MAX_ELASTIC_OVERSCROLL_DP * resources.displayMetrics.density
                 val elasticEnabled = LensOverscrollPhysics.isEnabled(
                     mUtilSettings?.getLensElasticOverscroll() ?: UtilSettings.DEFAULT_LENS_ELASTIC_OVERSCROLL,
@@ -1995,6 +2023,7 @@ class LensView : View {
                 mLongPressArmed = false
                 mLongPressHandler.removeCallbacks(mLongPressRunnable)
                 mClusterTracker.reset()
+                mSnapTracker.reset()
                 val ringPhase = mRingPhase
                 if (ringPhase == RingPhase.ROTATING || ringPhase == RingPhase.ABORTED) {
                     if (ringPhase == RingPhase.ROTATING) finishRingRotation() else { mRingPhase = RingPhase.IDLE; mRingTracker.reset() }
@@ -2089,6 +2118,7 @@ class LensView : View {
             MotionEvent.ACTION_CANCEL -> {
                 cancelRingRotation()
                 mClusterTracker.reset()
+                mSnapTracker.reset()
                 mFirstEmptyTap = null
                 mCurrentTapEligible = false
                 mCurrentTapSecond = false
@@ -2194,13 +2224,35 @@ class LensView : View {
             lensInertiaEnabled && mDrawType == DrawType.APPS && hasActiveTouch && focusCenter != null,
             mInertiaTestPanning ?: (mMoving && gestureState == LensGestureState.PANNING), mReduceMotion
         )
-        updateLensInertia(inertiaOn, lensCenterX, lensCenterY)
-        val drawCenterX = if (inertiaOn) mVisualX else lensCenterX
-        val drawCenterY = if (inertiaOn) mVisualY else lensCenterY
-        val inertiaSplit = inertiaOn && !LensInertia.sameCentre(mVisualX, mVisualY, lensCenterX, lensCenterY)
-        // Optical effects (DoF/vignette distance, fringe direction) read this; it is the finger unless inertia lags it.
-        mOpticX = if (inertiaOn) mVisualX else mTouchX
-        mOpticY = if (inertiaOn) mVisualY else mTouchY
+        // FISH-044: a slow real pan pulls the optical target towards the nearest icon; selection never reads it.
+        val snapOn = FocusSnap.shouldApply(
+            focusSnapEnabled && mDrawType == DrawType.APPS && hasActiveTouch && focusCenter != null,
+            mSnapTestPanning ?: (mMoving && gestureState == LensGestureState.PANNING), mReduceMotion
+        )
+        var snapDx = 0f
+        var snapDy = 0f
+        if (snapOn) {
+            val gain = FocusSnap.gain(mSnapTestSpeedDpPerS ?: mSnapTracker.speedDpPerS(SystemClock.uptimeMillis()))
+            val nearest = if (gain > 0f) FocusSnap.nearestApp(mTouchX, mTouchY, baseRects, itemCount) else -1
+            if (nearest >= 0) {
+                FocusSnap.pull(
+                    mTouchX, mTouchY, baseRects[nearest].centerX(), baseRects[nearest].centerY(),
+                    FocusSnap.MAX_PULL_DP * resources.displayMetrics.density, gain, mSnapPull
+                )
+                snapDx = mSnapPull[0]
+                snapDy = mSnapPull[1]
+            }
+        }
+        val targetCenterX = lensCenterX + snapDx
+        val targetCenterY = lensCenterY + snapDy
+        updateLensInertia(inertiaOn, targetCenterX, targetCenterY)
+        val drawCenterX = if (inertiaOn) mVisualX else targetCenterX
+        val drawCenterY = if (inertiaOn) mVisualY else targetCenterY
+        val inertiaSplit = (inertiaOn || snapOn) && !LensInertia.sameCentre(drawCenterX, drawCenterY, lensCenterX, lensCenterY)
+        // Optical effects (DoF/vignette distance, fringe direction) read this; it is the finger unless inertia lags
+        // it or focus snap pulls it.
+        mOpticX = if (inertiaOn) mVisualX else mTouchX + snapDx
+        mOpticY = if (inertiaOn) mVisualY else mTouchY + snapDy
         val warpMultiplier = when {
             useTilt -> TiltParallax.ANIMATION_MULTIPLIER
             focusCenter != null && !hasActiveTouch && mFocusLockPinned -> FOCUS_LOCK_WARP_MULTIPLIER
@@ -2319,7 +2371,7 @@ class LensView : View {
                 }
                 if (peakingDraw && focusCenter != null) {
                     val peakDistance = DepthOfField.focusDistance(
-                        if (inertiaOn) mVisualX else focusCenter.x, if (inertiaOn) mVisualY else focusCenter.y,
+                        if (inertiaOn) mVisualX else focusCenter.x + snapDx, if (inertiaOn) mVisualY else focusCenter.y + snapDy,
                         baseRect.centerX(), baseRect.centerY(),
                         width.toFloat(), height.toFloat()
                     )
@@ -2357,7 +2409,9 @@ class LensView : View {
         }
         drawFocusRing(canvas)
         // FISH-041: the lagged centre needs frames after the finger stops; one request per frame until it settles.
-        if (inertiaOn && !LensInertia.isSettled(mVisualX, mVisualY, lensCenterX, lensCenterY)) postInvalidateOnAnimation()
+        if (inertiaOn && !LensInertia.isSettled(mVisualX, mVisualY, targetCenterX, targetCenterY)) postInvalidateOnAnimation()
+        // FISH-044: a paused finger sends no events but its speed keeps falling, so the pull keeps growing.
+        else if (snapOn && mSnapTestSpeedDpPerS == null && mSnapTracker.needsRedraw(SystemClock.uptimeMillis())) postInvalidateOnAnimation()
     }
 
     /**
@@ -2383,6 +2437,12 @@ class LensView : View {
             mVisualY = LensInertia.step(mVisualY, fingerY, dtMs)
         }
         mInertiaLastFrameNanos = now
+    }
+
+    private fun resetFocusSnap() {
+        mSnapTracker.reset()
+        mSnapTestPanning = null
+        mSnapTestSpeedDpPerS = null
     }
 
     private fun resetLensInertia() {
@@ -2740,6 +2800,8 @@ class LensView : View {
                 ?: UtilSettings.DEFAULT_CHROMATIC_ABERRATION
             lensInertiaEnabled = mUtilSettings?.getBoolean(UtilSettings.KEY_LENS_INERTIA)
                 ?: UtilSettings.DEFAULT_LENS_INERTIA
+            focusSnapEnabled = mUtilSettings?.getBoolean(UtilSettings.KEY_FOCUS_SNAP)
+                ?: UtilSettings.DEFAULT_FOCUS_SNAP
             focusPeakingEnabled = mUtilSettings?.getBoolean(UtilSettings.KEY_FOCUS_PEAKING)
                 ?: UtilSettings.DEFAULT_FOCUS_PEAKING
             mUtilSettings?.let {

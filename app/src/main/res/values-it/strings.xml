@@ -347,4 +347,6 @@
     <string name="setting_chromatic_aberration_hint">Aggiunge sottili frange rosse e blu ad alcune icone lontane mentre trascini la lente. Disattivata per impostazione predefinita.</string>
     <string name="setting_lens_inertia">Inerzia della lente</string>
     <string name="setting_lens_inertia_hint">Gli effetti della lente seguono il dito con un breve ritardo durante il trascinamento. Disattivato per impostazione predefinita.</string>
+    <string name="setting_focus_snap">Aggancio messa a fuoco</string>
+    <string name="setting_focus_snap_hint">Attira dolcemente il fuoco della lente verso l\'icona più vicina quando trascini lentamente. Disattivato per impostazione predefinita.</string>
 </resources>

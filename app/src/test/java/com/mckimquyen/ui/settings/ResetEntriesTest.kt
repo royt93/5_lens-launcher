@@ -50,7 +50,7 @@ class ResetEntriesTest {
         val expected = setOf(
             "vibrate_app_hover", "vibrate_app_launch", "haptic_intensity", "show_name_app_hover", "show_touch_selection",
             "show_focus_halo", "show_search_bar", "recent_apps_quick_panel_enabled", "keep_screen_on", "clean_lens_mode",
-            "depth_of_field_blur", "lens_vignette", "focus_peaking", "chromatic_aberration", "lens_inertia", "smart_focus_bias_work", "quick_action_calculator_enabled", "quick_action_unit_enabled", "quick_action_timer_enabled",
+            "depth_of_field_blur", "lens_vignette", "focus_peaking", "chromatic_aberration", "lens_inertia", "focus_snap", "smart_focus_bias_work", "quick_action_calculator_enabled", "quick_action_unit_enabled", "quick_action_timer_enabled",
             "quick_action_battery_enabled", "quick_action_settings_enabled", "search_hint_text", "show_new_tag_app",
             "show_notification_badges", "background_mode", "background_color", "show_touch_selection_color",
             "icon_pack_package_name", "icon_pack_label_name", "night_mode"

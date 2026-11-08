@@ -337,4 +337,6 @@
     <string name="setting_chromatic_aberration_hint">拖动镜头时，为少数较远的图标添加淡淡的红蓝色边缘。默认关闭。</string>
     <string name="setting_lens_inertia">镜头惯性</string>
     <string name="setting_lens_inertia_hint">拖动时，镜头效果会以短暂延迟跟随手指。默认关闭。</string>
+    <string name="setting_focus_snap">焦点吸附</string>
+    <string name="setting_focus_snap_hint">缓慢拖动时，镜头焦点会轻轻吸向最近的图标。默认关闭。</string>
 </resources>

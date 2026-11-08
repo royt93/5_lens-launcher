@@ -87,6 +87,8 @@ class UtilSettings(context: Context) {
         const val DEFAULT_FOCUS_PEAKING = false
         const val DEFAULT_CHROMATIC_ABERRATION = false
         const val DEFAULT_LENS_INERTIA = false
+        // FISH-044: focus snap-to-icon is opt-in, off by default.
+        const val DEFAULT_FOCUS_SNAP = false
         // FISH-026: damped lens overscroll is enabled by default.
         const val DEFAULT_LENS_ELASTIC_OVERSCROLL = true
         // FISH-033: tilt parallax is opt-in (motion sickness and battery risk), off by default.
@@ -157,6 +159,7 @@ class UtilSettings(context: Context) {
         const val KEY_FOCUS_PEAKING = "focus_peaking"
         const val KEY_CHROMATIC_ABERRATION = "chromatic_aberration"
         const val KEY_LENS_INERTIA = "lens_inertia"
+        const val KEY_FOCUS_SNAP = "focus_snap"
         const val KEY_LENS_ELASTIC_OVERSCROLL = "lens_elastic_overscroll"
         /** FISH-033: global (not per-lens) toggle for the idle lens centre drifting with device tilt. */
         const val KEY_TILT_PARALLAX = "tilt_parallax"
@@ -369,6 +372,7 @@ class UtilSettings(context: Context) {
         KEY_FOCUS_PEAKING -> prefs.getBoolean(name, DEFAULT_FOCUS_PEAKING)
         KEY_CHROMATIC_ABERRATION -> prefs.getBoolean(name, DEFAULT_CHROMATIC_ABERRATION)
         KEY_LENS_INERTIA -> prefs.getBoolean(name, DEFAULT_LENS_INERTIA)
+        KEY_FOCUS_SNAP -> prefs.getBoolean(name, DEFAULT_FOCUS_SNAP)
         KEY_LENS_ELASTIC_OVERSCROLL -> prefs.getBoolean(name, DEFAULT_LENS_ELASTIC_OVERSCROLL)
         KEY_TILT_PARALLAX -> prefs.getBoolean(name, DEFAULT_TILT_PARALLAX)
         KEY_SMART_FOCUS_BIAS -> prefs.getBoolean(name, DEFAULT_SMART_FOCUS_BIAS)

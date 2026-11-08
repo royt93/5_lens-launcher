@@ -347,4 +347,6 @@
     <string name="setting_chromatic_aberration_hint">Adiciona franjas vermelhas e azuis sutis a alguns ícones distantes ao arrastar a lente. Desativada por padrão.</string>
     <string name="setting_lens_inertia">Inércia da lente</string>
     <string name="setting_lens_inertia_hint">Os efeitos da lente seguem o dedo com um breve atraso ao arrastar. Desativado por padrão.</string>
+    <string name="setting_focus_snap">Ímã de foco</string>
+    <string name="setting_focus_snap_hint">Puxa suavemente o foco da lente para o ícone mais próximo ao arrastar devagar. Desativado por padrão.</string>
 </resources>

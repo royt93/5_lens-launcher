@@ -337,4 +337,6 @@
     <string name="setting_chromatic_aberration_hint">ເພີ່ມຂອບສີແດງ/ຟ້າບາງໆໃຫ້ບາງໄອຄອນທີ່ໄກ ເມື່ອລາກເລນ. ປິດໄວ້ໂດຍຄ່າເລີ່ມຕົ້ນ.</string>
     <string name="setting_lens_inertia">ແຮງເຉື່ອຍເລນ</string>
     <string name="setting_lens_inertia_hint">ເອັບເຟັກເລນຕາມນິ້ວມືດ້ວຍການຊ້າສັ້ນໆໃນຂະນະລາກ. ປິດຕາມຄ່າເລີ່ມຕົ້ນ.</string>
+    <string name="setting_focus_snap">ດຶງຈຸດໂຟກັດ</string>
+    <string name="setting_focus_snap_hint">ດຶງຈຸດໂຟກັດຂອງເລນໄປຫາໄອຄອນທີ່ໃກ້ທີ່ສຸດເບົາໆ ເມື່ອລາກຊ້າໆ. ປິດຕາມຄ່າເລີ່ມຕົ້ນ.</string>
 </resources>

@@ -337,4 +337,6 @@
     <string name="setting_chromatic_aberration_hint">បន្ថែមគែមពណ៌ក្រហម/ខៀវស្រាលៗលើរូបតំណាងឆ្ងាយមួយចំនួនពេលអូសកែវ។ បិទតាមលំនាំដើម។</string>
     <string name="setting_lens_inertia">និចលភាពកែវថត</string>
     <string name="setting_lens_inertia_hint">ឥទ្ធិពលកែវថតដើរតាមម្រាមដៃដោយយឺតបន្តិចពេលអូស។ បិទតាមលំនាំដើម។</string>
+    <string name="setting_focus_snap">ទាញចំណុចផ្តោត</string>
+    <string name="setting_focus_snap_hint">ទាញចំណុចផ្តោតកែវថតទៅរកអ៊ីខនជិតបំផុតថ្នមៗ នៅពេលអូសយឺត។ បិទតាមលំនាំដើម។</string>
 </resources>

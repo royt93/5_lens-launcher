@@ -342,4 +342,6 @@
     <string name="setting_chromatic_aberration_hint">Fügt beim Ziehen der Linse einigen entfernten Symbolen dezente rote und blaue Farbsäume hinzu. Standardmäßig aus.</string>
     <string name="setting_lens_inertia">Linsenträgheit</string>
     <string name="setting_lens_inertia_hint">Lässt die Linseneffekte beim Ziehen mit kurzer Verzögerung dem Finger folgen. Standardmäßig aus.</string>
+    <string name="setting_focus_snap">Fokus-Einrasten</string>
+    <string name="setting_focus_snap_hint">Zieht den Linsenfokus beim langsamen Ziehen sanft zum nächsten Symbol. Standardmäßig aus.</string>
 </resources>

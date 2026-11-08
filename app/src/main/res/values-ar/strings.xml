@@ -368,4 +368,6 @@
     <string name="setting_chromatic_aberration_hint">يضيف حواف لونية حمراء وزرقاء خفيفة إلى بعض الأيقونات البعيدة أثناء سحب العدسة. معطل افتراضياً.</string>
     <string name="setting_lens_inertia">قصور العدسة</string>
     <string name="setting_lens_inertia_hint">تتبع تأثيرات العدسة إصبعك بتأخر قصير أثناء السحب. متوقفة افتراضيًا.</string>
+    <string name="setting_focus_snap">التقاط التركيز</string>
+    <string name="setting_focus_snap_hint">تسحب تركيز العدسة برفق نحو أقرب أيقونة أثناء السحب ببطء. متوقفة افتراضيًا.</string>
 </resources>

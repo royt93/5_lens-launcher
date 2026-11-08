@@ -347,4 +347,6 @@
     <string name="setting_chromatic_aberration_hint">Ajoute de légères franges rouges et bleues à quelques icônes éloignées pendant le déplacement de la loupe. Désactivé par défaut.</string>
     <string name="setting_lens_inertia">Inertie de la lentille</string>
     <string name="setting_lens_inertia_hint">Les effets de la lentille suivent votre doigt avec un léger retard pendant le glissement. Désactivé par défaut.</string>
+    <string name="setting_focus_snap">Aimant de mise au point</string>
+    <string name="setting_focus_snap_hint">Attire doucement la mise au point de la lentille vers l\'icône la plus proche lors d\'un glissement lent. Désactivé par défaut.</string>
 </resources>

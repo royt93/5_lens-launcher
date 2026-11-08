@@ -337,4 +337,6 @@
     <string name="setting_chromatic_aberration_hint">Menambahkan pinggiran merah/biru halus pada beberapa ikon yang jauh saat lensa digeser. Nonaktif secara default.</string>
     <string name="setting_lens_inertia">Inersia lensa</string>
     <string name="setting_lens_inertia_hint">Efek lensa mengikuti jari dengan jeda singkat saat menggeser. Nonaktif secara default.</string>
+    <string name="setting_focus_snap">Tarik fokus</string>
+    <string name="setting_focus_snap_hint">Menarik fokus lensa dengan lembut ke ikon terdekat saat menggeser perlahan. Nonaktif secara default.</string>
 </resources>
