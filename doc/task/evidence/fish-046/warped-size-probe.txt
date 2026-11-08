@@ -1,0 +1,18 @@
+FISH-046 Hover Magnify size probe (host/Robolectric, 1080x2436 @480dpi, icon 18dp, real LensProfile.FISHEYE warp math).
+Measures the warped icon size under the finger across 40/120/270 apps and default/boosted distortion/scaleFactor.
+
+density=3.0, defaults: distortion=2.5 scale=1.0, FISHEYE, hood FULL, animation multiplier 1.0
+-- distortion=2.5 scaleFactor=1.0
+apps=40 baseIcon=18.0dp  warped icon under finger: min=56.0 avg=57.9 max=58.7 dp  -> +20% adds 11.6 dp (35 px)
+apps=120 baseIcon=18.0dp  warped icon under finger: min=56.7 avg=57.9 max=58.9 dp  -> +20% adds 11.6 dp (35 px)
+apps=270 baseIcon=18.0dp  warped icon under finger: min=56.5 avg=58.0 max=59.1 dp  -> +20% adds 11.6 dp (35 px)
+-- distortion=2.5 scaleFactor=2.0
+apps=40 baseIcon=18.0dp  warped icon under finger: min=100.8 avg=107.0 max=109.8 dp  -> +20% adds 21.4 dp (64 px)
+apps=120 baseIcon=18.0dp  warped icon under finger: min=103.0 avg=107.2 max=110.8 dp  -> +20% adds 21.4 dp (64 px)
+apps=270 baseIcon=18.0dp  warped icon under finger: min=102.3 avg=107.4 max=111.3 dp  -> +20% adds 21.5 dp (64 px)
+-- distortion=5.0 scaleFactor=2.0
+apps=40 baseIcon=18.0dp  warped icon under finger: min=144.0 avg=159.7 max=166.9 dp  -> +20% adds 31.9 dp (96 px)
+apps=120 baseIcon=18.0dp  warped icon under finger: min=149.2 avg=160.1 max=169.4 dp  -> +20% adds 32.0 dp (96 px)
+apps=270 baseIcon=18.0dp  warped icon under finger: min=147.7 avg=160.5 max=170.8 dp  -> +20% adds 32.1 dp (96 px)
+
+Conclusion: with default distortion 2.5 and scaleFactor 1.0, an icon under the finger is already warped to ~58 dp (174 px). A +20% boost adds 11.6 dp (35 px), which is clearly visible and measurable without ambiguous threshold edges.
