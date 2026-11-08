@@ -1,0 +1,27 @@
+
+com.mckimquyen.views.ScratchClusterProbeTest:
+Error in probe(com.mckimquyen.views.ScratchClusterProbeTest):
+java.lang.AssertionError: PROBE
+apps=40 sweepSteps=160 clusterSize[min=2 max=4 avg=2,7] clusterSizeChanges=12
+apps=120 sweepSteps=160 clusterSize[min=4 max=8 avg=6,1] clusterSizeChanges=36
+apps=270 sweepSteps=160 clusterSize[min=8 max=16 avg=12,4] clusterSizeChanges=41
+
+	at org.junit.Assert.fail(Assert.java:89)
+	at com.mckimquyen.views.ScratchClusterProbeTest.probe(ScratchClusterProbeTest.kt:45)
+
+
+Time: 0,929
+There was 1 failure:
+1) probe(com.mckimquyen.views.ScratchClusterProbeTest)
+java.lang.AssertionError: PROBE
+apps=40 sweepSteps=160 clusterSize[min=2 max=4 avg=2,7] clusterSizeChanges=12
+apps=120 sweepSteps=160 clusterSize[min=4 max=8 avg=6,1] clusterSizeChanges=36
+apps=270 sweepSteps=160 clusterSize[min=8 max=16 avg=12,4] clusterSizeChanges=41
+
+	at org.junit.Assert.fail(Assert.java:89)
+	at com.mckimquyen.views.ScratchClusterProbeTest.probe(ScratchClusterProbeTest.kt:45)
+
+FAILURES!!!
+Tests run: 1,  Failures: 1
+
+
