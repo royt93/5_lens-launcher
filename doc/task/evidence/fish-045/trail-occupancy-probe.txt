@@ -7,3 +7,9 @@ apps=120 cells=120 sweep=400steps/6.4s enters=42 exits=33 maxTrailActive=4 frame
 apps=270 cells=270 sweep=400steps/6.4s enters=92 exits=73 maxTrailActive=7 framesWith>3=201 meanActive=3.38 finalActive=4
 
 Caveat: finger path and speed are one synthetic diagonal sweep (~245 dp/s average, above the FISH-044 snap threshold), not human data.
+
+--- Added later the same day: this probe was NOT sufficient ---
+It counted icons leaving the sharp zone but not the base alpha at the moment they leave. With the real vignette formula
+alpha(0.20)=255, alpha(0.30)=239, alpha(0.50)=207, alpha(0.68)=178, so a 70% (179) trail ceiling has nothing to raise.
+Simulation with the real formula (30..1200 dp/s, 40/120/270 apps): 0 icons raised at every setting except one icon at 1200 dp/s on 40 apps.
+On-device probe on TECNO BG6: dofMode=OFF, transition=1.0, vignette on, raised=0 for the whole sweep. FISH-045 was cancelled.

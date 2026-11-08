@@ -1,3 +1,5 @@
+> **HỦY 2026-11-08 — không triển khai.** Thiết kế này không thể quan sát được: alpha nền của icon vừa rời vùng nét là ~255 (vignette cho 255 tại khoảng cách nét 0,20 và chỉ dưới 179 từ ~0,68) nên trần 70% không có gì để nâng. Xem mục Skipped trong `doc/feature.md` và `doc/task/evidence/fish-045/trail-occupancy-probe.txt`. Giữ lại làm bài học.
+
 # FISH-045 — Focus Trail (dấu vết icon rời vùng nét) — Thiết kế
 
 Ngày: 2026-11-08  
