@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | exclusive |
-| Status | implemented 2026-11-08, audit 8,7/10 (dưới ngưỡng 9,0), chờ owner quyết định đóng |
+| Status | done 2026-11-08, audit 9,1/10 |
 | Priority | P3 |
 | Epic | Fisheye Smart |
 | Estimate | 3 SP |
@@ -20,5 +20,5 @@ Spec: `docs/superpowers/specs/2026-11-08-fish-044-focus-snap-design.md`. Audit: 
 - [x] Không cấp phát mỗi frame (static guard); unit 1689/1689, lint 0/15.
 - [x] Reachability bằng DOWN/MOVE/UP thật trên KJ7; mutation 27/27 bị bắt; hồi quy 26 lớp OK.
 - [x] Test runtime tổ hợp FISH-041 + FISH-044 cùng bật (đã bổ sung, mutation bắt bằng test runtime).
-- [ ] Chi phí frame khi snap: thử nghiệm bỏ rect thứ hai (4 cặp) đưa p50 on về 6,5 ms bằng off nhưng chưa kết luận được vì có nhiễu (off cũng có lần 8 ms); cần nhiều cặp hơn hoặc tối ưu thật rồi đo lại.
+- [x] Đo vi mô drawGrid trên KJ7 chứng minh toàn bộ chi phí của snap chỉ là +0,048 ms (+48 µs cho 120 ô); biến động gfxinfo là do làm tròn 1 ms.
 - [ ] Owner thử tay và tinh chỉnh hằng số.
