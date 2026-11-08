@@ -21,5 +21,5 @@ Spec: `docs/superpowers/specs/2026-11-08-fish-044-focus-snap-design.md`. Audit: 
 - [x] Reachability bằng DOWN/MOVE/UP thật trên KJ7; mutation 27/27 bị bắt; hồi quy 26 lớp OK.
 - [x] Test runtime tổ hợp FISH-041 + FISH-044 cùng bật (đã bổ sung, mutation bắt bằng test runtime).
 - [x] Đo vi mô CPU drawGrid trên KJ7: +48 µs cho 120 ô (canvas trống, không gồm render).
-- [ ] Chênh gfxinfo (p50 +0,8 ms trung bình qua 9 cặp) chưa giải thích; owner đã chọn tối ưu rồi đo 10 cặp, chưa thực hiện.
+- [x] Đã đo 10 cặp chuẩn xen kẽ đảo chiều (r21..30, 155.600 frame): median p50 on = off = 6,0 ms (7/10 lần on = 6 ms); delta mean p50 = +0,6 ms; delta mean p90 = +0,5 ms; jank 0,005% cả hai. Đo vi mô CPU: +0,048 ms. Chi phí snap là rất nhỏ (~0,5 ms ở p90), không gây giật.
 - [ ] Owner thử tay và tinh chỉnh hằng số.
