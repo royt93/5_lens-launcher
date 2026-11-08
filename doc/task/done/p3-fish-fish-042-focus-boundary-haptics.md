@@ -35,4 +35,4 @@ Owner picked one LIGHT haptic when the currently hovered app crosses into or out
 
 ## Kết quả
 
-Audit: `doc/task/AUDIT_FISH-042_2026-11-07.md` (8,8/10, owner đóng với giới hạn). Giới hạn chính: integration MotionEvent thật không tái hiện được boundary crossing (kéo đổi icon trước khi distance đủ đổi); mutation set chưa chạy; owner chưa thử tay. Commit: `85abcc12`, `02c159db`, `5d3e23a5`.
+Audit: `doc/task/AUDIT_FISH-042_2026-11-07.md` (8,8/10, owner đóng với giới hạn). Giới hạn chính: integration MotionEvent thật không tái hiện được boundary crossing (kéo đổi icon trước khi distance đủ đổi); mutation set chưa chạy; owner chưa thử tay. Commit: `85abcc12`, `02c159db`, `5d3e23a5`, kèm 3 bản vá lifecycle/conditional-test/optic-centre.

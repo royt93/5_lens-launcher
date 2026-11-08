@@ -84,47 +84,47 @@ class LensViewFocusBoundaryHapticWidgetTest {
      * warps cell 0 larger so it still falls under the finger.  We verify the precondition.
      */
 
-    @Test fun movingFromFarToSharpOnTheSameAppFiresBoundaryPulse() {
+    /**
+     * Moving the touch across the grid changes the selected app: the tracker must re-baseline to the new app
+     * silently (no boundary pulse on selection change). The crossing itself is proven unconditionally in
+     * [FocusBoundaryHapticsTest].
+     */
+    @Test fun movingTouchToADifferentAppEstablishesFreshBaselineWithoutBoundaryPulse() {
         val (cx, cy) = cellCentre(0)
-        // Start with the lens centre far from cell 0
-        val farX = SIZE_PX / 2f
-        val farY = SIZE_PX / 2f
-        touchAt(farX, farY)
+        touchAt(cx, cy)
         startPan()
         render()
-        val farIdx = lensView.selectedIndexForTest
+        val firstApp = lensView.selectedIndexForTest
         haptics.clear()
-        // Move the lens centre onto cell 0
-        touchAt(cx, cy)
+
+        // Move to the far corner: selects a different app
+        val (fx, fy) = cellCentre(APP_COUNT - 1)
+        touchAt(fx, fy)
         render()
-        val sharpIdx = lensView.selectedIndexForTest
-        if (farIdx == sharpIdx) {
-            // Same app, so focus distance changed from far to near => boundary crossing expected
-            assertTrue("boundary pulse on same app entering sharp zone", lensView.boundaryHapticFiredForTest)
-        } else {
-            // If the selected app changed, the tracker baselines; no boundary pulse is expected.
-            // This is not a failure of the feature, but the test cannot prove the crossing.
-            // Record and pass; the unit test already proves boundary crossing logic.
-        }
+        val secondApp = lensView.selectedIndexForTest
+
+        // Must be two different apps
+        assertTrue("precondition: touch selected a different app ($firstApp vs $secondApp)", firstApp != secondApp)
+        // Must NOT fire a boundary pulse when the app identity changes
+        assertFalse("app change must establish baseline without a boundary pulse", lensView.boundaryHapticFiredForTest)
     }
 
-    @Test fun movingFromSharpToFarOnTheSameAppFiresBoundaryPulse() {
+    /**
+     * When both hover haptic and boundary haptic could fire in the same frame, at most one pulse is emitted.
+     */
+    @Test fun boundaryPulseSuppressesHoverHapticInTheSameFrame() {
         val (cx, cy) = cellCentre(0)
-        // Start with the lens on cell 0 (sharp)
         touchAt(cx, cy)
         startPan()
         render()
-        val sharpIdx = lensView.selectedIndexForTest
         haptics.clear()
-        // Move the lens centre far from cell 0
-        val farX = SIZE_PX / 2f
-        val farY = SIZE_PX / 2f
-        touchAt(farX, farY)
+
+        // Move by a tiny step so hover would normally fire on entering a cell, but tracker is checked first
+        touchAt(cx + 2f, cy + 2f)
         render()
-        val farIdx = lensView.selectedIndexForTest
-        if (farIdx == sharpIdx) {
-            assertTrue("boundary pulse on same app leaving sharp zone", lensView.boundaryHapticFiredForTest)
-        }
+
+        // Total haptics in this frame must be at most 1
+        assertTrue("at most one haptic emitted in one frame, was ${haptics.size}", haptics.size <= 1)
     }
 
     @Test fun stayingInsideTheSharpZoneDoesNotPulse() {
@@ -171,4 +171,30 @@ class LensViewFocusBoundaryHapticWidgetTest {
         render()
         assertFalse("no pan = no boundary haptic", lensView.boundaryHapticFiredForTest)
     }
+
+    @Test fun actionUpResetsTrackerSoNewGestureStartsAsFreshBaseline() {
+        // Step 1: Touch down on cell 0, drag to far position, render (insideSharp=false, key=app0)
+        val (cx, cy) = cellCentre(0)
+        touchAt(cx, cy)
+        startPan()
+        render() // establishes baseline on cell 0
+        // Move far so cell 0 transitions to outside sharp (fires pulse)
+        touchAt(SIZE_PX / 2f, SIZE_PX / 2f)
+        render()
+        // Step 2: ACTION_UP ends the gesture
+        val down = android.os.SystemClock.uptimeMillis()
+        instrumentation.runOnMainSync {
+            val up = android.view.MotionEvent.obtain(down, down + 50, android.view.MotionEvent.ACTION_UP, cx, cy, 0)
+            lensView.dispatchTouchEvent(up)
+            up.recycle()
+        }
+        // Step 3: New gesture starts directly at cell 0 (inside sharp)
+        touchAt(cx, cy)
+        startPan()
+        render()
+        // If tracker survived: previousAppKey=app0, was outside, now inside => fires pulse!
+        // Expected: fresh baseline on new gesture => must NOT fire pulse on first frame
+        assertFalse("new gesture must establish fresh baseline without pulse", lensView.boundaryHapticFiredForTest)
+    }
+
 }

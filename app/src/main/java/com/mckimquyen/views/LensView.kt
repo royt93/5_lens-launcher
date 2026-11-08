@@ -165,6 +165,7 @@ class LensView : View {
         }
 
         /** Has the touch moved far enough from its down-point to count as a real pan? */
+
         @androidx.annotation.VisibleForTesting
         internal fun exceedsTouchSlop(dx: Float, dy: Float, touchSlop: Float): Boolean =
             sqrt(dx.toDouble().pow(2.0) + dy.toDouble().pow(2.0)) > touchSlop
@@ -1989,6 +1990,7 @@ class LensView : View {
             MotionEvent.ACTION_UP -> {
                 mLongPressArmed = false
                 mLongPressHandler.removeCallbacks(mLongPressRunnable)
+                mBoundaryTracker.reset()
                 val ringPhase = mRingPhase
                 if (ringPhase == RingPhase.ROTATING || ringPhase == RingPhase.ABORTED) {
                     if (ringPhase == RingPhase.ROTATING) finishRingRotation() else { mRingPhase = RingPhase.IDLE; mRingTracker.reset() }
@@ -2082,6 +2084,7 @@ class LensView : View {
 
             MotionEvent.ACTION_CANCEL -> {
                 cancelRingRotation()
+                mBoundaryTracker.reset()
                 mFirstEmptyTap = null
                 mCurrentTapEligible = false
                 mCurrentTapSecond = false
@@ -2322,7 +2325,7 @@ class LensView : View {
             val bdApp = mApps?.getOrNull(selectIndex)
             val bdKey = bdApp?.identifier ?: ""
             val bdDist = DepthOfField.focusDistance(
-                mTouchX, mTouchY,
+                mOpticX, mOpticY,
                 mGridCache.baseRects.getOrNull(selectIndex)?.centerX() ?: 0f,
                 mGridCache.baseRects.getOrNull(selectIndex)?.centerY() ?: 0f,
                 width.toFloat(), height.toFloat()
