@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | exclusive |
-| Status | done 2026-11-07 (audit 9,0/10; Samsung S24 Ultra; chưa push) |
+| Status | done 2026-11-07 nhưng **cần thiết kế lại** (audit 6,5/10 sau bằng chứng thực địa 2026-11-08: gần như không kích hoạt được) |
 | Priority | P3 |
 | Evidence | idea |
 | Epic | Fisheye Smart |
@@ -35,4 +35,8 @@ Owner picked one LIGHT haptic when the currently hovered app crosses into or out
 
 ## Kết quả
 
-Audit: `doc/task/AUDIT_FISH-042_2026-11-07.md` (9,0/10). Giới hạn chính: integration MotionEvent thật không tái hiện được boundary crossing (kéo đổi icon trước khi distance đủ đổi); mutation set chưa chạy; owner chưa thử tay. Commit: `85abcc12`, `02c159db`, `5d3e23a5`, kèm 3 bản vá lifecycle/conditional-test/optic-centre.
+Audit: `doc/task/AUDIT_FISH-042_2026-11-07.md` (6,5/10, hạ từ 9,0 sau bằng chứng thực địa). Giới hạn chính: integration MotionEvent thật không tái hiện được boundary crossing (kéo đổi icon trước khi distance đủ đổi); mutation set chưa chạy; owner chưa thử tay. Commit: `85abcc12`, `02c159db`, `5d3e23a5`, kèm 3 bản vá lifecycle/conditional-test/optic-centre.
+
+## Cảnh báo (2026-11-08)
+
+Thử trên S24U qua adb: icon đang hover luôn cách ngón ≤ 0,054 (ngưỡng vùng nét 0,2) trong 1.521 điểm × 3 cỡ lưới, 0 lần cắt biên; nhật ký rung hệ thống chỉ có xung hover MEDIUM, không có xung LIGHT. Tracker chỉ so sánh cùng một icon nên hầu như không bao giờ phát. Cần định nghĩa biên khác (ví dụ theo các icon lân cận hoặc bán kính lens hood) nếu muốn tính năng có ích. Chi tiết trong audit.

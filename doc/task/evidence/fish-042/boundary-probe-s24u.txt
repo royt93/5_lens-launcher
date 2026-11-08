@@ -1,0 +1,27 @@
+
+com.mckimquyen.views.ScratchBoundaryProbeTest:
+Error in probe(com.mckimquyen.views.ScratchBoundaryProbeTest):
+java.lang.AssertionError: PROBE
+apps=40 samples=1521 hovered=150 focusDist[min=0,010 max=0,045] hoveredOutsideZone=0 sameIconCrossings=0
+apps=120 samples=1521 hovered=360 focusDist[min=0,002 max=0,051] hoveredOutsideZone=0 sameIconCrossings=0
+apps=270 samples=1521 hovered=831 focusDist[min=0,000 max=0,054] hoveredOutsideZone=0 sameIconCrossings=0
+
+	at org.junit.Assert.fail(Assert.java:89)
+	at com.mckimquyen.views.ScratchBoundaryProbeTest.probe(ScratchBoundaryProbeTest.kt:49)
+
+
+Time: 4,198
+There was 1 failure:
+1) probe(com.mckimquyen.views.ScratchBoundaryProbeTest)
+java.lang.AssertionError: PROBE
+apps=40 samples=1521 hovered=150 focusDist[min=0,010 max=0,045] hoveredOutsideZone=0 sameIconCrossings=0
+apps=120 samples=1521 hovered=360 focusDist[min=0,002 max=0,051] hoveredOutsideZone=0 sameIconCrossings=0
+apps=270 samples=1521 hovered=831 focusDist[min=0,000 max=0,054] hoveredOutsideZone=0 sameIconCrossings=0
+
+	at org.junit.Assert.fail(Assert.java:89)
+	at com.mckimquyen.views.ScratchBoundaryProbeTest.probe(ScratchBoundaryProbeTest.kt:49)
+
+FAILURES!!!
+Tests run: 1,  Failures: 1
+
+
