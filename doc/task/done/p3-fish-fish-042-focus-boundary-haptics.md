@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | exclusive |
-| Status | done 2026-11-07 (audit 8,8/10, owner đóng với giới hạn; Samsung S24 Ultra; chưa push) |
+| Status | done 2026-11-07 (audit 9,1/10; Samsung S24 Ultra; chưa push) |
 | Priority | P3 |
 | Evidence | idea |
 | Epic | Fisheye Smart |
@@ -24,7 +24,7 @@ Owner picked one LIGHT haptic when the currently hovered app crosses into or out
 - [x] Tap, idle, pin, tilt, pinch, ring rotation, launch and switch-off do not emit a boundary haptic.
 - [x] No per-frame allocation and no geometry/`LensGridCache` changes.
 - [x] Host, widget, integration, and A50s device smoke; backup and restore exact.
-- [ ] Audit >9.0/10 — **8,8/10, owner đóng với giới hạn** before push; no push unless owner asks.
+- [ ] Audit >9.0/10 — **9,1/10** before push; no push unless owner asks.
 
 ## Verification and definition of done
 
@@ -35,4 +35,4 @@ Owner picked one LIGHT haptic when the currently hovered app crosses into or out
 
 ## Kết quả
 
-Audit: `doc/task/AUDIT_FISH-042_2026-11-07.md` (8,8/10, owner đóng với giới hạn). Giới hạn chính: integration MotionEvent thật không tái hiện được boundary crossing (kéo đổi icon trước khi distance đủ đổi); mutation set chưa chạy; owner chưa thử tay. Commit: `85abcc12`, `02c159db`, `5d3e23a5`, kèm 3 bản vá lifecycle/conditional-test/optic-centre.
+Audit: `doc/task/AUDIT_FISH-042_2026-11-07.md` (9,1/10). Giới hạn chính: integration MotionEvent thật không tái hiện được boundary crossing (kéo đổi icon trước khi distance đủ đổi); mutation set chưa chạy; owner chưa thử tay. Commit: `85abcc12`, `02c159db`, `5d3e23a5`, kèm 3 bản vá lifecycle/conditional-test/optic-centre.
