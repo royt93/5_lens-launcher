@@ -162,4 +162,41 @@ class LensViewFocusSnapWidgetTest {
             }
         }
     }
+
+    @Test fun withInertiaAlsoOnTheLaggedCentreStartsAtTheFingerThenSettlesOnTheSnappedTarget() {
+        ActivityScenario.launch(OrganizationHarnessActivity::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                val view = buildView(activity)
+                val rects = view.baseRectsForTest()
+                val fingerX = rects[0].centerX() + 30f * density
+                val fingerY = rects[0].centerY() + 40f * density
+                val nearest = rects[FocusSnap.nearestApp(fingerX, fingerY, rects, APP_COUNT)]
+                val expected = FloatArray(2)
+                val maxPx = FocusSnap.MAX_PULL_DP * density
+                FocusSnap.pull(fingerX, fingerY, nearest.centerX(), nearest.centerY(), maxPx, 1f, expected)
+                val fullPull = hypot(expected[0], expected[1])
+                assertTrue("test needs a real pull, was $fullPull", fullPull > 2f)
+
+                view.setInertiaStateForTest(enabled = true, panning = true, visualX = fingerX, visualY = fingerY)
+                view.setSnapStateForTest(enabled = true, panning = true, speedDpPerS = 0f)
+                view.setLensStateForTest(touchX = fingerX, touchY = fingerY, animationMultiplier = 1f, reduceMotion = false)
+                view.draw(Canvas()) // first inertia frame: the lagged centre starts on the finger
+                var optic = view.opticalCentreForTest()
+                assertEquals("first frame x starts on the finger", fingerX, optic.first, 0.5f)
+                assertEquals("first frame y starts on the finger", fingerY, optic.second, 0.5f)
+
+                SystemClock.sleep(20)
+                view.draw(Canvas())
+                optic = view.opticalCentreForTest()
+                val earlyGap = hypot(optic.first - fingerX, optic.second - fingerY)
+                assertTrue("inertia still lags after one short step: $earlyGap < half of $fullPull", earlyGap < fullPull * 0.5f)
+
+                repeat(40) { SystemClock.sleep(20); view.draw(Canvas()) }
+                optic = view.opticalCentreForTest()
+                assertEquals("settles on the snapped x, not the raw finger", fingerX + expected[0], optic.first, 1.5f)
+                assertEquals("settles on the snapped y, not the raw finger", fingerY + expected[1], optic.second, 1.5f)
+                assertEquals("the real finger centre is untouched", fingerX, view.touchCoordinatesForTest().first, 1e-3f)
+            }
+        }
+    }
 }

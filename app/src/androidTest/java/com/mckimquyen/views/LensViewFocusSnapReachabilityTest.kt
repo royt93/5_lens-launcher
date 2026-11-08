@@ -29,6 +29,7 @@ class LensViewFocusSnapReachabilityTest {
         const val STEPS = 40
         const val FRAME_DELAY_MS = 16L
         const val SLOW_STEP_DP = 0.5f   // ~45 dp/s diagonal at 16 ms
+        const val ADB_SWIPE_STEP_DP = 1.0f  // ~88 dp/s diagonal at 16 ms, the speed of the frame-budget swipes
         const val FAST_STEP_DP = 12f    // ~1000 dp/s diagonal at 16 ms
         const val PAN_START_DP = 40f
     }
@@ -110,5 +111,10 @@ class LensViewFocusSnapReachabilityTest {
         val on = sweep(switchOn = true, stepDp = SLOW_STEP_DP)
         assertEquals("same finger end x", off.fingerAtEnd.first, on.fingerAtEnd.first, 1f)
         assertEquals("selection follows the finger, not the snap", off.selectedAtEnd, on.selectedAtEnd)
+    }
+
+    @Test fun aSwipeAtTheFrameBudgetSpeedReallyRunsTheSnapBranch() {
+        val r = sweep(switchOn = true, stepDp = ADB_SWIPE_STEP_DP)
+        assertTrue("88 dp/s is below 120 dp/s so the pull must run; gap=${r.maxGapPx}px", r.maxGapPx > 1f)
     }
 }

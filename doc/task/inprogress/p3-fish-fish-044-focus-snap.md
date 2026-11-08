@@ -19,5 +19,6 @@ Spec: `docs/superpowers/specs/2026-11-08-fish-044-focus-snap-design.md`. Audit: 
 - [x] Chỉ khi pan thật và reduced-motion tắt.
 - [x] Không cấp phát mỗi frame (static guard); unit 1689/1689, lint 0/15.
 - [x] Reachability bằng DOWN/MOVE/UP thật trên KJ7; mutation 27/27 bị bắt; hồi quy 26 lớp OK.
-- [ ] Test runtime tổ hợp FISH-041 + FISH-044 cùng bật.
+- [x] Test runtime tổ hợp FISH-041 + FISH-044 cùng bật (đã bổ sung, mutation bắt bằng test runtime).
+- [ ] Giải thích/giảm chi phí frame khi snap kéo tâm (9 cặp: p50 on +0,8 ms trung bình; giả thuyết rect chọn thứ hai cho mọi ô).
 - [ ] Owner thử tay và tinh chỉnh hằng số.
