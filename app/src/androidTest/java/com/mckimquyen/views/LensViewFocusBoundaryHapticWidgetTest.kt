@@ -187,29 +187,39 @@ class LensViewFocusBoundaryHapticWidgetTest {
 
 
 
-    @Test fun actionUpResetsTrackerSoNewGestureStartsAsFreshBaseline() {
-        // Step 1: Touch down on cell 0, drag to far position, render (insideSharp=false, key=app0)
+    /**
+     * Gesture-end reset. The tracker is primed so that, WITHOUT a reset, the very next frame of cell 0 is a real
+     * crossing (outside -> inside). A finger-up or a cancel in between must wipe that memory, so the next gesture's
+     * first frame is a fresh baseline and stays silent. The next gesture re-opens every gate the same way as the
+     * positive control above, so a missing reset is the only reason a pulse could appear.
+     */
+    private fun gestureEndThenFirstFrameOfNextGesture(action: Int) {
         val (cx, cy) = cellCentre(0)
         touchAt(cx, cy)
         startPan()
-        render() // establishes baseline on cell 0
-        // Move far so cell 0 transitions to outside sharp (fires pulse)
-        touchAt(SIZE_PX / 2f, SIZE_PX / 2f)
-        render()
-        // Step 2: ACTION_UP ends the gesture
+        lensView.primeBoundaryTrackerForTest(index = 0, insideSharp = false)
         val down = android.os.SystemClock.uptimeMillis()
         instrumentation.runOnMainSync {
-            val up = android.view.MotionEvent.obtain(down, down + 50, android.view.MotionEvent.ACTION_UP, cx, cy, 0)
-            lensView.dispatchTouchEvent(up)
-            up.recycle()
+            val end = android.view.MotionEvent.obtain(down, down + 50, action, cx, cy, 0)
+            lensView.dispatchTouchEvent(end)
+            end.recycle()
         }
-        // Step 3: New gesture starts directly at cell 0 (inside sharp)
         touchAt(cx, cy)
         startPan()
+        haptics.clear()
         render()
-        // If tracker survived: previousAppKey=app0, was outside, now inside => fires pulse!
-        // Expected: fresh baseline on new gesture => must NOT fire pulse on first frame
-        assertFalse("new gesture must establish fresh baseline without pulse", lensView.boundaryHapticFiredForTest)
+    }
+
+    @Test fun actionUpResetsTrackerSoNewGestureStartsAsFreshBaseline() {
+        gestureEndThenFirstFrameOfNextGesture(android.view.MotionEvent.ACTION_UP)
+        assertFalse("ACTION_UP must wipe the tracker memory", lensView.boundaryHapticFiredForTest)
+        assertFalse("and no LIGHT boundary pulse was emitted (an ordinary hover pulse is allowed)", haptics.contains(80))
+    }
+
+    @Test fun actionCancelResetsTrackerSoNewGestureStartsAsFreshBaseline() {
+        gestureEndThenFirstFrameOfNextGesture(android.view.MotionEvent.ACTION_CANCEL)
+        assertFalse("ACTION_CANCEL must wipe the tracker memory", lensView.boundaryHapticFiredForTest)
+        assertFalse("and no LIGHT boundary pulse was emitted (an ordinary hover pulse is allowed)", haptics.contains(80))
     }
 
 }
