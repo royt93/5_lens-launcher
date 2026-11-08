@@ -1,0 +1,12 @@
+FISH-044 adb input swipe probe, TECNO BG6 118743744X002560, 720x1612 @320dpi (density 2.0), snap on, temporary DEBUG counters (removed, not committed).
+Swipe 150,1200 -> 560,560 = 380 dp. Expected speed: 6000 ms = 63 dp/s (gain 0.475), 2500 ms = 152 dp/s (gain 0), 700 ms = 543 dp/s (gain 0).
+
+MARK snap=on slow 6000ms
+gesture frames=513 pulled=512 meanGain=0.476159 maxPullPx=30.171623
+MARK snap=on medium 2500ms
+gesture frames=221 pulled=0 meanGain=0.0 maxPullPx=0.0
+MARK snap=on fast 700ms
+gesture frames=61 pulled=0 meanGain=0.0 maxPullPx=0.0
+MARK snap=off slow 6000ms
+
+Caveats: the second 6000 ms swipe produced no gesture line and its MARK line failed (parentheses in the shell argument), so only one slow swipe is evidenced. The snap-off run logs nothing by design (the counters only run when snap is on).
