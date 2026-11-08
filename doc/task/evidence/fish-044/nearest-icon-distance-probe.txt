@@ -1,0 +1,6 @@
+FISH-044 probe (host/Robolectric, KJ7 geometry 1080x2436 @480dpi, icon 18dp, 9px finger grid): distance finger -> nearest icon centre
+density=3.0
+apps=20 cells=20 grid=4x5 iconDp=18.0 pitchDp=75.6 nearestDp[p25=34.2 p50=51.4 p75=68.3 max=145.5] within16dp=5%
+apps=40 cells=40 grid=5x8 iconDp=18.0 pitchDp=63.0 nearestDp[p25=24.1 p50=34.5 p75=45.5 max=99.2] within16dp=11%
+apps=120 cells=120 grid=8x15 iconDp=18.0 pitchDp=42.0 nearestDp[p25=14.0 p50=19.6 p75=25.0 max=54.1] within16dp=33%
+apps=270 cells=276 grid=12x23 iconDp=18.0 pitchDp=29.1 nearestDp[p25=9.2 p50=13.0 p75=16.2 max=32.5] within16dp=74%
