@@ -63,4 +63,33 @@ class FocusBoundaryHapticsTest {
             assertEquals("user chose $chosen", com.mckimquyen.util.HapticIntensity.LIGHT, FocusBoundaryHaptics.pulseIntensity(chosen))
         }
     }
+    /** Without a real wipe, the next sample of the SAME app would be read as outside -> inside and pulse. */
+    @Test fun resetReallyForgetsTheSameAppSoItsNextSampleCannotPulse() {
+        assertFalse(tracker.observe("pkg/A", 0.3f))     // baseline: outside
+        tracker.reset()
+        assertFalse("after reset the same app is a fresh baseline, not a crossing", tracker.observe("pkg/A", 0.1f))
+    }
+
+    @Test fun resetAlsoForgetsTheInsideState() {
+        assertFalse(tracker.observe("pkg/A", 0.1f))     // baseline: inside
+        tracker.reset()
+        assertFalse(tracker.observe("pkg/A", 0.3f))     // fresh baseline: outside, no exit pulse
+        assertTrue("and now a real entry is detected from that new baseline", tracker.observe("pkg/A", 0.1f))
+    }
+
+    /** A NaN in the middle must neither pulse nor corrupt the state: the next finite sample behaves as if it never happened. */
+    @Test fun aNonFiniteSampleBetweenTwoFiniteOnesChangesNothing() {
+        assertFalse(tracker.observe("pkg/A", 0.3f))
+        assertFalse(tracker.observe("pkg/A", Float.NaN))
+        assertFalse("NaN must not re-baseline the app", tracker.observe("pkg/A", Float.NaN))
+        assertTrue("the crossing is still detected afterwards", tracker.observe("pkg/A", 0.1f))
+        assertFalse(tracker.observe("pkg/A", Float.NEGATIVE_INFINITY))
+        assertTrue("and leaving is still detected", tracker.observe("pkg/A", 0.5f))
+    }
+
+    @Test fun aNonFiniteFirstSampleDoesNotEstablishABaseline() {
+        assertFalse(tracker.observe("pkg/A", Float.NaN))
+        assertFalse("the first FINITE sample is the baseline", tracker.observe("pkg/A", 0.1f))
+        assertTrue(tracker.observe("pkg/A", 0.5f))
+    }
 }
