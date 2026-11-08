@@ -1,0 +1,33 @@
+OK (1 test)
+--- run 1
+BASE (no effects): median 595 us/draw keys=0
++DoF: median 689 us/draw keys=1
++Vignette: median 700 us/draw keys=2
++Peaking: median 1288 us/draw keys=3
++Chromatic: median 1272 us/draw keys=4
++Inertia: median 1243 us/draw keys=5
++Snap: median 1283 us/draw keys=6
++ClusterHaptic: median 1337 us/draw keys=7
+TOTAL/BASE = 2.25
+OK (1 test)
+--- run 2
+BASE (no effects): median 583 us/draw keys=0
++DoF: median 685 us/draw keys=1
++Vignette: median 691 us/draw keys=2
++Peaking: median 1229 us/draw keys=3
++Chromatic: median 1317 us/draw keys=4
++Inertia: median 1220 us/draw keys=5
++Snap: median 1307 us/draw keys=6
++ClusterHaptic: median 1317 us/draw keys=7
+TOTAL/BASE = 2.26
+OK (1 test)
+--- run 3
+BASE (no effects): median 657 us/draw keys=0
++DoF: median 1006 us/draw keys=1
++Vignette: median 887 us/draw keys=2
++Peaking: median 1286 us/draw keys=3
++Chromatic: median 1395 us/draw keys=4
++Inertia: median 1281 us/draw keys=5
++Snap: median 1353 us/draw keys=6
++ClusterHaptic: median 1389 us/draw keys=7
+TOTAL/BASE = 2.11
