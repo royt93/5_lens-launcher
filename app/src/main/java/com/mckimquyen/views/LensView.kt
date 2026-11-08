@@ -2660,16 +2660,15 @@ class LensView : View {
 
     /** FISH-042: fixed LIGHT pulse, independent of the user's chosen haptic level. */
     private fun performLightHaptic() {
+        val level = FocusBoundaryHaptics.pulseIntensity(mUtilSettings?.getHapticIntensity() ?: HapticIntensity.DEFAULT)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val vibrator = vibratorProvider?.invoke()
                 ?: context.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
             if (vibrator != null && vibrator.hasVibrator()) {
                 try {
-                    val effect = VibrationEffect.createOneShot(
-                        HapticIntensity.LIGHT.duration, HapticIntensity.LIGHT.amplitude
-                    )
+                    val effect = VibrationEffect.createOneShot(level.duration, level.amplitude)
                     vibrator.vibrate(effect)
-                    onHapticPerformed?.invoke(HapticIntensity.LIGHT.amplitude)
+                    onHapticPerformed?.invoke(level.amplitude)
                 } catch (_: Exception) {}
             }
         } else {

@@ -58,4 +58,9 @@ class FocusBoundaryHapticsTest {
         tracker.reset()
         assertFalse(tracker.observe("pkg/A", 0.1f))
     }
+    @Test fun theBoundaryPulseIsAlwaysLightWhateverTheUserChoseForOrdinaryHaptics() {
+        for (chosen in com.mckimquyen.util.HapticIntensity.entries) {
+            assertEquals("user chose $chosen", com.mckimquyen.util.HapticIntensity.LIGHT, FocusBoundaryHaptics.pulseIntensity(chosen))
+        }
+    }
 }

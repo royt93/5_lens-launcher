@@ -47,4 +47,15 @@ class LensViewFocusBoundaryHapticSourceTest {
         assertTrue("boundary distance must not use raw touch coordinates",
             !block.contains("DepthOfField.focusDistance(\n                mTouchX, mTouchY,"))
     }
+    @Test fun theBoundaryPulseVibratesWithTheTestedIntensityDecisionAndReportsTheSameLevel() {
+        val start = source.indexOf("private fun performLightHaptic()")
+        assertTrue("performLightHaptic exists", start >= 0)
+        val end = source.indexOf("private fun performHoverVibration()", start)
+        assertTrue("performLightHaptic has an end", end > start)
+        val body = source.substring(start, end)
+        assertTrue("the level comes from the tested pure decision", body.contains("FocusBoundaryHaptics.pulseIntensity("))
+        assertTrue("the vibration effect uses that level", body.contains("VibrationEffect.createOneShot(level.duration, level.amplitude)"))
+        assertTrue("the reported amplitude is that same level", body.contains("onHapticPerformed?.invoke(level.amplitude)"))
+        assertTrue("no hard-coded intensity may bypass the decision", !body.contains("HapticIntensity.STRONG") && !body.contains("HapticIntensity.MEDIUM"))
+    }
 }

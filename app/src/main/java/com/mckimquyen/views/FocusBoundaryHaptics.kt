@@ -12,6 +12,11 @@ object FocusBoundaryHaptics {
     /** Exit-sharp threshold (the zone plus hysteresis). */
     const val EXIT_DISTANCE = DepthOfField.FOCUS_ZONE + HYSTERESIS
 
+    /** The boundary pulse is always LIGHT; the user's ordinary hover/launch level never applies to it. */
+    @Suppress("UNUSED_PARAMETER")
+    fun pulseIntensity(userChosen: com.mckimquyen.util.HapticIntensity): com.mckimquyen.util.HapticIntensity =
+        com.mckimquyen.util.HapticIntensity.LIGHT
+
     /**
      * Per-frame tracker owned by LensView (one instance, allocated once).
      * [observe] returns true exactly when a focus-boundary pulse should fire.
