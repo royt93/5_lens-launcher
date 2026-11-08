@@ -20,6 +20,13 @@ object FocusBoundaryHaptics {
         private var previousAppKey: String? = null
         private var insideSharp = false
 
+        /** Test seam: puts the tracker in a known state so the next [observe] of [appKey] is a real crossing. */
+        @androidx.annotation.VisibleForTesting
+        internal fun prime(appKey: String, insideSharp: Boolean) {
+            previousAppKey = appKey
+            this.insideSharp = insideSharp
+        }
+
         /** Reset on gesture end, detach, cancel. Makes the next [observe] a fresh baseline. */
         fun reset() {
             previousAppKey = null

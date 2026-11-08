@@ -127,6 +127,22 @@ class LensViewFocusBoundaryHapticWidgetTest {
         assertTrue("at most one haptic emitted in one frame, was ${haptics.size}", haptics.size <= 1)
     }
 
+    /**
+     * Positive control: with every gate open, a same-app crossing MUST emit exactly one LIGHT pulse. Without it the
+     * "no pulse" gate tests below could pass for the wrong reason. The tracker is primed for the app under the finger
+     * as "outside the sharp zone" through a test seam, so the very next frame (finger on the icon) is a real crossing.
+     */
+    @Test fun withEveryGateOpenASameAppCrossingEmitsOneLightPulse() {
+        val (cx, cy) = cellCentre(0)
+        touchAt(cx, cy)
+        startPan()
+        lensView.primeBoundaryTrackerForTest(index = 0, insideSharp = false)
+        haptics.clear()
+        render()
+        assertTrue("the crossing was detected", lensView.boundaryHapticFiredForTest)
+        assertEquals("exactly one haptic, and it is LIGHT", listOf(80), haptics)
+    }
+
     @Test fun stayingInsideTheSharpZoneDoesNotPulse() {
         val (cx, cy) = cellCentre(0)
         touchAt(cx, cy)

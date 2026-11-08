@@ -955,6 +955,13 @@ class LensView : View {
     @androidx.annotation.VisibleForTesting
     internal val boundaryHapticFiredForTest: Boolean get() = mBoundaryHapticFired
 
+    /** FISH-042: primes the boundary tracker for the app at [index] so the next frame is a genuine crossing. */
+    @androidx.annotation.VisibleForTesting
+    internal fun primeBoundaryTrackerForTest(index: Int, insideSharp: Boolean) {
+        val key = mApps?.getOrNull(index)?.identifier ?: return
+        mBoundaryTracker.prime(key, insideSharp)
+    }
+
     @androidx.annotation.VisibleForTesting
     internal fun visualCentreForTest(): Pair<Float, Float> = Pair(mVisualX, mVisualY)
 
