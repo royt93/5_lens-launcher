@@ -1,0 +1,8 @@
+
+com.mckimquyen.views.LensViewSharpClusterHapticReachabilityTest:.
+
+Time: 7.233
+
+OK (1 test)
+
+

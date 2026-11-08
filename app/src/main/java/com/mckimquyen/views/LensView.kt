@@ -854,8 +854,8 @@ class LensView : View {
     private var mChromaLastAlpha = 0
     private val mChromaDrawnIndices = IntArray(ChromaticAberration.MAX_ICONS)
 
-    /** FISH-042: focus-boundary haptic detector, allocated once, reset per gesture. */
-    private val mBoundaryTracker = FocusBoundaryHaptics.Tracker()
+    /** FISH-042 rev2: sharp-cluster size tracker, allocated once, resized outside the draw loop, reset per gesture. */
+    private val mClusterTracker = SharpCluster.Tracker(0)
     private var mBoundaryHapticFired = false
 
     /** FISH-041: sampled once per lens show in LensAnimation.init (live touch only), never per frame. */
@@ -955,12 +955,9 @@ class LensView : View {
     @androidx.annotation.VisibleForTesting
     internal val boundaryHapticFiredForTest: Boolean get() = mBoundaryHapticFired
 
-    /** FISH-042: primes the boundary tracker for the app at [index] so the next frame is a genuine crossing. */
+    /** FISH-042 rev2: number of icons in the sharp cluster as of the last frame. */
     @androidx.annotation.VisibleForTesting
-    internal fun primeBoundaryTrackerForTest(index: Int, insideSharp: Boolean) {
-        val key = mApps?.getOrNull(index)?.identifier ?: return
-        mBoundaryTracker.prime(key, insideSharp)
-    }
+    internal val sharpClusterSizeForTest: Int get() = mClusterTracker.count
 
     @androidx.annotation.VisibleForTesting
     internal fun visualCentreForTest(): Pair<Float, Float> = Pair(mVisualX, mVisualY)
@@ -986,7 +983,7 @@ class LensView : View {
         mTiltX = 0f
         mTiltY = 0f
         resetLensInertia()
-        mBoundaryTracker.reset()
+        mClusterTracker.reset()
         gestureState = LensGestureState.IDLE
         mSelectIndex = -1
         mRectToSelect = null
@@ -1997,7 +1994,7 @@ class LensView : View {
             MotionEvent.ACTION_UP -> {
                 mLongPressArmed = false
                 mLongPressHandler.removeCallbacks(mLongPressRunnable)
-                mBoundaryTracker.reset()
+                mClusterTracker.reset()
                 val ringPhase = mRingPhase
                 if (ringPhase == RingPhase.ROTATING || ringPhase == RingPhase.ABORTED) {
                     if (ringPhase == RingPhase.ROTATING) finishRingRotation() else { mRingPhase = RingPhase.IDLE; mRingTracker.reset() }
@@ -2091,7 +2088,7 @@ class LensView : View {
 
             MotionEvent.ACTION_CANCEL -> {
                 cancelRingRotation()
-                mBoundaryTracker.reset()
+                mClusterTracker.reset()
                 mFirstEmptyTap = null
                 mCurrentTapEligible = false
                 mCurrentTapSecond = false
@@ -2238,6 +2235,16 @@ class LensView : View {
         )
         prepareChromaticAberration()
         mBoundaryHapticFired = false
+        // FISH-042 rev2: the cluster is only counted during a real pan with the hover switch on and motion allowed.
+        val clusterOn = mDrawType == DrawType.APPS && hasActiveTouch && mMoving
+            && mUtilSettings?.getBoolean(UtilSettings.KEY_VIBRATE_APP_HOVER) == true
+            && !(mGestureReduceMotion ?: LensPhysicsPolicy.shouldReduceLensMotion(context))
+        if (clusterOn) {
+            mClusterTracker.resize(baseRects.size)
+            mClusterTracker.beginFrame()
+        } else {
+            mClusterTracker.reset()
+        }
         dofBandCounts.fill(0)
         val dofLayers = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S && dofMode == DepthOfField.Mode.BLUR) mDofLayers else null
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
@@ -2282,6 +2289,13 @@ class LensView : View {
                 val dofIntensity = if (dofMode == DepthOfField.Mode.OFF) 0f else DepthOfField.intensity(focusDistance, dofTransition)
                 val dofBand = DepthOfField.band(dofIntensity)
                 dofBandCounts[dofBand]++
+                if (clusterOn) {
+                    mClusterTracker.markCell(
+                        currentIndex,
+                        if (dofMode != DepthOfField.Mode.OFF || vignetteOn || chromaOn) focusDistance
+                        else DepthOfField.focusDistance(mOpticX, mOpticY, baseRect.centerX(), baseRect.centerY(), width.toFloat(), height.toFloat())
+                    )
+                }
                 var iconAlpha = DepthOfField.OPAQUE_ALPHA
                 if (dofMode == DepthOfField.Mode.ALPHA || vignetteOn) {
                     val dofAlpha = if (dofMode == DepthOfField.Mode.ALPHA) DepthOfField.fallbackAlpha(dofIntensity) else DepthOfField.OPAQUE_ALPHA
@@ -2324,24 +2338,8 @@ class LensView : View {
         }
         if (chromaOn) drawChromaticFringes(canvas, resources.displayMetrics.density, dofTransition)
         mPaintIcons?.alpha = DepthOfField.OPAQUE_ALPHA
-        // FISH-042: focus-boundary haptic (before hover haptic so it can suppress it).
-        if (selectIndex >= 0 && hasActiveTouch && mMoving
-            && mUtilSettings?.getBoolean(UtilSettings.KEY_VIBRATE_APP_HOVER) == true
-            && !(mGestureReduceMotion ?: LensPhysicsPolicy.shouldReduceLensMotion(context))
-        ) {
-            val bdApp = mApps?.getOrNull(selectIndex)
-            val bdKey = bdApp?.identifier ?: ""
-            val bdDist = DepthOfField.focusDistance(
-                mOpticX, mOpticY,
-                mGridCache.baseRects.getOrNull(selectIndex)?.centerX() ?: 0f,
-                mGridCache.baseRects.getOrNull(selectIndex)?.centerY() ?: 0f,
-                width.toFloat(), height.toFloat()
-            )
-            if (mBoundaryTracker.observe(bdKey, bdDist)) {
-                performLightHaptic()
-                mBoundaryHapticFired = true
-            }
-        }
+        // FISH-042 rev2: one pulse when the sharp cluster changes size (before the hover haptic so it can suppress it).
+        if (clusterOn) finishClusterFrame()
         mMustVibrate = if (selectIndex >= 0) {
             selectIndex != mSelectIndex
         } else {
@@ -2658,9 +2656,17 @@ class LensView : View {
         }
     }
 
+    /** FISH-042 rev2: end-of-frame decision; one LIGHT pulse when the sharp cluster changed size. No allocation. */
+    private fun finishClusterFrame() {
+        if (mClusterTracker.endFrame(android.os.SystemClock.uptimeMillis())) {
+            performLightHaptic()
+            mBoundaryHapticFired = true
+        }
+    }
+
     /** FISH-042: fixed LIGHT pulse, independent of the user's chosen haptic level. */
     private fun performLightHaptic() {
-        val level = FocusBoundaryHaptics.pulseIntensity(mUtilSettings?.getHapticIntensity() ?: HapticIntensity.DEFAULT)
+        val level = SharpCluster.pulseIntensity(mUtilSettings?.getHapticIntensity() ?: HapticIntensity.DEFAULT)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val vibrator = vibratorProvider?.invoke()
                 ?: context.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator

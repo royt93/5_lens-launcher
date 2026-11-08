@@ -1,0 +1,8 @@
+
+com.mckimquyen.views.LensViewSharpClusterHapticWidgetTest:........
+
+Time: 9.767
+
+OK (8 tests)
+
+

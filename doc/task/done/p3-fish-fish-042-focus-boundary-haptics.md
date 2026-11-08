@@ -40,3 +40,7 @@ Audit: `doc/task/AUDIT_FISH-042_2026-11-07.md` (6,5/10, hạ từ 9,0 sau bằng
 ## Cảnh báo (2026-11-08)
 
 Thử trên S24U qua adb: icon đang hover luôn cách ngón ≤ 0,054 (ngưỡng vùng nét 0,2) trong 1.521 điểm × 3 cỡ lưới, 0 lần cắt biên; nhật ký rung hệ thống chỉ có xung hover MEDIUM, không có xung LIGHT. Tracker chỉ so sánh cùng một icon nên hầu như không bao giờ phát. Cần định nghĩa biên khác (ví dụ theo các icon lân cận hoặc bán kính lens hood) nếu muốn tính năng có ích. Chi tiết trong audit.
+
+## Rev2: verified reachability (2026-11-08)
+
+Probe S24U rev1 cho thấy icon hover luôn focusDistance ≤0,054 (FOCUS_ZONE 0,2), 0 crossings trên 1.521 điểm × 3 grid sizes. Rev2 đổi event thành sharp-cluster size change, max 1 LIGHT pulse/120ms. TECNO KJ7: real sweep 160 steps, 120 apps, reachability test 3/3; widget 8/8; vibrator_manager recorded `Step{amplitude=0.3137255,duration=20ms}` at 120–200ms spacing; 14 tracker + 10 LensView mutations caught; 1660 unit pass; restore 21 files and both APK hashes. Audit `doc/task/AUDIT_FISH-042_2026-11-07.md` updated to 9.2/10. Limit: KJ7 system `haptic_feedback_enabled=0` ignores motor effects unless system haptics enabled; app correctly respects system setting.
