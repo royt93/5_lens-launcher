@@ -1,3 +1,7 @@
+NOTE (2026-11-08): these numbers are CPU time of LensView.draw() into a software Canvas on KJ7, 3 runs, 120 icons.
+They do NOT measure GPU/RenderThread cost. The Perfetto FrameTimeline on BG6 (perfetto-analysis-bg6.txt) is the render-path evidence:
+UI thread +0.20 ms, RenderThread +0.09 ms with all 7 effects on. Do not read the +550 us Focus Peaking step as a render-path cost.
+
 OK (1 test)
 --- run 1
 BASE (no effects): median 595 us/draw keys=0
