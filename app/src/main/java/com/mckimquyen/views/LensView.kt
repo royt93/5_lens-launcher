@@ -879,6 +879,32 @@ class LensView : View {
     private var mSnapTestPanning: Boolean? = null
     private var mSnapTestSpeedDpPerS: Float? = null
 
+    /** FISH-046: hover magnify is opt-in. */
+    @androidx.annotation.VisibleForTesting
+    internal var hoverMagnifyEnabled = UtilSettings.DEFAULT_FOCUS_MAGNIFY
+    private val mHoverMagnifyTracker = HoverMagnify.Tracker()
+    private val mMagnifyRect = RectF()
+    private var mHoverMagnifyTestPanning: Boolean? = null
+    private var mHoverMagnifyTestIndex: Int? = null
+    private var mHoverMagnifyTestSpeed: Float? = null
+    private var mHoverMagnifyTestNow: Long? = null
+    private var mHoverMagnifyNow: Long = 0L
+    private var mHoverMagnifyScaleForTest = FloatArray(0)
+    private var mMagnifiedIconDrawn = 0
+    @androidx.annotation.VisibleForTesting
+    internal val magnifiedIconDrawnForTest: Int get() = mMagnifiedIconDrawn
+    @androidx.annotation.VisibleForTesting
+    internal fun hoverMagnifyScaleForTest(index: Int): Float = mHoverMagnifyScaleForTest.getOrElse(index) { 1f }
+
+    @androidx.annotation.VisibleForTesting
+    internal fun setHoverMagnifyStateForTest(enabled: Boolean, panning: Boolean, selectedIndex: Int, speedDpPerS: Float, nowMs: Long) {
+        hoverMagnifyEnabled = enabled
+        mHoverMagnifyTestPanning = panning
+        mHoverMagnifyTestIndex = selectedIndex
+        mHoverMagnifyTestSpeed = speedDpPerS
+        mHoverMagnifyTestNow = nowMs
+    }
+
     /** Icons fringed in the last frame. */
     @androidx.annotation.VisibleForTesting
     internal val chromaIconsForTest: Int get() = mChromaDrawn
@@ -1781,6 +1807,7 @@ class LensView : View {
                 mTouchDownX = event.x
                 mTouchDownY = event.y
                 mSnapTracker.reset()
+                mHoverMagnifyTracker.reset()
                 mSearchSwipeStartedInActivationZone = isInSearchSwipeActivationZone(event.y, height)
                 mSearchSwipeTriggered = false
                 mEdgeSwipeTriggered = false
@@ -2024,6 +2051,7 @@ class LensView : View {
                 mLongPressHandler.removeCallbacks(mLongPressRunnable)
                 mClusterTracker.reset()
                 mSnapTracker.reset()
+                mHoverMagnifyTracker.reset()
                 val ringPhase = mRingPhase
                 if (ringPhase == RingPhase.ROTATING || ringPhase == RingPhase.ABORTED) {
                     if (ringPhase == RingPhase.ROTATING) finishRingRotation() else { mRingPhase = RingPhase.IDLE; mRingTracker.reset() }
@@ -2119,6 +2147,7 @@ class LensView : View {
                 cancelRingRotation()
                 mClusterTracker.reset()
                 mSnapTracker.reset()
+                mHoverMagnifyTracker.reset()
                 mFirstEmptyTap = null
                 mCurrentTapEligible = false
                 mCurrentTapSecond = false
@@ -2297,6 +2326,18 @@ class LensView : View {
         } else {
             mClusterTracker.reset()
         }
+        // FISH-046: needs the setting, a real pan and motion allowed; the finger-rest decision uses the FISH-044 speed tracker.
+        val hoverMagnifyOn = HoverMagnify.shouldApply(
+            hoverMagnifyEnabled && mDrawType == DrawType.APPS && hasActiveTouch,
+            mHoverMagnifyTestPanning ?: (mMoving && gestureState == LensGestureState.PANNING), mReduceMotion
+        )
+        val frameTimeMs = mHoverMagnifyTestNow ?: SystemClock.uptimeMillis()
+        mMagnifiedIconDrawn = 0
+        if (hoverMagnifyOn) {
+            if (mHoverMagnifyScaleForTest.size != baseRects.size) mHoverMagnifyScaleForTest = FloatArray(baseRects.size)
+        } else {
+            mHoverMagnifyTracker.reset()
+        }
         dofBandCounts.fill(0)
         val dofLayers = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S && dofMode == DepthOfField.Mode.BLUR) mDofLayers else null
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
@@ -2360,11 +2401,24 @@ class LensView : View {
                 } else {
                     canvas
                 }
-                drawAppIcon(iconCanvas, rect, currentIndex)
+                var drawRect = rect
+                if (hoverMagnifyOn) {
+                    val scale = mHoverMagnifyTracker.scaleFor(currentIndex, frameTimeMs)
+                    if (currentIndex < mHoverMagnifyScaleForTest.size) mHoverMagnifyScaleForTest[currentIndex] = scale
+                    if (scale > 1f) {
+                        mMagnifyRect.set(rect)
+                        val grow = (scale - 1f) * rect.width() / 2f
+                        mMagnifyRect.inset(-grow, -grow)
+                        drawRect = mMagnifyRect
+                        mMagnifiedIconDrawn++
+                        if (currentIndex < mDrawnRectsForTest.size) mDrawnRectsForTest[currentIndex].set(mMagnifyRect)
+                    }
+                }
+                drawAppIcon(iconCanvas, drawRect, currentIndex)
                 if (chromaOn && ChromaticAberration.isFringed(focusDistance, dofBand)) {
                     val slot = mChromaTop.offer(focusDistance, currentIndex)
                     if (slot >= 0) {
-                        mChromaRects[slot].set(rect)
+                        mChromaRects[slot].set(drawRect)
                         mChromaDistances[slot] = focusDistance
                         mChromaAlphas[slot] = iconAlpha
                     }
@@ -2376,7 +2430,7 @@ class LensView : View {
                         width.toFloat(), height.toFloat()
                     )
                     if (FocusPeaking.isSharp(peakDistance)) {
-                        drawFocusPeakingRing(iconCanvas, rect)
+                        drawFocusPeakingRing(iconCanvas, drawRect)
                         mFocusPeakingRings++
                         if (currentIndex < mFocusPeakingRinged.size) mFocusPeakingRinged[currentIndex] = true
                     }
@@ -2400,18 +2454,28 @@ class LensView : View {
         if (!mAnimationHiding) {
             mSelectIndex = selectIndex
         }
+        if (hoverMagnifyOn) {
+            mHoverMagnifyTracker.onFrame(
+                mHoverMagnifyTestIndex ?: selectIndex,
+                mHoverMagnifyTestSpeed ?: mSnapTracker.speedDpPerS(frameTimeMs),
+                frameTimeMs
+            )
+        }
         if (mDrawType == DrawType.APPS) {
             performHoverVibration()
         }
         if (mRectToSelect != null && mDrawType == DrawType.APPS && mApps != null && mSelectIndex >= 0) {
-            drawFocusHalo(canvas, mRectToSelect)
-            drawAppName(canvas, mRectToSelect)
+            val labelRect = magnifiedRectOf(mRectToSelect, hoverMagnifyOn, frameTimeMs)
+            drawFocusHalo(canvas, labelRect)
+            drawAppName(canvas, labelRect)
         }
         drawFocusRing(canvas)
         // FISH-041: the lagged centre needs frames after the finger stops; one request per frame until it settles.
         if (inertiaOn && !LensInertia.isSettled(mVisualX, mVisualY, targetCenterX, targetCenterY)) postInvalidateOnAnimation()
         // FISH-044: a paused finger sends no events but its speed keeps falling, so the pull keeps growing.
         else if (snapOn && mSnapTestSpeedDpPerS == null && mSnapTracker.needsRedraw(SystemClock.uptimeMillis())) postInvalidateOnAnimation()
+        // FISH-046: a resting finger sends no events, so the dwell and the ramp need frames of their own.
+        else if (hoverMagnifyOn && mHoverMagnifyTestNow == null && mHoverMagnifyTracker.needsRedraw(frameTimeMs)) postInvalidateOnAnimation()
     }
 
     /**
@@ -2439,8 +2503,24 @@ class LensView : View {
         mInertiaLastFrameNanos = now
     }
 
+    /** FISH-046: the selected icon's rect with the hover scale applied, so halo and label follow the drawn icon. */
+    private fun magnifiedRectOf(selected: RectF?, on: Boolean, nowMs: Long): RectF? {
+        if (selected == null || !on) return selected
+        val scale = mHoverMagnifyTracker.scaleFor(mSelectIndex, nowMs)
+        if (scale <= 1f) return selected
+        mMagnifyRect.set(selected)
+        val grow = (scale - 1f) * selected.width() / 2f
+        mMagnifyRect.inset(-grow, -grow)
+        return mMagnifyRect
+    }
+
     private fun resetFocusSnap() {
         mSnapTracker.reset()
+        mHoverMagnifyTracker.reset()
+        mHoverMagnifyTestPanning = null
+        mHoverMagnifyTestIndex = null
+        mHoverMagnifyTestSpeed = null
+        mHoverMagnifyTestNow = null
         mSnapTestPanning = null
         mSnapTestSpeedDpPerS = null
     }
@@ -2802,6 +2882,8 @@ class LensView : View {
                 ?: UtilSettings.DEFAULT_LENS_INERTIA
             focusSnapEnabled = mUtilSettings?.getBoolean(UtilSettings.KEY_FOCUS_SNAP)
                 ?: UtilSettings.DEFAULT_FOCUS_SNAP
+            hoverMagnifyEnabled = mUtilSettings?.getBoolean(UtilSettings.KEY_FOCUS_MAGNIFY)
+                ?: UtilSettings.DEFAULT_FOCUS_MAGNIFY
             focusPeakingEnabled = mUtilSettings?.getBoolean(UtilSettings.KEY_FOCUS_PEAKING)
                 ?: UtilSettings.DEFAULT_FOCUS_PEAKING
             mUtilSettings?.let {

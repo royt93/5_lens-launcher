@@ -349,4 +349,6 @@
     <string name="setting_lens_inertia_hint">Los efectos de la lente siguen tu dedo con un breve retraso al arrastrar. Desactivado por defecto.</string>
     <string name="setting_focus_snap">Imán de enfoque</string>
     <string name="setting_focus_snap_hint">Atrae suavemente el enfoque de la lente hacia el icono más cercano al arrastrar despacio. Desactivado por defecto.</string>
+    <string name="setting_focus_magnify">Ampliar al detenerse</string>
+    <string name="setting_focus_magnify_hint">Agranda un poco el icono bajo tu dedo cuando te detienes un instante sobre él al arrastrar. Solo crece la imagen; el toque y la selección no cambian. Desactivado por defecto.</string>
 </resources>

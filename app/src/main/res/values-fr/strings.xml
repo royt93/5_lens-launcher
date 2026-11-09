@@ -349,4 +349,6 @@
     <string name="setting_lens_inertia_hint">Les effets de la lentille suivent votre doigt avec un léger retard pendant le glissement. Désactivé par défaut.</string>
     <string name="setting_focus_snap">Aimant de mise au point</string>
     <string name="setting_focus_snap_hint">Attire doucement la mise au point de la lentille vers l\'icône la plus proche lors d\'un glissement lent. Désactivé par défaut.</string>
+    <string name="setting_focus_magnify">Agrandir au survol</string>
+    <string name="setting_focus_magnify_hint">Agrandit légèrement l\'icône sous votre doigt quand vous vous y arrêtez un instant en glissant. Seule l\'image grandit ; le toucher et la sélection ne changent pas. Désactivé par défaut.</string>
 </resources>

@@ -389,4 +389,6 @@
     <string name="setting_lens_inertia_hint">Makes the lens effects follow your finger with a short lag while dragging. Off by default.</string>
     <string name="setting_focus_snap">Focus snap</string>
     <string name="setting_focus_snap_hint">Gently pulls the lens focus towards the nearest icon while you drag slowly. Off by default.</string>
+    <string name="setting_focus_magnify">Hover magnify</string>
+    <string name="setting_focus_magnify_hint">Slightly enlarges the icon under your finger once you rest on it for a moment while dragging. Only the picture grows; touch and selection are unchanged. Off by default.</string>
 </resources>

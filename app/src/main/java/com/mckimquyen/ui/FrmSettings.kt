@@ -69,6 +69,7 @@ class FrmSettings : Fragment(), SettingsInterface {
     private var swChromaticAberration: SwitchCompat? = null
     private var swLensInertia: SwitchCompat? = null
     private var swFocusSnap: SwitchCompat? = null
+    private var swFocusMagnify: SwitchCompat? = null
     private var swSmartFocus: SwitchCompat? = null
     private var tvSelectedSearchHint: TextView? = null
     private var swEnableT9SearchKeypad: SwitchCompat? = null
@@ -157,6 +158,7 @@ class FrmSettings : Fragment(), SettingsInterface {
         swChromaticAberration = view.findViewById(R.id.swChromaticAberration)
         swLensInertia = view.findViewById(R.id.swLensInertia)
         swFocusSnap = view.findViewById(R.id.swFocusSnap)
+        swFocusMagnify = view.findViewById(R.id.swFocusMagnify)
         swSmartFocus = view.findViewById(R.id.swSmartFocus)
         tvSelectedSearchHint = view.findViewById(R.id.tvSelectedSearchHint)
         swEnableT9SearchKeypad = view.findViewById(R.id.swEnableT9SearchKeypad)
@@ -312,6 +314,9 @@ class FrmSettings : Fragment(), SettingsInterface {
         swFocusSnap?.setOnCheckedChangeListener { _, isChecked ->
             utilSettings?.save(UtilSettings.KEY_FOCUS_SNAP, isChecked)
         }
+        swFocusMagnify?.setOnCheckedChangeListener { _, isChecked ->
+            utilSettings?.save(UtilSettings.KEY_FOCUS_MAGNIFY, isChecked)
+        }
         swSmartFocus?.setOnCheckedChangeListener { _, isChecked ->
             utilSettings?.saveSmartFocusBias(activeLensId, isChecked)
             com.mckimquyen.services.AppEventManager.notifyAppsEdited()
@@ -461,6 +466,7 @@ class FrmSettings : Fragment(), SettingsInterface {
             swChromaticAberration?.isChecked = us.getBoolean(UtilSettings.KEY_CHROMATIC_ABERRATION)
             swLensInertia?.isChecked = us.getBoolean(UtilSettings.KEY_LENS_INERTIA)
             swFocusSnap?.isChecked = us.getBoolean(UtilSettings.KEY_FOCUS_SNAP)
+            swFocusMagnify?.isChecked = us.getBoolean(UtilSettings.KEY_FOCUS_MAGNIFY)
             activeLensId = us.getString(UtilSettings.KEY_ACTIVE_LENS_ID) ?: LensWorkspace.DEFAULT_LENS_ID
             swSmartFocus?.isChecked = us.isSmartFocusBias(activeLensId)
             swQuickActionCalculator?.isChecked = us.getBoolean(UtilSettings.KEY_QUICK_ACTION_CALCULATOR)
@@ -668,6 +674,7 @@ class FrmSettings : Fragment(), SettingsInterface {
         swChromaticAberration = null
         swLensInertia = null
         swFocusSnap = null
+        swFocusMagnify = null
         swSmartFocus = null
         tvSelectedSearchHint = null
         swEnableT9SearchKeypad = null

@@ -339,4 +339,6 @@
     <string name="setting_lens_inertia_hint">เอฟเฟกต์เลนส์จะตามนิ้วด้วยความหน่วงสั้น ๆ ขณะลาก ปิดไว้เป็นค่าเริ่มต้น</string>
     <string name="setting_focus_snap">ดึงโฟกัสเข้าไอคอน</string>
     <string name="setting_focus_snap_hint">ดึงโฟกัสของเลนส์เข้าหาไอคอนที่ใกล้ที่สุดอย่างนุ่มนวลเมื่อลากช้า ๆ ปิดไว้เป็นค่าเริ่มต้น</string>
+    <string name="setting_focus_magnify">ขยายเมื่อหยุด</string>
+    <string name="setting_focus_magnify_hint">ขยายไอคอนใต้นิ้วเล็กน้อยเมื่อคุณหยุดนิ่งบนไอคอนชั่วครู่ขณะลาก ขยายเฉพาะภาพ การสัมผัสและการเลือกไม่เปลี่ยน ปิดไว้เป็นค่าเริ่มต้น</string>
 </resources>

@@ -339,4 +339,6 @@
     <string name="setting_lens_inertia_hint">ເອັບເຟັກເລນຕາມນິ້ວມືດ້ວຍການຊ້າສັ້ນໆໃນຂະນະລາກ. ປິດຕາມຄ່າເລີ່ມຕົ້ນ.</string>
     <string name="setting_focus_snap">ດຶງຈຸດໂຟກັດ</string>
     <string name="setting_focus_snap_hint">ດຶງຈຸດໂຟກັດຂອງເລນໄປຫາໄອຄອນທີ່ໃກ້ທີ່ສຸດເບົາໆ ເມື່ອລາກຊ້າໆ. ປິດຕາມຄ່າເລີ່ມຕົ້ນ.</string>
+    <string name="setting_focus_magnify">ຂະຫຍາຍເມື່ອຢຸດ</string>
+    <string name="setting_focus_magnify_hint">ຂະຫຍາຍໄອຄອນໃຕ້ນິ້ວເລັກນ້ອຍເມື່ອເຈົ້າຢຸດເທິງມັນຊົ່ວຄາວຕອນລາກ. ມີພຽງຮູບທີ່ໃຫຍ່ຂຶ້ນ; ການແຕະ ແລະ ການເລືອກບໍ່ປ່ຽນ. ປິດຕາມຄ່າເລີ່ມຕົ້ນ.</string>
 </resources>

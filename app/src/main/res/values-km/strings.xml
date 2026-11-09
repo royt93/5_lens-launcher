@@ -339,4 +339,6 @@
     <string name="setting_lens_inertia_hint">ឥទ្ធិពលកែវថតដើរតាមម្រាមដៃដោយយឺតបន្តិចពេលអូស។ បិទតាមលំនាំដើម។</string>
     <string name="setting_focus_snap">ទាញចំណុចផ្តោត</string>
     <string name="setting_focus_snap_hint">ទាញចំណុចផ្តោតកែវថតទៅរកអ៊ីខនជិតបំផុតថ្នមៗ នៅពេលអូសយឺត។ បិទតាមលំនាំដើម។</string>
+    <string name="setting_focus_magnify">ពង្រីកពេលឈប់</string>
+    <string name="setting_focus_magnify_hint">ពង្រីកអ៊ីខនក្រោមម្រាមដៃបន្តិចនៅពេលអ្នកឈប់លើវាមួយភ្លែតពេលអូស។ មានតែរូបភាពទេដែលធំឡើង ការប៉ះ និងការជ្រើសរើសមិនប្តូរ។ បិទតាមលំនាំដើម។</string>
 </resources>

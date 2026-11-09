@@ -339,4 +339,6 @@
     <string name="setting_lens_inertia_hint">드래그하는 동안 렌즈 효과가 짧은 지연으로 손가락을 따라갑니다. 기본값은 꺼짐입니다.</string>
     <string name="setting_focus_snap">포커스 스냅</string>
     <string name="setting_focus_snap_hint">천천히 드래그할 때 렌즈 초점을 가장 가까운 아이콘 쪽으로 부드럽게 끌어당깁니다. 기본값은 꺼짐입니다.</string>
+    <string name="setting_focus_magnify">멈추면 확대</string>
+    <string name="setting_focus_magnify_hint">드래그하다 아이콘 위에서 잠시 멈추면 손가락 아래 아이콘을 조금 키웁니다. 그림만 커지며 터치와 선택은 그대로입니다. 기본값은 꺼짐입니다.</string>
 </resources>

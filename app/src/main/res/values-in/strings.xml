@@ -339,4 +339,6 @@
     <string name="setting_lens_inertia_hint">Efek lensa mengikuti jari dengan jeda singkat saat menggeser. Nonaktif secara default.</string>
     <string name="setting_focus_snap">Tarik fokus</string>
     <string name="setting_focus_snap_hint">Menarik fokus lensa dengan lembut ke ikon terdekat saat menggeser perlahan. Nonaktif secara default.</string>
+    <string name="setting_focus_magnify">Perbesar saat berhenti</string>
+    <string name="setting_focus_magnify_hint">Memperbesar sedikit ikon di bawah jari setelah Anda berhenti sejenak di atasnya saat menggeser. Hanya gambar yang membesar; sentuhan dan pilihan tidak berubah. Nonaktif secara default.</string>
 </resources>

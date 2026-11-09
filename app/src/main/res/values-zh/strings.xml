@@ -339,4 +339,6 @@
     <string name="setting_lens_inertia_hint">拖动时，镜头效果会以短暂延迟跟随手指。默认关闭。</string>
     <string name="setting_focus_snap">焦点吸附</string>
     <string name="setting_focus_snap_hint">缓慢拖动时，镜头焦点会轻轻吸向最近的图标。默认关闭。</string>
+    <string name="setting_focus_magnify">停留放大</string>
+    <string name="setting_focus_magnify_hint">拖动时在图标上稍作停留，指下的图标会略微放大。只放大显示，触摸和选择不变。默认关闭。</string>
 </resources>

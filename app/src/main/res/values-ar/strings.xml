@@ -370,4 +370,6 @@
     <string name="setting_lens_inertia_hint">تتبع تأثيرات العدسة إصبعك بتأخر قصير أثناء السحب. متوقفة افتراضيًا.</string>
     <string name="setting_focus_snap">التقاط التركيز</string>
     <string name="setting_focus_snap_hint">تسحب تركيز العدسة برفق نحو أقرب أيقونة أثناء السحب ببطء. متوقفة افتراضيًا.</string>
+    <string name="setting_focus_magnify">تكبير عند التوقف</string>
+    <string name="setting_focus_magnify_hint">يكبّر قليلًا الأيقونة تحت إصبعك بعد أن تتوقف عليها لحظة أثناء السحب. تكبر الصورة فقط؛ اللمس والتحديد دون تغيير. متوقفة افتراضيًا.</string>
 </resources>
