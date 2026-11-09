@@ -83,12 +83,21 @@ class LensViewHoverMagnifyWidgetTest {
         val apps=ArrayList((0 until APPS).map { App(id=it,packageName="com.f046.c$it",name="C$it",label="C $it",iconCacheKey="f046c#$it") })
         apps.forEach { RAppsSingleton.instance.setAppIcon(it.iconCacheKey,iconBitmap) }
         ActivityScenario.launch(OrganizationHarnessActivity::class.java).use { s -> s.onActivity { a ->
-            val v=LensView(a).apply { layout(0,0,SIZE,SIZE); setApps(apps); hoverMagnifyEnabled=true; setHoverMagnifyStateForTest(true,true,0,0f,WAIT_CLOCK); setLensStateForTest(400f,400f,1f,false) }
+            val v=LensView(a).apply { layout(0,0,SIZE,SIZE); setApps(apps); hoverMagnifyEnabled=true; setLensStateForTest(400f,400f,1f,false) }
+            // Frame 1 starts the dwell on icon 0; frame 2, past the dwell and ramp, draws it at the target scale.
+            v.setHoverMagnifyStateForTest(true,true,0,0f,0L)
+            val b0=Bitmap.createBitmap(SIZE,SIZE,Bitmap.Config.ARGB_8888); v.draw(Canvas(b0)); b0.recycle()
+            v.setHoverMagnifyStateForTest(true,true,0,0f,WAIT_CLOCK)
             val b1=Bitmap.createBitmap(SIZE,SIZE,Bitmap.Config.ARGB_8888); v.draw(Canvas(b1)); b1.recycle()
             val full=v.drawnRectsForTest()[0].width()
+            assertEquals("icon 0 is at the target scale", HoverMagnify.SCALE, v.hoverMagnifyScaleForTest(0), 0.01f)
+            // The finger now rests on icon 1: icon 0 must drop to 1x at once.
             v.setHoverMagnifyStateForTest(true,true,1,0f,WAIT_CLOCK+10)
+            // Tracker consumes the new selection after this frame; next frame draws the old icon at 1x.
             val b2=Bitmap.createBitmap(SIZE,SIZE,Bitmap.Config.ARGB_8888); v.draw(Canvas(b2)); b2.recycle()
-            assertTrue("icon 0 returns to 1x",v.drawnRectsForTest()[0].width() < full)
+            val b3=Bitmap.createBitmap(SIZE,SIZE,Bitmap.Config.ARGB_8888); v.draw(Canvas(b3)); b3.recycle()
+            assertEquals("icon 0 is back at 1x", 1f, v.hoverMagnifyScaleForTest(0), 0f)
+            assertTrue("icon 0 drawn smaller: ${v.drawnRectsForTest()[0].width()} < $full", v.drawnRectsForTest()[0].width() < full)
         } }
     }
 }

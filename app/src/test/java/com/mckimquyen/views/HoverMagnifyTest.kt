@@ -88,15 +88,34 @@ class HoverMagnifyTest {
         assertEquals(1f, t.scaleFor(0, 5_000L), 0f)
     }
 
-    @Test fun needsRedrawWhileDwellingOrRampingAndStopsOnceTheTargetIsReached() {
+    @Test fun needsRedrawWhileAnIconIsSelectedUntilItIsFullyMagnified() {
         val t = HoverMagnify.Tracker()
-        assertFalse("nothing selected", t.needsRedraw(0L))
+        assertFalse("no icon under the finger", t.needsRedraw(-1, 0L))
         t.onFrame(4, still, 0L)
-        assertTrue(t.needsRedraw(1L))
-        assertTrue(t.needsRedraw(HoverMagnify.DWELL_MS + HoverMagnify.RAMP_MS - 1))
-        assertFalse("settled at the target", t.needsRedraw(HoverMagnify.DWELL_MS + HoverMagnify.RAMP_MS))
-        t.onFrame(4, HoverMagnify.STILL_SPEED_DP_PER_S, 5_000L)
-        assertFalse("moving: no dwell is running", t.needsRedraw(5_001L))
+        assertTrue(t.needsRedraw(4, 1L))
+        assertTrue(t.needsRedraw(4, HoverMagnify.DWELL_MS + HoverMagnify.RAMP_MS - 1))
+        assertFalse("settled at the target", t.needsRedraw(4, HoverMagnify.DWELL_MS + HoverMagnify.RAMP_MS))
+    }
+
+    @Test fun aFingerThatJustStoppedStillAsksForFramesSoItsSpeedCanBeReassessed() {
+        // The last frame of a gesture is drawn while the last segment is still fast; no more events arrive. If the view
+        // stopped asking for frames then, the speed would never decay below the threshold and the icon would stay at 1x.
+        val t = HoverMagnify.Tracker()
+        t.onFrame(4, HoverMagnify.STILL_SPEED_DP_PER_S * 10, 0L)
+        assertEquals(1f, t.scaleFor(4, 0L), 0f)
+        assertTrue("still wants frames although the dwell has not started", t.needsRedraw(4, 10L))
+        assertTrue(t.needsRedraw(4, 5_000L))
+        t.onFrame(4, still, 600L)
+        assertTrue("now dwelling", t.needsRedraw(4, 700L))
+    }
+
+    @Test fun anUnselectedOrUnknownIconNeverAsksForFramesAndAGrownIconStops() {
+        val t = HoverMagnify.Tracker()
+        t.onFrame(4, still, 0L)
+        t.onFrame(4, still, 1_000L)
+        assertFalse("fully grown", t.needsRedraw(4, 1_000L))
+        assertFalse("another icon is not selected", t.needsRedraw(-1, 1_000L))
+        assertTrue("selection moved to a new icon that has not grown", t.needsRedraw(9, 1_000L))
     }
 
     @Test fun resetForgetsTheIconAndTheDwell() {
@@ -105,7 +124,7 @@ class HoverMagnifyTest {
         t.onFrame(4, still, 1_000L)
         t.reset()
         assertEquals(1f, t.scaleFor(4, 1_000L), 0f)
-        assertFalse(t.needsRedraw(1_000L))
+        assertTrue("selected but nothing dwelling after reset", t.needsRedraw(4, 1_000L))
         t.onFrame(4, still, 1_010L)
         assertEquals("dwell restarts after a reset", 1f, t.scaleFor(4, 1_010L + HoverMagnify.DWELL_MS - 1), 0f)
     }

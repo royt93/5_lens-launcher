@@ -1,0 +1,23 @@
+FISH-046 Hover Magnify, Perfetto SurfaceFlinger FrameTimeline on Pixel 7 Pro 2B051FDH3006MU (Android 17-class build, 1440x3120 @560dpi).
+Scenario (adb input motionevent): approach an icon in 10 MOVE steps over ~1.2 s, then 12 same-point MOVE events 0.25 s apart (~3 s of "finger resting"), then UP.
+Four pairs, magnify on vs off, layer ActHome only. Each trace was taken after a screenshot check that no ad overlay was on screen (white fraction < 0.4, ads closed with BACK only).
+
+run      frames  fps   frame_ms_mean  frame_ms_p90  janky
+on-1     124     29.4  7.02           8.92          0
+on-2     127     28.2  7.08           9.39          0
+on-3     121     28.6  7.15           8.91          0
+on-4     124     27.9  7.18           8.47          0
+off-1    45      10.7  7.88           10.78         0
+off-2    45      10.1  7.43           10.40         0
+off-3    43      10.4  7.65           9.76          0
+off-4    44      10.0  7.60           9.61          0
+
+mean on : 28.5 fps, 7.11 ms/frame, p90 8.92 ms, 0/496 janky
+mean off: 10.3 fps, 7.64 ms/frame, p90 10.14 ms, 0/177 janky
+
+Reading: per-frame cost does not rise and there is no jank. The only cost is the NUMBER of frames: while an icon waits out the 200 ms dwell
+and grows for 150 ms, the view asks for a frame every vsync (postInvalidateOnAnimation). It stops once the icon is fully grown
+(frames per 0.5 s on-1: 29 18 6 34 31 2 1 2 1, then ~1-2). Removing that redraw leaves the icon stuck at 1x (mutation caught by LensViewHoverMagnifySelfRedrawTest).
+
+Limits: one device, one adb scenario; frame counts depend on how long the finger rests. The first trace attempt was discarded because a loop variable clash
+overwrote labels and every run ended with an ad on screen; this set was recaptured with the fix and an ad check before each run.

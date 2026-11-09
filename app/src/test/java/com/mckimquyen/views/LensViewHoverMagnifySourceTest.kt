@@ -45,7 +45,7 @@ class LensViewHoverMagnifySourceTest {
     }
 
     @Test fun redrawRequestedDuringDwellAndRamp() {
-        assertTrue(source.contains("mHoverMagnifyTracker.needsRedraw(frameTimeMs)"))
+        assertTrue(source.contains("mHoverMagnifyTracker.needsRedraw(selectIndex, frameTimeMs)"))
         assertTrue(source.contains("postInvalidateOnAnimation()"))
     }
 

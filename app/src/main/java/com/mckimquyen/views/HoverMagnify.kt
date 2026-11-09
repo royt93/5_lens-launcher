@@ -56,9 +56,17 @@ object HoverMagnify {
             return 1f + (SCALE - 1f) * grown.toFloat() / RAMP_MS
         }
 
-        /** True while an icon is waiting out the dwell or growing, so the lens keeps asking for frames with a still finger. */
-        fun needsRedraw(nowMs: Long): Boolean =
-            stillSinceMs != NOT_STILL && nowMs - stillSinceMs < DWELL_MS + RAMP_MS
+        /**
+         * True while the lens must keep asking for frames although the finger sends no events: an icon is selected and has
+         * not finished growing. That includes the moments after the finger stopped, when the last measured speed is still
+         * high and only the passing of time lowers it below [STILL_SPEED_DP_PER_S]; without those frames the icon would
+         * stay at 1x. False when no icon is selected or the dwelling icon is fully grown.
+         */
+        fun needsRedraw(selectedIndex: Int, nowMs: Long): Boolean {
+            if (selectedIndex < 0) return false
+            if (selectedIndex != index || stillSinceMs == NOT_STILL) return true
+            return nowMs - stillSinceMs < DWELL_MS + RAMP_MS
+        }
 
         /** Gesture end, cancel, detach: nothing is dwelling afterwards. */
         fun reset() {

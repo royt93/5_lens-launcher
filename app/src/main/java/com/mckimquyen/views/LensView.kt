@@ -884,6 +884,9 @@ class LensView : View {
     internal var hoverMagnifyEnabled = UtilSettings.DEFAULT_FOCUS_MAGNIFY
     private val mHoverMagnifyTracker = HoverMagnify.Tracker()
     private val mMagnifyRect = RectF()
+    private val mHaloRectForTest = RectF()
+    @androidx.annotation.VisibleForTesting
+    internal fun haloRectForTest(): RectF = RectF(mHaloRectForTest)
     private var mHoverMagnifyTestPanning: Boolean? = null
     private var mHoverMagnifyTestIndex: Int? = null
     private var mHoverMagnifyTestSpeed: Float? = null
@@ -2475,7 +2478,7 @@ class LensView : View {
         // FISH-044: a paused finger sends no events but its speed keeps falling, so the pull keeps growing.
         else if (snapOn && mSnapTestSpeedDpPerS == null && mSnapTracker.needsRedraw(SystemClock.uptimeMillis())) postInvalidateOnAnimation()
         // FISH-046: a resting finger sends no events, so the dwell and the ramp need frames of their own.
-        else if (hoverMagnifyOn && mHoverMagnifyTestNow == null && mHoverMagnifyTracker.needsRedraw(frameTimeMs)) postInvalidateOnAnimation()
+        else if (hoverMagnifyOn && mHoverMagnifyTestNow == null && mHoverMagnifyTracker.needsRedraw(selectIndex, frameTimeMs)) postInvalidateOnAnimation()
     }
 
     /**
@@ -2627,6 +2630,7 @@ class LensView : View {
         ) return
         val r = rect ?: return
         val paint = mPaintFocusHalo ?: return
+        mHaloRectForTest.set(r)
         focusHaloDrawCallCount++
         val radius = r.width() / 2f + resources.getDimension(R.dimen.padding_focus_halo)
         canvas.drawCircle(r.centerX(), r.centerY(), radius, paint)
