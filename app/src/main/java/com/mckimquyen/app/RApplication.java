@@ -96,9 +96,12 @@ public class RApplication extends android.app.Application {
 
     /**
      * TEST-SEAM: disables the unsolicited background PackageManager scan during tests to prevent
-     * clobbering test-seeded snapshots. Defaults to true when running under an instrumentation test runner.
+     * clobbering test-seeded snapshots (the scan commits the real app list and BitmapCache.retainKeys evicts the icons a test
+     * seeded under fake keys). Turned on in [onCreate] when an instrumentation test runner is registered. It cannot be
+     * initialised here: this runs when the class loads, before the instrumentation has registered itself, so it was
+     * false in every instrumented run and the scan randomly wiped test icons (flaky LensViewChromaticAberrationWidgetTest).
      */
-    public static volatile boolean sDisableAutoAppRefresh = isTestEnvironment();
+    public static volatile boolean sDisableAutoAppRefresh = false;
     private final ComponentCallbacks2 iconCacheMemoryCallbacks = new ComponentCallbacks2() {
         // CORE-002/PERF-002: evict cached icon bitmaps under real memory pressure instead of
         // relying only on LruCache's own bounded eviction. Tiered by severity so a mild signal
@@ -138,6 +141,9 @@ public class RApplication extends android.app.Application {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        // The instrumentation is registered by now (it was not when this class loaded); see sDisableAutoAppRefresh.
+        if (isTestEnvironment()) sDisableAutoAppRefresh = true;
 
         // Debug builds only: log main-thread I/O and leaked closeables before any startup work.
         com.mckimquyen.util.DebugStrictMode.installIfDebug(com.mckimquyen.BuildConfig.DEBUG);

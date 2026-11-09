@@ -170,6 +170,8 @@ FISH-022 đã chuyển Implemented; không còn nằm trong Picked.
 
 ## 💭 Ideas
 
+- ✅ **Flaky icon test do quét app thật (2026-11-09)**: `RApplication.sDisableAutoAppRefresh` gán lúc class nạp (trước khi instrumentation đăng ký) nên luôn `false`; quét `PackageManager` commit app thật và `BitmapCache.retainKeys` xoá icon giả của test (4/12 lần fail trên Pixel, đều kèm một log eviction; 0/12 sau sửa). Sửa: bật cờ trong `RApplication.onCreate()`; 2 test tất định mới (RED 3/3 → GREEN 3/3). Phát hiện kèm: smoke halo cần app thật nên tự gọi quét; test magnify FISH-046 flaky 2/10 do rung 21 dp/s trên ngưỡng 15 → 0/20 sau khi đổi rung theo dp. Giới hạn: S24U không tái hiện flaky gốc; một lần fail của smoke trong suite S24U chưa giải thích; 3 test `ui` fail sẵn ở cả hai bản. Audit: `doc/task/AUDIT_FLAKY-ICON-CACHE_2026-11-09.md`. Chưa push.
+
 - **Wave 2026-10-19 (Scrum breakdown)**: 58 story mới trong `doc/task/todo/` (9 fix P1 mất dữ liệu/race, 11 fix P2/P3, 14 enhance, 7 new, 10 idea, 7 exclusive). Danh sách và vùng bị loại: `doc/task/README.md` mục Wave 2026-10-19. Chưa chọn story nào để làm; chờ owner pick.
 
 - See `doc/task/todo/` for the remaining product backlog.

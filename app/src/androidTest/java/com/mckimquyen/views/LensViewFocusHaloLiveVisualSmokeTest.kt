@@ -10,6 +10,7 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.mckimquyen.R
+import com.mckimquyen.app.RApplication
 import com.mckimquyen.ui.ActHome
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -29,6 +30,10 @@ class LensViewFocusHaloLiveVisualSmokeTest {
     @Test
     fun captureLiveHoverWithHalo() {
         val instrumentation = InstrumentationRegistry.getInstrumentation()
+        // This smoke test needs the REAL installed apps in the live lens. RApplication switches the unsolicited startup
+        // scan off under instrumentation (so it cannot evict icons other tests seed), so this test asks for one scan itself.
+        val application = instrumentation.targetContext.applicationContext as RApplication
+        application.appRefreshPipeline.execute()
         ActivityScenario.launch(ActHome::class.java).use { scenario ->
             instrumentation.waitForIdleSync()
             var bitmap: Bitmap? = null
