@@ -24,4 +24,4 @@ Spec: `docs/superpowers/specs/2026-11-08-fish-044-focus-snap-design.md`. Audit: 
 - [x] Đã đo 10 cặp chuẩn xen kẽ đảo chiều (r21..30, 155.600 frame): median p50 on = off = 6,0 ms (7/10 lần on = 6 ms); delta mean p50 = +0,6 ms; delta mean p90 = +0,5 ms; jank 0,005% cả hai. Đo vi mô CPU: +0,048 ms. Chi phí snap là rất nhỏ (~0,5 ms ở p90), không gây giật.
 - [x] Phân tích Perfetto SurfaceFlinger FrameTimeline (BG6): UI thread delta +0,20 ms, RenderThread delta +0,09 ms; 99,8% Buffer Stuffing nhưng 547/551 frame app nộp đúng hạn (on_time_finish=1), xác nhận không drop frame.
 - [x] Test runtime tương tác snap với cụm nét FISH-042 (`LensViewFocusSnapClusterInteractionTest`, 3 test, 2 đột biến).
-- [ ] Owner thử tay và tinh chỉnh hằng số (bản debug đang cài trên KJ7, công tắc `focus_snap` tắt).
+- [x] Owner thử tay 2026-11-09 trên Pixel (bản debug, snap + magnify bật): "cảm giác ổn", không đổi hằng số (nhận xét định tính, không kèm số đo).

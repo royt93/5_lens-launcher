@@ -22,5 +22,5 @@ Spec: `docs/superpowers/specs/2026-11-09-fish-046-hover-magnify-design.md`. Audi
 - [x] Reachability bằng DOWN/MOVE thật trên Pixel (không hook tốc độ/clock/pan) và test tự vẽ lại không gọi `draw()`.
 - [x] Mutation: 17 loại đều bị bắt (năm lần lọt đã được gia cố test).
 - [x] Ảnh pixel thật (halo 264 → 310 px) và Perfetto FrameTimeline (không jank; bật 28,5 so với tắt 10,3 fps khi giữ ngón).
-- [ ] Owner thử tay và tinh chỉnh 200 ms / 15 dp/s / 1,2 / 150 ms.
+- [x] Owner thử tay 2026-11-09 trên Pixel: "cảm giác ổn", không đổi 200 ms / 15 dp/s / 1,2 / 150 ms (nhận xét định tính, không kèm số đo).
 - [ ] Giảm số khung vẽ trong giai đoạn chờ 200 ms (chưa làm; chi phí chỉ kéo dài ~350 ms mỗi lần giữ ngón).
