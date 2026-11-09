@@ -54,6 +54,10 @@ class LensOpticalProfileWidgetTest {
         AppDatabase.init(context)
         settings = UtilSettings(context)
         settings.sortType // Khởi tạo pref mặc định trước khi chụp trạng thái để so sánh.
+        // The first Activity launch of a fresh install writes the locale-migration flag. Do that here, as an installed app
+        // that has run before would already have, so the "writes nothing" snapshots below do not depend on the device
+        // having been used with this app (they failed on a device with the app freshly installed).
+        com.mckimquyen.util.LocaleHelper.onAttach(context)
         targetId = "f036-${UUID.randomUUID()}"
         runBlocking { dao.insertOrUpdate(LensWorkspace(targetId, "F036", orderIndex = 900)) }
         settings.saveDistortionFactor(targetId, 4.1f)
@@ -190,7 +194,10 @@ class LensOpticalProfileWidgetTest {
                 assertTrue(text.contains(context.getString(R.string.lens_optical_target_group)))
                 assertTrue(text.contains(context.getString(R.string.lens_optical_global_warning)))
                 assertTrue(text.contains(context.getString(R.string.lens_optical_custom_group)))
-                assertTrue(text.contains("3.30"))
+                // The preview formats numbers with the device locale (a comma decimal separator on vi-VN, de-DE...), so build the
+                // expected text the same way instead of hard-coding "3.30".
+                val expected = String.format(java.util.Locale.getDefault(), "%.2f", incoming.distortionFactor)
+                assertTrue("preview must show $expected, was: $text", text.contains(expected))
                 press(preview, DialogInterface.BUTTON_NEGATIVE)
                 instrumentation.waitForIdleSync()
             }
