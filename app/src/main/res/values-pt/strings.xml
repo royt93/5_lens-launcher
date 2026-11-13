@@ -351,4 +351,6 @@
     <string name="setting_focus_snap_hint">Puxa suavemente o foco da lente para o ícone mais próximo ao arrastar devagar. Desativado por padrão.</string>
     <string name="setting_focus_magnify">Ampliar ao parar</string>
     <string name="setting_focus_magnify_hint">Aumenta um pouco o ícone sob o dedo depois que você para sobre ele por um instante ao arrastar. Só a imagem cresce; o toque e a seleção não mudam. Desativado por padrão.</string>
+    <string name="setting_neighbour_labels">Rótulos vizinhos</string>
+    <string name="setting_neighbour_labels_hint">Mostra um nome discreto para os ícones ao lado do selecionado enquanto você arrasta, apenas quando há espaço. Desativado por padrão.</string>
 </resources>

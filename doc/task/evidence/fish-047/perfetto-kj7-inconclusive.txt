@@ -1,0 +1,19 @@
+FISH-047 frame budget attempt, TECNO KJ7 115333744A005844 (2026-11-13). RESULT: INCONCLUSIVE, not evidence of "no cost".
+
+Scenario: adb input motionevent DOWN, 30 MOVE steps across two rows, 12 same-point MOVEs 0.25 s apart, then CANCEL (never UP, so no app launched).
+Six traces (3 pairs, neighbour_labels on/off), layer ActHome, 8 s each, ActHome held window focus in every run (no ad overlay).
+
+run      frames  mean_ms  p90_ms  janky
+on-1     723     8.92     9.62    0
+on-2     715     8.90     9.53    0
+on-3     712     8.92     9.62    0
+off-1    716     8.94     9.46    2
+off-2    718     8.90     9.57    0
+off-3    719     8.89     9.51    0
+
+Why this proves nothing: a screenshot taken mid-gesture with the switch on shows an UNDISTORTED grid and no label at all (not even the main one), and the frame
+count is the same with the switch on and off (~720 frames in 8 s, i.e. a steady redraw rate in both). So the adb gesture most likely never put the lens into a
+real pan, and the neighbour-label path was probably not drawn during these traces. The numbers describe the idle redraw rate, not the cost of the labels.
+What is established instead: the device reachability tests (real DOWN/MOVE through dispatchTouchEvent) show 2 labels drawn on a 100-app lens.
+Open: reproduce a real pan from adb (or from the UiAutomation injectInputEvent used by FISH-039's smoke test) and re-measure.
+Tooling notes: perfetto must write to /data/misc/perfetto-traces on this device (a /data/local/tmp output failed with errno 13); the venv's perfetto package had to be reinstalled.

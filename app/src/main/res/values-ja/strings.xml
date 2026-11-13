@@ -341,4 +341,6 @@
     <string name="setting_focus_snap_hint">ゆっくりドラッグすると、レンズの焦点が最も近いアイコンへ穏やかに引き寄せられます。初期設定ではオフです。</string>
     <string name="setting_focus_magnify">停止で拡大</string>
     <string name="setting_focus_magnify_hint">ドラッグ中に指をアイコンの上で少し止めると、そのアイコンをわずかに拡大します。拡大されるのは表示だけで、タッチと選択は変わりません。初期設定ではオフです。</string>
+    <string name="setting_neighbour_labels">隣のラベル</string>
+    <string name="setting_neighbour_labels_hint">ドラッグ中、選択中のアイコンの隣にあるアイコンの名前を薄く表示します。スペースがある場合のみ表示します。初期設定ではオフです。</string>
 </resources>

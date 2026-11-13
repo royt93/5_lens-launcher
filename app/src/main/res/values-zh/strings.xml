@@ -341,4 +341,6 @@
     <string name="setting_focus_snap_hint">缓慢拖动时，镜头焦点会轻轻吸向最近的图标。默认关闭。</string>
     <string name="setting_focus_magnify">停留放大</string>
     <string name="setting_focus_magnify_hint">拖动时在图标上稍作停留，指下的图标会略微放大。只放大显示，触摸和选择不变。默认关闭。</string>
+    <string name="setting_neighbour_labels">相邻标签</string>
+    <string name="setting_neighbour_labels_hint">拖动时为所选图标左右相邻的图标显示淡色名称，仅在空间足够时显示。默认关闭。</string>
 </resources>

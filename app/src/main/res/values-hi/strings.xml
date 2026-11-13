@@ -346,4 +346,6 @@
     <string name="setting_focus_snap_hint">धीरे खींचते समय लेंस के फोकस को नज़दीकी आइकन की ओर हल्के से खींचता है। डिफ़ॉल्ट रूप से बंद।</string>
     <string name="setting_focus_magnify">रुकने पर बड़ा करें</string>
     <string name="setting_focus_magnify_hint">खींचते समय आपकी उंगली के नीचे के आइकन पर थोड़ी देर रुकने पर उसे हल्का बड़ा करता है। केवल चित्र बड़ा होता है; स्पर्श और चयन नहीं बदलते। डिफ़ॉल्ट रूप से बंद।</string>
+    <string name="setting_neighbour_labels">पड़ोसी लेबल</string>
+    <string name="setting_neighbour_labels_hint">खींचते समय चुने गए आइकन के ठीक बगल वाले आइकन का हल्का नाम दिखाता है, केवल जहाँ जगह हो। डिफ़ॉल्ट रूप से बंद।</string>
 </resources>

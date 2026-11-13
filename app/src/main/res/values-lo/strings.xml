@@ -341,4 +341,6 @@
     <string name="setting_focus_snap_hint">ດຶງຈຸດໂຟກັດຂອງເລນໄປຫາໄອຄອນທີ່ໃກ້ທີ່ສຸດເບົາໆ ເມື່ອລາກຊ້າໆ. ປິດຕາມຄ່າເລີ່ມຕົ້ນ.</string>
     <string name="setting_focus_magnify">ຂະຫຍາຍເມື່ອຢຸດ</string>
     <string name="setting_focus_magnify_hint">ຂະຫຍາຍໄອຄອນໃຕ້ນິ້ວເລັກນ້ອຍເມື່ອເຈົ້າຢຸດເທິງມັນຊົ່ວຄາວຕອນລາກ. ມີພຽງຮູບທີ່ໃຫຍ່ຂຶ້ນ; ການແຕະ ແລະ ການເລືອກບໍ່ປ່ຽນ. ປິດຕາມຄ່າເລີ່ມຕົ້ນ.</string>
+    <string name="setting_neighbour_labels">ປ້າຍຊື່ຂ້າງຄຽງ</string>
+    <string name="setting_neighbour_labels_hint">ສະແດງຊື່ຈາງໆຂອງໄອຄອນທີ່ຢູ່ຕິດກັບໄອຄອນທີ່ເລືອກໃນຂະນະລາກ ສະເພາະເມື່ອມີບ່ອນພໍ. ປິດຕາມຄ່າເລີ່ມຕົ້ນ.</string>
 </resources>

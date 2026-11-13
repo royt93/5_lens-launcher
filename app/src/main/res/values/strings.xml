@@ -391,4 +391,6 @@
     <string name="setting_focus_snap_hint">Gently pulls the lens focus towards the nearest icon while you drag slowly. Off by default.</string>
     <string name="setting_focus_magnify">Hover magnify</string>
     <string name="setting_focus_magnify_hint">Slightly enlarges the icon under your finger once you rest on it for a moment while dragging. Only the picture grows; touch and selection are unchanged. Off by default.</string>
+    <string name="setting_neighbour_labels">Neighbour labels</string>
+    <string name="setting_neighbour_labels_hint">Shows a faint name for the icons right beside the selected one while you drag, only where there is room for it. Off by default.</string>
 </resources>

@@ -69,6 +69,7 @@ object ResetEntries {
             flag(UtilSettings.KEY_LENS_INERTIA, R.string.setting_lens_inertia, UtilSettings.DEFAULT_LENS_INERTIA),
             flag(UtilSettings.KEY_FOCUS_SNAP, R.string.setting_focus_snap, UtilSettings.DEFAULT_FOCUS_SNAP),
             flag(UtilSettings.KEY_FOCUS_MAGNIFY, R.string.setting_focus_magnify, UtilSettings.DEFAULT_FOCUS_MAGNIFY),
+            flag(UtilSettings.KEY_NEIGHBOUR_LABELS, R.string.setting_neighbour_labels, UtilSettings.DEFAULT_NEIGHBOUR_LABELS),
             ResetEntry(
                 us.lensKey(UtilSettings.KEY_SMART_FOCUS_BIAS, lensId), R.string.setting_smart_focus,
                 UtilSettings.DEFAULT_SMART_FOCUS_BIAS, us.isSmartFocusBias(lensId)

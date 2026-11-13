@@ -879,6 +879,14 @@ class LensView : View {
     private var mSnapTestPanning: Boolean? = null
     private var mSnapTestSpeedDpPerS: Float? = null
 
+    /** FISH-047: faint labels for the icons beside the selected one are opt-in. */
+    @androidx.annotation.VisibleForTesting
+    internal var neighbourLabelsEnabled = UtilSettings.DEFAULT_NEIGHBOUR_LABELS
+    private val mNeighbourScratch = IntArray(NeighbourLabels.MAX_NEIGHBOURS)
+    private var mNeighbourLabelsDrawn = 0
+    @androidx.annotation.VisibleForTesting
+    internal val neighbourLabelsDrawnForTest: Int get() = mNeighbourLabelsDrawn
+
     /** FISH-046: hover magnify is opt-in. */
     @androidx.annotation.VisibleForTesting
     internal var hoverMagnifyEnabled = UtilSettings.DEFAULT_FOCUS_MAGNIFY
@@ -2713,6 +2721,7 @@ class LensView : View {
         canvas: Canvas,
         rect: RectF?,
     ) {
+        mNeighbourLabelsDrawn = 0
         mUtilSettings?.let { us ->
             if (shouldDrawAppNameLabel(
                     us.getBoolean(UtilSettings.KEY_SHOW_NAME_APP_HOVER),
@@ -2724,12 +2733,32 @@ class LensView : View {
                     val app = list.getOrNull(mSelectIndex) ?: return
                     rect?.let { r ->
                         mPaintText?.let { p ->
-                            canvas.drawText(
-                                app.label as String,
-                                r.centerX(),
-                                r.top - resources.getDimension(R.dimen.margin_lens_text),
-                                p
-                            )
+                            val labelY = r.top - resources.getDimension(R.dimen.margin_lens_text)
+                            canvas.drawText(app.label as String, r.centerX(), labelY, p)
+                            if (NeighbourLabels.shouldApply(
+                                    neighbourLabelsEnabled,
+                                    us.getBoolean(UtilSettings.KEY_SHOW_NAME_APP_HOVER),
+                                    us.getBoolean(UtilSettings.KEY_CLEAN_LENS_MODE),
+                                    mMoving
+                                )
+                            ) {
+                                val cols = mGridCache.grid?.itemCountHorizontal ?: 0
+                                val n = NeighbourLabels.neighbours(mSelectIndex, cols, list.size, mNeighbourScratch)
+                                val gapPx = NeighbourLabels.GAP_DP * resources.displayMetrics.density
+                                val selectedWidth = p.measureText(app.label as String)
+                                val previousAlpha = p.alpha
+                                p.alpha = NeighbourLabels.ALPHA
+                                for (slot in 0 until n) {
+                                    val cell = mNeighbourScratch[slot]
+                                    val nb = mDrawnRectsForTest.getOrNull(cell) ?: continue
+                                    val label = list.getOrNull(cell)?.label as? String ?: continue
+                                    if (NeighbourLabels.fits(r.centerX(), nb.centerX(), selectedWidth, p.measureText(label), gapPx)) {
+                                        canvas.drawText(label, nb.centerX(), nb.top - resources.getDimension(R.dimen.margin_lens_text), p)
+                                        mNeighbourLabelsDrawn++
+                                    }
+                                }
+                                p.alpha = previousAlpha
+                            }
                         }
                     }
                 }
@@ -2888,6 +2917,8 @@ class LensView : View {
                 ?: UtilSettings.DEFAULT_FOCUS_SNAP
             hoverMagnifyEnabled = mUtilSettings?.getBoolean(UtilSettings.KEY_FOCUS_MAGNIFY)
                 ?: UtilSettings.DEFAULT_FOCUS_MAGNIFY
+            neighbourLabelsEnabled = mUtilSettings?.getBoolean(UtilSettings.KEY_NEIGHBOUR_LABELS)
+                ?: UtilSettings.DEFAULT_NEIGHBOUR_LABELS
             focusPeakingEnabled = mUtilSettings?.getBoolean(UtilSettings.KEY_FOCUS_PEAKING)
                 ?: UtilSettings.DEFAULT_FOCUS_PEAKING
             mUtilSettings?.let {
