@@ -1,0 +1,12 @@
+Probe (2026-11-13), throwaway JVM test deleted after reading. Real formulas: UtilCalculator.calculateOptimalSquareSize, LensProfile.FISHEYE shift/scale/sizeFor.
+TECNO KJ7 numbers: 1080x2436 px, density 3.0, defaults distortion 2.5 and scale 1.0, lens at screen centre, icon base 18 dp = 54 px.
+Question: how big is a 4 dp (12 px) dot at an icon's top-left corner next to the WARPED icon size, over the whole grid?
+
+count=30  grid=4x8  warped icon px: min=21 p10=21 p50=27 p90=75 max=75  | dot/icon @p10=58% @p50=44% | icons smaller than 3 dots: 24 of 32
+count=60  grid=6x10 warped icon px: min=19 p10=19 p50=27 p90=64 max=92  | dot/icon @p10=62% @p50=45% | icons smaller than 3 dots: 36 of 60
+count=100 grid=7x15 warped icon px: min=18 p10=18 p50=27 p90=64 max=168 | dot/icon @p10=68% @p50=44% | icons smaller than 3 dots: 84 of 105
+count=150 grid=9x17 warped icon px: min=17 p10=17 p50=27 p90=54 max=168 | dot/icon @p10=69% @p50=44% | icons smaller than 3 dots: 108 of 153
+Notification badge for reference: 7 dp radius = 42 px diameter.
+
+Reading: while the lens is magnified most icons are 17-27 px (6-9 dp). A fixed 4 dp dot is 44-69% of their width and would cover a large part of the
+icon; only the few icons near the finger (p90 and above, 54-168 px) are big enough to carry it. A fixed-size dot is therefore wrong for this lens.
