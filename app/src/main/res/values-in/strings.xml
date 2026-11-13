@@ -341,6 +341,6 @@
     <string name="setting_focus_snap_hint">Menarik fokus lensa dengan lembut ke ikon terdekat saat menggeser perlahan. Nonaktif secara default.</string>
     <string name="setting_focus_magnify">Perbesar saat berhenti</string>
     <string name="setting_focus_magnify_hint">Memperbesar sedikit ikon di bawah jari setelah Anda berhenti sejenak di atasnya saat menggeser. Hanya gambar yang membesar; sentuhan dan pilihan tidak berubah. Nonaktif secara default.</string>
-    <string name="setting_neighbour_labels">Label tetangga</string>
+    <string name="setting_neighbour_labels">Label ikon di sebelah</string>
     <string name="setting_neighbour_labels_hint">Menampilkan nama samar untuk ikon di samping ikon terpilih saat menggeser, hanya jika ada ruang. Nonaktif secara default.</string>
 </resources>
