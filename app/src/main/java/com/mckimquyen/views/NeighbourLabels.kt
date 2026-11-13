@@ -14,7 +14,11 @@ object NeighbourLabels {
     /** Clear space kept between two labels. */
     const val GAP_DP = 8f
 
-    /** Same gate as the main label (name setting, not clean mode, finger moving) plus this effect's own switch. */
+    /**
+     * Same gate as the main label (name setting, not clean mode, finger moving) plus this effect's own switch. The caller already
+     * sits behind the main label's gate, so the clean-mode term is redundant today; it is kept so this decision stays correct if
+     * it is ever called from somewhere else (a device mutation without it is therefore NOT caught, by design).
+     */
     fun shouldApply(enabled: Boolean, nameShown: Boolean, cleanMode: Boolean, moving: Boolean): Boolean =
         enabled && nameShown && !cleanMode && moving
 
