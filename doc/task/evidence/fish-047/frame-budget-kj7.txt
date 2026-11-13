@@ -1,0 +1,18 @@
+FISH-047 frame budget, TECNO KJ7 115333744A005844 (2026-11-13), 1080x2436, real touch via UiAutomation.injectInputEvent.
+Test: app/src/androidTest/java/com/mckimquyen/ui/NeighbourLabelsFrameBudgetSmokeTest.kt. FrameMetrics TOTAL_DURATION of the ActHome window,
+real Home with 60 real launcher apps, a diagonal drag (the finger never rests) for 6 s per run, 4 pairs switch off/on, run order alternated per pair.
+Gesture ends with CANCEL (never UP) so no app launches. This replaces perfetto-kj7-inconclusive.txt: a near-horizontal sweep is read by LensView
+as a page swipe (|dx| > 2*|dy|), which is why the earlier adb gesture never panned the lens.
+
+Last run (4 pairs, 8 runs, ~870-900 frames per setting):
+OFF frames=869 mean=10.89ms p90=22.64ms p99=24.73ms max=28.96ms overBudget=236 labelsSeen=[0,0,0,0]
+ON  frames=901 mean= 9.39ms p90=21.15ms p99=24.47ms max=27.24ms overBudget=176 labelsSeen=[2,2,2,2]
+Three earlier runs of the same test gave the same picture (ON mean 9.8-10.0 vs OFF 10.7-11.7 ms; p99 within ~0.5 ms; overBudget 142-191 vs 212-246).
+The first run after a cold start is slow (15-17 ms mean) with either setting, which pulls both means up; the per-run table shows runs 2-4 within ~0.5 ms.
+
+Reading: with the switch on, 2 neighbour labels were drawn during the measured drags (positive control) and per-frame cost did not rise; the "ON is lower" numbers
+are noise and run order, not a speed-up. Limits: one device, one gesture, 4 pairs; overBudget is large for both because the display refresh budget is tight.
+
+NOT established: that the labels are VISIBLE. The counter proves drawText ran. Screenshots taken in a frame where the labels were being drawn show no text at all,
+not even the selected icon's own label, and the label paint is white (colorWhite) over a pale wallpaper; the screenshot also lags the sampled frame while the finger
+keeps moving. So visibility on this wallpaper is unverified and needs the owner's eyes.

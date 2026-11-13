@@ -20,5 +20,6 @@ Acceptance: công tắc `neighbour_labels` mặc định tắt, có trong reset 
 - Code, setting, reset entry, Settings row and 17 locales done. Host: unit tests, lint and `assembleDevDebugAndroidTest` green.
 - KJ7: `LensViewNeighbourLabelsReachabilityTest` 5/5 (15 runs 0 failures after fixing the test's own label length; first run exposed that 7-character labels sit at the fit boundary on a 100-app lens); `views` 311/311, `ui` 560/560.
 - Device mutation checks: fit always/never true and gate without the switch are all caught; **gate without clean mode survives** because the outer label gate (`shouldDrawAppNameLabel`) already covers clean mode, so that branch is redundant.
-- **Frame budget NOT measured**: see `doc/task/evidence/fish-047/perfetto-kj7-inconclusive.txt`.
+- Frame budget measured with a real drag (`NeighbourLabelsFrameBudgetSmokeTest`, `doc/task/evidence/fish-047/frame-budget-kj7.txt`): 2 neighbour labels drawn when on, per-frame cost not higher than off (4 pairs). The earlier adb gesture was invalid (it read as a page swipe) and is superseded.
+- **Visibility not verified**: screenshots in a frame with labels drawn show no text (white label on a pale wallpaper, screenshot lags the frame). The counter proves drawing, not legibility.
 - Not hand-tested by the owner; `NeighbourLabels.ALPHA` (140) and `GAP_DP` (8) are guesses.
