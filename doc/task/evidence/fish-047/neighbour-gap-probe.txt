@@ -1,0 +1,14 @@
+FISH-047 probe (2026-11-13). Real formulas: UtilCalculator.calculateOptimalSquareSize, LensProfile.FISHEYE.shiftX/shiftY/scaleX/scaleY,
+LensProfile.sizeFor. TECNO KJ7 numbers: 1080x2436 px, 480 dpi (density 3.0), font 1.15; defaults distortion 2.5, scale 1.0,
+animation multiplier 1.0, FISHEYE, full hood, lens at screen centre, selected = cell nearest the lens. Label: 14sp * 1.15 = 48 px high,
+8 characters at 0.55 em average advance = 213 px wide (an estimate; the build measures with Paint.measureText).
+
+count=30  grid=4x8  base=54px sel=13 size=75px  | dxLeft=202 dxRight=521 dyLeft=0 | neighbour size L=27 R=75 | labelW=213px textH=48px
+count=60  grid=6x10 base=54px sel=32 size=92px  | dxLeft=194 dxRight=412 dyLeft=0 | neighbour size L=40 R=92 | labelW=213px textH=48px
+count=100 grid=7x15 base=54px sel=52 size=168px | dxLeft=300 dxRight=300 dyLeft=0 | neighbour size L=64 R=64 | labelW=213px textH=48px
+count=150 grid=9x17 base=54px sel=76 size=168px | dxLeft=260 dxRight=260 dyLeft=0 | neighbour size L=75 R=75 | labelW=213px textH=48px
+
+Reading: neighbours sit on the same row (dy = 0). Centre-to-centre distance is 194-521 px against a label 213 px wide, so a label of
+the selected icon and one of its neighbour overlap when dx < ~213 px (60 apps, left side: 194 px) and fit otherwise. The effect is
+therefore visible on some layouts and must be skipped on others; a fixed "always draw" rule would print overlapping text.
+The probe test was throwaway and has been deleted.
