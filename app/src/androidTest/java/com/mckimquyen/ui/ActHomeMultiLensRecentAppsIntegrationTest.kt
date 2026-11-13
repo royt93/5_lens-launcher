@@ -47,6 +47,20 @@ class ActHomeMultiLensRecentAppsIntegrationTest {
         RAppsSingleton.instance.apps = ArrayList()
     }
 
+    private fun awaitRefreshSettled() {
+        val pipeline = (context.applicationContext as com.mckimquyen.app.RApplication).appRefreshPipeline
+        val deadline = android.os.SystemClock.uptimeMillis() + REFRESH_SETTLE_WAIT_MS
+        var idleSince = -1L
+        while (android.os.SystemClock.uptimeMillis() < deadline) {
+            val busy = pipeline.state.value is com.mckimquyen.services.AppRefreshState.Loading
+            val now = android.os.SystemClock.uptimeMillis()
+            if (busy) idleSince = -1L else if (idleSince < 0) idleSince = now
+            if (idleSince >= 0 && now - idleSince >= REFRESH_QUIET_MS) return
+            Thread.sleep(REFRESH_POLL_MS)
+        }
+        org.junit.Assert.fail("the app-refresh pipeline never settled")
+    }
+
     @Test
     fun launchRecordedOnOneLensAppearsInThePanelOpenedFromAnotherLens() {
         val camera = App(label = "Camera", packageName = "pkg.camera", name = "CameraActivity")
@@ -62,6 +76,11 @@ class ActHomeMultiLensRecentAppsIntegrationTest {
                 activity.findViewById<androidx.viewpager2.widget.ViewPager2>(R.id.lensPager).currentItem = 1
             }
             InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+            // Changing lens page asks the app-refresh pipeline for a real PackageManager scan (switchLens falls back to a full
+            // execute() when nothing is cached), which sDisableAutoAppRefresh does not cover. Its commit replaces the fake
+            // snapshot a moment later; on TECNO KJ7 the list then held 72 real apps and no pkg.camera (failed 10 of 16 runs).
+            // Wait for that scan to settle before seeding the snapshot this test asserts on.
+            awaitRefreshSettled()
 
             lateinit var fragment: RecentAppsPanelFragment
             scenario.onActivity { activity ->
@@ -77,5 +96,11 @@ class ActHomeMultiLensRecentAppsIntegrationTest {
             val recyclerView = requireNotNull(fragment.view).findViewById<RecyclerView>(R.id.rvRecentApps)
             assertEquals(1, recyclerView.adapter?.itemCount)
         }
+    }
+
+    private companion object {
+        const val REFRESH_SETTLE_WAIT_MS = 10_000L
+        const val REFRESH_QUIET_MS = 500L
+        const val REFRESH_POLL_MS = 50L
     }
 }
