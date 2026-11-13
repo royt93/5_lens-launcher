@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | enhance |
-| Status | picked (owner 2026-11-13), spec written |
+| Status | in progress (TDD, 2026-11-13) |
 | Priority | P3 |
 | Evidence | probe (real warp formula, KJ7 numbers) |
 | Epic | Fisheye lens |

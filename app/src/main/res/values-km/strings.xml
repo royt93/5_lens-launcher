@@ -343,4 +343,6 @@
     <string name="setting_focus_magnify_hint">ពង្រីកអ៊ីខនក្រោមម្រាមដៃបន្តិចនៅពេលអ្នកឈប់លើវាមួយភ្លែតពេលអូស។ មានតែរូបភាពទេដែលធំឡើង ការប៉ះ និងការជ្រើសរើសមិនប្តូរ។ បិទតាមលំនាំដើម។</string>
     <string name="setting_neighbour_labels">ស្លាកជិតខាង</string>
     <string name="setting_neighbour_labels_hint">បង្ហាញឈ្មោះស្រាលៗសម្រាប់រូបតំណាងដែលនៅជាប់នឹងរូបដែលបានជ្រើស នៅពេលអូស ប្រសិនបើមានទំហំគ្រប់គ្រាន់។ បិទតាមលំនាំដើម។</string>
+    <string name="setting_recent_dots">ចំណុចកម្មវិធីថ្មីៗ</string>
+    <string name="setting_recent_dots_hint">ដាក់ចំណុចតូចលើកម្មវិធីរហូតដល់បីដែលបានបើកក្នុង 24 ម៉ោងចុងក្រោយ នៅពេលអូស ដើម្បីងាយស្រួលរកឃើញ។ បិទតាមលំនាំដើម។</string>
 </resources>

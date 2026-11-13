@@ -343,4 +343,6 @@
     <string name="setting_focus_magnify_hint">ຂະຫຍາຍໄອຄອນໃຕ້ນິ້ວເລັກນ້ອຍເມື່ອເຈົ້າຢຸດເທິງມັນຊົ່ວຄາວຕອນລາກ. ມີພຽງຮູບທີ່ໃຫຍ່ຂຶ້ນ; ການແຕະ ແລະ ການເລືອກບໍ່ປ່ຽນ. ປິດຕາມຄ່າເລີ່ມຕົ້ນ.</string>
     <string name="setting_neighbour_labels">ປ້າຍຊື່ຂ້າງຄຽງ</string>
     <string name="setting_neighbour_labels_hint">ສະແດງຊື່ຈາງໆຂອງໄອຄອນທີ່ຢູ່ຕິດກັບໄອຄອນທີ່ເລືອກໃນຂະນະລາກ ສະເພາະເມື່ອມີບ່ອນພໍ. ປິດຕາມຄ່າເລີ່ມຕົ້ນ.</string>
+    <string name="setting_recent_dots">ຈຸດແອັບທີ່ເປີດຫຼ້າສຸດ</string>
+    <string name="setting_recent_dots_hint">ໃສ່ຈຸດນ້ອຍໃຫ້ແອັບສູງສຸດສາມອັນທີ່ເປີດໃນ 24 ຊົ່ວໂມງຜ່ານມາໃນຂະນະລາກ ເພື່ອໃຫ້ຊອກຫາງ່າຍ. ປິດຕາມຄ່າເລີ່ມຕົ້ນ.</string>
 </resources>

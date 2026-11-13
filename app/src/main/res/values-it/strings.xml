@@ -353,4 +353,6 @@
     <string name="setting_focus_magnify_hint">Ingrandisce leggermente l\'icona sotto il dito quando ti fermi un istante mentre trascini. Si ingrandisce solo l\'immagine; tocco e selezione restano invariati. Disattivato per impostazione predefinita.</string>
     <string name="setting_neighbour_labels">Etichette vicine</string>
     <string name="setting_neighbour_labels_hint">Mostra un nome tenue per le icone accanto a quella selezionata durante il trascinamento, solo se c\'è spazio. Disattivato per impostazione predefinita.</string>
+    <string name="setting_recent_dots">Puntini delle app recenti</string>
+    <string name="setting_recent_dots_hint">Segna con un piccolo puntino fino a tre app aperte nelle ultime 24 ore durante il trascinamento, per ritrovarle facilmente. Disattivato per impostazione predefinita.</string>
 </resources>

@@ -879,6 +879,15 @@ class LensView : View {
     private var mSnapTestPanning: Boolean? = null
     private var mSnapTestSpeedDpPerS: Float? = null
 
+    /** FISH-048: a dot on recently opened apps while dragging is opt-in. */
+    @androidx.annotation.VisibleForTesting
+    internal var recentDotsEnabled = UtilSettings.DEFAULT_RECENT_DOTS
+    private var mPaintRecentDot: Paint? = null
+    private var mRecentDotCells = BooleanArray(0)
+    private var mRecentDotsDrawn = 0
+    @androidx.annotation.VisibleForTesting
+    internal val recentDotsDrawnForTest: Int get() = mRecentDotsDrawn
+
     /** FISH-047: faint labels for the icons beside the selected one are opt-in. */
     @androidx.annotation.VisibleForTesting
     internal var neighbourLabelsEnabled = UtilSettings.DEFAULT_NEIGHBOUR_LABELS
@@ -1044,6 +1053,7 @@ class LensView : View {
         mTiltX = 0f
         mTiltY = 0f
         resetLensInertia()
+        clearRecentDotCells()
         mClusterTracker.reset()
         resetFocusSnap()
         gestureState = LensGestureState.IDLE
@@ -1691,6 +1701,12 @@ class LensView : View {
             textAlign = Paint.Align.CENTER
         }
 
+        mPaintRecentDot = Paint().apply {
+            isAntiAlias = true
+            style = Paint.Style.FILL
+            mUtilSettings?.let { color = it.highlightColorInt() }
+        }
+
         mPaintNewAppTag = Paint()
         mPaintNewAppTag?.apply {
             isAntiAlias = true
@@ -1808,6 +1824,7 @@ class LensView : View {
         return when (event.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
                 mPinchReported = false
+                refreshRecentDotCells()
                 // FISH-008 Phase 2: claim the gesture up front so a ViewPager2 ancestor cannot page
                 // away on its own slop before this view has seen enough movement to classify it;
                 // ACTION_MOVE releases the claim as soon as the drag reads as a horizontal swipe.
@@ -2060,6 +2077,7 @@ class LensView : View {
             MotionEvent.ACTION_UP -> {
                 mLongPressArmed = false
                 mLongPressHandler.removeCallbacks(mLongPressRunnable)
+                clearRecentDotCells()
                 mClusterTracker.reset()
                 mSnapTracker.reset()
                 mHoverMagnifyTracker.reset()
@@ -2156,6 +2174,7 @@ class LensView : View {
 
             MotionEvent.ACTION_CANCEL -> {
                 cancelRingRotation()
+                clearRecentDotCells()
                 mClusterTracker.reset()
                 mSnapTracker.reset()
                 mHoverMagnifyTracker.reset()
@@ -2342,6 +2361,14 @@ class LensView : View {
             hoverMagnifyEnabled && mDrawType == DrawType.APPS && hasActiveTouch,
             mHoverMagnifyTestPanning ?: (mMoving && gestureState == LensGestureState.PANNING), mReduceMotion
         )
+        // FISH-048: a real drag, the switch on and not Clean the Lens; the cells themselves were resolved once on touch down.
+        val recentDotsOn = RecentDots.shouldApply(
+            recentDotsEnabled,
+            mUtilSettings?.getBoolean(UtilSettings.KEY_CLEAN_LENS_MODE) == true,
+            mMoving && hasActiveTouch,
+            mDrawType == DrawType.APPS
+        )
+        mRecentDotsDrawn = 0
         val frameTimeMs = mHoverMagnifyTestNow ?: SystemClock.uptimeMillis()
         mMagnifiedIconDrawn = 0
         if (hoverMagnifyOn) {
@@ -2426,6 +2453,7 @@ class LensView : View {
                     }
                 }
                 drawAppIcon(iconCanvas, drawRect, currentIndex)
+                if (recentDotsOn && currentIndex < mRecentDotCells.size && mRecentDotCells[currentIndex]) drawRecentDot(iconCanvas, drawRect)
                 if (chromaOn && ChromaticAberration.isFringed(focusDistance, dofBand)) {
                     val slot = mChromaTop.offer(focusDistance, currentIndex)
                     if (slot >= 0) {
@@ -2766,6 +2794,36 @@ class LensView : View {
         }
     }
 
+    /** FISH-048: a small dot on the icon's top-left corner, sized from the warped rect; reuses one Paint, allocates nothing. */
+    private fun drawRecentDot(canvas: Canvas, rect: RectF) {
+        val paint = mPaintRecentDot ?: return
+        val radius = RecentDots.radiusPx(rect.width(), resources.displayMetrics.density)
+        if (radius <= 0f) return
+        canvas.drawCircle(rect.left + radius, rect.top + radius, radius, paint)
+        mRecentDotsDrawn++
+    }
+
+    /** FISH-048: marks which cells hold one of the newest launches; done once per touch, never in the draw path. */
+    private fun refreshRecentDotCells() {
+        val list = mApps
+        val us = mUtilSettings
+        if (!recentDotsEnabled || list == null || us == null) {
+            clearRecentDotCells()
+            return
+        }
+        val keys = com.mckimquyen.search.SearchHistoryStore(context).recentKeysSince(RecentDots.WINDOW_MS, RecentDots.MAX_DOTS)
+        if (mRecentDotCells.size != list.size) mRecentDotCells = BooleanArray(list.size) else mRecentDotCells.fill(false)
+        if (keys.isEmpty()) return
+        for (i in list.indices) {
+            if (com.mckimquyen.search.AppSearchEngine.componentKey(list[i]) in keys) mRecentDotCells[i] = true
+        }
+    }
+
+    private fun clearRecentDotCells() {
+        mRecentDotCells.fill(false)
+        mRecentDotsDrawn = 0
+    }
+
     private fun drawNewAppTag(
         canvas: Canvas,
         rect: RectF,
@@ -2919,6 +2977,8 @@ class LensView : View {
                 ?: UtilSettings.DEFAULT_FOCUS_MAGNIFY
             neighbourLabelsEnabled = mUtilSettings?.getBoolean(UtilSettings.KEY_NEIGHBOUR_LABELS)
                 ?: UtilSettings.DEFAULT_NEIGHBOUR_LABELS
+            recentDotsEnabled = mUtilSettings?.getBoolean(UtilSettings.KEY_RECENT_DOTS)
+                ?: UtilSettings.DEFAULT_RECENT_DOTS
             focusPeakingEnabled = mUtilSettings?.getBoolean(UtilSettings.KEY_FOCUS_PEAKING)
                 ?: UtilSettings.DEFAULT_FOCUS_PEAKING
             mUtilSettings?.let {

@@ -343,4 +343,6 @@
     <string name="setting_focus_magnify_hint">ドラッグ中に指をアイコンの上で少し止めると、そのアイコンをわずかに拡大します。拡大されるのは表示だけで、タッチと選択は変わりません。初期設定ではオフです。</string>
     <string name="setting_neighbour_labels">隣のアイコン名</string>
     <string name="setting_neighbour_labels_hint">ドラッグ中、選択中のアイコンの隣にあるアイコンの名前を薄く表示します。スペースがある場合のみ表示します。初期設定ではオフです。</string>
+    <string name="setting_recent_dots">最近のアプリの点</string>
+    <string name="setting_recent_dots_hint">ドラッグ中、過去24時間に開いた最大3つのアプリに小さな点を付けて、見つけやすくします。初期設定ではオフです。</string>
 </resources>

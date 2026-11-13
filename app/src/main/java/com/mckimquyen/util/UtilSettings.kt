@@ -93,6 +93,8 @@ class UtilSettings(context: Context) {
         const val DEFAULT_FOCUS_MAGNIFY = false
         // FISH-047: faint name labels for the icons next to the selected one are opt-in, off by default.
         const val DEFAULT_NEIGHBOUR_LABELS = false
+        // FISH-048: a dot on recently opened apps while dragging is opt-in, off by default.
+        const val DEFAULT_RECENT_DOTS = false
         // FISH-026: damped lens overscroll is enabled by default.
         const val DEFAULT_LENS_ELASTIC_OVERSCROLL = true
         // FISH-033: tilt parallax is opt-in (motion sickness and battery risk), off by default.
@@ -166,6 +168,7 @@ class UtilSettings(context: Context) {
         const val KEY_FOCUS_SNAP = "focus_snap"
         const val KEY_FOCUS_MAGNIFY = "focus_magnify"
         const val KEY_NEIGHBOUR_LABELS = "neighbour_labels"
+        const val KEY_RECENT_DOTS = "recent_dots"
         const val KEY_LENS_ELASTIC_OVERSCROLL = "lens_elastic_overscroll"
         /** FISH-033: global (not per-lens) toggle for the idle lens centre drifting with device tilt. */
         const val KEY_TILT_PARALLAX = "tilt_parallax"
@@ -381,6 +384,7 @@ class UtilSettings(context: Context) {
         KEY_FOCUS_SNAP -> prefs.getBoolean(name, DEFAULT_FOCUS_SNAP)
         KEY_FOCUS_MAGNIFY -> prefs.getBoolean(name, DEFAULT_FOCUS_MAGNIFY)
         KEY_NEIGHBOUR_LABELS -> prefs.getBoolean(name, DEFAULT_NEIGHBOUR_LABELS)
+        KEY_RECENT_DOTS -> prefs.getBoolean(name, DEFAULT_RECENT_DOTS)
         KEY_LENS_ELASTIC_OVERSCROLL -> prefs.getBoolean(name, DEFAULT_LENS_ELASTIC_OVERSCROLL)
         KEY_TILT_PARALLAX -> prefs.getBoolean(name, DEFAULT_TILT_PARALLAX)
         KEY_SMART_FOCUS_BIAS -> prefs.getBoolean(name, DEFAULT_SMART_FOCUS_BIAS)

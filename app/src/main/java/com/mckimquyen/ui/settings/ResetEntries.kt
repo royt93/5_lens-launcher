@@ -70,6 +70,7 @@ object ResetEntries {
             flag(UtilSettings.KEY_FOCUS_SNAP, R.string.setting_focus_snap, UtilSettings.DEFAULT_FOCUS_SNAP),
             flag(UtilSettings.KEY_FOCUS_MAGNIFY, R.string.setting_focus_magnify, UtilSettings.DEFAULT_FOCUS_MAGNIFY),
             flag(UtilSettings.KEY_NEIGHBOUR_LABELS, R.string.setting_neighbour_labels, UtilSettings.DEFAULT_NEIGHBOUR_LABELS),
+            flag(UtilSettings.KEY_RECENT_DOTS, R.string.setting_recent_dots, UtilSettings.DEFAULT_RECENT_DOTS),
             ResetEntry(
                 us.lensKey(UtilSettings.KEY_SMART_FOCUS_BIAS, lensId), R.string.setting_smart_focus,
                 UtilSettings.DEFAULT_SMART_FOCUS_BIAS, us.isSmartFocusBias(lensId)

@@ -350,4 +350,6 @@
     <string name="setting_focus_magnify_hint">Phóng nhẹ icon dưới ngón tay khi bạn dừng lại trên nó một lát lúc kéo. Chỉ hình ảnh to lên; vùng chạm và việc chọn icon không đổi. Mặc định tắt.</string>
     <string name="setting_neighbour_labels">Nhãn icon bên cạnh</string>
     <string name="setting_neighbour_labels_hint">Hiện tên mờ của các icon ngay cạnh icon đang chọn khi kéo, chỉ khi đủ chỗ. Mặc định tắt.</string>
+    <string name="setting_recent_dots">Chấm app mở gần đây</string>
+    <string name="setting_recent_dots_hint">Đánh dấu bằng chấm nhỏ tối đa ba app đã mở trong 24 giờ qua khi kéo, để dễ tìm lại. Mặc định tắt.</string>
 </resources>

@@ -14,7 +14,8 @@ class LensViewNeighbourLabelsSourceTest {
     private val drawAppName by lazy {
         val start = source.indexOf("private fun drawAppName(")
         assertTrue(start >= 0)
-        source.substring(start, source.indexOf("private fun drawNewAppTag(", start))
+        // Up to the next function declaration, so helpers added after drawAppName are not scanned as part of it.
+        source.substring(start, source.indexOf("\n    private fun ", start + 10))
     }
 
     @Test fun settingSampledFromTheKey() {

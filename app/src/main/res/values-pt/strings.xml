@@ -353,4 +353,6 @@
     <string name="setting_focus_magnify_hint">Aumenta um pouco o ícone sob o dedo depois que você para sobre ele por um instante ao arrastar. Só a imagem cresce; o toque e a seleção não mudam. Desativado por padrão.</string>
     <string name="setting_neighbour_labels">Rótulos vizinhos</string>
     <string name="setting_neighbour_labels_hint">Mostra um nome discreto para os ícones ao lado do selecionado enquanto você arrasta, apenas quando há espaço. Desativado por padrão.</string>
+    <string name="setting_recent_dots">Pontos de apps recentes</string>
+    <string name="setting_recent_dots_hint">Marca com um pequeno ponto até três apps abertos nas últimas 24 horas enquanto você arrasta, para achá-los com facilidade. Desativado por padrão.</string>
 </resources>

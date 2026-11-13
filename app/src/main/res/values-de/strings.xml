@@ -348,4 +348,6 @@
     <string name="setting_focus_magnify_hint">Vergrößert das Symbol unter dem Finger leicht, sobald du beim Ziehen kurz darauf verweilst. Nur das Bild wächst; Berührung und Auswahl bleiben gleich. Standardmäßig aus.</string>
     <string name="setting_neighbour_labels">Nachbarbeschriftungen</string>
     <string name="setting_neighbour_labels_hint">Zeigt beim Ziehen einen blassen Namen für die Symbole direkt neben dem gewählten, nur wenn genug Platz ist. Standardmäßig aus.</string>
+    <string name="setting_recent_dots">Punkte für zuletzt geöffnete Apps</string>
+    <string name="setting_recent_dots_hint">Markiert beim Ziehen bis zu drei in den letzten 24 Stunden geöffnete Apps mit einem kleinen Punkt, damit man sie leicht wiederfindet. Standardmäßig aus.</string>
 </resources>

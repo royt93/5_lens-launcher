@@ -20,6 +20,16 @@ class SearchHistoryStore @JvmOverloads constructor(
 
     fun recentKeys(): List<String> = liveEntries().map { it.first }
 
+    /**
+     * FISH-048: the keys launched within the last [windowMs] milliseconds, newest first, at most [limit]. The boundary is
+     * inclusive. Read-only: it never trims or rewrites the stored list. A non-positive window or limit returns nothing.
+     */
+    fun recentKeysSince(windowMs: Long, limit: Int): List<String> {
+        if (windowMs <= 0L || limit <= 0) return emptyList()
+        val now = clock()
+        return liveEntries().filter { now - it.second <= windowMs }.map { it.first }.take(limit)
+    }
+
     fun recordLaunch(componentKey: String) {
         if (componentKey.isBlank()) return
         val updated = buildList {

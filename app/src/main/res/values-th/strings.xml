@@ -343,4 +343,6 @@
     <string name="setting_focus_magnify_hint">ขยายไอคอนใต้นิ้วเล็กน้อยเมื่อคุณหยุดนิ่งบนไอคอนชั่วครู่ขณะลาก ขยายเฉพาะภาพ การสัมผัสและการเลือกไม่เปลี่ยน ปิดไว้เป็นค่าเริ่มต้น</string>
     <string name="setting_neighbour_labels">ป้ายชื่อข้างเคียง</string>
     <string name="setting_neighbour_labels_hint">แสดงชื่อจาง ๆ ของไอคอนที่อยู่ข้างไอคอนที่เลือกขณะลาก เฉพาะเมื่อมีที่ว่างพอ ปิดไว้เป็นค่าเริ่มต้น</string>
+    <string name="setting_recent_dots">จุดแอปที่เปิดล่าสุด</string>
+    <string name="setting_recent_dots_hint">ใส่จุดเล็ก ๆ ให้แอปสูงสุดสามแอปที่เปิดในรอบ 24 ชั่วโมงขณะลาก เพื่อให้หาเจอง่าย ปิดไว้เป็นค่าเริ่มต้น</string>
 </resources>

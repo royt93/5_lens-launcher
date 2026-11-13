@@ -343,4 +343,6 @@
     <string name="setting_focus_magnify_hint">Memperbesar sedikit ikon di bawah jari setelah Anda berhenti sejenak di atasnya saat menggeser. Hanya gambar yang membesar; sentuhan dan pilihan tidak berubah. Nonaktif secara default.</string>
     <string name="setting_neighbour_labels">Label ikon di sebelah</string>
     <string name="setting_neighbour_labels_hint">Menampilkan nama samar untuk ikon di samping ikon terpilih saat menggeser, hanya jika ada ruang. Nonaktif secara default.</string>
+    <string name="setting_recent_dots">Titik aplikasi terbaru</string>
+    <string name="setting_recent_dots_hint">Menandai hingga tiga aplikasi yang dibuka dalam 24 jam terakhir dengan titik kecil saat menggeser, agar mudah ditemukan lagi. Nonaktif secara default.</string>
 </resources>

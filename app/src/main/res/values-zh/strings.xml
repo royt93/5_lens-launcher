@@ -343,4 +343,6 @@
     <string name="setting_focus_magnify_hint">拖动时在图标上稍作停留，指下的图标会略微放大。只放大显示，触摸和选择不变。默认关闭。</string>
     <string name="setting_neighbour_labels">相邻标签</string>
     <string name="setting_neighbour_labels_hint">拖动时为所选图标左右相邻的图标显示淡色名称，仅在空间足够时显示。默认关闭。</string>
+    <string name="setting_recent_dots">最近应用圆点</string>
+    <string name="setting_recent_dots_hint">拖动时为过去 24 小时内打开的最多三个应用显示一个小圆点，方便再次找到。默认关闭。</string>
 </resources>

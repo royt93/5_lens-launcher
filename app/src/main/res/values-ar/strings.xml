@@ -374,4 +374,6 @@
     <string name="setting_focus_magnify_hint">يكبّر قليلًا الأيقونة تحت إصبعك بعد أن تتوقف عليها لحظة أثناء السحب. تكبر الصورة فقط؛ اللمس والتحديد دون تغيير. متوقفة افتراضيًا.</string>
     <string name="setting_neighbour_labels">تسميات الأيقونات المجاورة</string>
     <string name="setting_neighbour_labels_hint">يعرض اسمًا خافتًا للأيقونات المجاورة مباشرة للأيقونة المحددة أثناء السحب، وفقط عند توفر مساحة. متوقف افتراضيًا.</string>
+    <string name="setting_recent_dots">نقاط التطبيقات الأخيرة</string>
+    <string name="setting_recent_dots_hint">تضع نقطة صغيرة على ما يصل إلى ثلاثة تطبيقات فتحتها في آخر 24 ساعة أثناء السحب ليسهل العثور عليها. متوقف افتراضيًا.</string>
 </resources>

@@ -348,4 +348,6 @@
     <string name="setting_focus_magnify_hint">खींचते समय आपकी उंगली के नीचे के आइकन पर थोड़ी देर रुकने पर उसे हल्का बड़ा करता है। केवल चित्र बड़ा होता है; स्पर्श और चयन नहीं बदलते। डिफ़ॉल्ट रूप से बंद।</string>
     <string name="setting_neighbour_labels">पड़ोसी लेबल</string>
     <string name="setting_neighbour_labels_hint">खींचते समय चुने गए आइकन के ठीक बगल वाले आइकन का हल्का नाम दिखाता है, केवल जहाँ जगह हो। डिफ़ॉल्ट रूप से बंद।</string>
+    <string name="setting_recent_dots">हाल के ऐप के बिंदु</string>
+    <string name="setting_recent_dots_hint">खींचते समय पिछले 24 घंटों में खोले गए अधिकतम तीन ऐप पर एक छोटा बिंदु लगाता है, ताकि उन्हें आसानी से ढूँढा जा सके। डिफ़ॉल्ट रूप से बंद।</string>
 </resources>

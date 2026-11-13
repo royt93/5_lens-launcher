@@ -353,4 +353,6 @@
     <string name="setting_focus_magnify_hint">Agrandit légèrement l\'icône sous votre doigt quand vous vous y arrêtez un instant en glissant. Seule l\'image grandit ; le toucher et la sélection ne changent pas. Désactivé par défaut.</string>
     <string name="setting_neighbour_labels">Étiquettes voisines</string>
     <string name="setting_neighbour_labels_hint">Affiche un nom discret pour les icônes à côté de l\'icône sélectionnée pendant le glissement, seulement s\'il y a la place. Désactivé par défaut.</string>
+    <string name="setting_recent_dots">Pastilles des apps récentes</string>
+    <string name="setting_recent_dots_hint">Marque d\'une petite pastille jusqu\'à trois apps ouvertes ces 24 dernières heures pendant le glissement, pour les retrouver facilement. Désactivé par défaut.</string>
 </resources>

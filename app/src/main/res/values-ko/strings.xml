@@ -343,4 +343,6 @@
     <string name="setting_focus_magnify_hint">드래그하다 아이콘 위에서 잠시 멈추면 손가락 아래 아이콘을 조금 키웁니다. 그림만 커지며 터치와 선택은 그대로입니다. 기본값은 꺼짐입니다.</string>
     <string name="setting_neighbour_labels">인접 아이콘 이름</string>
     <string name="setting_neighbour_labels_hint">드래그하는 동안 선택한 아이콘 바로 옆 아이콘의 이름을 흐리게 표시합니다. 공간이 있을 때만 표시됩니다. 기본값은 꺼짐입니다.</string>
+    <string name="setting_recent_dots">최근 앱 점</string>
+    <string name="setting_recent_dots_hint">드래그하는 동안 최근 24시간 안에 연 앱 최대 3개에 작은 점을 표시해 쉽게 다시 찾을 수 있게 합니다. 기본값은 꺼짐입니다.</string>
 </resources>
