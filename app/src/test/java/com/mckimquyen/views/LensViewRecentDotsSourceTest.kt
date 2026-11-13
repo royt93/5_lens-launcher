@@ -47,6 +47,15 @@ class LensViewRecentDotsSourceTest {
         assertFalse("the draw path never reads the history store", frame.contains("recentKeysSince"))
     }
 
+    @Test fun theCellsReadTheSwitchFromSettingsNotFromTheFlagTheLensAnimationSamplesLater() {
+        // ACTION_DOWN runs before a pan is confirmed, and recentDotsEnabled is only sampled in LensAnimation's init, so at
+        // touch down it still holds the previous value (false on the first gesture): the cells would always stay empty.
+        val refresh = source.substring(source.indexOf("private fun refreshRecentDotCells()"))
+        val body = refresh.substring(0, refresh.indexOf("\n    }\n"))
+        assertTrue(body.contains("KEY_RECENT_DOTS"))
+        assertFalse("must not depend on the late-sampled flag", body.contains("recentDotsEnabled"))
+    }
+
     @Test fun theDotIsDrawnAfterTheIconFromTheWarpedRectWithACachedPaint() {
         val icon = frame.indexOf("drawAppIcon(iconCanvas, drawRect, currentIndex)")
         val dot = frame.indexOf("drawRecentDot(")

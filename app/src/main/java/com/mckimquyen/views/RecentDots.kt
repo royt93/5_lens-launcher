@@ -16,7 +16,12 @@ object RecentDots {
     const val MIN_DP = 1.5f
     const val MAX_DP = 4f
 
-    /** Needs the switch, not Clean the Lens, a finger really dragging, and the apps lens on screen. */
+    /**
+     * Needs the switch, not Clean the Lens, a finger really dragging, and the apps lens on screen. The switch term is redundant
+     * in the real path (LensView clears the marked cells on touch down whenever the switch is off, so nothing can be drawn),
+     * and is kept so this decision stays correct if it is ever called from elsewhere; a device mutation without it is
+     * therefore NOT caught, by design.
+     */
     fun shouldApply(enabled: Boolean, cleanMode: Boolean, dragging: Boolean, lensVisible: Boolean): Boolean =
         enabled && !cleanMode && dragging && lensVisible
 

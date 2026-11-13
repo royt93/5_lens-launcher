@@ -2807,7 +2807,8 @@ class LensView : View {
     private fun refreshRecentDotCells() {
         val list = mApps
         val us = mUtilSettings
-        if (!recentDotsEnabled || list == null || us == null) {
+        // Read the switch from settings here: this runs on ACTION_DOWN, before LensAnimation has sampled its cached copy for this gesture.
+        if (list == null || us == null || !us.getBoolean(UtilSettings.KEY_RECENT_DOTS)) {
             clearRecentDotCells()
             return
         }

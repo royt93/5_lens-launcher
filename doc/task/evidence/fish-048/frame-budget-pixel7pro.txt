@@ -1,0 +1,17 @@
+FISH-048 frame budget and visibility, Pixel 7 Pro 2B051FDH3006MU (2026-11-13), 1440x3120 @560 dpi, owner policy "dùng pixel cho mọi phiên".
+Test: app/src/androidTest/java/com/mckimquyen/ui/RecentDotsFrameBudgetSmokeTest.kt. Real touch via UiAutomation.injectInputEvent, FrameMetrics TOTAL_DURATION of the
+ActHome window, real Home with 60 real launcher apps, three of them written into the recents history as opened a moment ago, a diagonal drag (the finger never rests)
+for 6 s per run, 4 pairs switch off/on with the run order alternated per pair. The gesture ends with CANCEL (never UP) so no app launches.
+The Home screen was checked clean of ads by screenshot before the run (ActHome had focus).
+
+OFF frames=965 mean=8.31ms p90=11.16ms p99=12.99ms max=17.37ms overBudget=442 dotsSeen=[0,0,0,0]
+ON  frames=965 mean=7.99ms p90=10.62ms p99=13.37ms max=16.96ms overBudget=377 dotsSeen=[3,3,3,3]
+Per run: off 9.00/8.76/8.75/6.75 ms mean, on 7.47/8.49/8.53/7.49 ms mean; p99 within ~0.4 ms; the first run after a cold start is the slowest with either setting.
+Reading: with the switch on, 3 dots were drawn in every measured drag (positive control) and per-frame cost did not rise. "On is lower" is noise and run order.
+
+Visibility (screenshot taken inside a frame whose dot counter was >0, switch on):
+- The saved screenshot shows the dots. Pixels of the app's exact highlight colour (245,0,87): 0 in the switch-off screenshot; in the switch-on screenshot two clusters of ~395 px
+  (about 22 px across) on the two big icons near the finger, plus one smaller cluster (~93 px, about 11 px across) on a smaller icon. See recent-dots-crop-pixel7pro.png.
+- The dot of the Gallery icon is clearly visible at the icon's top-left corner. At the smallest icons of the lens (about 17-27 px wide at this density) a dot is only 1-2 px and
+  was not separately measurable; legibility there rests on the owner's hand test.
+Limits: one device, one gesture, 4 pairs. Dots on icons far from the finger are tiny by design (radius co theo icon).

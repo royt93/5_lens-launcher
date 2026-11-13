@@ -91,6 +91,72 @@ class LensViewRecentDotsReachabilityTest {
         return most
     }
 
+    private class Lens(val view: LensView, val send: (Int, Float, Float) -> Unit, val x: Float, val y: Float)
+
+    /** One lens view kept alive across several gestures, like a real Home that is touched again and again. */
+    private fun withLens(block: (Lens) -> Unit) {
+        UtilSettings(ctx).apply { save(UtilSettings.KEY_RECENT_DOTS, true); save(UtilSettings.KEY_CLEAN_LENS_MODE, false) }
+        ActivityScenario.launch(OrganizationHarnessActivity::class.java).use { sc ->
+            var v: LensView? = null
+            sc.onActivity { a ->
+                v = LensView(a).apply {
+                    setApps(ArrayList(apps))
+                    layoutParams = FrameLayout.LayoutParams(VIEW, VIEW); a.setContentView(this)
+                    measure(View.MeasureSpec.makeMeasureSpec(VIEW, View.MeasureSpec.EXACTLY), View.MeasureSpec.makeMeasureSpec(VIEW, View.MeasureSpec.EXACTLY))
+                    layout(0, 0, VIEW, VIEW); draw(Canvas())
+                }
+            }
+            val t = requireNotNull(v)
+            var downTime = SystemClock.uptimeMillis()
+            val send = { action: Int, px: Float, py: Float ->
+                if (action == MotionEvent.ACTION_DOWN) downTime = SystemClock.uptimeMillis()
+                inst.runOnMainSync {
+                    val e = MotionEvent.obtain(downTime, SystemClock.uptimeMillis(), action, px, py, 0); t.dispatchTouchEvent(e); e.recycle()
+                }
+            }
+            val cell = t.baseRectsForTest()[TARGET_CELL]
+            block(Lens(t, send, cell.centerX(), cell.centerY()))
+        }
+    }
+
+    private fun Lens.pan() {
+        send(MotionEvent.ACTION_DOWN, x - PAN_DP * density, y + PAN_DP * density)
+        send(MotionEvent.ACTION_MOVE, x - PAN_DP * density / 2f, y + PAN_DP * density / 2f)
+        send(MotionEvent.ACTION_MOVE, x, y)
+    }
+
+    private fun Lens.dotsNow(): Int {
+        var most = 0
+        repeat(FRAMES) { inst.runOnMainSync { view.draw(Canvas()); most = maxOf(most, view.recentDotsDrawnForTest) }; SystemClock.sleep(FRAME_MS) }
+        return most
+    }
+
+    @Test fun aSecondTouchThatNeverPansDrawsNoDotsEvenAfterAnEarlierGestureDidPan() {
+        listOf(10, 20, 30).forEach { SearchHistoryStore(ctx).recordLaunch(keyOf(it)) }
+        withLens { lens ->
+            lens.pan()
+            assertEquals("positive control: the first gesture pans and draws the three dots", 3, lens.dotsNow())
+            lens.send(MotionEvent.ACTION_UP, lens.x, lens.y)
+            // The lens animation of the first gesture left its cached switch value on; the new touch has not panned at all.
+            lens.send(MotionEvent.ACTION_DOWN, lens.x - PAN_DP * density, lens.y + PAN_DP * density)
+            assertEquals("a held touch with no pan is not a drag", 0, lens.dotsNow())
+            lens.send(MotionEvent.ACTION_UP, lens.x, lens.y)
+        }
+    }
+
+    @Test fun aTouchDownThatFollowsALostUpRecomputesTheCellsFromTheStore() {
+        listOf(10, 20, 30).forEach { SearchHistoryStore(ctx).recordLaunch(keyOf(it)) }
+        withLens { lens ->
+            lens.pan()
+            assertEquals("positive control", 3, lens.dotsNow())
+            SearchHistoryStore(ctx).clear()
+            // No UP or CANCEL in between: only the new DOWN can refresh the marked cells.
+            lens.pan()
+            assertEquals("the stale marks are gone", 0, lens.dotsNow())
+            lens.send(MotionEvent.ACTION_UP, lens.x, lens.y)
+        }
+    }
+
     @Test fun threeRecentLaunchesGetThreeDotsDuringARealPan() {
         listOf(10, 20, 30).forEach { SearchHistoryStore(ctx).recordLaunch(keyOf(it)) }
         assertEquals(3, run(switchOn = true))
