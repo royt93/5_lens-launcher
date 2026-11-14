@@ -61,6 +61,8 @@ class ActHomeLensManagementWidgetTest {
         const val TEST_SMALL_ROW_COUNT = 10
         const val TEST_MEDIUM_ROW_COUNT = 25
         const val TEST_LARGE_ROW_COUNT = 100
+        const val ROWS_WAIT_MS = 5_000L
+        const val ROWS_POLL_MS = 50L
     }
 
     @Before
@@ -123,6 +125,14 @@ class ActHomeLensManagementWidgetTest {
 
     private fun seedSecondLens() = runBlocking {
         dao.insertOrUpdate(LensWorkspace(id = "second", name = "Second Lens", orderIndex = 1))
+    }
+
+    private fun awaitRows(appDao: com.mckimquyen.model.AppPersistentDao, lensId: String, expected: Int) {
+        val deadline = SystemClock.uptimeMillis() + ROWS_WAIT_MS
+        while (SystemClock.uptimeMillis() < deadline) {
+            if (runBlocking { appDao.getAllForLens(lensId).size } == expected) return
+            SystemClock.sleep(ROWS_POLL_MS)
+        }
     }
 
     private fun idle() {
@@ -725,6 +735,9 @@ class ActHomeLensManagementWidgetTest {
 
                 val created = dao.getAll().single { it.name == "Auto copy $index" }
                 try {
+                    // The copy runs on Dispatchers.IO after the dialog confirms; on a slow device the largest lens (100 rows) can still be
+                    // copying when a fixed 550 ms of idling ends (measured: first read 0 rows, all 100 present 82 ms later). Wait for the rows.
+                    awaitRows(appDao, created.id, rowCount)
                     assertEquals("layout rows are copied", rowCount, appDao.getAllForLens(created.id).size)
                     assertEquals("copied row count chooses the aperture", expected[index], settings.getDistortionFactor(created.id), 0.001f)
                     assertEquals("source manual distortion is unchanged", 4.4f, settings.getDistortionFactor(sourceId), 0.001f)
