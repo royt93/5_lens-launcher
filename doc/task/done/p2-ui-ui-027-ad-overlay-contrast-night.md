@@ -31,4 +31,4 @@ Hai thuộc tính trong một file layout.
 
 ## Kết quả
 
-Xem `doc/task/AUDIT_UI-027_2026-11-14.md`. Hai màu foreground dùng `?attr/colorOnPrimary`, overlay nền/hành vi/chuỗi không đổi. Contrast light 6,64:1, night 7,74:1. Device widget RED 3/3 tại 1,6946:1 trên build cũ; GREEN 3/3 ×10 trên A50s. Audit 9,0/10; chưa push.
+Xem `doc/task/AUDIT_UI-027_2026-11-14.md`. Hai màu foreground dùng `?attr/colorOnPrimary`, overlay nền/hành vi/chuỗi không đổi. Contrast light 6,64:1, night 7,74:1. Device widget RED 3/3 tại 1,6946:1 trên build cũ; GREEN 3/3 ×10 trên A50s. Audit 9,1/10 sau khi kiểm 16 palette sinh từ Material (dynamic color thật chưa chạy trên máy, A50s là Android 11).
