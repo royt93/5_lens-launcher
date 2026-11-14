@@ -1,0 +1,43 @@
+# Warp under a real finger (dispatchTouchEvent) on the real window, Pixel 7 Pro 2B051FDH3006MU, LensViewWideScreenWarpTest, 102 apps
+# finger ends exactly on the centre of the cell nearest to each spot; selection is a positive control (selected must equal that cell and its drawn rect must contain the finger)
+# display changed with wm size/density and user_rotation per run, reset afterwards (verified: 1440x3120 @560, accel=1, rot=0)
+# discarded earlier runs: (1) drawn-rect probe read for the 3 surplus grid cells without apps -> bogus 2900 px idle 'movement'; (2) finger on arbitrary points -> selected=-1 at 20/20 so the selection assert checked nothing
+I F155WIDE: display 1440x3120 @560dpi view 1440x3120 grid 7x15 cells=105 apps=102 baseCell=74x74px
+I F155WIDE: idle max movement 0,00px
+I F155WIDE: centre finger=(720,1560) peakMagnification=3,10 selected=52 selectedContainsFinger=true centresOutsideView=0 overlappingPairs=0
+I F155WIDE: upper-left finger=(342,762) peakMagnification=3,23 selected=22 selectedContainsFinger=true centresOutsideView=27 overlappingPairs=0
+I F155WIDE: lower-right finger=(1098,2558) peakMagnification=3,23 selected=89 selectedContainsFinger=true centresOutsideView=24 overlappingPairs=0
+I F155WIDE: right-edge finger=(1288,1560) peakMagnification=3,27 selected=55 selectedContainsFinger=true centresOutsideView=0 overlappingPairs=0
+I F155WIDE: bottom-edge finger=(720,2957) peakMagnification=3,10 selected=101 selectedContainsFinger=true centresOutsideView=0 overlappingPairs=0
+= phone-landscape : Physical size: 1440x3120  Physical density: 560  rotation=1
+ (1 test)
+
+I F155WIDE: display 3120x1440 @560dpi view 3120x1440 grid 16x7 cells=112 apps=102 baseCell=73x74px
+I F155WIDE: idle max movement 0,00px
+I F155WIDE: centre finger=(1466,720) peakMagnification=3,10 selected=55 selectedContainsFinger=true centresOutsideView=7 overlappingPairs=0
+I F155WIDE: upper-left finger=(715,342) peakMagnification=3,23 selected=19 selectedContainsFinger=true centresOutsideView=28 overlappingPairs=0
+I F155WIDE: lower-right finger=(2405,1098) peakMagnification=3,23 selected=92 selectedContainsFinger=true centresOutsideView=18 overlappingPairs=0
+I F155WIDE: right-edge finger=(2781,720) peakMagnification=3,10 selected=62 selectedContainsFinger=true centresOutsideView=6 overlappingPairs=0
+I F155WIDE: bottom-edge finger=(1466,1098) peakMagnification=3,23 selected=87 selectedContainsFinger=true centresOutsideView=12 overlappingPairs=0
+= tablet-portrait : Physical size: 1440x3120 Override size: 1600x2560  Physical density: 560 Override density: 320  rotation=0
+ (1 test)
+
+I F155WIDE: display 1600x2560 @320dpi view 1600x2560 grid 9x12 cells=108 apps=102 baseCell=80x80px
+I F155WIDE: idle max movement 0,00px
+I F155WIDE: centre finger=(800,1178) peakMagnification=3,11 selected=49 selectedContainsFinger=true centresOutsideView=9 overlappingPairs=0
+I F155WIDE: upper-left finger=(464,569) peakMagnification=3,22 selected=20 selectedContainsFinger=true centresOutsideView=20 overlappingPairs=0
+I F155WIDE: lower-right finger=(1304,1991) peakMagnification=3,25 selected=88 selectedContainsFinger=true centresOutsideView=14 overlappingPairs=0
+I F155WIDE: right-edge finger=(1472,1178) peakMagnification=3,26 selected=53 selectedContainsFinger=true centresOutsideView=9 overlappingPairs=0
+I F155WIDE: bottom-edge finger=(800,2194) peakMagnification=3,11 selected=94 selectedContainsFinger=true centresOutsideView=3 overlappingPairs=0
+= tablet-landscape : Physical size: 1440x3120 Override size: 1600x2560  Physical density: 560 Override density: 320  rotation=1
+ (1 test)
+
+I F155WIDE: display 2560x1600 @320dpi view 2560x1600 grid 13x8 cells=104 apps=102 baseCell=80x80px
+I F155WIDE: idle max movement 0,00px
+I F155WIDE: centre finger=(1280,893) peakMagnification=3,15 selected=58 selectedContainsFinger=true centresOutsideView=11 overlappingPairs=0
+I F155WIDE: upper-left finger=(714,333) peakMagnification=3,24 selected=16 selectedContainsFinger=true centresOutsideView=27 overlappingPairs=0
+I F155WIDE: lower-right finger=(2034,1267) peakMagnification=3,24 selected=88 selectedContainsFinger=true centresOutsideView=25 overlappingPairs=0
+I F155WIDE: right-edge finger=(2411,893) peakMagnification=3,15 selected=64 selectedContainsFinger=true centresOutsideView=11 overlappingPairs=0
+I F155WIDE: bottom-edge finger=(1280,1453) peakMagnification=3,25 selected=97 selectedContainsFinger=true centresOutsideView=0 overlappingPairs=0
+# all 4 configurations: OK (1 test); idle max movement 0.00 px; selection correct and finger inside the drawn rect at 20/20 spots; overlappingPairs=0 at 20/20; peak magnification 3.10-3.27x on every display
+# centresOutsideView (0-28 of 102) is logged, NOT asserted and NOT compared with a design intent: it is a count of warped icon centres that leave the view while the finger is on an icon; the same order of magnitude on phone and tablet-like sizes
