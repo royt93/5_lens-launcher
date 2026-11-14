@@ -194,6 +194,21 @@ Owner-approved 4-story delivery loop (2026-09-29): FISH-014 (done) → FISH-015 
 - `store-assets` implementation work is excluded from the current product loop by owner decision. Reopen its security/store stories before deploying that tool.
 - `FISH-002` (Edge alphabet Fisheye scrubber) declined by owner (2026-09-20); remains in `todo` as historical backlog record.
 
+## 🗂️ Triage of the stories still in `todo/` (2026-11-14)
+
+Checked one by one against the decisions recorded in this file. None is workable inside the current scope, so none was picked; this table exists so the next round does not re-read all 17.
+
+| Story | Why it is not picked |
+|---|---|
+| `TEST-001` CI trustworthy gates | declined 2026-09-07 (no CI-gate process work); standing decision |
+| `REL-002` Play privacy release gate, `VIP-001` trusted entitlement, `MON-001` privacy-first billing, `INSIGHT-001` local usage insights | the ADS-001-dependent chain, declined 2026-09-22 |
+| `STORE-001`..`STORE-006` | `store-assets` is internal tooling, excluded from the product loop by owner decision (2026-09-07) |
+| `A11Y-002`, `A11Y-003` | TalkBack work declined 2026-10-29 |
+| `FISH-002` Edge alphabet scrubber | declined 2026-09-20 |
+| `FISH-001` Smart Focus map, `FISH-003` Contextual lens rings, `FISH-005` Smart cluster halo | declined/superseded: FISH-001 by the lite `FISH-006`; FISH-003/FISH-005 sit in the ADS-001-dependent chain |
+
+Reopen any of these only when the owner says so explicitly. `UI-027` was the last real one and was closed on 2026-11-14.
+
 ## 💭 Ideas
 
 - Accessible list mode, large-screen support, store asset automation, local insights, privacy-first monetization, and five Fisheye Smart concepts remain captured as individual `idea` stories in `todo`.
