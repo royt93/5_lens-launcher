@@ -1,0 +1,9 @@
+# Wide-screen / landscape static check, Pixel 7 Pro 2B051FDH3006MU, ActHome, idle lens (no touch), counted from the screenshots
+# display settings changed with adb (wm size/density, user_rotation) and reset right after; verified size/density/rotation back to the original
+# apps = (rows-1)*cols + last row icons; the same app list in every configuration
+1440x3120 @560dpi portrait (physical): cols=8 rows=13 last_row=6 apps=102
+3120x1440 @560dpi landscape (rotation only): cols=17 rows=6 last_row=17 apps=102
+1600x2560 @320dpi portrait (wm size override): cols=9 rows=12 last_row=3 apps=102
+2560x1600 @320dpi landscape (wm size override + rotation): cols=14 rows=8 last_row=4 apps=102
+distinct app totals: [102] -> all apps visible in every configuration
+# not measured: the warp under a finger, search/T9 panel, lens manager and settings in these sizes; idle layout only; screenshots not committed (5 MB)
