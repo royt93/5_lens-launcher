@@ -51,13 +51,16 @@ class LanguageBottomSheetDialogFragment : BottomSheetDialogFragment() {
 
         adapter = LanguageAdapter(
             items = LocaleHelper.supportedLanguages,
-            currentLangCode = currentLanguage
-        ) { language ->
-            LocaleHelper.setLocale(requireContext(), language.code)
-            LocaleHelper.setLanguageSelected(requireContext())
-            listener?.onLanguageSelected(language.code)
-            dismiss()
-        }
+            currentLangCode = currentLanguage,
+            onItemClick = onItemClick@{ language ->
+                // The row action runs 200 ms after the tap; if the sheet was detached in that window there is no context to use.
+                val context = context ?: return@onItemClick
+                LocaleHelper.setLocale(context, language.code)
+                LocaleHelper.setLanguageSelected(context)
+                listener?.onLanguageSelected(language.code)
+                dismiss()
+            }
+        )
 
         rvLanguages.layoutManager = LinearLayoutManager(requireContext())
         rvLanguages.adapter = adapter

@@ -1,0 +1,13 @@
+OPPO CPH1989 `FUJZIFIR7DQCNRWW` (Android 11, API 30, user 0, 1080x2340 @480dpi). Owner locked OPPO for every session on 2026-11-14. APK/data/package/state baseline backed up before install and restored afterwards (18 data files hash-identical, main/test APKs SHA-identical, 352 packages, system state and /data/local/tmp identical).
+
+Language picker race:
+- `LanguageBottomSheetLateClickWidgetTest` with the old production code: RED 5/5 on OPPO, process crash `IllegalStateException: Fragment LanguageBottomSheetDialogFragment ... not attached to a context`, stack at `onViewCreated` lambda line 56, called from delayed `LanguageAdapter` action line 149.
+- Minimal fix: capture nullable fragment `context` in the row callback and return if it is null before calling `LocaleHelper.setLocale` / dismiss.
+- Same test after fix: GREEN 0/15 failures. Positive control within the test: keeping the sheet attached still selects the requested language.
+
+Whole packages, FISH-047/048 build vs baseline `c2857803` built in a temporary worktree, same device:
+- `views`: 318 tests, 2 failures on both builds, same tests (`LensViewPhysicsSamplingIntegrationTest` x2); no new failure.
+- `ui`: new 567 tests, 9 failures; baseline 560 tests, 8 failures.
+  - 8 failures common to both: `ActHomeLensManagementWidgetTest.deleteLens_underReducedMotion_stillAppliesInstantly`, `...renameLens...`, `LensManagementActivityWidgetTest.chevronRotationAnimatesWhenAllowedAndIsImmediateWhenReduced`, `...actionBarSlidesInWhenMotionIsAllowedAndSnapsWhenReduced`, `ActHomeTiltWidgetTest.reducedMotionNeverRegisters`, `FrmSettingsHapticIntensityWidgetTest.tappingAButton_underReducedMotion_doesNotFireThePreviewHapticCallback`, `LensManagementActivityWidgetTest.lensOverflowMenuShowsLockForUnlockedLensAndStoresOnlyTarget`, `LensOpticalProfileWidgetTest.previewListsGroupsAndCancelWritesNothing`.
+  - Only in the new run: `ActHomeLensManagementWidgetTest.addLens_usesCopiedRowCountForAllApertureBandsAndPreservesSources` (`expected 100 but was 0`). Repeated on the new build 9/12 failures; on baseline 11/12 failures. Pre-existing, highly flaky; not caused by FISH-047/048.
+- A50s vs OPPO have similar old environmental failures: the test designs assume motion but OPPO runs `window_animation_scale=1.0`; the A50s runs 0.0 and lacks tilt sensors. Classical baseline comparison is per-device only.
