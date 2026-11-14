@@ -29,8 +29,8 @@ import java.util.Locale
 // locale override and font-scale clamp like every other screen.
 class ActVipManagement : BaseActivity() {
 
-    // lateinit is safe here: both are assigned first thing in onCreate, before any other
-    // lifecycle callback or listener that could read them can run.
+    // lateinit is safe here: binding is inflated first thing in onCreate (line below the super call), before any other
+    // lifecycle callback or listener that could read it can run.
     private lateinit var binding: ActVipManagementBinding
 
     private var countDownTimer: CountDownTimer? = null
@@ -40,6 +40,8 @@ class ActVipManagement : BaseActivity() {
     private var confettiAnimator: ObjectAnimator? = null
     private var entryAnimator: ValueAnimator? = null // BUG-10: store for cancellation
 
+    // lateinit is safe here: vipPrefs is assigned in onCreate right after setContentView, and every reader (the click handlers and the
+    // redeem/revoke paths) is registered or called after that assignment.
     private lateinit var vipPrefs: VipPrefs
     private var lastMinute: Int? = null
 

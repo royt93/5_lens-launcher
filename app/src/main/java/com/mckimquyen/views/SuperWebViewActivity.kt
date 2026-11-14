@@ -34,8 +34,8 @@ class SuperWebViewActivity : ActBase() {
 
     private var currentTitle: String = ""
     private var currentWebsite: String = "https://www.facebook.com/loitp93/"
-    // lateinit is safe here: all five are findViewById'd in onCreate before anything else
-    // (listener, callback) can read them.
+    // lateinit is safe here: setupViews() assigns all five together only after the URL allowlist check; an invalid URL finishes
+    // before that point, and onDestroy guards webView with ::webView.isInitialized before touching it.
     private lateinit var webView: WebView
     private lateinit var progressIndicator: LinearProgressIndicator
     private lateinit var errorLayout: ConstraintLayout

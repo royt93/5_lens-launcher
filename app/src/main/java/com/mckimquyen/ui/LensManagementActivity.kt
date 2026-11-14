@@ -46,6 +46,9 @@ class LensManagementActivity : ActBase() {
         private const val ACTION_BAR_START_OFFSET_DP = 48f
     }
 
+    // lateinit is safe here: onCreate assigns settings, then list, then adapter (adapter later than the other two, after the toolbar and
+    // inset setup). The inset listener registered in between reads list but never adapter, and the adapter is the first thing the
+    // later click listeners and the LensWorkspace.loadAll callback use, so none of them can run before it is assigned.
     private lateinit var list: RecyclerView
     private lateinit var adapter: LensGroupAdapter
     private lateinit var settings: UtilSettings
@@ -61,6 +64,8 @@ class LensManagementActivity : ActBase() {
     private var groupOperationInProgress = false
     private var groupLoadVersion = 0
     private var lastGroupOperationError: Throwable? = null
+    // lateinit is safe for these three views: findViewById'd in onCreate (managementToolbar and groupActions before the inset and
+    // menu setup, collapsingToolbar right after the toolbar), and setScreenTitle, the first reader of the toolbars, is called after.
     private lateinit var managementToolbar: com.google.android.material.appbar.MaterialToolbar
     private lateinit var groupActions: android.view.View
     private lateinit var collapsingToolbar: com.google.android.material.appbar.CollapsingToolbarLayout
