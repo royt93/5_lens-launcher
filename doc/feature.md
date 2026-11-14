@@ -178,6 +178,9 @@ FISH-022 đã chuyển Implemented; không còn nằm trong Picked.
 
 ## 💭 Ideas
 
+- **Brainstorm lens 2026-11-14 (không chọn tính năng mới)**: owner muốn khám phá ba trục (thao tác một tay trên màn hình dài, tìm/mở app trong lưới đông, quản lý nhiều lens). Đo trước khi đề xuất: DB backup của A50s là máy thử, 58 app trong 1 lens, `OPEN_COUNT` = 0, 0 yêu thích, 0 thư mục, 0 vùng ghim, nên không mang tín hiệu sử dụng nào; vùng với tay chỉ là giả định (không đo ngón cái của ai), và lens đã uốn theo ngón nên hàng trên vẫn kéo tới được. Không trục nào có vấn đề đã đo, nên không đề xuất tính năng. Cần dữ liệu thật từ máy dùng thường xuyên của owner (số lần mở, yêu thích, số lens). Chứng cứ `doc/task/evidence/brainstorm-2026-11-14/problem-axes-probe.txt`.
+
+
 - ✅ **Flaky icon test do quét app thật (2026-11-09)**: `RApplication.sDisableAutoAppRefresh` gán lúc class nạp (trước khi instrumentation đăng ký) nên luôn `false`; quét `PackageManager` commit app thật và `BitmapCache.retainKeys` xoá icon giả của test (4/12 lần fail trên Pixel, đều kèm một log eviction; 0/12 sau sửa). Sửa: bật cờ trong `RApplication.onCreate()`; 2 test tất định mới (RED 3/3 → GREEN 3/3). Phát hiện kèm: smoke halo cần app thật nên tự gọi quét; test magnify FISH-046 flaky 2/10 do rung 21 dp/s trên ngưỡng 15 → 0/20 sau khi đổi rung theo dp. Giới hạn: S24U không tái hiện flaky gốc; một lần fail của smoke trong suite S24U chưa giải thích; 3 test `ui` fail sẵn ở cả hai bản. Audit: `doc/task/AUDIT_FLAKY-ICON-CACHE_2026-11-09.md`. Chưa push.
 
 - **Wave 2026-10-19 (Scrum breakdown)**: 58 story mới trong `doc/task/todo/` (9 fix P1 mất dữ liệu/race, 11 fix P2/P3, 14 enhance, 7 new, 10 idea, 7 exclusive). Danh sách và vùng bị loại: `doc/task/README.md` mục Wave 2026-10-19. Chưa chọn story nào để làm; chờ owner pick.

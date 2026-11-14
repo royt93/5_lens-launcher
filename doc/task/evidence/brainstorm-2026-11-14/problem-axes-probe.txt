@@ -1,0 +1,17 @@
+Brainstorm probe, 2026-11-14: three axes the owner asked to explore (one-hand use on a tall screen, finding and opening apps in a dense grid, managing several lenses).
+Rule applied since FISH-045 / FISH-049: measure the problem before proposing a feature. This probe records what could and could not be measured. Nothing was built.
+
+What was measured (read-only copy of the Samsung A50s app database backup, /data/data/.../databases/app_persistent.db):
+  LENS_WORKSPACE: 2 rows (default "Lens 1", "second-lens" "Second Lens"; the second one is a leftover of a test).
+  APP_PERSISTENT: 58 rows, all in lens "default", all visible; OPEN_COUNT = 0 for every row; 0 favourites; 0 folders; 0 pinned zones.
+  Reading: this is a test device. It carries no usage signal at all (no open counts, no favourites, no organisation), so it says nothing about how a person opens apps,
+  how many lenses they keep, or where they struggle. It is NOT evidence for or against any of the three axes.
+
+What was only assumed, not measured:
+  Thumb reach. "Rows above 40% of the screen height are hard to reach with one thumb" is a rule of thumb. No person's reach was measured. The lens already warps toward the
+  finger, so rows that look far away in a static layout can still be reached by dragging. With the app's own grid formula a 60-app lens is 6 columns x 10 rows on the A50s,
+  KJ7 and Pixel 7 Pro alike; 4 of the 10 rows sit above that assumed line. That number depends entirely on the assumption.
+
+Conclusion: no axis has a measured problem, so no feature is proposed. The three nearest ideas already tested and dropped before any code: the edge-preview of the next lens (FISH-049,
+16-32 ms visibility), the breathing idle lens (continuous redraw on an idle screen, overlaps tilt parallax), and a drop shadow under the focused icon (an extra hot-path draw with no
+proof it is visible; FISH-045 failed on exactly that). A useful next step needs real usage data, which only the owner's own phone has (open counts, favourites, lens count).
