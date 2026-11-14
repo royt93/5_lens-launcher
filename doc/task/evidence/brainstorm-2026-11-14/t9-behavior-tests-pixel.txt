@@ -47,3 +47,18 @@
 ## jank (median p90 of 3 rounds / frame budget 8.33 ms), fixed build, valid profiles over the runs f212..f233
 # phone portrait 1.17-1.39, tablet portrait 0.91-1.27, tablet landscape 1.11-1.24; A/B (3 interleaved rounds, unfixed vs fixed, same test APK) 0.78-1.31 in both orientations and both builds.
 # threshold JANK_BUDGET_FACTOR = 2.0 (about 1.5x the worst seen).
+
+## UPDATE: phone landscape is now covered (f239 diagnosis, f240 repeat, f242 per-test run)
+# Cause found by sampling the display every 0.4 s during 'am instrument' (f239): once an instrumented test finishes, the Pixel launcher takes the foreground and the display goes back to portrait. Only the FIRST test after rotating saw landscape.
+# f240: variant B (rotate with the Pixel launcher in front, then run all 6 in one am instrument) x5: in every run exactly 1 test saw landscape (3120x1440, rotation 1) and 5 failed at the orientation check (1440x3120, rotation 0 for the whole 6 s wait). 5 of 5 identical.
+# f242: one 'am instrument' per test, rotation re-applied with the launcher in front before each (run-t9-per-test.sh), phone landscape 3120x1440 @560:
+Success
+phone-landscape | typingOnTheKeypadFiltersTheResultsOnThisDisplay | display before 1440x3120 | OK (1 test) | orientation check expected=landscape waitedMs=1 displayMetrics=3120x1440 configOrientation=2 | 
+phone-landscape | everyKeyIsInsideTheKeypadViewportOrReachableByScrollingOnThisDisplay | display before 1440x3120 | OK (1 test) | orientation check expected=landscape waitedMs=1 displayMetrics=3120x1440 configOrientation=2 | 
+phone-landscape | theKeypadSurvivesRecreationWithTheSearchOpenAndTheOldActivityIsCollectable | display before 1440x3120 | OK (1 test) | orientation check expected=landscape waitedMs=2 displayMetrics=3120x1440 configOrientation=2 | 
+phone-landscape | backgroundingAndReturningWithTheKeypadOpenKeepsTheKeypadAndItsInput | display before 1440x3120 | OK (1 test) | orientation check expected=landscape waitedMs=1 displayMetrics=3120x1440 configOrientation=2 | 
+phone-landscape | typingOnTheKeypadStaysInsideTheFrameBudgetOnThisDisplay | display before 1440x3120 | OK (1 test) | orientation check expected=landscape waitedMs=2 displayMetrics=3120x1440 configOrientation=2 | jank: p90s=[17,7, 5,0, 5,3] median=5,3ms frames=
+# 6 of 6 pass in phone landscape; the Activity saw 3120x1440, configOrientation 2 each time (waited 1-2 ms).
+# jank in that run: p90s=[17.7, 5.0, 5.3] median 5.3 ms, factor 0.63 against the 8.33 ms budget (the first round is slower, the median is what the test asserts).
+# the first sentence of the earlier section above, 'NOT VALID: phone landscape', describes the single-invocation runs; it is superseded by this section.
+# restored from the true baseline: DATA-IDENTICAL, apk 134ba042/a48a5efd, 421 packages, 198 tmp entries.
