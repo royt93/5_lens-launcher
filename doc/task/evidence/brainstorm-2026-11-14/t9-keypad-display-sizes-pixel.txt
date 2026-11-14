@@ -39,3 +39,24 @@ OK (1 test)
 # keypad cap = 40% of 974 = 389.6 -> 389. 596 + 389 = 985 > 974, so the column overflows its parent by 11 px = exactly the observed 1367 - 1356.
 # cause (derived from these numbers, not yet fixed): the 40% cap only bounds the keypad; the fixed children above it already take 61% of the height in landscape, so 61% + 40% > 100%.
 # the existing unit/widget tests never saw this: the 5 BoundedHeightNestedScrollViewTest cases check the 40% rule alone, ActHomeT9KeypadWidgetTest runs on whatever orientation the device is in (portrait).
+
+## FIX (BoundedHeightNestedScrollView subtracts the fixed rows above it when a weighted child sits at or above it)
+# unit, red first: 3 of 12 Robolectric tests failed on the unchanged code (expected 300 / 300 / 0 but was 400 / 400 / 400), then 12/12 green after the fix.
+# mutation: 9 mutations of the fix; 3 survived the first 12 tests (GONE rows, weighted filler, horizontal parent), 3 tests were added, then 9 of 9 are caught with 15 tests.
+# on the Pixel with -e t9Landscape true, all four display profiles OK (f198):
+=== phone-portrait : Physical size: 1440x3120  rotation=0
+4 I F172T9  : display 1440x3120 @560dpi parent=1440x2692 keypad viewport=1440x877 content=877 cap40=1076 overflowsCap=false viewportBottom=3036 visibleBottom=3036
+4 I F172T9  : last key bottom after scrolling to the end=2957 viewportBottom=3036
+=== phone-landscape : Physical size: 1440x3120  rotation=1
+5 I F172T9  : display 3120x1440 @560dpi parent=3120x1058 keypad viewport=3120x378 content=877 cap40=423 overflowsCap=true viewportBottom=1356 visibleBottom=1356
+5 I F172T9  : last key bottom after scrolling to the end=1277 viewportBottom=1356
+=== tablet-portrait : Physical size: 1440x3120 Override size: 1600x2560  rotation=0
+2 I F172T9  : display 1600x2560 @320dpi parent=1600x2280 keypad viewport=1600x501 content=501 cap40=912 overflowsCap=false viewportBottom=2496 visibleBottom=2496
+2 I F172T9  : last key bottom after scrolling to the end=2451 viewportBottom=2496
+=== tablet-landscape : Physical size: 1440x3120 Override size: 1600x2560  rotation=1
+1 I F172T9  : display 2560x1600 @320dpi parent=2560x1382 keypad viewport=2560x501 content=501 cap40=552 overflowsCap=false viewportBottom=1536 visibleBottom=1536
+1 I F172T9  : last key bottom after scrolling to the end=1491 viewportBottom=1536
+# phone landscape: keypad viewport 389 -> 378 px, keypad bottom 1367 -> 1356 == visible bottom 1356 (overshoot 11 px -> 0), last key reachable (1277 <= 1356).
+# the list rvSearchResults is still 0 px high in phone landscape with an empty query (596 px of rows above + a 378 px keypad in 974 px): the overflow is fixed, the cramped layout is not.
+# regression: full 'com.mckimquyen.ui' package on the Pixel with the fix: OK (568 tests), 23:29:08 -> 23:43:56 (the one extra test is the new T9 display-size test, which runs in portrait).
+# host: forced unit 1783/1783 (233 classes), forced lint 0 errors, 16 warnings, none in BoundedHeightNestedScrollView*; a first lint run had a 17th (UseKtx: View.isGone) in the new code and was fixed.
