@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Type | enhance |
-| Status | done 2026-11-13, audit 8,6/10 (dưới ngưỡng 9,0, owner đóng với giới hạn, chưa thử tay) |
+| Status | done 2026-11-13, audit 8,7/10 (dưới ngưỡng 9,0, owner đóng với giới hạn, owner thử tay 2026-11-14: ổn) |
 | Priority | P3 |
 | Evidence | probe (real warp formula, KJ7 numbers) |
 | Epic | Fisheye lens |
@@ -17,4 +17,4 @@ Acceptance: công tắc `recent_dots` mặc định tắt, có trong reset và 1
 
 ## Kết quả
 
-Xem `doc/task/AUDIT_FISH-048_2026-11-13.md`. Owner chọn đóng và push khi chưa thử tay. Giới hạn chính: độ thấy được trên icon nhỏ nhất không có bằng chứng, hằng số là giá trị đoán, một thiết bị.
+Xem `doc/task/AUDIT_FISH-048_2026-11-13.md`. Owner chọn đóng và push khi chưa thử tay, rồi thử tay 2026-11-14 trên Samsung A50s: "ổn cả hai", giữ nguyên hằng số. Giới hạn chính: độ thấy được trên icon nhỏ nhất không có bằng chứng, hằng số là giá trị đoán, một thiết bị.
