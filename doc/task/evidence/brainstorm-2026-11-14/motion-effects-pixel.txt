@@ -21,3 +21,13 @@ I F078MOT : DRIFT A2/A = 1,01
 
 # Samsung A50s R58MA6WYRPE, same test, NOT usable for cost: BASE stage 47 ms vs 19 ms with Snap or Inertia, and the repeated first stage drifted 23 ms -> 46 ms (DRIFT A2/A = 1.99). Controls passed (snap 35 px, inertia gap 10.7 px alone, magnify 1, haptics 60).
 # A50s lines (attribution run): A=23094 B(+Snap)=18183 C(-DoF)=43759 D(-vignette)=45844 E(-peaking)=43607 F(-chromatic)=43046 G(none)=37972 H(none+Snap)=16320 A2=46069 us pan median.
+
+# Third Pixel run (commit 1c34fd29 build, 20:39), ONLY the motionEffectsCostWithRealPanAndRest test, same setup
+I F078MOT : BASE (dof+vignette+peaking+chromatic): panMedian=23686us holdMedian=23921us snapGap=0,0px inertiaGap=0,0px magnifiedDrawn=0 haptics=0 motionKeysOn=0 baseKeysOn=4
+I F078MOT : ONLY Snap: panMedian=24994us holdMedian=25302us snapGap=44,2px inertiaGap=44,2px magnifiedDrawn=0 haptics=0 motionKeysOn=1 baseKeysOn=4
+I F078MOT : ONLY Inertia: panMedian=24049us holdMedian=24477us snapGap=9,6px inertiaGap=9,6px magnifiedDrawn=0 haptics=0 motionKeysOn=1 baseKeysOn=4
+I F078MOT : ONLY Magnify: panMedian=24243us holdMedian=25919us snapGap=0,0px inertiaGap=0,0px magnifiedDrawn=1 haptics=0 motionKeysOn=1 baseKeysOn=4
+I F078MOT : ONLY ClusterHaptic: panMedian=23362us holdMedian=24206us snapGap=0,0px inertiaGap=0,0px magnifiedDrawn=0 haptics=60 motionKeysOn=1 baseKeysOn=4
+I F078MOT : ALL four motion effects: panMedian=24785us holdMedian=25639us snapGap=43,4px inertiaGap=43,4px magnifiedDrawn=1 haptics=90 motionKeysOn=4 baseKeysOn=4
+I F078MOT : PAN TOTAL/BASE = 1,05 HOLD TOTAL/BASE = 1,07
+# Three Pixel runs, ALL-four vs BASE: pan x1.07 / x1.07 / x1.05, hold x1.06 / x1.03 / x1.07. Run 1 and 3 were the same test; run 2 came after the opt-in change.
