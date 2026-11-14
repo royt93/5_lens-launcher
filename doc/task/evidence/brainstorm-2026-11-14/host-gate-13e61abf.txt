@@ -1,0 +1,4 @@
+# Host gate for 13e61abf (androidTest + docs only), forced real runs
+# first attempt 'testDevDebugUnitTest lintDevDebug' ran in 16 s with testDevDebugUnitTest UP-TO-DATE: not evidence, discarded
+./gradlew testDevDebugUnitTest --rerun-tasks: 31 tasks executed, 231 classes, 1762 tests, 0 failures, 0 errors, 0 skipped
+./gradlew lintDevDebug --rerun-tasks: 32 tasks executed, 0 errors, 16 warnings, 0 issues in LensViewMotionEffectsDrawCostTest or LensViewCumulativeEffectsDrawCostTest
