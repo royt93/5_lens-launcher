@@ -4,6 +4,8 @@ Source of truth for implementation choices in this session. Detailed acceptance 
 
 ## ✅ Implemented
 
+- ✅ **UI-027 — Tương phản overlay quảng cáo dark mode (done 2026-11-14, audit 9,0/10)**: spinner và disclosure text trong `flAdOpenApp` dùng `?attr/colorOnPrimary` thay vì trắng cố định; màu primary, chuỗi và hành vi quảng cáo không đổi. Đo thật: light 6,64:1, night 7,74:1; bản cũ night 1,69:1. Device widget RED 3/3, GREEN 3/3 ×10 trên A50s; `ui` 6 fail đều baseline. Audit `doc/task/AUDIT_UI-027_2026-11-14.md`.
+
 - **SEARCH-012 — T9 fallback alias Latin cho nhãn non-Latin (24/10/2026)**: nhãn CJK/Cyrillic/Thai/Ả Rập không còn sinh `1`; T9 fallback sang package aliases Latin, giữ ưu tiên label. Unit 1043/1043, 57 test thiết bị trên OPPO CPH1989 Android 11, audit 9.1/10. Giới hạn: chưa hỗ trợ Pinyin/transliteration. Room OPPO được giữ theo owner choice sau instrumentation. Audit: `doc/task/AUDIT_SEARCH-012_2026-10-23.md`.
 
 - **SEARCH-014 — Giới hạn cache shortcut Drawable của SearchResultAdapter (23/10/2026)**: `ShortcutCache` (LruCache, trần 30 package) thay map không giới hạn; `ActHome.onTrimMemory` hạ cache theo mức `TRIM_MEMORY_*`. `ShortcutCacheTest` 7/7 + mutation check, 21 test search trên Pixel, 1039 unit, audit 9.1/10. Giới hạn: chưa đo heap, nhánh `ActHome.onTrimMemory` chưa có test riêng, trần đếm theo package không theo byte. Audit: `doc/task/AUDIT_SEARCH-014_2026-10-23.md`.

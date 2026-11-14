@@ -159,14 +159,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:indeterminate="true"
-                android:indeterminateTint="@color/colorWhite" />
+                android:indeterminateTint="?attr/colorOnPrimary" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:text="@string/ads_action_disclosure"
-                android:textColor="@color/colorWhite" />
+                android:textColor="?attr/colorOnPrimary" />
         </LinearLayout>
     </FrameLayout>
 
