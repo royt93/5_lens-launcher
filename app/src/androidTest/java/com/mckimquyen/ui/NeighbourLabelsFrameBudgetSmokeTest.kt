@@ -167,6 +167,8 @@ class NeighbourLabelsFrameBudgetSmokeTest {
         try {
             val off = ArrayList<Run>()
             val on = ArrayList<Run>()
+            // The first run after a cold start is slow whichever setting it has (JIT, icon loads, first layout): run one, keep nothing.
+            measure(false, null)
             for (pair in 1..PAIRS) {
                 // Alternate who goes first: the first run after a cold start is slower whichever setting it has.
                 if (pair % 2 == 1) {
@@ -211,7 +213,8 @@ class NeighbourLabelsFrameBudgetSmokeTest {
         const val SAMPLE_EVERY = 12
         const val SHOT_STEP = 60
         const val MIN_APPS = 12
-        const val MIN_FRAMES = 100
+        // 6 s of real drawing; a 60 Hz low-end phone (Samsung A50s) manages ~165 frames after warm-up, so 60 still means about a second of frames.
+        const val MIN_FRAMES = 60
         const val SEED_APPS = 60
         const val SEED_ICON_PX = 96
         const val NS_PER_MS = 1_000_000f

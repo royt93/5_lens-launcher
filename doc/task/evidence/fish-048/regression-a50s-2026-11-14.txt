@@ -23,3 +23,14 @@ the dots/labels positive controls themselves passed (labelsSeen=[3,3,3,3]).
 Frame numbers on the A50s (NeighbourLabelsFrameBudgetSmokeTest, 4 pairs, order alternated):
   OFF frames=583 mean=23.64ms p90=28.96ms p99=35.99ms; ON frames=616 mean=20.62ms p90=28.16ms p99=36.68ms; per-run p99 within ~2 ms except the cold first run.
 Reading: per-frame cost not higher with the switch on; the first run after a cold start is the slowest with either setting. These numbers are not comparable with the Pixel or KJ7.
+
+--- Follow-up, same day: the frame guard recalibrated for a 60 Hz phone (owner picked "lower the guard and drop the cold run") ---
+Both smoke tests (NeighbourLabelsFrameBudgetSmokeTest, RecentDotsFrameBudgetSmokeTest) now run one discarded warm-up measurement first and require MIN_FRAMES = 60 (was 100)
+per run; both pass on the A50s. The positive controls are unchanged (3 dots / 2 labels drawn when on, 0 when off).
+Numbers after the change (4 kept pairs each, order alternated):
+  labels test: OFF mean 21.45 / p99 33.34 ms, ON mean 20.13 / p99 33.47 ms.
+  dots test:   OFF mean 20.61 / p99 33.42 ms, ON mean 21.75 / p99 50.25 ms (max 150 ms).
+The ON p99 of the dots test is dominated by ONE frame of 150 ms in on-1, the first kept ON run (p99 107.90 ms, max 150.00). Setting the first kept run of each side aside, the other three:
+  dots test:   OFF runs 2-4 mean-of-means 20.62 ms, p99 32.29 ms; ON runs 2-4 mean-of-means 20.71 ms, p99 31.03 ms.
+So per-frame cost does not look higher with the switch on; the 150 ms frame is a one-off in the warm-up-adjacent run. This is a single sample on one low-end device, and it is not evidence
+that no such hitch ever happens with the dots on: on-1 is the only run with it and it is not reproduced.
