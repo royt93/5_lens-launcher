@@ -1,0 +1,49 @@
+# ActHomeT9KeypadLandscapeBehaviorTest (6 tests: filter, every key reachable, recreate + Activity GC, stop/start, typing jank, PixelCopy screenshot)
+# Pixel 7 Pro 2B051FDH3006MU, fixed build (ed0e8769), 4 display profiles via run-t9-profiles.sh (rotation done by the script with ActHome in front)
+# restored from the true baseline after the run: data identical, apk 134ba042/a48a5efd, 421 packages, 198 tmp entries
+
+## final run (f233): what the Activity inside the test saw vs what the script made the display
+=== phone-portrait : size 1440x3120 density 560 rotation 0 expecting portrait; display now 1440x3120 (wanted 1440x3120)
+3 I F211T9  : orientation check expected=portrait waitedMs=1 displayMetrics=1440x3120 configOrientation=1 decor=1440x3120 displayRotation=0 requested=-1
+3 I F211T9  : orientation check expected=portrait waitedMs=1 displayMetrics=1440x3120 configOrientation=1 decor=1440x3120 displayRotation=0 requested=-1
+3 I F211T9  : orientation check expected=portrait waitedMs=1 displayMetrics=1440x3120 configOrientation=1 decor=1440x3120 displayRotation=0 requested=-1
+3 I F211T9  : jank: typing rounds p90s=[11,1, 8,3, 11,1] median=11,1ms frames=54 budget=8,3ms factor=1,33
+3 I F211T9  : orientation check expected=portrait waitedMs=0 displayMetrics=1440x3120 configOrientation=1 decor=1440x3120 displayRotation=0 requested=-1
+3 I F211T9  : orientation check expected=portrait waitedMs=0 displayMetrics=1440x3120 configOrientation=1 decor=1440x3120 displayRotation=0 requested=-1
+3 I F211T9  : orientation check expected=portrait waitedMs=0 displayMetrics=1440x3120 configOrientation=1 decor=1440x3120 displayRotation=0 requested=-1
+3 I F211T9  : screenshot t9-1440x3120.png 1440x3120 activityDisplay=1440x3120 bytes=243081
+=== phone-landscape : size 1440x3120 density 560 rotation 1 expecting landscape; display now 3120x1440 (wanted 3120x1440)
+8 I F211T9  : orientation check expected=landscape waitedMs=6024 displayMetrics=1440x3120 configOrientation=1 decor=1440x3120 displayRotation=0 requested=-1
+8 I F211T9  : orientation check expected=landscape waitedMs=6056 displayMetrics=1440x3120 configOrientation=1 decor=1440x3120 displayRotation=0 requested=-1
+8 I F211T9  : orientation check expected=landscape waitedMs=6053 displayMetrics=1440x3120 configOrientation=1 decor=1440x3120 displayRotation=0 requested=-1
+8 I F211T9  : orientation check expected=landscape waitedMs=6008 displayMetrics=1440x3120 configOrientation=1 decor=1440x3120 displayRotation=0 requested=-1
+8 I F211T9  : orientation check expected=landscape waitedMs=6018 displayMetrics=1440x3120 configOrientation=1 decor=1440x3120 displayRotation=0 requested=-1
+8 I F211T9  : orientation check expected=landscape waitedMs=6056 displayMetrics=1440x3120 configOrientation=1 decor=1440x3120 displayRotation=0 requested=-1
+=== tablet-portrait : size 1600x2560 density 320 rotation 0 expecting portrait; display now 1600x2560 (wanted 1600x2560)
+6 I F211T9  : orientation check expected=portrait waitedMs=1 displayMetrics=1600x2560 configOrientation=1 decor=1600x2560 displayRotation=0 requested=-1
+6 I F211T9  : orientation check expected=portrait waitedMs=1 displayMetrics=1600x2560 configOrientation=1 decor=1600x2560 displayRotation=0 requested=-1
+6 I F211T9  : orientation check expected=portrait waitedMs=1 displayMetrics=1600x2560 configOrientation=1 decor=1600x2560 displayRotation=0 requested=-1
+6 I F211T9  : jank: typing rounds p90s=[9,5, 10,6, 11,4] median=10,6ms frames=53 budget=8,3ms factor=1,27
+6 I F211T9  : orientation check expected=portrait waitedMs=0 displayMetrics=1600x2560 configOrientation=1 decor=1600x2560 displayRotation=0 requested=-1
+6 I F211T9  : orientation check expected=portrait waitedMs=0 displayMetrics=1600x2560 configOrientation=1 decor=1600x2560 displayRotation=0 requested=-1
+6 I F211T9  : orientation check expected=portrait waitedMs=1 displayMetrics=1600x2560 configOrientation=1 decor=1600x2560 displayRotation=0 requested=-1
+6 I F211T9  : screenshot t9-1600x2560.png 1600x2560 activityDisplay=1600x2560 bytes=131430
+=== tablet-landscape : size 1600x2560 density 320 rotation 1 expecting landscape; display now 2560x1600 (wanted 2560x1600)
+7 I F211T9  : orientation check expected=landscape waitedMs=0 displayMetrics=2560x1600 configOrientation=2 decor=2560x1600 displayRotation=1 requested=-1
+7 I F211T9  : orientation check expected=landscape waitedMs=2 displayMetrics=2560x1600 configOrientation=2 decor=2560x1600 displayRotation=1 requested=-1
+7 I F211T9  : orientation check expected=landscape waitedMs=1 displayMetrics=2560x1600 configOrientation=2 decor=2560x1600 displayRotation=1 requested=-1
+7 I F211T9  : jank: typing rounds p90s=[9,2, 9,4, 10,3] median=9,4ms frames=53 budget=8,3ms factor=1,13
+7 I F211T9  : orientation check expected=landscape waitedMs=1 displayMetrics=2560x1600 configOrientation=2 decor=2560x1600 displayRotation=1 requested=-1
+7 I F211T9  : orientation check expected=landscape waitedMs=0 displayMetrics=2560x1600 configOrientation=2 decor=2560x1600 displayRotation=1 requested=-1
+7 I F211T9  : orientation check expected=landscape waitedMs=1 displayMetrics=2560x1600 configOrientation=2 decor=2560x1600 displayRotation=1 requested=-1
+7 I F211T9  : screenshot t9-2560x1600.png 2560x1600 activityDisplay=2560x1600 bytes=131675
+
+## reading
+# VALID: phone portrait, tablet-like portrait, tablet-like landscape: 6/6 pass each; the orientation the Activity reported matches the profile; tablet landscape screenshot 2560x1600.
+# NOT VALID: phone landscape. The script confirmed the display at 3120x1440, but the Activity created by ActivityScenario reported 1440x3120, rotation 0, configOrientation 1 for the full 6 s wait, so all 6 tests failed on the orientation check and none ran in landscape.
+# NOT EXPLAINED: earlier runs with another sequence (f187, f198) did get phone landscape inside the Activity (3120x1440). Tried and ruled out as the cause of the earlier false 'landscape' results: Activity.requestedOrientation (no rotation), user_rotation written from inside the test (no rotation), user_rotation from outside right after an instrumented run (no rotation in 8 s). user_rotation from outside WITH ActHome in front rotated the display in 1 s, 3 of 3.
+# Two earlier runs labelled 'phone landscape' (f220, and the first f223 pass) were really portrait (identical 1440x3120 / 243081-byte screenshots) and are discarded.
+
+## jank (median p90 of 3 rounds / frame budget 8.33 ms), fixed build, valid profiles over the runs f212..f233
+# phone portrait 1.17-1.39, tablet portrait 0.91-1.27, tablet landscape 1.11-1.24; A/B (3 interleaved rounds, unfixed vs fixed, same test APK) 0.78-1.31 in both orientations and both builds.
+# threshold JANK_BUDGET_FACTOR = 2.0 (about 1.5x the worst seen).
