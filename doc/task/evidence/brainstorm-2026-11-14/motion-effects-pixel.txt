@@ -31,3 +31,13 @@ I F078MOT : ONLY ClusterHaptic: panMedian=23362us holdMedian=24206us snapGap=0,0
 I F078MOT : ALL four motion effects: panMedian=24785us holdMedian=25639us snapGap=43,4px inertiaGap=43,4px magnifiedDrawn=1 haptics=90 motionKeysOn=4 baseKeysOn=4
 I F078MOT : PAN TOTAL/BASE = 1,05 HOLD TOTAL/BASE = 1,07
 # Three Pixel runs, ALL-four vs BASE: pan x1.07 / x1.07 / x1.05, hold x1.06 / x1.03 / x1.07. Run 1 and 3 were the same test; run 2 came after the opt-in change.
+
+# Fourth Pixel run (commit 7303313b build, 20:45), same test and setup
+I F078MOT : BASE (dof+vignette+peaking+chromatic): panMedian=23429us holdMedian=23795us snapGap=0,0px inertiaGap=0,0px magnifiedDrawn=0 haptics=0 motionKeysOn=0 baseKeysOn=4
+I F078MOT : ONLY Snap: panMedian=25120us holdMedian=25387us snapGap=44,0px inertiaGap=44,0px magnifiedDrawn=0 haptics=0 motionKeysOn=1 baseKeysOn=4
+I F078MOT : ONLY Inertia: panMedian=24391us holdMedian=24686us snapGap=9,7px inertiaGap=9,7px magnifiedDrawn=0 haptics=0 motionKeysOn=1 baseKeysOn=4
+I F078MOT : ONLY Magnify: panMedian=23787us holdMedian=25203us snapGap=0,0px inertiaGap=0,0px magnifiedDrawn=1 haptics=0 motionKeysOn=1 baseKeysOn=4
+I F078MOT : ONLY ClusterHaptic: panMedian=23793us holdMedian=23685us snapGap=0,0px inertiaGap=0,0px magnifiedDrawn=0 haptics=60 motionKeysOn=1 baseKeysOn=4
+I F078MOT : ALL four motion effects: panMedian=24643us holdMedian=25352us snapGap=44,0px inertiaGap=44,0px magnifiedDrawn=1 haptics=88 motionKeysOn=4 baseKeysOn=4
+I F078MOT : PAN TOTAL/BASE = 1,05 HOLD TOTAL/BASE = 1,07
+# Four Pixel runs, ALL-four vs BASE: pan x1.07 / x1.07 / x1.05 / x1.05, hold x1.06 / x1.03 / x1.07 / x1.07.
