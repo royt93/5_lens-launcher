@@ -205,7 +205,7 @@ Checked one by one against the decisions recorded in this file. None is workable
 | `STORE-001`..`STORE-006` | `store-assets` is internal tooling, excluded from the product loop by owner decision (2026-09-07) |
 | `A11Y-002`, `A11Y-003` | TalkBack work declined 2026-10-29 |
 | `FISH-002` Edge alphabet scrubber | declined 2026-09-20 |
-| `FISH-001` Smart Focus map, `FISH-003` Contextual lens rings, `FISH-005` Smart cluster halo | declined/superseded: FISH-001 by the lite `FISH-006`; FISH-003/FISH-005 sit in the ADS-001-dependent chain |
+| `FISH-001` Smart Focus map, `FISH-003` Contextual lens rings, `FISH-005` Smart cluster halo | declined as consequence of the ADS-001-dependent chain (2026-09-22); `FISH-006` already shipped a lite re-scope of `FISH-001` |
 
 Reopen any of these only when the owner says so explicitly. `UI-027` was the last real one and was closed on 2026-11-14.
 
