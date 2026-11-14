@@ -14,6 +14,8 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.mckimquyen.app.RAppsSingleton
 import com.mckimquyen.feature.organization.OrganizationHarnessActivity
 import com.mckimquyen.model.App
+import com.mckimquyen.search.AppSearchEngine
+import com.mckimquyen.search.SearchHistoryStore
 import com.mckimquyen.util.BitmapCache
 import com.mckimquyen.util.UtilSettings
 import org.junit.After
@@ -41,6 +43,7 @@ class LensViewCumulativeEffectsDrawCostTest {
         const val TAG = "F044CUM"
         const val MAX_TOTAL_TO_BASE_RATIO = 6.0
         const val PAN_START_DP = 40f
+        val RECENT_DOT_APP_INDEXES = listOf(10, 20, 30)
     }
 
     private val instrumentation = InstrumentationRegistry.getInstrumentation()
@@ -56,12 +59,16 @@ class LensViewCumulativeEffectsDrawCostTest {
         "+Inertia" to listOf(UtilSettings.KEY_LENS_INERTIA),
         "+Snap" to listOf(UtilSettings.KEY_FOCUS_SNAP),
         "+ClusterHaptic" to listOf(UtilSettings.KEY_VIBRATE_APP_HOVER),
+        "+Magnify" to listOf(UtilSettings.KEY_FOCUS_MAGNIFY),
+        "+NeighbourLabels" to listOf(UtilSettings.KEY_NEIGHBOUR_LABELS),
+        "+RecentDots" to listOf(UtilSettings.KEY_RECENT_DOTS),
     )
     private val allKeys = stages.flatMap { it.second }
 
     @After fun tearDown() {
         val us = UtilSettings(context)
         allKeys.forEach { us.save(it, false) }
+        SearchHistoryStore(context).clear()
         BitmapCache.clear()
     }
 
@@ -71,7 +78,11 @@ class LensViewCumulativeEffectsDrawCostTest {
             App(id = i, packageName = "com.cum.e$i", name = "E$i", label = "E $i", iconCacheKey = "cum#$i")
                 .also { RAppsSingleton.instance.setAppIcon(it.iconCacheKey, icon) }
         })
+        // RecentDots reads the search history: seed RECENT_DOT_APP_INDEXES so the last stage has dots to draw.
+        SearchHistoryStore(context).clear()
+        RECENT_DOT_APP_INDEXES.forEach { SearchHistoryStore(context).recordLaunch(AppSearchEngine.componentKey(apps[it])) }
         val medians = LinkedHashMap<String, Long>()
+        var previousPixels: Int? = null
         ActivityScenario.launch(OrganizationHarnessActivity::class.java).use { scenario ->
             var view: LensView? = null
             scenario.onActivity { activity ->
@@ -104,8 +115,16 @@ class LensViewCumulativeEffectsDrawCostTest {
                 send(MotionEvent.ACTION_DOWN, 300f, 700f)
                 send(MotionEvent.ACTION_MOVE, 300f + PAN_START_DP * density, 700f - PAN_START_DP * density)
                 send(MotionEvent.ACTION_MOVE, 300f + PAN_START_DP * density + 3f, 700f - PAN_START_DP * density - 3f)
-                val canvas = Canvas(Bitmap.createBitmap(VIEW_SIZE_PX, VIEW_SIZE_PX, Bitmap.Config.ARGB_8888))
+                val frame = Bitmap.createBitmap(VIEW_SIZE_PX, VIEW_SIZE_PX, Bitmap.Config.ARGB_8888)
+                val canvas = Canvas(frame)
                 instrumentation.runOnMainSync { repeat(WARMUP_DRAWS) { target.draw(canvas) } }
+                // Positive control (see FISH-045): clear, draw ONE frame, hash it. Repeated draws on one bitmap saturate alpha and hide
+                // vignette/label alpha, so the warm-up frames above must not be the ones hashed.
+                frame.eraseColor(Color.TRANSPARENT)
+                instrumentation.runOnMainSync { target.draw(canvas) }
+                val pixels = IntArray(VIEW_SIZE_PX * VIEW_SIZE_PX).also { frame.getPixels(it, 0, VIEW_SIZE_PX, 0, 0, VIEW_SIZE_PX, VIEW_SIZE_PX) }.contentHashCode()
+                Log.i(TAG, "$name: frameHash=$pixels changedVsPrevious=${previousPixels != null && previousPixels != pixels}")
+                previousPixels = pixels
                 val rounds = ArrayList<Long>()
                 repeat(ROUNDS) {
                     var micros = 0L

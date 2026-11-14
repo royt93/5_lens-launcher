@@ -1,0 +1,27 @@
+# Cumulative effects draw cost, Samsung A50s R58MA6WYRPE (SM-A507FN, Android 11), commit 37d06992 + test-only change
+# LensViewCumulativeEffectsDrawCostTest: 120 apps, 1000 px view, software canvas, 7 rounds x 200 draws, median
+# frameHash = hash of ONE frame drawn on a cleared bitmap after warm-up (positive control, see FISH-045).
+# Run 1 (before this file's control) used a stale main APK and ~0.9 ms/draw: discarded, not evidence.
+I F044CUM : BASE (no effects): frameHash=743667042 changedVsPrevious=false
+I F044CUM : BASE (no effects): median 6729 us/draw rounds=[6710, 6612, 6651, 7234, 7794, 7608, 6729] enabledKeys=0
+I F044CUM : +DoF: frameHash=-598510238 changedVsPrevious=true
+I F044CUM : +DoF: median 6912 us/draw rounds=[6967, 6913, 6899, 6912, 6857, 6911, 6990] enabledKeys=1
+I F044CUM : +Vignette: frameHash=-598510238 changedVsPrevious=false
+I F044CUM : +Vignette: median 6922 us/draw rounds=[7073, 6869, 7077, 6922, 6874, 6880, 6923] enabledKeys=2
+I F044CUM : +Peaking: frameHash=1979272361 changedVsPrevious=true
+I F044CUM : +Peaking: median 7472 us/draw rounds=[7623, 7436, 7587, 7472, 7432, 7447, 7647] enabledKeys=3
+I F044CUM : +Chromatic: frameHash=1131880245 changedVsPrevious=true
+I F044CUM : +Chromatic: median 7899 us/draw rounds=[7913, 8004, 7892, 7899, 7805, 8007, 7768] enabledKeys=4
+I F044CUM : +Inertia: frameHash=1131880245 changedVsPrevious=false
+I F044CUM : +Inertia: median 7832 us/draw rounds=[7946, 7933, 7824, 7832, 7834, 7787, 7773] enabledKeys=5
+I F044CUM : +Snap: frameHash=1131880245 changedVsPrevious=false
+I F044CUM : +Snap: median 7836 us/draw rounds=[8178, 7839, 7806, 8001, 7826, 7779, 7836] enabledKeys=6
+I F044CUM : +ClusterHaptic: frameHash=1131880245 changedVsPrevious=false
+I F044CUM : +ClusterHaptic: median 7869 us/draw rounds=[7907, 8243, 7798, 7962, 7782, 7787, 7869] enabledKeys=7
+I F044CUM : +Magnify: frameHash=1131880245 changedVsPrevious=false
+I F044CUM : +Magnify: median 7842 us/draw rounds=[7900, 7779, 7939, 7795, 7842, 7777, 7918] enabledKeys=8
+I F044CUM : +NeighbourLabels: frameHash=-1481575210 changedVsPrevious=true
+I F044CUM : +NeighbourLabels: median 8113 us/draw rounds=[8169, 8090, 8143, 8133, 8029, 8113, 7994] enabledKeys=9
+I F044CUM : +RecentDots: frameHash=985189032 changedVsPrevious=true
+I F044CUM : +RecentDots: median 8108 us/draw rounds=[8114, 8142, 8108, 8090, 8142, 8045, 8025] enabledKeys=10
+I F044CUM : TOTAL/BASE = 1.20
