@@ -1,0 +1,4 @@
+# Pixel 7 Pro 2B051FDH3006MU, whole 'com.mckimquyen.ui' instrumentation package, commit 5626a015 build
+# am instrument -e package com.mckimquyen.ui, 21:33:06 -> 21:47:59 (14 min 53 s)
+OK (567 tests)
+# the two opt-in benchmarks (LensViewMotionEffectsDrawCostTest, 2 tests) live in package views, so they were not in this run
