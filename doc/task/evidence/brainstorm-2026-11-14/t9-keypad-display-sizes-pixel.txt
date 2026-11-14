@@ -1,0 +1,41 @@
+# SEARCH-010 T9 keypad on four display profiles, Pixel 7 Pro 2B051FDH3006MU, ActHomeT9KeypadDisplaySizesTest
+# search opened through ActHome.openSearchFromHome() (no gesture, no ad), empty query, T9 switch on, 2 fake apps
+# display changed with wm size/density and user_rotation per run, reset afterwards (verified 1440x3120 @560, accel=1, rot=0)
+## run 1, all four profiles (no inset diagnostics yet)
+=== phone-portrait : Physical size: 1440x3120  Physical density: 560  rotation=0
+OK (1 test)
+
+9 I F172T9  : display 1440x3120 @560dpi parent=1440x2692 keypad viewport=1440x877 content=877 cap40=1076 overflowsCap=false viewportBottom=3036 visibleBottom=3036
+9 I F172T9  : last key bottom after scrolling to the end=2957 viewportBottom=3036
+=== phone-landscape : Physical size: 1440x3120  Physical density: 560  rotation=1
+java.lang.AssertionError: keypad bottom 1367 must be above the visible frame bottom 1356
+java.lang.AssertionError: keypad bottom 1367 must be above the visible frame bottom 1356
+FAILURES!!!
+Tests run: 1,  Failures: 1
+
+2 I F172T9  : display 3120x1440 @560dpi parent=3120x1058 keypad viewport=3120x389 content=877 cap40=423 overflowsCap=true viewportBottom=1367 visibleBottom=1356
+=== tablet-portrait : Physical size: 1440x3120 Override size: 1600x2560  Physical density: 560 Override density: 320  rotation=0
+OK (1 test)
+
+5 I F172T9  : display 1600x2560 @320dpi parent=1600x2280 keypad viewport=1600x501 content=501 cap40=912 overflowsCap=false viewportBottom=2496 visibleBottom=2496
+5 I F172T9  : last key bottom after scrolling to the end=2451 viewportBottom=2496
+=== tablet-landscape : Physical size: 1440x3120 Override size: 1600x2560  Physical density: 560 Override density: 320  rotation=1
+OK (1 test)
+
+0 I F172T9  : display 2560x1600 @320dpi parent=2560x1382 keypad viewport=2560x501 content=501 cap40=552 overflowsCap=false viewportBottom=1536 visibleBottom=1536
+0 I F172T9  : last key bottom after scrolling to the end=1491 viewportBottom=1536
+
+## phone landscape, repeated twice more with inset diagnostics, identical both times (f177 rep 1 and 2) and once more with the child-height probe (f180)
+7 I F172T9  : immediate systemBars=Insets{left=0, top=98, right=0, bottom=84} gestures=Insets{left=105, top=98, right=105, bottom=112} searchContentPaddingBottom=84 searchContentBottom=1440 keypadBottom=1367 visibleBottom=1356 decor=3120x1440
+3 I F172T9  : parentTopOnScreen=382 parentHeight=1058 parentBottomOnScreen=1440 parentPaddingTop=0 parentPaddingBottom=84 visibleChildren: hsvSearchFilterChips h=182 top=0 bottom=182 | llEmptyQuickActions h=274 top=182 bottom=456 | allAppsHeader h=140 top=456 bottom=596 | rvSearchResults h=0 top=596 bottom=596 | scrollT9Keypad h=389 top=596 bottom=985
+
+## phone portrait control (f177): padding 84 = system bar bottom 84, keypad bottom 3036 == visible bottom 3036, last key reachable
+0 I F172T9  : immediate systemBars=Insets{left=0, top=144, right=0, bottom=84} gestures=Insets{left=105, top=186, right=105, bottom=112} searchContentPaddingBottom=84 searchContentBottom=3120 keypadBottom=3036 visibleBottom=3036 decor=1440x3120
+
+## reading of the numbers (phone landscape)
+# insets are correct: searchContent paddingBottom 84 == systemBars bottom 84, so the padding is NOT the bug; 'settled' re-sample after 1.5 s equals 'immediate'.
+# parent (searchContent) is 1058 px tall incl. 84 px bottom padding -> 974 px of content height.
+# visible children: chips 182 + quick actions 274 + allAppsHeader 140 = 596 fixed, rvSearchResults 0 (weight 1, squeezed to nothing), keypad 389.
+# keypad cap = 40% of 974 = 389.6 -> 389. 596 + 389 = 985 > 974, so the column overflows its parent by 11 px = exactly the observed 1367 - 1356.
+# cause (derived from these numbers, not yet fixed): the 40% cap only bounds the keypad; the fixed children above it already take 61% of the height in landscape, so 61% + 40% > 100%.
+# the existing unit/widget tests never saw this: the 5 BoundedHeightNestedScrollViewTest cases check the 40% rule alone, ActHomeT9KeypadWidgetTest runs on whatever orientation the device is in (portrait).
