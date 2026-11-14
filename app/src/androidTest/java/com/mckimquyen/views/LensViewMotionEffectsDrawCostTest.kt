@@ -18,8 +18,9 @@ import com.mckimquyen.util.BitmapCache
 import com.mckimquyen.util.LensPhysicsPolicy
 import com.mckimquyen.util.UtilSettings
 import org.junit.After
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
+import org.junit.Assume.assumeFalse
+import org.junit.Assume.assumeTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import kotlin.math.hypot
@@ -29,7 +30,8 @@ import kotlin.math.hypot
  * cannot reach: it holds the finger still, so none of them runs there. Here the finger really pans (dispatchTouchEvent, 1 dp per
  * 16 ms per axis, about 88 dp/s, under Snap's 120 dp/s gate) onto an icon and then rests on it past the Magnify dwell. Each
  * effect has its own positive control, otherwise its number is not evidence (FISH-045). Benchmark, not a gate: log tag F078MOT.
- * Needs the system animator scale above 0, else the lens is in reduced-motion and none of this runs.
+ * Opt-in (`-e motionBench true`, about 4 and 6 minutes) and skipped when the animator scale is 0 (reduced-motion), where the
+ * lens does not run these effects at all. Deltas under about 2 ms are inside the run-to-run noise (see the drift control).
  */
 @RunWith(AndroidJUnit4::class)
 class LensViewMotionEffectsDrawCostTest {
@@ -47,6 +49,7 @@ class LensViewMotionEffectsDrawCostTest {
         const val HOLD_EXTRA_FRAMES = 20
         const val NANOS_PER_MICRO = 1_000L
         const val TAG = "F078MOT"
+        const val BENCH_ARG = "motionBench"
         const val MIN_GAP_PX = 1f
         const val JITTER_SPEED_FRACTION = 0.4f
         const val MS_PER_S = 1000f
@@ -94,13 +97,17 @@ class LensViewMotionEffectsDrawCostTest {
 
     private class Observed(val panMedianUs: Long, val holdMedianUs: Long, val snapGapPx: Float, val inertiaGapPx: Float, val magnifiedDrawn: Int, val haptics: Int)
 
-    private fun assertMotionAllowed() = assertFalse(
-        "lens is in reduced-motion (animator scale 0, battery saver or thermal): none of these effects can run; set animator_duration_scale 1",
-        LensPhysicsPolicy.shouldReduceLensMotion(context),
-    )
+    /** Skipped, not failed: the run takes minutes and is meaningless on a reduced-motion device (suites there must stay green). */
+    private fun assumeBenchRunnable() {
+        assumeTrue("opt-in benchmark, minutes long: pass `-e $BENCH_ARG true`", InstrumentationRegistry.getArguments().getString(BENCH_ARG) == "true")
+        assumeFalse(
+            "lens is in reduced-motion (animator scale 0, battery saver or thermal): none of these effects can run; set animator_duration_scale 1",
+            LensPhysicsPolicy.shouldReduceLensMotion(context),
+        )
+    }
 
     @Test fun baseEffectAttributionOfThePanCost() {
-        assertMotionAllowed()
+        assumeBenchRunnable()
         val r = runStages(attributionStages)
         val a = r.getValue("A all base, no motion").panMedianUs.toDouble()
         val a2 = r.getValue("A2 all base, no motion (drift control)").panMedianUs.toDouble()
@@ -111,7 +118,7 @@ class LensViewMotionEffectsDrawCostTest {
     }
 
     @Test fun motionEffectsCostWithRealPanAndRest() {
-        assertMotionAllowed()
+        assumeBenchRunnable()
         val results = runStages(stages)
         val base = results.values.first()
         val total = results.values.last()
