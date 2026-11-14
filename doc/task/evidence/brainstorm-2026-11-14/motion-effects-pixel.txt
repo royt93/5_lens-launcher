@@ -1,0 +1,23 @@
+# Motion effects draw cost, Pixel 7 Pro 2B051FDH3006MU (cheetah, animator scale 1.0), commit dea50e0d + LensViewMotionEffectsDrawCostTest
+# 120 apps, 1000 px view, software canvas, real dispatchTouchEvent pan 1 dp/16 ms per axis (~88 dp/s, under Snap's 120 dp/s gate) onto an icon, then rest past the Magnify dwell.
+# 5 rounds per stage + 1 discarded warm-up round per stage. Positive controls: snapGap, inertiaGap, magnifiedDrawn, haptics in each stage line.
+# Base effects (DoF, vignette, peaking, chromatic) are ON in every stage except where the stage name says otherwise.
+I F078MOT : ONLY Snap: panMedian=24925us holdMedian=25947us snapGap=43,8px inertiaGap=43,8px magnifiedDrawn=0 haptics=0 motionKeysOn=1 baseKeysOn=4
+I F078MOT : ONLY Inertia: panMedian=24589us holdMedian=24152us snapGap=9,0px inertiaGap=9,0px magnifiedDrawn=0 haptics=0 motionKeysOn=1 baseKeysOn=4
+I F078MOT : ONLY Magnify: panMedian=23386us holdMedian=25358us snapGap=0,0px inertiaGap=0,0px magnifiedDrawn=1 haptics=0 motionKeysOn=1 baseKeysOn=4
+I F078MOT : ONLY ClusterHaptic: panMedian=23557us holdMedian=23963us snapGap=0,0px inertiaGap=0,0px magnifiedDrawn=0 haptics=60 motionKeysOn=1 baseKeysOn=4
+I F078MOT : ALL four motion effects: panMedian=24966us holdMedian=24973us snapGap=43,3px inertiaGap=43,3px magnifiedDrawn=1 haptics=86 motionKeysOn=4 baseKeysOn=4
+I F078MOT : PAN TOTAL/BASE = 1,07 HOLD TOTAL/BASE = 1,06
+I F078MOT : A all base, no motion: panMedian=22826us holdMedian=24198us snapGap=0,0px inertiaGap=0,0px magnifiedDrawn=0 haptics=0 motionKeysOn=0 baseKeysOn=4
+I F078MOT : B all base + Snap: panMedian=24908us holdMedian=25920us snapGap=44,6px inertiaGap=44,6px magnifiedDrawn=0 haptics=0 motionKeysOn=1 baseKeysOn=4
+I F078MOT : C base without DoF: panMedian=24306us holdMedian=24225us snapGap=0,0px inertiaGap=0,0px magnifiedDrawn=0 haptics=0 motionKeysOn=0 baseKeysOn=3
+I F078MOT : D base without vignette: panMedian=23061us holdMedian=24193us snapGap=0,0px inertiaGap=0,0px magnifiedDrawn=0 haptics=0 motionKeysOn=0 baseKeysOn=3
+I F078MOT : E base without peaking: panMedian=23455us holdMedian=24128us snapGap=0,0px inertiaGap=0,0px magnifiedDrawn=0 haptics=0 motionKeysOn=0 baseKeysOn=3
+I F078MOT : F base without chromatic: panMedian=23380us holdMedian=23561us snapGap=0,0px inertiaGap=0,0px magnifiedDrawn=0 haptics=0 motionKeysOn=0 baseKeysOn=3
+I F078MOT : G no base effects at all: panMedian=25121us holdMedian=23989us snapGap=0,0px inertiaGap=0,0px magnifiedDrawn=0 haptics=0 motionKeysOn=0 baseKeysOn=0
+I F078MOT : H no base effects + Snap: panMedian=26255us holdMedian=26171us snapGap=44,4px inertiaGap=44,4px magnifiedDrawn=0 haptics=0 motionKeysOn=1 baseKeysOn=0
+I F078MOT : A2 all base, no motion (drift control): panMedian=22959us holdMedian=24371us snapGap=0,0px inertiaGap=0,0px magnifiedDrawn=0 haptics=0 motionKeysOn=0 baseKeysOn=4
+I F078MOT : DRIFT A2/A = 1,01
+
+# Samsung A50s R58MA6WYRPE, same test, NOT usable for cost: BASE stage 47 ms vs 19 ms with Snap or Inertia, and the repeated first stage drifted 23 ms -> 46 ms (DRIFT A2/A = 1.99). Controls passed (snap 35 px, inertia gap 10.7 px alone, magnify 1, haptics 60).
+# A50s lines (attribution run): A=23094 B(+Snap)=18183 C(-DoF)=43759 D(-vignette)=45844 E(-peaking)=43607 F(-chromatic)=43046 G(none)=37972 H(none+Snap)=16320 A2=46069 us pan median.
