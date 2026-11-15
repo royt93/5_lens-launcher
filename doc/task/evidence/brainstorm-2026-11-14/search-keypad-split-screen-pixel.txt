@@ -1,0 +1,9 @@
+Split-screen under 480 dp, Pixel 7 Pro 2B051FDH3006MU (Android 17, API 37), dev build 9f80ba39. RESULT: NOT MEASURED, adb could not create a real split.
+What was tried (read-only on app code):
+  cmd activity supports-split-screen-multi-window = true, supports-multiwindow = true; the app's activities are resizeable (RESIZEABLE_VIA_SDK_VERSION).
+  am start -n .../ActHome --windowingMode 3 -> task mode=3 but bounds 0,0-1440,3120 (full screen), configuration h891dp, still sw411dp w411dp.
+  am start -n com.android.settings/.Settings --windowingMode 4 -> second task mode=4, bounds 0,3120-1440,4680 (below the screen, off-display), ActHome task became visible=false; the Settings screenshot is full screen.
+  So no half-height window was ever produced; the screenshot shows Settings alone. I did not fake it with wm size (that would be the same measurement already made by the display profiles).
+What this leaves unknown: whether a real half-height split on a phone gets screenHeightDp < 480 and therefore the T9 keypad (SearchKeypadPolicy). Reasoning only, not measured: Configuration.screenHeightDp follows the window, so a half-height portrait split on a 891 dp phone is about 445 dp, below the threshold, so the keypad would be used there even with T9 off. Needs a hand test in the real split UI.
+Side effect of my try: I turned auto-rotate off; it was set back (accel=1 rot=0) after the restore.
+restore: DATA-IDENTICAL, APKs 134ba042/a48a5efd, 198 tmp entries, display 1440x3120. Packages 422 vs 421: com.freeapp.quick_invoice, a Play Store install at 16:52 that is not mine, left alone.
