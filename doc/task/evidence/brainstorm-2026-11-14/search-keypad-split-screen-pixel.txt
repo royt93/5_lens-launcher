@@ -1,9 +1,11 @@
-Split-screen under 480 dp, Pixel 7 Pro 2B051FDH3006MU (Android 17, API 37), dev build 9f80ba39. RESULT: NOT MEASURED, adb could not create a real split.
-What was tried (read-only on app code):
-  cmd activity supports-split-screen-multi-window = true, supports-multiwindow = true; the app's activities are resizeable (RESIZEABLE_VIA_SDK_VERSION).
-  am start -n .../ActHome --windowingMode 3 -> task mode=3 but bounds 0,0-1440,3120 (full screen), configuration h891dp, still sw411dp w411dp.
-  am start -n com.android.settings/.Settings --windowingMode 4 -> second task mode=4, bounds 0,3120-1440,4680 (below the screen, off-display), ActHome task became visible=false; the Settings screenshot is full screen.
-  So no half-height window was ever produced; the screenshot shows Settings alone. I did not fake it with wm size (that would be the same measurement already made by the display profiles).
-What this leaves unknown: whether a real half-height split on a phone gets screenHeightDp < 480 and therefore the T9 keypad (SearchKeypadPolicy). Reasoning only, not measured: Configuration.screenHeightDp follows the window, so a half-height portrait split on a 891 dp phone is about 445 dp, below the threshold, so the keypad would be used there even with T9 off. Needs a hand test in the real split UI.
-Side effect of my try: I turned auto-rotate off; it was set back (accel=1 rot=0) after the restore.
-restore: DATA-IDENTICAL, APKs 134ba042/a48a5efd, 198 tmp entries, display 1440x3120. Packages 422 vs 421: com.freeapp.quick_invoice, a Play Store install at 16:52 that is not mine, left alone.
+REAL split-screen on the Pixel (supersedes the earlier 'could not be produced with adb' note in git history: this time it was done through the system UI).
+Date 2026-11-15 ~19:15, Pixel 7 Pro 2B051FDH3006MU, Android 17, dev build 9f80ba39 + later doc commits (SearchKeypadPolicy present in the installed dex).
+
+ActHome task bounds Rect(0,0-1440,1543); app Configuration sw375dp w411dp h441dp, windowingMode=multi-window (<480 dp). T9 preference off (no enable_t9_search_keypad key).
+Open search (screenshot split-keyboard-at-reopen.png, taken at that moment; dumpsys then said mInputShown=true): normal soft keyboard docked at the bottom, T9 keypad not visible. The other files in this folder were captured AFTER a BACK that closed the keyboard, so they show a later state and are not evidence of the keyboard. AdActivity was not foreground during capture (focus ActHome, 0 AdActivity windows).
+What is established: in a real split the Activity reports h441dp (<480) and with T9 off the soft keyboard opened and the keypad did not show, contrary to the policy prediction. What is NOT established: why. Hypotheses, none tested: applyKeypadChoice is not reached for this reopen, it is reached but reads a different screenHeightDp, or the keypad view is visible but pushed out of the 441 dp column. One run, one reopen, adb taps, not a person.
+
+How the split was made: Recents (KEYCODE_APP_SWITCH) > app chip menu > 'Chia đôi màn hình' > picked Settings. No wm size, no --windowingMode.
+Ad: a test AdMob interstitial (AdActivity) covered the top half right after the split; with the owner's go-ahead ('tự chủ động đóng ad bằng adb') I brought the ActHome task to front with am start; the ad window was already gone (0 AdActivity windows) and I sent no BACK, tapped no ad content. This still does not show that BACK closes AdActivity.
+Restore: DATA-IDENTICAL, APKs 134ba042/a48a5efd, 198 tmp entries, display 1440x3120. Auto-rotate had been turned off by me during the test and was set back to 1.
+Packages: only com.freeapp.quick_invoice extra (Play Store install 16:52, not mine); com.mckimquyen.reader.test was removed by its owner session.
