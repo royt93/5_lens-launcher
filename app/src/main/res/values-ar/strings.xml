@@ -304,7 +304,7 @@
     <string name="edge_swipe_mode_left">الحافة اليسرى فقط</string>
     <string name="setting_enable_t9_search_keypad">لوحة أرقام T9 في البحث</string>
     <string name="setting_enable_t9_search_keypad_desc">إظهار لوحة أرقام أسفل البحث للكتابة السريعة بيد واحدة</string>
-    <string name="setting_enable_t9_search_keypad_short_screen_note">على الشاشات القصيرة (مثل الهاتف في الوضع الأفقي) تُستخدم لوحة الأرقام حتى عند إيقاف هذا الخيار، لأن لوحة المفاتيح ستخفي النتائج.</string>
+    <string name="setting_enable_t9_search_keypad_short_screen_note">على الشاشات منخفضة الارتفاع (مثل الهاتف في الوضع الأفقي) تُستخدم لوحة الأرقام حتى عند إيقاف هذا الخيار، لأن لوحة المفاتيح ستحجب النتائج.</string>
     <string name="setting_lens_elastic_overscroll">تمدد العدسة المرن</string>
     <string name="setting_lens_elastic_overscroll_desc">يضيف مقاومة مرنة طبيعية عند سحب العدسة إلى ما بعد حافة الشبكة</string>
     <string name="t9_key_clear">مسح</string>

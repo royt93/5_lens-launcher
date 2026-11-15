@@ -278,7 +278,7 @@
     <string name="edge_swipe_mode_left">केवल बायाँ किनारा</string>
     <string name="setting_enable_t9_search_keypad">खोज में T9 डायलपैड</string>
     <string name="setting_enable_t9_search_keypad_desc">एक हाथ से टाइपिंग के लिए खोज के नीचे नंबर पैड दिखाएं</string>
-    <string name="setting_enable_t9_search_keypad_short_screen_note">कम ऊँचाई वाली स्क्रीन पर (जैसे आड़ा पकड़ा गया फ़ोन) यह विकल्प बंद होने पर भी नंबर पैड इस्तेमाल होता है, क्योंकि कीबोर्ड नतीजों को ढक देगा।</string>
+    <string name="setting_enable_t9_search_keypad_short_screen_note">कम ऊँचाई वाली स्क्रीन पर (जैसे लैंडस्केप मोड में फ़ोन) यह विकल्प बंद होने पर भी नंबर पैड इस्तेमाल होता है, क्योंकि कीबोर्ड नतीजों को ढक देगा।</string>
     <string name="setting_lens_elastic_overscroll">लेंस इलास्टिक ओवरस्क्रॉल</string>
     <string name="setting_lens_elastic_overscroll_desc">लेंस को ग्रिड के किनारे से आगे खींचने पर स्वाभाविक प्रतिरोध जोड़ता है</string>
     <string name="t9_key_clear">साफ़ करें</string>
