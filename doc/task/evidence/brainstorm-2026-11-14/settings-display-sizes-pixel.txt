@@ -48,3 +48,10 @@ tablet landscape: last element bottom 1444, frame bottom 1536, gap above the bar
 # AppLovin (out of scope by the owner's choice 'only AdMob'): AppLovinFullscreenActivity, AppLovinWebViewActivity, Max*DebuggerActivity (debug tooling), MaxHybrid*AdActivity
 # the guard regex used in the 8 Settings runs was 'gms\.ads|AdActivity|com\.google\.android\.gms'. It matches AdActivity, so by NAME it would have recognised the AdMob window, but it also matched com.google.android.gms.common.api.GoogleApiActivity (Google services/sign-in), which is not an ad. Narrowed to 'com.google.android.gms.ads.AdActivity'.
 # STILL NOT TESTED: that the guard sends BACK and that BACK closes AdActivity. No ad window appeared in the 8 runs, and no interstitial was opened on purpose (the build's AppLovin ids are the real ones in debug, owner chose to focus on AdMob only).
+
+## single interstitial request (f279): ActSettingsAdGuardProbeTest, ONE ActSettings.openAbout() on a Pixel 7 Pro, devDebug
+# watcher on the focused window, once per second; AdMob com.google.android.gms.ads.AdActivity -> BACK, AppLovin -> one BACK and STOP. Nothing was tapped.
+# result: NO ad window appeared. 23 consecutive samples showed com.mckimquyen.lenslauncher/.ui.ActAbout (the screen openAbout opens when the interstitial callback runs), 2 the Pixel launcher, 1 empty. The guard log is empty and dumpsys found 0 ad windows.
+# what this shows: openAbout() went straight to ActAbout; the interstitial callback ran without a full-screen ad window being shown in this one attempt.
+# what this does NOT show: that the guard works (it was never triggered), that BACK closes AdActivity, or that no interstitial can ever appear (ad SDKs serve on their own schedule, frequency caps and fill; one request is one sample). The reason no ad was shown was not established: it can be no fill, a frequency cap, the build's ad flag, or the consent/VIP state.
+# restored from the true baseline: data identical, apk 134ba042/a48a5efd, 421 packages, 198 tmp entries.
