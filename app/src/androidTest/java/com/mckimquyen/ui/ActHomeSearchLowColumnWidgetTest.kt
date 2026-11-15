@@ -126,6 +126,14 @@ class ActHomeSearchLowColumnWidgetTest {
                 // Nothing of the list may be drawn under the soft keyboard (T9 off): its last rows would be unreachable. When the keyboard
                 // leaves less than minList above it (phone landscape: 967 px of keyboard in 1440 px, the search bar and chips take the rest) there
                 // is no room to give: that is logged as NOROOM, not asserted, and is a limit of this layout, not something the padding can fix.
+                // Short windows (< SearchKeypadPolicy.COMPACT_HEIGHT_DP) use the in-app keypad even when the user turned it off, because the soft
+                // keyboard leaves no room for the list there; tall windows keep the user's choice.
+                val keypadView = activity.findViewById<View>(R.id.scrollT9Keypad)
+                val heightDp = activity.resources.configuration.screenHeightDp
+                val userT9 = InstrumentationRegistry.getArguments().getString(T9_ARG) != T9_OFF
+                val expectKeypad = com.mckimquyen.search.SearchKeypadPolicy.useT9Keypad(userT9, heightDp)
+                assertEquals("keypad visibility for a ${heightDp}dp-high window (user T9=$userT9)", expectKeypad, keypadView.visibility == View.VISIBLE)
+                if (expectKeypad) assertTrue("no soft keyboard may open while the keypad stands in for it", !imeVisible)
                 if (imeVisible) assertEquals("px of the search list drawn under the soft keyboard", 0, hiddenUnderIme)
                 if (imeVisible && roomAboveIme >= minListPx) assertTrue("room above the keyboard was $roomAboveIme px but only $visibleList px of the list show", visibleList >= minListPx)
                 if (imeVisible && roomAboveIme < minListPx) Log.i(TAG, "NOROOM: only ${roomAboveIme}px above the keyboard, below minList ${minListPx}px")

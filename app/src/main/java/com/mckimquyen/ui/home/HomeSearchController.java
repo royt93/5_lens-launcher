@@ -31,6 +31,7 @@ import com.mckimquyen.search.T9SearchEngine;
 import com.mckimquyen.search.SearchEnterKeyPolicy;
 import com.mckimquyen.search.SearchFilterEngine;
 import com.mckimquyen.search.SearchHistoryStore;
+import com.mckimquyen.search.SearchKeypadPolicy;
 import com.mckimquyen.search.SearchQuickActionsRowPolicy;
 import com.mckimquyen.views.BoundedHeightNestedScrollView;
 import com.mckimquyen.search.SearchResultAdapter;
@@ -301,7 +302,10 @@ public final class HomeSearchController {
         // quick-actions row then. setVisibility only runs on a change, so the layout pass it causes converges instead of looping.
         searchColumn = activity.findViewById(R.id.searchContent);
         columnLayoutListener = (v, l, t, r, b, ol, ot, or, ob) -> {
-            if (searchView.isShowing()) applyQuickActionsRow(AppSearchEngine.normalize(appSearch.getText()).isEmpty());
+            if (searchView.isShowing()) {
+                applyKeypadChoice();
+                applyQuickActionsRow(AppSearchEngine.normalize(appSearch.getText()).isEmpty());
+            }
         };
         if (searchColumn != null) searchColumn.addOnLayoutChangeListener(columnLayoutListener);
     }
@@ -375,6 +379,27 @@ public final class HomeSearchController {
         chipGroupSearchFilters.check(targetChipId);
     }
 
+    /**
+     * The in-app T9 keypad replaces the soft keyboard when the user turned it on, or when the window is too short for the soft keyboard to
+     * leave any room for the results (phone landscape: 0 px of list measured). Re-run on rotation, since ActHome handles those itself.
+     */
+    private boolean keypadInUse() {
+        boolean userEnabled = host.settings() != null && host.settings().getEnableT9SearchKeypad();
+        return SearchKeypadPolicy.useT9Keypad(userEnabled, activity.getResources().getConfiguration().screenHeightDp);
+    }
+
+    private void applyKeypadChoice() {
+        boolean useKeypad = keypadInUse();
+        searchView.setAutoShowKeyboard(!useKeypad);
+        if (t9Keypad != null) {
+            int want = useKeypad ? View.VISIBLE : View.GONE;
+            if (t9Keypad.getVisibility() != want) t9Keypad.setVisibility(want);
+        }
+        if (appSearch != null) {
+            appSearch.setShowSoftInputOnFocus(!useKeypad);
+        }
+    }
+
     public void updateSearchCustomization() {
         UtilSettings settings = new UtilSettings(activity);
         updateSearchFilterChipChecked(settings.getSearchFilterPreset());
@@ -385,14 +410,7 @@ public final class HomeSearchController {
         searchBar.setHint(hint);
         searchView.setHint(hint);
 
-        boolean t9Enabled = settings.getEnableT9SearchKeypad();
-        searchView.setAutoShowKeyboard(!t9Enabled);
-        if (t9Keypad != null) {
-            t9Keypad.setVisibility(t9Enabled ? View.VISIBLE : View.GONE);
-        }
-        if (appSearch != null) {
-            appSearch.setShowSoftInputOnFocus(!t9Enabled);
-        }
+        applyKeypadChoice();
 
         activity.findViewById(R.id.tileCalculator).setVisibility(
                 settings.getBoolean(UtilSettings.KEY_QUICK_ACTION_CALCULATOR) ? View.VISIBLE : View.GONE);
@@ -429,8 +447,7 @@ public final class HomeSearchController {
         List<App> candidates = SearchFilterEngine.filterCandidates(apps, preset, lensApps, hiddenIds);
 
         // SEARCH-010: if T9 dialpad is active and query is all digits, use T9SearchEngine instead.
-        boolean useT9 = host.settings() != null && host.settings().getEnableT9SearchKeypad()
-                && isT9NumericQuery(query);
+        boolean useT9 = keypadInUse() && isT9NumericQuery(query);
         java.util.List<App> engineResults = useT9
                 ? T9SearchEngine.search(candidates, query, searchHistoryStore.recentKeys())
                 : AppSearchEngine.search(candidates, query, searchHistoryStore.recentKeys());
