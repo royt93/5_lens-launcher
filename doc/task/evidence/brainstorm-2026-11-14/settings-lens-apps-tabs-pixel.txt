@@ -1,0 +1,18 @@
+# ActSettings tabs Lens and Apps on four display profiles, Pixel 7 Pro 2B051FDH3006MU, ActSettingsLensAppsTabsDisplaySizesTest (2 tests)
+# one am instrument per test and profile, rotation + ad guard by run-display-tests-adguard.sh; Apps tab uses 60 fake apps (RAppsSingleton), scrolled to the last item
+# first Apps run: 4/4 error caused by my test (waitForIdleSync called on the main thread inside onActivity), fixed and rerun; Lens results below are from the first run
+## result: 8 of 8 pass (no ad window seen by the guard, overlayVisible=false on every Lens run)
+
+-- Lens tab (last element tvLensTiltParallaxDesc, scrolled to the end)
+LENS display 1440x3120 @560dpi frameBottom=3036 scroll=1440x2360 content=5228px (1494dp) scrollMax=2868 scrollTop=592 scrollBottom=2952 lastTop=2494 lastBottom=2840 gapToFrame=56dp overlayVisible=false
+LENS display 3120x1440 @560dpi frameBottom=1356 scroll=3120x726 content=4528px (1294dp) scrollMax=3802 scrollTop=546 scrollBottom=1272 lastTop=1024 lastBottom=1160 gapToFrame=56dp overlayVisible=false
+LENS display 1600x2560 @320dpi frameBottom=2496 scroll=1600x2074 content=2867px (1434dp) scrollMax=793 scrollTop=374 scrollBottom=2448 lastTop=2266 lastBottom=2384 gapToFrame=56dp overlayVisible=false
+LENS display 2560x1600 @320dpi frameBottom=1536 scroll=2560x1176 content=2587px (1294dp) scrollMax=1411 scrollTop=312 scrollBottom=1488 lastTop=1346 lastBottom=1424 gapToFrame=56dp overlayVisible=false
+
+-- Apps tab (last row after scrollToPosition)
+APPS display 1440x3120 @560dpi frameBottom=3036 rv=1440x2360 items=60 paddingBottom=280 rvTop=592 rvBottom=2952 lastTop=2406 lastBottom=2658 gapToFrame=108dp canScrollDown=false
+APPS display 3120x1440 @560dpi frameBottom=1356 rv=3120x726 items=60 paddingBottom=280 rvTop=546 rvBottom=1272 lastTop=726 lastBottom=978 gapToFrame=108dp canScrollDown=false
+APPS display 1600x2560 @320dpi frameBottom=2496 rv=1600x2074 items=60 paddingBottom=160 rvTop=374 rvBottom=2448 lastTop=2136 lastBottom=2280 gapToFrame=108dp canScrollDown=false
+APPS display 2560x1600 @320dpi frameBottom=1536 rv=2560x1176 items=60 paddingBottom=160 rvTop=312 rvBottom=1488 lastTop=1176 lastBottom=1320 gapToFrame=108dp canScrollDown=false
+
+restore (after both runs): DATA-IDENTICAL, APKs 134ba042/a48a5efd, 421 packages, 198 tmp entries, display 1440x3120 rot 0
