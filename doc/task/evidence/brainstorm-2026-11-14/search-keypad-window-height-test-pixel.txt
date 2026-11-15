@@ -36,3 +36,13 @@ Restore after every run: DATA-IDENTICAL, APKs 134ba042/a48a5efd, 198 tmp entries
 
 Observed, not asserted: in 'open-then-short' the soft keyboard that was already open stays visible (imeVisible=true) after the keypad appears; the keypad swap does not dismiss an IME that is already up. Opening the search in a short window after the fact gives keypad + no IME (test 3).
 Limits: the window is shortened with setLayout, not by a real split; real split was checked by hand-driven adb taps (search-keypad-split-screen-pixel.txt). One device. Foldables untested.
+
+=== IME DISMISS FIX (same day, 21:0x) ===
+Gap found earlier: shrinking the window while the soft keyboard was already up showed the keypad but left the keyboard (imeVisible=true).
+RED (assertion added: 'the soft keyboard that was already open must close when the keypad takes over'): shrinkingAndGrowingTheWindowWhileTheSearchIsOpenSwapsTheKeypad failed, log open-then-short keypadVisible=true imeVisible=true.
+Fix in HomeSearchController.applyKeypadChoice: when the keypad is in use and the search is showing, hideSoftInputFromWindow on the search EditText (setShowSoftInputOnFocus only affects the next focus). My first build failed on a missing Context import (fixed with the qualified name).
+GREEN: all four tests pass: open-then-short keypadVisible=true imeVisible=false; open-then-grown keypadVisible=false imeVisible=false. Another assertion was added that the IME dismissed for the keypad is NOT reopened when the window grows back: the user taps the search box to bring it back; this tests the mode transition, not keeping an IME session across resizing.
+Host: unit 1804/1804 (--rerun-tasks, result files), lint 0 errors / 16 baseline warnings.
+Device: whole com.mckimquyen.ui package OK 587 tests (21:06:07 -> 21:21:39). Restore: DATA-IDENTICAL, APKs 134ba042/a48a5efd, 198 tmp entries, display 1440x3120, accel=1 rot=0, extra package com.freeapp.quick_invoice only.
+Process notes: one run used the single-test script by mistake and hung part-way; I stopped it and restored the Pixel from the durable baseline before rerunning (DATA-IDENTICAL).
+Limit: the keyboard is only dismissed; nothing brings it back when the window grows. One device, window shortened with Window.setLayout, not a real split in this test.

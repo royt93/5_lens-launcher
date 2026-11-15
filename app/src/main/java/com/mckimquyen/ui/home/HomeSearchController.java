@@ -402,6 +402,13 @@ public final class HomeSearchController {
         }
         if (appSearch != null) {
             appSearch.setShowSoftInputOnFocus(!useKeypad);
+            // The keypad took over while the soft keyboard was already up (the window shrank into split-screen with the search open):
+            // setShowSoftInputOnFocus only affects the next focus, so the open keyboard has to be dismissed explicitly.
+            if (useKeypad && searchView.isShowing()) {
+                android.view.inputmethod.InputMethodManager imm =
+                        (android.view.inputmethod.InputMethodManager) activity.getSystemService(android.content.Context.INPUT_METHOD_SERVICE);
+                if (imm != null) imm.hideSoftInputFromWindow(appSearch.getWindowToken(), 0);
+            }
         }
     }
 

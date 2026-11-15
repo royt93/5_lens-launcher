@@ -142,10 +142,14 @@ class ActHomeSearchKeypadWindowHeightWidgetTest {
             val short = snap(scenario, "open-then-short")
             assertTrue("positive control: the window shrank below the compact height, was ${short.decorDp} dp", short.decorDp < SearchKeypadPolicy.COMPACT_HEIGHT_DP)
             assertTrue("shrunk below the compact height while open: the keypad must appear (decor ${short.decorDp} dp, Configuration ${short.configDp} dp)", short.keypadVisible)
+            assertFalse("the soft keyboard that was already open must close when the keypad takes over", short.imeVisible)
             resizeWindow(scenario, ViewGroup.LayoutParams.MATCH_PARENT)
             val grown = snap(scenario, "open-then-grown")
             assertTrue("positive control: the window grew back, was ${grown.decorDp} dp", grown.decorDp >= SearchKeypadPolicy.COMPACT_HEIGHT_DP)
             assertFalse("grown back to full height with T9 off: the keypad must go away", grown.keypadVisible)
+            // The IME was explicitly dismissed when the keypad took over; growing the window does not reopen it on its own. The user can
+            // tap the search box again to summon it. This tests the mode transition, not preservation of an IME session across window resizing.
+            assertFalse("the IME dismissed for the keypad must stay dismissed after the window grows", grown.imeVisible)
         }
     }
 
