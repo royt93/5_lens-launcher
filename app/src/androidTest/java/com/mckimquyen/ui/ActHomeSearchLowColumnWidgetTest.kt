@@ -34,6 +34,9 @@ class ActHomeSearchLowColumnWidgetTest {
     private companion object {
         const val TAG = "F297LOW"
         const val EXPECT_ARG = "displayExpectOrientation"
+        const val T9_ARG = "lowColumnT9" // on (default) | off: off means the soft keyboard opens with the search
+        const val QUERY_ARG = "lowColumnQuery" // typed after the search is open; absent = empty query
+        const val T9_OFF = "off"
         const val WAIT_MS = 8_000L
         const val POLL_MS = 50L
         const val SETTLE_MS = 800L
@@ -50,7 +53,7 @@ class ActHomeSearchLowColumnWidgetTest {
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
         hadStored = prefs.contains(UtilSettings.KEY_ENABLE_T9_SEARCH_KEYPAD)
         originalT9 = UtilSettings(context).getEnableT9SearchKeypad()
-        UtilSettings(context).saveEnableT9SearchKeypad(true)
+        UtilSettings(context).saveEnableT9SearchKeypad(InstrumentationRegistry.getArguments().getString(T9_ARG) != T9_OFF)
         originalApps = RAppsSingleton.instance.apps
         RAppsSingleton.instance.apps = ArrayList((0 until 40).map { App(label = "App$it", packageName = "com.low.a$it", name = "Main", isVisible = true) })
     }
@@ -90,6 +93,11 @@ class ActHomeSearchLowColumnWidgetTest {
             val expectedRowShown = InstrumentationRegistry.getArguments().getString("lowColumnExpectRow")?.let { it == "shown" }
             scenario.onActivity { it.openSearchFromHome() }
             awaitShown(scenario)
+            val query = InstrumentationRegistry.getArguments().getString(QUERY_ARG)
+            if (query != null) {
+                scenario.onActivity { it.findViewById<SearchView>(R.id.searchView).editText.setText(query) }
+                instrumentation.waitForIdleSync()
+            }
             // Let the layout passes that follow the search opening (and the one the controller posts when it hides the row) finish.
             instrumentation.waitForIdleSync()
             android.os.SystemClock.sleep(SETTLE_MS)
@@ -101,6 +109,19 @@ class ActHomeSearchLowColumnWidgetTest {
                 val column = activity.findViewById<View>(R.id.searchContent)
                 val minListPx = (SearchQuickActionsRowPolicy.MIN_LIST_DP * dm.density).toInt()
                 val rowShown = row.visibility == View.VISIBLE
+                val imeInsets = androidx.core.view.ViewCompat.getRootWindowInsets(activity.window.decorView)
+                val imeVisible = imeInsets?.isVisible(androidx.core.view.WindowInsetsCompat.Type.ime()) == true
+                val imeHeight = imeInsets?.getInsets(androidx.core.view.WindowInsetsCompat.Type.ime())?.bottom ?: 0
+                // Where the list really ends on screen versus where the soft keyboard starts (the list is clipped by the keyboard when its
+                // bottom is below that line). Logged, not asserted: whether the layout should shrink for the keyboard is a product decision.
+                val loc = IntArray(2)
+                list.getLocationOnScreen(loc)
+                val windowHeight = activity.window.decorView.height
+                val imeTop = windowHeight - imeHeight
+                val listBottom = loc[1] + list.height
+                Log.i(TAG, "onScreen listTop=${loc[1]} listBottom=$listBottom windowHeight=$windowHeight imeTop=$imeTop hiddenUnderIme=${if (imeVisible) (listBottom - imeTop).coerceAtLeast(0) else 0}px visibleList=${(minOf(listBottom, imeTop) - loc[1]).coerceAtLeast(0)}px")
+                val keypad = activity.findViewById<View>(R.id.scrollT9Keypad)
+                Log.i(TAG, "keypad=${if (keypad.visibility == View.VISIBLE) "VISIBLE h=${keypad.height}" else "GONE"} ime=${if (imeVisible) "VISIBLE" else "HIDDEN"} imeHeight=$imeHeight query=${query ?: "<empty>"} listItems=${list.adapter?.itemCount}")
                 Log.i(TAG, "display $dims @${dm.densityDpi}dpi column=${column.height} list=${list.height}px (${"%.0f".format(list.height / dm.density)}dp) top=${list.top} " +
                     "minList=${minListPx}px quickActionsRow=${if (rowShown) "VISIBLE" else "GONE"} listVisible=${list.visibility == View.VISIBLE}")
                 assertTrue("positive control: the empty search shows the all-apps list", list.visibility == View.VISIBLE && (list.adapter?.itemCount ?: 0) > 0)

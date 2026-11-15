@@ -1,0 +1,22 @@
+Search list vs soft keyboard, Pixel 7 Pro 2B051FDH3006MU, wm size/density + user_rotation, ActHomeSearchLowColumnWidgetTest (-e lowColumnT9 off|on, -e lowColumnQuery). Logged, not asserted: hiddenUnderIme / visibleList.
+Both runs: test only asserts list.height >= minList (layout), which passes; it does not assert what the keyboard leaves visible.
+
+land-t9off-empty | t9=off query=- | display 1440x3120 | OK (1 test) 
+    onScreen listTop=978 listBottom=1356 windowHeight=1440 imeTop=473 hiddenUnderIme=883px visibleList=0px
+    keypad=GONE ime=VISIBLE imeHeight=967 query=<empty> listItems=40
+    display 3120x1440 @560dpi column=1058 list=378px (108dp) top=596 minList=196px quickActionsRow=VISIBLE listVisible=true
+land-t9off-query | t9=off query=App1 | display 1440x3120 | OK (1 test) 
+    onScreen listTop=704 listBottom=1356 windowHeight=1440 imeTop=473 hiddenUnderIme=883px visibleList=0px
+    keypad=GONE ime=VISIBLE imeHeight=967 query=App1 listItems=22
+    display 3120x1440 @560dpi column=1058 list=652px (186dp) top=322 minList=196px quickActionsRow=GONE listVisible=true
+land-t9on-query | t9=on query=App1 | display 1440x3120 | OK (1 test) 
+    onScreen listTop=704 listBottom=978 windowHeight=1440 imeTop=1440 hiddenUnderIme=0px visibleList=274px
+    keypad=VISIBLE h=378 ime=HIDDEN imeHeight=0 query=App1 listItems=22
+    display 3120x1440 @560dpi column=1058 list=274px (78dp) top=322 minList=196px quickActionsRow=GONE listVisible=true
+port-t9off-query | t9=off query=App1 | display 1440x3120 | OK (1 test) 
+    onScreen listTop=750 listBottom=3036 windowHeight=3120 imeTop=1772 hiddenUnderIme=1264px visibleList=1022px
+    keypad=GONE ime=VISIBLE imeHeight=1348 query=App1 listItems=22
+    display 1440x3120 @560dpi column=2692 list=2286px (653dp) top=322 minList=196px quickActionsRow=GONE listVisible=true
+display after: Physical size: 1440x3120  accel=1 rot=0
+
+restore: DATA-IDENTICAL, APKs 134ba042/a48a5efd, 421 packages, 198 tmp entries, display 1440x3120 rot 0
