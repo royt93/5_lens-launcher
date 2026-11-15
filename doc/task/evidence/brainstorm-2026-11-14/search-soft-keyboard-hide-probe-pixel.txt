@@ -1,0 +1,4 @@
+Probe (temporary test code, removed): phone landscape 3120x1440 @560, T9 off, query App1, soft keyboard up. Chips and all list headers forced GONE.
+PROBEHIDE columnTop=382 columnH=1058 padBottom=967 listTop=382 listH=91 imeTop=473 roomAboveIme=91 rowPx=196
+Result: list gets 91 px = 26 dp, less than minList 196 px (56 dp). The search bar area above the column (382 px) plus the 967 px keyboard leave 91 px; chips/headers are not the cause.
+restore: DATA-IDENTICAL, APKs 134ba042/a48a5efd, 421 packages, 198 tmp entries
