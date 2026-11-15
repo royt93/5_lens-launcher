@@ -1,0 +1,45 @@
+# ActSettings, Settings tab (27 switches) on four display profiles, Pixel 7 Pro 2B051FDH3006MU, ActSettingsDisplaySizesTest (2 tests)
+# one am instrument per test and profile, rotation applied by run-display-tests-adguard.sh with the Pixel launcher in front; first-launch dialogs avoided by seeding KEY_READ_POLICY and the language-selected key (as AdOverlayContrastWidgetTest does); DeviceStateGuard restores the preferences
+# restored from the true baseline afterwards: data identical, apk 134ba042/a48a5efd, 421 packages, 198 tmp entries
+
+## result: 8 of 8 pass
+Success
+phone-portrait | theLastSettingCanBeScrolledAboveTheSystemBarAndTheBanner | display before 1440x3120 | OK (1 test) 
+      9 I F265SET : orientation check expected=portrait activity=1440x3120 portrait=true
+      0 I F265SET : display 1440x3120 @560dpi frameBottom=3036 scroll=1440x2360 content=12390px (3540dp) scrollMax=10030 scrollTop=592 scrollBottom=2952 lastTop=2651 lastBottom=2875 bannerTop=-1 overlayVisible=false tabs=224 paddingBottom=0 clipToPadding=true
+phone-landscape | theLastSettingCanBeScrolledAboveTheSystemBarAndTheBanner | display before 1440x3120 | OK (1 test) 
+      3 I F265SET : orientation check expected=landscape activity=3120x1440 portrait=false
+      8 I F265SET : display 3120x1440 @560dpi frameBottom=1356 scroll=3120x726 content=11523px (3292dp) scrollMax=10797 scrollTop=546 scrollBottom=1272 lastTop=971 lastBottom=1195 bannerTop=-1 overlayVisible=false tabs=224 paddingBottom=0 clipToPadding=true
+tablet-portrait | theLastSettingCanBeScrolledAboveTheSystemBarAndTheBanner | display before 1600x2560 | OK (1 test) 
+      1 I F265SET : orientation check expected=portrait activity=1600x2560 portrait=true
+      5 I F265SET : display 1600x2560 @320dpi frameBottom=2496 scroll=1600x2074 content=6606px (3303dp) scrollMax=4532 scrollTop=374 scrollBottom=2448 lastTop=2276 lastBottom=2404 bannerTop=-1 overlayVisible=false tabs=128 paddingBottom=0 clipToPadding=true
+tablet-landscape | theLastSettingCanBeScrolledAboveTheSystemBarAndTheBanner | display before 2560x1600 | OK (1 test) 
+      5 I F265SET : orientation check expected=landscape activity=2560x1600 portrait=false
+      0 I F265SET : display 2560x1600 @320dpi frameBottom=1536 scroll=2560x1176 content=6578px (3289dp) scrollMax=5402 scrollTop=312 scrollBottom=1488 lastTop=1316 lastBottom=1444 bannerTop=-1 overlayVisible=false tabs=128 paddingBottom=0 clipToPadding=true
+phone-portrait | theScreenshotMatchesTheActivityDisplayAndShowsNoAdOverlay | display before 1440x3120 | OK (1 test) 
+      3 I F265SET : orientation check expected=portrait activity=1440x3120 portrait=true
+      3 I F265SET : overlay visible at capture time = false
+      3 I F265SET : screenshot settings-1440x3120.png 1440x3120 display=1440x3120 bytes=203085
+phone-landscape | theScreenshotMatchesTheActivityDisplayAndShowsNoAdOverlay | display before 1440x3120 | OK (1 test) 
+      7 I F265SET : orientation check expected=landscape activity=3120x1440 portrait=false
+      7 I F265SET : overlay visible at capture time = false
+      7 I F265SET : screenshot settings-3120x1440.png 3120x1440 display=3120x1440 bytes=116410
+tablet-portrait | theScreenshotMatchesTheActivityDisplayAndShowsNoAdOverlay | display before 1600x2560 | OK (1 test) 
+      4 I F265SET : orientation check expected=portrait activity=1600x2560 portrait=true
+      4 I F265SET : overlay visible at capture time = false
+      4 I F265SET : screenshot settings-1600x2560.png 1600x2560 display=1600x2560 bytes=177328
+tablet-landscape | theScreenshotMatchesTheActivityDisplayAndShowsNoAdOverlay | display before 2560x1600 | OK (1 test) 
+      3 I F265SET : orientation check expected=landscape activity=2560x1600 portrait=false
+      3 I F265SET : overlay visible at capture time = false
+
+## last element (llImportLayout) after scrolling to the end, relative to the visible frame bottom
+phone portrait: last element bottom 2875, frame bottom 3036, gap above the bar 161px = 46dp
+phone landscape: last element bottom 1195, frame bottom 1356, gap above the bar 161px = 46dp
+tablet portrait: last element bottom 2404, frame bottom 2496, gap above the bar 92px = 46dp
+tablet landscape: last element bottom 1444, frame bottom 1536, gap above the bar 92px = 46dp
+# the last element ends 46 dp above the visible frame bottom on every profile; the whole Settings content is about 3290-3540 dp tall, i.e. 9-10 screens of scrolling on a phone in portrait.
+
+## ad handling: WHAT THIS RUN DOES AND DOES NOT PROVE
+# overlayVisible=false (flAdOpenApp) at capture time in all 4 screenshot runs and in all 4 geometry runs; bannerTop=-1 (banner container not visible or zero height) in all 4 geometry runs.
+# the guard (watcher sending KEYCODE_BACK to a focused ad window, stopping after 3 BACKs) wrote NO file in 8 runs. That is what 'no ad window appeared' looks like, and ALSO what 'the guard never recognised an ad window' looks like: its regex (gms.ads, AdActivity, com.google.android.gms) is a guess and was never triggered, so the guard itself is untested.
+# so: no ad overlay or banner covered the Settings tab in these 8 runs; it is NOT shown that no interstitial can appear on this build.
