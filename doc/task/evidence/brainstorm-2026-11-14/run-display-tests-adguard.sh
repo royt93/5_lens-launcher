@@ -1,7 +1,7 @@
 #!/bin/bash
 # usage: run-display-tests-adguard.sh <serial> <out-prefix> <class> <expect-arg-name> <log-tag> <methods-file>
 # Same as run-display-tests.sh, plus an ad guard for screens that start an ad flow. While a test runs, a watcher looks at the focused
-# window every second: when it is an ad window (com.google.android.gms.ads / AdActivity) it sends KEYCODE_BACK and logs it. It never taps
+# window every second: when it is the AdMob full-screen window (com.google.android.gms.ads.AdActivity) it sends KEYCODE_BACK and logs it. It never taps
 # ad content. If the SAME ad window is still in front after 3 BACKs, the run is STOPPED (R4): the instrumentation is killed, a marker is
 # printed, and nothing else is run until the owner clears it.
 S=$1; OUT=$2; CLS=$3; ARG=$4; TAG=$5; METHODS=$6
@@ -14,7 +14,9 @@ guard() { # logfile; runs until $OUT.guardstop exists
   same=0; last=""
   while [ ! -f $OUT.guardstop ]; do
     f=$(focus)
-    if echo "$f" | grep -qiE "gms\.ads|AdActivity|com\.google\.android\.gms"; then
+    # Window names taken from the debug APK manifest (aapt2 dump), AdMob only: com.google.android.gms.ads.AdActivity is the full-screen ad.
+    # com.google.android.gms.common.api.GoogleApiActivity (Google sign-in/services) is NOT an ad and must not get a BACK from this guard.
+    if echo "$f" | grep -qE "com\.google\.android\.gms\.ads\.AdActivity"; then
       if [ "$f" = "$last" ]; then same=$((same+1)); else same=1; last=$f; fi
       echo "$(date +%H:%M:%S) AD WINDOW $f (BACK #$same)" >> $1
       if [ $same -gt 3 ]; then echo "$(date +%H:%M:%S) AD-STUCK $f: BACK did not close it, stopping (R4)" >> $1; touch $OUT.adstuck; A shell am force-stop $P.test; break; fi
