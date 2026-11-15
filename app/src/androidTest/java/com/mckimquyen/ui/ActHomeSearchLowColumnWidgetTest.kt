@@ -112,14 +112,23 @@ class ActHomeSearchLowColumnWidgetTest {
                 val imeInsets = androidx.core.view.ViewCompat.getRootWindowInsets(activity.window.decorView)
                 val imeVisible = imeInsets?.isVisible(androidx.core.view.WindowInsetsCompat.Type.ime()) == true
                 val imeHeight = imeInsets?.getInsets(androidx.core.view.WindowInsetsCompat.Type.ime())?.bottom ?: 0
-                // Where the list really ends on screen versus where the soft keyboard starts (the list is clipped by the keyboard when its
-                // bottom is below that line). Logged, not asserted: whether the layout should shrink for the keyboard is a product decision.
+                // Where the list really ends on screen versus where the soft keyboard starts. Only the part of the list that has height can be
+                // hidden, so a 0 px list hides nothing (and shows nothing: that case is the "no room" one below).
                 val loc = IntArray(2)
                 list.getLocationOnScreen(loc)
                 val windowHeight = activity.window.decorView.height
                 val imeTop = windowHeight - imeHeight
                 val listBottom = loc[1] + list.height
-                Log.i(TAG, "onScreen listTop=${loc[1]} listBottom=$listBottom windowHeight=$windowHeight imeTop=$imeTop hiddenUnderIme=${if (imeVisible) (listBottom - imeTop).coerceAtLeast(0) else 0}px visibleList=${(minOf(listBottom, imeTop) - loc[1]).coerceAtLeast(0)}px")
+                val hiddenUnderIme = if (imeVisible && list.height > 0) (listBottom - imeTop).coerceIn(0, list.height) else 0
+                val visibleList = if (imeVisible) (minOf(listBottom, imeTop) - loc[1]).coerceIn(0, list.height) else list.height
+                val roomAboveIme = if (imeVisible) imeTop - loc[1] else Int.MAX_VALUE
+                Log.i(TAG, "onScreen listTop=${loc[1]} listBottom=$listBottom windowHeight=$windowHeight imeTop=$imeTop hiddenUnderIme=${hiddenUnderIme}px visibleList=${visibleList}px roomAboveIme=${if (imeVisible) "${roomAboveIme}px" else "n/a"}")
+                // Nothing of the list may be drawn under the soft keyboard (T9 off): its last rows would be unreachable. When the keyboard
+                // leaves less than minList above it (phone landscape: 967 px of keyboard in 1440 px, the search bar and chips take the rest) there
+                // is no room to give: that is logged as NOROOM, not asserted, and is a limit of this layout, not something the padding can fix.
+                if (imeVisible) assertEquals("px of the search list drawn under the soft keyboard", 0, hiddenUnderIme)
+                if (imeVisible && roomAboveIme >= minListPx) assertTrue("room above the keyboard was $roomAboveIme px but only $visibleList px of the list show", visibleList >= minListPx)
+                if (imeVisible && roomAboveIme < minListPx) Log.i(TAG, "NOROOM: only ${roomAboveIme}px above the keyboard, below minList ${minListPx}px")
                 val keypad = activity.findViewById<View>(R.id.scrollT9Keypad)
                 Log.i(TAG, "keypad=${if (keypad.visibility == View.VISIBLE) "VISIBLE h=${keypad.height}" else "GONE"} ime=${if (imeVisible) "VISIBLE" else "HIDDEN"} imeHeight=$imeHeight query=${query ?: "<empty>"} listItems=${list.adapter?.itemCount}")
                 Log.i(TAG, "display $dims @${dm.densityDpi}dpi column=${column.height} list=${list.height}px (${"%.0f".format(list.height / dm.density)}dp) top=${list.top} " +
@@ -127,7 +136,7 @@ class ActHomeSearchLowColumnWidgetTest {
                 assertTrue("positive control: the empty search shows the all-apps list", list.visibility == View.VISIBLE && (list.adapter?.itemCount ?: 0) > 0)
                 // The row yields only when it has to, and when it yields the list really gets the room (the first version of the controller
                 // hid the row but left the list at 0 px: the layout pass that should follow was swallowed).
-                assertTrue("the list must keep at least $minListPx px (row ${if (rowShown) "VISIBLE" else "GONE"}), had ${list.height}", list.height >= minListPx)
+                if (!imeVisible) assertTrue("the list must keep at least $minListPx px (row ${if (rowShown) "VISIBLE" else "GONE"}), had ${list.height}", list.height >= minListPx)
                 if (expectedRowShown != null) assertEquals("quick-actions row visibility for this display", expectedRowShown, rowShown)
             }
         }

@@ -509,9 +509,12 @@ public class ActHome extends ActBase implements LensViewHolderHost, HomeQuickAct
 
             // SEARCH-010: the edge-to-edge SearchView content (incl. the docked T9 keypad) has no
             // inset handling of its own, so its last row drew under the navigation bar.
+            // With T9 off the soft keyboard opens with the search and (edge-to-edge) does not resize the window, so the list's
+            // lower rows sat under it: the bottom padding is whichever is taller, the bars or the keyboard.
             View searchContent = findViewById(R.id.searchContent);
-            if (searchContent != null && searchContent.getPaddingBottom() != systemBars.bottom) {
-                searchContent.setPadding(0, 0, 0, systemBars.bottom);
+            int searchBottomInset = Math.max(systemBars.bottom, insets.getInsets(WindowInsetsCompat.Type.ime()).bottom);
+            if (searchContent != null && searchContent.getPaddingBottom() != searchBottomInset) {
+                searchContent.setPadding(0, 0, 0, searchBottomInset);
             }
 
             searchBar.post(() -> {

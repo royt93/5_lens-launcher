@@ -20,3 +20,26 @@ port-t9off-query | t9=off query=App1 | display 1440x3120 | OK (1 test)
 display after: Physical size: 1440x3120  accel=1 rot=0
 
 restore: DATA-IDENTICAL, APKs 134ba042/a48a5efd, 421 packages, 198 tmp entries, display 1440x3120 rot 0
+
+=== RED (before fix, assert 'nothing under keyboard'): land-t9off-empty 883 px, land-t9off-query 883 px, port-t9off-query 1264 px hidden; land-t9on-query green
+=== AFTER fix (ActHome: searchContent bottom padding = max(system bars, ime)), final assertions:
+land-t9off-empty | t9=off query=- | display 1440x3120 | OK (1 test) 
+    onScreen listTop=613 listBottom=613 windowHeight=1440 imeTop=473 hiddenUnderIme=0px visibleList=0px roomAboveIme=-140px
+    NOROOM: only -140px above the keyboard, below minList 196px
+    keypad=GONE ime=VISIBLE imeHeight=967 query=<empty> listItems=40
+    display 3120x1440 @560dpi column=1058 list=0px (0dp) top=231 minList=196px quickActionsRow=GONE listVisible=true
+land-t9off-query | t9=off query=App1 | display 1440x3120 | OK (1 test) 
+    onScreen listTop=613 listBottom=613 windowHeight=1440 imeTop=473 hiddenUnderIme=0px visibleList=0px roomAboveIme=-140px
+    NOROOM: only -140px above the keyboard, below minList 196px
+    keypad=GONE ime=VISIBLE imeHeight=967 query=App1 listItems=22
+    display 3120x1440 @560dpi column=1058 list=0px (0dp) top=231 minList=196px quickActionsRow=GONE listVisible=true
+land-t9on-query | t9=on query=App1 | display 1440x3120 | OK (1 test) 
+    onScreen listTop=704 listBottom=978 windowHeight=1440 imeTop=1440 hiddenUnderIme=0px visibleList=274px roomAboveIme=n/a
+    keypad=VISIBLE h=378 ime=HIDDEN imeHeight=0 query=App1 listItems=22
+    display 3120x1440 @560dpi column=1058 list=274px (78dp) top=322 minList=196px quickActionsRow=GONE listVisible=true
+port-t9off-query | t9=off query=App1 | display 1440x3120 | OK (1 test) 
+    onScreen listTop=750 listBottom=1772 windowHeight=3120 imeTop=1772 hiddenUnderIme=0px visibleList=1022px roomAboveIme=1022px
+    keypad=GONE ime=VISIBLE imeHeight=1348 query=App1 listItems=22
+    display 1440x3120 @560dpi column=2692 list=1022px (292dp) top=322 minList=196px quickActionsRow=GONE listVisible=true
+display after: Physical size: 1440x3120  accel=1 rot=0
+restore: DATA-IDENTICAL, APKs 134ba042/a48a5efd, 421 packages, 198 tmp entries
