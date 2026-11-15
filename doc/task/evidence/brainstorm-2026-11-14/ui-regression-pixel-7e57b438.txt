@@ -1,0 +1,7 @@
+Whole com.mckimquyen.ui package, Pixel 7 Pro 2B051FDH3006MU, build 7e57b438 (ActHome keyboard-inset fix), 15:17:01 -> 15:32:30
+1) cancelLeavesEveryValueUntouched(com.mckimquyen.ui.ResetDefaultsWidgetTest)
+FAILURES!!!
+Tests run: 580,  Failures: 1
+known flaky ResetDefaultsWidgetTest: base APK fails 5/30, changed APK 3/30 in interleaved A/B (reset-defaults-ab-20-pixel.txt)
+host: unit 1794/1794 (result files, --rerun-tasks), lint 0 errors / 16 warnings (baseline), none in ActHome.java
+restore: DATA-IDENTICAL, APKs 134ba042/a48a5efd, 421 packages, 198 tmp entries, display 1440x3120 rot 0
