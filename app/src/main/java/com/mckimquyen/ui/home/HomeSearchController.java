@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
@@ -30,6 +31,8 @@ import com.mckimquyen.search.T9SearchEngine;
 import com.mckimquyen.search.SearchEnterKeyPolicy;
 import com.mckimquyen.search.SearchFilterEngine;
 import com.mckimquyen.search.SearchHistoryStore;
+import com.mckimquyen.search.SearchQuickActionsRowPolicy;
+import com.mckimquyen.views.BoundedHeightNestedScrollView;
 import com.mckimquyen.search.SearchResultAdapter;
 import com.mckimquyen.util.UtilSettings;
 import java.util.ArrayList;
@@ -63,6 +66,8 @@ public final class HomeSearchController {
     private final TextView webSearchFallback;
     private final RecyclerView searchResults;
     private View t9Keypad;
+    private ViewGroup searchColumn;
+    private View.OnLayoutChangeListener columnLayoutListener;
     private ChipGroup chipGroupSearchFilters;
     private SearchResultAdapter searchResultAdapter;
     private SearchHistoryStore searchHistoryStore;
@@ -111,6 +116,9 @@ public final class HomeSearchController {
         for (View tile : prefillTiles) tile.setOnClickListener(null);
         prefillTiles.clear();
         if (t9Binder != null) { t9Binder.close(); t9Binder = null; }
+        if (searchColumn != null && columnLayoutListener != null) { searchColumn.removeOnLayoutChangeListener(columnLayoutListener); }
+        columnLayoutListener = null;
+        searchColumn = null;
         searchResults.setAdapter(null);
     }
 
@@ -289,6 +297,60 @@ public final class HomeSearchController {
         // SEARCH-010: T9 dialpad buttons wiring
         t9Keypad = activity.findViewById(R.id.scrollT9Keypad);
         t9Binder = new T9KeypadBinder(activity, appSearch);
+        // The column's height changes with rotation, window size and system bars, none of which touch the query: re-decide the
+        // quick-actions row then. setVisibility only runs on a change, so the layout pass it causes converges instead of looping.
+        searchColumn = activity.findViewById(R.id.searchContent);
+        columnLayoutListener = (v, l, t, r, b, ol, ot, or, ob) -> {
+            if (searchView.isShowing()) applyQuickActionsRow(AppSearchEngine.normalize(appSearch.getText()).isEmpty());
+        };
+        if (searchColumn != null) searchColumn.addOnLayoutChangeListener(columnLayoutListener);
+    }
+
+    /**
+     * Shows the empty-search quick-actions row unless it would squeeze the all-apps list under one row (phone landscape with the T9
+     * keypad: 596 px of rows plus the keypad in a 974 px column left the list 0 px high). The column's height is unknown before its
+     * first layout; then the previous behaviour (show) stands and the layout listener corrects it.
+     */
+    private void applyQuickActionsRow(boolean isEmptyQuery) {
+        boolean show = isEmptyQuery;
+        if (isEmptyQuery && searchColumn != null) {
+            int column = searchColumn.getHeight() - searchColumn.getPaddingTop() - searchColumn.getPaddingBottom();
+            if (column > 0) {
+                int fixedRows = 0;
+                for (int i = 0; i < searchColumn.getChildCount(); i++) {
+                    View child = searchColumn.getChildAt(i);
+                    if (child == searchResults || child == t9Keypad || child == llEmptyQuickActions || child.getVisibility() == View.GONE) continue;
+                    ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) child.getLayoutParams();
+                    fixedRows += child.getHeight() + lp.topMargin + lp.bottomMargin;
+                }
+                // The row's natural height, measured: a GONE row has none, and counting what it would take keeps the decision independent of the last one.
+                llEmptyQuickActions.measure(
+                        View.MeasureSpec.makeMeasureSpec(searchColumn.getWidth(), View.MeasureSpec.EXACTLY),
+                        View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+                fixedRows += llEmptyQuickActions.getMeasuredHeight();
+                int keypad = 0;
+                if (t9Keypad != null && t9Keypad.getVisibility() == View.VISIBLE) {
+                    // At most the cap; the keypad's own content when that is smaller (it does not depend on this decision either).
+                    int cap = column * BoundedHeightNestedScrollView.MAX_HEIGHT_PERCENT / 100;
+                    View content = ((ViewGroup) t9Keypad).getChildAt(0);
+                    keypad = content != null && content.getHeight() > 0 ? Math.min(cap, content.getHeight()) : cap;
+                }
+                int minList = (int) (SearchQuickActionsRowPolicy.MIN_LIST_DP * activity.getResources().getDisplayMetrics().density);
+                show = SearchQuickActionsRowPolicy.shouldShow(true, column, fixedRows, keypad, minList);
+            }
+        }
+        int want = show ? View.VISIBLE : View.GONE;
+        if (llEmptyQuickActions.getVisibility() != want) {
+            llEmptyQuickActions.setVisibility(want);
+            // Measured on a Pixel in phone landscape: with the row GONE the column kept the old layout (list.top still reserved the row's
+            // 274 px, list 0 px high) until a layout pass was requested; with it the list got its 274 px. This runs from a layout listener
+            // too, where the visibility change alone does not always schedule another pass.
+            // post(): a requestLayout issued from inside a layout pass (the listener below runs in one) is dropped by the pass that is
+            // still running, which left the list at 0 px for over a second; queued after it, it runs as a fresh pass.
+            if (searchColumn != null) searchColumn.post(() -> {
+                if (searchColumn != null) searchColumn.requestLayout();
+            });
+        }
     }
 
     private void prefillOnTap(int tileViewId, String exampleQuery) {
@@ -398,7 +460,7 @@ public final class HomeSearchController {
             resultsSectionHeader.setText(activity.getResources().getQuantityString(
                     R.plurals.search_results_count, resultCount, resultCount));
         }
-        llEmptyQuickActions.setVisibility(isEmptyQuery ? View.VISIBLE : View.GONE);
+        applyQuickActionsRow(isEmptyQuery);
         searchResults.setVisibility(hasResults ? View.VISIBLE : View.GONE);
         noSearchResults.setText(isEmptyQuery ? R.string.search_empty_state : R.string.no_apps_found);
         noSearchResults.setVisibility(hasResults ? View.GONE : View.VISIBLE);

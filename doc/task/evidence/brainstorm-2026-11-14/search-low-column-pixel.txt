@@ -1,0 +1,52 @@
+# Search results list 0 px in phone landscape (empty query, T9 on): SearchQuickActionsRowPolicy + HomeSearchController wiring
+# Pixel 7 Pro 2B051FDH3006MU, devDebug, ActHomeSearchLowColumnWidgetTest, rotation done by run-search-low-column-profiles.sh, restored to the true baseline after every run
+
+## red first (f298): policy existed, controller NOT wired
+phone-portrait  list 1135 px, row VISIBLE  OK
+phone-landscape list 0 px,    row VISIBLE  FAIL 'with the row VISIBLE the list must keep 392 px, had 0'  (column 1058 px, 974 content)
+tablet-portrait list 1374 px, row VISIBLE  OK
+tablet-landscape list 476 px, row VISIBLE  OK
+
+## first wiring did NOT work (f303): the row went GONE but the list stayed 0 px
+# f304-f309 isolated it: the layout still reserved the hidden row (list.top 596 = chips 182 + row 274 + header 140), and a layout requested from inside the column's own layout listener was swallowed by the running pass (f310, temporary logs): decision at .197 'show=false', requestLayout at .197 with listH=0, next real layout only when the test called requestLayout at .434 (list 274 px).
+# f311: requestLayout moved into post(): the very next pass ran at .322 with listH=274.
+
+## final (f316, clean build, temporary probe logs removed; 0 occurrences of F311PROBE)
+=== four profiles, clean build (probe removed)
+phone-portrait | expect row shown | display 1440x3120 | OK (1 test) 
+      7 I F297LOW : display 1440x3120 @560dpi column=2692 list=1135px (324dp) top=596 minList=196px quickActionsRow=VISIBLE listVisible=true
+phone-landscape | expect row hidden | display 1440x3120 | OK (1 test) 
+      2 I F297LOW : display 3120x1440 @560dpi column=1058 list=274px (78dp) top=322 minList=196px quickActionsRow=GONE listVisible=true
+tablet-portrait | expect row shown | display 1600x2560 | OK (1 test) 
+      9 I F297LOW : display 1600x2560 @320dpi column=2280 list=1374px (687dp) top=341 minList=112px quickActionsRow=VISIBLE listVisible=true
+tablet-landscape | expect row shown | display 2560x1600 | OK (1 test) 
+
+## host
+policy mutations: 9 (>= to >, drop empty-query term, ignore keypad, ignore fixed rows, drop column<=0 guard, negative keypad not clamped, negative minimum not clamped, always show, always hide): 6 caught by the first 9 tests, 3 survived, 3 tests added, 9 of 9 caught with 11 tests
+forced unit (--rerun-tasks): 234 classes, 1794 tests, 0 failures, 0 errors, 0 skipped (1783 before + 11 new), 41 tasks executed
+forced lint: 0 errors, 16 warnings (the baseline), none in HomeSearchController, BoundedHeightNestedScrollView, SearchQuickActionsRowPolicy or the new test
+
+## Pixel, whole com.mckimquyen.ui package (f316): 580 tests, 1 failure: ResetDefaultsWidgetTest.cancelLeavesEveryValueUntouched (RootViewWithoutFocusException)
+# that test does not touch search (0 mentions of HomeSearchController/openSearchFromHome/searchView). A/B, same test APK, interleaved, the whole ResetDefaultsWidgetTest class (3 tests), 10 rounds each (f318):
+round 1 base | OK (3 tests)
+round 1 after | OK (3 tests)
+round 2 base | OK (3 tests)
+round 2 after | OK (3 tests)
+round 3 base | OK (3 tests)
+round 3 after | OK (3 tests)
+round 4 base | OK (3 tests)
+round 4 after | OK (3 tests)
+round 5 base | OK (3 tests)
+round 5 after | OK (3 tests)
+round 6 base | OK (3 tests)
+round 6 after | OK (3 tests)
+round 7 base | OK (3 tests)
+round 7 after | OK (3 tests)
+round 8 base | Tests run: 3,  Failures: 1
+round 8 after | OK (3 tests)
+round 9 base | Tests run: 3,  Failures: 1
+round 9 after | OK (3 tests)
+round 10 base | OK (3 tests)
+round 10 after | OK (3 tests)
+SUMMARY base fails 2 / 10, changed fails 0 / 10
+# the unchanged base APK failed 2 of 10 and the changed APK 0 of 10: the failure exists without this change (it is a known flaky), it is NOT shown to be caused by it, and 0 of 10 is NOT shown to be an improvement (10 rounds).

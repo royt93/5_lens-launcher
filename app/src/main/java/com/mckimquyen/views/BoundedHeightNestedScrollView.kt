@@ -60,7 +60,8 @@ class BoundedHeightNestedScrollView @JvmOverloads constructor(
         return if (weightSeen > 0f) taken else 0
     }
 
-    private companion object {
+    companion object {
+        /** Share of the offered column height the keypad may take; also read by the search layout to budget the rows above the list. */
         const val MAX_HEIGHT_PERCENT = 40
     }
 }
