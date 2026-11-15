@@ -1,0 +1,45 @@
+# LensManagementActivity on four display profiles, Pixel 7 Pro 2B051FDH3006MU, LensManagementDisplaySizesTest (2 tests), 12 lenses
+# one am instrument per test and profile, rotation applied by run-display-tests.sh with the Pixel launcher in front; the test fails if the Activity is not in the asked orientation
+# restored from the true baseline afterwards: data identical, apk 134ba042/a48a5efd, 421 packages, 198 tmp entries
+
+## final run (f255): 8 of 8 pass
+Success
+phone-portrait | theListKeepsRoomAndItsLastRowCanBeScrolledAboveTheSystemBar | display 1440x3120 | OK (1 test) 
+      9 I F248LM  : orientation check expected=portrait activity=1440x3120 portrait=true
+      4 I F248LM  : EXPANDED list bottom=3568 frameBottom=3036 below-frame=532px (152dp)
+      4 I F248LM  : COLLAPSED display 1440x3120 @560dpi frameBottom=3036 appBar=816px (233dp) list=1440x2752px (786dp) top=368 bottom=3120 firstRowHeight=196 rowsFullyVisibleWithoutScroll=14 canScrollDown=true actionsVisible=false listPaddingBottom=140
+      4 I F248LM  : last row top=2756 bottom=2980 frameBottom=3036 overshootPx=-56
+phone-landscape | theListKeepsRoomAndItsLastRowCanBeScrolledAboveTheSystemBar | display 1440x3120 | OK (1 test) 
+      8 I F248LM  : orientation check expected=landscape activity=3120x1440 portrait=false
+      1 I F248LM  : EXPANDED list bottom=1888 frameBottom=1356 below-frame=532px (152dp)
+      1 I F248LM  : COLLAPSED display 3120x1440 @560dpi frameBottom=1356 appBar=770px (220dp) list=2976x1118px (319dp) top=322 bottom=1440 firstRowHeight=196 rowsFullyVisibleWithoutScroll=5 canScrollDown=true actionsVisible=false listPaddingBottom=140
+      1 I F248LM  : last row top=1076 bottom=1300 frameBottom=1356 overshootPx=-56
+tablet-portrait | theListKeepsRoomAndItsLastRowCanBeScrolledAboveTheSystemBar | display 1600x2560 | OK (1 test) 
+      0 I F248LM  : orientation check expected=portrait activity=1600x2560 portrait=true
+      1 I F248LM  : EXPANDED list bottom=2816 frameBottom=2496 below-frame=320px (160dp)
+      1 I F248LM  : COLLAPSED display 1600x2560 @320dpi frameBottom=2496 appBar=502px (251dp) list=1600x2314px (1157dp) top=246 bottom=2560 firstRowHeight=112 rowsFullyVisibleWithoutScroll=20 canScrollDown=false actionsVisible=false listPaddingBottom=96
+      1 I F248LM  : last row top=1790 bottom=1918 frameBottom=2496 overshootPx=-578
+tablet-landscape | theListKeepsRoomAndItsLastRowCanBeScrolledAboveTheSystemBar | display 2560x1600 | OK (1 test) 
+      1 I F248LM  : orientation check expected=landscape activity=2560x1600 portrait=false
+      4 I F248LM  : EXPANDED list bottom=1856 frameBottom=1536 below-frame=320px (160dp)
+      4 I F248LM  : COLLAPSED display 2560x1600 @320dpi frameBottom=1536 appBar=440px (220dp) list=2442x1416px (708dp) top=184 bottom=1600 firstRowHeight=112 rowsFullyVisibleWithoutScroll=12 canScrollDown=true actionsVisible=false listPaddingBottom=96
+      4 I F248LM  : last row top=1376 bottom=1504 frameBottom=1536 overshootPx=-32
+phone-portrait | theScreenshotMatchesTheActivityDisplayAndIsWrittenForReview | display 1440x3120 | OK (1 test) 
+      5 I F248LM  : orientation check expected=portrait activity=1440x3120 portrait=true
+      5 I F248LM  : screenshot lensmanager-1440x3120.png 1440x3120 display=1440x3120 bytes=144827
+phone-landscape | theScreenshotMatchesTheActivityDisplayAndIsWrittenForReview | display 1440x3120 | OK (1 test) 
+      7 I F248LM  : orientation check expected=landscape activity=3120x1440 portrait=false
+      7 I F248LM  : screenshot lensmanager-3120x1440.png 3120x1440 display=3120x1440 bytes=76735
+tablet-portrait | theScreenshotMatchesTheActivityDisplayAndIsWrittenForReview | display 1600x2560 | OK (1 test) 
+      9 I F248LM  : orientation check expected=portrait activity=1600x2560 portrait=true
+      9 I F248LM  : screenshot lensmanager-1600x2560.png 1600x2560 display=1600x2560 bytes=105781
+tablet-landscape | theScreenshotMatchesTheActivityDisplayAndIsWrittenForReview | display 2560x1600 | OK (1 test) 
+      9 I F248LM  : orientation check expected=landscape activity=2560x1600 portrait=false
+
+## reading
+# expanded vs collapsed list bottom differs by exactly 128 dp on every profile (448 px at 3.5x, 256 px at 2.0x). The list bottom is the screen bottom in both states (it carries 140 px / 96 px of bottom padding for the system bar), so on the expanded state it sits 152 dp (phone) / 160 dp (tablet-like) below the visible frame: 128 dp of toolbar range plus the 24 dp / 32 dp bar.
+# last row, after scrolling to it: ends 56 px (phone portrait and landscape), 578 px (tablet portrait, all rows fit, no scroll) and 32 px (tablet landscape) above the visible frame bottom.
+# phone landscape: appBar 220 dp, list 319 dp = about 5 whole rows without scrolling (196 px rows). Usable, not cramped to zero like the search results list.
+# screenshots: 1440x3120, 3120x1440, 1600x2560, 2560x1600, each equal to the Activity display and not blank (PixelCopy). They are for review, not compared with a stored baseline.
+
+## discarded: first run (f249) failed 3 geometry tests because it compared the EXPANDED list bottom with the visible frame; the phone-landscape cases were skipped by a script gate that read the display too early. A later run (f252) failed 4 of 8: three on the same wrong assertion, one PixelCopy 'Window doesn't have a backing surface' race, and the tablet-landscape geometry case died with 'waiting for device'.
