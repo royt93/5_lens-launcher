@@ -1,0 +1,14 @@
+Hand-style check driven by adb (input tap/swipe/text + screencap), NOT a person's finger. Pixel 7 Pro 2B051FDH3006MU, dev build 3b4cff00, ActHome in phone landscape (3120x1440 @560, user_rotation=1 applied while ActHome was in front).
+Screenshots kept in /tmp/f341 (not committed: they show the apps installed on the device).
+
+T9 OFF (default prefs), landscape:
+  tap search bar -> soft keyboard opens (mInputShown=true), `input text face` fills the box, keyboard suggestions row shows.
+  Screenshot 03: chips visible but cut in half by the keyboard row; NO result list is visible at all (matches the measured visibleList=0 px, NOROOM).
+T9 ON (enable_t9_search_keypad=true written into the app prefs; original prefs restored from the baseline afterwards), landscape:
+  empty query: quick-actions row hidden (a6ef9b97), chips + "Ung dung gan day" header + 1 full row (Chrome) + a cut-off second row, keypad shows rows 1-2-3 and the top of 4-5-6.
+  `input text 3223` does NOT type into the box when T9 is on (the box takes no soft keyboard): expected for T9, not a bug found here.
+  tap keys 3 then 2 -> query "32", "24 ung dung phu hop", list scrolls under the headers (swipe moves it: App Tester -> Chep loi truc tiep).
+  swipe on the keypad -> it scrolls to rows 7-8-9 (PQRS/TUV/WXYZ), last row fully visible above the navigation bar.
+  tap 7 while the keypad was scrolled -> query "327", "7 ung dung phu hop"; scrolling the list again moves it independently (Chep loi -> Google -> InspireMe).
+Observed, not asserted: with T9 on in phone landscape the list viewport is about one and a half rows; the keypad hides the rest. Usable but tight.
+restore: DATA-IDENTICAL, APKs 134ba042/a48a5efd, 421 packages, 198 tmp entries, display 1440x3120 rot 0.
