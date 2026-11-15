@@ -1,0 +1,49 @@
+A/B ResetDefaultsWidgetTest, Pixel 2B051FDH3006MU, 20 rounds interleaved, same test APK, base vs changed main APK
+round 1 base | OK (3 tests)
+round 1 after | OK (3 tests)
+round 2 base | Tests run: 3,  Failures: 1
+round 2 after | OK (3 tests)
+round 3 base | Tests run: 3,  Failures: 1
+round 3 after | OK (3 tests)
+round 4 base | OK (3 tests)
+round 4 after | OK (3 tests)
+round 5 base | OK (3 tests)
+round 5 after | Tests run: 3,  Failures: 1
+round 6 base | OK (3 tests)
+round 6 after | OK (3 tests)
+round 7 base | OK (3 tests)
+round 7 after | OK (3 tests)
+round 8 base | OK (3 tests)
+round 8 after | OK (3 tests)
+round 9 base | OK (3 tests)
+round 9 after | Tests run: 3,  Failures: 1
+round 10 base | OK (3 tests)
+round 10 after | OK (3 tests)
+round 11 base | OK (3 tests)
+round 11 after | OK (3 tests)
+round 12 base | Tests run: 3,  Failures: 1
+round 12 after | OK (3 tests)
+round 13 base | OK (3 tests)
+round 13 after | OK (3 tests)
+round 14 base | OK (3 tests)
+round 14 after | Tests run: 3,  Failures: 1
+round 15 base | OK (3 tests)
+round 15 after | OK (3 tests)
+round 16 base | OK (3 tests)
+round 16 after | OK (3 tests)
+round 17 base | OK (3 tests)
+round 17 after | OK (3 tests)
+round 18 base | OK (3 tests)
+round 18 after | OK (3 tests)
+round 19 base | OK (3 tests)
+round 19 after | OK (3 tests)
+round 20 base | OK (3 tests)
+round 20 after | OK (3 tests)
+SUMMARY base fails 3 / 20, changed fails 3 / 20
+
+f318-base-2: 1) resetThenUndoRestoresValuesAndAbsentKeysAndLeavesOtherPrefsAlone(com.mckimquyen.ui.ResetDefaultsWidgetTest)
+f318-base-3: 1) resetThenUndoRestoresValuesAndAbsentKeysAndLeavesOtherPrefsAlone(com.mckimquyen.ui.ResetDefaultsWidgetTest)
+f318-base-12: 1) resetThenUndoRestoresValuesAndAbsentKeysAndLeavesOtherPrefsAlone(com.mckimquyen.ui.ResetDefaultsWidgetTest)
+f318-after-5: 1) resetThenUndoRestoresValuesAndAbsentKeysAndLeavesOtherPrefsAlone(com.mckimquyen.ui.ResetDefaultsWidgetTest)
+f318-after-9: 1) cancelLeavesEveryValueUntouched(com.mckimquyen.ui.ResetDefaultsWidgetTest)
+f318-after-14: 1) cancelLeavesEveryValueUntouched(com.mckimquyen.ui.ResetDefaultsWidgetTest)
