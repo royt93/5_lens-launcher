@@ -1,0 +1,38 @@
+ActHomeSearchKeypadWindowHeightWidgetTest (4 tests): the keypad decision follows the WINDOW height, not the Configuration. T9 switch OFF in every test.
+Reproduction without split-screen: Window.setLayout(MATCH_PARENT, 400 dp) shortens the decor view and leaves the Configuration at 891 dp (log 'Configuration follows window: false'), the same disagreement measured in the real split.
+Pixel 7 Pro 2B051FDH3006MU, one am instrument per test, restore from ~/lens-launcher-device-backups/pixel-20261115-003038 after each run.
+
+RED (controller temporarily reverted to the pre-fix Configuration decision, then restored; git diff clean after):
+aFullHeightWindowKeepsTheSoftKeyboardWhenT9IsOff | OK (1 test) 
+    full decorDp=891 configDp=891 keypadVisible=false imeVisible=true
+theConfigurationDoesNotFollowTheShortenedWindow | OK (1 test) 
+    config-check decorDp=400 configDp=891 keypadVisible=false imeVisible=false
+    Configuration follows window: false
+openingTheSearchInAShortWindowShowsTheKeypadAndNoSoftKeyboard | Tests run: 1,  Failures: 1 java.lang.AssertionError: a window under 480 dp must show the keypad even with T9 off (decor 400 dp, Configuration 891 dp)
+    short-before-open decorDp=400 configDp=891 keypadVisible=false imeVisible=false
+    short-after-open decorDp=400 configDp=891 keypadVisible=false imeVisible=true
+shrinkingAndGrowingTheWindowWhileTheSearchIsOpenSwapsTheKeypad | Tests run: 1,  Failures: 1 java.lang.AssertionError: shrunk below the compact height while open: the keypad must appear (decor 400 dp, Configuration 891 dp)
+    open-full decorDp=891 configDp=891 keypadVisible=false imeVisible=true
+    open-then-short decorDp=400 configDp=891 keypadVisible=false imeVisible=true
+apk after restore: 134ba0429754c07b a48a5efdfa746123
+
+GREEN (fixed controller):
+aFullHeightWindowKeepsTheSoftKeyboardWhenT9IsOff | OK (1 test) 
+    full decorDp=891 configDp=891 keypadVisible=false imeVisible=true
+theConfigurationDoesNotFollowTheShortenedWindow | OK (1 test) 
+    config-check decorDp=400 configDp=891 keypadVisible=false imeVisible=false
+    Configuration follows window: false
+openingTheSearchInAShortWindowShowsTheKeypadAndNoSoftKeyboard | OK (1 test) 
+    short-before-open decorDp=400 configDp=891 keypadVisible=false imeVisible=false
+    short-after-open decorDp=400 configDp=891 keypadVisible=true imeVisible=false
+shrinkingAndGrowingTheWindowWhileTheSearchIsOpenSwapsTheKeypad | OK (1 test) 
+    open-full decorDp=891 configDp=891 keypadVisible=false imeVisible=true
+    open-then-short decorDp=400 configDp=891 keypadVisible=true imeVisible=true
+    open-then-grown decorDp=891 configDp=891 keypadVisible=false imeVisible=true
+apk after restore: 134ba0429754c07b a48a5efdfa746123
+
+whole com.mckimquyen.ui package with the new tests: OK 587 tests (20:27:55 -> 20:43:27).
+Restore after every run: DATA-IDENTICAL, APKs 134ba042/a48a5efd, 198 tmp entries, display 1440x3120, accel=1 rot=0; extra package com.freeapp.quick_invoice (Play Store, not mine).
+
+Observed, not asserted: in 'open-then-short' the soft keyboard that was already open stays visible (imeVisible=true) after the keypad appears; the keypad swap does not dismiss an IME that is already up. Opening the search in a short window after the fact gives keypad + no IME (test 3).
+Limits: the window is shortened with setLayout, not by a real split; real split was checked by hand-driven adb taps (search-keypad-split-screen-pixel.txt). One device. Foldables untested.
