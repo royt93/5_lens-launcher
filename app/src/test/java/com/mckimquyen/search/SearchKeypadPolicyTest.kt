@@ -46,6 +46,30 @@ class SearchKeypadPolicyTest {
         assertFalse(SearchKeypadPolicy.useT9Keypad(userEnabled = false, screenHeightDp = -1))
     }
 
+    // Measured on the Pixel 7 Pro in a real split: the Activity's Configuration stayed at 891 dp (it had been launched full screen) while
+    // its window was 1543 px = 440 dp high. The window the user sees is the truth; the Configuration is only the fallback.
+    @Test fun theMeasuredWindowHeightBeatsAStaleConfiguration() {
+        val dp = SearchKeypadPolicy.windowHeightDp(measuredHeightPx = 1543, density = 3.5f, configHeightDp = PHONE_PORTRAIT_HEIGHT_DP)
+        assertEquals(440, dp)
+        assertTrue(SearchKeypadPolicy.useT9Keypad(userEnabled = false, screenHeightDp = dp))
+    }
+
+    @Test fun theConfigurationIsUsedUntilTheWindowIsMeasured() {
+        assertEquals(PHONE_PORTRAIT_HEIGHT_DP, SearchKeypadPolicy.windowHeightDp(measuredHeightPx = 0, density = 3.5f, configHeightDp = PHONE_PORTRAIT_HEIGHT_DP))
+        assertEquals(PHONE_PORTRAIT_HEIGHT_DP, SearchKeypadPolicy.windowHeightDp(measuredHeightPx = -5, density = 3.5f, configHeightDp = PHONE_PORTRAIT_HEIGHT_DP))
+    }
+
+    @Test fun aBadDensityFallsBackToTheConfiguration() {
+        assertEquals(PHONE_LANDSCAPE_HEIGHT_DP, SearchKeypadPolicy.windowHeightDp(measuredHeightPx = 1543, density = 0f, configHeightDp = PHONE_LANDSCAPE_HEIGHT_DP))
+        assertEquals(PHONE_LANDSCAPE_HEIGHT_DP, SearchKeypadPolicy.windowHeightDp(measuredHeightPx = 1543, density = -1f, configHeightDp = PHONE_LANDSCAPE_HEIGHT_DP))
+    }
+
+    @Test fun aTallMeasuredWindowDoesNotForceTheKeypadEvenIfTheConfigurationIsShort() {
+        val dp = SearchKeypadPolicy.windowHeightDp(measuredHeightPx = 3120, density = 3.5f, configHeightDp = PHONE_LANDSCAPE_HEIGHT_DP)
+        assertEquals(891, dp)
+        assertFalse(SearchKeypadPolicy.useT9Keypad(userEnabled = false, screenHeightDp = dp))
+    }
+
     @Test fun theThresholdSitsBetweenTheMeasuredPhoneAndTabletLandscape() {
         assertTrue(PHONE_LANDSCAPE_HEIGHT_DP < BOUNDARY)
         assertTrue(TABLET_LANDSCAPE_HEIGHT_DP >= BOUNDARY)

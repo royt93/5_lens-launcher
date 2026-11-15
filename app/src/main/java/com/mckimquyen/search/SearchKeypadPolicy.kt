@@ -5,6 +5,10 @@ object SearchKeypadPolicy {
     const val COMPACT_HEIGHT_DP = 480
 
     @JvmStatic
+    fun windowHeightDp(measuredHeightPx: Int, density: Float, configHeightDp: Int): Int =
+        if (measuredHeightPx > 0 && density > 0f) (measuredHeightPx / density).toInt() else configHeightDp
+
+    @JvmStatic
     fun useT9Keypad(userEnabled: Boolean, screenHeightDp: Int): Boolean =
         userEnabled || (screenHeightDp > 0 && screenHeightDp < COMPACT_HEIGHT_DP)
 }

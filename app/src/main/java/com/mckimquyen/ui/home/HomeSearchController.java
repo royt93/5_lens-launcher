@@ -385,7 +385,12 @@ public final class HomeSearchController {
      */
     private boolean keypadInUse() {
         boolean userEnabled = host.settings() != null && host.settings().getEnableT9SearchKeypad();
-        return SearchKeypadPolicy.useT9Keypad(userEnabled, activity.getResources().getConfiguration().screenHeightDp);
+        // The Configuration's screenHeightDp is not updated when the Activity is put into split-screen after it was launched full screen
+        // (measured on the Pixel 7 Pro: 891 dp reported for a 440 dp window), so the real window height decides, the Configuration only
+        // stands in until the window is laid out.
+        int heightDp = SearchKeypadPolicy.windowHeightDp(activity.getWindow().getDecorView().getHeight(),
+                activity.getResources().getDisplayMetrics().density, activity.getResources().getConfiguration().screenHeightDp);
+        return SearchKeypadPolicy.useT9Keypad(userEnabled, heightDp);
     }
 
     private void applyKeypadChoice() {
