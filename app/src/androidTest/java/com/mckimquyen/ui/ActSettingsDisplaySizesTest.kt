@@ -126,6 +126,38 @@ class ActSettingsDisplaySizesTest {
         }
     }
 
+    /**
+     * The T9 switch says that short windows use the keypad even when it is off (SearchKeypadPolicy). The note must exist, carry the
+     * string resource, and be reachable by scrolling inside the viewport on every display profile.
+     */
+    @Test fun theT9ShortScreenNoteIsShownAndReachable() {
+        ActivityScenario.launch(ActSettings::class.java).use { scenario ->
+            checkOrientation(scenario)
+            showSettingsTab(scenario)
+            scenario.onActivity { activity ->
+                val dm = activity.resources.displayMetrics
+                val fragment = activity.supportFragmentManager.fragments.filterIsInstance<FrmSettings>().first()
+                val scroll = fragment.view as NestedScrollView
+                val note = scroll.findViewById<android.widget.TextView>(R.id.tvEnableT9SearchKeypadShortScreenNote)
+                assertNotNull("the T9 short-screen note must exist", note)
+                assertEquals("the note must show the string resource", activity.getString(R.string.setting_enable_t9_search_keypad_short_screen_note), note.text.toString())
+                // Scroll so the note's top edge is at the viewport top: its position inside the scrolled content is the sum of the offsets of
+                // its ancestors up to the NestedScrollView's child, not its own 0,0.
+                val rect = Rect(0, 0, note.width, note.height)
+                scroll.offsetDescendantRectToMyCoords(note, rect)
+                scroll.scrollTo(0, rect.top)
+                val scrollTop = IntArray(2).also { scroll.getLocationOnScreen(it) }[1]
+                val scrollBottom = scrollTop + scroll.height
+                val top = IntArray(2).also { note.getLocationOnScreen(it) }[1]
+                val bottom = top + note.height
+                Log.i(TAG, "T9NOTE display ${dm.widthPixels}x${dm.heightPixels} @${dm.densityDpi}dpi note=${note.width}x${note.height} lines=${note.lineCount} top=$top bottom=$bottom viewport=[$scrollTop,$scrollBottom] visible=${note.isShown}")
+                assertTrue("the note must be shown", note.isShown && note.height > 0)
+                assertTrue("the note must be inside the scroll viewport: top=$top bottom=$bottom viewport=[$scrollTop,$scrollBottom]", top >= scrollTop - BAR_TOLERANCE_PX && bottom <= scrollBottom + BAR_TOLERANCE_PX)
+                scroll.scrollTo(0, 0)
+            }
+        }
+    }
+
     @Test fun theScreenshotMatchesTheActivityDisplayAndShowsNoAdOverlay() {
         ActivityScenario.launch(ActSettings::class.java).use { scenario ->
             val dims = checkOrientation(scenario)

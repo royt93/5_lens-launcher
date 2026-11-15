@@ -8,10 +8,16 @@ import javax.xml.parsers.DocumentBuilderFactory
 
 class T9SearchStringsTest {
 
+    private companion object {
+        const val SHORT_SCREEN_NOTE_KEY = "setting_enable_t9_search_keypad_short_screen_note"
+        const val DEFAULT_LOCALE_DIR = "values"
+    }
+
     private val documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder()
     private val expectedKeys = setOf(
         "setting_enable_t9_search_keypad",
-        "setting_enable_t9_search_keypad_desc"
+        "setting_enable_t9_search_keypad_desc",
+        SHORT_SCREEN_NOTE_KEY
     )
 
     private fun resDirectory(): File {
@@ -33,6 +39,7 @@ class T9SearchStringsTest {
     fun all17LocalesContainT9StringsNonEmpty() {
         val dirs = localeDirectories()
         assertEquals("Phải đủ 17 values/values-* thư mục locale", 17, dirs.size)
+        val noteByLocale = mutableMapOf<String, String>()
         for (dir in dirs) {
             val file = File(dir, "strings.xml")
             val doc = documentBuilder.parse(file)
@@ -44,11 +51,17 @@ class T9SearchStringsTest {
                 if (name in expectedKeys) {
                     found[name] = elem.textContent
                 }
+                if (name == SHORT_SCREEN_NOTE_KEY) noteByLocale[dir.name] = elem.textContent
             }
             for (key in expectedKeys) {
                 assertTrue("File ${dir.name}/strings.xml thiếu key $key", found.containsKey(key))
                 assertTrue("File ${dir.name}/strings.xml key $key không được rỗng", found[key]?.isNotBlank() == true)
             }
+        }
+        // A pasted English copy would pass the non-blank check above; every other locale must differ from the default text.
+        val english = requireNotNull(noteByLocale[DEFAULT_LOCALE_DIR]) { "values/strings.xml thiếu $SHORT_SCREEN_NOTE_KEY" }
+        for ((locale, text) in noteByLocale) {
+            if (locale != DEFAULT_LOCALE_DIR) assertTrue("$locale/strings.xml: $SHORT_SCREEN_NOTE_KEY là bản tiếng Anh dán lại", text != english)
         }
     }
 }

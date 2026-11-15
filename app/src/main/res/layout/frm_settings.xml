@@ -1744,6 +1744,20 @@
                         android:textColor="?android:attr/textColorTertiary"
                         android:textSize="12sp" />
 
+                    <!-- SearchKeypadPolicy: on windows under 480 dp the keypad replaces the soft keyboard even when this switch is off -->
+                    <TextView
+                        android:id="@+id/tvEnableT9SearchKeypadShortScreenNote"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/tvEnableT9SearchKeypadHint"
+                        android:layout_marginStart="12dp"
+                        android:layout_marginEnd="16dp"
+                        android:layout_toEndOf="@id/iconT9SearchKeypad"
+                        android:paddingBottom="8dp"
+                        android:text="@string/setting_enable_t9_search_keypad_short_screen_note"
+                        android:textColor="?android:attr/textColorTertiary"
+                        android:textSize="12sp" />
+
                 </RelativeLayout>
 
                 <com.google.android.material.divider.MaterialDivider

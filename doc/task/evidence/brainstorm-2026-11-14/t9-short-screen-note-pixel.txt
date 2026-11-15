@@ -1,0 +1,16 @@
+T9 switch note: tvEnableT9SearchKeypadShortScreenNote (string setting_enable_t9_search_keypad_short_screen_note), 17 locales, AI translation.
+
+RED: T9SearchStringsTest failed 'File values/strings.xml thiếu key ...short_screen_note' before the strings existed. GREEN after strings + layout.
+Mutations on the strings test, forced with --rerun-tasks: drop key in values-de, blank in values-ja, English pasted into values-ko, drop key in default values: 4/4 killed. (A first mutation pass was INVALID: Gradle returned the test task up-to-date, so it showed 1/4; discarded.)
+
+Pixel, ActSettingsDisplaySizesTest#theT9ShortScreenNoteIsShownAndReachable on four profiles (rotation + ad guard by run-display-tests-adguard.sh, no ad window seen):
+T9NOTE display 1440x3120 @560dpi note=1006x183 lines=3 top=690 bottom=873 viewport=[592,2952] visible=true
+T9NOTE display 3120x1440 @560dpi note=2686x85 lines=1 top=546 bottom=631 viewport=[546,1272] visible=true
+T9NOTE display 1600x2560 @320dpi note=1352x77 lines=2 top=1185 bottom=1262 viewport=[374,2448] visible=true
+T9NOTE display 2560x1600 @320dpi note=2312x49 lines=1 top=312 bottom=361 viewport=[312,1488] visible=true
+(first run failed 4/4 because of my test: requestChildRectangleOnScreen got the note's own 0,0 instead of its position in the scroll content; fixed with offsetDescendantRectToMyCoords)
+
+host: unit 1800/1800 (--rerun-tasks, result files), lint 0 errors / 16 warnings baseline; the one PluralsCandidate warning that touches a changed res file is the existing 'lenses' string, not mine
+device: whole com.mckimquyen.ui package 583 tests, 1 failure = ResetDefaultsWidgetTest.resetThenUndoRestoresValuesAndAbsentKeysAndLeavesOtherPrefsAlone (known flaky, fails on the base build too: 5/30 vs 3/30 in reset-defaults-ab-20-pixel.txt)
+restore: DATA-IDENTICAL, APKs 134ba042/a48a5efd, 198 tmp entries, display 1440x3120 rot 0.
+packages: 422 vs 421 baseline. The extra one is com.freeapp.quick_invoice, installerPackageName com.android.vending, firstInstallTime 2026-11-15 16:52:32: installed by the device (Play Store), not by me (I only install com.mckimquyen.lenslauncher and .test). Left alone.
