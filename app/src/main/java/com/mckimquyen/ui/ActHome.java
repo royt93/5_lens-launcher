@@ -814,6 +814,12 @@ public class ActHome extends ActBase implements LensViewHolderHost, HomeQuickAct
     }
 
     @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus && searchController != null) searchController.onWindowFocusGained();
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         Log.d("roy93~", "onResume");

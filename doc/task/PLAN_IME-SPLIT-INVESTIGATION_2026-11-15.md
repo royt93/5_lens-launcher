@@ -52,3 +52,7 @@ Run with null-safe logs on the A50s (see `doc/task/evidence/brainstorm-2026-11-1
 ## In-process test attempt (2026-11-21): not possible as designed
 
 A test that forces the soft keyboard up in a shortened window and then calls `ActHome.onWindowFocusChanged(true)` could not start from its required state on the A50s: `showSoftInput` returned true but both the IME inset and `dumpsys input_method` (`mInputShown`) said the keyboard was not shown, so the positive control failed three times and no valid red exists. No fix was written. Remaining options for whoever continues: (a) ship the focus hook with a manual verification only, saying plainly that nothing automated covers it; (b) find how the controller suppresses the keyboard while the keypad is in use and build the starting state from that; (c) leave the rare case documented. See `search-keypad-split-screen-a50s.txt`.
+
+## Outcome (2026-11-21): hook shipped without an automated test
+
+The focus hook was written and verified by hand on the A50s (base 3/3 keyboard returns, fixed 0/3). No in-process test exists for it; see `search-keypad-split-screen-a50s.txt`. Open: the Pixel was not re-checked, and the cause of the different Pixel behaviour (keyboard stays up right after the split) is unknown.

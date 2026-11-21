@@ -404,12 +404,25 @@ public final class HomeSearchController {
             appSearch.setShowSoftInputOnFocus(!useKeypad);
             // The keypad took over while the soft keyboard was already up (the window shrank into split-screen with the search open):
             // setShowSoftInputOnFocus only affects the next focus, so the open keyboard has to be dismissed explicitly.
-            if (useKeypad && searchView.isShowing()) {
-                android.view.inputmethod.InputMethodManager imm =
-                        (android.view.inputmethod.InputMethodManager) activity.getSystemService(android.content.Context.INPUT_METHOD_SERVICE);
-                if (imm != null) imm.hideSoftInputFromWindow(appSearch.getWindowToken(), 0);
-            }
+            hideSoftKeyboardWhileKeypadInUse();
         }
+    }
+
+    /**
+     * Called when the Activity window regains focus. In a real split-screen on the A50s (One UI) the system brought the soft keyboard back
+     * at that moment with the keypad still showing, and nothing of ours ran to hide it again (log: onWindowFocusChanged(true), then
+     * mInputShown=true). Posted so it runs after the system's own restore in the same pass. NOT covered by an automated test: a test cannot
+     * make One UI move focus, see doc/task/PLAN_IME-SPLIT-INVESTIGATION_2026-11-15.md.
+     */
+    public void onWindowFocusGained() {
+        if (appSearch != null) appSearch.post(this::hideSoftKeyboardWhileKeypadInUse);
+    }
+
+    private void hideSoftKeyboardWhileKeypadInUse() {
+        if (appSearch == null || !searchView.isShowing() || !keypadInUse()) return;
+        android.view.inputmethod.InputMethodManager imm =
+                (android.view.inputmethod.InputMethodManager) activity.getSystemService(android.content.Context.INPUT_METHOD_SERVICE);
+        if (imm != null) imm.hideSoftInputFromWindow(appSearch.getWindowToken(), 0);
     }
 
     public void updateSearchCustomization() {
