@@ -1,6 +1,6 @@
 # Plan: why the soft keyboard stays up in a real split-screen (2026-11-15)
 
-Status: NOT STARTED. Needs the Pixel, which another Claude session (ReadYou) holds. Nothing here may be run until that session says "xong".
+Status: NOT STARTED as a log probe. UPDATE 2026-11-21: the owner locked the A50s `R58MA6WYRPE` only; the Pixel is not to be touched (another Claude session uses it). Run the probe on the A50s instead; its One UI split behaviour (keyboard returns on focus, see `search-keypad-split-screen-a50s.txt`) leans toward cause 1 but is unproven. The Pixel rules below stay as history; for the A50s use the same single-block gate (launcher `com.sec.android.app.launcher` in front, no `*.test` process) and restore from `~/lens-launcher-device-backups/a50s-20261114-183017`.
 
 ## What is known
 
