@@ -99,3 +99,12 @@ KJ7 (Android 14, owner's current lock), backed up before any install (kj7-202611
   The paging test alone, 6 interleaved rounds per build on the KJ7: base 0/6 fails, hook 0/6 fails; also passed alone on the base earlier.
 So: the hook build failed one extra test once in two full runs; it did not repeat, it does not reproduce alone (0/12 across both builds), and the base build passed it in its single full run. This does NOT show the failure is a pre-existing flake and does not show the hook is innocent: one occurrence, cause unknown (the assertion is about hidden-app counts on a lens page, which the hook, a keyboard-hiding call tied to window focus, has no obvious path to). Treat it as an unexplained single failure.
 Other devices for the same package: A50s with the hook 587/11 failures, the same 10 failing alone on base plus the flaky ResetDefaults (see above); the Pixel with an earlier build 587/587 and 582/583 runs, not re-run with the hook (not allowed).
+
+=== FOUR MORE FULL ui RUNS ON THE KJ7, INTERLEAVED (2026-11-21, 22:39-23:53) ===
+Order base, hook, base, hook; each run: install the build, `am instrument -e package com.mckimquyen.ui`; KJ7 restored from kj7-20261121 at the end: DATA-IDENTICAL 207 files, APK hashes equal to the backup, 358 packages, display 1080x2436, accel=1 rot=0.
+  run 1 base  (d5fd29b789f12df7): 587 tests, 3 failures (the three screenshot-height tests).
+  run 2 hook  (ca45cd68e8213a99): 587 tests, 3 failures (the same three).
+  run 3 base: 587 tests, 3 failures (the same three).
+  run 4 hook: 587 tests, 3 failures (the same three).
+Including the two earlier full runs on the KJ7 (base: 3 failures; hook: 4 then 3 failures), the hook build has been run through the whole package 3 times and the base 3 times; the paging failure (ActHomeTemporaryHidingWidgetTest#pagingKeepsHiddenIdsAndRecoveryOnTheirOwnLens, expected:<0> but was:<8>) occurred ONCE, in the first hook run, and in none of the other 5 full runs; it also passed 6/6 per build when run alone. 1 failure in 3 hook runs against 0 in 3 base runs is too small a sample to tell a hook effect from a one-off. No cause found.
+The three failures that repeat in every run on both builds are the screenshot-size tests (PixelCopy height 2328 vs the Activity display 2436): an environment property of this device, not related to the hook.
