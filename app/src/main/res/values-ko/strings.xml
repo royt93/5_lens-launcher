@@ -271,7 +271,7 @@
     <string name="edge_swipe_mode_both">양쪽 가장자리</string>
     <string name="edge_swipe_mode_right">오른쪽 가장자리만</string>
     <string name="edge_swipe_mode_left">왼쪽 가장자리만</string>
-    <string name="setting_enable_t9_search_keypad">검색 내 T9 다이얼패드</string>
+    <string name="setting_enable_t9_search_keypad">검색 내 T9 숫자 패드</string>
     <string name="setting_enable_t9_search_keypad_desc">한 손 타이핑을 위해 검색창 하단에 숫자 패드를 표시합니다</string>
     <string name="setting_enable_t9_search_keypad_short_screen_note">화면 높이가 낮을 때(예: 휴대전화를 가로로 든 경우)는 이 설정이 꺼져 있어도 숫자 패드를 사용합니다. 키보드가 결과를 가리기 때문입니다.</string>
     <string name="setting_lens_elastic_overscroll">렌즈 탄성 오버스크롤</string>

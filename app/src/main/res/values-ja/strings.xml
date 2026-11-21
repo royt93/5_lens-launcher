@@ -271,7 +271,7 @@
     <string name="edge_swipe_mode_both">両方の端</string>
     <string name="edge_swipe_mode_right">右端のみ</string>
     <string name="edge_swipe_mode_left">左端のみ</string>
-    <string name="setting_enable_t9_search_keypad">検索内のT9ダイヤルパッド</string>
+    <string name="setting_enable_t9_search_keypad">検索内のT9テンキー</string>
     <string name="setting_enable_t9_search_keypad_desc">片手入力のために検索の下部にテンキーを表示します</string>
     <string name="setting_enable_t9_search_keypad_short_screen_note">画面の高さが低い場合（スマートフォンを横向きにしたときなど）は、この設定がオフでもテンキーを使います。キーボードが結果を隠してしまうためです。</string>
     <string name="setting_lens_elastic_overscroll">レンズの弾性オーバースクロール</string>
