@@ -44,3 +44,7 @@ If the probe points at a fixable cause: write the failing test first. The test m
 ## Out of scope / limits
 
 One device, adb taps, no person; foldables untested; the other IME apps were not tried (only the Pixel's stock keyboard).
+
+## Result of the A50s probe (2026-11-21)
+
+Run with null-safe logs on the A50s (see `doc/task/evidence/brainstorm-2026-11-14/search-keypad-split-screen-a50s.txt`): cause 3 is false (the decision runs after the resize with use=true and decorH 1201), cause 2 is false (token and focus present), and the keyboard returns when the window regains focus (`onWindowFocusChanged(true)`), where nothing of ours runs. Not shown: that the Pixel behaves the same. Candidate fix, NOT written: re-apply `applyKeypadChoice()` (and hide the IME while the keypad is in use) from `ActHome.onWindowFocusChanged(true)`. Per the TDD rule the test must reproduce the real path; a `Window.setLayout` test cannot change focus the way One UI does, so any in-process test would only cover the call, not the real focus return. Say so in the evidence if a fix is written.

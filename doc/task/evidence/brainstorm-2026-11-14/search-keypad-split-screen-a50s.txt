@@ -12,3 +12,24 @@ What this adds: on the A50s the keyboard is hidden by the window change, but is 
 Differences from the Pixel run: there the keyboard stayed up straight after the split; here it went away and returned on focus. Why they differ is not established (Android 17 vs 11, stock IME vs Samsung keyboard, One UI split handling).
 Limits: one device, adb taps, no person; animator 0 so no animation effect was exercised; the Samsung keyboard may behave differently from the Pixel's; the T9 preference edit was a test setup, not a product path.
 Restore after the run: the baseline APK was reinstalled over the dev build with install -r (the test APK was left in place), then pm clear and data.tar extracted with run-as; DATA-IDENTICAL (14 files), APKs 410212b7ac1e471c / acce3c203cf30493, 52 tmp entries, 461 packages, animator 0.0, font 1.3, accel=1 rot=0, 1080x2340, launcher in front.
+
+=== PROBE WITH LOGS (same day, 2026-11-21 ~18:1x), A50s, T9 preference OFF (edited for the run, restored from backup after) ===
+Temporary null-safe logs (tag F479IME) in ActHome.onConfigurationChanged, onWindowFocusChanged and HomeSearchController.applyKeypadChoice (and around hideSoftInputFromWindow); removed afterwards, git clean, none committed. Build = HEAD + those logs.
+Scenario: full screen, search open, soft keyboard up (mInputShown=true), then Recents > "Open in split screen view" > Settings.
+Log right after the split (ActHome window now 1201 px high, cfg heightDp 859 = the stale Configuration, which is why decorH is what the code uses):
+  applyKeypadChoice use=false showing=true decorH=2340 hasFocus=true token=true            (before the split)
+  onWindowFocusChanged hasFocus=false decorH=2340                                           (Settings took focus)
+  onConfigurationChanged heightDp=859 decorH=2340
+  applyKeypadChoice use=true showing=true decorH=1201 hasFocus=true token=true   (x several, from the layout listener)
+  hideSoftInputFromWindow -> false acceptingText=false                         (after each one)
+  dumpsys: mInputShown=false  (the keyboard was already gone, the call returned false because there was nothing to hide)
+After ONE tap on a non-input label in the top pane:
+  onWindowFocusChanged hasFocus=true decorH=1201
+  no applyKeypadChoice call and no hide call in the log, and dumpsys then says mInputShown=true: the keyboard came back.
+What this establishes (one run, one device):
+  - cause 3 of the plan (the decision does not run after the resize) is FALSE on this device: it runs with use=true and the correct window height 1201.
+  - cause 2 (no token/focus) is FALSE: token=true, hasFocus=true, at every call.
+  - the hide call is not what matters here: when it ran there was no keyboard to hide.
+  - the keyboard is brought back by the window regaining focus (onWindowFocusChanged hasFocus=true), and nothing in our code runs at that moment, so nothing hides it again. This supports cause 1 in the form "IME re-shown by the focus return" for the A50s.
+What it does not establish: whether the same sequence explains the Pixel (there the keyboard stayed up right after the split, no focus change was needed); one run; the Samsung keyboard.
+Restore after the probe: baseline APK reinstalled over the diagnostic build (install -r -d), pm clear, data.tar; DATA-IDENTICAL (14 files), APKs 410212b7ac1e471c / acce3c203cf30493, 461 packages, 52 tmp entries, animator 0.0, font 1.3, accel=1 rot=0, 1080x2340, launcher in front.
