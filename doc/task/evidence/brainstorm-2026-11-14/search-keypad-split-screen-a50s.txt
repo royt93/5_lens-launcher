@@ -82,3 +82,11 @@ Conclusion that is supported: the keyboard cannot be brought up while the search
 Consequence: no valid red, no automated test for the focus hook. Test variants were removed; the committed test file is unchanged.
 The A50s is still not confirmed baseline (see the section above). The KJ7 backup folder is ~/lens-launcher-device-backups/kj7-20261121.
 Also in this step: the Spanish, French, German and Vietnamese T9 notes were reworded after the independent back-translation review (still AI translation): es "poca altura"/"teclado normal", fr "clavier système", de "normale Tastatur"/"diese Option", vi "tùy chọn này". T9SearchStringsTest passes.
+
+=== FOCUS HOOK ON THE TECNO KJ7, REAL SPLIT (2026-11-21, KJ7 is the owner's current lock) ===
+KJ7: Android 14 (sdk 34), 1080x2436 @480, animator 1.0. Backed up first (kj7-20261121), restored after: DATA-IDENTICAL 207 files, APKs fe23953939048df0 / 3a1816c943eefc42 equal to the backup, 358 packages, display and rotation unchanged. Split made through the system UI (Recents > app label > "Split Screen" > Settings); no ad window appeared in any run (0 AdActivity), so no BACK was sent.
+T9 preference OFF (edited in shared_prefs for the run; the key was absent before, so the default was already off), search open with the soft keyboard up (mInputShown=true) before the split.
+  BASE build (committed code, no hook), after the split: mInputShown=true in 2 of 2 valid runs (the first run was the exploratory one that took the screenshots; it also showed the keyboard up with the keypad: window h367dp, bounds 0,0-1080,1208, the top pane).
+  FIXED build (with the hook), after the split: mInputShown=false in 3 of 3 runs.
+Different from the A50s: there the split itself hid the keyboard and it came back on the focus return; on the KJ7 the keyboard stayed up right after the split on the base build with focus already on ActHome, and the fixed build hid it. So the hook changes the outcome on both phones, but the sequence that leads to the keyboard being up differs by device; the Pixel (the first phone that showed this) was not retested because it is not allowed.
+Limits: one KJ7, adb taps (coordinates found from screenshots), not a person, the Google keyboard on a TECNO skin; foldables not tested. No automated test, as before.
