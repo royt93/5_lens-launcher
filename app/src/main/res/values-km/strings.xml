@@ -273,7 +273,7 @@
     <string name="edge_swipe_mode_left">តែគែមឆ្វេង</string>
     <string name="setting_enable_t9_search_keypad">ក្ដារចុចលេខ T9 ក្នុងការស្វែងរក</string>
     <string name="setting_enable_t9_search_keypad_desc">បង្ហាញក្ដារចុចលេខនៅខាងក្រោមនៃការស្វែងរកសម្រាប់ការវាយអក្សរដោយដៃម្ខាង</string>
-    <string name="setting_enable_t9_search_keypad_short_screen_note">នៅលើអេក្រង់ទាប (ឧទាហរណ៍ ទូរសព្ទដែលកាន់ផ្ដេក) ក្ដារចុចលេខនឹងត្រូវបានប្រើ ទោះជាជម្រើសនេះបិទក៏ដោយ ព្រោះក្ដារចុចធម្មតានឹងបាំងលទ្ធផល។</string>
+    <string name="setting_enable_t9_search_keypad_short_screen_note">នៅពេលអេក្រង់មានកម្ពស់ទាប (ឧទាហរណ៍ ពេលកាន់ទូរសព្ទផ្ដេក) ក្ដារចុចលេខនឹងត្រូវបានប្រើ ទោះបីជាជម្រើសនេះត្រូវបានបិទក៏ដោយ ព្រោះក្ដារចុចធម្មតានឹងបាំងលទ្ធផល។</string>
     <string name="setting_lens_elastic_overscroll">ឥទ្ធិពលយឺតនៃកែវពង្រីក</string>
     <string name="setting_lens_elastic_overscroll_desc">បន្ថែមភាពទប់ទល់ធម្មជាតិ នៅពេលអ្នកអូសកែវពង្រីកហួសគែមក្រឡា</string>
     <string name="t9_key_clear">លុប</string>
