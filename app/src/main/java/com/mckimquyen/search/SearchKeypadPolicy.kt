@@ -11,4 +11,9 @@ object SearchKeypadPolicy {
     @JvmStatic
     fun useT9Keypad(userEnabled: Boolean, screenHeightDp: Int): Boolean =
         userEnabled || (screenHeightDp > 0 && screenHeightDp < COMPACT_HEIGHT_DP)
+
+    /** The soft keyboard is hidden only while the search is showing and the keypad is in use; a keyboard the user wants is never touched. */
+    @JvmStatic
+    fun shouldHideSoftKeyboard(searchShowing: Boolean, userEnabled: Boolean, screenHeightDp: Int): Boolean =
+        searchShowing && useT9Keypad(userEnabled, screenHeightDp)
 }

@@ -70,6 +70,35 @@ class SearchKeypadPolicyTest {
         assertFalse(SearchKeypadPolicy.useT9Keypad(userEnabled = false, screenHeightDp = dp))
     }
 
+    // The soft keyboard is hidden only while the search is showing AND the keypad is in use (the real-split fix); never otherwise, so a keyboard the
+    // user wants (T9 off, tall window) is left alone. Measured on the KJ7/A50s: base kept the keyboard after the split, the hook hid it, and a full-height
+    // keyboard survived a focus loss.
+    @Test fun theSoftKeyboardIsHiddenOnlyWhileTheSearchShowsAndTheKeypadIsInUse() {
+        assertTrue(SearchKeypadPolicy.shouldHideSoftKeyboard(searchShowing = true, userEnabled = false, screenHeightDp = PHONE_LANDSCAPE_HEIGHT_DP))
+        assertTrue(SearchKeypadPolicy.shouldHideSoftKeyboard(searchShowing = true, userEnabled = true, screenHeightDp = PHONE_PORTRAIT_HEIGHT_DP))
+    }
+
+    @Test fun aKeyboardTheUserWantsIsLeftAlone() {
+        // T9 off and a tall window: the keypad is not in use, so the keyboard must stay.
+        assertFalse(SearchKeypadPolicy.shouldHideSoftKeyboard(searchShowing = true, userEnabled = false, screenHeightDp = PHONE_PORTRAIT_HEIGHT_DP))
+        assertFalse(SearchKeypadPolicy.shouldHideSoftKeyboard(searchShowing = true, userEnabled = false, screenHeightDp = TABLET_LANDSCAPE_HEIGHT_DP))
+    }
+
+    @Test fun nothingIsHiddenWhenTheSearchIsNotShowing() {
+        assertFalse(SearchKeypadPolicy.shouldHideSoftKeyboard(searchShowing = false, userEnabled = true, screenHeightDp = PHONE_LANDSCAPE_HEIGHT_DP))
+        assertFalse(SearchKeypadPolicy.shouldHideSoftKeyboard(searchShowing = false, userEnabled = false, screenHeightDp = PHONE_LANDSCAPE_HEIGHT_DP))
+    }
+
+    @Test fun anUnknownHeightDoesNotHideTheKeyboard() {
+        assertFalse(SearchKeypadPolicy.shouldHideSoftKeyboard(searchShowing = true, userEnabled = false, screenHeightDp = 0))
+        assertFalse(SearchKeypadPolicy.shouldHideSoftKeyboard(searchShowing = true, userEnabled = false, screenHeightDp = -1))
+    }
+
+    @Test fun theBoundaryHeightDoesNotHideTheKeyboardButOnePixelBelowDoes() {
+        assertFalse(SearchKeypadPolicy.shouldHideSoftKeyboard(searchShowing = true, userEnabled = false, screenHeightDp = BOUNDARY))
+        assertTrue(SearchKeypadPolicy.shouldHideSoftKeyboard(searchShowing = true, userEnabled = false, screenHeightDp = BOUNDARY - 1))
+    }
+
     @Test fun theThresholdSitsBetweenTheMeasuredPhoneAndTabletLandscape() {
         assertTrue(PHONE_LANDSCAPE_HEIGHT_DP < BOUNDARY)
         assertTrue(TABLET_LANDSCAPE_HEIGHT_DP >= BOUNDARY)
