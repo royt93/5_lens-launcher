@@ -2,6 +2,22 @@
 
 Draft written 2026-11-23 from `dev` bf702b2a. Everything under "Checked" was measured and is in `doc/task/evidence/release-2026.11.23-prep-kj7.txt` and `doc/task/evidence/brainstorm-2026-11-14/SUMMARY_split-screen-keyboard-hook.md`. Everything under "Not checked" was not. This is NOT a sign-off: the audit stays 8.5/10, below the 9.0 gate in the working agreement.
 
+## Changes since the first draft of this file (2026-11-23, after three read-only reviews and their follow-ups)
+
+Fixed, each with a test and a device run on the KJ7 (see the evidence file, sections "REVIEW ROUND 1" and "REVIEW ROUND 2"):
+- A lens page that came back from the pager cache with 3 lenses lost pull-down search, edge swipe, the lens menu on a long-press and the drop strip for a dragged icon. Introduced after 2026.10.07 (2026-10-22), so users of the shipped build have not met it.
+- Choosing a language in the first-run sheet right after pressing Home could throw `IllegalStateException`.
+- The Settings "reset" preview printed the whole sentence "Already at default values" for an empty value, and printed enum constants (INSTALL_DATE_DESCENDING, COLOR) and English-only words for sort type, background and vibration strength; it now uses the same translated words as the Settings screen. Night-mode names stay as they were on purpose (the selection code matches the English text).
+- The default `values` strings for the share chooser title and the share message were Vietnamese; now English ("Share via", "I found this app really useful. Give it a try!"). The Italian "Focus peaking" title is back to the English term.
+Re-checked: upgrade from a 2026.10.07 build over its data with pinned apps, a favourite in a folder, a hidden app, sort type, background and vibration strength set: all kept, Room 12 -> 13 ran. Whole `ui` package 590/590, `views` 327/327, `model` 12/12 on the KJ7 for the build with the fixes; forced host gate 1827 tests, lint 0 errors / 16 baseline warnings. Release build smoke with 3 lenses, paging, the lens menu and pull-down search: no crash, ANR or R8 signature in the logs.
+
+Open, read but not reproduced or not measured (none changes the advice to upload to the internal track first):
+- Rotating the phone while the lens-unlock credential screen is open can drop the result on Android 7-10 (API 25-29 path); not reproducible on the Android 14 phone.
+- The Set-folder dialog in the home list mode is not dismissed if the system destroys the Activity while it is open.
+- Icon pack scan on the main thread in Settings: 0.7-2 ms cold with no icon pack installed; with many packs it is unmeasured.
+- ICU pinyin per keystroke for labels with Chinese characters; unmeasured on this phone.
+- Smart Focus order recorded on "freeze" is computed from the settings screen's size, not the home grid's; icon order only.
+
 ## What changed since 2026.10.07 (514 commits, 124 feat, 70 fix; the user-visible ones, grouped)
 
 - **Search on short windows:** on any window under 480 dp high (phone held sideways, split-screen) the in-app T9 number pad replaces the on-screen keyboard even with the T9 switch off, and a note under the switch says so (17 locales). The window height is now measured from the real window, so split-screen picks it up; the on-screen keyboard is dismissed when the pad takes over and when the window regains focus.

@@ -2,6 +2,8 @@
 
 Draft only. The listing is the owner's to write and publish; every line below is something I measured or read in the code, but the wording is mine, and the Vietnamese is an AI translation with no native-speaker review. Do not paste it without reading it. Facts come from `doc/task/evidence/release-2026.11.23-prep-kj7.txt` and the app's own strings.
 
+> Review note (2026-11-23): nothing in the draft text below changed after the review rounds; the fixes did not add or remove a feature the listing mentions. The English and Vietnamese are still AI text. If you add "lift your finger to open" wording, it matches what was measured on the KJ7; I did not test with a real finger.
+
 ## What is measured and safe to say
 
 - The launcher shows ALL apps on one grid (an "equispaced grid"); touching and sliding a finger across it magnifies the icons near the finger like a fisheye lens; lifting the finger on an icon opens that app (measured: a touch held 10 ms or more on an icon opens it; a touch shorter than that did nothing, which a hand does not produce).
