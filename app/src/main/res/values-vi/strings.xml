@@ -112,7 +112,7 @@
     <string name="get_more_icon_packs">Tải thêm gói biểu tượng</string>
     <string name="confirm">Xác nhận</string>
     <string name="agree_and_continue">Đồng ý và Tiếp tục</string>
-    <string name="read_policy">Cảm ơn bạn đã tin tưởng và lựa chọn sản phẩm và dịch vụ của chúng tôi.\nBy selecting "Đồng ý và Tiếp tục", bạn xác nhận rằng bạn đã đọc và đồng ý với Thỏa thuận người dùng và Chính sách bảo mật của chúng tôi đồng thời chấp nhận việc chúng tôi thu thập, sử dụng và xử lý thông tin cá nhân của bạn theo các điều khoản của Chính sách bảo mật</string>
+    <string name="read_policy">Cảm ơn bạn đã tin tưởng và lựa chọn sản phẩm và dịch vụ của chúng tôi.\nBằng việc chọn "Đồng ý và Tiếp tục", bạn xác nhận rằng bạn đã đọc và đồng ý với Thỏa thuận người dùng và Chính sách bảo mật của chúng tôi đồng thời chấp nhận việc chúng tôi thu thập, sử dụng và xử lý thông tin cá nhân của bạn theo các điều khoản của Chính sách bảo mật</string>
     <string name="verify_your_identity">Xác minh danh tính</string>
     <string name="lock">Khóa</string>
     <string name="unlock">Mở khóa</string>
