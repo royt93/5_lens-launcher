@@ -16,7 +16,9 @@ class ResetPreviewWiringTest {
         const val SNACKBAR_SENTENCE_KEY = "R.string.reset_already_default"
         const val SHORT_WORD_KEY = "R.string.setting_search_hint_default"
         const val FORMATTER_CALL = "new ResetValueFormatter("
-        const val CALL_WINDOW = 260
+        const val CALL_WINDOW = 520
+        const val LABEL_SOURCE_ARGUMENT = "labels::labelFor"
+        const val LABELS_CLASS = "ResetValueLabels("
     }
 
     private fun actSettingsSource(): String {
@@ -41,5 +43,11 @@ class ResetPreviewWiringTest {
     @Test fun theFormatterReturnsExactlyTheWordItWasGiven() {
         val formatter = ResetValueFormatter(on = "On", off = "Off", default = "Default", ms = { "$it ms" })
         assertEquals("Default", formatter.format("search_hint_text", ""))
+    }
+
+    @Test fun theFormatterIsGivenTheSettingsScreenWordsForEnumValues() {
+        val src = actSettingsSource()
+        assertTrue("ActSettings must build the translated labels the reset preview uses", src.contains(LABELS_CLASS))
+        assertTrue("the formatter call must pass the label source, or the preview prints enum constants again: ${formatterCall()}", formatterCall().contains(LABEL_SOURCE_ARGUMENT))
     }
 }

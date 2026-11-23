@@ -5,13 +5,15 @@ import com.mckimquyen.util.UtilNightModeUtil
 import com.mckimquyen.util.UtilSettings
 
 /** UI-034: turns a raw setting value into the short text shown in the reset preview. */
-class ResetValueFormatter(
+class ResetValueFormatter @JvmOverloads constructor(
     private val on: String,
     private val off: String,
     private val default: String,
-    private val ms: (Long) -> String
+    private val ms: (Long) -> String,
+    /** Words the Settings screen already uses for enum-valued settings; null from it means "not mine", then the rules below apply. */
+    private val labelFor: (String, Any) -> String? = { _, _ -> null }
 ) {
-    fun format(key: String, value: Any): String = when {
+    fun format(key: String, value: Any): String = labelFor(key, value) ?: when {
         key == UtilSettings.KEY_HAPTIC_INTENSITY && value is Int ->
             HapticIntensity.from(value).name.lowercase().replaceFirstChar { it.uppercase() }
         key == UtilSettings.KEY_NIGHT_MODE && value is Int -> UtilNightModeUtil.getNightModeDisplayName(value)

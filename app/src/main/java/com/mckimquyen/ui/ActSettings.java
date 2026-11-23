@@ -374,9 +374,17 @@ public class ActSettings extends ActBase implements SettingsMenuHost {
     }
 
     private void showResetPreview(int tab, List<ResetEntry> entries, ResetPlan plan) {
+        String[] backgroundNames = getResources().getStringArray(R.array.backgrounds);
+        com.mckimquyen.ui.settings.ResetValueLabels labels = new com.mckimquyen.ui.settings.ResetValueLabels(
+                intensity -> getString(intensity == com.mckimquyen.util.HapticIntensity.LIGHT ? R.string.haptic_intensity_light
+                        : intensity == com.mckimquyen.util.HapticIntensity.MEDIUM ? R.string.haptic_intensity_medium
+                        : R.string.haptic_intensity_strong),
+                sortType -> getString(sortType.getDisplayNameResId()),
+                mode -> mode.ordinal() < backgroundNames.length ? backgroundNames[mode.ordinal()] : mode.name());
         ResetValueFormatter formatter = new ResetValueFormatter(
                 getString(R.string.reset_value_on), getString(R.string.reset_value_off),
-                getString(R.string.setting_search_hint_default), value -> getString(R.string.unit_ms_format, value));
+                getString(R.string.setting_search_hint_default), value -> getString(R.string.unit_ms_format, value),
+                labels::labelFor);
         StringBuilder message = new StringBuilder();
         for (com.mckimquyen.ui.settings.ResetPreviewRow row : plan.getRows()) {
             if (message.length() > 0) message.append('\n');
