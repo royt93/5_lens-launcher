@@ -177,3 +177,8 @@ KJ7 only (115333744A005844), gate first in the same block (launcher in front, 0 
 Whole com.mckimquyen.ui package, refactor build, 2 runs: 587 tests, 3 failures each, the same three screenshot-height tests as every base and hook run (PixelCopy height vs Activity display, device property). A first attempt installed the OLD test apk from the backup (350 failures, NullPointerException on missing views): INVALID, discarded; rerun with the androidTest apk built from the same sources.
 Restore after each script: DATA-IDENTICAL 207 files, APK hashes equal to the backup, display 1080x2436, accel=1 rot=0; packages 359 vs 358, the only difference by name is com.mckimquyen.reader.test (other session, left alone).
 Limits unchanged: one phone, adb taps, no person, no automated test for the focus hook itself (the pure decision is unit tested; the focus event is not).
+
+=== WHOLE ui PACKAGE ON THE PUSHED HEAD 115555aa, KJ7 (2026-11-23) ===
+Build: dev debug apk 3c77e5e145b962e0 (with the Robolectric test and robolectric.properties, which do not enter the apk) and the androidTest apk built from the same sources. Gate first in the same block (launcher in front, 0 active test processes; the other session had confirmed it was off the phone). Backup kj7-20261121.
+run 1: 587 tests, 3 failures; run 2: 587 tests, 3 failures. Both the same three screenshot-height tests (ActHomeT9KeypadWidgetTest, ActSettingsLayoutTest, LensManagementDisplaySizesTest, 2328 vs 2436), as every base, hook and refactor run.
+Restore: DATA-IDENTICAL 207 files, APK hashes fe23953939048df0 / 3a1816c943eefc42 equal to the backup, display 1080x2436, accel=1 rot=0, launcher in front; packages 359 vs 358, the only difference by name com.mckimquyen.reader.test (other session).
