@@ -1,0 +1,13 @@
+Release prep 2026.11.23 (versionCode 20261123), 2026-11-23. Build from dev a3b7c78f plus the version bump. Device: TECNO KJ7 only.
+
+Version: bumped from 20261007 / 2026.10.07 (514 commits and 187 app/src/main files behind). 20261123 is date-based and higher than the old code; I did NOT know the last versionCode uploaded to Play. If a higher one was uploaded, raise it before building.
+
+productionRelease build (assembleProductionRelease, signed with a THROWAWAY keystore created outside the repo and deleted afterwards, CN=tmp): BUILD SUCCESSFUL, 16,060,836 bytes. aapt2: package com.mckimquyen.lenslauncher, versionCode 20261123, versionName 2026.11.23, targetSdk 37, label "Fisheye Launcher", ABIs arm64-v8a armeabi-v7a x86 x86_64. zipalign -P 16 -c: Verification successful (16 KB aligned). Not debuggable. R8 mapping.txt, configuration.txt, resources.txt produced. BuildConfig: real AdMob banner id, rewarded id still the Google TEST id (BUG-6, owner decision 2026-10-07 to keep), IS_ENABLE_ADMOB=true.
+THIS APK IS NOT UPLOADABLE: it is signed with the throwaway key. The upload needs the real keystore via ANDROID_RELEASE_* or keystore.properties (SEC-001 stays deferred by the owner).
+
+Room 12 -> 13 on the KJ7: AppDatabaseMigrationIntegrationTest, 5/5 OK (migrate10To11, migrate12To13 keeps lens metadata and layout, multiLensRoundTrip, concurrentLensOrderWrites, legacyVersionBelow7). The v12 database is built by hand SQL in the test from the 12.json schema, NOT from a database written by a released build.
+
+Release smoke on the KJ7 (fresh install after uninstalling lenslauncher, data cleared): ActSettings cold start status ok, TotalTime 1338 ms; ActHome status ok, TotalTime 286 ms; process alive after ~16 s; screenshots show the home grid with the search bar and the first-run Terms and Privacy dialog; logcat (main+crash): 0 FATAL/AndroidRuntime, 0 ClassNotFound/NoSuchMethod/NoClassDefFound (the R8 failure signatures), 0 StrictMode, 0 ANR. No ad window took focus, so no BACK was sent; no ad content tapped. The build uses real AdMob ids, so the launch made real ad requests from the test phone.
+Restore after: DATA-IDENTICAL 207 files, APK hash equal to the backup (kj7-20261121), display 1080x2436, accel=1 rot=0; packages 359 vs 358, the only difference by name com.mckimquyen.reader.test (other session).
+
+NOT covered: an UPGRADE from a previously released build (no released APK or its data was available), long-session use of the release build, gestures and search on the release build, the Play Console items in doc/task/RELEASE_OWNER_CHECKLIST.md (Data safety, privacy policy URL, internal track upload), consent (ADS-001) and the rewarded test id, which the owner deferred.
