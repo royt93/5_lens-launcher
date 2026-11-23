@@ -11,10 +11,14 @@ Draft written 2026-11-23 from `dev` bf702b2a. Everything under "Checked" was mea
 - **Fixes:** Vietnamese terms text and the default share message and chooser title no longer mix languages (the default `values` file used to hold Vietnamese for `share_via` and `share_app_message`, shown to every unsupported language); Italian "Focus peaking" title translated.
 - Store-listing text is the owner's to write; the lines above are a source, not final copy. Translations are AI, no native-speaker review.
 
+## How the lens opens an app (so a reviewer or a new user does not think it is broken)
+
+Measured on the release build on the KJ7 (see the evidence file, section "OPEN AN APP FROM THE LENS GRID"): touch the grid and slide to magnify; **lift the finger on an icon to open that app**; **hold on an icon for about half a second to get its menu**. A short tap on an icon does NOT open the app. Search (the bar at the top) opens an app with a normal tap on a result. If the store listing or a reviewer tests with plain taps on the grid, they will see nothing open; the listing text should say "touch, slide and lift". The app has no first-run hint for this today (I found no onboarding string or class); adding one is a product change with 17 locales and a test, and is not in this release.
+
 ## Checked (host and TECNO KJ7 only)
 
 - Host: unit 1819 tests, 0 failures; lint 0 errors / 16 baseline warnings (forced runs).
-- KJ7 (Android 14, 1080x2436, display cutout): whole `com.mckimquyen.ui` package 587/587 twice on a debug build; Room 12->13 migration test 5/5; `productionRelease` (R8, 16 KB aligned, not debuggable) installs and runs; deep smoke by adb on the release build: first run, lens drag, search, real split-screen with the keyboard up, landscape, 0 crash/ANR/Room errors; upgrade from a 2026.10.07 build over its data (same throwaway key) keeps the language and starts without a Room error.
+- KJ7 (Android 14, 1080x2436, display cutout): whole `com.mckimquyen.ui` package 587/587 on three debug builds of the later HEADs (the last on 05c92e9a), plus `com.mckimquyen.model` 12/12; Room 12->13 migration test 5/5; `productionRelease` (R8, 16 KB aligned, not debuggable) installs and runs; deep smoke by adb on the release build: first run, lens drag, search, real split-screen with the keyboard up, landscape, 0 crash/ANR/Room errors; upgrade from a 2026.10.07 build over its data (same throwaway key) keeps the language and starts without a Room error.
 - The A50s and the KJ7 were restored to their baselines after every run.
 
 ## Not checked, or not provable from here
