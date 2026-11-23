@@ -111,7 +111,7 @@ Source of truth for implementation choices in this session. Detailed acceptance 
 
 
 
-- **FISH-021 follow-up — Icon trong danh sách chọn app (09/10/2026)**: owner duyệt mỗi dòng gồm icon launcher 40dp + tên + checkbox. Tái dùng iconCacheKey/cache và ListView multi-choice; Set vẫn là nguồn lựa chọn để cuộn không mất tick. Thiết bị khóa hiện tại: Pixel 7 Pro `2B051FDH3006MU`. Chưa kiểm chứng và chưa push; plan `docs/superpowers/plans/2026-10-09-lens-picker-icons.md`.
+- **FISH-021 follow-up — Icon trong danh sách chọn app (09/10/2026)**: owner duyệt mỗi dòng gồm icon launcher 40dp + tên + checkbox. Tái dùng iconCacheKey/cache và ListView multi-choice; Set vẫn là nguồn lựa chọn để cuộn không mất tick. Thiết bị khóa hiện tại: Pixel 7 Pro `2B051FDH3006MU`. Chưa kiểm chứng và chưa push; plan `docs/superpowers/plans/2026-10-09-lens-picker-icons.md`. **[2026-11-23 rà soát: mục này lỗi thời. Commit `73fcca56` (2026-10-10, sau bản 2026.10.07) đã đưa icon launcher vào hàng chọn app (`LensAppChoiceAdapter` + `LensAppChoiceAdapterTest`); mục chỉ còn "chưa kiểm chứng trên máy" từ lúc ghi, không có việc code nào còn treo. Máy khóa nay là TECNO KJ7.]**
 
 - **REL-2026.10.07 — Chuẩn bị release store (07/10/2026)**: audit tĩnh xong; code-side đã bump version, thêm backup rules (`BackupRulesTest` 3/3), R8 release build + 16 KB zipalign OK, unit 725/725. Owner quyết (07/10): giữ rewarded ID test, skip consent ADS-001, giữ 3 permission nhạy cảm, dùng key hiện tại (SEC-001 để sau). Còn lại: smoke TECNO + audit >9. Xem `doc/task/RELEASE_OWNER_CHECKLIST.md`.
 
