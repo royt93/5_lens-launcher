@@ -17,6 +17,7 @@ class ReadPolicyStringsTest {
         const val LOCALE_COUNT = 17
         const val ENGLISH_RUN_WORDS = 2
         const val SHARE_KEY = "share_app_message"
+        const val SHARE_VIA_KEY = "share_via"
         const val ASCII_LIMIT = 128
     }
 
@@ -72,11 +73,15 @@ class ReadPolicyStringsTest {
         return (0 until nodes.length).map { nodes.item(it) as org.w3c.dom.Element }.associate { it.getAttribute("name") to it.textContent }
     }
 
-    @Test fun theDefaultShareMessageIsNotVietnamese() {
-        val default = stringsOf(DEFAULT_LOCALE_DIR).getValue(SHARE_KEY)
-        val vietnamese = stringsOf("values-vi").getValue(SHARE_KEY)
-        assertTrue("positive control: the vi file keeps its own Vietnamese text", vietnamese.isNotBlank())
-        assertTrue("the fallback $SHARE_KEY must not be the Vietnamese text (it is shown to every unsupported language): $default", default != vietnamese)
-        assertTrue("the fallback $SHARE_KEY must be ASCII English, found: $default", default.all { it.code < ASCII_LIMIT })
+    @Test fun theDefaultShareMessageIsNotVietnamese() = assertDefaultIsEnglish(SHARE_KEY)
+
+    @Test fun theDefaultShareChooserTitleIsNotVietnamese() = assertDefaultIsEnglish(SHARE_VIA_KEY)
+
+    private fun assertDefaultIsEnglish(key: String) {
+        val default = stringsOf(DEFAULT_LOCALE_DIR).getValue(key)
+        val vietnamese = stringsOf("values-vi").getValue(key)
+        assertTrue("positive control: the vi file keeps its own Vietnamese text for $key", vietnamese.isNotBlank())
+        assertTrue("the fallback $key must not be the Vietnamese text (it is shown to every unsupported language): $default", default != vietnamese)
+        assertTrue("the fallback $key must be ASCII English, found: $default", default.all { it.code < ASCII_LIMIT })
     }
 }
