@@ -11,9 +11,10 @@ Draft written 2026-11-23 from `dev` bf702b2a. Everything under "Checked" was mea
 - **Fixes:** Vietnamese terms text and the default share message and chooser title no longer mix languages (the default `values` file used to hold Vietnamese for `share_via` and `share_app_message`, shown to every unsupported language); Italian "Focus peaking" title translated.
 - Store-listing text is the owner's to write; the lines above are a source, not final copy. Translations are AI, no native-speaker review.
 
-## How the lens opens an app (so a reviewer or a new user does not think it is broken)
+## How the lens opens an app (measured, with a correction)
 
-Measured on the release build on the KJ7 (see the evidence file, section "OPEN AN APP FROM THE LENS GRID"): touch the grid and slide to magnify; **lift the finger on an icon to open that app**; **hold on an icon for about half a second to get its menu**. A short tap on an icon does NOT open the app. Search (the bar at the top) opens an app with a normal tap on a result. If the store listing or a reviewer tests with plain taps on the grid, they will see nothing open; the listing text should say "touch, slide and lift". The app has no first-run hint for this today (I found no onboarding string or class); adding one is a product change with 17 locales and a test, and is not in this release.
+Touch the grid and slide to magnify; lift the finger on an icon to open that app; hold on an icon longer than the system long-press time (300 ms on the KJ7) to get its menu. Search opens an app with a normal tap on a result.
+Correction (2026-11-23): an earlier draft of this file said a short tap on an icon does NOT open the app. That came from `adb input tap` (DOWN and UP about 1 ms apart). With a finger held in place for 10 ms or more the app opened every time (see the evidence file, section "CORRECTION"); only a touch shorter than about one frame (under 10 ms) does nothing, which a hand does not produce. I did not test with a real finger. No first-run hint is needed on this evidence.
 
 ## Checked (host and TECNO KJ7 only)
 
