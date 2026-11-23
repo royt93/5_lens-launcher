@@ -52,14 +52,7 @@ class LanguageBottomSheetDialogFragment : BottomSheetDialogFragment() {
         adapter = LanguageAdapter(
             items = LocaleHelper.supportedLanguages,
             currentLangCode = currentLanguage,
-            onItemClick = onItemClick@{ language ->
-                // The row action runs 200 ms after the tap; if the sheet was detached in that window there is no context to use.
-                val context = context ?: return@onItemClick
-                LocaleHelper.setLocale(context, language.code)
-                LocaleHelper.setLanguageSelected(context)
-                listener?.onLanguageSelected(language.code)
-                dismiss()
-            }
+            onItemClick = ::applyLanguageChoice
         )
 
         rvLanguages.layoutManager = LinearLayoutManager(requireContext())
@@ -82,6 +75,18 @@ class LanguageBottomSheetDialogFragment : BottomSheetDialogFragment() {
                 adapter?.filter(s?.toString() ?: "")
             }
         })
+    }
+
+    /** What a tap on a language row does; the row calls it 200 ms after the tap. */
+    internal fun applyLanguageChoice(language: AppLanguage) {
+        // The row action runs 200 ms after the tap; if the sheet was detached in that window there is no context to use.
+        val context = context ?: return
+        LocaleHelper.setLocale(context, language.code)
+        LocaleHelper.setLanguageSelected(context)
+        listener?.onLanguageSelected(language.code)
+        // Home pressed inside the 200 ms window: the Activity's state is already saved and a plain dismiss() throws IllegalStateException. The choice is
+        // already stored above, and a sheet with no state worth keeping may go without it.
+        if (isStateSaved) dismissAllowingStateLoss() else dismiss()
     }
 
     // ─── Adapter ────────────────────────────────────────────────────────────────
