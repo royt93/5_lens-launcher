@@ -53,6 +53,10 @@ android {
     // SDK Versions - Android 14 (API 36)
     compileSdkVersion 37
 
+    testOptions {
+        unitTests.includeAndroidResources = true
+    }
+
     defaultConfig {
         applicationId "com.mckimquyen.lenslauncher"
         minSdkVersion 25    // Android 7.1 (Nougat)
