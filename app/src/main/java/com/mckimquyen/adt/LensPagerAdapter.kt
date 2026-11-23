@@ -71,6 +71,21 @@ class LensPagerAdapter(
         onBindPage(holder.lensView, lens)
     }
 
+    /**
+     * A page the RecyclerView kept in its cache comes back WITHOUT another [onBindViewHolder], but LensView.onDetachedFromWindow has already released the
+     * owner callbacks (search, edge swipe, lens menu, drag, curvature) that only the bind sets. With three lenses a swipe out and back left page 0 with none of
+     * them. Reaching the owner again is the bind's job, so run it when the page is attached and one of those callbacks is missing; a first attach and a
+     * freshly bound page already have them, and a locked page is never bound with a grid.
+     */
+    override fun onViewAttachedToWindow(holder: PageHolder) {
+        super.onViewAttachedToWindow(holder)
+        val position = holder.bindingAdapterPosition
+        val lens = lenses.getOrNull(position) ?: return
+        if (lens.id in lockedLensIds) return
+        if (holder.lensView.hasOwnerCallbacks()) return
+        onBindPage(holder.lensView, lens)
+    }
+
     /** Diffs by id so an unrelated create/rename/delete doesn't reset scroll/page position. */
     fun submitLenses(newLenses: List<LensWorkspace>) {
         val old = lenses

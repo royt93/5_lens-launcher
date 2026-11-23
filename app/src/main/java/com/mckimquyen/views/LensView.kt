@@ -695,6 +695,9 @@ class LensView : View {
     /** Test seam: observes a lift-to-open launch (package, activity name) instead of starting the activity; null in production. */
     internal var appLauncherForTest: ((String, String) -> Unit)? = null
 
+    /** True while the owner's callbacks are set; [onDetachedFromWindow] clears them and only the owner's bind sets them again. */
+    fun hasOwnerCallbacks(): Boolean = onSearchSwipeDownListener != null && onEdgeSwipeListener != null && onEmptySpaceLongPressListener != null
+
     internal fun isFocusRingActiveForTest(): Boolean = mFocusRingActive
     internal fun activeFocusChipIndexForTest(): Int = mActiveFocusChipIndex
     internal fun focusRingSlotsForTest(): List<FocusChipSlot> = mFocusRingSlots
