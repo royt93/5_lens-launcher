@@ -41,7 +41,7 @@ What it proves: the focus event is wired to the policy and hides the keyboard on
 
 ## Limits
 
-One phone, adb taps, no person; foldables untested; the Pixel was never re-tested with the hook; the A50s may still hold the hook build and cannot be restored unless it reappears in `adb devices`; the focus hook test uses a fake IME (the real IME behaviour is checked only on the phone); only Gboard was tried: the KJ7 has no second keyboard installed (checked 2026-11-23 with `ime list -s`: Gboard, voice input, autofill).
+One phone, adb taps, no person; foldables untested; the Pixel was never re-tested with the hook; the A50s was restored to baseline on 2026-11-23 (hashes equal to its backup); the focus hook test uses a fake IME (the real IME behaviour is checked only on the phone); only Gboard was tried: the KJ7 has no second keyboard installed (checked 2026-11-23 with `ime list -s`: Gboard, voice input, autofill).
 
 ## Score
 
