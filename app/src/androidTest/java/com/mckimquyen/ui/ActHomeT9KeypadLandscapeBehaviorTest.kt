@@ -316,7 +316,9 @@ class ActHomeT9KeypadLandscapeBehaviorTest {
             val latch = java.util.concurrent.CountDownLatch(1)
             scenario.onActivity { activity ->
                 width = activity.resources.displayMetrics.widthPixels
-                height = activity.resources.displayMetrics.heightPixels
+                // The window bounds, not displayMetrics: on a phone with a display cutout (TECNO KJ7: 108 px) displayMetrics.heightPixels is 2328 for a
+                // 2436 px window, while PixelCopy of the decor view is the full 2436.
+                height = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) activity.windowManager.currentWindowMetrics.bounds.height() else activity.resources.displayMetrics.heightPixels
                 val bmp = Bitmap.createBitmap(activity.window.decorView.width, activity.window.decorView.height, Bitmap.Config.ARGB_8888)
                 bitmap = bmp
                 android.view.PixelCopy.request(activity.window, bmp, { code -> copyResult = code; latch.countDown() }, Handler(android.os.Looper.getMainLooper()))
