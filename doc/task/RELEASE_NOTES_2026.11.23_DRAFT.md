@@ -13,7 +13,7 @@ Re-checked: upgrade from a 2026.10.07 build over its data with pinned apps, a fa
 
 Open, read but not reproduced or not measured (none changes the advice to upload to the internal track first):
 - Rotating the phone while the lens-unlock credential screen is open can drop the result on Android 7-10 (API 25-29 path); not reproducible on the Android 14 phone.
-- The Set-folder dialog in the home list mode is not dismissed if the system destroys the Activity while it is open.
+- (Fixed in 69657aa6, see the one-page file: the home list adapter is dropped in onDestroy. The leaked dialog window itself was never observed.)
 - Icon pack scan on the main thread in Settings: 0.7-2 ms cold with no icon pack installed; with many packs it is unmeasured.
 - ICU pinyin per keystroke for labels with Chinese characters; unmeasured on this phone.
 - Smart Focus order recorded on "freeze" is computed from the settings screen's size, not the home grid's; icon order only.
@@ -56,7 +56,7 @@ Correction (2026-11-23): an earlier draft of this file said a short tap on an ic
 
 ## Only you can do (from `RELEASE_OWNER_CHECKLIST.md`)
 
-1. Build the real bundle/APK from a commit at or after bf702b2a with your key; check the versionCode against the Play Console.
+1. Build the real bundle/APK from commit 69657aa6 or later (NOT bf702b2a: it lacks the home list adapter fix, the last app code change) with your key; check the versionCode against the Play Console.
 2. Play Console: Data safety form against the merged `productionRelease` manifest; privacy policy URL reachable; permission explanations for `REQUEST_DELETE_PACKAGES`, location, contacts; store text says this is a replacement launcher.
 3. Upload to an internal or closed track first and run it on a phone before production.
 4. Decide whether to publish with the rewarded test id and without the consent flow.
