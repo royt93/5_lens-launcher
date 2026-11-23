@@ -1248,6 +1248,9 @@ public class ActHome extends ActBase implements LensViewHolderHost, HomeQuickAct
         lensMenu.onDestroy();
         searchController.onDestroy();
         quickActions.onDestroy();
+        // AppAdapter.onViewRecycled dismisses a row's Set-folder dialog, and a RecyclerView recycles its rows only when its adapter is dropped. Without
+        // this an Activity destroyed with that dialog open left the dialog window behind (FrmApps already does the same).
+        if (rvHomeAppList != null) rvHomeAppList.setAdapter(null);
         super.onDestroy();
     }
 }
