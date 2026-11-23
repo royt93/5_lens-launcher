@@ -33,6 +33,11 @@ Short version of the scattered sections in `search-keypad-split-screen-a50s.txt`
 - A first refactor `ui` run installed the old test APK from the backup (350 failures); discarded and rerun with the matching APK.
 - 21 session commits carry a Claude trailer; the owner chose to keep pushed history (R6 applies from 2026-11-21).
 
+## Attempt at an automated hook test with Robolectric (2026-11-23): works, but breaks the unit gate, not shipped
+
+`ActHome` can be built under Robolectric (`@Config(sdk=[34])`) only with `testOptions { unitTests.includeAndroidResources = true }` and without `onResume` (`BaseActivity.requestHighRefreshRate` calls `getDisplay()` on a context Robolectric does not tie to a display), i.e. `buildActivity(ActHome).create().start().postCreate(null).visible()`. With `ShadowInputMethodManager` standing in for the IME, 4 tests passed (keyboard hidden on focus gain with the keypad in use by window height and by the T9 switch; kept at full height; untouched while the search is closed) and 6 of 6 host mutants (drop the call, hide while closed, hide at full height, never hide, skip the post, ignore the user switch) were killed.
+Not shipped: with `includeAndroidResources` the whole unit run crashed the JVM natively (SIGBUS in `librobolectric-nativeruntime` `walIndexReadHdr`, Room/SQLite tests, exit 134) in 2 of 2 full forced runs, with or without the new test; the original `build.gradle` gave 1809/1809, 0 failures. The test and the build.gradle variant are kept outside the repo in `~/lens-launcher-device-backups/spikes/`. Open: a fix for the native crash (e.g. fewer parallel forks or a different SQLite mode) was not tried; it would be needed before this test can ship. The focus hook therefore still has no automated test in the repo.
+
 ## Limits
 
 One phone, adb taps, no person; foldables untested; the Pixel was never re-tested with the hook; the A50s may still hold the hook build and cannot be restored unless it reappears in `adb devices`; the focus hook itself has no automated test (the decision is unit tested, the focus event is not); only Gboard was tried: the KJ7 has no second keyboard installed (checked 2026-11-23 with `ime list -s`: Gboard, voice input, autofill).
