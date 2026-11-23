@@ -28,7 +28,7 @@ Short version of `doc/task/evidence/release-2026.11.23-prep-kj7.txt` (168 lines,
 
 ## Open, read but not reproduced or not measured (none of these changed my advice)
 
-- Rotating the phone while the unlock credential screen is open can lose the result on Android 7-10 only; the KJ7 is Android 14. A unit test now pins that a result handed to a new authenticator instance is dropped; whether the system recreates the Activity at that moment is not shown. Not changed: the fix alters rotation behaviour of two screens and I cannot test it here.
+- DECISION RECORDED (2026-11-23, proposed by me after you picked "decide B", yours to overrule): ACCEPT, do not fix. Rotating the phone while the unlock credential screen is open can lose the result on Android 7-10 only (the KJ7 is Android 14). The effect is that one unlock attempt is swallowed and the user taps unlock again; no data is lost and a lens cannot be locked out by it. The lens lock is new in this build. Fixing it changes rotation behaviour of two screens for everyone and I cannot test the case that needs it. A unit test pins the current behaviour. Revisit if a Play pre-launch report or a user shows it.
 - Icon pack scan on the main thread: 0.7-2 ms with NO icon pack installed; unmeasured with real packs.
 - ICU pinyin for apps with Chinese names; Smart Focus order recorded on "freeze" uses the settings screen's size.
 
