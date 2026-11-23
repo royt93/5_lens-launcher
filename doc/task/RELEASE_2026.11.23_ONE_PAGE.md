@@ -4,14 +4,14 @@ Short version of `doc/task/evidence/release-2026.11.23-prep-kj7.txt` (168 lines,
 
 ## The commit to build from
 
-`dev` at `a8c729dc` or later: later commits only add documents. `versionCode 20261123`, `versionName 2026.11.23` (was 20261007 / 2026.10.07; 514 commits and 187 files in `app/src/main` behind).
+`dev` at `69657aa6` or later: later commits only add documents (the last code change is the one-line home list fix in that commit). `versionCode 20261123`, `versionName 2026.11.23` (was 20261007 / 2026.10.07; 514 commits and 187 files in `app/src/main` behind).
 
 ## What I checked, in one table
 
 | Check | Result |
 |---|---|
 | Unit tests plus lint on the host, forced | 1827 tests, 0 failures; lint 0 errors, 16 baseline warnings |
-| Device tests on the KJ7, debug build of `a8c729dc` | `ui` 590 OK, `views` 327 OK, `model` 12 OK (the D fix below was measured separately, see the evidence file) |
+| Device tests on the KJ7, debug build of `69657aa6` | `ui` 591 OK, `views` 327 OK, `model` 12 OK |
 | `productionRelease` (R8 and shrink on, 16 KB aligned, not debuggable) | builds, installs, starts in 0.2-1.3 s; logs by our own pid: 0 crash, 0 ANR, 0 R8 signatures, 0 Room errors |
 | Room 12 to 13 | 5 migration tests; a dense database (12 lenses, 3000 rows) kept field by field; a mutant that deletes rows is caught |
 | Upgrade 2026.10.07 to 2026.11.23 over data | kept: pinned apps, a favourite in a folder, a hidden app, sort type, background, vibration, language; Room ran 12 to 13 |
