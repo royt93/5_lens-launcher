@@ -19,6 +19,8 @@ class ReadPolicyStringsTest {
         const val SHARE_KEY = "share_app_message"
         const val SHARE_VIA_KEY = "share_via"
         const val ASCII_LIMIT = 128
+        const val VI_EDGE_SWIPE_KEY = "setting_edge_swipe_lens_switch"
+        const val FR_RECOVERY_KEY = "layout_import_workspace_recovery_required"
     }
 
     private val documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder()
@@ -83,5 +85,18 @@ class ReadPolicyStringsTest {
         assertTrue("positive control: the vi file keeps its own Vietnamese text for $key", vietnamese.isNotBlank())
         assertTrue("the fallback $key must not be the Vietnamese text (it is shown to every unsupported language): $default", default != vietnamese)
         assertTrue("the fallback $key must be ASCII English, found: $default", default.all { it.code < ASCII_LIMIT })
+    }
+
+    @Test fun theVietnameseEdgeSwipeLabelUsesTheVietnameseWordForLensLikeTheRestOfTheFile() {
+        val vi = stringsOf("values-vi")
+        val own = vi.getValue(VI_EDGE_SWIPE_KEY)
+        assertTrue("positive control: the file uses the Vietnamese word many times", vi.values.count { it.contains("thấu kính") } > 10)
+        assertTrue("the edge swipe label keeps the English word 'Lens' while every other string says 'thấu kính': $own", !Regex("\\bLens\\b").containsMatchIn(own))
+    }
+
+    @Test fun theFrenchRecoveryMessageIsAGrammaticalSentence() {
+        val fr = stringsOf("values-fr").getValue(FR_RECOVERY_KEY)
+        assertTrue("a noun phrase ('Échec de la restauration') must not be joined to a full clause with 'et la récupération ... est': $fr",
+            !fr.contains("Échec de la restauration de l’espace de travail et la récupération"))
     }
 }
