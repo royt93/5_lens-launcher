@@ -692,6 +692,8 @@ class LensView : View {
     /** Test seams: the shortcut source and the launcher; null in production. */
     internal var shortcutProviderForTest: ((Context, String) -> List<QuickShortcut>)? = null
     internal var shortcutLauncherForTest: ((Context, QuickShortcut, Rect?) -> Boolean)? = null
+    /** Test seam: observes a lift-to-open launch (package, activity name) instead of starting the activity; null in production. */
+    internal var appLauncherForTest: ((String, String) -> Unit)? = null
 
     internal fun isFocusRingActiveForTest(): Boolean = mFocusRingActive
     internal fun activeFocusChipIndexForTest(): Int = mActiveFocusChipIndex
@@ -2949,6 +2951,7 @@ class LensView : View {
         val bounds = mRectToSelect?.let {
             Rect(it.left.toInt(), it.top.toInt(), it.right.toInt(), it.bottom.toInt())
         }
+        appLauncherForTest?.let { it(app.packageName.toString(), app.name.toString()); return }
         UtilApp.launchComponent(
             context,
             app.packageName as String?,
