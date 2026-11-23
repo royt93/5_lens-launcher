@@ -103,6 +103,26 @@ class LensUnlockAuthenticatorTest {
         assertEquals(LensUnlockResult.ERROR, result)
     }
 
+    /**
+     * Below API 30 the device-credential screen is a separate Activity. If the phone is rotated while it is open, the owning Activity is recreated and
+     * its authenticator is a NEW instance, so the result the system hands back finds no pending callback: the unlock is dropped without any message.
+     * This pins that as the CURRENT behaviour (the lens stays locked, nothing crashes); it is a statement about what happens, not about what should.
+     */
+    @Test fun aCredentialResultThatArrivesAtANewAuthenticatorInstanceIsDroppedSilently() {
+        platform.biometricStatus = BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED
+        platform.deviceSecure = true
+        var result: LensUnlockResult? = null
+        authenticator.authenticate(activity, "Private") { result = it }
+        assertEquals("positive control: the credential screen was started by the first instance", 1, platform.credentialLaunches)
+
+        val recreated = SystemLensUnlockAuthenticator(platform)
+        recreated.onCredentialResult(true)
+
+        assertEquals("the new instance has no pending callback, so the owner is never told (the lens stays locked)", null, result)
+        authenticator.onCredentialResult(true)
+        assertEquals("only the instance that started the screen can finish it", LensUnlockResult.SUCCESS, result)
+    }
+
     private class FakePlatform : LensUnlockPlatform {
         var sdk = 28
         var biometricStatus = BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE

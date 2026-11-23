@@ -10,7 +10,7 @@ Short version of `doc/task/evidence/release-2026.11.23-prep-kj7.txt` (168 lines,
 
 | Check | Result |
 |---|---|
-| Unit tests plus lint on the host, forced | 1827 tests, 0 failures; lint 0 errors, 16 baseline warnings |
+| Unit tests plus lint on the host, forced | 1828 tests, 0 failures; lint 0 errors, 16 baseline warnings |
 | Device tests on the KJ7, debug build of `69657aa6` | `ui` 591 OK, `views` 327 OK, `model` 12 OK |
 | `productionRelease` (R8 and shrink on, 16 KB aligned, not debuggable) | builds, installs, starts in 0.2-1.3 s; logs by our own pid: 0 crash, 0 ANR, 0 R8 signatures, 0 Room errors |
 | Room 12 to 13 | 5 migration tests; a dense database (12 lenses, 3000 rows) kept field by field; a mutant that deletes rows is caught |
@@ -28,7 +28,7 @@ Short version of `doc/task/evidence/release-2026.11.23-prep-kj7.txt` (168 lines,
 
 ## Open, read but not reproduced or not measured (none of these changed my advice)
 
-- Rotating the phone while the unlock credential screen is open can lose the result on Android 7-10 only; the KJ7 is Android 14.
+- Rotating the phone while the unlock credential screen is open can lose the result on Android 7-10 only; the KJ7 is Android 14. A unit test now pins that a result handed to a new authenticator instance is dropped; whether the system recreates the Activity at that moment is not shown. Not changed: the fix alters rotation behaviour of two screens and I cannot test it here.
 - Icon pack scan on the main thread: 0.7-2 ms with NO icon pack installed; unmeasured with real packs.
 - ICU pinyin for apps with Chinese names; Smart Focus order recorded on "freeze" uses the settings screen's size.
 
