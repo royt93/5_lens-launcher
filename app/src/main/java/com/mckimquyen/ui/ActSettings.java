@@ -376,7 +376,7 @@ public class ActSettings extends ActBase implements SettingsMenuHost {
     private void showResetPreview(int tab, List<ResetEntry> entries, ResetPlan plan) {
         ResetValueFormatter formatter = new ResetValueFormatter(
                 getString(R.string.reset_value_on), getString(R.string.reset_value_off),
-                getString(R.string.reset_already_default), value -> getString(R.string.unit_ms_format, value));
+                getString(R.string.setting_search_hint_default), value -> getString(R.string.unit_ms_format, value));
         StringBuilder message = new StringBuilder();
         for (com.mckimquyen.ui.settings.ResetPreviewRow row : plan.getRows()) {
             if (message.length() > 0) message.append('\n');
