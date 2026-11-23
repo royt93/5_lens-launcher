@@ -18,6 +18,7 @@ class ReadPolicyStringsTest {
         const val ENGLISH_RUN_WORDS = 2
         const val SHARE_KEY = "share_app_message"
         const val SHARE_VIA_KEY = "share_via"
+        const val FOCUS_PEAKING_KEY = "setting_focus_peaking"
         const val ASCII_LIMIT = 128
     }
 
@@ -83,5 +84,15 @@ class ReadPolicyStringsTest {
         assertTrue("positive control: the vi file keeps its own Vietnamese text for $key", vietnamese.isNotBlank())
         assertTrue("the fallback $key must not be the Vietnamese text (it is shown to every unsupported language): $default", default != vietnamese)
         assertTrue("the fallback $key must be ASCII English, found: $default", default.all { it.code < ASCII_LIMIT })
+    }
+
+    // Not about read_policy: kept here because this file already holds the locale-text checks. These settings titles were left in English
+    // in a translated locale while their neighbours were translated.
+    @Test fun theItalianFocusPeakingTitleIsTranslated() {
+        val english = stringsOf(DEFAULT_LOCALE_DIR).getValue(FOCUS_PEAKING_KEY)
+        val italian = stringsOf("values-it").getValue(FOCUS_PEAKING_KEY)
+        assertTrue("positive control: the default title is not blank", english.isNotBlank())
+        assertTrue("the Italian $FOCUS_PEAKING_KEY must not be the English title \"$english\"", italian != english)
+        assertTrue("the Italian $FOCUS_PEAKING_KEY must not be blank", italian.isNotBlank())
     }
 }
