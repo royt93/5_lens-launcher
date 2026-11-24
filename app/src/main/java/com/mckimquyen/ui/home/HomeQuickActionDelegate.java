@@ -305,11 +305,9 @@ public final class HomeQuickActionDelegate {
      * it is this Settings screen, and the only way to detect the result is re-checking
      * isNotificationPolicyAccessGranted() next time the row renders, which onResume() does below.
      */
-    private void openDndAccessSettings() {
+    void openDndAccessSettings() {
         new UtilSettings(activity()).save(UtilSettings.KEY_DND_PERMISSION_REQUESTED, true);
-        try {
-            activity().startActivity(new Intent(android.provider.Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS));
-        } catch (ActivityNotFoundException e) {
+        if (!startQuickActionIntent(activity(), new Intent(android.provider.Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS))) {
             Toast.makeText(activity(), R.string.error_app_not_found, Toast.LENGTH_SHORT).show();
         }
     }
@@ -377,11 +375,10 @@ public final class HomeQuickActionDelegate {
         );
     }
 
-    private void startContactIntent(Intent intent) {
-        try {
-            activity().startActivity(intent);
+    void startContactIntent(Intent intent) {
+        if (startQuickActionIntent(activity(), intent)) {
             host.hideSearch();
-        } catch (ActivityNotFoundException e) {
+        } else {
             Toast.makeText(activity(), R.string.error_app_not_found, Toast.LENGTH_SHORT).show();
         }
     }
