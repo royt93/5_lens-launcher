@@ -88,14 +88,15 @@ class AppRowFontScaleWidgetTest {
                 )
 
                 // 3. Label layout params must be anchored to ivAppMenu
-                val labelParams = tvAppLabel.layoutParams as RelativeLayout.LayoutParams
+                // the label and the organization summary share the llAppText column, which carries the end anchor
+                val labelParams = holder.itemView.findViewById<View>(R.id.llAppText).layoutParams as RelativeLayout.LayoutParams
                 val anchor = if (labelParams.getRule(RelativeLayout.START_OF) != 0) {
                     labelParams.getRule(RelativeLayout.START_OF)
                 } else {
                     labelParams.getRule(RelativeLayout.LEFT_OF)
                 }
                 assertEquals(
-                    "tvAppLabel must anchor to start of ivAppMenu when actions are collapsed",
+                    "the label column must anchor to start of ivAppMenu when actions are collapsed",
                     R.id.ivAppMenu,
                     anchor
                 )
@@ -137,14 +138,15 @@ class AppRowFontScaleWidgetTest {
                 assertEquals("Hide button must be VISIBLE at 1.0x font", View.VISIBLE, ivAppHide.visibility)
                 assertEquals("Menu button must be VISIBLE at 1.0x font", View.VISIBLE, ivAppMenu.visibility)
 
-                val labelParams = tvAppLabel.layoutParams as RelativeLayout.LayoutParams
+                // the label and the organization summary share the llAppText column, which carries the end anchor
+                val labelParams = holder.itemView.findViewById<View>(R.id.llAppText).layoutParams as RelativeLayout.LayoutParams
                 val anchor = if (labelParams.getRule(RelativeLayout.START_OF) != 0) {
                     labelParams.getRule(RelativeLayout.START_OF)
                 } else {
                     labelParams.getRule(RelativeLayout.LEFT_OF)
                 }
                 assertEquals(
-                    "tvAppLabel must anchor to start of btAppLock under normal font",
+                    "the label column must anchor to start of btAppLock under normal font",
                     R.id.btAppLock,
                     anchor
                 )

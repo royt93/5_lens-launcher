@@ -2195,6 +2195,10 @@ class LensView : View {
                 mLongPressHandler.removeCallbacks(mLongPressRunnable)
                 resetSearchSwipeState()
                 gestureState = LensGestureState.IDLE
+                // A cancelled gesture must open nothing: the hide animation launches the selected app when it ends,
+                // so drop the selection first (the edge-swipe and search-swipe exits do the same).
+                mSelectIndex = -1
+                mRectToSelect = null
                 if (mMoving) {
                     val lensHideAnimation = LensAnimation(false)
                     startAnimation(lensHideAnimation)

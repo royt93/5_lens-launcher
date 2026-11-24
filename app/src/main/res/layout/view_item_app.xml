@@ -60,35 +60,41 @@
             tools:text="3"
             tools:visibility="visible" />
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/tvAppLabel"
+        <!-- One centered column: a RelativeLayout resolves layout_below against the label's
+             position BEFORE its own centerVertical shift, so label + summary were drawn on top
+             of each other when an organization summary was shown. -->
+        <LinearLayout
+            android:id="@+id/llAppText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_marginStart="@dimen/margin_app"
             android:layout_toStartOf="@+id/btAppLock"
             android:layout_toEndOf="@+id/ivAppIcon"
-            android:ellipsize="end"
-            android:maxLines="2"
-            android:textAppearance="?attr/textAppearanceTitleMedium"
-            android:textColor="?attr/colorOnSurface"
-            tools:text="AppName" />
+            android:orientation="vertical">
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/tvAppOrganization"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/tvAppLabel"
-            android:layout_marginStart="@dimen/margin_app"
-            android:layout_toStartOf="@id/btAppLock"
-            android:layout_toEndOf="@id/ivAppIcon"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:textAppearance="?attr/textAppearanceLabelMedium"
-            android:textColor="?attr/colorOnSurfaceVariant"
-            android:visibility="gone"
-            tools:text="Favorite • Work • Pinned first"
-            tools:visibility="visible" />
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvAppLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:textAppearance="?attr/textAppearanceTitleMedium"
+                android:textColor="?attr/colorOnSurface"
+                tools:text="AppName" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvAppOrganization"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textAppearance="?attr/textAppearanceLabelMedium"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                android:visibility="gone"
+                tools:text="Favorite • Work • Pinned first"
+                tools:visibility="visible" />
+        </LinearLayout>
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/btAppLock"

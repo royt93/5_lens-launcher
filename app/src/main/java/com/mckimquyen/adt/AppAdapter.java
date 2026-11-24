@@ -609,15 +609,13 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
             }
 
             int endAnchor = AppRowFontScalePolicy.rowLabelEndAnchor(isCollapsed || isSelfApp);
-            RelativeLayout.LayoutParams labelParams = (RelativeLayout.LayoutParams) tvAppLabel.getLayoutParams();
-            labelParams.addRule(RelativeLayout.START_OF, endAnchor);
-            labelParams.addRule(RelativeLayout.LEFT_OF, endAnchor);
-            tvAppLabel.setLayoutParams(labelParams);
-
-            RelativeLayout.LayoutParams orgParams = (RelativeLayout.LayoutParams) tvAppOrganization.getLayoutParams();
-            orgParams.addRule(RelativeLayout.START_OF, endAnchor);
-            orgParams.addRule(RelativeLayout.LEFT_OF, endAnchor);
-            tvAppOrganization.setLayoutParams(orgParams);
+            // The label and the organization summary share one column (llAppText); the end anchor
+            // belongs to that column, so both lines stay left of the same action button.
+            View textColumn = itemView.findViewById(R.id.llAppText);
+            RelativeLayout.LayoutParams textParams = (RelativeLayout.LayoutParams) textColumn.getLayoutParams();
+            textParams.addRule(RelativeLayout.START_OF, endAnchor);
+            textParams.addRule(RelativeLayout.LEFT_OF, endAnchor);
+            textColumn.setLayoutParams(textParams);
         }
 
         /**
