@@ -55,6 +55,12 @@ class LensViewDragGestureWidgetTest {
         return field.getFloat(lensView)
     }
 
+    private fun isPanning(): Boolean {
+        val field = LensView::class.java.getDeclaredField("mMoving")
+        field.isAccessible = true
+        return field.getBoolean(lensView)
+    }
+
     private fun holdTriggered(): Boolean {
         val field = LensView::class.java.getDeclaredField("mLongPressTriggered")
         field.isAccessible = true
@@ -212,6 +218,8 @@ class LensViewDragGestureWidgetTest {
         instrumentation.runOnMainSync {
             touch(MotionEvent.ACTION_MOVE, point.first + 400f, point.second + 400f)
         }
+        // Positive control: the two "nothing happened" assertions below mean something only if the pan really started.
+        instrumentation.runOnMainSync { assertTrue("the move must have started a pan", isPanning()) }
         waitPastLongPress()
         instrumentation.runOnMainSync { touch(MotionEvent.ACTION_UP, point.first + 400f, point.second + 400f) }
         assertTrue("a pan must not start a drag", dragRequests.isEmpty())

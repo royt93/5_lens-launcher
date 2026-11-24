@@ -57,6 +57,33 @@ public final class HomeQuickActionDelegate {
         return host.activity();
     }
 
+    /**
+     * Starts a quick-action intent without ever throwing at the caller. Returns false when nothing handles it or the system refuses it.
+     * Google Clock guards SET_TIMER with com.android.alarm.permission.SET_ALARM, which the app does not declare (the manifest permission list is a
+     * frozen owner decision, see Build003SafeScopeContractTest), so a refused timer opens the Clock timers screen instead of crashing.
+     */
+    // ACTION_SHOW_TIMERS is API 26 and minSdk is 25: it is a compile-time string constant, and on API 25 no Clock handles it, so the
+    // startActivity below throws ActivityNotFoundException, which is caught. Same pattern as the Settings table in QuickActionEngine.
+    @android.annotation.SuppressLint("InlinedApi")
+    static boolean startQuickActionIntent(Activity activity, Intent intent) {
+        try {
+            activity.startActivity(intent);
+            return true;
+        } catch (ActivityNotFoundException e) {
+            return false;
+        } catch (SecurityException e) {
+            if (android.provider.AlarmClock.ACTION_SET_TIMER.equals(intent.getAction())) {
+                try {
+                    activity.startActivity(new Intent(android.provider.AlarmClock.ACTION_SHOW_TIMERS));
+                    return true;
+                } catch (ActivityNotFoundException | SecurityException ignored) {
+                    return false;
+                }
+            }
+            return false;
+        }
+    }
+
     /** Finds the row views and starts the contact controller (the old ActHome.setupViews lines). */
     public void attach() {
         Activity activity = activity();
@@ -196,10 +223,9 @@ public final class HomeQuickActionDelegate {
             tvQuickActionValue.setCompoundDrawablesRelativeWithIntrinsicBounds(
                     0, 0, R.drawable.ic_arrow_forward_24dp, 0);
             quickActionRow.setOnClickListener(v -> {
-                try {
-                    activity().startActivity(quickAction.getIntent());
+                if (startQuickActionIntent(activity(), quickAction.getIntent())) {
                     host.hideSearch();
-                } catch (ActivityNotFoundException e) {
+                } else {
                     Toast.makeText(activity(), R.string.error_app_not_found, Toast.LENGTH_SHORT).show();
                 }
             });

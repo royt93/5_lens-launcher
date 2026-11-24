@@ -102,6 +102,17 @@ class LensViewRingRotateIntegrationTest {
         return downTime
     }
 
+    /**
+     * Drags, runs [whileDown] with the finger still on the glass, then lifts at the last point. For "nothing was reported" tests: they only mean
+     * something if the ring really was rotating before the lift, so [whileDown] asserts that as a positive control.
+     */
+    private fun dragThenRelease(view: LensView, points: List<Pt>, whileDown: () -> Unit): Long {
+        val downTime = drag(view, points, release = false)
+        whileDown()
+        sendAt(view, downTime, points.size * FRAME_MS, MotionEvent.ACTION_UP, points.last().x, points.last().y)
+        return downTime
+    }
+
     private fun arc(view: LensView, sweepSteps: Float, release: Boolean = true, radius: Float = ARC_RADIUS_PX) =
         drag(view, onCircle(radius, ramp(sweepSteps * RingRotation.STEP_RADIANS)), release)
 
@@ -167,7 +178,9 @@ class LensViewRingRotateIntegrationTest {
         listenerInto(view, requests)
         val out = ramp(RingRotation.STEP_RADIANS * 2.2f)
         val back = ramp(-RingRotation.STEP_RADIANS * 1.9f, from = out.last())   // ends at +0.3 steps -> net 0
-        drag(view, onCircle(ARC_RADIUS_PX, out + back.drop(1)))
+        dragThenRelease(view, onCircle(ARC_RADIUS_PX, out + back.drop(1))) {
+            assertTrue("positive control: the ring was rotating before the lift", view.isRingRotatingForTest())
+        }
         assertTrue(requests.isEmpty())
         assertEquals(base, displayed(view))
         assertNull(view.ringPendingTokenForTest())
@@ -178,7 +191,10 @@ class LensViewRingRotateIntegrationTest {
         pinAt500(view)
         val requests = mutableListOf<RingRotationRequest>()
         listenerInto(view, requests)
-        arc(view, sweepSteps = 12.1f)           // 12 whole steps: every group returns to its start
+        // 12 whole steps: every group returns to its start
+        dragThenRelease(view, onCircle(ARC_RADIUS_PX, ramp(12.1f * RingRotation.STEP_RADIANS))) {
+            assertTrue("positive control: the ring was rotating before the lift", view.isRingRotatingForTest())
+        }
         assertTrue(requests.isEmpty())
         assertEquals(base, displayed(view))
     }
@@ -189,7 +205,9 @@ class LensViewRingRotateIntegrationTest {
         pinAt500(view)
         val requests = mutableListOf<RingRotationRequest>()
         listenerInto(view, requests)
-        arc(view, sweepSteps = 1.2f)
+        dragThenRelease(view, onCircle(ARC_RADIUS_PX, ramp(1.2f * RingRotation.STEP_RADIANS))) {
+            assertTrue("positive control: the ring was rotating before the lift", view.isRingRotatingForTest())
+        }
         assertTrue(requests.isEmpty())
         assertEquals(listOf("S", "N", "E"), displayed(view))
     }
