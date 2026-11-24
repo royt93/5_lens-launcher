@@ -593,6 +593,8 @@ class LensView : View {
     private var mAnimationHiding = false
     private var mTouchSlop = 0f
     private var mMoving = false
+    /** Set by ACTION_CANCEL, cleared by the next ACTION_DOWN: the wind-down animation of a cancelled gesture must not open an app. */
+    private var mLaunchSuppressed = false
 
     // FISH-008 Phase 3: Lens-scoped configuration
     var lensId: String = LensWorkspace.DEFAULT_LENS_ID
@@ -1846,6 +1848,7 @@ class LensView : View {
                 mEdgeSwipeTriggered = false
                 mSelectIndex = -1
                 mMoving = false
+                mLaunchSuppressed = false
                 mLongPressTriggered = false
                 mHoldIndex = -1
                 mDragStarted = false
@@ -2195,10 +2198,9 @@ class LensView : View {
                 mLongPressHandler.removeCallbacks(mLongPressRunnable)
                 resetSearchSwipeState()
                 gestureState = LensGestureState.IDLE
-                // A cancelled gesture must open nothing: the hide animation launches the selected app when it ends,
-                // so drop the selection first (the edge-swipe and search-swipe exits do the same).
-                mSelectIndex = -1
-                mRectToSelect = null
+                // A cancelled gesture must open nothing. The hide animation launches the selected app when it ends and the next
+                // frame re-selects from the touch point that is still stored, so clearing the selection here is not enough.
+                mLaunchSuppressed = true
                 if (mMoving) {
                     val lensHideAnimation = LensAnimation(false)
                     startAnimation(lensHideAnimation)
@@ -3011,7 +3013,7 @@ class LensView : View {
 
                 override fun onAnimationEnd(animation: Animation) {
                     if (!mShow) {
-                        launchApp()
+                        if (!mLaunchSuppressed) launchApp()
                         mTouchX = -Float.MAX_VALUE
                         mTouchY = -Float.MAX_VALUE
                         mAnimationHiding = false

@@ -1,6 +1,8 @@
 package com.mckimquyen.views
 
+import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.Rect
 import android.os.SystemClock
 import android.view.MotionEvent
@@ -9,6 +11,7 @@ import android.widget.FrameLayout
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import com.mckimquyen.app.RAppsSingleton
 import com.mckimquyen.feature.organization.OrganizationHarnessActivity
 import com.mckimquyen.model.App
 import org.junit.Assert.assertEquals
@@ -33,6 +36,7 @@ class LensViewCancelDoesNotLaunchIntegrationTest {
         const val DRAG_STEP_PX = 6f
         const val STEP_DELAY_MS = 16L
         const val ANIMATION_SETTLE_MS = 1_500L
+        const val ICON_PX = 48
     }
 
     private val instrumentation = InstrumentationRegistry.getInstrumentation()
@@ -42,6 +46,9 @@ class LensViewCancelDoesNotLaunchIntegrationTest {
         val apps = ArrayList((0 until APP_COUNT).map { i ->
             App(id = i, packageName = "com.cancel.t$i", name = "T$i", label = "T $i", iconCacheKey = "cancelt#$i")
         })
+        // An icon without a cached bitmap is not drawn and so never selected, which would make every "launches nothing" assertion pass for the wrong reason.
+        val icon = Bitmap.createBitmap(ICON_PX, ICON_PX, Bitmap.Config.ARGB_8888).apply { eraseColor(Color.WHITE) }
+        apps.forEach { RAppsSingleton.instance.setAppIcon(it.iconCacheKey, icon) }
         ActivityScenario.launch(OrganizationHarnessActivity::class.java).use { scenario ->
             var view: LensView? = null
             scenario.onActivity { activity ->
@@ -60,7 +67,11 @@ class LensViewCancelDoesNotLaunchIntegrationTest {
                 }
             }
             instrumentation.waitForIdleSync()
-            block(requireNotNull(view) { "assigned in onActivity above" })
+            try {
+                block(requireNotNull(view) { "assigned in onActivity above" })
+            } finally {
+                com.mckimquyen.util.BitmapCache.clear()
+            }
         }
     }
 
@@ -73,27 +84,42 @@ class LensViewCancelDoesNotLaunchIntegrationTest {
         }
     }
 
-    /** Presses an icon, drags past the touch slop so the pan starts, and returns the last finger position. */
-    private fun dragFromAnIcon(view: LensView): Triple<Long, Float, Float> {
+    /**
+     * Presses the icon nearest the view centre, drags out past the touch slop so the pan starts, then comes back to the icon centre and draws
+     * there, so the finger ends ON an icon (a drag that ends in a gap selects nothing and would make the cancel test pass for the wrong reason).
+     */
+    private fun dragOutAndBackOntoAnIcon(view: LensView): Triple<Long, Float, Float> {
         val bounds = Rect()
+        var best = Float.MAX_VALUE
         var found = false
-        instrumentation.runOnMainSync { found = view.getAppBounds(APP_COUNT / 2, bounds) }
-        assertTrue("positive control: the icon has bounds", found)
+        instrumentation.runOnMainSync {
+            val candidate = Rect()
+            for (i in 0 until APP_COUNT) {
+                if (!view.getAppBounds(i, candidate)) continue
+                val distance = Math.hypot((candidate.exactCenterX() - SIZE_PX / 2f).toDouble(), (candidate.exactCenterY() - SIZE_PX / 2f).toDouble()).toFloat()
+                if (distance < best) { best = distance; bounds.set(candidate); found = true }
+            }
+        }
+        assertTrue("positive control: a cell has bounds", found)
         val down = SystemClock.uptimeMillis()
-        var x = bounds.exactCenterX()
-        var y = bounds.exactCenterY()
-        send(view, down, MotionEvent.ACTION_DOWN, x, y)
-        repeat(DRAG_STEPS) {
-            x += DRAG_STEP_PX
-            y += DRAG_STEP_PX
-            send(view, down, MotionEvent.ACTION_MOVE, x, y)
+        val startX = bounds.exactCenterX()
+        val startY = bounds.exactCenterY()
+        send(view, down, MotionEvent.ACTION_DOWN, startX, startY)
+        repeat(DRAG_STEPS) { step ->
+            val offset = DRAG_STEP_PX * (step + 1)
+            send(view, down, MotionEvent.ACTION_MOVE, startX + offset, startY + offset)
             SystemClock.sleep(STEP_DELAY_MS)
         }
-        return Triple(down, x, y)
+        repeat(DRAG_STEPS) { step ->
+            val offset = DRAG_STEP_PX * (DRAG_STEPS - step - 1)
+            send(view, down, MotionEvent.ACTION_MOVE, startX + offset, startY + offset)
+            SystemClock.sleep(STEP_DELAY_MS)
+        }
+        return Triple(down, startX, startY)
     }
 
     @Test fun aCancelledPanLaunchesNothingEvenAfterTheWindDownAnimationEnds() = withView { view ->
-        val (down, x, y) = dragFromAnIcon(view)
+        val (down, x, y) = dragOutAndBackOntoAnIcon(view)
         send(view, down, MotionEvent.ACTION_CANCEL, x, y)
         SystemClock.sleep(ANIMATION_SETTLE_MS)
         instrumentation.waitForIdleSync()
@@ -101,7 +127,7 @@ class LensViewCancelDoesNotLaunchIntegrationTest {
     }
 
     @Test fun aNormalLiftAfterAPanStillOpensTheSelectedApp() = withView { view ->
-        val (down, x, y) = dragFromAnIcon(view)
+        val (down, x, y) = dragOutAndBackOntoAnIcon(view)
         send(view, down, MotionEvent.ACTION_UP, x, y)
         SystemClock.sleep(ANIMATION_SETTLE_MS)
         instrumentation.waitForIdleSync()
