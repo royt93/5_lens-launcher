@@ -66,3 +66,6 @@ Correction (2026-11-23): an earlier draft of this file said a short tap on an ic
 - The Terms and Privacy dialog shows again after every versionCode change (the flag is `KEY_READ_POLICY${VERSION_CODE}`). It looks designed; confirm it is wanted.
 - Indonesian `organization_folder_label` reads "Folder: %1$s"; the same locale already uses the word "folder" in its neighbours ("Atur folder", "Nama folder"), so I left it.
 - Many strings are identical to English in several locales on purpose (brand and loanwords: Github, WiFi, Timer, Feedback, Apps in de).
+
+## Folder is a label, not a group (read 2026-11-24)
+A folder name set from the Apps tab is shown in that row's summary, used as a sort key and carried by layout backup/import. Nothing draws apps grouped in a folder on the lens grid or in search, so do not describe folders as groups in the store text. Quick actions seen on a Pixel release build: Wi-Fi name (after the location prompt) and `timer N` (hands off a SET_TIMER intent; a running countdown was not shown). See the evidence file, last two sections.
