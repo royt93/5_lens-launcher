@@ -394,6 +394,10 @@ object UtilApp {
                 com.mckimquyen.services.AppEventManager.notifyAppsEdited()
             } catch (_: ActivityNotFoundException) {
                 Toast.makeText(context, R.string.error_app_not_found, Toast.LENGTH_SHORT).show()
+            } catch (_: SecurityException) {
+                // An app whose launcher activity is guarded by a permission this app does not hold refuses the start; like the timer quick action
+                // (HomeQuickActionDelegate.startQuickActionIntent) that must be a message, not a crash. launchInProfile already did this.
+                Toast.makeText(context, R.string.error_app_not_found, Toast.LENGTH_SHORT).show()
             }
         }
 

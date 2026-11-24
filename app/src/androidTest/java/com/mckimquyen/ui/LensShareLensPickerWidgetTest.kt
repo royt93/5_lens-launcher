@@ -10,6 +10,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.mckimquyen.model.AppDatabase
 import com.mckimquyen.model.LensWorkspace
+import com.mckimquyen.util.LensLockStore
 import com.mckimquyen.util.UtilSettings
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -216,5 +217,48 @@ class LensShareLensPickerWidgetTest {
             assertFalse("cancel must not launch share", launched)
             assertFalse("cancel must clear the durable pending flag", settings.hasPendingAutoExportLens())
         }
+    }
+
+    /**
+     * Audit R2: the picker listed every lens, so a LOCKED lens could be ticked and its icons and name went out in the shared image with no unlock.
+     * The lock is written straight to the store (the biometric prompt is not what is under test). The first half is the positive control: the
+     * same three lenses with no lock show up as three rows, so "two rows" below can only come from the filter.
+     */
+    @Test
+    fun aLockedLensIsNotOfferedByThePicker() {
+        runBlocking {
+            val dao = AppDatabase.getInstance().lensWorkspaceDao()
+            dao.insertOrUpdate(LensWorkspace(id = "second", name = "Second", orderIndex = 1))
+            dao.insertOrUpdate(LensWorkspace(id = "private", name = "Private", orderIndex = 2))
+        }
+        val store = LensLockStore(context)
+        try {
+            store.saveLocked("private", false)
+            assertEquals("positive control: with no lock all three lenses are offered", listOf("Lens 1", "Second", "Private").size, rowsOfPicker().size)
+
+            store.saveLocked("private", true)
+            val rows = rowsOfPicker()
+            assertEquals("a locked lens must not be offered", 2, rows.size)
+            assertFalse("the locked lens name must not be listed: $rows", rows.contains("Private"))
+        } finally {
+            store.delete("private")
+        }
+    }
+
+    private fun rowsOfPicker(): List<String> {
+        var rows: List<String> = emptyList()
+        ActivityScenario.launch(ActHome::class.java).use { scenario ->
+            idle()
+            scenario.onActivity { activity -> activity.exportActiveLensImage() }
+            idle()
+            scenario.onActivity { activity ->
+                val dialog = requireNotNull(activity.lensDialog) { "picker dialog must be showing" }
+                val list = dialog.listView
+                rows = (0 until list.count).map { list.adapter.getItem(it).toString() }
+                dialog.dismiss()
+            }
+            idle()
+        }
+        return rows
     }
 }

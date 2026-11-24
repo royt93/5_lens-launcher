@@ -83,7 +83,10 @@ class LanguageBottomSheetDialogFragment : BottomSheetDialogFragment() {
         val context = context ?: return
         LocaleHelper.setLocale(context, language.code)
         LocaleHelper.setLanguageSelected(context)
-        listener?.onLanguageSelected(language.code)
+        // A sheet restored after the Activity was recreated (dark mode, font size, locale change while it was open) has no listener: the field is
+        // set by whoever created the sheet and is not saved. The screen must still switch language now, so the Activity is recreated here instead.
+        val owner = listener
+        if (owner != null) owner.onLanguageSelected(language.code) else activity?.recreate()
         // Home pressed inside the 200 ms window: the Activity's state is already saved and a plain dismiss() throws IllegalStateException. The choice is
         // already stored above, and a sheet with no state worth keeping may go without it.
         if (isStateSaved) dismissAllowingStateLoss() else dismiss()

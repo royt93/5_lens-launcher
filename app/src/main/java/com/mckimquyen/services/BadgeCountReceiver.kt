@@ -33,7 +33,8 @@ import com.mckimquyen.model.AppPersistent
 class BadgeCountReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
-        val packageName = intent.getStringExtra(EXTRA_PACKAGE_NAME) ?: return
+        // Exported receiver: a sender's extras that cannot be unparcelled here must be "no value", not a crash of this process.
+        val packageName = com.mckimquyen.util.SafeIntentExtras.string(intent, EXTRA_PACKAGE_NAME) ?: return
         // UI-024 fix: a package can expose more than one launcher activity (more than one App
         // entry sharing this packageName) - apply the same count to every one of them instead of
         // just the first match, so the badge doesn't land on an arbitrary/order-dependent entry.
@@ -42,7 +43,7 @@ class BadgeCountReceiver : BroadcastReceiver() {
         val matches = RAppsSingleton.instance.apps.orEmpty()
             .filter { it.packageName.toString() == packageName && it.userId == com.mckimquyen.model.AppIdentity.PRIMARY_USER_ID }
         if (matches.isEmpty()) return
-        val count = parseBadgeCount(intent.extras)
+        val count = parseBadgeCount(com.mckimquyen.util.SafeIntentExtras.extras(intent))
         matches.forEach { AppPersistent.setNotificationCount(packageName, it.name.toString(), count) }
         AppEventManager.notifyAppsEdited()
     }

@@ -24,6 +24,13 @@ object LensAccessPolicy {
         return firstUnlocked(lenses.filterNot { it.id == lensId }, locked - lensId) != null
     }
 
+    /**
+     * The lenses the share picker may offer. A locked lens is a privacy guard inside the app, so its icons and name must not leave in a shared image
+     * without unlocking it first; a share of it is only possible once the lock is off.
+     */
+    fun shareable(lenses: List<LensWorkspace>, locked: Set<String>): List<LensWorkspace> =
+        lenses.filter { it.id !in locked }
+
     fun firstUnlocked(lenses: List<LensWorkspace>, locked: Set<String>): String? =
         lenses.firstOrNull { it.id !in locked }?.id
 

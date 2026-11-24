@@ -421,7 +421,13 @@ public final class LensMenuCoordinator {
             return;
         }
         String activeLensId = view.getLensId();
-        List<LensWorkspace> allLenses = host.lenses().currentLenses();
+        // A locked lens must not leave the app in a shared image (it is a privacy guard); only unlocked lenses are offered to the picker.
+        // The lens being viewed is unlocked by definition, otherwise its page would not be showing.
+        List<LensWorkspace> currentLenses = host.lenses().currentLenses();
+        List<LensWorkspace> allLenses = com.mckimquyen.util.LensAccessPolicy.INSTANCE.shareable(
+                currentLenses,
+                new com.mckimquyen.util.LensLockStore(activity).lockedLensIds(
+                        currentLenses.stream().map(LensWorkspace::getId).collect(java.util.stream.Collectors.toSet())));
         LensWorkspace matched = null;
         for (LensWorkspace lens : allLenses) {
             if (lens.getId().equals(activeLensId)) {

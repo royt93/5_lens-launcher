@@ -361,7 +361,7 @@ public class ActHome extends ActBase implements LensViewHolderHost, HomeQuickAct
      */
     private boolean applyTargetLensExtra(Intent intent) {
         if (intent == null || utilSettings == null) return false;
-        String target = intent.getStringExtra(EXTRA_TARGET_LENS_ID);
+        String target = com.mckimquyen.util.SafeIntentExtras.string(intent, EXTRA_TARGET_LENS_ID);
         if (target == null) return false;
         intent.removeExtra(EXTRA_TARGET_LENS_ID);
         if (target.isEmpty()) return false;
@@ -439,7 +439,7 @@ public class ActHome extends ActBase implements LensViewHolderHost, HomeQuickAct
 
     @androidx.annotation.VisibleForTesting
     void handleTargetLensIntent(Intent intent) {
-        String requestedLensId = intent != null ? intent.getStringExtra(EXTRA_TARGET_LENS_ID) : null;
+        String requestedLensId = com.mckimquyen.util.SafeIntentExtras.string(intent, EXTRA_TARGET_LENS_ID);
         applyTargetLensExtra(intent);
         if (requestedLensId != null && !requestedLensId.isEmpty()) {
             lensHolder.setManagementReturnTargetId(requestedLensId);
@@ -456,7 +456,7 @@ public class ActHome extends ActBase implements LensViewHolderHost, HomeQuickAct
      *  at the moment of the tap) and read back on every entry point, cleared only once
      *  exportActiveLensImage() actually reaches a terminal outcome. */
     private void consumeAutoExportExtra(Intent intent) {
-        boolean fromIntent = intent != null && intent.getBooleanExtra(EXTRA_AUTO_EXPORT_LENS, false);
+        boolean fromIntent = com.mckimquyen.util.SafeIntentExtras.bool(intent, EXTRA_AUTO_EXPORT_LENS, false);
         if (fromIntent) {
             intent.removeExtra(EXTRA_AUTO_EXPORT_LENS);
             if (utilSettings != null) {
