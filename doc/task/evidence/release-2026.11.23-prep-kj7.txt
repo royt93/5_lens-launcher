@@ -292,3 +292,11 @@ Not run: the OLD versions of the four tests against the mutants. That without th
 === THE ONE ui ERROR, REPEATED TWICE, PIXEL (2026-11-24) ===
 Same build (debug of 28a0d40c, apk and test apk unchanged since the run that showed `ResetDefaultsWidgetTest#cancelLeavesEveryValueUntouched` = ERROR "the reset dialog must settle"), gate first, ad guard on (BACK only), restore after (DATA-IDENTICAL 151 files, APK 134ba0429754c07b). The whole `com.mckimquyen.ui` package twice in a row: round 1 591 started / 590 OK / 1 skipped / 0 failures / 0 errors; round 2 the same. Together with the 3 of 3 OK of the class alone, that is 5 clean runs of that test after one failure. So: not reproduced, still unexplained. I call it a timing flake of the "dialog must settle" wait, but that is a guess from its message and a single failure, not a finding.
 Totals for this build on the Pixel: ui 591 x 3 runs (589 + 1 error, 590, 590), views 329 (326 OK, 3 skipped), model 12.
+
+=== THE OLD VERSIONS OF THE FOUR TESTS AGAINST THE MUTANTS, PIXEL (2026-11-24) ===
+Closes the "argued, not shown" gap of the mutant section above. Test APK built from the two test files as they were BEFORE the controls (`git checkout 28a0d40c~1 -- <the two files>`, built in place, files put back to HEAD right after, tree clean), the same two mutant debug APKs, gate first, restore after (DATA-IDENTICAL 151 files, APK 134ba0429754c07b).
+- Old tests vs the REAL build: ring class 26 of 26 OK, drag class 10 of 10 OK (so the old tests are green on a healthy build).
+- Old tests vs mutant A (the ring never rotates): whenEveryAppIsInItsOwnGroupARotationChangesNothingAndReportsNothing, aFullTurnIsANetNoOpAndWritesNothing and reversingTheArcBelowOneStepRestoresTheOrderAndReportsNothing all PASSED (OK) although the ring never rotated. The other tests of the class still failed, which is why the class as a whole was red.
+- Old tests vs mutant B (the pan never starts): the whole drag class passed 10 of 10, multiLens_moveBeforeTimeout_isAPanNotADrag included, although no pan ever started.
+So these four tests did pass for the wrong reason, and the new controls (shown above to fail on the same mutants) are what make them mean something.
+
