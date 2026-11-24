@@ -463,7 +463,10 @@ public class ActSettings extends ActBase implements SettingsMenuHost {
 
     @Override
     public void openWebUrl(@NonNull String url, int titleResId, boolean isExternal) {
-        openUrlInBrowser(this, url, getString(titleResId), isExternal);
+        // The 4th parameter of openUrlInBrowser is isUsingInternalWebView, the opposite of isExternal, and it was passed straight through: GitHub, License
+        // and Changelog (isExternal=true) went to SuperWebViewActivity, whose host allowlist is loitp.notion.site only, so it closed at once and nothing
+        // opened. Every menu URL is opened in the user's browser (the Privacy item already was).
+        openUrlInBrowser(this, url, getString(titleResId), false);
     }
 
     @Override
