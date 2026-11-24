@@ -1,17 +1,18 @@
 # Release 2026.11.23, one page (written 2026-11-23)
 
-Short version of `doc/task/evidence/release-2026.11.23-prep-kj7.txt` (168 lines, 17 sections; kept as is, it is the source) and of `RELEASE_NOTES_2026.11.23_DRAFT.md`. If a number here differs from those, they win. Everything below was measured on ONE phone, a TECNO KJ7 (Android 14, 1080x2436, display cutout), by `adb` and by device tests, not by a person.
+Short version of `doc/task/evidence/release-2026.11.23-prep-kj7.txt` (168 lines, 17 sections; kept as is, it is the source) and of `RELEASE_NOTES_2026.11.23_DRAFT.md`. If a number here differs from those, they win. Everything below was measured by `adb` and by device tests, not by a person: mostly on a TECNO KJ7 (Android 14, 1080x2436, display cutout), and the two fixes of 2026-11-24 on a Pixel 7 Pro (1440x3120), because the KJ7 stopped appearing in `adb devices`.
 
 ## The commit to build from
 
-`dev` at `69657aa6` or later: later commits only add documents (the last code change is the one-line home list fix in that commit). `versionCode 20261123`, `versionName 2026.11.23` (was 20261007 / 2026.10.07; 514 commits and 187 files in `app/src/main` behind).
+`dev` at `38b3dd0c` or later: later commits should only add documents. The last code changes are two fixes found by the adb smoke on 2026-11-24: the Apps-tab row no longer draws the app name and the organization summary on top of each other (`665aebf2`), and a drag that ends in a cancelled gesture no longer opens the app under the finger (`665aebf2`, corrected in `38b3dd0c`). Both defects were already in the released 2026.10.07. `versionCode 20261123`, `versionName 2026.11.23` (was 20261007 / 2026.10.07; 514 commits and 187 files in `app/src/main` behind).
 
 ## What I checked, in one table
 
 | Check | Result |
 |---|---|
 | Unit tests plus lint on the host, forced | 1828 tests, 0 failures; lint 0 errors, 16 baseline warnings |
-| Device tests on the KJ7, debug build of `69657aa6` | `ui` 591 OK, `views` 327 OK, `model` 12 OK |
+| Device tests, debug build of `69657aa6` on the KJ7 | `ui` 591 OK, `views` 327 OK, `model` 12 OK |
+| Device tests, debug build of `38b3dd0c` on the PIXEL 7 Pro (the KJ7 left adb; owner switched to the Pixel) | `ui` 591 started / 590 OK / 1 skipped, `views` 329 / 326 OK / 3 skipped, `model` 12 OK, 0 failures |
 | `productionRelease` (R8 and shrink on, 16 KB aligned, not debuggable) | builds, installs, starts in 0.2-1.3 s; logs by our own pid: 0 crash, 0 ANR, 0 R8 signatures, 0 Room errors |
 | Room 12 to 13 | 5 migration tests; a dense database (12 lenses, 3000 rows) kept field by field; a mutant that deletes rows is caught |
 | Upgrade 2026.10.07 to 2026.11.23 over data | kept: pinned apps, a favourite in a folder, a hidden app, sort type, background, vibration, language; Room ran 12 to 13 |
