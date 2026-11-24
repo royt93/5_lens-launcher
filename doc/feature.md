@@ -96,6 +96,7 @@ Source of truth for implementation choices in this session. Detailed acceptance 
 
 ## 🟡 In progress
 
+- 🟡 **AUDIT-2026-11-24 — kết quả audit độc lập cực đoan (3 agent chỉ đọc, từng phát hiện được đọc lại trong mã trước khi hỏi owner)**: đã sửa + có test (commit `19e38984` và R1 sau đó): E2 sheet ngôn ngữ mất listener sau recreate, R2 lens đã khoá hiện trong bảng chọn chia sẻ, R3 extras từ app lạ vào `ActHome`/`BadgeCountReceiver` (`SafeIntentExtras`), R4 `SecurityException` ở `UtilApp.launchComponent`, R1 bốn mục menu Settings (GitHub/License/Changelog) không mở được gì. **Owner quyết 2026-11-24:** S2 (import v2 ẩn app cài sau bản sao lưu và app work profile) → giữ app thiếu trong backup như hiện tại, KHÔNG ẩn, giống đường v1 (chưa làm, cần đổi `LensWorkspaceDao.replaceWorkspace` + test + chạy lại `model/views/ui`). Owner chọn viết test tái hiện S1 (import xong bộ nhớ cũ đè thứ tự mới) và S3 (ActHome không nạp lại danh sách lens sau màn quản lý, `renameLens` ghi bản copy cũ) trước khi sửa. Chờ đo: E4 (danh sách ngôn ngữ cao cố định 360dp), E1 (panel tìm kiếm ngang chỉ áp inset đáy), E6 (icon thanh hệ thống sau khi đóng tìm kiếm ban đêm). Chưa xử lý: R5 (import đọc cả file, `OutOfMemoryError` không bị bắt), R6 (`task.exception as ReviewException`), R7 (cờ "đã hỏi quyền" được backup), R8 (feedback không báo khi không có app email), S4-S10, E3/E5/E7-E9.
 
 
 

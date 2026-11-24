@@ -103,6 +103,14 @@ class WorkspaceBackupRoomStore(context: Context) : WorkspaceBackupImportStore {
         settings.restoreWorkspacePreferences(snapshot as WorkspacePreferencesSnapshot)
 
     override suspend fun refreshWorkspace() {
+        // appsEdited only re-sorts the list already in memory. An import rewrote Room (favourites, folders, pins, order, hidden, lens ids), so the snapshot
+        // is rebuilt from it first; otherwise the next drag writes the pre-import state back over the imported one. Same merge the lens switch uses, over
+        // the apps already in memory: no PackageManager scan, and the version bump makes a sorter that is running re-sort from the new list.
+        val shells = com.mckimquyen.app.RAppsSingleton.instance.apps.orEmpty()
+        if (shells.isNotEmpty()) {
+            val lensId = settings.getString(UtilSettings.KEY_ACTIVE_LENS_ID) ?: LensWorkspace.DEFAULT_LENS_ID
+            com.mckimquyen.app.RAppsSingleton.instance.apps = UtilApp.mergeLensPersistence(shells, lensId, settings.sortType)
+        }
         com.mckimquyen.services.AppEventManager.notifyAppsEdited()
         com.mckimquyen.services.AppEventManager.notifyLensScopeChanged()
         LensShortcuts.refresh(appContext, database.lensWorkspaceDao().getAll())

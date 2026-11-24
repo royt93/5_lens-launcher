@@ -105,7 +105,7 @@ data class LensWorkspace(
         @JvmStatic
         fun renameLens(lens: LensWorkspace, newName: String, onDone: (List<LensWorkspace>) -> Unit) {
             ApplicationScope.scope.launch(Dispatchers.Main.immediate) {
-                withContext(Dispatchers.IO) { dao().update(lens.copy(name = newName)) }
+                withContext(Dispatchers.IO) { dao().updateName(lens.id, newName) }
                 notifyLensesChanged(onDone)
             }
         }

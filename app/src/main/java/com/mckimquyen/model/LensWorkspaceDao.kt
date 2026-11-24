@@ -30,6 +30,13 @@ interface LensWorkspaceDao {
     @Update
     suspend fun update(workspace: LensWorkspace)
 
+    /**
+     * Changes only the NAME of one lens. A rename must not write back the group and the order of the object the caller was holding: the home screen keeps its
+     * lens list from onCreate, so that object can be older than a group assigned or a reorder done in lens management meanwhile.
+     */
+    @Query("UPDATE LENS_WORKSPACE SET NAME = :name WHERE ID = :id")
+    suspend fun updateName(id: String, name: String): Int
+
     @Delete
     suspend fun delete(workspace: LensWorkspace)
 
