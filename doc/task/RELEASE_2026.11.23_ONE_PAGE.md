@@ -4,7 +4,7 @@ Short version of `doc/task/evidence/release-2026.11.23-prep-kj7.txt` (168 lines,
 
 ## The commit to build from
 
-`dev` at `28a0d40c` or later: later commits should only add documents. The last code changes are three fixes found by the adb smoke on 2026-11-24 (the third is the timer quick action, which crashed the app when Google Clock refused SET_TIMER, fixed in `28a0d40c`; it was also in 2026.10.07): the Apps-tab row no longer draws the app name and the organization summary on top of each other (`665aebf2`), and a drag that ends in a cancelled gesture no longer opens the app under the finger (`665aebf2`, corrected in `38b3dd0c`). Both defects were already in the released 2026.10.07. `versionCode 20261123`, `versionName 2026.11.23` (was 20261007 / 2026.10.07; 514 commits and 187 files in `app/src/main` behind).
+`dev` at `016b559d` or later: later commits should only add documents. The last code changes are four fixes (the fourth, `016b559d`, guards the contact and Do Not Disturb rows like the timer row; found by reading, not by a crash) found by the adb smoke on 2026-11-24 (the third is the timer quick action, which crashed the app when Google Clock refused SET_TIMER, fixed in `28a0d40c`; it was also in 2026.10.07): the Apps-tab row no longer draws the app name and the organization summary on top of each other (`665aebf2`), and a drag that ends in a cancelled gesture no longer opens the app under the finger (`665aebf2`, corrected in `38b3dd0c`). Both defects were already in the released 2026.10.07. `versionCode 20261123`, `versionName 2026.11.23` (was 20261007 / 2026.10.07; 514 commits and 187 files in `app/src/main` behind).
 
 ## What I checked, in one table
 

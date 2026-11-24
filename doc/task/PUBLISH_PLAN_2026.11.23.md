@@ -9,7 +9,7 @@ This build is 514 commits and 187 `app/src/main` files after the version that is
 ## Before you build
 
 1. Open the Play Console and read the highest `versionCode` ever uploaded. This build uses `20261123`. If the console has a number equal or higher, raise `versionCode` in `app/build.gradle` first (a higher number only; `versionName` is free text).
-2. Build from commit `28a0d40c` or later on `dev` (it carries three fixes found after `69657aa6`: the Apps-tab row text overlap, the cancelled-gesture launch and the timer quick-action crash; later commits should add documents only). Sign with YOUR keystore through `ANDROID_RELEASE_*` or an untracked `keystore.properties`. The build fails on purpose if neither is present; do not work around that.
+2. Build from commit `016b559d` or later on `dev` (it carries four fixes found after `69657aa6`: the Apps-tab row text overlap, the cancelled-gesture launch, the timer quick-action crash and the same guard on the contact and Do Not Disturb rows; later commits should add documents only). Sign with YOUR keystore through `ANDROID_RELEASE_*` or an untracked `keystore.properties`. The build fails on purpose if neither is present; do not work around that.
 3. Prefer an Android App Bundle (`bundleProductionRelease`) if your Play app uses Play App Signing; the 4 native ABIs and 16 KB alignment were checked on an APK.
 
 ## Rollout, in this order
