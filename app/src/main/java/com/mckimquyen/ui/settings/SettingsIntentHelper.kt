@@ -29,6 +29,23 @@ object SettingsIntentHelper {
         [Your Name]
     """.trimIndent()
 
+    /**
+     * Opens [intent] only if some app handles it. Returns false when none does, or when the handler refuses or vanishes between the check and the start
+     * (ActivityNotFoundException, SecurityException); the caller says so to the user. Feedback used to do nothing at all when no mail app existed.
+     */
+    @JvmStatic
+    fun startIfResolvable(activity: android.app.Activity, intent: Intent): Boolean {
+        if (intent.resolveActivity(activity.packageManager) == null) return false
+        return try {
+            activity.startActivity(intent)
+            true
+        } catch (_: android.content.ActivityNotFoundException) {
+            false
+        } catch (_: SecurityException) {
+            false
+        }
+    }
+
     @JvmStatic
     fun createFeedbackEmailIntent(): Intent {
         return Intent(Intent.ACTION_SENDTO).apply {

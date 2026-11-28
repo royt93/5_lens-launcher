@@ -65,4 +65,56 @@ class SettingsIntentHelperTest {
         val intent = SettingsIntentHelper.createVipIntent(context)
         assertEquals(ActVipManagement::class.java.name, intent.component?.className)
     }
+
+    /** Audit R8: feedback did nothing, silently, when no mail app existed. A real Activity that resolves, refuses or does not resolve stands in for the phone. */
+    class MailHost : android.app.Activity() {
+        override fun startActivity(intent: Intent?) {
+            started++
+            if (refuse) throw SecurityException("refused")
+        }
+
+        companion object {
+            var refuse = false
+            var started = 0
+        }
+    }
+
+    private fun mailHost(refuse: Boolean = false, hasMailApp: Boolean = true): android.app.Activity {
+        MailHost.refuse = refuse
+        MailHost.started = 0
+        val activity = org.robolectric.Robolectric.buildActivity(MailHost::class.java).setup().get()
+        if (hasMailApp) {
+            org.robolectric.Shadows.shadowOf(activity.packageManager).addResolveInfoForIntent(
+                SettingsIntentHelper.createFeedbackEmailIntent(),
+                android.content.pm.ResolveInfo().apply {
+                    activityInfo = android.content.pm.ActivityInfo().apply { packageName = "com.example.mail"; name = "com.example.mail.Compose" }
+                }
+            )
+        }
+        return activity
+    }
+
+    @Test
+    fun `startIfResolvable opens the mail app when one exists`() {
+        val activity = mailHost()
+
+        assertTrue(SettingsIntentHelper.startIfResolvable(activity, SettingsIntentHelper.createFeedbackEmailIntent()))
+        assertEquals("positive control: the intent really reached startActivity", 1, MailHost.started)
+    }
+
+    @Test
+    fun `startIfResolvable reports false and starts nothing when no mail app exists`() {
+        val activity = mailHost(hasMailApp = false)
+
+        assertEquals(false, SettingsIntentHelper.startIfResolvable(activity, SettingsIntentHelper.createFeedbackEmailIntent()))
+        assertEquals(0, MailHost.started)
+    }
+
+    @Test
+    fun `startIfResolvable reports false when the mail app refuses the start`() {
+        val activity = mailHost(refuse = true)
+
+        assertEquals(false, SettingsIntentHelper.startIfResolvable(activity, SettingsIntentHelper.createFeedbackEmailIntent()))
+        assertEquals("positive control: the start was attempted", 1, MailHost.started)
+    }
 }

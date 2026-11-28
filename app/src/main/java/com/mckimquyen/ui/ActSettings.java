@@ -756,18 +756,8 @@ public class ActSettings extends ActBase implements SettingsMenuHost {
     }
 
     private void sendEmail() {
-        Intent intent = SettingsIntentHelper.createFeedbackEmailIntent();
         // Feedback used to do nothing at all when no email app existed (a println nobody sees); say so, with the "app not found" message every locale already has.
-        boolean started = false;
-        if (intent.resolveActivity(getPackageManager()) != null) {
-            try {
-                startActivity(intent);
-                started = true;
-            } catch (ActivityNotFoundException | SecurityException ignored) {
-                // resolveActivity said yes, but the handler refused or vanished between the two calls: same outcome as no email app.
-            }
-        }
-        if (!started) {
+        if (!SettingsIntentHelper.startIfResolvable(this, SettingsIntentHelper.createFeedbackEmailIntent())) {
             Toast.makeText(this, R.string.error_app_not_found, Toast.LENGTH_SHORT).show();
         }
     }
