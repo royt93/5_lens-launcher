@@ -56,7 +56,7 @@ Correction (2026-11-23): an earlier draft of this file said a short tap on an ic
 
 ## Only you can do (from `RELEASE_OWNER_CHECKLIST.md`)
 
-1. Build the real bundle/APK from commit 82cbfccd or later (NOT bf702b2a: it lacks the home list adapter fix, the last app code change) with your key; check the versionCode against the Play Console.
+1. Build the real bundle/APK from commit 2384551c or later (NOT bf702b2a: it lacks the home list adapter fix, the last app code change) with your key; check the versionCode against the Play Console.
 2. Play Console: Data safety form against the merged `productionRelease` manifest; privacy policy URL reachable; permission explanations for `REQUEST_DELETE_PACKAGES`, location, contacts; store text says this is a replacement launcher.
 3. Upload to an internal or closed track first and run it on a phone before production.
 4. Decide whether to publish with the rewarded test id and without the consent flow.
