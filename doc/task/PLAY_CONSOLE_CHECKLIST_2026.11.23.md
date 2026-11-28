@@ -55,4 +55,4 @@ Merged (app plus libraries): intents `MAIN`, `VIEW` (https), `DIAL` (tel), `INSE
 3. Data safety form with the table in section 1 next to it; do not fill it from `app/src/main/AndroidManifest.xml` alone (libraries add 10 permissions).
 4. Ads declaration, content rating, target audience.
 5. Decide on POST_NOTIFICATIONS (section 2). If you remove it, tell me and I will redo the device runs.
-6. Then build from `2384551c` or later with your key and use the internal track first (`PUBLISH_PLAN_2026.11.23.md`).
+6. Then build from `d31c6842` or later with your key and use the internal track first (`PUBLISH_PLAN_2026.11.23.md`).
