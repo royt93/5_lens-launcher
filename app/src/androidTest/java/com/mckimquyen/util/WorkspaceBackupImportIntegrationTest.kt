@@ -144,6 +144,9 @@ class WorkspaceBackupImportIntegrationTest {
             AppPersistent(packageName="com.local", name="com.local.Main", identifier="com.local-com.local.Main", openCount=8, paletteColor=77, notificationCount=5, isFavorite=true, lensId="default")
         ))
         settings.replaceWorkspacePreferences(listOf(LensAppSettingsBackup("default", LensAppScope.SELECTED, setOf("local"), true)), "default")
+        // com.local is NOT installed on this phone: only another app is. An empty snapshot would mean "unknown" and hide nothing (S2), so the snapshot lists
+        // an unrelated installed app, which makes com.local the app that is no longer installed and must be parked invisibly.
+        RAppsSingleton.instance.apps = arrayListOf(App(label = "Other", packageName = "com.other.installed", name = "com.other.installed.Main"))
 
         val result = WorkspaceBackupImportCoordinator(WorkspaceBackupRoomStore(context)).apply(backup)
 
@@ -161,6 +164,40 @@ class WorkspaceBackupImportIntegrationTest {
         assertFalse(parked?.appVisible ?: true)
         val shortcutIds = ShortcutManagerCompat.getDynamicShortcuts(context).map { it.id }
         assertEquals(setOf("lens_default", "lens_work"), shortcutIds.toSet())
+    }
+
+    /**
+     * Audit S2 (owner decision 2026-11-28): through the real store, an app that is installed (it is in the in-memory snapshot) but absent from the backup keeps its
+     * row, visible and favourite, while an app that is not installed is still parked invisibly. The snapshot stands for "what is installed".
+     */
+    @Test
+    fun anInstalledAppAbsentFromTheBackupStaysVisibleAndAnUninstalledOneIsParked() = runBlocking {
+        val workspaceDao = database.lensWorkspaceDao()
+        val appDao = database.appPersistentDao()
+        val backup = LayoutBackupSnapshotFactory.create(
+            listOf(LensWorkspace.createDefault()), emptyList(),
+            listOf(LensAppSettingsBackup(LensWorkspace.DEFAULT_LENS_ID, LensAppScope.ALL, emptySet(), false)), 10L
+        )
+        workspaceDao.replaceWorkspace(
+            listOf(LensWorkspace.createDefault()),
+            listOf(
+                AppPersistent(packageName="com.installed.later", name="com.installed.later.Main", identifier="com.installed.later-com.installed.later.Main", isFavorite=true, folderName="Mine", lensId="default"),
+                AppPersistent(packageName="com.removed", name="com.removed.Main", identifier="com.removed-com.removed.Main", openCount=6, isFavorite=true, lensId="default")
+            )
+        )
+        RAppsSingleton.instance.apps = arrayListOf(App(label = "Later", packageName = "com.installed.later", name = "com.installed.later.Main"))
+
+        val result = WorkspaceBackupImportCoordinator(WorkspaceBackupRoomStore(context)).apply(backup)
+
+        assertEquals(WorkspaceBackupImportResult.Applied, result)
+        val installed = appDao.findByIdentifier("default", "com.installed.later-com.installed.later.Main")
+        assertTrue("the installed app keeps its row and stays visible", installed?.appVisible == true)
+        assertTrue(installed?.isFavorite == true)
+        assertEquals("Mine", installed?.folderName)
+        val removed = appDao.findByIdentifier("default", "com.removed-com.removed.Main")
+        assertFalse("the uninstalled app is parked invisibly", removed?.appVisible ?: true)
+        assertFalse(removed?.isFavorite ?: true)
+        assertEquals(6L, removed?.openCount)
     }
 
     /** DB-003: after any create/delete attempt (incl. the refused default delete), export still works and re-imports. */

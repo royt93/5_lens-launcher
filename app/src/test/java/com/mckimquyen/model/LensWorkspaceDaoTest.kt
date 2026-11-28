@@ -382,7 +382,7 @@ class LensWorkspaceDaoTest {
             AppPersistent(packageName="com.gone", name="com.gone.Main", identifier="com.gone-com.gone.Main", orderNumber=1, lensId="work")
         )
 
-        dao.replaceWorkspace(backupLenses, backupRows)
+        dao.replaceWorkspace(backupLenses, backupRows, installedIdentifiers = emptySet())
 
         assertEquals(listOf("default", "work"), dao.getAll().map { it.id })
         assertEquals(listOf("Home", "Work"), dao.getAll().map { it.name })
@@ -411,6 +411,83 @@ class LensWorkspaceDaoTest {
         assertEquals(false, retainedStats.appVisible)
         assertEquals(false, retainedStats.isFavorite)
         assertNull(retainedStats.folderName)
+    }
+
+    /**
+     * Audit S2 (owner decision 2026-11-28, "lai"): an app that is INSTALLED but absent from the backup (installed after the backup was taken, or a
+     * work-profile app that exports never carry) keeps the row it had, so it does not vanish from the grid and keeps its favourite/folder/pin. An app
+     * that is no longer installed stays parked invisibly with only its stats, as the v2 design spec says.
+     */
+    @Test
+    fun `replaceWorkspace keeps installed apps absent from the backup visible and parks only the uninstalled ones`() = runBlocking {
+        dao.insertOrUpdate(LensWorkspace.createDefault())
+        apps.insert(AppPersistent(packageName="com.new", name="com.new.Main", identifier="com.new-com.new.Main", openCount=3, orderNumber=4, isFavorite=true, folderName="Mine", pinnedZone="START", lensId="default"))
+        apps.insert(AppPersistent(packageName="com.work", name="com.work.Main", identifier="com.work-com.work.Main@u10", openCount=2, isFavorite=true, lensId="default"))
+        apps.insert(AppPersistent(packageName="com.gone", name="com.gone.Main", identifier="com.gone-com.gone.Main", openCount=7, paletteColor=55, isFavorite=true, folderName="Old", lensId="default"))
+        val backupRows = listOf(AppPersistent(packageName="com.kept", name="com.kept.Main", identifier="com.kept-com.kept.Main", orderNumber=1, lensId="default"))
+
+        dao.replaceWorkspace(
+            listOf(LensWorkspace.createDefault()), backupRows,
+            installedIdentifiers = setOf("com.kept-com.kept.Main", "com.new-com.new.Main", "com.work-com.work.Main@u10")
+        )
+
+        val installedNew = apps.findByIdentifier("default", "com.new-com.new.Main") ?: throw AssertionError("installed app lost its row")
+        assertEquals("an installed app stays visible", true, installedNew.appVisible)
+        assertEquals(true, installedNew.isFavorite)
+        assertEquals("Mine", installedNew.folderName)
+        assertEquals("START", installedNew.pinnedZone)
+        assertEquals(4, installedNew.orderNumber)
+        assertEquals(true, apps.findByIdentifier("default", "com.work-com.work.Main@u10")?.appVisible)
+        // Positive control: the same call still parks an app that is not installed, so "visible" above is not just "nothing was hidden at all".
+        val gone = apps.findByIdentifier("default", "com.gone-com.gone.Main") ?: throw AssertionError("uninstalled app lost its stats")
+        assertEquals(false, gone.appVisible)
+        assertEquals(false, gone.isFavorite)
+        assertNull(gone.folderName)
+        assertEquals(7L, gone.openCount)
+        assertEquals(55, gone.paletteColor)
+    }
+
+    @Test
+    fun `replaceWorkspace moves an installed absent app out of a lens the import removed instead of leaving an orphan row`() = runBlocking {
+        dao.insertOrUpdate(LensWorkspace.createDefault())
+        dao.insertOrUpdate(LensWorkspace("old-work", "Old work", 1, 11L))
+        apps.insert(AppPersistent(packageName="com.new", name="com.new.Main", identifier="com.new-com.new.Main", openCount=3, isFavorite=true, folderName="Mine", lensId="old-work"))
+
+        dao.replaceWorkspace(
+            listOf(LensWorkspace.createDefault()), emptyList(),
+            installedIdentifiers = setOf("com.new-com.new.Main")
+        )
+
+        assertNull("no row may stay in a lens that no longer exists", apps.findByIdentifier("old-work", "com.new-com.new.Main"))
+        val moved = apps.findByIdentifier("default", "com.new-com.new.Main") ?: throw AssertionError("the installed app lost its row")
+        assertEquals(true, moved.appVisible)
+        assertEquals(true, moved.isFavorite)
+        assertEquals("Mine", moved.folderName)
+        assertEquals(3L, moved.openCount)
+        assertEquals(listOf("default"), apps.getAllRows().map { it.lensId }.distinct())
+    }
+
+    @Test
+    fun `replaceWorkspace with an empty installed set parks every absent app as before`() = runBlocking {
+        dao.insertOrUpdate(LensWorkspace.createDefault())
+        apps.insert(AppPersistent(packageName="com.stale", name="com.stale.Main", identifier="com.stale-com.stale.Main", openCount=5, isFavorite=true, lensId="default"))
+
+        dao.replaceWorkspace(listOf(LensWorkspace.createDefault()), emptyList(), installedIdentifiers = emptySet())
+
+        assertEquals(false, apps.findByIdentifier("default", "com.stale-com.stale.Main")?.appVisible)
+    }
+
+    @Test
+    fun `replaceWorkspace with an unknown installed set hides nothing`() = runBlocking {
+        // null means the app list was not loaded yet: not knowing what is installed must never hide apps.
+        dao.insertOrUpdate(LensWorkspace.createDefault())
+        apps.insert(AppPersistent(packageName="com.new", name="com.new.Main", identifier="com.new-com.new.Main", isFavorite=true, lensId="default"))
+
+        dao.replaceWorkspace(listOf(LensWorkspace.createDefault()), emptyList(), installedIdentifiers = null)
+
+        val row = apps.findByIdentifier("default", "com.new-com.new.Main")
+        assertEquals(true, row?.appVisible)
+        assertEquals(true, row?.isFavorite)
     }
 
     @Test

@@ -89,7 +89,11 @@ interface LensWorkspaceDao {
 
     /** v2-only destructive replacement; v1 imports use the default-lens layout applier instead. */
     @Transaction
-    suspend fun replaceWorkspace(workspaces: List<LensWorkspace>, importedRows: List<AppPersistent>) {
+    suspend fun replaceWorkspace(
+        workspaces: List<LensWorkspace>,
+        importedRows: List<AppPersistent>,
+        installedIdentifiers: Set<String>? = null
+    ) {
         require(workspaces.isNotEmpty()) { "Workspace must contain at least the default lens" }
         require(workspaces.count { it.id == LensWorkspace.DEFAULT_LENS_ID } == 1) {
             "Workspace must contain exactly one default lens"
@@ -113,7 +117,13 @@ interface LensWorkspaceDao {
         } + preservedByIdentifier.values
             .filter { it.identifier !in importedIds }
             .map { old ->
-                old.copy(
+                // Owner decision 2026-11-28: an app that is still installed (installed after the backup was taken, or a work-profile app, which exports
+                // never carry) keeps the row it had, in the lens it had; if the import removed that lens the row moves to the default lens, so no row is left
+                // pointing at a lens that no longer exists. Only an app that is no longer installed is parked invisibly with its stats, as the v2 spec says.
+                // null = the installed set is unknown, which must never hide anything.
+                if (installedIdentifiers == null || old.identifier in installedIdentifiers) {
+                    old.copy(id = null, lensId = old.lensId.takeIf { it in lensIds } ?: LensWorkspace.DEFAULT_LENS_ID)
+                } else old.copy(
                     id = null,
                     orderNumber = -1,
                     appVisible = false,

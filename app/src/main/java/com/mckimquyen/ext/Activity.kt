@@ -144,6 +144,16 @@ fun Activity?.sendSMS(
     this.startActivity(sendIntent)
 }
 
+/** Shown in the log when a failed review request carries no Play ReviewException (a null or another exception type). */
+internal const val REVIEW_ERROR_UNKNOWN = -100
+
+/**
+ * The Play review error code of a failed request, or [REVIEW_ERROR_UNKNOWN] (not one of Play's own codes, so no @ReviewErrorCode here). The listener used to cast `task.exception as ReviewException`, which throws
+ * ClassCastException or NullPointerException inside the callback (on the main thread) when Play Services reports anything else.
+ */
+internal fun reviewErrorCodeOf(exception: Exception?): Int =
+    (exception as? ReviewException)?.errorCode ?: REVIEW_ERROR_UNKNOWN
+
 @SuppressLint("ApplySharedPref") // commit() is intentional here — see comment below
 fun Activity.rateAppInApp(forceRateInApp: Boolean = false) {
     // Bypass in test environments to prevent Play Core review dialog from hanging instrumentation tests
@@ -174,7 +184,7 @@ fun Activity.rateAppInApp(forceRateInApp: Boolean = false) {
                     // Use commit() instead of apply() to ensure synchronous write
                     sharedPreferences.edit(commit = true) { putLong("last_review_time", currentTime) }
                 } else {
-                    @ReviewErrorCode val reviewErrorCode = (task.exception as ReviewException).errorCode
+                    val reviewErrorCode = reviewErrorCodeOf(task.exception)
                     Log.e("rateAppInApp", "Review request error: $reviewErrorCode")
                 }
             }

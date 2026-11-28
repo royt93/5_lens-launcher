@@ -101,6 +101,70 @@ class PermissionAskedFlagsTest {
         assertTrue(flag(UtilSettings.KEY_WIFI_SSID_PERMISSION_REQUESTED))
     }
 
+    /**
+     * Audit R7: the flags sit in the default preferences file, which Android backs up. A phone restored from a backup arrived with "already asked" set although
+     * its user was never asked on it, so the row never came back. Here the flag is written the way a restore leaves it (flag set, no marker of this install).
+     */
+    @Test
+    fun `a flag restored from a backup without this installs marker does not count as asked`() {
+        UtilSettings(context).save(UtilSettings.KEY_FLASHLIGHT_PERMISSION_REQUESTED, true)
+
+        assertTrue("positive control: the raw flag really is set", flag(UtilSettings.KEY_FLASHLIGHT_PERMISSION_REQUESTED))
+        assertFalse(PermissionAskedFlags.isAsked(context, UtilSettings.KEY_FLASHLIGHT_PERMISSION_REQUESTED))
+    }
+
+    @Test
+    fun `a real denial on this install counts as asked`() {
+        PermissionAskedFlags.recordResult(
+            context, UtilSettings.KEY_CONTACTS_PERMISSION_REQUESTED, contacts, denied, Manifest.permission.READ_CONTACTS
+        )
+
+        assertTrue(PermissionAskedFlags.isAsked(context, UtilSettings.KEY_CONTACTS_PERMISSION_REQUESTED))
+    }
+
+    @Test
+    fun `a marker without the flag does not count as asked`() {
+        PermissionAskedFlags.markAsked(context, UtilSettings.KEY_CONTACTS_PERMISSION_REQUESTED)
+        UtilSettings(context).save(UtilSettings.KEY_CONTACTS_PERMISSION_REQUESTED, false)
+
+        assertFalse(PermissionAskedFlags.isAsked(context, UtilSettings.KEY_CONTACTS_PERMISSION_REQUESTED))
+    }
+
+    @Test
+    fun `a later grant clears the flag and the marker`() {
+        PermissionAskedFlags.markAsked(context, UtilSettings.KEY_CONTACTS_PERMISSION_REQUESTED)
+
+        PermissionAskedFlags.recordResult(
+            context, UtilSettings.KEY_CONTACTS_PERMISSION_REQUESTED, contacts, granted, Manifest.permission.READ_CONTACTS
+        )
+
+        assertFalse(flag(UtilSettings.KEY_CONTACTS_PERMISSION_REQUESTED))
+        assertFalse(PermissionAskedFlags.isAsked(context, UtilSettings.KEY_CONTACTS_PERMISSION_REQUESTED))
+    }
+
+    @Test
+    fun `reset clears the markers too so a fresh denial is recorded again`() {
+        PermissionAskedFlags.markAsked(context, UtilSettings.KEY_FLASHLIGHT_PERMISSION_REQUESTED)
+
+        PermissionAskedFlags.resetAll(context)
+
+        assertFalse(PermissionAskedFlags.isAsked(context, UtilSettings.KEY_FLASHLIGHT_PERMISSION_REQUESTED))
+        PermissionAskedFlags.markAsked(context, UtilSettings.KEY_FLASHLIGHT_PERMISSION_REQUESTED)
+        assertTrue(PermissionAskedFlags.isAsked(context, UtilSettings.KEY_FLASHLIGHT_PERMISSION_REQUESTED))
+    }
+
+    @Test
+    fun `the engines show a permission row again for a flag restored without a marker`() {
+        Shadows.shadowOf(context).denyPermissions(Manifest.permission.READ_CONTACTS, Manifest.permission.CAMERA, Manifest.permission.ACCESS_FINE_LOCATION)
+        UtilSettings(context).save(UtilSettings.KEY_CONTACTS_PERMISSION_REQUESTED, true)
+        UtilSettings(context).save(UtilSettings.KEY_FLASHLIGHT_PERMISSION_REQUESTED, true)
+        UtilSettings(context).save(UtilSettings.KEY_WIFI_SSID_PERMISSION_REQUESTED, true)
+
+        assertTrue(com.mckimquyen.search.ContactSearchEngine.shouldShowPermissionRequest(context, "contact Jane"))
+        assertTrue(QuickActionEngine.resolveFlashlightToggle(context, "flashlight") != null)
+        assertTrue(QuickActionEngine.resolveWifiSsid(context, "wifi name") != null)
+    }
+
     @Test
     fun `reset clears all four flags and reports whether anything changed`() {
         val settings = UtilSettings(context)

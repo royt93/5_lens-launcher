@@ -11,8 +11,6 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.BufferedReader
-import java.io.InputStreamReader
 
 /**
  * FEAT-006: SAF file I/O + Room read, kept out of ActSettings.java (a Java class with no
@@ -81,14 +79,20 @@ object LayoutBackupIo {
     fun importAsync(context: Context, uri: Uri, onResult: (LayoutBackupParseResult) -> Unit) {
         ApplicationScope.scope.launch(Dispatchers.IO) {
             val result = try {
-                val json = context.applicationContext.contentResolver.openInputStream(uri)?.use { stream ->
-                    BufferedReader(InputStreamReader(stream, Charsets.UTF_8)).readText()
-                }
+                val json = context.applicationContext.contentResolver.openInputStream(uri)?.use(::readBoundedText)
                 if (json == null) LayoutBackupParseResult.Malformed else LayoutBackup.parse(json)
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (error: Exception) {
                 Logger.e("LayoutBackupIo: workspace import read failed", error)
+                LayoutBackupParseResult.Malformed
+            } catch (error: OutOfMemoryError) {
+                // The size cap below should make this unreachable; a tight heap on a small phone is still a refused file, not a dead process.
+                Logger.e("LayoutBackupIo: workspace import ran out of memory", error)
+                LayoutBackupParseResult.Malformed
+            } catch (error: StackOverflowError) {
+                // A deeply nested JSON document overflows the recursive parser; it is not a layout backup.
+                Logger.e("LayoutBackupIo: workspace import JSON nested too deeply", error)
                 LayoutBackupParseResult.Malformed
             }
             withContext(Dispatchers.Main) { onResult(result) }
@@ -108,4 +112,28 @@ object LayoutBackupIo {
             withContext(Dispatchers.Main) { onResult(result) }
         }
     }
+
+    /** Largest layout backup the import will read. A 12-lens, 3000-row backup is a few hundred KB; this is far above any real file. */
+    internal const val MAX_IMPORT_BYTES = 16 * 1024 * 1024
+    private const val READ_BUFFER_BYTES = 8 * 1024
+
+    /**
+     * Reads the whole stream as UTF-8 text but never holds more than [MAX_IMPORT_BYTES] + 1 bytes: `readText()` on a huge file filled the heap before any
+     * check could run. A file over the cap returns a value that is not JSON, so the parser reports it as malformed.
+     */
+    internal fun readBoundedText(stream: java.io.InputStream): String {
+        val output = java.io.ByteArrayOutputStream()
+        val buffer = ByteArray(READ_BUFFER_BYTES)
+        while (output.size() <= MAX_IMPORT_BYTES) {
+            val room = MAX_IMPORT_BYTES + 1 - output.size()
+            val count = stream.read(buffer, 0, minOf(buffer.size, room))
+            if (count < 0) break
+            output.write(buffer, 0, count)
+        }
+        if (output.size() > MAX_IMPORT_BYTES) return TOO_LARGE_MARKER
+        return output.toString(Charsets.UTF_8.name())
+    }
+
+    /** Not JSON on purpose: LayoutBackup.parse turns it into Malformed. */
+    internal const val TOO_LARGE_MARKER = "too large"
 }

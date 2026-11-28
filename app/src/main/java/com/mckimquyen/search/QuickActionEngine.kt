@@ -358,7 +358,7 @@ object QuickActionEngine {
         if (AppSearchEngine.normalize(raw) !in FLASHLIGHT_KEYWORDS) return null
         val granted = ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) ==
             PackageManager.PERMISSION_GRANTED
-        val alreadyAsked = UtilSettings(context).getBoolean(UtilSettings.KEY_FLASHLIGHT_PERMISSION_REQUESTED)
+        val alreadyAsked = PermissionAskedFlags.isAsked(context, UtilSettings.KEY_FLASHLIGHT_PERMISSION_REQUESTED)
         if (!granted && alreadyAsked) return null
         return QuickAction.FlashlightToggle(raw.trim())
     }
@@ -379,7 +379,7 @@ object QuickActionEngine {
         val granted = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) ==
             PackageManager.PERMISSION_GRANTED
         if (!granted) {
-            val alreadyAsked = UtilSettings(context).getBoolean(UtilSettings.KEY_WIFI_SSID_PERMISSION_REQUESTED)
+            val alreadyAsked = PermissionAskedFlags.isAsked(context, UtilSettings.KEY_WIFI_SSID_PERMISSION_REQUESTED)
             return if (alreadyAsked) null else QuickAction.WifiSsidPermissionRequest(raw.trim())
         }
         val wifiManager = context.applicationContext
@@ -407,7 +407,7 @@ object QuickActionEngine {
         val notificationManager = context.applicationContext
             .getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager ?: return null
         if (!notificationManager.isNotificationPolicyAccessGranted) {
-            val previouslyRequested = UtilSettings(context).getBoolean(UtilSettings.KEY_DND_PERMISSION_REQUESTED)
+            val previouslyRequested = PermissionAskedFlags.isAsked(context, UtilSettings.KEY_DND_PERMISSION_REQUESTED)
             return QuickAction.DndAccessRequest(raw.trim(), previouslyRequested)
         }
         val isOn = notificationManager.currentInterruptionFilter != NotificationManager.INTERRUPTION_FILTER_ALL

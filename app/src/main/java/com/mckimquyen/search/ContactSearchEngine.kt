@@ -62,7 +62,7 @@ object ContactSearchEngine {
     fun shouldShowPermissionRequest(context: Context, query: CharSequence?): Boolean {
         if (!isExplicitContactQuery(query)) return false
         if (hasContactsPermission(context)) return false
-        return !UtilSettings(context).getBoolean(UtilSettings.KEY_CONTACTS_PERMISSION_REQUESTED)
+        return !PermissionAskedFlags.isAsked(context, UtilSettings.KEY_CONTACTS_PERMISSION_REQUESTED)
     }
 
     @JvmStatic

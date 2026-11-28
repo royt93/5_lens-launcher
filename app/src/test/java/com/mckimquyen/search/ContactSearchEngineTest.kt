@@ -44,7 +44,7 @@ class ContactSearchEngineTest {
         assertFalse(ContactSearchEngine.shouldShowPermissionRequest(context(), "camera"))
         assertTrue(ContactSearchEngine.shouldShowPermissionRequest(context(), "contact Jane"))
 
-        UtilSettings(context()).save(UtilSettings.KEY_CONTACTS_PERMISSION_REQUESTED, true)
+        com.mckimquyen.search.PermissionAskedFlags.markAsked(context(), UtilSettings.KEY_CONTACTS_PERMISSION_REQUESTED)
         assertFalse(ContactSearchEngine.shouldShowPermissionRequest(context(), "contact Jane"))
     }
 

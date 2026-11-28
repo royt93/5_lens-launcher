@@ -275,8 +275,7 @@ class QuickActionEngineTest {
     @Test
     fun `flashlight toggle silently stops offering itself once permission was already denied once`() {
         deny(android.Manifest.permission.CAMERA)
-        com.mckimquyen.util.UtilSettings(context())
-            .save(com.mckimquyen.util.UtilSettings.KEY_FLASHLIGHT_PERMISSION_REQUESTED, true)
+        com.mckimquyen.search.PermissionAskedFlags.markAsked(context(), com.mckimquyen.util.UtilSettings.KEY_FLASHLIGHT_PERMISSION_REQUESTED)
         assertNull(QuickActionEngine.resolveFlashlightToggle(context(), "flashlight"))
     }
 
@@ -299,8 +298,7 @@ class QuickActionEngineTest {
     @Test
     fun `wifi ssid silently stops offering itself once permission was already denied once`() {
         deny(android.Manifest.permission.ACCESS_FINE_LOCATION)
-        com.mckimquyen.util.UtilSettings(context())
-            .save(com.mckimquyen.util.UtilSettings.KEY_WIFI_SSID_PERMISSION_REQUESTED, true)
+        com.mckimquyen.search.PermissionAskedFlags.markAsked(context(), com.mckimquyen.util.UtilSettings.KEY_WIFI_SSID_PERMISSION_REQUESTED)
         assertNull(QuickActionEngine.resolveWifiSsid(context(), "ten wifi"))
     }
 }

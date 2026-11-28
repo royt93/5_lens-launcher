@@ -39,8 +39,18 @@ class WorkspaceBackupRoomStore(context: Context) : WorkspaceBackupImportStore {
                         lensId = lens.id
                     )
                 }
-            }
+            },
+            installedIdentifiers = installedIdentifiers()
         )
+    }
+
+    /**
+     * The identities of the apps installed right now, taken from the in-memory snapshot (user-aware, so work-profile apps count). An empty snapshot means the
+     * app list has not loaded yet; that is reported as "unknown" (null) and replaceWorkspace then hides nothing, instead of treating every app as uninstalled.
+     */
+    private fun installedIdentifiers(): Set<String>? {
+        val apps = com.mckimquyen.app.RAppsSingleton.instance.apps.orEmpty()
+        return if (apps.isEmpty()) null else apps.mapTo(HashSet()) { it.identifier }
     }
 
     override suspend fun applyLegacyV1(plan: LayoutImportApplier.WorkspacePlan) {

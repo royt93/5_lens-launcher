@@ -306,7 +306,7 @@ public final class HomeQuickActionDelegate {
      * isNotificationPolicyAccessGranted() next time the row renders, which onResume() does below.
      */
     void openDndAccessSettings() {
-        new UtilSettings(activity()).save(UtilSettings.KEY_DND_PERMISSION_REQUESTED, true);
+        com.mckimquyen.search.PermissionAskedFlags.markAsked(activity(), UtilSettings.KEY_DND_PERMISSION_REQUESTED);
         if (!startQuickActionIntent(activity(), new Intent(android.provider.Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS))) {
             Toast.makeText(activity(), R.string.error_app_not_found, Toast.LENGTH_SHORT).show();
         }

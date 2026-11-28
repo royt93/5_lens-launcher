@@ -51,11 +51,22 @@ class QuickActionEngineDndTest {
     fun `access not granted, previously requested, returns denied-state request`() {
         freshPrefs()
         shadowOf(notificationManager()).setNotificationPolicyAccessGranted(false)
-        UtilSettings(context()).save(UtilSettings.KEY_DND_PERMISSION_REQUESTED, true)
+        com.mckimquyen.search.PermissionAskedFlags.markAsked(context(), UtilSettings.KEY_DND_PERMISSION_REQUESTED)
 
         val result = QuickActionEngine.resolveDnd(context(), "focus")
 
         assertEquals(QuickAction.DndAccessRequest("focus", previouslyRequested = true), result)
+    }
+
+    @Test
+    fun `a requested flag restored from a backup without this installs marker reads as not requested`() {
+        freshPrefs()
+        shadowOf(notificationManager()).setNotificationPolicyAccessGranted(false)
+        UtilSettings(context()).save(UtilSettings.KEY_DND_PERMISSION_REQUESTED, true)
+
+        val result = QuickActionEngine.resolveDnd(context(), "focus")
+
+        assertEquals(QuickAction.DndAccessRequest("focus", previouslyRequested = false), result)
     }
 
     @Test
